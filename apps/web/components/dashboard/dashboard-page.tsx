@@ -32,8 +32,6 @@ import {
   Zap,
 } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -50,27 +48,13 @@ import { useRoomStore } from "@/stores/room-store";
 import { useSceneStore } from "@/stores/scene-store";
 import type { DeviceOut, RoomOut } from "@/types/api";
 
-const energyData = [
-  { time: "06:00", load: 1.1, baseline: 0.8 },
-  { time: "08:00", load: 1.8, baseline: 1.2 },
-  { time: "10:00", load: 2.3, baseline: 1.5 },
-  { time: "12:00", load: 2.0, baseline: 1.6 },
-  { time: "14:00", load: 1.7, baseline: 1.4 },
-  { time: "16:00", load: 2.8, baseline: 1.8 },
-  { time: "18:00", load: 4.4, baseline: 2.3 },
-  { time: "20:00", load: 5.2, baseline: 2.9 },
-  { time: "22:00", load: 3.4, baseline: 2.1 },
-];
-
-const automationData = [
-  { day: "Mon", runs: 22 },
-  { day: "Tue", runs: 18 },
-  { day: "Wed", runs: 26 },
-  { day: "Thu", runs: 31 },
-  { day: "Fri", runs: 34 },
-  { day: "Sat", runs: 20 },
-  { day: "Sun", runs: 24 },
-];
+const triggerLabels: Record<string, string> = {
+  device_state: "STATE",
+  device_offline: "OFFLINE",
+  new_device: "NEW DEV",
+  time: "TIME",
+  manual: "MANUAL",
+};
 
 const deviceIconMap = {
   camera: Radio,
@@ -157,6 +141,29 @@ export function DashboardPage() {
         new Date(a.last_seen || a.created_at).getTime(),
     )
     .slice(0, 6);
+
+  // Live power draw, built only from devices actually reporting consumption.
+  const powerByDevice = devices
+    .map((device) => {
+      const watts = deviceStates[device.id]?.attributes?.current_consumption;
+      return typeof watts === "number" && watts > 0
+        ? { name: device.name, watts: Number(watts.toFixed(1)) }
+        : null;
+    })
+    .filter((d): d is { name: string; watts: number } => d !== null)
+    .sort((a, b) => b.watts - a.watts)
+    .slice(0, 8);
+
+  // Real automation footprint: count of configured rules per trigger type.
+  const automationsByTrigger = Object.entries(
+    automations.reduce<Record<string, number>>((acc, automation) => {
+      acc[automation.trigger.type] = (acc[automation.trigger.type] || 0) + 1;
+      return acc;
+    }, {}),
+  ).map(([type, rules]) => ({
+    trigger: triggerLabels[type] || type.toUpperCase(),
+    rules,
+  }));
 
   const handleRefresh = async () => {
     if (!activeHomeId) return;
@@ -251,9 +258,20 @@ export function DashboardPage() {
       className="min-h-[calc(100vh-7rem)] space-y-4 sm:space-y-5"
     >
       <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
-        <div className="relative overflow-hidden rounded-lg border border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
-          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-          <div className="grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-end">
+        <div className="relative overflow-hidden rounded-none border-2 border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
+          <div className="absolute inset-x-0 top-0 h-1 bg-[#E61919]" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0px, hsl(var(--foreground)) 1px, transparent 1px, transparent 4px)",
+            }}
+          />
+          <span className="pointer-events-none absolute right-3 top-3 font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+            UNIT / D-01
+          </span>
+          <div className="relative grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-end">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
                 <StatusPill
@@ -385,106 +403,108 @@ export function DashboardPage() {
 
       <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
         <DashboardCard
-          title="Energy Envelope"
-          description="Smart plug telemetry versus expected baseline"
+          title="Live Power Draw"
+          description="Real-time consumption reported by metered devices"
           action={<MiniLink href="/devices">Inspect load</MiniLink>}
         >
           <ChartFrame ready={chartsReady}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={energyData}
-                margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
-              >
-                <defs>
-                  <linearGradient id="load" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.32}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  stroke="hsl(var(--border))"
-                  strokeDasharray="3 3"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="time"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={chartTick}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={chartTick}
-                  tickFormatter={(value) => `${value}kW`}
-                />
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  labelStyle={tooltipLabelStyle}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="baseline"
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  fill="transparent"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="load"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2.25}
-                  fill="url(#load)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {powerByDevice.length === 0 ? (
+              <ChartEmpty
+                icon={PlugZap}
+                label="No live power telemetry"
+                detail="Connect a smart plug or meter that reports consumption"
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={powerByDevice}
+                  margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
+                >
+                  <CartesianGrid
+                    stroke="hsl(var(--border))"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={chartTick}
+                    interval={0}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={chartTick}
+                    tickFormatter={(value) => `${value}W`}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    labelStyle={tooltipLabelStyle}
+                    cursor={{ fill: "hsl(var(--muted))" }}
+                  />
+                  <Bar
+                    dataKey="watts"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 0, 0, 0]}
+                    maxBarSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </ChartFrame>
         </DashboardCard>
 
         <DashboardCard
-          title="Automation Throughput"
-          description="Rule executions over the last seven days"
+          title="Rule Distribution"
+          description="Configured automations grouped by trigger type"
           action={<MiniLink href="/automations">Open rules</MiniLink>}
         >
           <ChartFrame ready={chartsReady}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={automationData}
-                margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
-              >
-                <CartesianGrid
-                  stroke="hsl(var(--border))"
-                  strokeDasharray="3 3"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="day"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={chartTick}
-                />
-                <YAxis axisLine={false} tickLine={false} tick={chartTick} />
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  labelStyle={tooltipLabelStyle}
-                />
-                <Bar
-                  dataKey="runs"
-                  fill="hsl(var(--primary))"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={34}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {automationsByTrigger.length === 0 ? (
+              <ChartEmpty
+                icon={SlidersHorizontal}
+                label="No automations configured"
+                detail="Create a rule to map its trigger distribution"
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={automationsByTrigger}
+                  margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
+                >
+                  <CartesianGrid
+                    stroke="hsl(var(--border))"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="trigger"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={chartTick}
+                    interval={0}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={chartTick}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    labelStyle={tooltipLabelStyle}
+                    cursor={{ fill: "hsl(var(--muted))" }}
+                  />
+                  <Bar
+                    dataKey="rules"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 0, 0, 0]}
+                    maxBarSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </ChartFrame>
         </DashboardCard>
       </motion.section>
@@ -777,13 +797,12 @@ function StatusPill({
   const tones = {
     neutral: "border-border bg-secondary text-secondary-foreground",
     success: "border-primary/30 bg-accent text-accent-foreground",
-    warning:
-      "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    warning: "border-[#E61919]/40 bg-[#E61919]/10 text-[#E61919]",
   };
 
   return (
     <span
-      className={`inline-flex min-h-8 items-center gap-2 rounded-full border px-3 font-mono text-[11px] font-semibold uppercase ${tones[tone]}`}
+      className={`inline-flex min-h-8 items-center gap-2 rounded-none border px-3 font-mono text-[11px] font-semibold uppercase ${tones[tone]}`}
     >
       <Icon className="h-3.5 w-3.5" />
       {children}
@@ -810,7 +829,7 @@ function HeroStat({
   };
 
   return (
-    <div className="rounded-md border border-border bg-background/45 p-3">
+    <div className="rounded-none border border-border bg-background/45 p-3">
       <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
@@ -840,10 +859,10 @@ function SystemTile({
   warning?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-subtle">
+    <div className="rounded-none border-2 border-border bg-card p-4 shadow-subtle">
       <div className="flex items-center justify-between gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-md border ${warning ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300" : "border-primary/30 bg-accent text-primary"}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-none border ${warning ? "border-[#E61919]/40 bg-[#E61919]/10 text-[#E61919]" : "border-primary/30 bg-accent text-primary"}`}
         >
           <Icon className="h-4 w-4" />
         </div>
@@ -869,7 +888,7 @@ function MetricPanel({
   detail: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-subtle transition duration-200 hover:border-primary/40">
+    <div className="rounded-none border-2 border-border bg-card p-4 shadow-subtle transition duration-200 hover:border-[#E61919]/50">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -877,7 +896,7 @@ function MetricPanel({
           </p>
           <p className="mt-2 text-3xl font-semibold text-foreground">{value}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-secondary text-foreground">
+        <div className="flex h-10 w-10 items-center justify-center rounded-none border border-border bg-secondary text-foreground">
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -898,11 +917,14 @@ function DashboardCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-subtle sm:p-5">
+    <div className="rounded-none border-2 border-border bg-card p-4 shadow-subtle sm:p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-foreground">
+            <span className="text-[#E61919]">[</span> {title}{" "}
+            <span className="text-[#E61919]">]</span>
+          </h2>
+          <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
             {description}
           </p>
         </div>
@@ -925,7 +947,7 @@ function ChartFrame({
       {ready ? (
         children
       ) : (
-        <div className="h-full w-full animate-pulse rounded-md border border-border bg-secondary/60" />
+        <div className="h-full w-full animate-pulse rounded-none border border-border bg-secondary/60" />
       )}
     </div>
   );
@@ -1006,6 +1028,26 @@ function DeviceRow({
       >
         Toggle
       </button>
+    </div>
+  );
+}
+
+function ChartEmpty({
+  icon: Icon,
+  label,
+  detail,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center border border-dashed border-border bg-background/35 p-6 text-center">
+      <Icon className="h-7 w-7 text-muted-foreground" />
+      <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+        {label}
+      </p>
+      <p className="mt-1 max-w-xs text-xs text-muted-foreground">{detail}</p>
     </div>
   );
 }
