@@ -303,7 +303,7 @@ export function AppShell({
 
   const renderSidebarContent = (collapsed: boolean) => (
     <div
-      className={`flex h-full flex-col gap-6 transition-all duration-300 ${collapsed ? "py-5 px-2 items-center" : "p-5"}`}
+      className={`flex h-full flex-col gap-6 transition-all duration-300 ${collapsed ? "pt-7 pb-6 px-2 items-center" : "pt-8 pb-6 px-5"}`}
     >
       {/* Brand Header */}
       <div
@@ -477,7 +477,7 @@ export function AppShell({
       <aside
         onMouseEnter={() => setIsSidebarHovered(true)}
         onMouseLeave={() => setIsSidebarHovered(false)}
-        className={`fixed left-4 top-4 bottom-4 z-40 hidden lg:flex flex-col border border-border bg-card rounded-2xl shadow-subtle transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+        className={`fixed left-4 top-1/2 -translate-y-1/2 h-[calc(100vh-5rem)] z-40 hidden lg:flex flex-col border border-border bg-card rounded-[2rem] shadow-subtle transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
           isCollapsed && !isSidebarHovered ? "w-16" : "w-64"
         }`}
       >
@@ -589,69 +589,82 @@ export function AppShell({
         </main>
 
         {/* Mobile Bottom Navigation Bar */}
-        <nav className="fixed bottom-4 left-4 right-4 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-2xl flex items-center justify-around py-2.5 px-2 select-none">
+        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full flex items-center gap-1.5 p-1.5 select-none w-fit max-w-[95vw]">
           <Link
             href="/"
-            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
-              pathname === "/" ? "text-foreground font-bold" : "text-muted-foreground"
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
+              pathname === "/"
+                ? "bg-foreground text-background shadow-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             }`}
+            title="Dashboard"
           >
             <LayoutDashboard
-              className={`h-5 w-5 ${pathname === "/" ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              className="h-4.5 w-4.5"
               strokeWidth={pathname === "/" ? 2.25 : 1.75}
             />
-            <span className="text-[9px] font-mono tracking-wider uppercase">Dashboard</span>
           </Link>
 
           <Link
             href="/devices"
-            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
-              pathname.startsWith("/devices") ? "text-foreground font-bold" : "text-muted-foreground"
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
+              pathname.startsWith("/devices")
+                ? "bg-foreground text-background shadow-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             }`}
+            title="Devices"
           >
             <Cpu
-              className={`h-5 w-5 ${pathname.startsWith("/devices") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              className="h-4.5 w-4.5"
               strokeWidth={pathname.startsWith("/devices") ? 2.25 : 1.75}
             />
-            <span className="text-[9px] font-mono tracking-wider uppercase">Devices</span>
           </Link>
 
           <Link
             href="/scenes"
-            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
-              pathname.startsWith("/scenes") ? "text-foreground font-bold" : "text-muted-foreground"
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
+              pathname.startsWith("/scenes")
+                ? "bg-foreground text-background shadow-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             }`}
+            title="Scenes"
           >
             <Sparkles
-              className={`h-5 w-5 ${pathname.startsWith("/scenes") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              className="h-4.5 w-4.5"
               strokeWidth={pathname.startsWith("/scenes") ? 2.25 : 1.75}
             />
-            <span className="text-[9px] font-mono tracking-wider uppercase">Scenes</span>
           </Link>
 
           <Link
             href="/notifications"
-            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
-              pathname.startsWith("/notifications") ? "text-foreground font-bold" : "text-muted-foreground"
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 relative cursor-pointer ${
+              pathname.startsWith("/notifications")
+                ? "bg-foreground text-background shadow-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             }`}
+            title="Alerts"
           >
             <Bell
-              className={`h-5 w-5 ${pathname.startsWith("/notifications") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              className="h-4.5 w-4.5"
               strokeWidth={pathname.startsWith("/notifications") ? 2.25 : 1.75}
             />
-            <span className="text-[9px] font-mono tracking-wider uppercase">Alerts</span>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-2.5 flex h-2 w-2 rounded-full bg-destructive animate-pulse" />
+              <span className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
+                pathname.startsWith("/notifications") ? "bg-background animate-pulse" : "bg-destructive animate-pulse"
+              }`} />
             )}
           </Link>
+
+          {/* Divider */}
+          <div className="h-5 w-px bg-border/80 mx-0.5" />
 
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(true)}
-            className="flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer text-muted-foreground hover:text-foreground"
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            title="Menu"
           >
-            <Menu className="h-5 w-5 text-muted-foreground/80" strokeWidth={1.75} />
-            <span className="text-[9px] font-mono tracking-wider uppercase">Menu</span>
+            <Menu className="h-4.5 w-4.5" strokeWidth={1.75} />
           </button>
         </nav>
       </div>
