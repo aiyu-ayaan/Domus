@@ -28,7 +28,7 @@ const integrationSchema = z.object({
   type: z.enum(["tapo", "xiaomi", "tuya", "mqtt", "matter", "zigbee"] as const),
   enabled: z.boolean(),
   config: z.object({
-    host: z.string().min(1, "Host IP or endpoint required"),
+    host: z.string().optional(),
     username: z.string().optional(),
     token: z.string().optional(),
   }),
@@ -74,7 +74,7 @@ export default function IntegrationsPage() {
       name: "",
       type: "tapo",
       enabled: true,
-      config: { host: "192.168.1.100", username: "", token: "" },
+      config: { host: "", username: "", token: "" },
     },
   });
 
@@ -207,6 +207,7 @@ export default function IntegrationsPage() {
                   </label>
                   <input
                     type="text"
+                    placeholder="e.g. 192.168.1.50 (optional)"
                     className="w-full rounded-xl border border-border bg-background/50 py-2.5 px-3.5 text-sm outline-none focus:border-primary"
                     {...register("config.host")}
                   />
