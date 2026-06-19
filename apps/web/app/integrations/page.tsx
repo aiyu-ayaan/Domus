@@ -26,7 +26,7 @@ import type { IntegrationType } from '@/types/api';
 const integrationSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     type: z.enum(['tapo', 'xiaomi', 'tuya', 'mqtt', 'matter', 'zigbee'] as const),
-    enabled: z.boolean().default(true),
+    enabled: z.boolean(),
     config: z.object({
         host: z.string().min(1, 'Host IP or endpoint required'),
         token: z.string().optional(),

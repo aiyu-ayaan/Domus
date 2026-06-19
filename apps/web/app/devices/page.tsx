@@ -40,7 +40,7 @@ const typeIcons: Record<string, any> = {
     other: Cpu,
 };
 
-export default function DevicesPage() {
+function DevicesPageContent() {
     const searchParams = useSearchParams();
     const roomQuery = searchParams.get('room');
 
@@ -398,5 +398,18 @@ export default function DevicesPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function DevicesPage() {
+    return (
+        <React.Suspense fallback={
+            <div className="flex h-[60vh] flex-col items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="mt-4 text-sm text-muted-foreground animate-pulse-slow font-medium">Loading devices...</p>
+            </div>
+        }>
+            <DevicesPageContent />
+        </React.Suspense>
     );
 }

@@ -30,7 +30,7 @@ import type { TriggerType, ActionType, ConditionOp } from '@/types/api';
 
 const automationSchema = z.object({
     name: z.string().min(2, 'Automation name must be at least 2 characters'),
-    enabled: z.boolean().default(true),
+    enabled: z.boolean(),
     trigger: z.object({
         type: z.enum(['device_state', 'device_offline', 'new_device', 'time', 'manual'] as const),
         device_id: z.string().nullable().optional(),

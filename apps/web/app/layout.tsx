@@ -5,7 +5,7 @@ import { AppShell } from '@/components/layout/app-shell';
 import { Providers } from '@/components/providers';
 import type { ReactNode } from 'react';
 
-const sans = IBM_Plex_Sans({ subsets: ['latin'], variable: '--font-sans' });
+const sans = IBM_Plex_Sans({ subsets: ['latin'], variable: '--font-sans', weight: ['300', '400', '500', '600', '700'] });
 const display = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
 
 export const metadata: Metadata = {
