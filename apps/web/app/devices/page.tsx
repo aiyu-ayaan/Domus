@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { useHomeStore } from "@/stores/home-store";
 import { useRoomStore } from "@/stores/room-store";
@@ -41,6 +42,34 @@ const typeIcons: Record<string, any> = {
 };
 
 function DevicesPageContent() {
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.03,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 6, filter: "blur(2px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        duration: 0.3,
+        bounce: 0,
+      },
+    },
+  };
+
   const searchParams = useSearchParams();
   const roomQuery = searchParams.get("room");
 
@@ -231,7 +260,12 @@ function DevicesPageContent() {
         />
       ) : isGridView ? (
         /* Grid View */
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+        >
           {filteredDevices.map((dev) => {
             const Icon = typeIcons[dev.device_type] || Cpu;
             const state = deviceStates[dev.id];
@@ -245,8 +279,9 @@ function DevicesPageContent() {
               state?.state === "on" || state?.state === "closed";
 
             return (
-              <div
+              <motion.div
                 key={dev.id}
+                variants={itemVariants}
                 className={`rounded-3xl border p-5 backdrop-blur-sm flex flex-col justify-between h-48 transition hover:bg-card/30 ${
                   dev.online
                     ? "border-border/60 bg-card/20"
@@ -359,10 +394,10 @@ function DevicesPageContent() {
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       ) : (
         /* List View */
         <div className="border border-border/60 bg-card/15 rounded-3xl overflow-hidden backdrop-blur-sm">
@@ -378,7 +413,11 @@ function DevicesPageContent() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <motion.tbody
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+              >
                 {filteredDevices.map((dev) => {
                   const Icon = typeIcons[dev.device_type] || Cpu;
                   const state = deviceStates[dev.id];
@@ -396,8 +435,9 @@ function DevicesPageContent() {
                     state?.state === "on" || state?.state === "closed";
 
                   return (
-                    <tr
+                    <motion.tr
                       key={dev.id}
+                      variants={itemVariants}
                       className={`border-b border-border/40 transition hover:bg-accent/20 ${
                         dev.online
                           ? "text-foreground"
@@ -460,10 +500,10 @@ function DevicesPageContent() {
                           </Link>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
                 })}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         </div>

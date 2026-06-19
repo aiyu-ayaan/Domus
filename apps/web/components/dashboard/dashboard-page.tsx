@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Activity,
   ArrowUpRight,
@@ -214,9 +215,42 @@ export function DashboardPage() {
     }
   };
 
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 8, filter: "blur(4px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        duration: 0.35,
+        bounce: 0,
+      },
+    },
+  };
+
   return (
-    <div className="min-h-[calc(100vh-7rem)] space-y-4 sm:space-y-5">
-      <section className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="min-h-[calc(100vh-7rem)] space-y-4 sm:space-y-5"
+    >
+      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
         <div className="relative overflow-hidden rounded-lg border border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
           <div className="grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-end">
@@ -320,9 +354,9 @@ export function DashboardPage() {
             warning={securityAlerts.length > 0}
           />
         </div>
-      </section>
+      </motion.section>
 
-      <section className="grid gap-4 lg:grid-cols-4">
+      <motion.section variants={itemVariants} className="grid gap-4 lg:grid-cols-4">
         <MetricPanel
           icon={Cpu}
           label="Devices"
@@ -347,9 +381,9 @@ export function DashboardPage() {
           value={activeAutomations.length}
           detail={`${automations.length} total rules`}
         />
-      </section>
+      </motion.section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
         <DashboardCard
           title="Energy Envelope"
           description="Smart plug telemetry versus expected baseline"
@@ -453,9 +487,9 @@ export function DashboardPage() {
             </ResponsiveContainer>
           </ChartFrame>
         </DashboardCard>
-      </section>
+      </motion.section>
 
-      <section className="grid gap-4 2xl:grid-cols-[0.9fr_1fr_1.1fr]">
+      <motion.section variants={itemVariants} className="grid gap-4 2xl:grid-cols-[0.9fr_1fr_1.1fr]">
         <DashboardCard
           title="Room Health"
           description="Availability grouped by location"
@@ -507,7 +541,7 @@ export function DashboardPage() {
                   className="group flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 text-left transition duration-200 hover:border-primary/50 hover:bg-accent/60 focus:outline-none focus:ring-2 focus:ring-ring/40"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary">
+                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary">
                       <Sparkles className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -552,9 +586,9 @@ export function DashboardPage() {
             )}
           </div>
         </DashboardCard>
-      </section>
+      </motion.section>
 
-      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1fr_1fr]">
         <DashboardCard
           title="Automation Stack"
           description="Enabled rules ready for manual test runs"
@@ -662,8 +696,8 @@ export function DashboardPage() {
             )}
           </div>
         </DashboardCard>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 }
 

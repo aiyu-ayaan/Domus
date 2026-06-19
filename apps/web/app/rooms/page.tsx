@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -58,6 +59,34 @@ const iconOptions = [
 ];
 
 export default function RoomsPage() {
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 8, filter: "blur(4px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        duration: 0.35,
+        bounce: 0,
+      },
+    },
+  };
+
   const { activeHomeId } = useHomeStore();
   const { rooms, createRoom, updateRoom, deleteRoom } = useRoomStore();
   const { devices } = useDeviceStore();
@@ -224,7 +253,12 @@ export default function RoomsPage() {
           onAction={() => setIsCreateOpen(true)}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        >
           {rooms.map((room) => {
             const RoomIcon = iconMap[room.icon] || FolderKanban;
             const roomDevices = devices.filter((d) => d.room_id === room.id);
@@ -232,8 +266,9 @@ export default function RoomsPage() {
             const onlineDevCount = roomDevices.filter((d) => d.online).length;
 
             return (
-              <div
+              <motion.div
                 key={room.id}
+                variants={itemVariants}
                 className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm flex flex-col justify-between h-44 transition hover:bg-card/30"
               >
                 <div className="flex justify-between items-start">
@@ -282,10 +317,10 @@ export default function RoomsPage() {
                     Manage Devices
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
 
       {/* Edit Room Dialog */}

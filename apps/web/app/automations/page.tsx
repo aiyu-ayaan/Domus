@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -74,6 +75,34 @@ const automationSchema = z.object({
 type AutomationFormValues = z.infer<typeof automationSchema>;
 
 export default function AutomationsPage() {
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 8, filter: "blur(4px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        duration: 0.35,
+        bounce: 0,
+      },
+    },
+  };
+
   const { activeHomeId } = useHomeStore();
   const { devices } = useDeviceStore();
   const { scenes } = useSceneStore();
@@ -554,7 +583,12 @@ export default function AutomationsPage() {
           onAction={() => setIsCreateOpen(true)}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:grid-cols-2"
+        >
           {automations.map((auto) => {
             let triggerText = "IF ";
             if (auto.trigger.type === "device_state") {
@@ -580,8 +614,9 @@ export default function AutomationsPage() {
             }
 
             return (
-              <div
+              <motion.div
                 key={auto.id}
+                variants={itemVariants}
                 className={`rounded-3xl border p-5 backdrop-blur-sm flex flex-col justify-between transition hover:bg-card/30 ${
                   auto.enabled
                     ? "border-border/60 bg-card/25"
@@ -654,10 +689,10 @@ export default function AutomationsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,6 +31,34 @@ const sceneSchema = z.object({
 type SceneFormValues = z.infer<typeof sceneSchema>;
 
 export default function ScenesPage() {
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 8, filter: "blur(4px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        duration: 0.35,
+        bounce: 0,
+      },
+    },
+  };
+
   const { activeHomeId } = useHomeStore();
   const { devices, fetchDevices } = useDeviceStore();
   const { scenes, createScene, deleteScene, activateScene } = useSceneStore();
@@ -244,10 +273,16 @@ export default function ScenesPage() {
           onAction={() => setIsCreateOpen(true)}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        >
           {scenes.map((scene) => (
-            <div
+            <motion.div
               key={scene.id}
+              variants={itemVariants}
               className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm flex flex-col justify-between h-44 transition hover:bg-card/30"
             >
               <div className="flex justify-between items-start">
@@ -287,9 +322,9 @@ export default function ScenesPage() {
                   Activate Preset
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
