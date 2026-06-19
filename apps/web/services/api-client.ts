@@ -12,9 +12,13 @@ class ApiClient {
     path: string,
     options: RequestOptions = {},
   ): Promise<any> {
-    const url = new URL(
-      `${API_BASE_URL}${path.startsWith("/") ? path : `/api/v1/${path}`}`,
-    );
+    // Every REST endpoint lives under /api/v1. Normalize the leading slash and
+    // prepend the prefix unless the caller already included it.
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    const prefixed = normalized.startsWith("/api/v1")
+      ? normalized
+      : `/api/v1${normalized}`;
+    const url = new URL(`${API_BASE_URL}${prefixed}`);
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, val]) => {
