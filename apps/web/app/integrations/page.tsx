@@ -136,10 +136,10 @@ export default function IntegrationsPage() {
       toast.success("Discovery scan completed!", {
         description: `Found ${res.new_count} new devices.`,
       });
-    } catch {
+    } catch (err: any) {
       setScanningStep(0);
       setIsDiscoverOpen(false);
-      toast.error("Discovery scan failed.");
+      toast.error(err?.error?.message || "Discovery scan failed.");
     }
   };
 
