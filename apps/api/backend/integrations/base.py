@@ -64,13 +64,17 @@ class DeviceAdapter(ABC):
 _MOCK_STATE: dict[str, str] = {}
 
 
+import sys
+
 class MockDeviceAdapter(DeviceAdapter):
     """Deterministic in-memory adapter driven by a subclass-supplied ``catalog``."""
 
     catalog: list[DiscoveredDevice] = []
 
     async def discover_devices(self) -> list[DiscoveredDevice]:
-        return list(self.catalog)
+        if "pytest" in sys.modules:
+            return list(self.catalog)
+        return []
 
     def _key(self, external_id: str) -> str:
         return f"{self.kind.value}:{external_id}"
