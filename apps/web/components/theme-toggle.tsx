@@ -15,7 +15,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   if (!mounted) {
     return (
       <div
-        className={`h-8 rounded bg-muted/40 animate-pulse-slow ${compact ? "w-8 mx-auto" : "w-full"}`}
+        className={`h-10 rounded-full bg-muted/40 animate-pulse-slow ${compact ? "w-10 mx-auto" : "w-full"}`}
       />
     );
   }
@@ -27,13 +27,13 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
       <button
         type="button"
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        className="flex h-8 w-8 items-center justify-center rounded border border-border/80 bg-card hover:bg-muted text-foreground transition duration-150 cursor-pointer mx-auto"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-card hover:bg-muted/40 text-foreground transition duration-150 cursor-pointer mx-auto"
         title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
       >
         {isDark ? (
-          <Sun className="h-4 w-4" strokeWidth={2} />
+          <Sun className="h-4.5 w-4.5" strokeWidth={1.75} />
         ) : (
-          <Moon className="h-4 w-4" strokeWidth={2} />
+          <Moon className="h-4.5 w-4.5" strokeWidth={1.75} />
         )}
       </button>
     );

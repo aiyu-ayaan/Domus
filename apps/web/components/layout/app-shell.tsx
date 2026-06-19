@@ -63,20 +63,20 @@ function SidebarNavItem({
 
   return (
     <div
-      className="relative w-full"
+      className="relative flex justify-center w-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href={item.href}
-        className={`relative flex items-center py-2 px-3 text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer rounded-md ${
+        className={`relative flex items-center transition-all duration-200 cursor-pointer ${
           isCollapsed
-            ? "justify-center mx-1.5"
-            : "justify-between border-l-2 -ml-[1.5px]"
+            ? "justify-center h-10 w-10 rounded-full"
+            : "justify-between py-2 px-3 text-xs font-medium tracking-wide rounded-md border-l-2 -ml-[1.5px] w-full"
         } ${
           isActive
             ? isCollapsed
-              ? "bg-foreground text-background font-bold"
+              ? "bg-foreground text-background font-bold shadow-glow"
               : "border-foreground bg-muted/60 text-foreground font-bold"
             : isCollapsed
               ? "text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -118,7 +118,9 @@ function SidebarNavItem({
         )}
 
         {isCollapsed && item.badge && unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-destructive animate-pulse" />
+          <span className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
+            isActive ? "bg-background animate-pulse" : "bg-destructive animate-pulse"
+          }`} />
         )}
       </Link>
 
@@ -473,31 +475,63 @@ export function AppShell({
       {/* Desktop Sidebar Spacer (keeps layout space to prevent reflow) */}
       <aside className="hidden lg:block w-20 flex-shrink-0 h-screen bg-transparent" />
 
-      {/* Desktop Sidebar (Collapsible & Floating) */}
+      {/* Desktop Sidebar (Floating Vertical Dock) */}
       <aside
-        onMouseEnter={() => setIsSidebarHovered(true)}
-        onMouseLeave={() => setIsSidebarHovered(false)}
-        className={`fixed left-4 top-1/2 -translate-y-1/2 h-[calc(100vh-5rem)] z-40 hidden lg:flex flex-col border border-border bg-card rounded-[2rem] shadow-subtle transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
-          isCollapsed && !isSidebarHovered ? "w-16" : "w-64"
-        }`}
+        className="fixed left-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full p-1.5 py-3.5 gap-2.5 w-14 h-fit max-h-[90vh] select-none"
       >
-        {renderSidebarContent(isCollapsed && !isSidebarHovered)}
+        {/* Brand/Logo */}
+        <Link
+          href="/"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-background font-serif text-base font-bold shadow-glow hover:scale-105 transition cursor-pointer"
+          title="Domus OS"
+        >
+          D
+        </Link>
 
-        {/* Pin/Collapse Toggle Button */}
-        {(!isCollapsed || isSidebarHovered) && (
+        {/* Divider */}
+        <div className="w-5 h-px bg-border/80 my-0.5" />
+
+        {/* Navigation items */}
+        <nav className="flex flex-col gap-2 items-center w-full">
+          {navItems.map((item) => {
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            return (
+              <SidebarNavItem
+                key={item.href}
+                item={item}
+                isActive={isActive}
+                isCollapsed={true}
+                unreadCount={unreadCount}
+                pathname={pathname}
+              />
+            );
+          })}
+        </nav>
+
+        {/* Divider */}
+        <div className="w-5 h-px bg-border/80 my-0.5" />
+
+        {/* Theme Toggle (Compact) */}
+        <ThemeToggle compact={true} />
+
+        {/* User initials / Logout Avatar */}
+        <div className="relative group mt-0.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs cursor-pointer hover:bg-muted/40 transition">
+            {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+          </div>
+          {/* Logout Tooltip/Button */}
           <button
             type="button"
-            onClick={toggleCollapse}
-            className="absolute top-5 right-3 z-30 hidden lg:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-subtle hover:bg-muted text-foreground transition-all duration-200 cursor-pointer animate-fade-in"
-            title={isCollapsed ? "Pin Sidebar" : "Collapse Sidebar"}
+            onClick={handleLogout}
+            className="absolute left-full top-1/2 ml-3.5 -translate-y-1/2 z-50 rounded border border-border bg-card shadow-subtle px-2.5 py-1.5 text-[9px] font-mono font-bold tracking-wider text-destructive hover:bg-destructive/10 whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 uppercase"
+            title="Logout"
           >
-            {isCollapsed ? (
-              <ChevronRight className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronLeft className="h-3.5 w-3.5" />
-            )}
+            Logout
           </button>
-        )}
+        </div>
       </aside>
 
       {/* Mobile Sidebar Slider */}
