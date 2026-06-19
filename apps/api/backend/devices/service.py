@@ -105,13 +105,22 @@ class DeviceService:
 
     # --- control (always via the integration adapter) ---------------------------
     async def control(self, device_id: UUID, action: str, user: User) -> DeviceState:
+        device = await self.get_for(device_id, user)  # authorises via home
+        return await self._apply(device, action)
+
+    async def control_system(self, device_id: UUID, action: str) -> DeviceState:
+        """Unauthenticated control for system actors (automation engine, scenes)."""
+        device = await self.session.get(Device, device_id)
+        if device is None:
+            raise NotFoundError("Device not found")
+        return await self._apply(device, action)
+
+    async def _apply(self, device: Device, action: str) -> DeviceState:
         if action not in ACTIONS:
             raise NotFoundError(f"Unknown action: {action}")
-        device = await self.get_for(device_id, user)
         integration = await self.session.get(Integration, device.integration_id)
         if integration is None or not integration.enabled:
             raise ConflictError("Integration is missing or disabled")
-
         adapter = get_adapter(integration)
         snapshot: StateSnapshot = await getattr(adapter, action)(device.external_id)
         return await self._record(device, snapshot)

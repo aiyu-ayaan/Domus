@@ -43,3 +43,4 @@ class NotificationType(str, Enum):
     automation_failed = "automation_failed"
     new_device_found = "new_device_found"
     security_alert = "security_alert"
+    info = "info"  # generic notifications (e.g. automation notification.send)

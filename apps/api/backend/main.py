@@ -17,7 +17,10 @@ log = get_logger("main")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from backend.automations.engine import register as register_automations
+
     log.info("Starting %s (%s)", settings.app_name, settings.environment)
+    register_automations()  # subscribe the automation engine to the event bus
     if await redis_mod.ping():
         log.info("Redis connected")
     yield
