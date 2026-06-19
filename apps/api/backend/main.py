@@ -18,12 +18,22 @@ log = get_logger("main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     from backend.automations.engine import register as register_automations
+    from backend.mqtt.service import mqtt_service
+    from backend.websocket import manager as ws_manager
+    from backend.websocket import redis_bridge
 
     log.info("Starting %s (%s)", settings.app_name, settings.environment)
-    register_automations()  # subscribe the automation engine to the event bus
+    register_automations()  # automation engine subscribes to the event bus
+    ws_manager.register()  # websocket manager subscribes to the event bus
+    await redis_bridge.start()  # cross-process fan-out (best-effort)
     if await redis_mod.ping():
         log.info("Redis connected")
+    if settings.mqtt_enabled:
+        await mqtt_service.start()
+        log.info("MQTT service started")
     yield
+    await mqtt_service.stop()
+    await redis_bridge.stop()
     await redis_mod.close()
     log.info("Shutdown complete")
 
@@ -50,6 +60,10 @@ def create_app() -> FastAPI:
 
     register_exception_handlers(app)
     app.include_router(api_router)
+
+    from backend.websocket.router import router as ws_router
+
+    app.include_router(ws_router)  # /ws (real-time updates, notifications, presence)
 
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
