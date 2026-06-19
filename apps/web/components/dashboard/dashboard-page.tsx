@@ -40,6 +40,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { HomeSetup } from "@/components/dashboard/home-setup";
 import { useAutomationStore } from "@/stores/automation-store";
 import { useDeviceStore } from "@/stores/device-store";
 import { useHomeStore } from "@/stores/home-store";
@@ -70,7 +71,7 @@ const deviceIconMap = {
 
 export function DashboardPage() {
   const [chartsReady, setChartsReady] = useState(false);
-  const { activeHomeId, homes } = useHomeStore();
+  const { activeHomeId, homes, isLoading: homesLoading } = useHomeStore();
   const { devices, deviceStates, fetchDevices, toggleDevice } =
     useDeviceStore();
   const { rooms, fetchRooms } = useRoomStore();
@@ -249,6 +250,11 @@ export function DashboardPage() {
       },
     },
   };
+
+  // First-run: no workspaces yet — route the operator to provisioning.
+  if (!homesLoading && homes.length === 0) {
+    return <HomeSetup />;
+  }
 
   return (
     <motion.div
