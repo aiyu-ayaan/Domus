@@ -4,8 +4,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth.dependencies import CurrentUser
-from backend.common.enums import DeviceType
+from backend.auth.dependencies import CurrentUser, require_role
+from backend.auth.models import User
+from backend.common.enums import DeviceType, Role
 from backend.core.database import get_db
 from backend.core.exceptions import NotFoundError
 from backend.core.pagination import Page, PageParams
@@ -16,6 +17,8 @@ router = APIRouter(prefix="/devices", tags=["devices"])
 
 Session = Annotated[AsyncSession, Depends(get_db)]
 Params = Annotated[PageParams, Depends()]
+# Controlling a device requires at least the `user` role — guests are read-only.
+ControlUser = Annotated[User, Depends(require_role(Role.user))]
 
 
 @router.get("", response_model=Page[DeviceOut])
@@ -61,24 +64,24 @@ async def delete_device(device_id: UUID, user: CurrentUser, session: Session) ->
     await DeviceService(session).delete(device_id, user)
 
 
-# --- control ---------------------------------------------------------------------
-async def _control(action: str, device_id: UUID, user: CurrentUser, session: Session):
+# --- control (requires user role or higher) --------------------------------------
+async def _control(action: str, device_id: UUID, user: User, session: Session):
     state = await DeviceService(session).control(device_id, action, user)
     return DeviceStateOut.model_validate(state)
 
 
 @router.post("/{device_id}/turn-on", response_model=DeviceStateOut)
-async def turn_on(device_id: UUID, user: CurrentUser, session: Session) -> DeviceStateOut:
+async def turn_on(device_id: UUID, user: ControlUser, session: Session) -> DeviceStateOut:
     return await _control("turn_on", device_id, user, session)
 
 
 @router.post("/{device_id}/turn-off", response_model=DeviceStateOut)
-async def turn_off(device_id: UUID, user: CurrentUser, session: Session) -> DeviceStateOut:
+async def turn_off(device_id: UUID, user: ControlUser, session: Session) -> DeviceStateOut:
     return await _control("turn_off", device_id, user, session)
 
 
 @router.post("/{device_id}/toggle", response_model=DeviceStateOut)
-async def toggle(device_id: UUID, user: CurrentUser, session: Session) -> DeviceStateOut:
+async def toggle(device_id: UUID, user: ControlUser, session: Session) -> DeviceStateOut:
     return await _control("toggle", device_id, user, session)
 
 
