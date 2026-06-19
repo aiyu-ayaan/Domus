@@ -54,6 +54,8 @@ export default function DeviceDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [localBrightness, setLocalBrightness] = useState<number | null>(null);
 
+  const state = device ? deviceStates[device.id] : undefined;
+
   const {
     register,
     handleSubmit,
@@ -91,6 +93,20 @@ export default function DeviceDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+    if (state && device) {
+      setHistory((prev) => {
+        const exists = prev.some(
+          (h) => h.id === state.id || h.created_at === state.created_at
+        );
+        if (exists) {
+          return prev;
+        }
+        return [state, ...prev].slice(0, 100);
+      });
+    }
+  }, [state, device]);
+
   if (isLoading || !device) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center">
@@ -102,7 +118,6 @@ export default function DeviceDetailPage() {
     );
   }
 
-  const state = deviceStates[device.id];
   const isChecked = state?.state === "on" || state?.state === "closed";
 
   const handleQuickToggle = async () => {
