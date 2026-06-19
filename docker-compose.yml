@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
     environment:
-      NEXT_PUBLIC_API_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:8000}
     ports:
       - "3000:3000"
     depends_on:
@@ -14,12 +14,8 @@ services:
     build:
       context: .
       dockerfile: docker/api.Dockerfile
-    environment:
-      DATABASE_URL: postgresql+psycopg://domus:domus@postgres:5432/domus
-      REDIS_URL: redis://redis:6379/0
-      JWT_SECRET: change-me
-      ENCRYPTION_KEY: change-me-too
-      CORS_ORIGINS: '["http://localhost:3000"]'
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     depends_on:
@@ -31,15 +27,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: domus
-      POSTGRES_PASSWORD: domus
-      POSTGRES_DB: domus
+      POSTGRES_USER: ${POSTGRES_USER:-domus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domus}
+      POSTGRES_DB: ${POSTGRES_DB:-domus}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U domus"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-domus}"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -21,3 +21,4 @@ alembic/versions/*.pyc
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*
+bun-debug.log*

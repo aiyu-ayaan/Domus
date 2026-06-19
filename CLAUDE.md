@@ -4,33 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Start
 
-This is a TypeScript/Python monorepo for Domus, a self-hosted smart home platform. The project uses npm workspaces spanning frontend (Next.js) and backend (FastAPI) applications.
+This is a TypeScript/Python monorepo for Domus, a self-hosted smart home platform. The project uses Bun workspaces spanning frontend (Next.js) and backend (FastAPI) applications.
 
 ### Setup
 
-1. Install Node.js and Python 3.12+
-2. Run `npm install` to set up all workspaces
+1. Install Bun, Node.js, and Python 3.12+
+2. Run `bun install` to set up all workspaces
 3. For the API, create a Python virtual environment in `apps/api` and install with `pip install -e ".[dev]"`
 4. PostgreSQL and Redis are required — use `docker-compose up postgres redis` for local development
 
 ### Common Commands
 
 **Web (Frontend)**
-- `npm run dev:web` — Start Next.js dev server on port 3000
-- `npm run build --workspace @domus/web` — Build for production
-- `npm run lint --workspace @domus/web` — Run ESLint
+- `bun run dev:web` — Start Next.js dev server on port 3000
+- `bun --filter @domus/web build` — Build for production
+- `bun --filter @domus/web lint` — Run ESLint
 
 **API (Backend)**
-- `npm run dev:api` — Start FastAPI dev server on port 8000 (requires Python venv)
-- `npm run test --workspace @domus/api` — Run pytest tests
-- `npm run lint --workspace @domus/api` — Run ruff and black checks
-- `npm run format` — Format code with prettier (Node) and black (Python)
+- `bun run dev:api` — Start FastAPI dev server on port 8000 (requires Python venv)
+- `bun --filter @domus/api test` — Run pytest tests
+- `bun --filter @domus/api lint` — Run ruff and black checks
+- `bun run format` — Format code with prettier (Node) and black (Python)
 
 **Full Stack**
 - `docker-compose up` — Spin up web, api, postgres, and redis
-- `npm run build` — Build both web and api
-- `npm run lint` — Lint all workspaces
-- `npm run format` — Format code across all workspaces
+- `bun run build` — Build both web and api
+- `bun run lint` — Lint all workspaces
+- `bun run format` — Format code across all workspaces
 
 ## Architecture
 

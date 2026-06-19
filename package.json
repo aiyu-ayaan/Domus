@@ -7,10 +7,10 @@
         "packages/*"
     ],
     "scripts": {
-        "dev:web": "npm run dev --workspace @domus/web",
-        "dev:api": "npm run dev --workspace @domus/api",
-        "build": "npm run build --workspaces",
-        "lint": "npm run lint --workspaces",
+        "dev:web": "bun --filter @domus/web dev",
+        "dev:api": "bun --filter @domus/api dev",
+        "build": "bun --filter \"*\" build",
+        "lint": "bun --filter \"*\" lint",
         "format": "prettier . --write",
         "prepare": "husky"
     },
