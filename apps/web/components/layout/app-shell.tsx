@@ -163,6 +163,7 @@ export function AppShell({
 }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname() || "/";
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
 
   const {
     user,
@@ -535,24 +536,36 @@ export function AppShell({
       </aside>
 
       {/* Mobile Sidebar Slider */}
-      {mobileSidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <aside className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border shadow-subtle animate-in slide-in-from-left duration-250">
-            <button
-              type="button"
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm"
               onClick={() => setMobileSidebarOpen(false)}
-              className="absolute top-4 right-4 rounded p-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
+            />
+            <motion.aside
+              initial={shouldReduceMotion ? { opacity: 0 } : { x: "-100%" }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border shadow-glow flex flex-col"
             >
-              <X className="h-4 w-4" />
-            </button>
-            {renderSidebarContent(false)}
-          </aside>
-        </div>
-      )}
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                className="absolute top-4 right-4 rounded-full h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+              {renderSidebarContent(false)}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Navbar */}
@@ -694,8 +707,12 @@ export function AppShell({
 
           <button
             type="button"
-            onClick={() => setMobileSidebarOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
+              mobileSidebarOpen
+                ? "bg-foreground text-background shadow-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            }`}
             title="Menu"
           >
             <Menu className="h-4.5 w-4.5" strokeWidth={1.75} />
@@ -704,99 +721,111 @@ export function AppShell({
       </div>
 
       {/* Sliding Notification Center Drawer */}
-      {notifDrawerOpen && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={() => setNotifDrawerOpen(false)}
-          />
-          <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-[22rem] bg-card border-l border-border shadow-subtle flex flex-col animate-in slide-in-from-right duration-250">
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between border-b border-border p-4 sm:p-5">
-              <div>
-                <h3 className="font-serif text-lg font-medium text-foreground">
-                  Notifications
-                </h3>
-                <p className="text-[10px] font-mono text-muted-foreground mt-1">
-                  {unreadCount} unread messages
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setNotifDrawerOpen(false)}
-                className="rounded p-1 text-muted-foreground hover:bg-muted cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Drawer Body List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <Bell
-                    className="h-6 w-6 text-muted-foreground/35 mb-2"
-                    strokeWidth={1.5}
-                  />
-                  <p className="text-xs font-semibold text-muted-foreground">
-                    No notifications
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/80 mt-1">
-                    You're all caught up!
+      <AnimatePresence>
+        {notifDrawerOpen && (
+          <div className="fixed inset-0 z-50">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setNotifDrawerOpen(false)}
+            />
+            <motion.aside
+              initial={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="fixed inset-y-0 right-0 z-50 w-full sm:w-[22rem] bg-card border-l border-border shadow-glow flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between border-b border-border p-4 sm:p-5">
+                <div>
+                  <h3 className="font-serif text-lg font-medium text-foreground">
+                    Notifications
+                  </h3>
+                  <p className="text-[10px] font-mono text-muted-foreground mt-1">
+                    {unreadCount} unread messages
                   </p>
                 </div>
-              ) : (
-                notifications.slice(0, 10).map((notif) => (
-                  <div
-                    key={notif.id}
-                    className={`rounded-md border p-4 text-xs relative transition hover:border-border/80 ${
-                      notif.read
-                        ? "border-border bg-muted/10 text-muted-foreground"
-                        : "border-border bg-muted/40 text-foreground"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <p className="font-semibold leading-tight">
-                        {notif.title}
-                      </p>
-                      {!notif.read && (
-                        <button
-                          onClick={() => markAsRead(notif.id)}
-                          className="text-[9px] font-mono font-semibold text-muted-foreground hover:text-foreground cursor-pointer flex-shrink-0"
-                        >
-                          Dismiss
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground/90 mt-1.5 leading-relaxed">
-                      {notif.body}
+                <button
+                  type="button"
+                  onClick={() => setNotifDrawerOpen(false)}
+                  className="rounded p-1 text-muted-foreground hover:bg-muted cursor-pointer"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+
+              {/* Drawer Body List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-center">
+                    <Bell
+                      className="h-6 w-6 text-muted-foreground/35 mb-2"
+                      strokeWidth={1.5}
+                    />
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      No notifications
                     </p>
-                    <p className="text-[9px] font-mono text-muted-foreground/75 mt-2.5">
-                      {new Date(notif.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <p className="text-[10px] text-muted-foreground/80 mt-1">
+                      You're all caught up!
                     </p>
                   </div>
-                ))
-              )}
-            </div>
-
-            {/* Drawer Drawer Footer */}
-            {notifications.length > 0 && (
-              <div className="border-t border-border p-4 bg-muted/10">
-                <Link
-                  href="/notifications"
-                  onClick={() => setNotifDrawerOpen(false)}
-                  className="block w-full text-center rounded-md bg-secondary hover:bg-muted border border-border px-4 py-2 text-xs font-semibold transition cursor-pointer"
-                >
-                  View Activity Feed
-                </Link>
+                ) : (
+                  notifications.slice(0, 10).map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`rounded-md border p-4 text-xs relative transition hover:border-border/80 ${
+                        notif.read
+                          ? "border-border bg-muted/10 text-muted-foreground"
+                          : "border-border bg-muted/40 text-foreground"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <p className="font-semibold leading-tight">
+                          {notif.title}
+                        </p>
+                        {!notif.read && (
+                          <button
+                            onClick={() => markAsRead(notif.id)}
+                            className="text-[9px] font-mono font-semibold text-muted-foreground hover:text-foreground cursor-pointer flex-shrink-0"
+                          >
+                            Dismiss
+                        </button>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground/90 mt-1.5 leading-relaxed">
+                        {notif.body}
+                      </p>
+                      <p className="text-[9px] font-mono text-muted-foreground/75 mt-2.5">
+                        {new Date(notif.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
-            )}
-          </aside>
-        </div>
-      )}
+
+              {/* Drawer Drawer Footer */}
+              {notifications.length > 0 && (
+                <div className="border-t border-border p-4 bg-muted/10">
+                  <Link
+                    href="/notifications"
+                    onClick={() => setNotifDrawerOpen(false)}
+                    className="block w-full text-center rounded-md bg-secondary hover:bg-muted border border-border px-4 py-2 text-xs font-semibold transition cursor-pointer"
+                  >
+                    View Activity Feed
+                  </Link>
+                </div>
+              )}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
