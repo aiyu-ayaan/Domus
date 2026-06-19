@@ -70,7 +70,7 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
 
             const res = await deviceRepository.list({
                 home_id: homeId,
-                room_id: get().selectedRoomId,
+                room_id: get().selectedRoomId || undefined,
                 device_type: get().selectedType || undefined,
                 online: onlineParam,
                 limit: get().limit,
