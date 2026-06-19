@@ -1,21 +1,22 @@
 {
-    "name": "domus",
-    "private": true,
-    "version": "0.1.0",
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "scripts": {
-        "dev:web": "bun --filter @domus/web dev",
-        "dev:api": "bun --filter @domus/api dev",
-        "build": "bun --filter \"*\" build",
-        "lint": "bun --filter \"*\" lint",
-        "format": "prettier . --write",
-        "prepare": "husky"
-    },
-    "devDependencies": {
-        "husky": "^9.1.6",
-        "prettier": "^3.3.3"
-    }
+  "name": "domus",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "bun run scripts/run-dev.ts 3000 bun --cwd apps/web dev",
+    "dev:api": "bun run scripts/run-dev.ts 8000 bun --cwd apps/api dev",
+    "build": "bun --filter \"*\" build",
+    "lint": "bun --filter \"*\" lint",
+    "format": "prettier . --write",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3"
+  }
 }
+    
