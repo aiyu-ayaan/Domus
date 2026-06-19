@@ -1,0 +1,74 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.dev.Dockerfile
+    container_name: domus-dev-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_USE_MOCK_API=false
+    volumes:
+      # Mount the entire monorepo to resolve typescript path aliases
+      - .:/app
+      # Exclude node_modules to avoid host overrides
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/apps/web/.next
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.dev.Dockerfile
+    container_name: domus-dev-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg://domus:domus@postgres:5432/domus
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=development
+      - DEBUG=true
+    volumes:
+      - .:/app
+      - /app/apps/api/.venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: domus-dev-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-domus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domus}
+      POSTGRES_DB: ${POSTGRES_DB:-domus}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-domus}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: domus-dev-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-dev-data:

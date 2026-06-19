@@ -1,6 +1,5 @@
 // Repositories provider entry point
-// By default, this exports the memory-backed Mock Repositories.
-// To connect to a real backend, implement classes using apiClient and switch exports here.
+// Dynamically switches between Mock and API implementations based on env.
 
 import { MockAuthRepository } from './mock/auth.mock';
 import { MockHomeRepository } from './mock/home.mock';
@@ -11,14 +10,25 @@ import { MockSceneRepository } from './mock/scene.mock';
 import { MockAutomationRepository } from './mock/automation.mock';
 import { MockNotificationRepository } from './mock/notification.mock';
 
-export const authRepository = new MockAuthRepository();
-export const homeRepository = new MockHomeRepository();
-export const roomRepository = new MockRoomRepository();
-export const deviceRepository = new MockDeviceRepository();
-export const integrationRepository = new MockIntegrationRepository();
-export const sceneRepository = new MockSceneRepository();
-export const automationRepository = new MockAutomationRepository();
-export const notificationRepository = new MockNotificationRepository();
+import { ApiAuthRepository } from './api/auth.repository';
+import { ApiHomeRepository } from './api/home.repository';
+import { ApiRoomRepository } from './api/room.repository';
+import { ApiDeviceRepository } from './api/device.repository';
+import { ApiIntegrationRepository } from './api/integration.repository';
+import { ApiSceneRepository } from './api/scene.repository';
+import { ApiAutomationRepository } from './api/automation.repository';
+import { ApiNotificationRepository } from './api/notification.repository';
+
+const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API !== 'false';
+
+export const authRepository = useMock ? new MockAuthRepository() : new ApiAuthRepository();
+export const homeRepository = useMock ? new MockHomeRepository() : new ApiHomeRepository();
+export const roomRepository = useMock ? new MockRoomRepository() : new ApiRoomRepository();
+export const deviceRepository = useMock ? new MockDeviceRepository() : new ApiDeviceRepository();
+export const integrationRepository = useMock ? new MockIntegrationRepository() : new ApiIntegrationRepository();
+export const sceneRepository = useMock ? new MockSceneRepository() : new ApiSceneRepository();
+export const automationRepository = useMock ? new MockAutomationRepository() : new ApiAutomationRepository();
+export const notificationRepository = useMock ? new MockNotificationRepository() : new ApiNotificationRepository();
 
 // Type helper for the UI
 export type Repositories = {
@@ -31,3 +41,4 @@ export type Repositories = {
     automation: typeof automationRepository;
     notification: typeof notificationRepository;
 };
+
