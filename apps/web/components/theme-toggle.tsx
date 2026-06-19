@@ -1,31 +1,42 @@
 'use client';
 
+import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 
 export function ThemeToggle() {
-    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+    const { resolvedTheme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        const storedTheme = window.localStorage.getItem('domus-theme');
-        const initialTheme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
-        setTheme(initialTheme);
-        document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+        setMounted(true);
     }, []);
 
-    function toggleTheme() {
-        const nextTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(nextTheme);
-        window.localStorage.setItem('domus-theme', nextTheme);
-        document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    if (!mounted) {
+        return (
+            <div className="h-10 w-full animate-pulse-slow rounded-xl border border-border bg-muted/30" />
+        );
     }
+
+    const isDark = resolvedTheme === 'dark';
 
     return (
         <button
             type="button"
-            onClick={toggleTheme}
-            className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-left text-sm font-medium transition hover:bg-accent/60"
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className="flex items-center gap-3 rounded-xl border border-border bg-background/50 px-4 py-2.5 text-left text-sm font-medium transition hover:border-accent hover:bg-accent/30 cursor-pointer w-full text-foreground/80 hover:text-foreground"
         >
-            {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            {isDark ? (
+                <>
+                    <Sun className="h-4 w-4 text-amber-500 animate-spin-slow" />
+                    <span>Light Mode</span>
+                </>
+            ) : (
+                <>
+                    <Moon className="h-4 w-4 text-indigo-500" />
+                    <span>Dark Mode</span>
+                </>
+            )}
         </button>
     );
 }
