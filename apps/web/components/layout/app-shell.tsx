@@ -177,15 +177,18 @@ export function AppShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   // Sync collapse state with localStorage on mount
   useEffect(() => {
     setIsMounted(true);
     const stored = localStorage.getItem("domus_sidebar_collapsed");
-    if (stored === "true") {
-      setIsCollapsed(true);
+    if (stored !== null) {
+      setIsCollapsed(stored === "true");
+    } else {
+      setIsCollapsed(true); // Default to true
     }
   }, []);
 
@@ -467,25 +470,34 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:flex">
-      {/* Desktop Sidebar (Collapsible) */}
-      <aside
-        className={`relative hidden lg:block border-r border-border bg-card flex-shrink-0 h-screen sticky top-0 transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isCollapsed ? "w-16" : "w-64 xl:w-68"}`}
-      >
-        {renderSidebarContent(isCollapsed)}
+      {/* Desktop Sidebar Spacer (keeps layout space to prevent reflow) */}
+      <aside className="hidden lg:block w-20 flex-shrink-0 h-screen bg-transparent" />
 
-        {/* Collapse Toggle Button */}
-        <button
-          type="button"
-          onClick={toggleCollapse}
-          className="absolute top-5 -right-3 z-30 hidden lg:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-subtle hover:bg-muted text-foreground transition-all duration-200 cursor-pointer"
-          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronLeft className="h-3.5 w-3.5" />
-          )}
-        </button>
+      {/* Desktop Sidebar (Collapsible & Floating) */}
+      <aside
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+        className={`fixed left-4 top-4 bottom-4 z-40 hidden lg:flex flex-col border border-border bg-card rounded-2xl shadow-subtle transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+          isCollapsed && !isSidebarHovered ? "w-16" : "w-64"
+        }`}
+      >
+        {renderSidebarContent(isCollapsed && !isSidebarHovered)}
+
+        {/* Pin/Collapse Toggle Button */}
+        {(!isCollapsed || isSidebarHovered) && (
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="absolute top-5 right-3 z-30 hidden lg:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-subtle hover:bg-muted text-foreground transition-all duration-200 cursor-pointer animate-fade-in"
+            title={isCollapsed ? "Pin Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronLeft className="h-3.5 w-3.5" />
+            )}
+          </button>
+        )}
       </aside>
 
       {/* Mobile Sidebar Slider */}
