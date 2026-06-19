@@ -57,6 +57,14 @@ const triggerLabels: Record<string, string> = {
   manual: "MANUAL",
 };
 
+// Energy fields reported by metered plugs (matches the Tapo adapter snapshot).
+const energyMetrics = [
+  { key: "current_consumption", label: "Power", unit: "W", digits: 1 },
+  { key: "voltage", label: "Voltage", unit: "V", digits: 1 },
+  { key: "current", label: "Current", unit: "A", digits: 3 },
+  { key: "consumption_today", label: "Today", unit: "kWh", digits: 2 },
+] as const;
+
 const deviceIconMap = {
   camera: Radio,
   fan: Gauge,
@@ -154,6 +162,20 @@ export function DashboardPage() {
     .filter((d): d is { name: string; watts: number } => d !== null)
     .sort((a, b) => b.watts - a.watts)
     .slice(0, 8);
+
+  // Metered plugs: any device whose latest state carries energy telemetry.
+  const meteredDevices = devices
+    .map((device) => {
+      const attrs = deviceStates[device.id]?.attributes ?? {};
+      const hasEnergy = energyMetrics.some(
+        (m) => typeof attrs[m.key] === "number",
+      );
+      return hasEnergy ? { device, attrs } : null;
+    })
+    .filter(
+      (d): d is { device: DeviceOut; attrs: Record<string, number> } =>
+        d !== null,
+    );
 
   // Real automation footprint: count of configured rules per trigger type.
   const automationsByTrigger = Object.entries(
@@ -512,6 +534,37 @@ export function DashboardPage() {
               </ResponsiveContainer>
             )}
           </ChartFrame>
+        </DashboardCard>
+      </motion.section>
+
+      <motion.section variants={itemVariants}>
+        <DashboardCard
+          title="Smart Plug Telemetry"
+          description="Live voltage, current, and energy draw from metered plugs"
+          action={<MiniLink href="/devices">All devices</MiniLink>}
+        >
+          {meteredDevices.length === 0 ? (
+            <div className="flex min-h-40 flex-col items-center justify-center border border-dashed border-border bg-background/35 p-6 text-center">
+              <PlugZap className="h-7 w-7 text-muted-foreground" />
+              <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+                No metered plugs reporting
+              </p>
+              <p className="mt-1 max-w-md text-xs text-muted-foreground">
+                Voltage, current, and energy appear here once a Tapo plug
+                reports telemetry.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {meteredDevices.map(({ device, attrs }) => (
+                <PlugTelemetryRow
+                  key={device.id}
+                  name={device.name}
+                  attrs={attrs}
+                />
+              ))}
+            </div>
+          )}
         </DashboardCard>
       </motion.section>
 
@@ -1054,6 +1107,52 @@ function ChartEmpty({
         {label}
       </p>
       <p className="mt-1 max-w-xs text-xs text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
+function PlugTelemetryRow({
+  name,
+  attrs,
+}: {
+  name: string;
+  attrs: Record<string, number>;
+}) {
+  return (
+    <div className="rounded-none border border-border bg-background/45 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <PlugZap className="h-4 w-4 shrink-0 text-primary" />
+          <p className="truncate text-sm font-semibold text-foreground">
+            {name}
+          </p>
+        </div>
+        {typeof attrs.consumption_this_month === "number" && (
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            {attrs.consumption_this_month.toFixed(2)} kWh/mo
+          </span>
+        )}
+      </div>
+      <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {energyMetrics.map((metric) => (
+          <div
+            key={metric.key}
+            className="rounded-none border border-border bg-card p-2"
+          >
+            <dt className="font-mono text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {metric.label}
+            </dt>
+            <dd className="mt-1 font-mono text-base font-semibold leading-none text-foreground">
+              {typeof attrs[metric.key] === "number"
+                ? attrs[metric.key].toFixed(metric.digits)
+                : "—"}
+              <span className="ml-1 text-[10px] font-medium text-muted-foreground">
+                {metric.unit}
+              </span>
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

@@ -102,12 +102,26 @@ class RealTapoAdapter(DeviceAdapter):
         except KasaException as exc:
             raise ConflictError(f"Could not reach Tapo device {host}: {exc}") from exc
 
+    # Energy-monitoring fields exposed by python-kasa's Energy module. Each is
+    # optional — a plug without voltage/current sensing simply reports None and
+    # the key is dropped. Units: W, V, A, kWh, kWh, kWh.
+    _ENERGY_FIELDS = (
+        "current_consumption",
+        "voltage",
+        "current",
+        "consumption_today",
+        "consumption_this_month",
+        "consumption_total",
+    )
+
     def _snapshot(self, dev: Any) -> StateSnapshot:
         attributes: dict[str, Any] = {"model": dev.model}
         energy = dev.modules.get(Module.Energy)
-        if energy is not None and energy.current_consumption is not None:
-            # python-kasa reports current_consumption in watts.
-            attributes["current_consumption"] = float(energy.current_consumption)
+        if energy is not None:
+            for field_name in self._ENERGY_FIELDS:
+                value = getattr(energy, field_name, None)
+                if value is not None:
+                    attributes[field_name] = float(value)
         return StateSnapshot(
             state="on" if dev.is_on else "off",
             attributes=attributes,

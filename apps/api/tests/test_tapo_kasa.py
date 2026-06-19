@@ -20,7 +20,12 @@ from backend.integrations.adapters.tapo_kasa import (  # noqa: E402
 
 
 class _FakeEnergy:
-    current_consumption = 45.2
+    current_consumption = 45.2  # W
+    voltage = 229.8  # V
+    current = 0.197  # A
+    consumption_today = 0.84  # kWh
+    consumption_this_month = 12.6  # kWh
+    consumption_total = 318.4  # kWh
 
 
 class _FakeDevice:
@@ -77,7 +82,13 @@ async def test_turn_on_off_toggle_and_energy(fake_device):
 
     on = await adapter.turn_on("192.168.1.50")
     assert on.state == "on"
+    # Full energy feature set surfaces through attributes.
     assert on.attributes["current_consumption"] == 45.2
+    assert on.attributes["voltage"] == 229.8
+    assert on.attributes["current"] == 0.197
+    assert on.attributes["consumption_today"] == 0.84
+    assert on.attributes["consumption_this_month"] == 12.6
+    assert on.attributes["consumption_total"] == 318.4
 
     off = await adapter.turn_off("192.168.1.50")
     assert off.state == "off"
