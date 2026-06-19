@@ -1,5 +1,8 @@
 from functools import lru_cache
+import os
+from urllib.parse import urlparse, urlunparse
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +37,29 @@ class Settings(BaseSettings):
     mqtt_port: int = 1883
     mqtt_username: str | None = None
     mqtt_password: str | None = None
+
+    @model_validator(mode="after")
+    def adjust_urls_for_local_dev(self) -> "Settings":
+        # Check if we are running inside a Docker container.
+        is_docker = os.path.exists("/.dockerenv") or os.environ.get("IS_DOCKER") == "true" or os.path.exists("/run/.containerenv")
+        if not is_docker:
+            # If running locally on host, resolve container hostnames to 127.0.0.1
+            try:
+                parsed = urlparse(self.database_url)
+                if parsed.hostname == "postgres":
+                    netloc = parsed.netloc.replace("postgres", "127.0.0.1")
+                    self.database_url = urlunparse(parsed._replace(netloc=netloc))
+            except Exception:
+                pass
+
+            try:
+                parsed = urlparse(self.redis_url)
+                if parsed.hostname == "redis":
+                    netloc = parsed.netloc.replace("redis", "127.0.0.1")
+                    self.redis_url = urlunparse(parsed._replace(netloc=netloc))
+            except Exception:
+                pass
+        return self
 
     @property
     def database_url_sync(self) -> str:
