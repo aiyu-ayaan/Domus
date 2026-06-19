@@ -23,6 +23,53 @@ Domus is a self-hosted, local-first smart home platform for discovering, managin
 
 ---
 
+## System Architecture & Event Flow
+
+### Architecture Topology
+```mermaid
+graph TD
+    subgraph Frontend (Next.js 15 & React 19)
+        UI[Dashboard & Telemetry Plot] <--> Store[Zustand Store]
+        Store <--> WS_Client[WebSocket Client]
+    end
+
+    subgraph Backend (FastAPI & python-kasa)
+        WS_Server[WebSocket Manager] <--> EventBus[Event Bus]
+        Poller[Background Poller Loop] -- Polls every 2s --> Adapters[RealTapoAdapter]
+        Poller -- Saves state --> DB[(PostgreSQL)]
+        Poller -- Publishes event --> EventBus
+        EventBus --> WS_Server
+    end
+
+    subgraph Physical Hardware (Local LAN)
+        Adapters <--> L900[Tapo L900 Lightstrip]
+        Adapters <--> P110[Tapo P110 Smart Plug]
+    end
+```
+
+### Real-Time Telemetry Sequence
+```mermaid
+sequenceDiagram
+    participant Hardware as Physical Tapo Device (LAN)
+    participant Poller as Background Poller Loop
+    participant DB as PostgreSQL Database
+    participant Bus as Event Bus
+    participant WS as WebSocket Manager (WS Server)
+    participant UI as Frontend Telemetry Plot (Recharts)
+
+    loop Every 2 Seconds
+        Poller->>Hardware: get_state()
+        Hardware-->>Poller: StateSnapshot (e.g. 253.4 W, color: #ff0000)
+        Poller->>DB: Record new DeviceState row
+        Poller->>Bus: Publish DEVICE_STATE_CHANGED
+        Bus->>WS: Forward event
+        WS->>UI: Stream over WebSocket (device.state_changed)
+        UI->>UI: Prepend state & update Recharts live line
+    end
+```
+
+---
+
 ## Quick Start
 
 1. **Install Prerequisites**: Install Bun, Node.js, Python 3.12+, PostgreSQL, and Redis.
