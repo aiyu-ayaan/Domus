@@ -29,6 +29,7 @@ const integrationSchema = z.object({
   enabled: z.boolean(),
   config: z.object({
     host: z.string().min(1, "Host IP or endpoint required"),
+    username: z.string().optional(),
     token: z.string().optional(),
   }),
 });
@@ -73,7 +74,7 @@ export default function IntegrationsPage() {
       name: "",
       type: "tapo",
       enabled: true,
-      config: { host: "192.168.1.100", token: "" },
+      config: { host: "192.168.1.100", username: "", token: "" },
     },
   });
 
@@ -219,7 +220,23 @@ export default function IntegrationsPage() {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  API Token / Password (Opaque)
+                  Account Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="off"
+                  className="w-full rounded-xl border border-border bg-background/50 py-2.5 px-3.5 text-sm outline-none focus:border-primary"
+                  {...register("config.username")}
+                />
+                <p className="text-[10px] text-muted-foreground/70">
+                  Required for TP-Link Tapo (KLAP) — your TP-Link account login.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Account Password / API Token
                 </label>
                 <input
                   type="password"

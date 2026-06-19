@@ -29,11 +29,27 @@ def adapter_class(kind: IntegrationType | str) -> type[DeviceAdapter]:
 
 
 def get_adapter(integration) -> DeviceAdapter:
-    """Build an adapter from an Integration model, decrypting its stored config."""
+    """Build an adapter from an Integration model, decrypting its stored config.
+
+    A Tapo integration provisioned with real credentials/hosts gets the live
+    ``python-kasa`` adapter; otherwise it falls back to the in-memory mock (which
+    also keeps the test suite and the no-hardware demo working).
+    """
     config: dict = {}
     if integration.config_encrypted:
         config = decrypt_json(integration.config_encrypted)
-    return adapter_class(integration.type)(config)
+
+    kind = IntegrationType(integration.type)
+    if kind is IntegrationType.tapo:
+        from backend.integrations.adapters.tapo_kasa import (
+            RealTapoAdapter,
+            has_real_config,
+        )
+
+        if has_real_config(config):
+            return RealTapoAdapter(config)
+
+    return adapter_class(kind)(config)
 
 
 def available_integrations() -> list[str]:
