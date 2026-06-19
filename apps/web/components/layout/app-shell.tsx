@@ -523,16 +523,8 @@ export function AppShell({
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Navbar */}
         <header className="h-14 border-b border-border bg-card sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
-          {/* Hamburger Menu & Breadcrumbs */}
+          {/* Breadcrumbs */}
           <div className="flex items-center gap-3 sm:gap-4 truncate">
-            <button
-              type="button"
-              onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden rounded p-1.5 text-muted-foreground hover:bg-muted cursor-pointer flex-shrink-0"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-
             <nav className="flex items-center gap-1.5 text-xs font-mono tracking-wide uppercase truncate text-muted-foreground">
               {breadcrumbs.map((crumb, idx) => (
                 <React.Fragment key={crumb.href}>
@@ -592,9 +584,76 @@ export function AppShell({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 w-full max-w-[1600px] mx-auto p-3 sm:p-5 lg:p-6 xl:p-8 animate-fade-in">
+        <main className="flex-1 w-full max-w-[1600px] mx-auto p-3 sm:p-5 lg:p-6 xl:p-8 pb-24 lg:pb-8 animate-fade-in">
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav className="fixed bottom-4 left-4 right-4 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-2xl flex items-center justify-around py-2.5 px-2 select-none">
+          <Link
+            href="/"
+            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
+              pathname === "/" ? "text-foreground font-bold" : "text-muted-foreground"
+            }`}
+          >
+            <LayoutDashboard
+              className={`h-5 w-5 ${pathname === "/" ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              strokeWidth={pathname === "/" ? 2.25 : 1.75}
+            />
+            <span className="text-[9px] font-mono tracking-wider uppercase">Dashboard</span>
+          </Link>
+
+          <Link
+            href="/devices"
+            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
+              pathname.startsWith("/devices") ? "text-foreground font-bold" : "text-muted-foreground"
+            }`}
+          >
+            <Cpu
+              className={`h-5 w-5 ${pathname.startsWith("/devices") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              strokeWidth={pathname.startsWith("/devices") ? 2.25 : 1.75}
+            />
+            <span className="text-[9px] font-mono tracking-wider uppercase">Devices</span>
+          </Link>
+
+          <Link
+            href="/scenes"
+            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
+              pathname.startsWith("/scenes") ? "text-foreground font-bold" : "text-muted-foreground"
+            }`}
+          >
+            <Sparkles
+              className={`h-5 w-5 ${pathname.startsWith("/scenes") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              strokeWidth={pathname.startsWith("/scenes") ? 2.25 : 1.75}
+            />
+            <span className="text-[9px] font-mono tracking-wider uppercase">Scenes</span>
+          </Link>
+
+          <Link
+            href="/notifications"
+            className={`flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer ${
+              pathname.startsWith("/notifications") ? "text-foreground font-bold" : "text-muted-foreground"
+            }`}
+          >
+            <Bell
+              className={`h-5 w-5 ${pathname.startsWith("/notifications") ? "text-foreground scale-110" : "text-muted-foreground/80"}`}
+              strokeWidth={pathname.startsWith("/notifications") ? 2.25 : 1.75}
+            />
+            <span className="text-[9px] font-mono tracking-wider uppercase">Alerts</span>
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-2.5 flex h-2 w-2 rounded-full bg-destructive animate-pulse" />
+            )}
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="flex flex-col items-center justify-center gap-1 py-0.5 px-2.5 rounded-xl transition duration-150 relative cursor-pointer text-muted-foreground hover:text-foreground"
+          >
+            <Menu className="h-5 w-5 text-muted-foreground/80" strokeWidth={1.75} />
+            <span className="text-[9px] font-mono tracking-wider uppercase">Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* Sliding Notification Center Drawer */}
