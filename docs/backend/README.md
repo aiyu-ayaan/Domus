@@ -5,14 +5,14 @@ without reading the backend source.
 
 ## Start here
 
-| Doc | What's in it |
-|-----|--------------|
-| [api-reference.md](./api-reference.md) | Every endpoint: auth, conventions, error envelope, pagination, request/response shapes, enums |
-| [data-model.md](./data-model.md) | Entities, relationships, cascade & ownership rules |
-| [realtime.md](./realtime.md) | WebSocket: connect, auth, message shape, event catalog |
-| [automations.md](./automations.md) | The IF/THEN rule model with worked examples |
-| [frontend-guide.md](./frontend-guide.md) | Build order, screen→endpoint map, live-update wiring |
-| [openapi.json](./openapi.json) | Machine-readable OpenAPI 3.1 spec — feed to a client generator |
+| Doc                                      | What's in it                                                                                  |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [api-reference.md](./api-reference.md)   | Every endpoint: auth, conventions, error envelope, pagination, request/response shapes, enums |
+| [data-model.md](./data-model.md)         | Entities, relationships, cascade & ownership rules                                            |
+| [realtime.md](./realtime.md)             | WebSocket: connect, auth, message shape, event catalog                                        |
+| [automations.md](./automations.md)       | The IF/THEN rule model with worked examples                                                   |
+| [frontend-guide.md](./frontend-guide.md) | Build order, screen→endpoint map, live-update wiring                                          |
+| [openapi.json](./openapi.json)           | Machine-readable OpenAPI 3.1 spec — feed to a client generator                                |
 
 ## TL;DR for a frontend
 

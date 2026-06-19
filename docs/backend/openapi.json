@@ -7,9 +7,7 @@
   "paths": {
     "/api/v1/auth/register": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Register",
         "operationId": "register_api_v1_auth_register_post",
         "requestBody": {
@@ -48,9 +46,7 @@
     },
     "/api/v1/auth/login": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Login",
         "operationId": "login_api_v1_auth_login_post",
         "requestBody": {
@@ -89,9 +85,7 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Refresh",
         "operationId": "refresh_api_v1_auth_refresh_post",
         "requestBody": {
@@ -130,9 +124,7 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Logout",
         "operationId": "logout_api_v1_auth_logout_post",
         "requestBody": {
@@ -164,9 +156,7 @@
     },
     "/api/v1/auth/change-password": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Change Password",
         "operationId": "change_password_api_v1_auth_change_password_post",
         "requestBody": {
@@ -203,9 +193,7 @@
     },
     "/api/v1/users/me": {
       "get": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "summary": "Get Me",
         "operationId": "get_me_api_v1_users_me_get",
         "responses": {
@@ -227,9 +215,7 @@
         ]
       },
       "delete": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "summary": "Delete Me",
         "operationId": "delete_me_api_v1_users_me_delete",
         "responses": {
@@ -244,9 +230,7 @@
         ]
       },
       "patch": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "summary": "Update Me",
         "operationId": "update_me_api_v1_users_me_patch",
         "requestBody": {
@@ -290,9 +274,7 @@
     },
     "/api/v1/homes": {
       "get": {
-        "tags": [
-          "homes"
-        ],
+        "tags": ["homes"],
         "summary": "List Homes",
         "operationId": "list_homes_api_v1_homes_get",
         "responses": {
@@ -318,9 +300,7 @@
         ]
       },
       "post": {
-        "tags": [
-          "homes"
-        ],
+        "tags": ["homes"],
         "summary": "Create Home",
         "operationId": "create_home_api_v1_homes_post",
         "requestBody": {
@@ -364,9 +344,7 @@
     },
     "/api/v1/homes/{home_id}": {
       "get": {
-        "tags": [
-          "homes"
-        ],
+        "tags": ["homes"],
         "summary": "Get Home",
         "operationId": "get_home_api_v1_homes__home_id__get",
         "security": [
@@ -410,9 +388,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "homes"
-        ],
+        "tags": ["homes"],
         "summary": "Update Home",
         "operationId": "update_home_api_v1_homes__home_id__patch",
         "security": [
@@ -466,9 +442,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "homes"
-        ],
+        "tags": ["homes"],
         "summary": "Delete Home",
         "operationId": "delete_home_api_v1_homes__home_id__delete",
         "security": [
@@ -507,9 +481,7 @@
     },
     "/api/v1/rooms": {
       "get": {
-        "tags": [
-          "rooms"
-        ],
+        "tags": ["rooms"],
         "summary": "List Rooms",
         "operationId": "list_rooms_api_v1_rooms_get",
         "security": [
@@ -564,9 +536,7 @@
         }
       },
       "post": {
-        "tags": [
-          "rooms"
-        ],
+        "tags": ["rooms"],
         "summary": "Create Room",
         "operationId": "create_room_api_v1_rooms_post",
         "security": [
@@ -610,9 +580,7 @@
     },
     "/api/v1/rooms/{room_id}": {
       "patch": {
-        "tags": [
-          "rooms"
-        ],
+        "tags": ["rooms"],
         "summary": "Update Room",
         "operationId": "update_room_api_v1_rooms__room_id__patch",
         "security": [
@@ -666,9 +634,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "rooms"
-        ],
+        "tags": ["rooms"],
         "summary": "Delete Room",
         "operationId": "delete_room_api_v1_rooms__room_id__delete",
         "security": [
@@ -707,9 +673,7 @@
     },
     "/api/v1/integrations/available": {
       "get": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "List Available",
         "operationId": "list_available_api_v1_integrations_available_get",
         "responses": {
@@ -737,9 +701,7 @@
     },
     "/api/v1/integrations": {
       "get": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "List Integrations",
         "operationId": "list_integrations_api_v1_integrations_get",
         "security": [
@@ -794,9 +756,7 @@
         }
       },
       "post": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "Create Integration",
         "operationId": "create_integration_api_v1_integrations_post",
         "security": [
@@ -840,9 +800,7 @@
     },
     "/api/v1/integrations/{integration_id}": {
       "get": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "Get Integration",
         "operationId": "get_integration_api_v1_integrations__integration_id__get",
         "security": [
@@ -886,9 +844,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "Update Integration",
         "operationId": "update_integration_api_v1_integrations__integration_id__patch",
         "security": [
@@ -942,9 +898,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "Delete Integration",
         "operationId": "delete_integration_api_v1_integrations__integration_id__delete",
         "security": [
@@ -983,9 +937,7 @@
     },
     "/api/v1/integrations/{integration_id}/discover": {
       "post": {
-        "tags": [
-          "integrations"
-        ],
+        "tags": ["integrations"],
         "summary": "Discover",
         "operationId": "discover_api_v1_integrations__integration_id__discover_post",
         "security": [
@@ -1031,9 +983,7 @@
     },
     "/api/v1/devices": {
       "get": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "List Devices",
         "operationId": "list_devices_api_v1_devices_get",
         "security": [
@@ -1174,9 +1124,7 @@
         }
       },
       "post": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Create Device",
         "operationId": "create_device_api_v1_devices_post",
         "security": [
@@ -1220,9 +1168,7 @@
     },
     "/api/v1/devices/{device_id}": {
       "get": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Get Device",
         "operationId": "get_device_api_v1_devices__device_id__get",
         "security": [
@@ -1266,9 +1212,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Update Device",
         "operationId": "update_device_api_v1_devices__device_id__patch",
         "security": [
@@ -1322,9 +1266,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Delete Device",
         "operationId": "delete_device_api_v1_devices__device_id__delete",
         "security": [
@@ -1363,9 +1305,7 @@
     },
     "/api/v1/devices/{device_id}/turn-on": {
       "post": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Turn On",
         "operationId": "turn_on_api_v1_devices__device_id__turn_on_post",
         "security": [
@@ -1411,9 +1351,7 @@
     },
     "/api/v1/devices/{device_id}/turn-off": {
       "post": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Turn Off",
         "operationId": "turn_off_api_v1_devices__device_id__turn_off_post",
         "security": [
@@ -1459,9 +1397,7 @@
     },
     "/api/v1/devices/{device_id}/toggle": {
       "post": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Toggle",
         "operationId": "toggle_api_v1_devices__device_id__toggle_post",
         "security": [
@@ -1507,9 +1443,7 @@
     },
     "/api/v1/devices/{device_id}/state": {
       "get": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Get State",
         "operationId": "get_state_api_v1_devices__device_id__state_get",
         "security": [
@@ -1555,9 +1489,7 @@
     },
     "/api/v1/devices/{device_id}/history": {
       "get": {
-        "tags": [
-          "devices"
-        ],
+        "tags": ["devices"],
         "summary": "Get History",
         "operationId": "get_history_api_v1_devices__device_id__history_get",
         "security": [
@@ -1648,9 +1580,7 @@
     },
     "/api/v1/scenes": {
       "get": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "List Scenes",
         "operationId": "list_scenes_api_v1_scenes_get",
         "security": [
@@ -1705,9 +1635,7 @@
         }
       },
       "post": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "Create Scene",
         "operationId": "create_scene_api_v1_scenes_post",
         "security": [
@@ -1751,9 +1679,7 @@
     },
     "/api/v1/scenes/{scene_id}": {
       "get": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "Get Scene",
         "operationId": "get_scene_api_v1_scenes__scene_id__get",
         "security": [
@@ -1797,9 +1723,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "Update Scene",
         "operationId": "update_scene_api_v1_scenes__scene_id__patch",
         "security": [
@@ -1853,9 +1777,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "Delete Scene",
         "operationId": "delete_scene_api_v1_scenes__scene_id__delete",
         "security": [
@@ -1894,9 +1816,7 @@
     },
     "/api/v1/scenes/{scene_id}/activate": {
       "post": {
-        "tags": [
-          "scenes"
-        ],
+        "tags": ["scenes"],
         "summary": "Activate Scene",
         "operationId": "activate_scene_api_v1_scenes__scene_id__activate_post",
         "security": [
@@ -1942,9 +1862,7 @@
     },
     "/api/v1/automations": {
       "get": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "List Automations",
         "operationId": "list_automations_api_v1_automations_get",
         "security": [
@@ -1999,9 +1917,7 @@
         }
       },
       "post": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "Create Automation",
         "operationId": "create_automation_api_v1_automations_post",
         "security": [
@@ -2045,9 +1961,7 @@
     },
     "/api/v1/automations/{automation_id}": {
       "get": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "Get Automation",
         "operationId": "get_automation_api_v1_automations__automation_id__get",
         "security": [
@@ -2091,9 +2005,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "Update Automation",
         "operationId": "update_automation_api_v1_automations__automation_id__patch",
         "security": [
@@ -2147,9 +2059,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "Delete Automation",
         "operationId": "delete_automation_api_v1_automations__automation_id__delete",
         "security": [
@@ -2188,9 +2098,7 @@
     },
     "/api/v1/automations/{automation_id}/trigger": {
       "post": {
-        "tags": [
-          "automations"
-        ],
+        "tags": ["automations"],
         "summary": "Trigger Automation",
         "operationId": "trigger_automation_api_v1_automations__automation_id__trigger_post",
         "security": [
@@ -2247,9 +2155,7 @@
     },
     "/api/v1/notifications": {
       "get": {
-        "tags": [
-          "notifications"
-        ],
+        "tags": ["notifications"],
         "summary": "List Notifications",
         "operationId": "list_notifications_api_v1_notifications_get",
         "security": [
@@ -2363,9 +2269,7 @@
     },
     "/api/v1/notifications/{notification_id}/read": {
       "post": {
-        "tags": [
-          "notifications"
-        ],
+        "tags": ["notifications"],
         "summary": "Mark Read",
         "operationId": "mark_read_api_v1_notifications__notification_id__read_post",
         "security": [
@@ -2411,9 +2315,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "summary": "Health",
         "operationId": "health_health_get",
         "responses": {
@@ -2436,9 +2338,7 @@
     },
     "/health/ready": {
       "get": {
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "summary": "Ready",
         "operationId": "ready_health_ready_get",
         "responses": {
@@ -2513,9 +2413,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "type"
-        ],
+        "required": ["type"],
         "title": "Action"
       },
       "ActionType": {
@@ -2567,12 +2465,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "home_id",
-          "name",
-          "trigger",
-          "actions"
-        ],
+        "required": ["home_id", "name", "trigger", "actions"],
         "title": "AutomationCreate"
       },
       "AutomationOut": {
@@ -2684,11 +2577,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "automation_id",
-          "matched",
-          "executed"
-        ],
+        "required": ["automation_id", "matched", "executed"],
         "title": "AutomationRunResult"
       },
       "AutomationUpdate": {
@@ -2773,10 +2662,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_password",
-          "new_password"
-        ],
+        "required": ["current_password", "new_password"],
         "title": "ChangePasswordRequest"
       },
       "Condition": {
@@ -2793,24 +2679,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "field",
-          "op",
-          "value"
-        ],
+        "required": ["field", "op", "value"],
         "title": "Condition"
       },
       "ConditionOp": {
         "type": "string",
-        "enum": [
-          "eq",
-          "ne",
-          "gt",
-          "lt",
-          "gte",
-          "lte",
-          "in"
-        ],
+        "enum": ["eq", "ne", "gt", "lt", "gte", "lte", "in"],
         "title": "ConditionOp"
       },
       "DeviceCreate": {
@@ -2893,12 +2767,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "home_id",
-          "integration_id",
-          "external_id",
-          "name"
-        ],
+        "required": ["home_id", "integration_id", "external_id", "name"],
         "title": "DeviceCreate"
       },
       "DeviceOut": {
@@ -3048,13 +2917,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "device_id",
-          "state",
-          "attributes",
-          "created_at"
-        ],
+        "required": ["id", "device_id", "state", "attributes", "created_at"],
         "title": "DeviceStateOut"
       },
       "DeviceType": {
@@ -3253,9 +3116,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "title": "HomeCreate"
       },
       "HomeOut": {
@@ -3376,11 +3237,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "home_id",
-          "name",
-          "type"
-        ],
+        "required": ["home_id", "name", "type"],
         "title": "IntegrationCreate"
       },
       "IntegrationOut": {
@@ -3439,14 +3296,7 @@
       },
       "IntegrationType": {
         "type": "string",
-        "enum": [
-          "tapo",
-          "xiaomi",
-          "tuya",
-          "mqtt",
-          "matter",
-          "zigbee"
-        ],
+        "enum": ["tapo", "xiaomi", "tuya", "mqtt", "matter", "zigbee"],
         "title": "IntegrationType"
       },
       "IntegrationUpdate": {
@@ -3504,10 +3354,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "LoginRequest"
       },
       "NotificationOut": {
@@ -3595,12 +3442,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ],
+        "required": ["items", "total", "limit", "offset"],
         "title": "Page[DeviceOut]"
       },
       "RefreshRequest": {
@@ -3611,9 +3453,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "refresh_token"
-        ],
+        "required": ["refresh_token"],
         "title": "RefreshRequest"
       },
       "RegisterRequest": {
@@ -3643,10 +3483,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "RegisterRequest"
       },
       "RegisterResponse": {
@@ -3659,20 +3496,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "user",
-          "tokens"
-        ],
+        "required": ["user", "tokens"],
         "title": "RegisterResponse"
       },
       "Role": {
         "type": "string",
-        "enum": [
-          "owner",
-          "admin",
-          "user",
-          "guest"
-        ],
+        "enum": ["owner", "admin", "user", "guest"],
         "title": "Role"
       },
       "RoomCreate": {
@@ -3702,10 +3531,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "home_id",
-          "name"
-        ],
+        "required": ["home_id", "name"],
         "title": "RoomCreate"
       },
       "RoomOut": {
@@ -3742,13 +3568,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "home_id",
-          "name",
-          "icon",
-          "created_at"
-        ],
+        "required": ["id", "home_id", "name", "icon", "created_at"],
         "title": "RoomOut"
       },
       "RoomUpdate": {
@@ -3799,11 +3619,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "scene_id",
-          "applied",
-          "failed"
-        ],
+        "required": ["scene_id", "applied", "failed"],
         "title": "SceneActivateResult"
       },
       "SceneCreate": {
@@ -3839,10 +3655,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "home_id",
-          "name"
-        ],
+        "required": ["home_id", "name"],
         "title": "SceneCreate"
       },
       "SceneDeviceStateIn": {
@@ -3865,10 +3678,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "device_id",
-          "state"
-        ],
+        "required": ["device_id", "state"],
         "title": "SceneDeviceStateIn"
       },
       "SceneDeviceStateOut": {
@@ -3889,11 +3699,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "device_id",
-          "state",
-          "attributes"
-        ],
+        "required": ["device_id", "state", "attributes"],
         "title": "SceneDeviceStateOut"
       },
       "SceneOut": {
@@ -4008,10 +3814,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "access_token",
-          "refresh_token"
-        ],
+        "required": ["access_token", "refresh_token"],
         "title": "TokenPair"
       },
       "Trigger": {
@@ -4055,9 +3858,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "type"
-        ],
+        "required": ["type"],
         "title": "Trigger"
       },
       "TriggerType": {
@@ -4198,11 +3999,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       }
     },

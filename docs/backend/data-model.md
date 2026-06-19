@@ -26,19 +26,19 @@ User (1) ──> (N) RefreshToken   (revocable, rotated on refresh)
 
 ## Entities
 
-| Entity | Key fields | Notes |
-|--------|-----------|-------|
-| **User** | email (unique), password_hash, full_name?, avatar_url?, role, is_active, is_verified | bcrypt hash; role ∈ owner/admin/user/guest |
-| **RefreshToken** | user_id, jti (unique), expires_at, revoked | server-side so refresh is revocable |
-| **Home** | name, description?, timezone, owner_id | auth boundary; user owns many |
-| **Room** | home_id, name, icon? | grouping for devices |
-| **Integration** | home_id, name, type, enabled, last_sync_at?, config_encrypted? | credentials Fernet-encrypted, never returned |
-| **Device** | home_id, integration_id, room_id?, external_id, name, manufacturer?, model?, serial_number?, device_type, online, last_seen?, meta | unique on (integration_id, external_id) |
-| **DeviceState** | device_id, state, attributes, created_at | append-only; latest row is current state |
-| **Scene** | home_id, name, description? | has many SceneDeviceState |
-| **SceneDeviceState** | scene_id, device_id, state, attributes | desired state when scene activates |
-| **Automation** | home_id, name, enabled, trigger(json), conditions(json), actions(json), last_triggered_at?, last_error? | rule stored as JSON; see automations.md |
-| **Notification** | home_id, type, title, body, read, meta | raised by system events |
+| Entity               | Key fields                                                                                                                         | Notes                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| **User**             | email (unique), password_hash, full_name?, avatar_url?, role, is_active, is_verified                                               | bcrypt hash; role ∈ owner/admin/user/guest   |
+| **RefreshToken**     | user_id, jti (unique), expires_at, revoked                                                                                         | server-side so refresh is revocable          |
+| **Home**             | name, description?, timezone, owner_id                                                                                             | auth boundary; user owns many                |
+| **Room**             | home_id, name, icon?                                                                                                               | grouping for devices                         |
+| **Integration**      | home_id, name, type, enabled, last_sync_at?, config_encrypted?                                                                     | credentials Fernet-encrypted, never returned |
+| **Device**           | home_id, integration_id, room_id?, external_id, name, manufacturer?, model?, serial_number?, device_type, online, last_seen?, meta | unique on (integration_id, external_id)      |
+| **DeviceState**      | device_id, state, attributes, created_at                                                                                           | append-only; latest row is current state     |
+| **Scene**            | home_id, name, description?                                                                                                        | has many SceneDeviceState                    |
+| **SceneDeviceState** | scene_id, device_id, state, attributes                                                                                             | desired state when scene activates           |
+| **Automation**       | home_id, name, enabled, trigger(json), conditions(json), actions(json), last_triggered_at?, last_error?                            | rule stored as JSON; see automations.md      |
+| **Notification**     | home_id, type, title, body, read, meta                                                                                             | raised by system events                      |
 
 ## Cascade behavior
 

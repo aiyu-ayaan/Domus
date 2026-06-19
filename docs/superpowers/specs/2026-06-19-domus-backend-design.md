@@ -17,7 +17,7 @@ pytest · ruff · black.
 ## Layout (modular monolith, clean-ish layers)
 
 Modules live directly under `apps/api/backend/<module>/` (the `backend` package
-*is* the source root — the spec's `src/` wrapper is dropped as redundant).
+_is_ the source root — the spec's `src/` wrapper is dropped as redundant).
 
 ```
 backend/

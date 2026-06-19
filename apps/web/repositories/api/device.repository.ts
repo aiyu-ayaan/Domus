@@ -1,70 +1,83 @@
 // API Device Repository implementation
-import type { IDeviceRepository } from '../types';
-import type { DeviceOut, DeviceCreate, DeviceUpdate, DeviceStateOut, Page } from '@/types/api';
-import { apiClient } from '@/services/api-client';
+import type { IDeviceRepository } from "../types";
+import type {
+  DeviceOut,
+  DeviceCreate,
+  DeviceUpdate,
+  DeviceStateOut,
+  Page,
+} from "@/types/api";
+import { apiClient } from "@/services/api-client";
 
 export class ApiDeviceRepository implements IDeviceRepository {
-    public async list(params: {
-        home_id: string;
-        room_id?: string | null;
-        device_type?: string;
-        online?: boolean;
-        limit?: number;
-        offset?: number;
-        sort?: string;
-    }): Promise<Page<DeviceOut>> {
-        // Flatten params for apiClient
-        const queryParams: Record<string, string | number | boolean | null | undefined> = {
-            home_id: params.home_id,
-            device_type: params.device_type,
-            online: params.online,
-            limit: params.limit,
-            offset: params.offset,
-            sort: params.sort,
-        };
+  public async list(params: {
+    home_id: string;
+    room_id?: string | null;
+    device_type?: string;
+    online?: boolean;
+    limit?: number;
+    offset?: number;
+    sort?: string;
+  }): Promise<Page<DeviceOut>> {
+    // Flatten params for apiClient
+    const queryParams: Record<
+      string,
+      string | number | boolean | null | undefined
+    > = {
+      home_id: params.home_id,
+      device_type: params.device_type,
+      online: params.online,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+    };
 
-        if (params.room_id !== undefined) {
-            queryParams.room_id = params.room_id;
-        }
-
-        return apiClient.get('/devices', { params: queryParams });
+    if (params.room_id !== undefined) {
+      queryParams.room_id = params.room_id;
     }
 
-    public async get(id: string): Promise<DeviceOut> {
-        return apiClient.get(`/devices/${id}`);
-    }
+    return apiClient.get("/devices", { params: queryParams });
+  }
 
-    public async create(req: DeviceCreate): Promise<DeviceOut> {
-        return apiClient.post('/devices', req);
-    }
+  public async get(id: string): Promise<DeviceOut> {
+    return apiClient.get(`/devices/${id}`);
+  }
 
-    public async update(id: string, req: DeviceUpdate): Promise<DeviceOut> {
-        return apiClient.patch(`/devices/${id}`, req);
-    }
+  public async create(req: DeviceCreate): Promise<DeviceOut> {
+    return apiClient.post("/devices", req);
+  }
 
-    public async delete(id: string): Promise<void> {
-        return apiClient.delete(`/devices/${id}`);
-    }
+  public async update(id: string, req: DeviceUpdate): Promise<DeviceOut> {
+    return apiClient.patch(`/devices/${id}`, req);
+  }
 
-    public async turnOn(id: string): Promise<DeviceStateOut> {
-        return apiClient.post(`/devices/${id}/turn-on`);
-    }
+  public async delete(id: string): Promise<void> {
+    return apiClient.delete(`/devices/${id}`);
+  }
 
-    public async turnOff(id: string): Promise<DeviceStateOut> {
-        return apiClient.post(`/devices/${id}/turn-off`);
-    }
+  public async turnOn(id: string): Promise<DeviceStateOut> {
+    return apiClient.post(`/devices/${id}/turn-on`);
+  }
 
-    public async toggle(id: string): Promise<DeviceStateOut> {
-        return apiClient.post(`/devices/${id}/toggle`);
-    }
+  public async turnOff(id: string): Promise<DeviceStateOut> {
+    return apiClient.post(`/devices/${id}/turn-off`);
+  }
 
-    public async getState(id: string): Promise<DeviceStateOut> {
-        return apiClient.get(`/devices/${id}/state`);
-    }
+  public async toggle(id: string): Promise<DeviceStateOut> {
+    return apiClient.post(`/devices/${id}/toggle`);
+  }
 
-    public async getHistory(id: string, limit?: number, offset?: number): Promise<DeviceStateOut[]> {
-        return apiClient.get(`/devices/${id}/history`, {
-            params: { limit, offset },
-        });
-    }
+  public async getState(id: string): Promise<DeviceStateOut> {
+    return apiClient.get(`/devices/${id}/state`);
+  }
+
+  public async getHistory(
+    id: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<DeviceStateOut[]> {
+    return apiClient.get(`/devices/${id}/history`, {
+      params: { limit, offset },
+    });
+  }
 }

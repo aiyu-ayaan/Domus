@@ -42,24 +42,25 @@ Hold the selected `home_id` in UI state; pass it as a query param everywhere.
 
 ## 3. Screen → endpoint mapping
 
-| Screen | Reads | Writes |
-|--------|-------|--------|
-| Login / Register | — | `auth/login`, `auth/register` |
-| Home switcher | `GET /homes` | `POST/PATCH/DELETE /homes` |
-| Dashboard (device grid) | `GET /devices` (+ filters) | control endpoints |
-| Device detail | `GET /devices/{id}`, `…/state`, `…/history` | `PATCH`, control |
-| Rooms | `GET /rooms` | room CRUD |
-| Integrations | `GET /integrations`, `…/available` | integration CRUD, `…/discover` |
-| Scenes | `GET /scenes` | scene CRUD, `…/activate` |
-| Automations | `GET /automations` | automation CRUD, `…/trigger` |
-| Notifications | `GET /notifications` | `…/read` |
-| Settings/profile | `GET /users/me` | `PATCH /users/me`, change-password |
+| Screen                  | Reads                                       | Writes                             |
+| ----------------------- | ------------------------------------------- | ---------------------------------- |
+| Login / Register        | —                                           | `auth/login`, `auth/register`      |
+| Home switcher           | `GET /homes`                                | `POST/PATCH/DELETE /homes`         |
+| Dashboard (device grid) | `GET /devices` (+ filters)                  | control endpoints                  |
+| Device detail           | `GET /devices/{id}`, `…/state`, `…/history` | `PATCH`, control                   |
+| Rooms                   | `GET /rooms`                                | room CRUD                          |
+| Integrations            | `GET /integrations`, `…/available`          | integration CRUD, `…/discover`     |
+| Scenes                  | `GET /scenes`                               | scene CRUD, `…/activate`           |
+| Automations             | `GET /automations`                          | automation CRUD, `…/trigger`       |
+| Notifications           | `GET /notifications`                        | `…/read`                           |
+| Settings/profile        | `GET /users/me`                             | `PATCH /users/me`, change-password |
 
 ## 4. Controlling devices
 
 ```
 POST /devices/{id}/turn-on | turn-off | toggle   → DeviceStateOut
 ```
+
 Returns the new `DeviceState`. For optimistic UI: flip the toggle immediately, reconcile
 with the returned `state`, and let the incoming `device.state_changed` WS event be the
 source of truth.
@@ -89,6 +90,7 @@ POST /integrations { home_id, name, type, config }   → create (config encrypte
 POST /integrations/{id}/discover             → DiscoveryResult; new devices auto-appear
 GET  /devices?home_id=…                       → refresh the grid
 ```
+
 `config` is opaque per integration (credentials/keys) and is never returned — treat it as
 write-only in the UI.
 

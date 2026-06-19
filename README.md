@@ -26,22 +26,27 @@ Domus is a self-hosted, local-first smart home platform for discovering, managin
 5. Copy environment files as needed and start `web` and `api`.
 
 ## Commands
+
 ### To Activate Python Virtual Environment
+
 ```
 & apps/api/.venv/Scripts/Activate.ps1
 ```
 
 ### Web (Frontend)
+
 - `bun run dev:web` — Start Next.js dev server on port 3000
 - `bun --filter @domus/web build` — Build for production
 - `bun --filter @domus/web lint` — Run ESLint
 
 ### API (Backend)
+
 - `bun run dev:api` — Start FastAPI dev server on port 8000 (requires Python venv)
 - `bun --filter @domus/api test` — Run pytest tests
 - `bun --filter @domus/api lint` — Run ruff and black checks
 
 ### Full Stack
+
 - `docker-compose up` — Spin up web, api, postgres, and redis
 - `bun run build` — Build both web and api
 - `bun run lint` — Lint all workspaces

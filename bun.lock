@@ -58,12 +58,18 @@
     "packages/shared-config": {
       "name": "@domus/shared-config",
       "version": "0.1.0",
+      "devDependencies": {
+        "typescript": "^5.6.3",
+      },
     },
     "packages/shared-types": {
       "name": "@domus/shared-types",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^3.23.8",
+      },
+      "devDependencies": {
+        "typescript": "^5.6.3",
       },
     },
   },

@@ -16,17 +16,20 @@ This is a TypeScript/Python monorepo for Domus, a self-hosted smart home platfor
 ### Common Commands
 
 **Web (Frontend)**
+
 - `bun run dev:web` — Start Next.js dev server on port 3000
 - `bun --filter @domus/web build` — Build for production
 - `bun --filter @domus/web lint` — Run ESLint
 
 **API (Backend)**
+
 - `bun run dev:api` — Start FastAPI dev server on port 8000 (requires Python venv)
 - `bun --filter @domus/api test` — Run pytest tests
 - `bun --filter @domus/api lint` — Run ruff and black checks
 - `bun run format` — Format code with prettier (Node) and black (Python)
 
 **Full Stack**
+
 - `docker-compose up` — Spin up web, api, postgres, and redis
 - `bun run build` — Build both web and api
 - `bun run lint` — Lint all workspaces
@@ -56,6 +59,7 @@ Domus uses a modular monolith with clear separation of concerns:
 PostgreSQL with SQLAlchemy ORM. Migrations use Alembic and live in `apps/api/backend/migrations/`.
 
 To run a migration:
+
 ```bash
 cd apps/api
 alembic upgrade head
@@ -64,6 +68,7 @@ alembic upgrade head
 ## Workspace Setup
 
 All workspaces are listed in the root `package.json`. Each workspace can have independent scripts and dependencies. When adding a new workspace, update:
+
 1. Root `package.json` workspaces array
 2. Root `tsconfig.base.json` paths (for TypeScript references)
 

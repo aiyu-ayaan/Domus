@@ -22,25 +22,27 @@ ws://localhost:8000/ws?token=<access_token>
 Every server message is JSON:
 
 ```json
-{ "type": "device.state_changed",
+{
+  "type": "device.state_changed",
   "data": { "device_id": "…", "state": "on", "attributes": { "mock": true } },
   "home_id": "…",
-  "ts": "2026-06-19T12:00:00+00:00" }
+  "ts": "2026-06-19T12:00:00+00:00"
+}
 ```
 
 `home_id` may be `null` for global broadcasts. `ts` is ISO-8601 UTC.
 
 ## Event types
 
-| `type` | When | `data` |
-|--------|------|--------|
-| `presence.updated` | a user connects/disconnects | `{ "online_users": ["<user_id>", …] }` |
-| `device.state_changed` | a device is controlled or reports state | `{ device_id, state, attributes }` |
-| `device.online_changed` | a device goes online/offline | `{ device_id, online }` |
-| `notification.created` | a notification is raised | `{ id, title, notification_type }` |
-| `integration.new_device_found` | discovery finds a new device | `{ name, external_id }` |
-| `mqtt.message` | an MQTT message arrives (if MQTT enabled) | `{ topic, payload }` |
-| `dashboard.updated` | reserved for aggregate dashboard refreshes | `{ … }` |
+| `type`                         | When                                       | `data`                                 |
+| ------------------------------ | ------------------------------------------ | -------------------------------------- |
+| `presence.updated`             | a user connects/disconnects                | `{ "online_users": ["<user_id>", …] }` |
+| `device.state_changed`         | a device is controlled or reports state    | `{ device_id, state, attributes }`     |
+| `device.online_changed`        | a device goes online/offline               | `{ device_id, online }`                |
+| `notification.created`         | a notification is raised                   | `{ id, title, notification_type }`     |
+| `integration.new_device_found` | discovery finds a new device               | `{ name, external_id }`                |
+| `mqtt.message`                 | an MQTT message arrives (if MQTT enabled)  | `{ topic, payload }`                   |
+| `dashboard.updated`            | reserved for aggregate dashboard refreshes | `{ … }`                                |
 
 A frontend can switch on `type` and update local state (e.g. patch the device in a
 TanStack Query cache by `data.device_id`).
@@ -52,8 +54,9 @@ function connect(accessToken: string, onEvent: (e: any) => void) {
   const ws = new WebSocket(`ws://localhost:8000/ws?token=${accessToken}`);
   ws.onmessage = (m) => onEvent(JSON.parse(m.data));
   ws.onclose = (e) => {
-    if (e.code === 1008) {/* refresh token, then reconnect */}
-    else setTimeout(() => connect(accessToken, onEvent), 1000);
+    if (e.code === 1008) {
+      /* refresh token, then reconnect */
+    } else setTimeout(() => connect(accessToken, onEvent), 1000);
   };
   return ws;
 }
