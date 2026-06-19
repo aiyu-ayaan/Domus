@@ -26,10 +26,17 @@ interface DeviceState {
 
   // Async operations
   fetchDevices: (homeId: string) => Promise<void>;
-  fetchDeviceState: (deviceId: string) => Promise<DeviceStateOut>;
+  fetchDeviceState: (
+    deviceId: string,
+    refresh?: boolean,
+  ) => Promise<DeviceStateOut>;
   turnOnDevice: (deviceId: string) => Promise<void>;
   turnOffDevice: (deviceId: string) => Promise<void>;
   toggleDevice: (deviceId: string) => Promise<void>;
+  setDeviceAttributes: (
+    deviceId: string,
+    attributes: Record<string, any>,
+  ) => Promise<void>;
   createDevice: (req: DeviceCreate) => Promise<DeviceOut>;
   deleteDevice: (deviceId: string) => Promise<void>;
 
@@ -91,7 +98,7 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       res.items.forEach((device) => {
         if (device.online) {
           get()
-            .fetchDeviceState(device.id)
+            .fetchDeviceState(device.id, true)
             .catch(() => {});
         }
       });
@@ -103,9 +110,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     }
   },
 
-  fetchDeviceState: async (deviceId) => {
+  fetchDeviceState: async (deviceId, refresh) => {
     try {
-      const state = await deviceRepository.getState(deviceId);
+      const state = await deviceRepository.getState(deviceId, refresh);
       set((prev) => ({
         deviceStates: {
           ...prev.deviceStates,
@@ -200,6 +207,37 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     } catch (err) {
       if (currentState) {
         get().updateDeviceStateInStore(deviceId, currentState);
+      }
+      throw err;
+    }
+  },
+
+  setDeviceAttributes: async (deviceId, attributes) => {
+    const originalState = get().deviceStates[deviceId];
+    const originalAttributes = originalState?.attributes || {};
+    
+    set((prev) => ({
+      deviceStates: {
+        ...prev.deviceStates,
+        [deviceId]: {
+          ...prev.deviceStates[deviceId],
+          attributes: {
+            ...originalAttributes,
+            ...attributes,
+          },
+        },
+      },
+    }));
+
+    try {
+      const finalState = await deviceRepository.setAttributes(
+        deviceId,
+        attributes,
+      );
+      get().updateDeviceStateInStore(deviceId, finalState);
+    } catch (err) {
+      if (originalState) {
+        get().updateDeviceStateInStore(deviceId, originalState);
       }
       throw err;
     }

@@ -7,11 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useHomeStore } from "@/stores/home-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useDeviceStore } from "@/stores/device-store";
 import { deviceRepository } from "@/repositories";
-import { PageHeader } from "@/components/shared/page-header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -26,7 +24,6 @@ import {
 } from "recharts";
 import {
   ArrowLeft,
-  Cpu,
   Info,
   History,
   Activity as ActivityIcon,
@@ -47,15 +44,15 @@ export default function DeviceDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
 
-  const { activeHomeId } = useHomeStore();
   const { rooms } = useRoomStore();
-  const { deviceStates, updateDeviceStateInStore, toggleDevice, deleteDevice } =
+  const { deviceStates, updateDeviceStateInStore, toggleDevice, deleteDevice, setDeviceAttributes } =
     useDeviceStore();
 
   const [device, setDevice] = useState<DeviceOut | null>(null);
   const [history, setHistory] = useState<DeviceStateOut[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [localBrightness, setLocalBrightness] = useState<number | null>(null);
 
   const {
     register,
@@ -91,6 +88,7 @@ export default function DeviceDetailPage() {
     if (id) {
       fetchDetailData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (isLoading || !device) {
@@ -281,14 +279,14 @@ export default function DeviceDetailPage() {
                         onChange={async (e) => {
                           const targetVal = parseFloat(e.target.value);
                           try {
-                            const res = await deviceRepository.update(
+                            await deviceRepository.update(
                               device.id,
                               {
                                 online: true,
                               },
                             );
                             // Update attributes
-                            const curState = await deviceRepository.getState(
+                            await deviceRepository.getState(
                               device.id,
                             );
                             const updatedState = await deviceRepository.turnOn(
@@ -305,33 +303,136 @@ export default function DeviceDetailPage() {
                   )}
 
                   {device.device_type === "light" && (
-                    <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-3">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold">Brightness Level</span>
-                        <span className="font-mono text-primary font-bold">
-                          {state?.attributes?.brightness || "100"}%
-                        </span>
+                    <div className="space-y-4">
+                      {/* Brightness Control */}
+                      <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-3">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-semibold">Brightness Level</span>
+                          <span className="font-mono text-primary font-bold">
+                            {localBrightness !== null
+                              ? localBrightness
+                              : state?.attributes?.brightness || "100"}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="100"
+                          step="1"
+                          value={
+                            localBrightness !== null
+                              ? localBrightness
+                              : state?.attributes?.brightness || 100
+                          }
+                          onChange={(e) => {
+                            setLocalBrightness(parseInt(e.target.value));
+                          }}
+                          onMouseUp={async (e) => {
+                            const val = parseInt((e.target as HTMLInputElement).value);
+                            try {
+                              await setDeviceAttributes(device.id, { brightness: val });
+                              setLocalBrightness(null);
+                              toast.success(`Brightness set to ${val}%`);
+                            } catch {
+                              toast.error("Failed to set brightness");
+                            }
+                          }}
+                          onTouchEnd={async (e) => {
+                            const val = parseInt((e.target as HTMLInputElement).value);
+                            try {
+                              await setDeviceAttributes(device.id, { brightness: val });
+                              setLocalBrightness(null);
+                              toast.success(`Brightness set to ${val}%`);
+                            } catch {
+                              toast.error("Failed to set brightness");
+                            }
+                          }}
+                          className="w-full h-1.5 rounded-lg bg-muted border-none outline-none accent-primary cursor-pointer"
+                        />
                       </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="100"
-                        step="5"
-                        defaultValue={state?.attributes?.brightness || "100"}
-                        onChange={async (e) => {
-                          const brightnessVal = parseInt(e.target.value);
-                          try {
-                            const curState = await deviceRepository.getState(
-                              device.id,
+
+                      {/* Color Control */}
+                      <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-4">
+                        <div>
+                          <p className="text-sm font-semibold">Color Selection</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Select preset colors or pick a custom hue.
+                          </p>
+                        </div>
+
+                        {/* Presets Grid */}
+                        <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+                          {[
+                            { name: "Warm White", hex: "#fff4e6" },
+                            { name: "Cool Daylight", hex: "#e6f7ff" },
+                            { name: "Sunset Orange", hex: "#ff7f50" },
+                            { name: "Rose Pink", hex: "#ff69b4" },
+                            { name: "Mystic Violet", hex: "#8a2be2" },
+                            { name: "Ocean Blue", hex: "#1e90ff" },
+                            { name: "Forest Green", hex: "#3cb371" },
+                            { name: "Lemon Yellow", hex: "#ffd700" },
+                          ].map((preset) => {
+                            const isActive =
+                              state?.attributes?.color?.toLowerCase() ===
+                              preset.hex.toLowerCase();
+                            return (
+                              <button
+                                key={preset.hex}
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await setDeviceAttributes(device.id, {
+                                      color: preset.hex,
+                                    });
+                                    toast.success(`${preset.name} applied`);
+                                  } catch {
+                                    toast.error("Failed to set color");
+                                  }
+                                }}
+                                title={preset.name}
+                                style={{ backgroundColor: preset.hex }}
+                                className={`h-10 w-10 rounded-full border cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-sm relative group ${
+                                  isActive
+                                    ? "border-primary ring-2 ring-primary/45 scale-105"
+                                    : "border-border/60"
+                                }`}
+                              >
+                                {isActive && (
+                                  <Check className="h-4 w-4 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
+                                )}
+                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 text-[9px] bg-popover border border-border text-popover-foreground rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 font-medium">
+                                  {preset.name}
+                                </span>
+                              </button>
                             );
-                            curState.attributes.brightness = brightnessVal;
-                            updateDeviceStateInStore(device.id, {
-                              ...curState,
-                            });
-                          } catch {}
-                        }}
-                        className="w-full h-1.5 rounded-lg bg-muted border-none outline-none accent-primary cursor-pointer"
-                      />
+                          })}
+                        </div>
+
+                        {/* Custom Color Input */}
+                        <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+                          <div className="relative h-10 w-10 rounded-full border border-border overflow-hidden cursor-pointer shadow-sm hover:scale-105 transition-transform duration-200">
+                            <input
+                              type="color"
+                              value={state?.attributes?.color || "#ffffff"}
+                              onChange={async (e) => {
+                                const customColor = e.target.value;
+                                try {
+                                  await setDeviceAttributes(device.id, {
+                                    color: customColor,
+                                  });
+                                } catch {}
+                              }}
+                              className="absolute inset-0 h-[150%] w-[150%] -translate-x-[15%] -translate-y-[15%] cursor-pointer border-none p-0 bg-transparent"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold">Custom Palette</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">
+                              {state?.attributes?.color || "Not Set"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

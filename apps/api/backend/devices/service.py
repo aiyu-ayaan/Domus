@@ -108,6 +108,15 @@ class DeviceService:
         device = await self.get_for(device_id, user)  # authorises via home
         return await self._apply(device, action)
 
+    async def set_attributes(self, device_id: UUID, attributes: dict[str, Any], user: User) -> DeviceState:
+        device = await self.get_for(device_id, user)  # authorises via home
+        integration = await self.session.get(Integration, device.integration_id)
+        if integration is None or not integration.enabled:
+            raise ConflictError("Integration is missing or disabled")
+        adapter = get_adapter(integration)
+        snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+        return await self._record(device, snapshot)
+
     async def control_system(self, device_id: UUID, action: str) -> DeviceState:
         """Unauthenticated control for system actors (automation engine, scenes)."""
         device = await self.session.get(Device, device_id)
@@ -150,8 +159,19 @@ class DeviceService:
         )
         return state
 
-    async def current_state(self, device_id: UUID, user: User) -> DeviceState | None:
+    async def current_state(self, device_id: UUID, user: User, refresh: bool = False) -> DeviceState | None:
         device = await self.get_for(device_id, user)
+        
+        if refresh:
+            try:
+                integration = await self.session.get(Integration, device.integration_id)
+                if integration and integration.enabled:
+                    adapter = get_adapter(integration)
+                    snapshot = await adapter.get_state(device.external_id)
+                    return await self._record(device, snapshot)
+            except Exception:
+                pass
+
         res = await self.session.execute(
             select(DeviceState)
             .where(DeviceState.device_id == device.id)

@@ -193,7 +193,45 @@ export class MockDeviceRepository implements IDeviceRepository {
     return this.setDeviceState(id, nextState);
   }
 
-  public async getState(id: string): Promise<DeviceStateOut> {
+  public async setAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ): Promise<DeviceStateOut> {
+    await this.delay(100);
+    const states = mockDb.get("deviceStates");
+    const oldState = states[id];
+    if (!oldState) {
+      throw {
+        error: {
+          code: "not_found",
+          message: "Device state not found",
+          details: null,
+        },
+      };
+    }
+    const newAttributes = {
+      ...(oldState.attributes || {}),
+      ...attributes,
+    };
+    const newState: DeviceStateOut = {
+      ...oldState,
+      attributes: newAttributes,
+      created_at: new Date().toISOString(),
+    };
+    mockDb.set("deviceStates", { ...states, [id]: newState });
+    
+    // Add to history
+    const histories = mockDb.get("deviceHistory");
+    const history = histories[id] || [];
+    mockDb.set("deviceHistory", {
+      ...histories,
+      [id]: [newState, ...history].slice(0, 100),
+    });
+
+    return newState;
+  }
+
+  public async getState(id: string, refresh?: boolean): Promise<DeviceStateOut> {
     await this.delay(50);
     const states = mockDb.get("deviceStates");
     const state = states[id];

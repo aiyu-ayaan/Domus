@@ -77,7 +77,11 @@ export interface IDeviceRepository {
   turnOn(id: string): Promise<DeviceStateOut>;
   turnOff(id: string): Promise<DeviceStateOut>;
   toggle(id: string): Promise<DeviceStateOut>;
-  getState(id: string): Promise<DeviceStateOut>;
+  setAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ): Promise<DeviceStateOut>;
+  getState(id: string, refresh?: boolean): Promise<DeviceStateOut>;
   getHistory(
     id: string,
     limit?: number,

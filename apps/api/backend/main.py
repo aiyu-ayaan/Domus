@@ -17,10 +17,13 @@ log = get_logger("main")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    import sys
+    import asyncio
     from backend.automations.engine import register as register_automations
     from backend.mqtt.service import mqtt_service
     from backend.websocket import manager as ws_manager
     from backend.websocket import redis_bridge
+    from backend.devices.poller import poll_devices_loop
 
     log.info("Starting %s (%s)", settings.app_name, settings.environment)
     register_automations()  # automation engine subscribes to the event bus
@@ -31,7 +34,20 @@ async def lifespan(app: FastAPI):
     if settings.mqtt_enabled:
         await mqtt_service.start()
         log.info("MQTT service started")
+
+    poller_task = None
+    if "pytest" not in sys.modules:
+        poller_task = asyncio.create_task(poll_devices_loop())
+
     yield
+
+    if poller_task:
+        poller_task.cancel()
+        try:
+            await poller_task
+        except asyncio.CancelledError:
+            pass
+
     await mqtt_service.stop()
     await redis_bridge.stop()
     await redis_mod.close()

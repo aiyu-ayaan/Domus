@@ -122,6 +122,23 @@ class RealTapoAdapter(DeviceAdapter):
                 value = getattr(energy, field_name, None)
                 if value is not None:
                     attributes[field_name] = float(value)
+        
+        # Capture light attributes if it is a smart bulb/light
+        if hasattr(dev, "brightness") or _device_type(dev) == DeviceType.light:
+            if hasattr(dev, "brightness"):
+                attributes["brightness"] = dev.brightness
+            if hasattr(dev, "color_temp"):
+                attributes["color_temp"] = dev.color_temp
+            if hasattr(dev, "hsv"):
+                hsv = dev.hsv
+                attributes["hsv"] = list(hsv) if hsv else None
+                if hsv:
+                    # Convert HSV (Hue: 0-360, Sat: 0-100, Val: 0-100) to Hex color for UI
+                    h, s, v = hsv
+                    import colorsys
+                    r, g, b = colorsys.hsv_to_rgb(h / 360.0, s / 100.0, 1.0)
+                    attributes["color"] = f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+
         return StateSnapshot(
             state="on" if dev.is_on else "off",
             attributes=attributes,
@@ -181,5 +198,47 @@ class RealTapoAdapter(DeviceAdapter):
             await dev.turn_off()
         else:
             await dev.turn_on()
+        await dev.update()
+        return self._snapshot(dev)
+
+    async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
+        dev = await self._connect(external_id)
+        
+        # Set brightness (0-100)
+        if "brightness" in attributes and hasattr(dev, "set_brightness"):
+            try:
+                brightness = int(attributes["brightness"])
+                brightness = max(1, min(100, brightness))
+                await dev.set_brightness(brightness)
+            except Exception:
+                pass
+                
+        # Set color temperature (Kelvin)
+        if "color_temp" in attributes and hasattr(dev, "set_color_temp"):
+            try:
+                color_temp = int(attributes["color_temp"])
+                await dev.set_color_temp(color_temp)
+            except Exception:
+                pass
+                
+        # Set color (hex string like "#ff0000")
+        if "color" in attributes and hasattr(dev, "set_hsv"):
+            try:
+                color_hex = attributes["color"].lstrip("#")
+                r = int(color_hex[0:2], 16) / 255.0
+                g = int(color_hex[2:4], 16) / 255.0
+                b = int(color_hex[4:6], 16) / 255.0
+                
+                import colorsys
+                h, s, v = colorsys.rgb_to_hsv(r, g, b)
+                h_deg = int(h * 360)
+                s_pct = int(s * 100)
+                # Keep value/brightness at current brightness level or 100
+                v_pct = int(v * 100) if v > 0 else 100
+                
+                await dev.set_hsv(h_deg, s_pct, v_pct)
+            except Exception:
+                pass
+                
         await dev.update()
         return self._snapshot(dev)

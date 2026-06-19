@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -74,6 +74,13 @@ async def _control(action: str, device_id: UUID, user: User, session: Session):
 async def turn_on(device_id: UUID, user: ControlUser, session: Session) -> DeviceStateOut:
     return await _control("turn_on", device_id, user, session)
 
+@router.post("/{device_id}/attributes", response_model=DeviceStateOut)
+async def set_attributes(
+    device_id: UUID, payload: dict[str, Any], user: ControlUser, session: Session
+) -> DeviceStateOut:
+    state = await DeviceService(session).set_attributes(device_id, payload, user)
+    return DeviceStateOut.model_validate(state)
+
 
 @router.post("/{device_id}/turn-off", response_model=DeviceStateOut)
 async def turn_off(device_id: UUID, user: ControlUser, session: Session) -> DeviceStateOut:
@@ -87,8 +94,10 @@ async def toggle(device_id: UUID, user: ControlUser, session: Session) -> Device
 
 # --- state & history -------------------------------------------------------------
 @router.get("/{device_id}/state", response_model=DeviceStateOut)
-async def get_state(device_id: UUID, user: CurrentUser, session: Session) -> DeviceStateOut:
-    state = await DeviceService(session).current_state(device_id, user)
+async def get_state(
+    device_id: UUID, user: CurrentUser, session: Session, refresh: bool = False
+) -> DeviceStateOut:
+    state = await DeviceService(session).current_state(device_id, user, refresh=refresh)
     if state is None:
         raise NotFoundError("No state recorded for this device yet")
     return DeviceStateOut.model_validate(state)

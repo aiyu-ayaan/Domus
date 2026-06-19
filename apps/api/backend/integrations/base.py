@@ -54,6 +54,9 @@ class DeviceAdapter(ABC):
     @abstractmethod
     async def turn_off(self, external_id: str) -> StateSnapshot: ...
 
+    async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
+        return await self.get_state(external_id)
+
     async def toggle(self, external_id: str) -> StateSnapshot:
         current = await self.get_state(external_id)
         return await (self.turn_off if current.state == "on" else self.turn_on)(external_id)
@@ -90,3 +93,11 @@ class MockDeviceAdapter(DeviceAdapter):
     async def turn_off(self, external_id: str) -> StateSnapshot:
         _MOCK_STATE[self._key(external_id)] = "off"
         return StateSnapshot(state="off", attributes={"mock": True})
+
+    async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
+        key = self._key(external_id)
+        state = _MOCK_STATE.get(key, "off")
+        if "state" in attributes:
+            _MOCK_STATE[key] = attributes["state"]
+            state = attributes["state"]
+        return StateSnapshot(state=state, attributes=attributes)
