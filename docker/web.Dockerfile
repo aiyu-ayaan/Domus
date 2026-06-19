@@ -16,6 +16,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web ./apps/web
 COPY packages ./packages
 COPY package.json tsconfig.base.json ./
+# NEXT_PUBLIC_* vars are inlined into the bundle at build time, so they must be
+# present here — not at runtime. Defaults connect to the real API (not mock).
+ARG NEXT_PUBLIC_USE_MOCK_API=false
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_USE_MOCK_API=$NEXT_PUBLIC_USE_MOCK_API
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN bun --filter @domus/web build
 
 FROM oven/bun:1-alpine AS runner

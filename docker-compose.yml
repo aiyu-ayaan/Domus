@@ -3,8 +3,11 @@ services:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
-    environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:8000}
+      # Browser-side vars: baked in at build time. The browser reaches the API on
+      # the host port, so default to localhost:8000 (not the internal api:8000).
+      args:
+        NEXT_PUBLIC_USE_MOCK_API: ${NEXT_PUBLIC_USE_MOCK_API:-false}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     ports:
       - "3000:3000"
     depends_on:
