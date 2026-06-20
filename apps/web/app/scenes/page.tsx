@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { toast } from "sonner";
 import { Sparkles, Plus, Trash2, Edit2, CheckCircle2 } from "lucide-react";
+import { LIGHT_COLOR_PRESETS } from "@/lib/color";
 
 const sceneSchema = z.object({
   name: z.string().min(2, "Scene name must be at least 2 characters"),
@@ -21,13 +22,13 @@ const sceneSchema = z.object({
   states: z
     .array(
       z.object({
-        device_id: z.string().min(1, "Please select a device"),
+        device_ids: z.array(z.string()).min(1, "Select at least one device"),
         state: z.string().min(1, "Target state required"),
         color: z.string().optional(),
         brightness: z.coerce.number().min(1).max(100).optional(),
       }),
     )
-    .min(1, "Scene requires at least one device state setting"),
+    .min(1, "Scene requires at least one device group"),
 });
 
 type SceneFormValues = z.infer<typeof sceneSchema>;
@@ -73,18 +74,19 @@ export default function ScenesPage() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<SceneFormValues>({
     resolver: zodResolver(sceneSchema),
     defaultValues: {
       name: "",
       description: "",
-      states: [{ device_id: "", state: "off", color: "#ffffff", brightness: 100 }],
+      states: [{ device_ids: [], state: "off", color: "#ffffff", brightness: 100 }],
     },
   });
 
   const watchedStates = watch("states");
-  const newRow = () => ({ device_id: "", state: "off", color: "#ffffff", brightness: 100 });
+  const newRow = () => ({ device_ids: [], state: "off", color: "#ffffff", brightness: 100 });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -98,16 +100,18 @@ export default function ScenesPage() {
         home_id: activeHomeId,
         name: data.name,
         description: data.description || null,
-        states: data.states.map((s) => {
-          const dev = devices.find((d) => d.id === s.device_id);
-          const attributes: Record<string, any> = {};
-          // Lights turning on can carry a target color + brightness.
-          if (dev?.device_type === "light" && s.state === "on") {
-            if (s.color) attributes.color = s.color;
-            if (s.brightness != null) attributes.brightness = s.brightness;
-          }
-          return { device_id: s.device_id, state: s.state, attributes };
-        }),
+        states: data.states.flatMap((s) =>
+          s.device_ids.map((device_id) => {
+            const dev = devices.find((d) => d.id === device_id);
+            const attributes: Record<string, any> = {};
+            // Lights turning on can carry a target color + brightness.
+            if (dev?.device_type === "light" && s.state === "on") {
+              if (s.color) attributes.color = s.color;
+              if (s.brightness != null) attributes.brightness = s.brightness;
+            }
+            return { device_id, state: s.state, attributes };
+          }),
+        ),
       });
       toast.success("Scene configured successfully!");
       setIsCreateOpen(false);
@@ -219,30 +223,59 @@ export default function ScenesPage() {
 
                 <div className="space-y-2">
                   {fields.map((field, idx) => {
-                    const selected = devices.find(
-                      (d) => d.id === watchedStates?.[idx]?.device_id,
+                    const selectedIds = watchedStates?.[idx]?.device_ids ?? [];
+                    const selectedDevices = devices.filter((d) =>
+                      selectedIds.includes(d.id),
                     );
+                    const allLights =
+                      selectedDevices.length > 0 &&
+                      selectedDevices.every((d) => d.device_type === "light");
                     const isLightOn =
-                      selected?.device_type === "light" &&
-                      watchedStates?.[idx]?.state === "on";
+                      allLights && watchedStates?.[idx]?.state === "on";
+                    const activeColor = watchedStates?.[idx]?.color;
+
+                    const toggleDevice = (deviceId: string) => {
+                      const next = selectedIds.includes(deviceId)
+                        ? selectedIds.filter((id) => id !== deviceId)
+                        : [...selectedIds, deviceId];
+                      setValue(`states.${idx}.device_ids`, next, {
+                        shouldValidate: true,
+                      });
+                    };
+
                     return (
                       <div
                         key={field.id}
                         className="rounded-xl border border-border/40 bg-background/20 p-2 space-y-2"
                       >
-                        <div className="flex gap-2 items-center">
-                          {/* Select Device */}
-                          <select
-                            className="flex-1 rounded-xl border border-border bg-background py-2 px-3 text-xs outline-none focus:border-primary cursor-pointer"
-                            {...register(`states.${idx}.device_id` as const)}
-                          >
-                            <option value="">Select Accessory</option>
+                        <div className="flex gap-2 items-start">
+                          {/* Multi-select devices */}
+                          <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 max-h-32 overflow-y-auto space-y-1">
+                            {devices.length === 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                No devices available
+                              </p>
+                            )}
                             {devices.map((d) => (
-                              <option key={d.id} value={d.id}>
-                                {d.name} ({d.device_type})
-                              </option>
+                              <label
+                                key={d.id}
+                                className="flex items-center gap-2 text-xs cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.includes(d.id)}
+                                  onChange={() => toggleDevice(d.id)}
+                                  className="accent-primary cursor-pointer"
+                                />
+                                <span>
+                                  {d.name}{" "}
+                                  <span className="text-muted-foreground">
+                                    ({d.device_type})
+                                  </span>
+                                </span>
+                              </label>
                             ))}
-                          </select>
+                          </div>
 
                           {/* Select State */}
                           <select
@@ -268,16 +301,40 @@ export default function ScenesPage() {
                           </button>
                         </div>
 
-                        {/* Light target: color + brightness */}
+                        {selectedIds.length > 1 && (
+                          <p className="text-[10px] text-primary px-1">
+                            {selectedIds.length} devices will be set together
+                          </p>
+                        )}
+
+                        {/* Light target: color presets + brightness, shared across selected bulbs */}
                         {isLightOn && (
-                          <div className="flex items-center gap-3 px-1 pt-1">
-                            <input
-                              type="color"
-                              {...register(`states.${idx}.color` as const)}
-                              className="h-8 w-8 flex-shrink-0 cursor-pointer rounded-lg border border-border bg-transparent p-0.5"
-                              title="Target color"
-                            />
-                            <div className="flex-1">
+                          <div className="space-y-2 px-1 pt-1">
+                            <div className="flex flex-wrap gap-1.5">
+                              {LIGHT_COLOR_PRESETS.map((preset) => (
+                                <button
+                                  key={preset.hex}
+                                  type="button"
+                                  title={preset.name}
+                                  onClick={() =>
+                                    setValue(`states.${idx}.color`, preset.hex)
+                                  }
+                                  style={{ backgroundColor: preset.hex }}
+                                  className={`h-6 w-6 rounded-full border cursor-pointer hover:scale-110 transition-transform ${
+                                    activeColor?.toLowerCase() === preset.hex
+                                      ? "border-primary ring-2 ring-primary/45"
+                                      : "border-border/60"
+                                  }`}
+                                />
+                              ))}
+                              <input
+                                type="color"
+                                {...register(`states.${idx}.color` as const)}
+                                className="h-6 w-6 cursor-pointer rounded-full border border-border bg-transparent p-0"
+                                title="Custom color"
+                              />
+                            </div>
+                            <div>
                               <label className="text-[10px] text-muted-foreground">
                                 Brightness {watchedStates?.[idx]?.brightness ?? 100}%
                               </label>
