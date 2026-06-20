@@ -23,6 +23,8 @@ const sceneSchema = z.object({
       z.object({
         device_id: z.string().min(1, "Please select a device"),
         state: z.string().min(1, "Target state required"),
+        color: z.string().optional(),
+        brightness: z.coerce.number().min(1).max(100).optional(),
       }),
     )
     .min(1, "Scene requires at least one device state setting"),
@@ -70,15 +72,19 @@ export default function ScenesPage() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<SceneFormValues>({
     resolver: zodResolver(sceneSchema),
     defaultValues: {
       name: "",
       description: "",
-      states: [{ device_id: "", state: "off" }],
+      states: [{ device_id: "", state: "off", color: "#ffffff", brightness: 100 }],
     },
   });
+
+  const watchedStates = watch("states");
+  const newRow = () => ({ device_id: "", state: "off", color: "#ffffff", brightness: 100 });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -92,11 +98,16 @@ export default function ScenesPage() {
         home_id: activeHomeId,
         name: data.name,
         description: data.description || null,
-        states: data.states.map((s) => ({
-          device_id: s.device_id,
-          state: s.state,
-          attributes: {}, // simplify attributes for mock builder
-        })),
+        states: data.states.map((s) => {
+          const dev = devices.find((d) => d.id === s.device_id);
+          const attributes: Record<string, any> = {};
+          // Lights turning on can carry a target color + brightness.
+          if (dev?.device_type === "light" && s.state === "on") {
+            if (s.color) attributes.color = s.color;
+            if (s.brightness != null) attributes.brightness = s.brightness;
+          }
+          return { device_id: s.device_id, state: s.state, attributes };
+        }),
       });
       toast.success("Scene configured successfully!");
       setIsCreateOpen(false);
@@ -141,11 +152,7 @@ export default function ScenesPage() {
           <DialogTrigger asChild>
             <button
               onClick={() =>
-                reset({
-                  name: "",
-                  description: "",
-                  states: [{ device_id: "", state: "off" }],
-                })
+                reset({ name: "", description: "", states: [newRow()] })
               }
               className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground px-4 py-2.5 text-xs font-semibold transition cursor-pointer shadow-lg shadow-primary/20"
             >
@@ -198,7 +205,7 @@ export default function ScenesPage() {
                   </label>
                   <button
                     type="button"
-                    onClick={() => append({ device_id: "", state: "off" })}
+                    onClick={() => append(newRow())}
                     className="text-xs font-semibold text-primary hover:underline cursor-pointer"
                   >
                     + Add Device
@@ -211,45 +218,84 @@ export default function ScenesPage() {
                 )}
 
                 <div className="space-y-2">
-                  {fields.map((field, idx) => (
-                    <div key={field.id} className="flex gap-2 items-center">
-                      {/* Select Device */}
-                      <select
-                        className="flex-1 rounded-xl border border-border bg-background py-2 px-3 text-xs outline-none focus:border-primary cursor-pointer"
-                        {...register(`states.${idx}.device_id` as const)}
+                  {fields.map((field, idx) => {
+                    const selected = devices.find(
+                      (d) => d.id === watchedStates?.[idx]?.device_id,
+                    );
+                    const isLightOn =
+                      selected?.device_type === "light" &&
+                      watchedStates?.[idx]?.state === "on";
+                    return (
+                      <div
+                        key={field.id}
+                        className="rounded-xl border border-border/40 bg-background/20 p-2 space-y-2"
                       >
-                        <option value="">Select Accessory</option>
-                        {devices.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name} ({d.device_type})
-                          </option>
-                        ))}
-                      </select>
+                        <div className="flex gap-2 items-center">
+                          {/* Select Device */}
+                          <select
+                            className="flex-1 rounded-xl border border-border bg-background py-2 px-3 text-xs outline-none focus:border-primary cursor-pointer"
+                            {...register(`states.${idx}.device_id` as const)}
+                          >
+                            <option value="">Select Accessory</option>
+                            {devices.map((d) => (
+                              <option key={d.id} value={d.id}>
+                                {d.name} ({d.device_type})
+                              </option>
+                            ))}
+                          </select>
 
-                      {/* Select State */}
-                      <select
-                        className="w-28 rounded-xl border border-border bg-background py-2 px-3 text-xs outline-none focus:border-primary cursor-pointer"
-                        {...register(`states.${idx}.state` as const)}
-                      >
-                        <option value="on">Turn On</option>
-                        <option value="off">Turn Off</option>
-                        <option value="closed">Lock/Close</option>
-                        <option value="open">Unlock/Open</option>
-                        <option value="21.0">Temp 21°C</option>
-                        <option value="18.0">Temp 18°C</option>
-                      </select>
+                          {/* Select State */}
+                          <select
+                            className="w-28 rounded-xl border border-border bg-background py-2 px-3 text-xs outline-none focus:border-primary cursor-pointer"
+                            {...register(`states.${idx}.state` as const)}
+                          >
+                            <option value="on">Turn On</option>
+                            <option value="off">Turn Off</option>
+                            <option value="closed">Lock/Close</option>
+                            <option value="open">Unlock/Open</option>
+                            <option value="21.0">Temp 21°C</option>
+                            <option value="18.0">Temp 18°C</option>
+                          </select>
 
-                      {/* Delete row */}
-                      <button
-                        type="button"
-                        onClick={() => remove(idx)}
-                        disabled={fields.length === 1}
-                        className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive disabled:opacity-50 transition cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                          {/* Delete row */}
+                          <button
+                            type="button"
+                            onClick={() => remove(idx)}
+                            disabled={fields.length === 1}
+                            className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive disabled:opacity-50 transition cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* Light target: color + brightness */}
+                        {isLightOn && (
+                          <div className="flex items-center gap-3 px-1 pt-1">
+                            <input
+                              type="color"
+                              {...register(`states.${idx}.color` as const)}
+                              className="h-8 w-8 flex-shrink-0 cursor-pointer rounded-lg border border-border bg-transparent p-0.5"
+                              title="Target color"
+                            />
+                            <div className="flex-1">
+                              <label className="text-[10px] text-muted-foreground">
+                                Brightness {watchedStates?.[idx]?.brightness ?? 100}%
+                              </label>
+                              <input
+                                type="range"
+                                min={1}
+                                max={100}
+                                {...register(`states.${idx}.brightness` as const, {
+                                  valueAsNumber: true,
+                                })}
+                                className="w-full h-1.5 rounded-lg bg-muted accent-primary cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
