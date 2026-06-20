@@ -46,19 +46,21 @@ export function AmbientSync({
     if (screen) {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
-      } else {
-        await setDeviceAttributes(deviceId, { ambient_sync: null });
       }
+      await setDeviceAttributes(deviceId, { ambient_sync: null });
     } else {
-      // Direct user gesture triggers media prompt synchronously
+      if (isSceneBuilder) {
+        // Clear normal color/temp attributes to prioritize sync
+        onSetAttrs({ ambient_sync: "screen", color: null, color_temp: 0 });
+      }
+      // Optimistic store update synchronously first to register in ambientScreenDevices
+      setDeviceAttributes(deviceId, { ambient_sync: "screen" }).catch(() => {});
       const success = await startScreenSharing();
-      if (success) {
+      if (!success) {
         if (isSceneBuilder) {
-          // Clear normal color/temp attributes to prioritize sync
-          onSetAttrs({ ambient_sync: "screen", color: null, color_temp: 0 });
-        } else {
-          await setDeviceAttributes(deviceId, { ambient_sync: "screen" });
+          onSetAttrs({ ambient_sync: null });
         }
+        await setDeviceAttributes(deviceId, { ambient_sync: null });
       }
     }
   };
@@ -67,18 +69,20 @@ export function AmbientSync({
     if (music) {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
-      } else {
-        await setDeviceAttributes(deviceId, { ambient_sync: null });
       }
+      await setDeviceAttributes(deviceId, { ambient_sync: null });
     } else {
-      // Direct user gesture triggers audio prompt synchronously
+      if (isSceneBuilder) {
+        onSetAttrs({ ambient_sync: "music", music_theme: theme, color: null, color_temp: 0 });
+      }
+      // Optimistic store update synchronously first to register in ambientMusicDevices
+      setDeviceAttributes(deviceId, { ambient_sync: "music", music_theme: theme }).catch(() => {});
       const success = await startAudioSharing();
-      if (success) {
+      if (!success) {
         if (isSceneBuilder) {
-          onSetAttrs({ ambient_sync: "music", music_theme: theme, color: null, color_temp: 0 });
-        } else {
-          await setDeviceAttributes(deviceId, { ambient_sync: "music", music_theme: theme });
+          onSetAttrs({ ambient_sync: null });
         }
+        await setDeviceAttributes(deviceId, { ambient_sync: null });
       }
     }
   };
@@ -86,9 +90,8 @@ export function AmbientSync({
   const handleSelectTheme = async (themeId: string) => {
     if (isSceneBuilder) {
       onSetAttrs({ music_theme: themeId });
-    } else {
-      await setDeviceAttributes(deviceId, { music_theme: themeId });
     }
+    await setDeviceAttributes(deviceId, { music_theme: themeId });
   };
 
   return (
