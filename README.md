@@ -1,4 +1,4 @@
-# Domus
+# <img src="./pic/logo.svg" alt="Domus Logo" width="36" height="36" align="center" /> Domus
 
 Domus is a self-hosted, local-first smart home platform for discovering, managing, automating, and controlling devices from a unified dashboard.
 ![Home Screenshots](./pic/home.png)
