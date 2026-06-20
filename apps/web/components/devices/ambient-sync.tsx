@@ -8,9 +8,9 @@ import { useDeviceStore } from "@/stores/device-store";
 import { lerpPalette, hueToHex, rgbToHex } from "@/lib/color";
 import { toast } from "sonner";
 
-// ponytail: push as fast as the backend allows via an in-flight guard, capped at
-// MIN_GAP so a fast API doesn't spam. Drop MIN_GAP / thresholds for snappier sync.
-const MIN_GAP = 90; // ms floor between pushes
+// ponytail: a WiFi bulb can't take 10 writes/sec without thrashing the app, so
+// pace pushes here. ~4/sec is plenty for ambient. Lower MIN_GAP if your device keeps up.
+const MIN_GAP = 250; // ms between pushes
 const COLOR_DELTA = 10; // min RGB distance before re-sending a color
 const BRIGHT_DELTA = 5; // min brightness % change before re-sending
 
