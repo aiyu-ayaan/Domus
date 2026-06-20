@@ -31,6 +31,10 @@ _REGISTRY: dict[IntegrationType, type[DeviceAdapter]] = {
 }
 
 
+# SmartLife/Tuya cloud family — these share the legacy Tuya cloud control path.
+_TUYA_FAMILY = {IntegrationType.tuya, IntegrationType.wipro, IntegrationType.syska}
+
+
 def adapter_class(kind: IntegrationType | str) -> type[DeviceAdapter]:
     return _REGISTRY[IntegrationType(kind)]
 
@@ -55,6 +59,16 @@ def get_adapter(integration) -> DeviceAdapter:
 
         if has_real_config(config):
             return RealTapoAdapter(config)
+
+    # Wipro/Syska/Tuya are all SmartLife cloud devices (see HA's legacy smart_life).
+    if kind in _TUYA_FAMILY:
+        from backend.integrations.adapters.tuya_cloud import (
+            RealTuyaAdapter,
+            has_real_config,
+        )
+
+        if has_real_config(config):
+            return RealTuyaAdapter(config, kind)
 
     return adapter_class(kind)(config)
 
