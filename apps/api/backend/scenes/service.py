@@ -79,6 +79,8 @@ class SceneService:
             action = "turn_off" if target.state == "off" else "turn_on"
             try:
                 await self.devices.control_system(target.device_id, action)
+                if action == "turn_on" and target.attributes:
+                    await self.devices.set_attributes_system(target.device_id, target.attributes)
                 applied += 1
             except Exception:  # noqa: BLE001 — one bad device shouldn't abort the scene
                 failed += 1

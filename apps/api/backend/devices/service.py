@@ -125,6 +125,18 @@ class DeviceService:
             raise NotFoundError("Device not found")
         return await self._apply(device, action)
 
+    async def set_attributes_system(self, device_id: UUID, attributes: dict[str, Any]) -> DeviceState:
+        """Unauthenticated attributes write for system actors (scenes)."""
+        device = await self.session.get(Device, device_id)
+        if device is None:
+            raise NotFoundError("Device not found")
+        integration = await self.session.get(Integration, device.integration_id)
+        if integration is None or not integration.enabled:
+            raise ConflictError("Integration is missing or disabled")
+        adapter = get_adapter(integration)
+        snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+        return await self._record(device, snapshot)
+
     async def _apply(self, device: Device, action: str) -> DeviceState:
         if action not in ACTIONS:
             raise NotFoundError(f"Unknown action: {action}")
