@@ -11,9 +11,9 @@ import { toast } from "sonner";
 
 // ponytail: faster tick + per-tick easing gives a smooth fade instead of jumps.
 // FADE is the ease factor toward the target each tick; lower = slower fade.
-const MIN_GAP = 110; // ms between pushes (~9/sec ceiling)
+const MIN_GAP = 90; // ms between pushes (~11/sec ceiling)
 const COLOR_DELTA = 5; // min RGB distance before re-sending a color
-const FADE = 0.2;
+const FADE = 0.7;
 
 // Music color themes (color only — no brightness). `spectrum` rotates the hue wheel.
 const THEMES: { id: string; label: string; stops: string[]; spectrum?: boolean }[] = [
