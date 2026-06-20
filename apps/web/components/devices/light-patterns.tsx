@@ -1,73 +1,24 @@
 // Animated light scenes: run a COLOR pattern on a loop, plus a builder for
-// custom color sequences. Brightness is left to the slider — scenes only change
-// color (Breathe/Strobe pulse via color lightness, not brightness).
+// custom color sequences.
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Play } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
-import { hueToHex, lerpPalette } from "@/lib/color";
 
 type Pattern = {
   id: string;
   label: string;
   gap: number;
-  tick: (t: number) => string;
 };
 
-// ponytail: gaps are device-realistic and the runner dedupes identical colors,
-// so discrete patterns only write on an actual change.
 const PATTERNS: Pattern[] = [
-  {
-    id: "rainbow",
-    label: "Rainbow Loop",
-    gap: 500,
-    tick: (t) => hueToHex((t * 60) % 360),
-  },
-  {
-    id: "breathe",
-    label: "Breathe",
-    gap: 350,
-    // Pulse via color lightness so brightness stays user-controlled.
-    tick: (t) =>
-      hueToHex(265, 0.7, 0.12 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6))),
-  },
-  {
-    id: "strobe",
-    label: "Strobe",
-    gap: 250,
-    tick: (t) => (Math.floor(t * 2) % 2 ? "#ffffff" : "#000000"),
-  },
-  {
-    id: "party",
-    label: "Party",
-    gap: 600,
-    tick: (t) => {
-      const palette = [
-        "#ff0040",
-        "#ff8800",
-        "#ffee00",
-        "#22ff44",
-        "#00ccff",
-        "#cc00ff",
-      ];
-      return palette[Math.floor(t * 1.6) % palette.length];
-    },
-  },
-  {
-    id: "candle",
-    label: "Candle",
-    gap: 450,
-    // ponytail: real flicker is random; lightness wobble keeps a warm glow.
-    tick: () => hueToHex(28, 0.9, 0.28 + Math.random() * 0.22),
-  },
-  {
-    id: "sunrise",
-    label: "Sunrise",
-    gap: 1000,
-    tick: (t) =>
-      lerpPalette(["#3a1d00", "#ff6a00", "#ffd27f", "#fff4e6"], (t % 30) / 30),
-  },
+  { id: "rainbow", label: "Rainbow Loop", gap: 500 },
+  { id: "breathe", label: "Breathe", gap: 350 },
+  { id: "strobe", label: "Strobe", gap: 250 },
+  { id: "party", label: "Party", gap: 600 },
+  { id: "candle", label: "Candle", gap: 450 },
+  { id: "sunrise", label: "Sunrise", gap: 1000 },
 ];
 
 type Custom = { id: string; name: string; gap: number; colors: string[] };
@@ -78,9 +29,19 @@ const SPEEDS = [
   { label: "Fast", gap: 350 },
 ];
 
-export function LightPatterns({ deviceId }: { deviceId: string }) {
+export function LightPatterns({
+  deviceId,
+  attributes: targetAttributes,
+  onSetAttrs,
+}: {
+  deviceId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  attributes?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSetAttrs?: (attrs: Record<string, any>) => void;
+}) {
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
-  const [active, setActive] = useState<string | null>(null);
+  const deviceState = useDeviceStore((s) => s.deviceStates[deviceId]);
   const [customs, setCustoms] = useState<Custom[]>([]);
 
   // Builder state
@@ -90,10 +51,9 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
   const [colors, setColors] = useState<string[]>([]);
   const [draft, setDraft] = useState("#ff4040");
 
-  const timer = useRef<number | null>(null);
-  const inFlight = useRef(false);
-  const start = useRef(0);
-  const lastColor = useRef("");
+  const isSceneBuilder = !!onSetAttrs;
+  const currentAttrs = isSceneBuilder ? targetAttributes || {} : deviceState?.attributes || {};
+  const active = currentAttrs.light_scene || null;
 
   useEffect(() => {
     try {
@@ -108,47 +68,48 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
     localStorage.setItem(LS_KEY, JSON.stringify(next));
   };
 
-  const stop = () => {
-    if (timer.current) clearInterval(timer.current);
-    timer.current = null;
-    inFlight.current = false;
-    lastColor.current = "";
-    setActive(null);
-  };
-
-  useEffect(() => () => stop(), []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const run = (id: string, g: number, tick: (t: number) => string) => {
-    if (active === id) {
-      stop();
-      return;
+  const handleTogglePattern = async (p: Pattern) => {
+    if (active === p.id) {
+      if (isSceneBuilder) {
+        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      } else {
+        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      }
+    } else {
+      if (isSceneBuilder) {
+        onSetAttrs({ light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null, color: null, color_temp: 0 });
+      } else {
+        await setDeviceAttributes(deviceId, { light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null });
+      }
     }
-    if (timer.current) clearInterval(timer.current);
-    setActive(id);
-    start.current = performance.now();
-    inFlight.current = false;
-    lastColor.current = "";
-    timer.current = window.setInterval(() => {
-      if (inFlight.current) return;
-      const t = (performance.now() - start.current) / 1000;
-      const color = tick(t);
-      if (color === lastColor.current) return; // dedupe — only write on change
-      lastColor.current = color;
-      inFlight.current = true;
-      setDeviceAttributes(deviceId, { color })
-        .catch(() => {})
-        .finally(() => {
-          inFlight.current = false;
-        });
-    }, g);
   };
 
-  const runCustom = (c: Custom) =>
-    run(
-      c.id,
-      c.gap,
-      (t) => c.colors[Math.floor((t * 1000) / c.gap) % c.colors.length],
-    );
+  const handleToggleCustom = async (c: Custom) => {
+    if (active === c.id) {
+      if (isSceneBuilder) {
+        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      } else {
+        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      }
+    } else {
+      if (isSceneBuilder) {
+        onSetAttrs({ light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors, color: null, color_temp: 0 });
+      } else {
+        await setDeviceAttributes(deviceId, { light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors });
+      }
+    }
+  };
+
+  const handleDeleteCustom = async (c: Custom) => {
+    if (active === c.id) {
+      if (isSceneBuilder) {
+        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      } else {
+        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+      }
+    }
+    persist(customs.filter((x) => x.id !== c.id));
+  };
 
   const saveCustom = () => {
     if (!name.trim() || colors.length < 2) return;
@@ -175,7 +136,7 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
           <button
             key={p.id}
             type="button"
-            onClick={() => run(p.id, p.gap, p.tick)}
+            onClick={() => handleTogglePattern(p)}
             className={`rounded-xl border px-3 py-2.5 text-xs font-semibold transition cursor-pointer ${
               active === p.id
                 ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40"
@@ -205,7 +166,7 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
               >
                 <button
                   type="button"
-                  onClick={() => runCustom(c)}
+                  onClick={() => handleToggleCustom(c)}
                   className="flex items-center gap-2 text-xs font-semibold cursor-pointer min-w-0"
                 >
                   <span className="flex -space-x-1 flex-shrink-0">
@@ -223,10 +184,7 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (active === c.id) stop();
-                    persist(customs.filter((x) => x.id !== c.id));
-                  }}
+                  onClick={() => handleDeleteCustom(c)}
                   className="rounded-lg p-1 text-muted-foreground hover:text-destructive transition cursor-pointer flex-shrink-0"
                   title="Delete scene"
                 >

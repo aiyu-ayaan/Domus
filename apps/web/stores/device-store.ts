@@ -234,6 +234,19 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
         deviceId,
         attributes,
       );
+
+      // Preserve virtual UI attributes so they are not wiped out
+      const virtualKeys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"];
+      const preservedAttributes = { ...finalState.attributes };
+      virtualKeys.forEach((key) => {
+        if (key in attributes) {
+          preservedAttributes[key] = attributes[key];
+        } else if (key in originalAttributes) {
+          preservedAttributes[key] = originalAttributes[key];
+        }
+      });
+      finalState.attributes = preservedAttributes;
+
       get().updateDeviceStateInStore(deviceId, finalState);
     } catch (err) {
       if (originalState) {
@@ -295,18 +308,36 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   },
 
   updateDeviceStateInStore: (deviceId, newState) => {
-    set((prev) => ({
-      deviceStates: {
-        ...prev.deviceStates,
-        [deviceId]: newState,
-      },
-      // Also mark as online since it reported state
-      devices: prev.devices.map((d) =>
-        d.id === deviceId
-          ? { ...d, online: true, last_seen: new Date().toISOString() }
-          : d,
-      ),
-    }));
+    set((prev) => {
+      const originalState = prev.deviceStates[deviceId];
+      const originalAttributes = originalState?.attributes || {};
+      const virtualKeys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"];
+
+      const preservedAttributes = { ...newState.attributes };
+      virtualKeys.forEach((key) => {
+        if (key in originalAttributes && !(key in newState.attributes)) {
+          preservedAttributes[key] = originalAttributes[key];
+        }
+      });
+
+      const updatedState = {
+        ...newState,
+        attributes: preservedAttributes,
+      };
+
+      return {
+        deviceStates: {
+          ...prev.deviceStates,
+          [deviceId]: updatedState,
+        },
+        // Also mark as online since it reported state
+        devices: prev.devices.map((d) =>
+          d.id === deviceId
+            ? { ...d, online: true, last_seen: new Date().toISOString() }
+            : d,
+        ),
+      };
+    });
   },
 }));
 

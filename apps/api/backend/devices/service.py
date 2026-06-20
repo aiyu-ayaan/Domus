@@ -116,6 +116,13 @@ class DeviceService:
             raise ConflictError("Integration is missing or disabled")
         adapter = get_adapter(integration)
         snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+        
+        # Merge virtual UI attributes to preserve them
+        virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
+        for key in virtual_keys:
+            if key in attributes:
+                snapshot.attributes[key] = attributes[key]
+                
         return await self._record(device, snapshot)
 
     async def control_system(self, device_id: UUID, action: str) -> DeviceState:
@@ -135,6 +142,13 @@ class DeviceService:
             raise ConflictError("Integration is missing or disabled")
         adapter = get_adapter(integration)
         snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+        
+        # Merge virtual UI attributes to preserve them
+        virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
+        for key in virtual_keys:
+            if key in attributes:
+                snapshot.attributes[key] = attributes[key]
+                
         return await self._record(device, snapshot)
 
     async def _apply(self, device: Device, action: str) -> DeviceState:
@@ -181,6 +195,19 @@ class DeviceService:
                 if integration and integration.enabled:
                     adapter = get_adapter(integration)
                     snapshot = await adapter.get_state(device.external_id)
+                    # Preserve virtual UI attributes from the last recorded state
+                    last_res = await self.session.execute(
+                        select(DeviceState)
+                        .where(DeviceState.device_id == device.id)
+                        .order_by(DeviceState.created_at.desc())
+                        .limit(1)
+                    )
+                    last_state = last_res.scalar_one_or_none()
+                    if last_state and last_state.attributes:
+                        virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
+                        for key in virtual_keys:
+                            if key in last_state.attributes and key not in snapshot.attributes:
+                                snapshot.attributes[key] = last_state.attributes[key]
                     return await self._record(device, snapshot)
             except Exception:
                 pass

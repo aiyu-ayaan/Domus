@@ -769,8 +769,8 @@ function LightTargetControls({
           device control screen. Only shown for an online device. */}
       {deviceId && (
         <>
-          <AmbientSync deviceId={deviceId} />
-          <LightPatterns deviceId={deviceId} />
+          <AmbientSync deviceId={deviceId} attributes={attributes} onSetAttrs={onSetAttrs} />
+          <LightPatterns deviceId={deviceId} attributes={attributes} onSetAttrs={onSetAttrs} />
         </>
       )}
     </div>

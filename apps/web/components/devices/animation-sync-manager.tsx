@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Monitor, Music, Volume2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceStore } from "@/stores/device-store";
+import { useAnimationSyncStore } from "@/stores/animation-sync-store";
 import { hueToHex, lerpPalette, rgbToHex } from "@/lib/color";
-import { toast } from "sonner";
 
 // Predefined patterns matching light-patterns.tsx
 const PATTERNS: Record<string, { gap: number; tick: (t: number) => string }> = {
@@ -87,18 +87,18 @@ export function AnimationSyncManager() {
   const deviceStates = useDeviceStore((s) => s.deviceStates);
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
 
-  // Screen share refs & state
-  const [screenActive, setScreenActive] = useState(false);
-  const streamRef = useRef<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-
-  // Audio refs & state
-  const [audioActive, setAudioActive] = useState(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const audioStreamRef = useRef<MediaStream | null>(null);
+  // Use global animation sync store
+  const {
+    screenActive,
+    audioActive,
+    video,
+    ctx,
+    analyser,
+    startScreenSharing,
+    stopScreenSharing,
+    startAudioSharing,
+    stopAudioSharing,
+  } = useAnimationSyncStore();
 
   // Global runner in-flight checks to prevent queueing commands
   const inFlight = useRef<Record<string, boolean>>({});
@@ -200,21 +200,19 @@ export function AnimationSyncManager() {
     if (ambientScreenDevices.length === 0 && screenActive) {
       stopScreenSharing();
     }
-  }, [ambientScreenDevices, screenActive]);
+  }, [ambientScreenDevices, screenActive, stopScreenSharing]);
 
   useEffect(() => {
     if (ambientMusicDevices.length === 0 && audioActive) {
       stopAudioSharing();
     }
-  }, [ambientMusicDevices, audioActive]);
+  }, [ambientMusicDevices, audioActive, stopAudioSharing]);
 
-  // Cleanup helper
+  // Cleanup helper on unmount
   useEffect(() => {
+    const currentTimers = timers.current;
     return () => {
-      stopScreenSharing();
-      stopAudioSharing();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      Object.values(timers.current).forEach((t) => window.clearInterval(t.intervalId));
+      Object.values(currentTimers).forEach((t) => window.clearInterval(t.intervalId));
     };
   }, []);
 
@@ -287,12 +285,12 @@ export function AnimationSyncManager() {
       // 1. Process Screen Sync
       if (
         screenActive &&
-        videoRef.current &&
-        ctxRef.current &&
+        video &&
+        ctx &&
         ambientScreenDevices.length > 0
       ) {
-        ctxRef.current.drawImage(videoRef.current, 0, 0, 24, 24);
-        const target = avgColor(ctxRef.current, 24, 24);
+        ctx.drawImage(video, 0, 0, 24, 24);
+        const target = avgColor(ctx, 24, 24);
 
         eased[0] += (target[0] - eased[0]) * FADE;
         eased[1] += (target[1] - eased[1]) * FADE;
@@ -335,8 +333,8 @@ export function AnimationSyncManager() {
       }
 
       // 2. Process Music Sync
-      if (audioActive && analyserRef.current && ambientMusicDevices.length > 0) {
-        analyserRef.current.getByteFrequencyData(bins);
+      if (audioActive && analyser && ambientMusicDevices.length > 0) {
+        analyser.getByteFrequencyData(bins);
         let sum = 0;
         for (let i = 0; i < bins.length; i++) sum += bins[i];
         const level = sum / bins.length / 255; // 0..1
@@ -385,84 +383,13 @@ export function AnimationSyncManager() {
   }, [
     screenActive,
     audioActive,
+    video,
+    ctx,
+    analyser,
     ambientScreenDevices,
     ambientMusicDevices,
     setDeviceAttributes,
   ]);
-
-  // Sharing controls implementation
-  const startScreenSharing = async () => {
-    try {
-      const s = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
-      });
-      streamRef.current = s;
-
-      const video = document.createElement("video");
-      video.srcObject = s;
-      video.muted = true;
-      await video.play();
-      videoRef.current = video;
-
-      const canvas = document.createElement("canvas");
-      canvas.width = 24;
-      canvas.height = 24;
-      canvasRef.current = canvas;
-      ctxRef.current = canvas.getContext("2d", { willReadFrequently: true });
-
-      s.getVideoTracks()[0]?.addEventListener("ended", () =>
-        stopScreenSharing(),
-      );
-      setScreenActive(true);
-    } catch {
-      toast.error("Screen share permission denied or unavailable.");
-      stopScreenSharing();
-    }
-  };
-
-  const stopScreenSharing = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current = null;
-    }
-    canvasRef.current = null;
-    ctxRef.current = null;
-    setScreenActive(false);
-  };
-
-  const startAudioSharing = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-      audioStreamRef.current = s;
-
-      const ac = new AudioContext();
-      const an = ac.createAnalyser();
-      an.fftSize = 256;
-      ac.createMediaStreamSource(s).connect(an);
-      audioCtxRef.current = ac;
-      analyserRef.current = an;
-
-      setAudioActive(true);
-    } catch {
-      toast.error("Microphone permission denied or unavailable.");
-      stopAudioSharing();
-    }
-  };
-
-  const stopAudioSharing = () => {
-    audioStreamRef.current?.getTracks().forEach((t) => t.stop());
-    audioStreamRef.current = null;
-    audioCtxRef.current?.close().catch(() => {});
-    audioCtxRef.current = null;
-    analyserRef.current = null;
-    setAudioActive(false);
-  };
 
   const needsScreenShare = ambientScreenDevices.length > 0 && !screenActive;
   const needsAudioShare = ambientMusicDevices.length > 0 && !audioActive;
