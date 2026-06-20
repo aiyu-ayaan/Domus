@@ -9,6 +9,7 @@ import { useHomeStore } from "@/stores/home-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useRealtime } from "@/providers/realtime-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AnimationSyncManager } from "@/components/devices/animation-sync-manager";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -477,6 +478,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:flex">
+      <AnimationSyncManager />
       {/* Desktop Sidebar Spacer (keeps layout space to prevent reflow) */}
       <aside className="hidden lg:block w-20 flex-shrink-0 h-screen bg-transparent" />
 
