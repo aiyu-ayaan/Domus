@@ -44,6 +44,8 @@ const integrationSchema = z.object({
     host: z.string().optional(),
     username: z.string().optional(),
     token: z.string().optional(),
+    country_code: z.string().optional(),
+    platform: z.string().optional(),
   }),
 });
 
@@ -92,7 +94,7 @@ export default function IntegrationsPage() {
       name: "",
       type: "tapo",
       enabled: true,
-      config: { host: "", username: "", token: "" },
+      config: { host: "", username: "", token: "", country_code: "", platform: "smart_life" },
     },
   });
 
@@ -270,6 +272,37 @@ export default function IntegrationsPage() {
                   {...register("config.token")}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Country Code
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 91"
+                    className="w-full rounded-xl border border-border bg-background/50 py-2.5 px-3.5 text-sm outline-none focus:border-primary"
+                    {...register("config.country_code")}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Cloud Platform
+                  </label>
+                  <select
+                    className="w-full rounded-xl border border-border bg-background py-2.5 px-3.5 text-sm outline-none focus:border-primary cursor-pointer"
+                    {...register("config.platform")}
+                  >
+                    <option value="smart_life">SmartLife</option>
+                    <option value="tuya">Tuya Smart</option>
+                    <option value="jinvoo_smart">Jinvoo Smart</option>
+                  </select>
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground/70">
+                Country code + platform are for SmartLife cloud bulbs (Wipro, Syska,
+                Tuya) — the same fields as Home Assistant&apos;s smart_life config.
+              </p>
 
               <button
                 type="submit"
