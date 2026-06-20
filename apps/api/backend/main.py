@@ -82,6 +82,13 @@ def create_app() -> FastAPI:
 
     app.include_router(ws_router)  # /ws (real-time updates, notifications, presence)
 
+    import os
+    from fastapi.staticfiles import StaticFiles
+    
+    static_dir = os.path.join(os.getcwd(), "static")
+    os.makedirs(os.path.join(static_dir, "avatars"), exist_ok=True)
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "domus-api"}

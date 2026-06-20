@@ -43,6 +43,7 @@ export interface IAuthRepository {
   getMe(): Promise<UserPublic>;
   updateMe(req: UserUpdateRequest): Promise<UserPublic>;
   deleteMe(): Promise<void>;
+  uploadAvatar(file: File): Promise<{ avatar_url: string }>;
 }
 
 export interface IHomeRepository {

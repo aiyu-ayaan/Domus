@@ -149,6 +149,18 @@ class ApiClient {
     });
   }
 
+  public postForm(
+    path: string,
+    body: FormData,
+    options?: Omit<RequestOptions, "method" | "body">,
+  ) {
+    return this.request(path, {
+      ...options,
+      method: "POST",
+      body,
+    });
+  }
+
   public patch(
     path: string,
     body?: any,

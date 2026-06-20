@@ -8,6 +8,7 @@ import {
   Activity,
   ArrowUpRight,
   Bell,
+  Check,
   CircuitBoard,
   Cpu,
   DoorOpen,
@@ -49,6 +50,9 @@ import { useNotificationStore } from "@/stores/notification-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useSceneStore } from "@/stores/scene-store";
 import type { DeviceOut, RoomOut } from "@/types/api";
+import { LIGHT_COLOR_PRESETS } from "@/lib/color";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 const triggerLabels: Record<string, string> = {
   device_state: "STATE",
@@ -81,8 +85,13 @@ const deviceIconMap = {
 export function DashboardPage() {
   const [chartsReady, setChartsReady] = useState(false);
   const { activeHomeId, homes, isLoading: homesLoading } = useHomeStore();
-  const { devices, deviceStates, fetchDevices, toggleDevice } =
-    useDeviceStore();
+  const {
+    devices,
+    deviceStates,
+    fetchDevices,
+    toggleDevice,
+    setDeviceAttributes,
+  } = useDeviceStore();
   const { rooms, fetchRooms } = useRoomStore();
   const { notifications, fetchNotifications, markAsRead } =
     useNotificationStore();
@@ -94,6 +103,10 @@ export function DashboardPage() {
   const [deviceOrder, setDeviceOrder] = useState<string[]>([]);
   const [orderedDevices, setOrderedDevices] = useState<DeviceOut[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [controlDevice, setControlDevice] = useState<DeviceOut | null>(null);
+  const [localBrightness, setLocalBrightness] = useState<number | null>(null);
+  const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("temp");
+  const [localTempPercent, setLocalTempPercent] = useState<number | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -726,6 +739,7 @@ export function DashboardPage() {
                         onToggle={() => handleDeviceToggle(device)}
                         isPinned={pinnedIds.includes(device.id)}
                         onTogglePin={() => handleTogglePin(device.id)}
+                        onOpenControl={() => setControlDevice(device)}
                       />
                     </Reorder.Item>
                   ),
@@ -895,6 +909,404 @@ export function DashboardPage() {
           </div>
         </DashboardCard>
       </motion.section>
+
+      {controlDevice && (
+        <Dialog
+          open={!!controlDevice}
+          onOpenChange={(open) => {
+            if (!open) {
+              setControlDevice(null);
+              setLocalBrightness(null);
+              setLocalTempPercent(null);
+            }
+          }}
+        >
+          <DialogContent
+            title={controlDevice.name}
+            description="Adjust device color, white light temperature, and brightness."
+          >
+            {(() => {
+              const state = deviceStates[controlDevice.id];
+              const isChecked = state?.state === "on";
+
+              return (
+                <div className="space-y-6 pt-4">
+                  {/* Status & Quick Toggle */}
+                  <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 p-4">
+                    <div>
+                      <p className="text-sm font-semibold">Power Status</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Current state is {state?.state?.toUpperCase() || "OFF"}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={isChecked}
+                      onCheckedChange={async () => {
+                        try {
+                          await toggleDevice(controlDevice.id);
+                          toast.success(`${controlDevice.name} toggled`);
+                        } catch {
+                          toast.error(`Could not toggle ${controlDevice.name}`);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Settings section - only active if power is ON */}
+                  <div
+                    className={`space-y-6 ${!isChecked ? "opacity-45 pointer-events-none" : ""}`}
+                  >
+                    {/* Brightness Control */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm font-semibold">
+                        <span>Brightness Level</span>
+                        <span className="font-mono text-primary font-bold">
+                          {localBrightness !== null
+                            ? localBrightness
+                            : state?.attributes?.brightness || "100"}
+                          %
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="100"
+                        step="1"
+                        value={
+                          localBrightness !== null
+                            ? localBrightness
+                            : state?.attributes?.brightness || 100
+                        }
+                        onChange={(e) => {
+                          setLocalBrightness(parseInt(e.target.value));
+                        }}
+                        onMouseUp={async (e) => {
+                          const val = parseInt(
+                            (e.target as HTMLInputElement).value,
+                          );
+                          try {
+                            await setDeviceAttributes(controlDevice.id, {
+                              brightness: val,
+                            });
+                            setLocalBrightness(null);
+                            toast.success(`Brightness set to ${val}%`);
+                          } catch {
+                            toast.error("Failed to set brightness");
+                          }
+                        }}
+                        onTouchEnd={async (e) => {
+                          const val = parseInt(
+                            (e.target as HTMLInputElement).value,
+                          );
+                          try {
+                            await setDeviceAttributes(controlDevice.id, {
+                              brightness: val,
+                            });
+                            setLocalBrightness(null);
+                            toast.success(`Brightness set to ${val}%`);
+                          } catch {
+                            toast.error("Failed to set brightness");
+                          }
+                        }}
+                        className="w-full h-1.5 rounded-lg bg-muted border-none outline-none accent-primary cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Color Control */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold">
+                          Color Mode
+                        </span>
+                        <div className="flex p-0.5 bg-muted rounded-lg border border-border/30">
+                          <button
+                            type="button"
+                            onClick={() => setColorModeTab("temp")}
+                            className={`py-1 px-3 rounded text-xs font-semibold transition cursor-pointer ${
+                              colorModeTab === "temp"
+                                ? "bg-background text-foreground shadow-sm font-bold"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            White Light
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setColorModeTab("color")}
+                            className={`py-1 px-3 rounded text-xs font-semibold transition cursor-pointer ${
+                              colorModeTab === "color"
+                                ? "bg-background text-foreground shadow-sm font-bold"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            Colors
+                          </button>
+                        </div>
+                      </div>
+
+                      {colorModeTab === "color" ? (
+                        <div className="space-y-4">
+                          {/* Presets Grid */}
+                          <div className="grid grid-cols-5 gap-2">
+                            {LIGHT_COLOR_PRESETS.map((preset) => {
+                              const stateColor = state?.attributes?.color;
+                              const isColorMode =
+                                !state?.attributes?.color_temp ||
+                                state?.attributes?.color_temp === 0;
+                              let isActive = false;
+                              if (isColorMode && stateColor) {
+                                isActive =
+                                  stateColor.toLowerCase() ===
+                                  preset.hex.toLowerCase();
+                              }
+
+                              return (
+                                <button
+                                  key={preset.hex}
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await setDeviceAttributes(
+                                        controlDevice.id,
+                                        {
+                                          color: preset.hex,
+                                          color_temp: 0,
+                                        },
+                                      );
+                                      toast.success(`${preset.name} applied`);
+                                    } catch {
+                                      toast.error("Failed to set color");
+                                    }
+                                  }}
+                                  title={preset.name}
+                                  style={{ backgroundColor: preset.hex }}
+                                  className={`h-8 w-8 rounded-full border cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center relative shadow-sm ${
+                                    isActive
+                                      ? "border-primary ring-2 ring-primary/45 scale-105"
+                                      : "border-border/60"
+                                  }`}
+                                >
+                                  {isActive && (
+                                    <Check className="h-3.5 w-3.5 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Custom Color Input */}
+                          <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+                            <div className="relative h-10 w-10 rounded-full border border-border overflow-hidden cursor-pointer shadow-sm hover:scale-105 transition-transform duration-200">
+                              <input
+                                type="color"
+                                value={state?.attributes?.color || "#ffffff"}
+                                onChange={async (e) => {
+                                  const customColor = e.target.value;
+                                  try {
+                                    await setDeviceAttributes(
+                                      controlDevice.id,
+                                      {
+                                        color: customColor,
+                                        color_temp: 0,
+                                      },
+                                    );
+                                  } catch {}
+                                }}
+                                className="absolute inset-0 h-[150%] w-[150%] -translate-x-[15%] -translate-y-[15%] cursor-pointer border-none p-0 bg-transparent"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold">
+                                Custom Palette
+                              </p>
+                              <p className="text-[10px] text-muted-foreground font-mono">
+                                {state?.attributes?.color || "Not Set"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Temperature Presets */}
+                          <div className="flex items-center gap-3">
+                            {[
+                              {
+                                name: "Warm",
+                                kelvin: 2700,
+                                bg: "bg-[#ffb347]",
+                              },
+                              {
+                                name: "Neutral",
+                                kelvin: 4000,
+                                bg: "bg-[#fffaed]",
+                              },
+                              {
+                                name: "Cool",
+                                kelvin: 6500,
+                                bg: "bg-[#a8d3ff]",
+                              },
+                            ].map((preset) => {
+                              const currentTemp =
+                                state?.attributes?.color_temp || 4000;
+                              const isActive = currentTemp === preset.kelvin;
+                              return (
+                                <button
+                                  key={preset.kelvin}
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await setDeviceAttributes(
+                                        controlDevice.id,
+                                        {
+                                          color_temp: preset.kelvin,
+                                          color: null,
+                                        },
+                                      );
+                                      toast.success(
+                                        `${preset.name} White applied (${preset.kelvin}K)`,
+                                      );
+                                    } catch {
+                                      toast.error("Failed to set temperature");
+                                    }
+                                  }}
+                                  title={`${preset.name} (${preset.kelvin}K)`}
+                                  className={`h-9 w-9 rounded-full border cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-sm ${preset.bg} ${
+                                    isActive
+                                      ? "border-primary ring-2 ring-primary/45 scale-105"
+                                      : "border-border/60"
+                                  }`}
+                                >
+                                  {isActive && (
+                                    <Check className="h-4 w-4 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* White to Warm Gradient Slider */}
+                          {(() => {
+                            const minTemp = 2700;
+                            const maxTemp = 6500;
+                            const currentColorTemp =
+                              state?.attributes?.color_temp || 4000;
+                            const tempPercent = Math.min(
+                              100,
+                              Math.max(
+                                0,
+                                Math.round(
+                                  ((currentColorTemp - minTemp) /
+                                    (maxTemp - minTemp)) *
+                                    100,
+                                ),
+                              ),
+                            );
+                            const displayPercent =
+                              localTempPercent !== null
+                                ? localTempPercent
+                                : tempPercent;
+
+                            return (
+                              <div className="relative w-full h-16 rounded-xl overflow-hidden shadow-inner border border-border/30 bg-[linear-gradient(to_right,#ffb347_0%,#ffdfa9_30%,#ffffff_50%,#d8ebff_75%,#a8d3ff_100%)]">
+                                <div className="absolute top-2 right-2 bg-black/35 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-semibold text-white pointer-events-none select-none z-10">
+                                  {Math.round(
+                                    minTemp +
+                                      (displayPercent / 100) *
+                                        (maxTemp - minTemp),
+                                  )}
+                                  K
+                                </div>
+
+                                <div
+                                  className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-white bg-transparent shadow pointer-events-none z-10"
+                                  style={{
+                                    left: `calc(${displayPercent}% - ${displayPercent * 0.24}px)`,
+                                  }}
+                                />
+
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  value={displayPercent}
+                                  onChange={(e) => {
+                                    setLocalTempPercent(
+                                      parseInt(e.target.value),
+                                    );
+                                  }}
+                                  onMouseUp={async (e) => {
+                                    const val = parseInt(
+                                      (e.target as HTMLInputElement).value,
+                                    );
+                                    try {
+                                      const kelvin = Math.round(
+                                        minTemp +
+                                          (val / 100) * (maxTemp - minTemp),
+                                      );
+                                      await setDeviceAttributes(
+                                        controlDevice.id,
+                                        {
+                                          color_temp: kelvin,
+                                          color: null,
+                                        },
+                                      );
+                                      setLocalTempPercent(null);
+                                      toast.success(
+                                        `White temperature set to ${kelvin}K`,
+                                      );
+                                    } catch {
+                                      toast.error("Failed to set temperature");
+                                    }
+                                  }}
+                                  onTouchEnd={async (e) => {
+                                    const val = parseInt(
+                                      (e.target as HTMLInputElement).value,
+                                    );
+                                    try {
+                                      const kelvin = Math.round(
+                                        minTemp +
+                                          (val / 100) * (maxTemp - minTemp),
+                                      );
+                                      await setDeviceAttributes(
+                                        controlDevice.id,
+                                        {
+                                          color_temp: kelvin,
+                                          color: null,
+                                        },
+                                      );
+                                      setLocalTempPercent(null);
+                                      toast.success(
+                                        `White temperature set to ${kelvin}K`,
+                                      );
+                                    } catch {
+                                      toast.error("Failed to set temperature");
+                                    }
+                                  }}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Option to go to detail screen of the device */}
+                  <div className="pt-4 border-t border-border/50 flex justify-end">
+                    <Link
+                      href={`/devices/${controlDevice.id}`}
+                      className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-ring/40"
+                    >
+                      Open Full Detail Screen →
+                    </Link>
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
+      )}
     </motion.div>
   );
 }
@@ -1173,12 +1585,14 @@ function DeviceRow({
   onToggle,
   isPinned,
   onTogglePin,
+  onOpenControl,
 }: {
   device: DeviceOut;
   state: string;
   onToggle: () => void;
   isPinned: boolean;
   onTogglePin: () => void;
+  onOpenControl: () => void;
 }) {
   const Icon = deviceIconMap[device.device_type] || CircuitBoard;
 
@@ -1186,25 +1600,43 @@ function DeviceRow({
     <div className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
       <div className="flex min-w-0 items-center gap-3">
         <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing" />
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
+        <Link
+          href={`/devices/${device.id}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border hover:scale-105 transition-transform ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
+          title="View device details"
         >
           {device.online ? (
             <Icon className="h-4 w-4" />
           ) : (
             <WifiOff className="h-4 w-4" />
           )}
-        </div>
+        </Link>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">
+          <Link
+            href={`/devices/${device.id}`}
+            className="block truncate text-sm font-semibold text-foreground hover:text-primary transition hover:underline"
+          >
             {device.name}
-          </p>
+          </Link>
           <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
             {device.manufacturer} · {state}
           </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {device.device_type === "light" && device.online && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenControl();
+            }}
+            className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40"
+            title="Adjust brightness & color"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+          </button>
+        )}
         <button
           type="button"
           onClick={(e) => {
