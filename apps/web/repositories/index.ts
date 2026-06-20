@@ -6,6 +6,7 @@ import { MockHomeRepository } from "./mock/home.mock";
 import { MockRoomRepository } from "./mock/room.mock";
 import { MockDeviceRepository } from "./mock/device.mock";
 import { MockIntegrationRepository } from "./mock/integration.mock";
+import { MockSceneRepository } from "./mock/scene.mock";
 import { MockAutomationRepository } from "./mock/automation.mock";
 import { MockNotificationRepository } from "./mock/notification.mock";
 
@@ -14,6 +15,7 @@ import { ApiHomeRepository } from "./api/home.repository";
 import { ApiRoomRepository } from "./api/room.repository";
 import { ApiDeviceRepository } from "./api/device.repository";
 import { ApiIntegrationRepository } from "./api/integration.repository";
+import { ApiSceneRepository } from "./api/scene.repository";
 import { ApiAutomationRepository } from "./api/automation.repository";
 import { ApiNotificationRepository } from "./api/notification.repository";
 
@@ -34,6 +36,9 @@ export const deviceRepository = useMock
 export const integrationRepository = useMock
   ? new MockIntegrationRepository()
   : new ApiIntegrationRepository();
+export const sceneRepository = useMock
+  ? new MockSceneRepository()
+  : new ApiSceneRepository();
 export const automationRepository = useMock
   ? new MockAutomationRepository()
   : new ApiAutomationRepository();
@@ -48,6 +53,7 @@ export type Repositories = {
   room: typeof roomRepository;
   device: typeof deviceRepository;
   integration: typeof integrationRepository;
+  scene: typeof sceneRepository;
   automation: typeof automationRepository;
   notification: typeof notificationRepository;
 };

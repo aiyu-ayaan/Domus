@@ -6,6 +6,7 @@ import type {
   DeviceOut,
   DeviceStateOut,
   IntegrationOut,
+  SceneOut,
   AutomationOut,
   NotificationOut,
 } from "@/types/api";
@@ -20,6 +21,7 @@ interface MockDatabase {
   deviceStates: Record<string, DeviceStateOut>;
   deviceHistory: Record<string, DeviceStateOut[]>;
   integrations: IntegrationOut[];
+  scenes: SceneOut[];
   automations: AutomationOut[];
   notifications: NotificationOut[];
 }
@@ -94,6 +96,7 @@ const DEFAULT_DB: MockDatabase = {
   devices: [],
   deviceStates: {},
   deviceHistory: {},
+  scenes: [],
   automations: [],
   notifications: [],
 };

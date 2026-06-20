@@ -243,6 +243,44 @@ export interface Page<T> {
 }
 
 // ==========================================
+// Scenes
+// ==========================================
+
+export interface SceneDeviceState {
+  device_id: string;
+  state: string; // 'on' | 'off' | 'open' | 'closed' | ...
+  attributes: Record<string, any>; // brightness, color, color_temp, etc.
+}
+
+export interface SceneOut {
+  id: string;
+  home_id: string;
+  name: string;
+  description: string | null;
+  states: SceneDeviceState[];
+  created_at: string;
+}
+
+export interface SceneCreate {
+  home_id: string;
+  name: string;
+  description: string | null;
+  states: SceneDeviceState[];
+}
+
+export interface SceneUpdate {
+  name?: string;
+  description?: string | null;
+  states?: SceneDeviceState[];
+}
+
+export interface SceneActivateResult {
+  scene_id: string;
+  applied: number;
+  failed: number;
+}
+
+// ==========================================
 // Automations
 // ==========================================
 
