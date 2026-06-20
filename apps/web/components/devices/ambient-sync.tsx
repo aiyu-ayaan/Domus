@@ -18,17 +18,25 @@ const THEMES = [
 
 export function AmbientSync({
   deviceId,
+  deviceIds,
   attributes: targetAttributes,
   onSetAttrs,
 }: {
-  deviceId: string;
+  deviceId?: string;
+  deviceIds?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes?: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSetAttrs?: (attrs: Record<string, any>) => void;
 }) {
+  const ids = React.useMemo(() => {
+    if (deviceIds && deviceIds.length > 0) return deviceIds;
+    return deviceId ? [deviceId] : [];
+  }, [deviceId, deviceIds]);
+
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
-  const deviceState = useDeviceStore((s) => s.deviceStates[deviceId]);
+  const primaryId = ids[0];
+  const deviceState = useDeviceStore((s) => primaryId ? s.deviceStates[primaryId] : undefined);
 
   // Bind active states and selected theme
   const isSceneBuilder = !!onSetAttrs;
@@ -42,25 +50,29 @@ export function AmbientSync({
   // Retrieve global stream controls
   const { startScreenSharing, startAudioSharing } = useAnimationSyncStore();
 
+  if (ids.length === 0) return null;
+
   const toggleScreen = async () => {
     if (screen) {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
       }
-      await setDeviceAttributes(deviceId, { ambient_sync: null });
+      await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
     } else {
       if (isSceneBuilder) {
         // Clear normal color/temp attributes to prioritize sync
         onSetAttrs({ ambient_sync: "screen", color: null, color_temp: 0 });
       }
       // Optimistic store update synchronously first to register in ambientScreenDevices
-      setDeviceAttributes(deviceId, { ambient_sync: "screen" }).catch(() => {});
+      ids.forEach((id) => {
+        setDeviceAttributes(id, { ambient_sync: "screen" }).catch(() => {});
+      });
       const success = await startScreenSharing();
       if (!success) {
         if (isSceneBuilder) {
           onSetAttrs({ ambient_sync: null });
         }
-        await setDeviceAttributes(deviceId, { ambient_sync: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
       }
     }
   };
@@ -70,19 +82,21 @@ export function AmbientSync({
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
       }
-      await setDeviceAttributes(deviceId, { ambient_sync: null });
+      await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
     } else {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: "music", music_theme: theme, color: null, color_temp: 0 });
       }
       // Optimistic store update synchronously first to register in ambientMusicDevices
-      setDeviceAttributes(deviceId, { ambient_sync: "music", music_theme: theme }).catch(() => {});
+      ids.forEach((id) => {
+        setDeviceAttributes(id, { ambient_sync: "music", music_theme: theme }).catch(() => {});
+      });
       const success = await startAudioSharing();
       if (!success) {
         if (isSceneBuilder) {
           onSetAttrs({ ambient_sync: null });
         }
-        await setDeviceAttributes(deviceId, { ambient_sync: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
       }
     }
   };
@@ -91,7 +105,7 @@ export function AmbientSync({
     if (isSceneBuilder) {
       onSetAttrs({ music_theme: themeId });
     }
-    await setDeviceAttributes(deviceId, { music_theme: themeId });
+    await Promise.all(ids.map((id) => setDeviceAttributes(id, { music_theme: themeId }).catch(() => {})));
   };
 
   return (

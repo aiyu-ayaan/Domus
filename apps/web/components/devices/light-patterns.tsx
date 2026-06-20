@@ -31,17 +31,25 @@ const SPEEDS = [
 
 export function LightPatterns({
   deviceId,
+  deviceIds,
   attributes: targetAttributes,
   onSetAttrs,
 }: {
-  deviceId: string;
+  deviceId?: string;
+  deviceIds?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes?: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSetAttrs?: (attrs: Record<string, any>) => void;
 }) {
+  const ids = React.useMemo(() => {
+    if (deviceIds && deviceIds.length > 0) return deviceIds;
+    return deviceId ? [deviceId] : [];
+  }, [deviceId, deviceIds]);
+
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
-  const deviceState = useDeviceStore((s) => s.deviceStates[deviceId]);
+  const primaryId = ids[0];
+  const deviceState = useDeviceStore((s) => primaryId ? s.deviceStates[primaryId] : undefined);
   const [customs, setCustoms] = useState<Custom[]>([]);
 
   // Builder state
@@ -68,18 +76,20 @@ export function LightPatterns({
     localStorage.setItem(LS_KEY, JSON.stringify(next));
   };
 
+  if (ids.length === 0) return null;
+
   const handleTogglePattern = async (p: Pattern) => {
     if (active === p.id) {
       if (isSceneBuilder) {
         onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
       } else {
-        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
       }
     } else {
       if (isSceneBuilder) {
         onSetAttrs({ light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null, color: null, color_temp: 0 });
       } else {
-        await setDeviceAttributes(deviceId, { light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null }).catch(() => {})));
       }
     }
   };
@@ -89,13 +99,13 @@ export function LightPatterns({
       if (isSceneBuilder) {
         onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
       } else {
-        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
       }
     } else {
       if (isSceneBuilder) {
         onSetAttrs({ light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors, color: null, color_temp: 0 });
       } else {
-        await setDeviceAttributes(deviceId, { light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors }).catch(() => {})));
       }
     }
   };
@@ -105,7 +115,7 @@ export function LightPatterns({
       if (isSceneBuilder) {
         onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
       } else {
-        await setDeviceAttributes(deviceId, { light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
       }
     }
     persist(customs.filter((x) => x.id !== c.id));

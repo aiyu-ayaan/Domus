@@ -423,6 +423,10 @@ export default function SceneBuilderPage() {
               attributes={master}
               onSetAttrs={setAllLightAttrs}
               note={`Applies to all ${lightCount} light${lightCount === 1 ? "" : "s"} in the scene`}
+              deviceIds={includedDevices
+                .filter((d) => d.device_type === "light" && d.online)
+                .map((d) => d.id)}
+              isOn={allOn}
             />
           )}
         </div>
@@ -593,12 +597,13 @@ function DeviceTargetRow({
           </div>
         )}
 
-        {/* Bulb controls — only meaningful when the target is "on" */}
-        {isLight && isOn && (
+        {/* Bulb controls — now always rendered, but dimmed/disabled when the target state is "off" */}
+        {isLight && (
           <LightTargetControls
             attributes={target.attributes}
             onSetAttrs={onSetAttrs}
             deviceId={device.online ? device.id : undefined}
+            isOn={isOn}
           />
         )}
       </div>
@@ -611,11 +616,17 @@ function LightTargetControls({
   onSetAttrs,
   note,
   deviceId,
+  deviceIds,
+  isOn = true,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSetAttrs: (attrs: Record<string, any>) => void;
   note?: string;
   deviceId?: string; // present on per-device rows → enables live ambient/scenes
+  deviceIds?: string[];
+  isOn?: boolean;
 }) {
   // White Light is the default tab; only start on Colors if a colour is already set.
   const startsOnColor =
@@ -628,7 +639,7 @@ function LightTargetControls({
   const tempPercent = Math.round(((tempKelvin - 2700) / (6500 - 2700)) * 100);
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${!isOn ? "opacity-40 pointer-events-none" : ""}`}>
       {note && (
         <p className="text-[11px] text-muted-foreground -mb-1">{note}</p>
       )}
@@ -767,10 +778,10 @@ function LightTargetControls({
       {/* Live ambient + animated scenes — drive the real bulb in real time.
           These are live modes (not stored in the saved scene), matching the
           device control screen. Only shown for an online device. */}
-      {deviceId && (
+      {(deviceId || (deviceIds && deviceIds.length > 0)) && (
         <>
-          <AmbientSync deviceId={deviceId} attributes={attributes} onSetAttrs={onSetAttrs} />
-          <LightPatterns deviceId={deviceId} attributes={attributes} onSetAttrs={onSetAttrs} />
+          <AmbientSync deviceId={deviceId} deviceIds={deviceIds} attributes={attributes} onSetAttrs={onSetAttrs} />
+          <LightPatterns deviceId={deviceId} deviceIds={deviceIds} attributes={attributes} onSetAttrs={onSetAttrs} />
         </>
       )}
     </div>
