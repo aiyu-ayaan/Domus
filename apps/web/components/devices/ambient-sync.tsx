@@ -58,15 +58,14 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
   const stream = useRef<MediaStream | null>(null);
   const audioCtx = useRef<AudioContext | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
-  const raf = useRef<number | null>(null);
+  const timer = useRef<number | null>(null);
   const inFlight = useRef(false);
-  const lastPush = useRef(0);
   const lastRGB = useRef<readonly [number, number, number]>([0, 0, 0]);
   const lastBright = useRef(-1);
 
   const stop = () => {
-    if (raf.current) cancelAnimationFrame(raf.current);
-    raf.current = null;
+    if (timer.current) clearInterval(timer.current);
+    timer.current = null;
     stream.current?.getTracks().forEach((t) => t.stop());
     stream.current = null;
     audioCtx.current?.close().catch(() => {});
@@ -117,7 +116,6 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
       const bins = new Uint8Array(128);
       const push = (attrs: Record<string, number | string>) => {
         inFlight.current = true;
-        lastPush.current = performance.now();
         setDeviceAttributes(deviceId, attrs)
           .catch(() => {})
           .finally(() => {
@@ -125,10 +123,11 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
           });
       };
 
-      const loop = () => {
-        raf.current = requestAnimationFrame(loop);
-        // Drive as fast as the API drains, but never tighter than MIN_GAP.
-        if (inFlight.current || performance.now() - lastPush.current < MIN_GAP) return;
+      // setInterval (not rAF) so sync keeps running while this tab is in the
+      // background — which is the whole point of mirroring another window.
+      // Browsers clamp background intervals to ~1s; foreground runs at MIN_GAP.
+      const tick = () => {
+        if (inFlight.current) return;
 
         const attrs: Record<string, number | string> = {};
         let level = 0;
@@ -173,7 +172,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
 
         if (Object.keys(attrs).length) push(attrs);
       };
-      loop();
+      timer.current = window.setInterval(tick, MIN_GAP);
       return true;
     } catch {
       toast.error("Screen share permission denied or unavailable.");
