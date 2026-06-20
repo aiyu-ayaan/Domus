@@ -1,5 +1,29 @@
 // Small color helpers for ambient sync and light patterns.
 
+// Shared preset palette for light color pickers (device detail page + scene builder).
+export const LIGHT_COLOR_PRESETS = [
+  { name: "Warm White", hex: "#fff4e6" },
+  { name: "Soft White", hex: "#faf0d7" },
+  { name: "Cool Daylight", hex: "#e6f7ff" },
+  { name: "Candle Amber", hex: "#ffb347" },
+  { name: "Sunset Orange", hex: "#ff7f50" },
+  { name: "Coral Red", hex: "#ff4040" },
+  { name: "Crimson", hex: "#dc143c" },
+  { name: "Rose Pink", hex: "#ff69b4" },
+  { name: "Magenta", hex: "#ff00ff" },
+  { name: "Mystic Violet", hex: "#8a2be2" },
+  { name: "Indigo", hex: "#4b0082" },
+  { name: "Royal Blue", hex: "#4169e1" },
+  { name: "Ocean Blue", hex: "#1e90ff" },
+  { name: "Cyan", hex: "#00e5ff" },
+  { name: "Teal", hex: "#008080" },
+  { name: "Mint", hex: "#3eb489" },
+  { name: "Forest Green", hex: "#3cb371" },
+  { name: "Lime", hex: "#7fff00" },
+  { name: "Lemon Yellow", hex: "#ffd700" },
+  { name: "Gold", hex: "#ffaa00" },
+] as const;
+
 export function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [
