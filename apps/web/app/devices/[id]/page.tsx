@@ -1,7 +1,7 @@
 // Device details page implementation with history graphs, activity logs, and settings
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -32,8 +32,6 @@ import {
   Check,
 } from "lucide-react";
 import type { DeviceOut, DeviceStateOut } from "@/types/api";
-import { AmbientSync } from "@/components/devices/ambient-sync";
-import { LightPatterns } from "@/components/devices/light-patterns";
 import { LIGHT_COLOR_PRESETS, hexToRgb } from "@/lib/color";
 
 const deviceSettingsSchema = z.object({
@@ -81,36 +79,7 @@ export default function DeviceDetailPage() {
     }
   };
 
-  // Sync active mode tab once when a device's state first loads. Some adapters (Tuya)
-  // never report color_temp on poll, so re-running this on every state refresh would
-  // keep snapping the tab back to "Colors" even after the user picks "White Light".
-  const tabInitializedFor = useRef<string | null>(null);
-  useEffect(() => {
-    if (!device?.id || !state?.attributes) return;
-    if (tabInitializedFor.current === device.id) return;
-    tabInitializedFor.current = device.id;
-
-    const hasColorTemp =
-      state.attributes.color_temp !== undefined &&
-      state.attributes.color_temp !== null;
-    const hasColor =
-      state.attributes.color !== undefined &&
-      state.attributes.color !== null &&
-      typeof state.attributes.color === "string";
-    const currentColorTemp = hasColorTemp
-      ? Number(state.attributes.color_temp)
-      : 0;
-
-    if (currentColorTemp > 0) {
-      setColorModeTab("temp");
-    } else if (hasColor && state.attributes.color !== "") {
-      setColorModeTab("color");
-    } else if (hasColorTemp) {
-      setColorModeTab("temp");
-    } else {
-      setColorModeTab("color");
-    }
-  }, [device?.id, state?.attributes]);
+  // White Light is the default tab; the user switches to Colors manually.
 
   const {
     register,
@@ -730,11 +699,6 @@ export default function DeviceDetailPage() {
                         )}
                       </div>
 
-                      {/* Live ambient modes (screen color + music sync) */}
-                      <AmbientSync deviceId={device.id} />
-
-                      {/* Animated LED-style color patterns */}
-                      <LightPatterns deviceId={device.id} />
                     </div>
                   )}
                 </div>
