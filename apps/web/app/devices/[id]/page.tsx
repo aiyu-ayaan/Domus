@@ -1,7 +1,7 @@
 // Device details page implementation with history graphs, activity logs, and settings
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -76,17 +76,20 @@ export default function DeviceDetailPage() {
     }
   };
 
-  // Sync active mode tab dynamically when device state is loaded
+  // Sync active mode tab once when a device's state first loads. Some adapters (Tuya)
+  // never report color_temp on poll, so re-running this on every state refresh would
+  // keep snapping the tab back to "Colors" even after the user picks "White Light".
+  const tabInitializedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (state?.attributes) {
-      if (state.attributes.color_temp && state.attributes.color_temp > 0) {
-        setColorModeTab("temp");
-      } else if (state.attributes.color) {
-        setColorModeTab("color");
-      }
+    if (!device?.id || !state?.attributes) return;
+    if (tabInitializedFor.current === device.id) return;
+    tabInitializedFor.current = device.id;
+    if (state.attributes.color_temp && state.attributes.color_temp > 0) {
+      setColorModeTab("temp");
+    } else if (state.attributes.color) {
+      setColorModeTab("color");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device?.id, state?.attributes?.color_temp, state?.attributes?.color]);
+  }, [device?.id, state?.attributes]);
 
   const {
     register,
@@ -416,17 +419,6 @@ export default function DeviceDetailPage() {
                           <div className="flex p-0.5 bg-muted/60 rounded-xl border border-border/30 w-full sm:w-auto max-w-[240px] self-start sm:self-auto">
                             <button
                               type="button"
-                              onClick={() => setColorModeTab("color")}
-                              className={`flex-1 sm:flex-initial py-1 px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                                colorModeTab === "color"
-                                  ? "bg-background text-foreground shadow-sm font-bold"
-                                  : "text-muted-foreground hover:text-foreground"
-                              }`}
-                            >
-                              Colors
-                            </button>
-                            <button
-                              type="button"
                               onClick={() => setColorModeTab("temp")}
                               className={`flex-1 sm:flex-initial py-1 px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                                 colorModeTab === "temp"
@@ -435,6 +427,17 @@ export default function DeviceDetailPage() {
                               }`}
                             >
                               White Light
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setColorModeTab("color")}
+                              className={`flex-1 sm:flex-initial py-1 px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                                colorModeTab === "color"
+                                  ? "bg-background text-foreground shadow-sm font-bold"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              Colors
                             </button>
                           </div>
                         </div>
