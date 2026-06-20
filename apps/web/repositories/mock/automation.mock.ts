@@ -8,7 +8,6 @@ import type {
 } from "@/types/api";
 import { mockDb } from "@/mocks/mock-db";
 import { MockDeviceRepository } from "./device.mock";
-import { MockSceneRepository } from "./scene.mock";
 
 export class MockAutomationRepository implements IAutomationRepository {
   private delay(ms: number = 100) {
@@ -152,7 +151,6 @@ export class MockAutomationRepository implements IAutomationRepository {
     // Execute actions!
     try {
       const devRepo = new MockDeviceRepository();
-      const sceneRepo = new MockSceneRepository();
 
       for (const action of auto.actions) {
         if (action.type === "device.turn_on" && action.device_id) {
@@ -161,8 +159,6 @@ export class MockAutomationRepository implements IAutomationRepository {
           await devRepo.turnOff(action.device_id);
         } else if (action.type === "device.toggle" && action.device_id) {
           await devRepo.toggle(action.device_id);
-        } else if (action.type === "scene.activate" && action.scene_id) {
-          await sceneRepo.activate(action.scene_id);
         } else if (action.type === "notification.send") {
           const notifications = mockDb.get("notifications");
           const newNotif = {

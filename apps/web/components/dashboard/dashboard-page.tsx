@@ -46,7 +46,6 @@ import { useDeviceStore } from "@/stores/device-store";
 import { useHomeStore } from "@/stores/home-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useRoomStore } from "@/stores/room-store";
-import { useSceneStore } from "@/stores/scene-store";
 import type { DeviceOut, RoomOut } from "@/types/api";
 
 const triggerLabels: Record<string, string> = {
@@ -85,7 +84,6 @@ export function DashboardPage() {
   const { rooms, fetchRooms } = useRoomStore();
   const { notifications, fetchNotifications, markAsRead } =
     useNotificationStore();
-  const { scenes, fetchScenes, activateScene } = useSceneStore();
   const { automations, fetchAutomations, triggerAutomation } =
     useAutomationStore();
 
@@ -99,7 +97,6 @@ export function DashboardPage() {
     fetchDevices(activeHomeId);
     fetchRooms(activeHomeId);
     fetchNotifications(activeHomeId);
-    fetchScenes(activeHomeId);
     fetchAutomations(activeHomeId);
   }, [
     activeHomeId,
@@ -107,7 +104,6 @@ export function DashboardPage() {
     fetchDevices,
     fetchNotifications,
     fetchRooms,
-    fetchScenes,
   ]);
 
   const activeHome = homes.find((home) => home.id === activeHomeId);
@@ -195,24 +191,9 @@ export function DashboardPage() {
       fetchDevices(activeHomeId),
       fetchRooms(activeHomeId),
       fetchNotifications(activeHomeId),
-      fetchScenes(activeHomeId),
       fetchAutomations(activeHomeId),
     ]);
     toast.success("Command center refreshed");
-  };
-
-  const handleSceneClick = async (sceneId: string, sceneName: string) => {
-    try {
-      await activateScene(sceneId);
-      toast.success("Scene activated", {
-        description: `${sceneName} state changes were sent to the adapter layer.`,
-      });
-      if (activeHomeId) fetchDevices(activeHomeId);
-    } catch {
-      toast.error("Scene failed", {
-        description: `Could not activate ${sceneName}.`,
-      });
-    }
   };
 
   const handleAutomationRun = async (
@@ -422,12 +403,6 @@ export function DashboardPage() {
           detail={`${activeRooms.length} with live devices`}
         />
         <MetricPanel
-          icon={Sparkles}
-          label="Scenes"
-          value={scenes.length}
-          detail="Ready-to-apply presets"
-        />
-        <MetricPanel
           icon={Activity}
           label="Automations"
           value={activeAutomations.length}
@@ -606,48 +581,6 @@ export function DashboardPage() {
                     )}
                   />
                 ))
-            )}
-          </div>
-        </DashboardCard>
-
-        <DashboardCard
-          title="Quick Scenes"
-          description="Run a whole-home state change"
-          action={<MiniLink href="/scenes">Scene builder</MiniLink>}
-        >
-          <div className="grid gap-3">
-            {scenes.length === 0 ? (
-              <EmptyPanel
-                icon={Sparkles}
-                label="No scenes yet"
-                href="/scenes"
-                action="Create scene"
-              />
-            ) : (
-              scenes.slice(0, 4).map((scene) => (
-                <button
-                  key={scene.id}
-                  type="button"
-                  onClick={() => handleSceneClick(scene.id, scene.name)}
-                  className="group flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 text-left transition duration-200 hover:border-primary/50 hover:bg-accent/60 focus:outline-none focus:ring-2 focus:ring-ring/40"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {scene.name}
-                      </p>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {scene.description ||
-                          `${scene.states.length} configured state${scene.states.length === 1 ? "" : "s"}`}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
-                </button>
-              ))
             )}
           </div>
         </DashboardCard>

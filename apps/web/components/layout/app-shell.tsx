@@ -38,7 +38,6 @@ const navItems = [
   { href: "/homes", label: "Homes", icon: Home },
   { href: "/rooms", label: "Rooms", icon: FolderKanban },
   { href: "/devices", label: "Devices", icon: Cpu },
-  { href: "/scenes", label: "Scenes", icon: Sparkles },
   { href: "/automations", label: "Automations", icon: Zap },
   { href: "/integrations", label: "Integrations", icon: Plug },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: true },
@@ -668,21 +667,6 @@ export function AppShell({
             <Cpu
               className="h-4.5 w-4.5"
               strokeWidth={pathname.startsWith("/devices") ? 2.25 : 1.75}
-            />
-          </Link>
-
-          <Link
-            href="/scenes"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
-              pathname.startsWith("/scenes")
-                ? "bg-foreground text-background shadow-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            }`}
-            title="Scenes"
-          >
-            <Sparkles
-              className="h-4.5 w-4.5"
-              strokeWidth={pathname.startsWith("/scenes") ? 2.25 : 1.75}
             />
           </Link>
 

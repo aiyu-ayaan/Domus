@@ -80,7 +80,6 @@ class AutomationEngine:
         # Imported here to avoid import cycles (services import models, engine imports services).
         from backend.devices.service import DeviceService
         from backend.notifications.service import NotificationService
-        from backend.scenes.service import SceneService
 
         for action in actions:
             atype = action["type"]
@@ -88,8 +87,6 @@ class AutomationEngine:
                 await DeviceService(session).control_system(
                     UUID(str(action["device_id"])), atype.split(".", 1)[1]
                 )
-            elif atype == "scene.activate":
-                await SceneService(session).activate_system(UUID(str(action["scene_id"])))
             elif atype == "notification.send":
                 await NotificationService(session).create(
                     home_id,

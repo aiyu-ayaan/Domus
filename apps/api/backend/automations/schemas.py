@@ -28,7 +28,6 @@ class ActionType(str, Enum):
     turn_on = "device.turn_on"
     turn_off = "device.turn_off"
     toggle = "device.toggle"
-    activate_scene = "scene.activate"
     notify = "notification.send"
 
 
@@ -48,7 +47,6 @@ class Condition(BaseModel):
 class Action(BaseModel):
     type: ActionType
     device_id: UUID | None = None
-    scene_id: UUID | None = None
     title: str | None = None
     body: str | None = None
 

@@ -41,7 +41,6 @@ export type ActionType =
   | "device.turn_on"
   | "device.turn_off"
   | "device.toggle"
-  | "scene.activate"
   | "notification.send";
 
 // ==========================================
@@ -241,44 +240,6 @@ export interface Page<T> {
   total: number;
   limit: number;
   offset: number;
-}
-
-// ==========================================
-// Scenes
-// ==========================================
-
-export interface SceneDeviceState {
-  device_id: string;
-  state: string;
-  attributes: Record<string, any>;
-}
-
-export interface SceneOut {
-  id: string;
-  home_id: string;
-  name: string;
-  description: string | null;
-  states: SceneDeviceState[];
-  created_at: string;
-}
-
-export interface SceneCreate {
-  home_id: string;
-  name: string;
-  description: string | null;
-  states: SceneDeviceState[];
-}
-
-export interface SceneUpdate {
-  name?: string;
-  description?: string | null;
-  states?: SceneDeviceState[];
-}
-
-export interface SceneActivateResult {
-  scene_id: string;
-  applied: number;
-  failed: number;
 }
 
 // ==========================================

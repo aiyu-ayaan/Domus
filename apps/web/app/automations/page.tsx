@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useHomeStore } from "@/stores/home-store";
 import { useDeviceStore } from "@/stores/device-store";
-import { useSceneStore } from "@/stores/scene-store";
 import { useAutomationStore } from "@/stores/automation-store";
 import { PageHeader } from "@/components/shared/page-header";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -60,11 +59,9 @@ const automationSchema = z.object({
           "device.turn_on",
           "device.turn_off",
           "device.toggle",
-          "scene.activate",
           "notification.send",
         ] as const),
         device_id: z.string().optional(),
-        scene_id: z.string().optional(),
         title: z.string().optional(),
         body: z.string().optional(),
       }),
@@ -105,7 +102,6 @@ export default function AutomationsPage() {
 
   const { activeHomeId } = useHomeStore();
   const { devices } = useDeviceStore();
-  const { scenes } = useSceneStore();
   const {
     automations,
     createAutomation,
@@ -470,9 +466,6 @@ export default function AutomationsPage() {
                               <option value="device.toggle">
                                 Toggle Device
                               </option>
-                              <option value="scene.activate">
-                                Activate Scene Preset
-                              </option>
                               <option value="notification.send">
                                 Send Toast Alert
                               </option>
@@ -494,27 +487,6 @@ export default function AutomationsPage() {
                                 {devices.map((d) => (
                                   <option key={d.id} value={d.id}>
                                     {d.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-
-                          {type === "scene.activate" && (
-                            <div className="space-y-1">
-                              <label className="text-[9px] uppercase font-bold text-muted-foreground">
-                                Target Scene
-                              </label>
-                              <select
-                                className="w-full rounded-xl border border-border bg-background py-1.5 px-2 text-xs outline-none focus:border-primary cursor-pointer"
-                                {...register(
-                                  `actions.${idx}.scene_id` as const,
-                                )}
-                              >
-                                <option value="">Select Scene</option>
-                                {scenes.map((s) => (
-                                  <option key={s.id} value={s.id}>
-                                    {s.name}
                                   </option>
                                 ))}
                               </select>
