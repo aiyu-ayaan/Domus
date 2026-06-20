@@ -25,7 +25,20 @@ import type { IntegrationType } from "@/types/api";
 
 const integrationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  type: z.enum(["tapo", "xiaomi", "tuya", "mqtt", "matter", "zigbee"] as const),
+  type: z.enum([
+    "tapo",
+    "xiaomi",
+    "tuya",
+    "mqtt",
+    "matter",
+    "zigbee",
+    "philips_hue",
+    "wiz",
+    "lifx",
+    "govee",
+    "wipro",
+    "syska",
+  ] as const),
   enabled: z.boolean(),
   config: z.object({
     host: z.string().optional(),
@@ -201,6 +214,12 @@ export default function IntegrationsPage() {
                     <option value="tapo">TP-Link Tapo</option>
                     <option value="xiaomi">Xiaomi Home</option>
                     <option value="tuya">Tuya Smart</option>
+                    <option value="philips_hue">Philips Hue</option>
+                    <option value="wiz">WiZ</option>
+                    <option value="lifx">LIFX</option>
+                    <option value="govee">Govee</option>
+                    <option value="wipro">Wipro Smart</option>
+                    <option value="syska">Syska Smart</option>
                     <option value="mqtt">MQTT Broker</option>
                     <option value="matter">Matter Ecosystem</option>
                     <option value="zigbee">Zigbee Bridge</option>

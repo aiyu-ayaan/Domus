@@ -36,6 +36,12 @@ class IntegrationType(str, Enum):
     mqtt = "mqtt"
     matter = "matter"
     zigbee = "zigbee"
+    philips_hue = "philips_hue"
+    wiz = "wiz"
+    lifx = "lifx"
+    govee = "govee"
+    wipro = "wipro"
+    syska = "syska"
 
 
 class NotificationType(str, Enum):

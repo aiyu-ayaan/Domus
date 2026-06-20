@@ -6,6 +6,7 @@ stored credentials before handing them to the adapter.
 
 from backend.common.enums import IntegrationType
 from backend.core.crypto import decrypt_json
+from backend.integrations.adapters import brands
 from backend.integrations.adapters.matter import MatterAdapter
 from backend.integrations.adapters.mqtt import MqttAdapter
 from backend.integrations.adapters.tapo import TapoAdapter
@@ -21,6 +22,12 @@ _REGISTRY: dict[IntegrationType, type[DeviceAdapter]] = {
     IntegrationType.mqtt: MqttAdapter,
     IntegrationType.matter: MatterAdapter,
     IntegrationType.zigbee: ZigbeeAdapter,
+    IntegrationType.philips_hue: brands.PhilipsHueAdapter,
+    IntegrationType.wiz: brands.WizAdapter,
+    IntegrationType.lifx: brands.LifxAdapter,
+    IntegrationType.govee: brands.GoveeAdapter,
+    IntegrationType.wipro: brands.WiproAdapter,
+    IntegrationType.syska: brands.SyskaAdapter,
 }
 
 
