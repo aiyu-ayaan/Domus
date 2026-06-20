@@ -44,4 +44,10 @@ export class ApiAuthRepository implements IAuthRepository {
   public async deleteMe(): Promise<void> {
     return apiClient.delete("/users/me");
   }
+
+  public async uploadAvatar(file: File): Promise<{ avatar_url: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.postForm("/users/me/avatar", formData);
+  }
 }

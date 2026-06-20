@@ -146,4 +146,10 @@ export class MockAuthRepository implements IAuthRepository {
     await this.delay(300);
     return;
   }
+
+  public async uploadAvatar(file: File): Promise<{ avatar_url: string }> {
+    await this.delay(300);
+    const mockUrl = `/static/avatars/mock_${file.name}`;
+    return { avatar_url: mockUrl };
+  }
 }
