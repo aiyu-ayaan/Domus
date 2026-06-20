@@ -108,3 +108,72 @@ async def test_discover_maps_host_to_external_id(fake_device):
     assert discovered[0].external_id == "192.168.1.50"
     assert discovered[0].device_type.value == "plug"
     assert discovered[0].manufacturer == "TP-Link"
+
+
+class _FakeLight:
+    def __init__(self):
+        self._on = False
+        self.alias = "Tapo Smart Bulb"
+        self.model = "L530"
+        self.mac = "AA:BB:CC:DD:EE:FE"
+        self.device_type = SimpleNamespace(value="bulb")
+        self.modules = {}
+        self.brightness = 75
+        self.color_temp = 0
+        self.hsv = (0, 0, 75)
+
+    @property
+    def is_on(self):
+        return self._on
+
+    async def update(self):
+        pass
+
+    async def turn_on(self):
+        self._on = True
+
+    async def turn_off(self):
+        self._on = False
+
+    async def set_brightness(self, value):
+        self.brightness = value
+        self.hsv = (self.hsv[0], self.hsv[1], value)
+
+    async def set_color_temp(self, value):
+        self.color_temp = value
+
+    async def set_hsv(self, h, s, v):
+        self.hsv = (h, s, v)
+        self.brightness = v
+
+
+@pytest.mark.asyncio
+async def test_set_attributes_preserves_brightness(monkeypatch):
+    light = _FakeLight()
+
+    async def _discover_single(host, credentials=None):
+        return light
+
+    monkeypatch.setattr(
+        tapo_kasa.Discover, "discover_single", staticmethod(_discover_single)
+    )
+
+    adapter = RealTapoAdapter({"hosts": ["192.168.1.51"]})
+
+    # Initially brightness is 75. Setting color temp only.
+    await adapter.set_attributes("192.168.1.51", {"color_temp": 4000})
+    assert light.color_temp == 4000
+    assert light.brightness == 75
+
+    # Setting color only. Existing brightness 75 should be preserved, not overridden to 100.
+    await adapter.set_attributes("192.168.1.51", {"color": "#ff0000"})
+    assert light.hsv[0] == 0  # Red hue is 0
+    assert light.hsv[1] == 100  # Fully saturated
+    assert light.hsv[2] == 75  # Brightness is preserved at 75!
+    assert light.brightness == 75
+
+    # Setting color and brightness together.
+    await adapter.set_attributes("192.168.1.51", {"color": "#ff0000", "brightness": 42})
+    assert light.hsv[2] == 42
+    assert light.brightness == 42
+

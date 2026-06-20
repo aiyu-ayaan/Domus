@@ -205,11 +205,17 @@ class RealTapoAdapter(DeviceAdapter):
         dev = await self._connect(external_id)
         
         # Set brightness (0-100)
-        if "brightness" in attributes and hasattr(dev, "set_brightness"):
+        target_brightness = None
+        if "brightness" in attributes:
             try:
-                brightness = int(attributes["brightness"])
-                brightness = max(1, min(100, brightness))
-                await dev.set_brightness(brightness)
+                target_brightness = int(attributes["brightness"])
+                target_brightness = max(1, min(100, target_brightness))
+            except (ValueError, TypeError):
+                pass
+
+        if target_brightness is not None and hasattr(dev, "set_brightness"):
+            try:
+                await dev.set_brightness(target_brightness)
             except Exception:
                 pass
                 
@@ -233,8 +239,17 @@ class RealTapoAdapter(DeviceAdapter):
                 h, s, v = colorsys.rgb_to_hsv(r, g, b)
                 h_deg = int(h * 360)
                 s_pct = int(s * 100)
-                # Keep value/brightness at current brightness level or 100
-                v_pct = int(v * 100) if v > 0 else 100
+                
+                # Keep value/brightness at target brightness, current brightness level, or 100
+                if target_brightness is not None:
+                    v_pct = target_brightness
+                elif hasattr(dev, "brightness") and dev.brightness is not None:
+                    v_pct = dev.brightness
+                elif hasattr(dev, "hsv") and dev.hsv and len(dev.hsv) > 2:
+                    v_pct = dev.hsv[2]
+                else:
+                    v_pct = int(v * 100) if v > 0 else 100
+                v_pct = max(1, min(100, v_pct))
                 
                 await dev.set_hsv(h_deg, s_pct, v_pct)
             except Exception:
