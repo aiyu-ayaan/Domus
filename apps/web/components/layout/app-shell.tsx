@@ -38,6 +38,7 @@ const navItems = [
   { href: "/homes", label: "Homes", icon: Home },
   { href: "/rooms", label: "Rooms", icon: FolderKanban },
   { href: "/devices", label: "Devices", icon: Cpu },
+  { href: "/scenes", label: "Scenes", icon: Sparkles },
   { href: "/automations", label: "Automations", icon: Zap },
   { href: "/integrations", label: "Integrations", icon: Plug },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: true },

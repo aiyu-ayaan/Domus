@@ -1,7 +1,12 @@
 // Zustand Scene Store implementation
 import { create } from "zustand";
 import { sceneRepository } from "@/repositories";
-import type { SceneOut, SceneCreate, SceneUpdate } from "@/types/api";
+import type {
+  SceneOut,
+  SceneCreate,
+  SceneUpdate,
+  SceneActivateResult,
+} from "@/types/api";
 
 interface SceneState {
   scenes: SceneOut[];
@@ -12,7 +17,7 @@ interface SceneState {
   createScene: (req: SceneCreate) => Promise<SceneOut>;
   updateScene: (id: string, req: SceneUpdate) => Promise<SceneOut>;
   deleteScene: (id: string) => Promise<void>;
-  activateScene: (id: string) => Promise<void>;
+  activateScene: (id: string) => Promise<SceneActivateResult>;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
@@ -87,10 +92,6 @@ export const useSceneStore = create<SceneState>((set) => ({
   },
 
   activateScene: async (id) => {
-    try {
-      await sceneRepository.activate(id);
-    } catch (err: any) {
-      throw err;
-    }
+    return sceneRepository.activate(id);
   },
 }));
