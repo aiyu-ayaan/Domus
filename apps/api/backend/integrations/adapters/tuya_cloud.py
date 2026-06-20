@@ -97,6 +97,9 @@ class RealTuyaAdapter(DeviceAdapter):
     # --- sync cloud helpers (run inside asyncio.to_thread) ---------------------
 
     def _ensure_api(self) -> Any:
+        # ponytail: tuyapy keeps auth in a module-level global, so one SmartLife
+        # account per process is the safe assumption. Ceiling: two real Tuya-family
+        # integrations on different accounts would clobber each other's session.
         if self._api is None:
             api = TuyaApi()
             api.init(self._username, self._password, self._country_code, self._platform)
@@ -104,7 +107,9 @@ class RealTuyaAdapter(DeviceAdapter):
         return self._api
 
     def _all_devices(self) -> list[Any]:
-        # get_all_devices() re-polls the cloud, so state stays fresh each call.
+        # _ensure_api() logs in once per adapter instance, and login populates the
+        # device list with fresh state. Adapters are built per request, so each call
+        # path re-logs in and sees current state — no separate poll needed.
         try:
             return self._ensure_api().get_all_devices()
         except Exception as exc:  # tuyapy raises bare Exceptions on auth/network fail
@@ -184,19 +189,18 @@ class RealTuyaAdapter(DeviceAdapter):
 
         if "color" in attributes and hasattr(dev, "set_color"):
             try:
-                h, s, v = _hex_to_hsv(attributes["color"])
-                dev.set_color([h, s, v])
+                dev.set_color(list(_hex_to_hsv(attributes["color"])))
             except Exception:  # noqa: BLE001 - best-effort, device may not be RGB
                 pass
 
         return self._snapshot(dev)
 
 
-def _hex_to_hsv(color_hex: str) -> tuple[int, int, int]:
-    """'#ff8800' -> (hue 0-360, saturation 0-255, value 0-255) for tuyapy.set_color."""
+def _hex_to_hsv(color_hex: str) -> tuple[int, int, float]:
+    """'#ff8800' -> (hue 0-360, saturation 0-100, brightness 0-1) for tuyapy.set_color."""
     import colorsys
 
     color_hex = color_hex.lstrip("#")
     r, g, b = (int(color_hex[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
     h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    return int(h * 360), int(s * 255), int(v * 255)
+    return int(h * 360), int(s * 100), round(v, 3)

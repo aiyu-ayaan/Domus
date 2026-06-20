@@ -26,7 +26,8 @@ dependencies = [
   "slowapi>=0.1.9",
   "greenlet>=3.1.1",
   "python-kasa>=0.7.0",
-  "tuyapy>=0.1.4"
+  "tuyapy>=0.1.4",
+  "requests>=2.32.0"
 ]
 
 [project.optional-dependencies]
