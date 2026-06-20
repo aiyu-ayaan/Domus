@@ -1,0 +1,231 @@
+// Live ambient light modes: mirror the screen's dominant color and/or pulse
+// brightness to system audio. Both ride a single getDisplayMedia stream.
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { Monitor, Music, Loader2 } from "lucide-react";
+import { useDeviceStore } from "@/stores/device-store";
+import { toast } from "sonner";
+
+// ponytail: push at ~5fps with a change threshold so we don't flood the API/websocket.
+// Bump PUSH_MS / loosen the thresholds if the light feels laggy or jumpy.
+const PUSH_MS = 200;
+const COLOR_DELTA = 18; // min RGB distance before re-sending a color
+const BRIGHT_DELTA = 6; // min brightness % change before re-sending
+
+function avgColor(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const { data } = ctx.getImageData(0, 0, w, h);
+  let r = 0,
+    g = 0,
+    b = 0;
+  const px = data.length / 4;
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+  }
+  return [Math.round(r / px), Math.round(g / px), Math.round(b / px)] as const;
+}
+
+const toHex = (r: number, g: number, b: number) =>
+  "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+
+export function AmbientSync({ deviceId }: { deviceId: string }) {
+  const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
+
+  const [screen, setScreen] = useState(false);
+  const [music, setMusic] = useState(false);
+  const [starting, setStarting] = useState(false);
+
+  // Live refs read inside the rAF loop without re-subscribing it.
+  const screenRef = useRef(false);
+  const musicRef = useRef(false);
+  screenRef.current = screen;
+  musicRef.current = music;
+
+  const stream = useRef<MediaStream | null>(null);
+  const audioCtx = useRef<AudioContext | null>(null);
+  const analyser = useRef<AnalyserNode | null>(null);
+  const raf = useRef<number | null>(null);
+  const lastPush = useRef(0);
+  const lastRGB = useRef<readonly [number, number, number]>([0, 0, 0]);
+  const lastBright = useRef(-1);
+
+  const stop = () => {
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = null;
+    stream.current?.getTracks().forEach((t) => t.stop());
+    stream.current = null;
+    audioCtx.current?.close().catch(() => {});
+    audioCtx.current = null;
+    analyser.current = null;
+    setScreen(false);
+    setMusic(false);
+  };
+
+  // Stop everything when the device page unmounts.
+  useEffect(() => () => stop(), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ensureStream = async (wantAudio: boolean) => {
+    if (stream.current) return true;
+    setStarting(true);
+    try {
+      const s = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: wantAudio,
+      });
+      stream.current = s;
+      // User clicked the browser's "Stop sharing" bar.
+      s.getVideoTracks()[0]?.addEventListener("ended", () => stop());
+
+      const video = document.createElement("video");
+      video.srcObject = s;
+      video.muted = true;
+      await video.play();
+
+      const w = 24,
+        h = 24;
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+
+      if (wantAudio && s.getAudioTracks().length) {
+        const ac = new AudioContext();
+        const an = ac.createAnalyser();
+        an.fftSize = 256;
+        ac.createMediaStreamSource(s).connect(an);
+        audioCtx.current = ac;
+        analyser.current = an;
+      }
+
+      const bins = new Uint8Array(128);
+      const loop = () => {
+        raf.current = requestAnimationFrame(loop);
+        const now = performance.now();
+        if (now - lastPush.current < PUSH_MS) return;
+
+        const attrs: Record<string, number | string> = {};
+
+        if (screenRef.current && video.readyState >= 2) {
+          ctx.drawImage(video, 0, 0, w, h);
+          const rgb = avgColor(ctx, w, h);
+          const [pr, pg, pb] = lastRGB.current;
+          const dist =
+            Math.abs(rgb[0] - pr) + Math.abs(rgb[1] - pg) + Math.abs(rgb[2] - pb);
+          if (dist > COLOR_DELTA) {
+            attrs.color = toHex(rgb[0], rgb[1], rgb[2]);
+            lastRGB.current = rgb;
+          }
+        }
+
+        if (musicRef.current && analyser.current) {
+          analyser.current.getByteFrequencyData(bins);
+          let sum = 0;
+          for (let i = 0; i < bins.length; i++) sum += bins[i];
+          const level = sum / bins.length / 255; // 0..1
+          const brightness = Math.max(10, Math.round(level * 100));
+          if (Math.abs(brightness - lastBright.current) > BRIGHT_DELTA) {
+            attrs.brightness = brightness;
+            lastBright.current = brightness;
+          }
+        }
+
+        if (Object.keys(attrs).length) {
+          lastPush.current = now;
+          setDeviceAttributes(deviceId, attrs).catch(() => {});
+        }
+      };
+      loop();
+      return true;
+    } catch {
+      toast.error("Screen share permission denied or unavailable.");
+      stop();
+      return false;
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const toggleScreen = async () => {
+    if (screen) {
+      setScreen(false);
+      if (!musicRef.current) stop();
+      return;
+    }
+    if (await ensureStream(musicRef.current)) setScreen(true);
+  };
+
+  const toggleMusic = async () => {
+    if (music) {
+      setMusic(false);
+      if (!screenRef.current) stop();
+      return;
+    }
+    // Music needs the audio track; if a video-only stream is already live, restart it.
+    if (stream.current && !analyser.current) stop();
+    if (await ensureStream(true)) {
+      if (!analyser.current) {
+        toast.error('Enable "Share system/tab audio" in the share dialog for music sync.');
+        return;
+      }
+      setMusic(true);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold">Ambient Sync</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Mirror your screen color or pulse to system audio (live).
+          </p>
+        </div>
+        {starting && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={toggleScreen}
+          className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition cursor-pointer ${
+            screen
+              ? "border-primary bg-primary/10 ring-1 ring-primary/40"
+              : "border-border/60 hover:border-border"
+          }`}
+        >
+          <Monitor
+            className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
+          />
+          <div>
+            <p className="text-xs font-semibold">Screen Color</p>
+            <p className="text-[10px] text-muted-foreground">
+              {screen ? "Live — following screen" : "Match dominant hue"}
+            </p>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={toggleMusic}
+          className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition cursor-pointer ${
+            music
+              ? "border-primary bg-primary/10 ring-1 ring-primary/40"
+              : "border-border/60 hover:border-border"
+          }`}
+        >
+          <Music
+            className={`h-5 w-5 flex-shrink-0 ${music ? "text-primary" : "text-muted-foreground"}`}
+          />
+          <div>
+            <p className="text-xs font-semibold">Music Sync</p>
+            <p className="text-[10px] text-muted-foreground">
+              {music ? "Live — pulsing to audio" : "Brightness to beat"}
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}

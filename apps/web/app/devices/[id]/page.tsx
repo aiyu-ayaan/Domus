@@ -32,6 +32,7 @@ import {
   Check,
 } from "lucide-react";
 import type { DeviceOut, DeviceStateOut } from "@/types/api";
+import { AmbientSync } from "@/components/devices/ambient-sync";
 
 const deviceSettingsSchema = z.object({
   name: z.string().min(2, "Device name must be at least 2 characters"),
@@ -379,13 +380,25 @@ export default function DeviceDetailPage() {
                         <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
                           {[
                             { name: "Warm White", hex: "#fff4e6" },
+                            { name: "Soft White", hex: "#faf0d7" },
                             { name: "Cool Daylight", hex: "#e6f7ff" },
+                            { name: "Candle Amber", hex: "#ffb347" },
                             { name: "Sunset Orange", hex: "#ff7f50" },
+                            { name: "Coral Red", hex: "#ff4040" },
+                            { name: "Crimson", hex: "#dc143c" },
                             { name: "Rose Pink", hex: "#ff69b4" },
+                            { name: "Magenta", hex: "#ff00ff" },
                             { name: "Mystic Violet", hex: "#8a2be2" },
+                            { name: "Indigo", hex: "#4b0082" },
+                            { name: "Royal Blue", hex: "#4169e1" },
                             { name: "Ocean Blue", hex: "#1e90ff" },
+                            { name: "Cyan", hex: "#00e5ff" },
+                            { name: "Teal", hex: "#008080" },
+                            { name: "Mint", hex: "#3eb489" },
                             { name: "Forest Green", hex: "#3cb371" },
+                            { name: "Lime", hex: "#7fff00" },
                             { name: "Lemon Yellow", hex: "#ffd700" },
+                            { name: "Gold", hex: "#ffaa00" },
                           ].map((preset) => {
                             const isActive =
                               state?.attributes?.color?.toLowerCase() ===
@@ -448,6 +461,9 @@ export default function DeviceDetailPage() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Live ambient modes (screen color + music sync) */}
+                      <AmbientSync deviceId={device.id} />
                     </div>
                   )}
                 </div>
