@@ -217,7 +217,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
         <div className="flex items-center gap-2">
           {preview && (
             <span
-              className="h-4 w-4 rounded-full border border-border/60 shadow-sm transition-colors"
+              className="h-4 w-4 rounded-full border border-border/60 shadow-sm"
               style={{ backgroundColor: preview }}
               title="Live color"
             />

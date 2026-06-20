@@ -204,6 +204,9 @@ class RealTapoAdapter(DeviceAdapter):
     async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
         dev = await self._connect(external_id)
         
+        # Extract transition (ms), default to 0 to prevent overlapping firmware fades from causing stutter/breaking.
+        transition = attributes.get("transition", 0)
+
         # Set brightness (0-100)
         target_brightness = None
         if "brightness" in attributes:
@@ -215,9 +218,12 @@ class RealTapoAdapter(DeviceAdapter):
 
         if target_brightness is not None and hasattr(dev, "set_brightness"):
             try:
-                await dev.set_brightness(target_brightness)
+                await dev.set_brightness(target_brightness, transition=transition)
             except Exception:
-                pass
+                try:
+                    await dev.set_brightness(target_brightness)
+                except Exception:
+                    pass
                 
         # Set color temperature (Kelvin)
         if "color_temp" in attributes and hasattr(dev, "set_color_temp"):
@@ -251,7 +257,10 @@ class RealTapoAdapter(DeviceAdapter):
                     v_pct = int(v * 100) if v > 0 else 100
                 v_pct = max(1, min(100, v_pct))
                 
-                await dev.set_hsv(h_deg, s_pct, v_pct)
+                try:
+                    await dev.set_hsv(h_deg, s_pct, v_pct, transition=transition)
+                except Exception:
+                    await dev.set_hsv(h_deg, s_pct, v_pct)
             except Exception:
                 pass
                 
