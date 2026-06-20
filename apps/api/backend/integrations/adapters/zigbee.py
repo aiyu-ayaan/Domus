@@ -12,7 +12,12 @@ class ZigbeeAdapter(MockDeviceAdapter):
             manufacturer="IKEA",
             model="TRADFRI LED1545G12",
             serial_number="ZB0001",
-            attributes={"dimmable": True},
+            attributes={
+                "color": "#ffffff",
+                "color_temp": 4000,
+                "dimmable": True,
+                "brightness": 100,
+            },
         ),
         DiscoveredDevice(
             external_id="zigbee-contact-01",

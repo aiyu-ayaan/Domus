@@ -127,17 +127,21 @@ class RealTapoAdapter(DeviceAdapter):
         if hasattr(dev, "brightness") or _device_type(dev) == DeviceType.light:
             if hasattr(dev, "brightness"):
                 attributes["brightness"] = dev.brightness
-            if hasattr(dev, "color_temp"):
+            if hasattr(dev, "color_temp") and dev.color_temp and dev.color_temp > 0:
                 attributes["color_temp"] = dev.color_temp
-            if hasattr(dev, "hsv"):
-                hsv = dev.hsv
-                attributes["hsv"] = list(hsv) if hsv else None
-                if hsv:
-                    # Convert HSV (Hue: 0-360, Sat: 0-100, Val: 0-100) to Hex color for UI
-                    h, s, v = hsv
-                    import colorsys
-                    r, g, b = colorsys.hsv_to_rgb(h / 360.0, s / 100.0, 1.0)
-                    attributes["color"] = f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+                attributes["color"] = None
+                attributes["hsv"] = None
+            else:
+                attributes["color_temp"] = 0
+                if hasattr(dev, "hsv"):
+                    hsv = dev.hsv
+                    attributes["hsv"] = list(hsv) if hsv else None
+                    if hsv:
+                        # Convert HSV (Hue: 0-360, Sat: 0-100, Val: 0-100) to Hex color for UI
+                        h, s, v = hsv
+                        import colorsys
+                        r, g, b = colorsys.hsv_to_rgb(h / 360.0, s / 100.0, 1.0)
+                        attributes["color"] = f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
 
         return StateSnapshot(
             state="on" if dev.is_on else "off",
@@ -204,7 +208,8 @@ class RealTapoAdapter(DeviceAdapter):
     async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
         dev = await self._connect(external_id)
         
-        # Extract transition (ms), default to 0 to prevent overlapping firmware fades from causing stutter/breaking.
+        # Extract transition (ms), default to 0 to prevent overlapping firmware
+        # fades from causing stutter/breaking.
         transition = attributes.get("transition", 0)
 
         # Set brightness (0-100)
@@ -234,7 +239,7 @@ class RealTapoAdapter(DeviceAdapter):
                 pass
                 
         # Set color (hex string like "#ff0000")
-        if "color" in attributes and hasattr(dev, "set_hsv"):
+        if "color" in attributes and attributes["color"] is not None and hasattr(dev, "set_hsv"):
             try:
                 color_hex = attributes["color"].lstrip("#")
                 r = int(color_hex[0:2], 16) / 255.0

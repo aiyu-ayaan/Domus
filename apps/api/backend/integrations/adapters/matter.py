@@ -21,6 +21,11 @@ class MatterAdapter(MockDeviceAdapter):
             manufacturer="Matter",
             model="M-Light 200",
             serial_number="MATTER0002",
-            attributes={"dimmable": True},
+            attributes={
+                "color": "#ffffff",
+                "color_temp": 4000,
+                "dimmable": True,
+                "brightness": 100,
+            },
         ),
     ]

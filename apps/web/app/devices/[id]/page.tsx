@@ -48,8 +48,13 @@ export default function DeviceDetailPage() {
   const router = useRouter();
 
   const { rooms } = useRoomStore();
-  const { deviceStates, updateDeviceStateInStore, toggleDevice, deleteDevice, setDeviceAttributes } =
-    useDeviceStore();
+  const {
+    deviceStates,
+    updateDeviceStateInStore,
+    toggleDevice,
+    deleteDevice,
+    setDeviceAttributes,
+  } = useDeviceStore();
 
   const [device, setDevice] = useState<DeviceOut | null>(null);
   const [history, setHistory] = useState<DeviceStateOut[]>([]);
@@ -68,8 +73,8 @@ export default function DeviceDetailPage() {
       const rgb2 = hexToRgb(color2);
       return Math.sqrt(
         Math.pow(rgb1[0] - rgb2[0], 2) +
-        Math.pow(rgb1[1] - rgb2[1], 2) +
-        Math.pow(rgb1[2] - rgb2[2], 2)
+          Math.pow(rgb1[1] - rgb2[1], 2) +
+          Math.pow(rgb1[2] - rgb2[2], 2),
       );
     } catch {
       return Infinity;
@@ -84,9 +89,25 @@ export default function DeviceDetailPage() {
     if (!device?.id || !state?.attributes) return;
     if (tabInitializedFor.current === device.id) return;
     tabInitializedFor.current = device.id;
-    if (state.attributes.color_temp && state.attributes.color_temp > 0) {
+
+    const hasColorTemp =
+      state.attributes.color_temp !== undefined &&
+      state.attributes.color_temp !== null;
+    const hasColor =
+      state.attributes.color !== undefined &&
+      state.attributes.color !== null &&
+      typeof state.attributes.color === "string";
+    const currentColorTemp = hasColorTemp
+      ? Number(state.attributes.color_temp)
+      : 0;
+
+    if (currentColorTemp > 0) {
       setColorModeTab("temp");
-    } else if (state.attributes.color) {
+    } else if (hasColor && state.attributes.color !== "") {
+      setColorModeTab("color");
+    } else if (hasColorTemp) {
+      setColorModeTab("temp");
+    } else {
       setColorModeTab("color");
     }
   }, [device?.id, state?.attributes]);
@@ -132,7 +153,7 @@ export default function DeviceDetailPage() {
     if (state && device) {
       setHistory((prev) => {
         const exists = prev.some(
-          (h) => h.id === state.id || h.created_at === state.created_at
+          (h) => h.id === state.id || h.created_at === state.created_at,
         );
         if (exists) {
           return prev;
@@ -331,16 +352,11 @@ export default function DeviceDetailPage() {
                         onChange={async (e) => {
                           const targetVal = parseFloat(e.target.value);
                           try {
-                            await deviceRepository.update(
-                              device.id,
-                              {
-                                online: true,
-                              },
-                            );
+                            await deviceRepository.update(device.id, {
+                              online: true,
+                            });
                             // Update attributes
-                            await deviceRepository.getState(
-                              device.id,
-                            );
+                            await deviceRepository.getState(device.id);
                             const updatedState = await deviceRepository.turnOn(
                               device.id,
                             ); // turn-on updates
@@ -359,11 +375,14 @@ export default function DeviceDetailPage() {
                       {/* Brightness Control */}
                       <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-3">
                         <div className="flex justify-between items-center text-sm">
-                          <span className="font-semibold">Brightness Level</span>
+                          <span className="font-semibold">
+                            Brightness Level
+                          </span>
                           <span className="font-mono text-primary font-bold">
                             {localBrightness !== null
                               ? localBrightness
-                              : state?.attributes?.brightness || "100"}%
+                              : state?.attributes?.brightness || "100"}
+                            %
                           </span>
                         </div>
                         <input
@@ -380,9 +399,13 @@ export default function DeviceDetailPage() {
                             setLocalBrightness(parseInt(e.target.value));
                           }}
                           onMouseUp={async (e) => {
-                            const val = parseInt((e.target as HTMLInputElement).value);
+                            const val = parseInt(
+                              (e.target as HTMLInputElement).value,
+                            );
                             try {
-                              await setDeviceAttributes(device.id, { brightness: val });
+                              await setDeviceAttributes(device.id, {
+                                brightness: val,
+                              });
                               setLocalBrightness(null);
                               toast.success(`Brightness set to ${val}%`);
                             } catch {
@@ -390,9 +413,13 @@ export default function DeviceDetailPage() {
                             }
                           }}
                           onTouchEnd={async (e) => {
-                            const val = parseInt((e.target as HTMLInputElement).value);
+                            const val = parseInt(
+                              (e.target as HTMLInputElement).value,
+                            );
                             try {
-                              await setDeviceAttributes(device.id, { brightness: val });
+                              await setDeviceAttributes(device.id, {
+                                brightness: val,
+                              });
                               setLocalBrightness(null);
                               toast.success(`Brightness set to ${val}%`);
                             } catch {
@@ -407,7 +434,9 @@ export default function DeviceDetailPage() {
                       <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div>
-                            <p className="text-sm font-semibold">Color Selection</p>
+                            <p className="text-sm font-semibold">
+                              Color Selection
+                            </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               {colorModeTab === "color"
                                 ? "Select preset colors or pick a custom hue."
@@ -448,12 +477,17 @@ export default function DeviceDetailPage() {
                             <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
                               {(() => {
                                 const stateColor = state?.attributes?.color;
-                                const isColorMode = !state?.attributes?.color_temp || state?.attributes?.color_temp === 0;
+                                const isColorMode =
+                                  !state?.attributes?.color_temp ||
+                                  state?.attributes?.color_temp === 0;
                                 let closestPresetHex = "";
                                 if (isColorMode && stateColor) {
                                   let minDistance = Infinity;
                                   for (const p of LIGHT_COLOR_PRESETS) {
-                                    const dist = getColorDistance(stateColor, p.hex);
+                                    const dist = getColorDistance(
+                                      stateColor,
+                                      p.hex,
+                                    );
                                     if (dist < minDistance) {
                                       minDistance = dist;
                                       closestPresetHex = p.hex;
@@ -466,7 +500,8 @@ export default function DeviceDetailPage() {
 
                                 return LIGHT_COLOR_PRESETS.map((preset) => {
                                   const isActive =
-                                    closestPresetHex.toLowerCase() === preset.hex.toLowerCase();
+                                    closestPresetHex.toLowerCase() ===
+                                    preset.hex.toLowerCase();
                                   return (
                                     <button
                                       key={preset.hex}
@@ -477,7 +512,9 @@ export default function DeviceDetailPage() {
                                             color: preset.hex,
                                             color_temp: 0,
                                           });
-                                          toast.success(`${preset.name} applied`);
+                                          toast.success(
+                                            `${preset.name} applied`,
+                                          );
                                         } catch {
                                           toast.error("Failed to set color");
                                         }
@@ -521,7 +558,9 @@ export default function DeviceDetailPage() {
                                 />
                               </div>
                               <div>
-                                <p className="text-xs font-semibold">Custom Palette</p>
+                                <p className="text-xs font-semibold">
+                                  Custom Palette
+                                </p>
                                 <p className="text-[10px] text-muted-foreground font-mono">
                                   {state?.attributes?.color || "Not Set"}
                                 </p>
@@ -533,11 +572,24 @@ export default function DeviceDetailPage() {
                             {/* Temperature Presets (Circles above progress bar/slider) */}
                             <div className="flex items-center gap-3">
                               {[
-                                { name: "Warm", kelvin: 2700, bg: "bg-[#ffb347]" },
-                                { name: "Neutral", kelvin: 4000, bg: "bg-[#fffaed]" },
-                                { name: "Cool", kelvin: 6500, bg: "bg-[#a8d3ff]" },
+                                {
+                                  name: "Warm",
+                                  kelvin: 2700,
+                                  bg: "bg-[#ffb347]",
+                                },
+                                {
+                                  name: "Neutral",
+                                  kelvin: 4000,
+                                  bg: "bg-[#fffaed]",
+                                },
+                                {
+                                  name: "Cool",
+                                  kelvin: 6500,
+                                  bg: "bg-[#a8d3ff]",
+                                },
                               ].map((preset) => {
-                                const currentTemp = state?.attributes?.color_temp || 4000;
+                                const currentTemp =
+                                  state?.attributes?.color_temp || 4000;
                                 const isActive = currentTemp === preset.kelvin;
                                 return (
                                   <button
@@ -549,9 +601,13 @@ export default function DeviceDetailPage() {
                                           color_temp: preset.kelvin,
                                           color: null,
                                         });
-                                        toast.success(`${preset.name} White applied (${preset.kelvin}K)`);
+                                        toast.success(
+                                          `${preset.name} White applied (${preset.kelvin}K)`,
+                                        );
                                       } catch {
-                                        toast.error("Failed to set temperature");
+                                        toast.error(
+                                          "Failed to set temperature",
+                                        );
                                       }
                                     }}
                                     title={`${preset.name} (${preset.kelvin}K)`}
@@ -576,18 +632,23 @@ export default function DeviceDetailPage() {
                             {(() => {
                               const minTemp = 2700;
                               const maxTemp = 6500;
-                              const currentColorTemp = state?.attributes?.color_temp || 4000;
+                              const currentColorTemp =
+                                state?.attributes?.color_temp || 4000;
                               const tempPercent = Math.min(
                                 100,
                                 Math.max(
                                   0,
                                   Math.round(
-                                    ((currentColorTemp - minTemp) / (maxTemp - minTemp)) * 100
-                                  )
-                                )
+                                    ((currentColorTemp - minTemp) /
+                                      (maxTemp - minTemp)) *
+                                      100,
+                                  ),
+                                ),
                               );
                               const displayPercent =
-                                localTempPercent !== null ? localTempPercent : tempPercent;
+                                localTempPercent !== null
+                                  ? localTempPercent
+                                  : tempPercent;
 
                               return (
                                 <div className="relative w-full h-32 rounded-2xl overflow-hidden shadow-inner border border-border/30 bg-[linear-gradient(to_right,#ffb347_0%,#ffdfa9_30%,#ffffff_50%,#d8ebff_75%,#a8d3ff_100%)]">
@@ -611,37 +672,53 @@ export default function DeviceDetailPage() {
                                     max="100"
                                     value={displayPercent}
                                     onChange={(e) => {
-                                      setLocalTempPercent(parseInt(e.target.value));
+                                      setLocalTempPercent(
+                                        parseInt(e.target.value),
+                                      );
                                     }}
                                     onMouseUp={async (e) => {
-                                      const val = parseInt((e.target as HTMLInputElement).value);
+                                      const val = parseInt(
+                                        (e.target as HTMLInputElement).value,
+                                      );
                                       try {
                                         const kelvin = Math.round(
-                                          minTemp + (val / 100) * (maxTemp - minTemp)
+                                          minTemp +
+                                            (val / 100) * (maxTemp - minTemp),
                                         );
                                         await setDeviceAttributes(device.id, {
                                           color_temp: kelvin,
                                           color: null,
                                         });
                                         setLocalTempPercent(null);
-                                        toast.success(`White temperature set to ${kelvin}K`);
+                                        toast.success(
+                                          `White temperature set to ${kelvin}K`,
+                                        );
                                       } catch {
-                                        toast.error("Failed to set temperature");
+                                        toast.error(
+                                          "Failed to set temperature",
+                                        );
                                       }
                                     }}
                                     onTouchEnd={async (e) => {
-                                      const val = parseInt((e.target as HTMLInputElement).value);
+                                      const val = parseInt(
+                                        (e.target as HTMLInputElement).value,
+                                      );
                                       try {
                                         const kelvin = Math.round(
-                                          minTemp + (val / 100) * (maxTemp - minTemp)
+                                          minTemp +
+                                            (val / 100) * (maxTemp - minTemp),
                                         );
                                         await setDeviceAttributes(device.id, {
                                           color_temp: kelvin,
                                         });
                                         setLocalTempPercent(null);
-                                        toast.success(`White temperature set to ${kelvin}K`);
+                                        toast.success(
+                                          `White temperature set to ${kelvin}K`,
+                                        );
                                       } catch {
-                                        toast.error("Failed to set temperature");
+                                        toast.error(
+                                          "Failed to set temperature",
+                                        );
                                       }
                                     }}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"

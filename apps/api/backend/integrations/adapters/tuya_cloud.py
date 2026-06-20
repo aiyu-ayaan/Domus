@@ -209,7 +209,16 @@ class RealTuyaAdapter(DeviceAdapter):
             except Exception:  # noqa: BLE001 - best-effort, device may not dim
                 pass
 
-        if "color" in attributes and hasattr(dev, "set_color"):
+        if "color_temp" in attributes and hasattr(dev, "set_color_temp"):
+            try:
+                kelvin = int(attributes["color_temp"])
+                pct = (kelvin - 2700) / (6500 - 2700)
+                pct = max(0.0, min(1.0, pct))
+                dev.set_color_temp(int(pct * 1000))
+            except Exception:
+                pass
+
+        if "color" in attributes and attributes["color"] is not None and hasattr(dev, "set_color"):
             try:
                 dev.set_color(list(_hex_to_hsv(attributes["color"])))
             except Exception:  # noqa: BLE001 - best-effort, device may not be RGB

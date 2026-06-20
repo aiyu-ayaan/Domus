@@ -21,6 +21,11 @@ class TapoAdapter(MockDeviceAdapter):
             manufacturer="TP-Link",
             model="Tapo L530",
             serial_number="TAPO0002",
-            attributes={"color": True, "dimmable": True},
+            attributes={
+                "color": "#ffffff",
+                "color_temp": 4000,
+                "dimmable": True,
+                "brightness": 100,
+            },
         ),
     ]

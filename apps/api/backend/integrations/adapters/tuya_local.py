@@ -111,12 +111,65 @@ class RealTuyaLocalAdapter(DeviceAdapter):
     @staticmethod
     def _snapshot(entry: dict[str, Any], dps: dict[str, Any]) -> StateSnapshot:
         attributes: dict[str, Any] = {}
-        if "2" in dps and entry.get("type") == "light":
-            try:
-                attributes["brightness"] = round(int(dps["2"]) / 10)
-            except (TypeError, ValueError):
-                pass
-        return StateSnapshot(state="on" if dps.get("1") else "off", attributes=attributes)
+        if entry.get("type") == "light":
+            # Extract brightness from DP 2 or 22
+            bright_val = dps.get("22") or dps.get("2")
+            mode_val = dps.get("21") or dps.get("2") if isinstance(dps.get("2"), str) else None
+            
+            if bright_val is not None and not isinstance(bright_val, str):
+                try:
+                    val = int(bright_val)
+                    attributes["brightness"] = round(val / 10) if val > 255 else round(val / 2.55)
+                except (TypeError, ValueError):
+                    pass
+
+            # Extract color temperature from DP 3 or 23
+            temp_val = dps.get("23") or dps.get("3")
+            if temp_val is not None:
+                try:
+                    val = int(temp_val)
+                    max_val = 1000 if val > 255 else 255
+                    pct = val / max_val
+                    attributes["color_temp"] = round(2700 + pct * (6500 - 2700))
+                except (TypeError, ValueError):
+                    pass
+
+            # Extract color from DP 5 or 24
+            color_val = dps.get("24") or dps.get("5")
+            if color_val is not None and isinstance(color_val, str) and len(color_val) >= 6:
+                try:
+                    color_str = color_val.strip()
+                    if not color_str.startswith("#"):
+                        if color_str.startswith("{"):
+                            import json
+                            hsv = json.loads(color_str)
+                            from backend.integrations.adapters.tuya_openapi import _hsv_to_hex
+                            attributes["color"] = _hsv_to_hex(hsv["h"], hsv["s"], hsv["v"])
+                        else:
+                            if len(color_str) >= 12:
+                                h = int(color_str[0:4], 16)
+                                s = int(color_str[4:8], 16)
+                                v = int(color_str[8:12], 16)
+                                from backend.integrations.adapters.tuya_openapi import _hsv_to_hex
+                                attributes["color"] = _hsv_to_hex(h, s, v)
+                            else:
+                                attributes["color"] = f"#{color_str[:6]}"
+                    else:
+                        attributes["color"] = color_str
+                except Exception:
+                    pass
+
+            # Handle mutual exclusivity
+            if mode_val == "colour":
+                attributes["color_temp"] = 0
+            elif mode_val == "white":
+                attributes["color"] = None
+            elif attributes.get("color_temp") and attributes["color_temp"] > 0:
+                attributes["color"] = None
+
+        power_val = dps.get("20") or dps.get("1")
+        is_on = bool(power_val) if power_val is not None else False
+        return StateSnapshot(state="on" if is_on else "off", attributes=attributes)
 
     # --- DeviceAdapter contract ----------------------------------------------
 
@@ -176,7 +229,22 @@ class RealTuyaLocalAdapter(DeviceAdapter):
             except Exception:  # noqa: BLE001 - best-effort, device may not dim
                 pass
 
-        if "color" in attributes and entry.get("type") == "light":
+        if "color_temp" in attributes and entry.get("type") == "light":
+            try:
+                kelvin = int(attributes["color_temp"])
+                if kelvin > 0:
+                    pct = (kelvin - 2700) / (6500 - 2700)
+                    pct = max(0.0, min(1.0, pct))
+                    temp_val = int(pct * 1000)
+                    if hasattr(dev, "set_colourtemp"):
+                        dev.set_colourtemp(temp_val)
+                    elif hasattr(dev, "set_white"):
+                        dev.set_white(100, temp_val)
+            except Exception:
+                pass
+
+        is_light = entry.get("type") == "light"
+        if "color" in attributes and attributes["color"] is not None and is_light:
             try:
                 color_hex = attributes["color"].lstrip("#")
                 r, g, b = (int(color_hex[i : i + 2], 16) for i in (0, 2, 4))

@@ -17,7 +17,7 @@ def _light(prefix: str, name: str, manufacturer: str, model: str) -> DiscoveredD
         manufacturer=manufacturer,
         model=model,
         serial_number=f"{prefix.upper()}0001",
-        attributes={"brightness": 100, "color": "#ffffff"},
+        attributes={"brightness": 100, "color": "#ffffff", "color_temp": 4000},
     )
 
 

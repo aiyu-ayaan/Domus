@@ -122,17 +122,33 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
         return None
 
     def _send(self, device_id: str, code: str, value: Any) -> None:
+        cmd = {"commands": [{"code": code, "value": value}]}
         self._raise_if_error(
-            self._ensure_cloud().sendcommand(device_id, {"commands": [{"code": code, "value": value}]}),
+            self._ensure_cloud().sendcommand(device_id, cmd),
             f"command {code} for {device_id}",
         )
 
     def _snapshot(self, codes: dict[str, Any]) -> StateSnapshot:
         power_code = self._find_code(codes, "switch")
         attributes: dict[str, Any] = {}
+        
         bright_code = self._find_code(codes, "bright")
-        if bright_code is not None:
-            attributes["brightness"] = round(int(codes[bright_code]) / 10)
+        if bright_code is not None and codes[bright_code] is not None:
+            try:
+                attributes["brightness"] = round(int(codes[bright_code]) / 10)
+            except (ValueError, TypeError):
+                pass
+
+        temp_code = self._find_code(codes, "temp")
+        if temp_code is not None and codes[temp_code] is not None:
+            try:
+                raw_temp = int(codes[temp_code])
+                max_val = 1000 if ("v2" in temp_code.lower() or raw_temp > 255) else 255
+                pct = raw_temp / max_val
+                attributes["color_temp"] = round(2700 + pct * (6500 - 2700))
+            except (ValueError, TypeError):
+                pass
+
         colour_code = self._find_code(codes, "colour", "color")
         if colour_code is not None and codes[colour_code]:
             try:
@@ -140,6 +156,18 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
                 attributes["color"] = _hsv_to_hex(hsv["h"], hsv["s"], hsv["v"])
             except (ValueError, KeyError, TypeError):
                 pass
+
+        # Handle mutual exclusivity based on work mode if available
+        mode_code = self._find_code(codes, "mode")
+        current_mode = codes.get(mode_code) if mode_code else None
+        if current_mode == "colour":
+            attributes["color_temp"] = 0
+        elif current_mode == "white":
+            attributes["color"] = None
+        elif attributes.get("color_temp") and attributes["color_temp"] > 0:
+            # Fallback if no mode is explicitly returned but temp is active
+            attributes["color"] = None
+
         is_on = bool(codes.get(power_code)) if power_code else False
         return StateSnapshot(state="on" if is_on else "off", attributes=attributes)
 
@@ -201,12 +229,34 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
             except Exception:  # noqa: BLE001 - best-effort, device may not dim
                 pass
 
+        temp_code = self._find_code(codes, "temp")
+        if "color_temp" in attributes and temp_code is not None:
+            try:
+                kelvin = int(attributes["color_temp"])
+                if kelvin > 0:
+                    pct = (kelvin - 2700) / (6500 - 2700)
+                    pct = max(0.0, min(1.0, pct))
+                    self._send(external_id, temp_code, int(pct * 1000))
+            except Exception:
+                pass
+
         colour_code = self._find_code(codes, "colour", "color")
-        if "color" in attributes and colour_code is not None:
+        if "color" in attributes and attributes["color"] is not None and colour_code is not None:
             try:
                 h, s, v = _hex_to_hsv(attributes["color"])
                 self._send(external_id, colour_code, json.dumps({"h": h, "s": s, "v": v}))
             except Exception:  # noqa: BLE001 - best-effort, device may not be RGB
+                pass
+
+        # Switch work mode if supported
+        mode_code = self._find_code(codes, "mode")
+        if mode_code is not None:
+            try:
+                if "color_temp" in attributes and attributes["color_temp"]:
+                    self._send(external_id, mode_code, "white")
+                elif "color" in attributes and attributes["color"] is not None:
+                    self._send(external_id, mode_code, "colour")
+            except Exception:
                 pass
 
         return self._snapshot(self._status_codes(external_id))

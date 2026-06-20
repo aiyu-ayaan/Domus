@@ -144,7 +144,8 @@ class TasmotaMqttAdapter(DeviceAdapter):
             pct = max(1, min(100, int(attributes["brightness"])))
             result = await self._request(external_id, "Dimmer", str(pct))
 
-        if "color" in attributes and entry.get("type") == "light":
+        is_light = entry.get("type") == "light"
+        if "color" in attributes and attributes["color"] is not None and is_light:
             result = await self._request(
                 external_id, "Color", attributes["color"].lstrip("#")
             )

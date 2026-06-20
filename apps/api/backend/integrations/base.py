@@ -8,6 +8,7 @@ full control + discovery + state-history path is exercisable without hardware. R
 adapters (Tapo, Tuya, ...) would replace the network calls; the mocks ship working.
 """
 
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
@@ -68,7 +69,8 @@ _MOCK_STATE: dict[str, str] = {}
 _MOCK_ATTRIBUTES: dict[str, dict[str, Any]] = {}
 
 
-import sys
+
+
 
 class MockDeviceAdapter(DeviceAdapter):
     """Deterministic in-memory adapter driven by a subclass-supplied ``catalog``."""
@@ -116,6 +118,16 @@ class MockDeviceAdapter(DeviceAdapter):
         
         # Merge new attributes
         new_attrs = {**current_attrs, **attributes}
+        has_temp = (
+            "color_temp" in attributes
+            and attributes["color_temp"] is not None
+        )
+        if has_temp and int(attributes["color_temp"]) > 0:
+            new_attrs["color"] = None
+            new_attrs["hsv"] = None
+        elif "color" in attributes and attributes["color"] is not None:
+            new_attrs["color_temp"] = 0
+            
         _MOCK_ATTRIBUTES[key] = new_attrs
         
         return StateSnapshot(state=state, attributes=new_attrs)
