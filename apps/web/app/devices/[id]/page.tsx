@@ -59,6 +59,8 @@ export default function DeviceDetailPage() {
   const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("temp");
   const [localTempPercent, setLocalTempPercent] = useState<number | null>(null);
 
+  const state = device ? deviceStates[device.id] : undefined;
+
   // Helper to get Euclidean distance between two hex colors
   const getColorDistance = (color1: string, color2: string) => {
     try {
@@ -85,8 +87,6 @@ export default function DeviceDetailPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device?.id, state?.attributes?.color_temp, state?.attributes?.color]);
-
-  const state = device ? deviceStates[device.id] : undefined;
 
   const {
     register,
