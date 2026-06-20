@@ -65,6 +65,7 @@ class DeviceAdapter(ABC):
 # ponytail: process-level fake state for all mock adapters. Resets on restart — fine for
 # a mock; a real adapter reads state from the device. Upgrade path: per-integration store.
 _MOCK_STATE: dict[str, str] = {}
+_MOCK_ATTRIBUTES: dict[str, dict[str, Any]] = {}
 
 
 import sys
@@ -83,16 +84,23 @@ class MockDeviceAdapter(DeviceAdapter):
         return f"{self.kind.value}:{external_id}"
 
     async def get_state(self, external_id: str) -> StateSnapshot:
-        state = _MOCK_STATE.get(self._key(external_id), "off")
-        return StateSnapshot(state=state, attributes={"mock": True})
+        key = self._key(external_id)
+        state = _MOCK_STATE.get(key, "off")
+        # Find default attributes from catalog
+        dev = next((d for d in self.catalog if d.external_id == external_id), None)
+        default_attrs = dict(dev.attributes) if dev else {}
+        attrs = _MOCK_ATTRIBUTES.get(key, default_attrs)
+        return StateSnapshot(state=state, attributes=attrs)
 
     async def turn_on(self, external_id: str) -> StateSnapshot:
-        _MOCK_STATE[self._key(external_id)] = "on"
-        return StateSnapshot(state="on", attributes={"mock": True})
+        key = self._key(external_id)
+        _MOCK_STATE[key] = "on"
+        return await self.get_state(external_id)
 
     async def turn_off(self, external_id: str) -> StateSnapshot:
-        _MOCK_STATE[self._key(external_id)] = "off"
-        return StateSnapshot(state="off", attributes={"mock": True})
+        key = self._key(external_id)
+        _MOCK_STATE[key] = "off"
+        return await self.get_state(external_id)
 
     async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
         key = self._key(external_id)
@@ -100,4 +108,14 @@ class MockDeviceAdapter(DeviceAdapter):
         if "state" in attributes:
             _MOCK_STATE[key] = attributes["state"]
             state = attributes["state"]
-        return StateSnapshot(state=state, attributes=attributes)
+            
+        # Get current/default attributes
+        dev = next((d for d in self.catalog if d.external_id == external_id), None)
+        default_attrs = dict(dev.attributes) if dev else {}
+        current_attrs = _MOCK_ATTRIBUTES.get(key, default_attrs)
+        
+        # Merge new attributes
+        new_attrs = {**current_attrs, **attributes}
+        _MOCK_ATTRIBUTES[key] = new_attrs
+        
+        return StateSnapshot(state=state, attributes=new_attrs)

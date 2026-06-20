@@ -13,7 +13,7 @@ import { toast } from "sonner";
 // FADE is the ease factor toward the target each tick; lower = slower fade.
 const MIN_GAP = 110; // ms between pushes (~9/sec ceiling)
 const COLOR_DELTA = 5; // min RGB distance before re-sending a color
-const FADE = 0.3;
+const FADE = 0.2;
 
 // Music color themes (color only — no brightness). `spectrum` rotates the hue wheel.
 const THEMES: { id: string; label: string; stops: string[]; spectrum?: boolean }[] = [
@@ -62,6 +62,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
   const inFlight = useRef(false);
   const eased = useRef<[number, number, number]>([255, 255, 255]);
   const lastRGB = useRef<[number, number, number]>([0, 0, 0]);
+  const lastPushTime = useRef(0);
 
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
@@ -116,9 +117,8 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
       const bins = new Uint8Array(128);
       // setInterval (not rAF) so sync keeps running while this tab is in the
       // background — which is the whole point of mirroring another window.
+      // Run updates fast (~33fps / 30ms) for smooth preview transitions, but throttle API requests to MIN_GAP.
       const tick = () => {
-        if (inFlight.current) return;
-
         let target: [number, number, number] | null = null;
 
         if (screenRef.current && video.readyState >= 2) {
@@ -147,12 +147,19 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
           g = Math.round(e[1]),
           b = Math.round(e[2]);
 
+        const hex = rgbToHex(r, g, b);
+        setPreview(hex);
+
+        // Throttle backend pushes to MIN_GAP (110ms)
+        const now = performance.now();
+        if (now - lastPushTime.current < MIN_GAP) return;
+        if (inFlight.current) return;
+
         const [lr, lg, lb] = lastRGB.current;
         if (Math.abs(r - lr) + Math.abs(g - lg) + Math.abs(b - lb) <= COLOR_DELTA) return;
 
-        const hex = rgbToHex(r, g, b);
         lastRGB.current = [r, g, b];
-        setPreview(hex);
+        lastPushTime.current = now;
         inFlight.current = true;
         setDeviceAttributes(deviceId, { color: hex })
           .catch(() => {})
@@ -160,7 +167,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
             inFlight.current = false;
           });
       };
-      timer.current = window.setInterval(tick, MIN_GAP);
+      timer.current = window.setInterval(tick, 30);
       return true;
     } catch {
       toast.error("Screen share permission denied or unavailable.");
