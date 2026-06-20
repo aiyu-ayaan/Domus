@@ -1,7 +1,7 @@
 // Settings page implementation with profile, appearance, and security forms
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { authRepository } from "@/repositories";
 import { toast } from "sonner";
+import { getAvatarUrl } from "@/lib/avatar";
 import {
   User,
   Sun,
@@ -22,11 +23,17 @@ import {
   Check,
   Lock,
   KeyRound,
+  Upload,
+  X,
 } from "lucide-react";
 
 const profileSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
-  avatarUrl: z.string().url("Please enter a valid image URL").or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .url("Please enter a valid image URL")
+    .or(z.string().startsWith("/static/"))
+    .or(z.literal("")),
 });
 
 const passwordSchema = z
@@ -53,10 +60,18 @@ export default function SettingsPage() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
 
+  // Custom states for file upload preview
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(
+    getAvatarUrl(user?.avatar_url),
+  );
+
   // Profile Form
   const {
     register: registerProfile,
     handleSubmit: handleProfileSubmit,
+    setValue: setProfileValue,
+    watch: watchProfile,
     formState: { errors: profileErrors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -65,6 +80,27 @@ export default function SettingsPage() {
       avatarUrl: user?.avatar_url || "",
     },
   });
+
+  const watchedAvatarUrl = watchProfile("avatarUrl");
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl(getAvatarUrl(watchedAvatarUrl));
+    }
+  }, [watchedAvatarUrl, selectedFile]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleClearSelectedFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(getAvatarUrl(watchedAvatarUrl));
+  };
 
   // Password Form
   const {
@@ -84,10 +120,17 @@ export default function SettingsPage() {
   const onProfileSubmit = async (data: ProfileFormValues) => {
     setIsSavingProfile(true);
     try {
+      let finalAvatarUrl = data.avatarUrl;
+      if (selectedFile) {
+        const uploadRes = await authRepository.uploadAvatar(selectedFile);
+        finalAvatarUrl = uploadRes.avatar_url;
+        setProfileValue("avatarUrl", finalAvatarUrl);
+      }
       await updateProfile({
         full_name: data.fullName,
-        avatar_url: data.avatarUrl || null,
+        avatar_url: finalAvatarUrl || null,
       });
+      setSelectedFile(null);
       toast.success("Profile updated successfully!");
     } catch {
       toast.error("Failed to update profile settings.");
@@ -153,6 +196,59 @@ export default function SettingsPage() {
               onSubmit={handleProfileSubmit(onProfileSubmit)}
               className="space-y-4"
             >
+              <div className="flex items-center gap-4 py-2 border-b border-border/40 pb-4">
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary border border-border/80 text-foreground font-mono font-bold text-lg overflow-hidden flex-shrink-0">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Profile preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    user?.full_name?.charAt(0) || (
+                      <User className="h-6 w-6 text-muted-foreground" />
+                    )
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                    Profile Picture
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    <label
+                      htmlFor="avatar-upload"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background/50 hover:bg-muted/30 px-3 py-2 text-xs font-semibold cursor-pointer transition select-none"
+                    >
+                      <Upload className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>Upload from Device</span>
+                    </label>
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        onClick={handleClearSelectedFile}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-2 text-xs font-semibold text-rose-500 cursor-pointer transition"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        <span>Cancel Upload</span>
+                      </button>
+                    )}
+                  </div>
+                  {selectedFile && (
+                    <p className="text-[10px] text-primary font-semibold">
+                      Selected: {selectedFile.name} (saves when you submit
+                      below)
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Full Name

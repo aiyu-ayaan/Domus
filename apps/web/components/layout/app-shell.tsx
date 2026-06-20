@@ -29,6 +29,7 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getAvatarUrl } from "@/lib/avatar";
 
 // Navigation Items Configuration
 const navItems = [
@@ -407,10 +408,18 @@ export function AppShell({
         {collapsed ? (
           <div className="flex flex-col items-center gap-3">
             <div
-              className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0 cursor-pointer animate-fade-in"
+              className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0 cursor-pointer animate-fade-in overflow-hidden"
               title={`${user?.full_name} (${user?.role})`}
             >
-              {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+              {user?.avatar_url ? (
+                <img
+                  src={getAvatarUrl(user.avatar_url)}
+                  alt={user.full_name || "Avatar"}
+                  className="h-full w-full object-cover rounded"
+                />
+              ) : (
+                user?.full_name?.charAt(0) || <User className="h-4 w-4" />
+              )}
             </div>
             <button
               type="button"
@@ -424,8 +433,16 @@ export function AppShell({
         ) : (
           <div className="flex items-center justify-between rounded border border-border/60 bg-muted/10 p-3">
             <div className="flex items-center gap-3 truncate">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0">
-                {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0 overflow-hidden">
+                {user?.avatar_url ? (
+                  <img
+                    src={getAvatarUrl(user.avatar_url)}
+                    alt={user.full_name || "Avatar"}
+                    className="h-full w-full object-cover rounded"
+                  />
+                ) : (
+                  user?.full_name?.charAt(0) || <User className="h-4 w-4" />
+                )}
               </div>
               <div className="truncate">
                 <p className="text-xs font-semibold truncate leading-none text-foreground">
@@ -536,8 +553,16 @@ export function AppShell({
             className="flex items-center justify-between rounded border border-border/60 bg-muted/10 p-2.5 w-full"
           >
             <div className="flex items-center gap-3 truncate">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0">
-                {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0 overflow-hidden">
+                {user?.avatar_url ? (
+                  <img
+                    src={getAvatarUrl(user.avatar_url)}
+                    alt={user.full_name || "Avatar"}
+                    className="h-full w-full object-cover rounded"
+                  />
+                ) : (
+                  user?.full_name?.charAt(0) || <User className="h-4 w-4" />
+                )}
               </div>
               <div className="truncate">
                 <p className="text-xs font-semibold truncate leading-none text-foreground">
@@ -559,8 +584,16 @@ export function AppShell({
           </motion.div>
         ) : (
           <div className="relative group mt-0.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs cursor-pointer hover:bg-muted/40 transition">
-              {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs cursor-pointer hover:bg-muted/40 transition overflow-hidden">
+              {user?.avatar_url ? (
+                <img
+                  src={getAvatarUrl(user.avatar_url)}
+                  alt={user.full_name || "Avatar"}
+                  className="h-full w-full object-cover rounded-full"
+                />
+              ) : (
+                user?.full_name?.charAt(0) || <User className="h-4 w-4" />
+              )}
             </div>
             {/* Logout Tooltip/Button */}
             <button
