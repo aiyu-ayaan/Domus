@@ -169,6 +169,26 @@ _Make sure your Python virtual environment is activated before running backend c
 - `bun run lint` — Lint all workspaces
 - `bun run format` — Format code across all workspaces (Prettier & Black)
 
+
+---
+
+## Database Management (pgAdmin)
+
+If you are using the local services stack (`docker-compose.dev.local.yml`), pgAdmin is available at [http://localhost:5050](http://localhost:5050). 
+
+Log in using the credentials defined in your `.env` file (default: `admin@domus.com` / `admin`).
+
+To register the PostgreSQL server in pgAdmin:
+- **General Tab**:
+  - **Name**: `Domus Local` (or any custom name)
+- **Connection Tab**:
+  - **Host name/address**: `postgres` (use `postgres` because pgAdmin runs inside the Docker network; do not use `localhost` here)
+  - **Port**: `5432`
+  - **Maintenance database**: `domus`
+  - **Username**: `domus`
+  - **Password**: `domus`
+  - **Save password?**: Checked / Toggle On
+
 ---
 
 ## Documentation Index
