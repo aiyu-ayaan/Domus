@@ -34,7 +34,7 @@ import {
 import type { DeviceOut, DeviceStateOut } from "@/types/api";
 import { AmbientSync } from "@/components/devices/ambient-sync";
 import { LightPatterns } from "@/components/devices/light-patterns";
-import { LIGHT_COLOR_PRESETS } from "@/lib/color";
+import { LIGHT_COLOR_PRESETS, hexToRgb } from "@/lib/color";
 
 const deviceSettingsSchema = z.object({
   name: z.string().min(2, "Device name must be at least 2 characters"),
@@ -56,8 +56,35 @@ export default function DeviceDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [localBrightness, setLocalBrightness] = useState<number | null>(null);
-  const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("color");
+  const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("temp");
   const [localTempPercent, setLocalTempPercent] = useState<number | null>(null);
+
+  // Helper to get Euclidean distance between two hex colors
+  const getColorDistance = (color1: string, color2: string) => {
+    try {
+      const rgb1 = hexToRgb(color1);
+      const rgb2 = hexToRgb(color2);
+      return Math.sqrt(
+        Math.pow(rgb1[0] - rgb2[0], 2) +
+        Math.pow(rgb1[1] - rgb2[1], 2) +
+        Math.pow(rgb1[2] - rgb2[2], 2)
+      );
+    } catch {
+      return Infinity;
+    }
+  };
+
+  // Sync active mode tab dynamically when device state is loaded
+  useEffect(() => {
+    if (state?.attributes) {
+      if (state.attributes.color_temp && state.attributes.color_temp > 0) {
+        setColorModeTab("temp");
+      } else if (state.attributes.color) {
+        setColorModeTab("color");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [device?.id, state?.attributes?.color_temp, state?.attributes?.color]);
 
   const state = device ? deviceStates[device.id] : undefined;
 
@@ -416,41 +443,60 @@ export default function DeviceDetailPage() {
                           <>
                             {/* Presets Grid */}
                             <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
-                              {LIGHT_COLOR_PRESETS.map((preset) => {
-                                const isActive =
-                                  state?.attributes?.color?.toLowerCase() ===
-                                  preset.hex.toLowerCase();
-                                return (
-                                  <button
-                                    key={preset.hex}
-                                    type="button"
-                                    onClick={async () => {
-                                      try {
-                                        await setDeviceAttributes(device.id, {
-                                          color: preset.hex,
-                                        });
-                                        toast.success(`${preset.name} applied`);
-                                      } catch {
-                                        toast.error("Failed to set color");
-                                      }
-                                    }}
-                                    title={preset.name}
-                                    style={{ backgroundColor: preset.hex }}
-                                    className={`h-10 w-10 rounded-full border cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-sm relative group ${
-                                      isActive
-                                        ? "border-primary ring-2 ring-primary/45 scale-105"
-                                        : "border-border/60"
-                                    }`}
-                                  >
-                                    {isActive && (
-                                      <Check className="h-4 w-4 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
-                                    )}
-                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 text-[9px] bg-popover border border-border text-popover-foreground rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 font-medium">
-                                      {preset.name}
-                                    </span>
-                                  </button>
-                                );
-                              })}
+                              {(() => {
+                                const stateColor = state?.attributes?.color;
+                                const isColorMode = !state?.attributes?.color_temp || state?.attributes?.color_temp === 0;
+                                let closestPresetHex = "";
+                                if (isColorMode && stateColor) {
+                                  let minDistance = Infinity;
+                                  for (const p of LIGHT_COLOR_PRESETS) {
+                                    const dist = getColorDistance(stateColor, p.hex);
+                                    if (dist < minDistance) {
+                                      minDistance = dist;
+                                      closestPresetHex = p.hex;
+                                    }
+                                  }
+                                  if (minDistance > 25) {
+                                    closestPresetHex = "";
+                                  }
+                                }
+
+                                return LIGHT_COLOR_PRESETS.map((preset) => {
+                                  const isActive =
+                                    closestPresetHex.toLowerCase() === preset.hex.toLowerCase();
+                                  return (
+                                    <button
+                                      key={preset.hex}
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          await setDeviceAttributes(device.id, {
+                                            color: preset.hex,
+                                            color_temp: 0,
+                                          });
+                                          toast.success(`${preset.name} applied`);
+                                        } catch {
+                                          toast.error("Failed to set color");
+                                        }
+                                      }}
+                                      title={preset.name}
+                                      style={{ backgroundColor: preset.hex }}
+                                      className={`h-10 w-10 rounded-full border cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-sm relative group ${
+                                        isActive
+                                          ? "border-primary ring-2 ring-primary/45 scale-105"
+                                          : "border-border/60"
+                                      }`}
+                                    >
+                                      {isActive && (
+                                        <Check className="h-4 w-4 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
+                                      )}
+                                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 text-[9px] bg-popover border border-border text-popover-foreground rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 font-medium">
+                                        {preset.name}
+                                      </span>
+                                    </button>
+                                  );
+                                });
+                              })()}
                             </div>
 
                             {/* Custom Color Input */}
@@ -464,6 +510,7 @@ export default function DeviceDetailPage() {
                                     try {
                                       await setDeviceAttributes(device.id, {
                                         color: customColor,
+                                        color_temp: 0,
                                       });
                                     } catch {}
                                   }}
@@ -497,6 +544,7 @@ export default function DeviceDetailPage() {
                                       try {
                                         await setDeviceAttributes(device.id, {
                                           color_temp: preset.kelvin,
+                                          color: null,
                                         });
                                         toast.success(`${preset.name} White applied (${preset.kelvin}K)`);
                                       } catch {
@@ -570,6 +618,7 @@ export default function DeviceDetailPage() {
                                         );
                                         await setDeviceAttributes(device.id, {
                                           color_temp: kelvin,
+                                          color: null,
                                         });
                                         setLocalTempPercent(null);
                                         toast.success(`White temperature set to ${kelvin}K`);
