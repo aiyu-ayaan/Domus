@@ -8,7 +8,6 @@ import {
   Activity,
   ArrowUpRight,
   Bell,
-  ChevronRight,
   CircuitBoard,
   Cpu,
   DoorOpen,
@@ -46,6 +45,7 @@ import { useDeviceStore } from "@/stores/device-store";
 import { useHomeStore } from "@/stores/home-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useRoomStore } from "@/stores/room-store";
+import { useSceneStore } from "@/stores/scene-store";
 import type { DeviceOut, RoomOut } from "@/types/api";
 
 const triggerLabels: Record<string, string> = {
@@ -86,6 +86,7 @@ export function DashboardPage() {
     useNotificationStore();
   const { automations, fetchAutomations, triggerAutomation } =
     useAutomationStore();
+  const { scenes, fetchScenes, activateScene } = useSceneStore();
 
   useEffect(() => {
     setChartsReady(true);
@@ -98,12 +99,14 @@ export function DashboardPage() {
     fetchRooms(activeHomeId);
     fetchNotifications(activeHomeId);
     fetchAutomations(activeHomeId);
+    fetchScenes(activeHomeId);
   }, [
     activeHomeId,
     fetchAutomations,
     fetchDevices,
     fetchNotifications,
     fetchRooms,
+    fetchScenes,
   ]);
 
   const activeHome = homes.find((home) => home.id === activeHomeId);
@@ -192,6 +195,7 @@ export function DashboardPage() {
       fetchRooms(activeHomeId),
       fetchNotifications(activeHomeId),
       fetchAutomations(activeHomeId),
+      fetchScenes(activeHomeId),
     ]);
     toast.success("Command center refreshed");
   };
@@ -223,6 +227,20 @@ export function DashboardPage() {
       toast.success(`${device.name} toggled`);
     } catch {
       toast.error(`Could not toggle ${device.name}`);
+    }
+  };
+
+  const handleActivateScene = async (sceneId: string, sceneName: string) => {
+    try {
+      const res = await activateScene(sceneId);
+      toast.success(`Scene "${sceneName}" applied`, {
+        description: res
+          ? `${res.applied} device(s) updated${res.failed ? `, ${res.failed} failed` : ""}.`
+          : "Target states dispatched.",
+      });
+      if (activeHomeId) fetchDevices(activeHomeId);
+    } catch {
+      toast.error(`Failed to apply "${sceneName}"`);
     }
   };
 
@@ -407,6 +425,12 @@ export function DashboardPage() {
           label="Automations"
           value={activeAutomations.length}
           detail={`${automations.length} total rules`}
+        />
+        <MetricPanel
+          icon={Sparkles}
+          label="Scenes"
+          value={scenes.length}
+          detail="Multi-device preset configurations"
         />
       </motion.section>
 
@@ -606,6 +630,51 @@ export function DashboardPage() {
                   state={deviceStates[device.id]?.state || "unknown"}
                   onToggle={() => handleDeviceToggle(device)}
                 />
+              ))
+            )}
+          </div>
+        </DashboardCard>
+
+        <DashboardCard
+          title="Saved Scenes"
+          description="Activate pre-configured multi-device environments"
+          action={<MiniLink href="/scenes">All scenes</MiniLink>}
+        >
+          <div className="grid gap-3">
+            {scenes.length === 0 ? (
+              <EmptyPanel
+                icon={Sparkles}
+                label="No scenes configured"
+                href="/scenes/new"
+                action="Create scene"
+              />
+            ) : (
+              scenes.slice(0, 6).map((scene) => (
+                <div
+                  key={scene.id}
+                  className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-accent text-primary">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {scene.name}
+                      </p>
+                      <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+                        {scene.states.length} {scene.states.length === 1 ? "device" : "devices"} · {scene.description || "No description"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleActivateScene(scene.id, scene.name)}
+                    className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                  >
+                    Apply
+                  </button>
+                </div>
               ))
             )}
           </div>
