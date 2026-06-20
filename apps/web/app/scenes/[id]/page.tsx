@@ -26,6 +26,8 @@ import {
   SlidersHorizontal,
   RefreshCw,
 } from "lucide-react";
+import { AmbientSync } from "@/components/devices/ambient-sync";
+import { LightPatterns } from "@/components/devices/light-patterns";
 import { LIGHT_COLOR_PRESETS } from "@/lib/color";
 import type { DeviceOut } from "@/types/api";
 
@@ -58,19 +60,25 @@ export default function SceneBuilderPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [autoSave, setAutoSave] = useState(false);
-  const [autoStatus, setAutoStatus] = useState<"idle" | "saving" | "saved">(
-    "idle",
-  );
+  const [autoApply, setAutoApply] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<
+    "idle" | "saving" | "saved" | "applied"
+  >("idle");
   // Serialized last-persisted payload, so auto-save only fires on real changes.
   const lastSavedRef = useRef("");
 
-  // Remember the auto-save preference across sessions.
+  // Remember the auto-save / auto-apply preferences across sessions.
   useEffect(() => {
     setAutoSave(localStorage.getItem("domus_scene_autosave") === "true");
+    setAutoApply(localStorage.getItem("domus_scene_autoapply") === "true");
   }, []);
   const toggleAutoSave = (v: boolean) => {
     setAutoSave(v);
     localStorage.setItem("domus_scene_autosave", String(v));
+  };
+  const toggleAutoApply = (v: boolean) => {
+    setAutoApply(v);
+    localStorage.setItem("domus_scene_autoapply", String(v));
   };
 
   // Populate the device picker (and their live states for the wattage meter).
@@ -217,13 +225,15 @@ export default function SceneBuilderPage() {
     } catch {
       toast.error("Saved, but failed to apply");
     }
-    router.push("/scenes");
+    // Stay on the details screen; just switch a freshly-created scene to edit mode.
+    if (isNew) router.replace(`/scenes/${savedId}`);
   };
 
-  // Debounced auto-save (edit mode only) when the toggle is enabled.
+  // Debounced auto-save / auto-apply (edit mode only) when a toggle is enabled.
+  // Applying requires a saved scene, so auto-apply implies a save first.
   const snapshot = JSON.stringify({ name, description, targets });
   useEffect(() => {
-    if (isNew || !autoSave || loading) return;
+    if (isNew || (!autoSave && !autoApply) || loading) return;
     if (snapshot === lastSavedRef.current) return;
     if (name.trim().length < 2 || Object.keys(targets).length === 0) return;
     setAutoStatus("saving");
@@ -235,13 +245,33 @@ export default function SceneBuilderPage() {
           states: Object.values(targets),
         });
         lastSavedRef.current = snapshot;
-        setAutoStatus("saved");
+        if (autoApply) {
+          await activateScene(id);
+          if (activeHomeId) fetchDevices(activeHomeId);
+          setAutoStatus("applied");
+        } else {
+          setAutoStatus("saved");
+        }
       } catch {
         setAutoStatus("idle");
       }
     }, 900);
     return () => clearTimeout(handle);
-  }, [snapshot, autoSave, loading, isNew, id, name, description, targets, updateScene]);
+  }, [
+    snapshot,
+    autoSave,
+    autoApply,
+    loading,
+    isNew,
+    id,
+    name,
+    description,
+    targets,
+    updateScene,
+    activateScene,
+    activeHomeId,
+    fetchDevices,
+  ]);
 
   if (loading) {
     return (
@@ -283,20 +313,31 @@ export default function SceneBuilderPage() {
           </div>
         </div>
         <div className="flex items-center gap-2.5 flex-shrink-0">
-          {/* Auto-save toggle (edit mode) */}
+          {/* Auto-save / auto-apply toggles (edit mode) */}
           {!isNew && (
-            <label className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-3 py-2.5 text-xs font-semibold cursor-pointer select-none">
-              <Switch checked={autoSave} onCheckedChange={toggleAutoSave} />
-              <span className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-3 py-2 text-xs font-semibold select-none">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <Switch checked={autoSave} onCheckedChange={toggleAutoSave} />
                 Auto-save
-                {autoSave && autoStatus === "saving" && (
-                  <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
-                )}
-                {autoSave && autoStatus === "saved" && (
-                  <Check className="h-3 w-3 text-primary" />
-                )}
-              </span>
-            </label>
+              </label>
+              <span className="h-4 w-px bg-border" />
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <Switch checked={autoApply} onCheckedChange={toggleAutoApply} />
+                Auto-apply
+              </label>
+              {(autoSave || autoApply) && autoStatus !== "idle" && (
+                <span className="flex items-center gap-1 text-[11px] font-normal text-muted-foreground">
+                  {autoStatus === "saving" ? (
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Check className="h-3 w-3 text-primary" />
+                      {autoStatus === "applied" ? "Applied" : "Saved"}
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
           )}
           <button
             onClick={async () => {
@@ -557,6 +598,7 @@ function DeviceTargetRow({
           <LightTargetControls
             attributes={target.attributes}
             onSetAttrs={onSetAttrs}
+            deviceId={device.online ? device.id : undefined}
           />
         )}
       </div>
@@ -568,10 +610,12 @@ function LightTargetControls({
   attributes,
   onSetAttrs,
   note,
+  deviceId,
 }: {
   attributes: Record<string, any>;
   onSetAttrs: (attrs: Record<string, any>) => void;
   note?: string;
+  deviceId?: string; // present on per-device rows → enables live ambient/scenes
 }) {
   // White Light is the default tab; only start on Colors if a colour is already set.
   const startsOnColor =
@@ -719,6 +763,16 @@ function LightTargetControls({
           </div>
         )}
       </div>
+
+      {/* Live ambient + animated scenes — drive the real bulb in real time.
+          These are live modes (not stored in the saved scene), matching the
+          device control screen. Only shown for an online device. */}
+      {deviceId && (
+        <>
+          <AmbientSync deviceId={deviceId} />
+          <LightPatterns deviceId={deviceId} />
+        </>
+      )}
     </div>
   );
 }

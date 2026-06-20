@@ -11,7 +11,7 @@ import { useSceneStore } from "@/stores/scene-store";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { toast } from "sonner";
-import { Sparkles, Plus, Trash2, Pencil, Play } from "lucide-react";
+import { Sparkles, Plus, Trash2, Play } from "lucide-react";
 
 export default function ScenesPage() {
   const shouldReduceMotion = useReducedMotion();
@@ -119,22 +119,13 @@ export default function ScenesPage() {
                     </p>
                   </div>
                 </Link>
-                <div className="flex items-center gap-0.5 flex-shrink-0">
-                  <Link
-                    href={`/scenes/${scene.id}`}
-                    className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
-                    title="Edit scene"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(scene.id, scene.name)}
-                    className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
-                    title="Delete scene"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleDelete(scene.id, scene.name)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer flex-shrink-0"
+                  title="Delete scene"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
 
               <div className="border-t border-border/40 pt-3 flex items-center justify-between text-xs text-muted-foreground mt-4">
