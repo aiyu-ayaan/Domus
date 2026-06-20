@@ -109,6 +109,63 @@ Domus is a self-hosted, local-first smart home platform for discovering, managin
 
 ---
 
+## Database Schema
+
+The database uses PostgreSQL with SQLAlchemy ORM. All primary keys are UUIDs.
+
+The authorization and tenancy boundary is the **Home** entity — all core entities (devices, rooms, scenes, automations, notifications, integrations) carry a `home_id` column referencing `homes.id` to enforce strict workspace isolation.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                            DOMUS — DATABASE TABLE RELATIONSHIPS                             │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                             │
+│                                      ┌───────────────┐                                      │
+│                                      │     users     │                                      │
+│                                      └───────┬───────┘                                      │
+│                                              │                                              │
+│                                  ┌───────────┴───────────┐                                  │
+│                        (user_id) │                       │ (owner_id)                       │
+│                                  ▼                       ▼                                  │
+│                          ┌───────────────┐       ┌───────────────┐                          │
+│                          │refresh_tokens │       │     homes     │                          │
+│                          └───────────────┘       └───────┬───────┘                          │
+│                                                           │                                 │
+│       ┌──────────────────┬──────────────┬────────────────┼───────────────┐                  │
+│       │                  │              │                │               │                  │
+│       ▼                  ▼              ▼                ▼               ▼                  │
+│ ┌───────────┐     ┌─────────────┐  ┌─────────┐     ┌─────────────┐  ┌─────────┐             │
+│ │automations│     │notifications│  │  rooms  │     │integrations │  │  scenes │             │
+│ └───────────┘     └─────────────┘  └────┬────┘     └──────┬──────┘  └────┬────┘             │
+│                                         │                 │              │                  │
+│                                 room_id │                 │              │                  │
+│                               (nullable)│                 │integration_id│                  │
+│                                         └───────┐ ┌───────┘              │                  │
+│                                                 ▼ ▼                      │                  │
+│                                           ┌───────────┐                  │                  │
+│                                           │  devices  │                  │                  │
+│                                           └─────┬─────┘                  │                  │
+│                                                 │                        │                  │
+│                                       ┌─────────┴─────────┐              │                  │
+│                             device_id │                   │ device_id    │                  │
+│                                       ▼                   ▼              ▼                  │
+│                               ┌───────────────┐   ┌──────────────────────▼┐                 │
+│                               │ device_states │   │  scene_device_states  │                 │
+│                               └───────────────┘   └───────────────────────┘                 │
+│                                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────────────────────┐   │
+│   │ Note: All entity tables (automations, notifications, rooms, integrations, scenes,   │   │
+│   │ devices) carry a home_id foreign key referencing homes.id.                          │   │
+│   └─────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                             │
+│                                      ┌─────────────────┐                                    │
+│                                      │ alembic_version │ (Standalone migration history)     │
+│                                      └─────────────────┘                                    │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Quick Start
 
 1. Install Bun, Node.js, Python 3.12+, PostgreSQL, and Redis.
@@ -169,16 +226,16 @@ _Make sure your Python virtual environment is activated before running backend c
 - `bun run lint` — Lint all workspaces
 - `bun run format` — Format code across all workspaces (Prettier & Black)
 
-
 ---
 
 ## Database Management (pgAdmin)
 
-If you are using the local services stack (`docker-compose.dev.local.yml`), pgAdmin is available at [http://localhost:5050](http://localhost:5050). 
+If you are using the local services stack (`docker-compose.dev.local.yml`), pgAdmin is available at [http://localhost:5050](http://localhost:5050).
 
 Log in using the credentials defined in your `.env` file (default: `admin@domus.com` / `admin`).
 
 To register the PostgreSQL server in pgAdmin:
+
 - **General Tab**:
   - **Name**: `Domus Local` (or any custom name)
 - **Connection Tab**:
