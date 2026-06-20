@@ -27,8 +27,6 @@ import {
   User,
   ChevronDown,
   Check,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,13 +48,11 @@ function SidebarNavItem({
   isActive,
   isCollapsed,
   unreadCount,
-  pathname,
 }: {
   item: (typeof navItems)[0];
   isActive: boolean;
   isCollapsed: boolean;
   unreadCount: number;
-  pathname: string;
 }) {
   const Icon = item.icon;
   const [isHovered, setIsHovered] = useState(false);
@@ -185,28 +181,7 @@ export function AppShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Sync collapse state with localStorage on mount
-  useEffect(() => {
-    setIsMounted(true);
-    const stored = localStorage.getItem("domus_sidebar_collapsed");
-    if (stored !== null) {
-      setIsCollapsed(stored === "true");
-    } else {
-      setIsCollapsed(true); // Default to true
-    }
-  }, []);
-
-  const toggleCollapse = () => {
-    const next = !isCollapsed;
-    setIsCollapsed(next);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("domus_sidebar_collapsed", String(next));
-    }
-  };
 
   // 1. Initialize Authentication session on mount
   useEffect(() => {
@@ -420,7 +395,6 @@ export function AppShell({
               isActive={isActive}
               isCollapsed={collapsed}
               unreadCount={unreadCount}
-              pathname={pathname}
             />
           );
         })}
@@ -483,21 +457,50 @@ export function AppShell({
       <aside className="hidden lg:block w-20 flex-shrink-0 h-screen bg-transparent" />
 
       {/* Desktop Sidebar (Floating Vertical Dock) */}
-      <aside className="fixed left-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full p-1.5 py-3.5 gap-2.5 w-14 h-fit max-h-[90vh] select-none">
+      <aside
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+        className={`fixed left-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col border border-border bg-card/85 backdrop-blur-md shadow-glow transition-all duration-300 select-none ${
+          isSidebarHovered
+            ? "w-64 rounded-3xl p-5 py-6 h-[85vh] items-start gap-4.5"
+            : "w-14 rounded-full p-1.5 py-3.5 h-fit max-h-[90vh] items-center gap-2.5"
+        }`}
+      >
         {/* Brand/Logo */}
-        <Link
-          href="/"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-background font-serif text-base font-bold shadow-glow hover:scale-105 transition cursor-pointer"
-          title="Domus OS"
-        >
-          D
-        </Link>
+        {isSidebarHovered ? (
+          <div className="w-full pb-3 border-b border-border/60">
+            <Link href="/" className="inline-block cursor-pointer group">
+              <p className="text-[9px] font-mono font-semibold uppercase tracking-[0.35em] text-muted-foreground transition duration-150 group-hover:text-foreground">
+                Domus OS
+              </p>
+              <h1 className="mt-1.5 font-serif text-xl font-normal tracking-tight text-foreground leading-none">
+                Your Home. Unified.
+              </h1>
+            </Link>
+          </div>
+        ) : (
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-background font-serif text-base font-bold shadow-glow hover:scale-105 transition cursor-pointer flex-shrink-0"
+            title="Domus OS"
+          >
+            D
+          </Link>
+        )}
 
         {/* Divider */}
-        <div className="w-5 h-px bg-border/80 my-0.5" />
+        <div
+          className={`h-px bg-border/80 my-0.5 transition-all duration-300 ${
+            isSidebarHovered ? "w-full" : "w-5"
+          }`}
+        />
 
         {/* Navigation items */}
-        <nav className="flex flex-col gap-2 items-center w-full">
+        <nav
+          className={`flex flex-col gap-2 w-full ${
+            isSidebarHovered ? "items-stretch" : "items-center"
+          }`}
+        >
           {navItems.map((item) => {
             const isActive =
               item.href === "/"
@@ -508,35 +511,68 @@ export function AppShell({
                 key={item.href}
                 item={item}
                 isActive={isActive}
-                isCollapsed={true}
+                isCollapsed={!isSidebarHovered}
                 unreadCount={unreadCount}
-                pathname={pathname}
               />
             );
           })}
         </nav>
 
         {/* Divider */}
-        <div className="w-5 h-px bg-border/80 my-0.5" />
+        <div
+          className={`h-px bg-border/80 my-0.5 mt-auto transition-all duration-300 ${
+            isSidebarHovered ? "w-full" : "w-5"
+          }`}
+        />
 
         {/* Theme Toggle (Compact) */}
-        <ThemeToggle compact={true} />
+        <ThemeToggle compact={!isSidebarHovered} />
 
         {/* User initials / Logout Avatar */}
-        <div className="relative group mt-0.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs cursor-pointer hover:bg-muted/40 transition">
-            {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
-          </div>
-          {/* Logout Tooltip/Button */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="absolute left-full top-1/2 ml-3.5 -translate-y-1/2 z-50 rounded border border-border bg-card shadow-subtle px-2.5 py-1.5 text-[9px] font-mono font-bold tracking-wider text-destructive hover:bg-destructive/10 whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 uppercase"
-            title="Logout"
+        {isSidebarHovered ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center justify-between rounded border border-border/60 bg-muted/10 p-2.5 w-full"
           >
-            Logout
-          </button>
-        </div>
+            <div className="flex items-center gap-3 truncate">
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs flex-shrink-0">
+                {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-semibold truncate leading-none text-foreground">
+                  {user?.full_name}
+                </p>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mt-1.5 leading-none">
+                  {user?.role}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer flex-shrink-0"
+              title="Logout"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+            </button>
+          </motion.div>
+        ) : (
+          <div className="relative group mt-0.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-xs cursor-pointer hover:bg-muted/40 transition">
+              {user?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+            </div>
+            {/* Logout Tooltip/Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="absolute left-full top-1/2 ml-3.5 -translate-y-1/2 z-50 rounded border border-border bg-card shadow-subtle px-2.5 py-1.5 text-[9px] font-mono font-bold tracking-wider text-destructive hover:bg-destructive/10 whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 uppercase"
+              title="Logout"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Mobile Sidebar Slider */}
@@ -763,7 +799,7 @@ export function AppShell({
                       No notifications
                     </p>
                     <p className="text-[10px] text-muted-foreground/80 mt-1">
-                      You're all caught up!
+                      You&apos;re all caught up!
                     </p>
                   </div>
                 ) : (
