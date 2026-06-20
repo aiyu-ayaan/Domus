@@ -5,7 +5,7 @@
 // wattage readout. Saved targets are applied together on activate.
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useHomeStore } from "@/stores/home-store";
@@ -24,6 +24,7 @@ import {
   Plus,
   X,
   SlidersHorizontal,
+  RefreshCw,
 } from "lucide-react";
 import { LIGHT_COLOR_PRESETS } from "@/lib/color";
 import type { DeviceOut } from "@/types/api";
@@ -56,6 +57,21 @@ export default function SceneBuilderPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [autoSave, setAutoSave] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  // Serialized last-persisted payload, so auto-save only fires on real changes.
+  const lastSavedRef = useRef("");
+
+  // Remember the auto-save preference across sessions.
+  useEffect(() => {
+    setAutoSave(localStorage.getItem("domus_scene_autosave") === "true");
+  }, []);
+  const toggleAutoSave = (v: boolean) => {
+    setAutoSave(v);
+    localStorage.setItem("domus_scene_autosave", String(v));
+  };
 
   // Populate the device picker (and their live states for the wattage meter).
   useEffect(() => {
@@ -73,16 +89,20 @@ export default function SceneBuilderPage() {
       .get(id)
       .then((scene) => {
         if (!active) return;
+        const seeded = Object.fromEntries(
+          scene.states.map((s) => [
+            s.device_id,
+            { device_id: s.device_id, state: s.state, attributes: { ...s.attributes } },
+          ]),
+        );
         setName(scene.name);
         setDescription(scene.description || "");
-        setTargets(
-          Object.fromEntries(
-            scene.states.map((s) => [
-              s.device_id,
-              { device_id: s.device_id, state: s.state, attributes: { ...s.attributes } },
-            ]),
-          ),
-        );
+        setTargets(seeded);
+        lastSavedRef.current = JSON.stringify({
+          name: scene.name,
+          description: scene.description || "",
+          targets: seeded,
+        });
       })
       .catch(() => {
         toast.error("Failed to load scene");
@@ -175,6 +195,7 @@ export default function SceneBuilderPage() {
         description: description.trim() || null,
         states,
       });
+      lastSavedRef.current = JSON.stringify({ name, description, targets });
       toast.success("Scene updated");
       return id;
     } catch (err) {
@@ -198,6 +219,29 @@ export default function SceneBuilderPage() {
     }
     router.push("/scenes");
   };
+
+  // Debounced auto-save (edit mode only) when the toggle is enabled.
+  const snapshot = JSON.stringify({ name, description, targets });
+  useEffect(() => {
+    if (isNew || !autoSave || loading) return;
+    if (snapshot === lastSavedRef.current) return;
+    if (name.trim().length < 2 || Object.keys(targets).length === 0) return;
+    setAutoStatus("saving");
+    const handle = setTimeout(async () => {
+      try {
+        await updateScene(id, {
+          name: name.trim(),
+          description: description.trim() || null,
+          states: Object.values(targets),
+        });
+        lastSavedRef.current = snapshot;
+        setAutoStatus("saved");
+      } catch {
+        setAutoStatus("idle");
+      }
+    }, 900);
+    return () => clearTimeout(handle);
+  }, [snapshot, autoSave, loading, isNew, id, name, description, targets, updateScene]);
 
   if (loading) {
     return (
@@ -239,8 +283,26 @@ export default function SceneBuilderPage() {
           </div>
         </div>
         <div className="flex items-center gap-2.5 flex-shrink-0">
+          {/* Auto-save toggle (edit mode) */}
+          {!isNew && (
+            <label className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-3 py-2.5 text-xs font-semibold cursor-pointer select-none">
+              <Switch checked={autoSave} onCheckedChange={toggleAutoSave} />
+              <span className="flex items-center gap-1.5">
+                Auto-save
+                {autoSave && autoStatus === "saving" && (
+                  <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                )}
+                {autoSave && autoStatus === "saved" && (
+                  <Check className="h-3 w-3 text-primary" />
+                )}
+              </span>
+            </label>
+          )}
           <button
-            onClick={handleSave}
+            onClick={async () => {
+              const savedId = await handleSave();
+              if (savedId && isNew) router.replace(`/scenes/${savedId}`);
+            }}
             disabled={saving}
             className="flex items-center gap-1.5 rounded-xl border border-border bg-background/50 hover:bg-muted/40 px-4 py-2.5 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
           >
@@ -511,9 +573,11 @@ function LightTargetControls({
   onSetAttrs: (attrs: Record<string, any>) => void;
   note?: string;
 }) {
-  const isWhiteMode = (attributes.color_temp ?? 0) > 0;
+  // White Light is the default tab; only start on Colors if a colour is already set.
+  const startsOnColor =
+    !!attributes.color && (attributes.color_temp ?? 0) === 0;
   const [mode, setMode] = useState<"white" | "color">(
-    isWhiteMode ? "white" : "color",
+    startsOnColor ? "color" : "white",
   );
   const brightness = attributes.brightness ?? 100;
   const tempKelvin = attributes.color_temp || 4000;
