@@ -1,7 +1,7 @@
 // Integrations drivers page implementation with animating Local Scan Discovery modal
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -56,7 +56,12 @@ export default function IntegrationsPage() {
     deleteIntegration,
     discoverDevices,
     clearDiscoveryResult,
+    fetchIntegrations,
   } = useIntegrationStore();
+
+  useEffect(() => {
+    if (activeHomeId) fetchIntegrations(activeHomeId);
+  }, [activeHomeId, fetchIntegrations]);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDiscoverOpen, setIsDiscoverOpen] = useState(false);
