@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, Reorder } from "framer-motion";
 import {
   Activity,
   ArrowUpRight,
@@ -12,10 +12,12 @@ import {
   Cpu,
   DoorOpen,
   Gauge,
+  GripVertical,
   Home,
   Layers3,
   Lightbulb,
   Lock,
+  Pin,
   PlugZap,
   Plus,
   Power,
@@ -88,6 +90,95 @@ export function DashboardPage() {
     useAutomationStore();
   const { scenes, fetchScenes, activateScene } = useSceneStore();
 
+  const [pinnedIds, setPinnedIds] = useState<string[]>([]);
+  const [deviceOrder, setDeviceOrder] = useState<string[]>([]);
+  const [orderedDevices, setOrderedDevices] = useState<DeviceOut[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    try {
+      const savedPins = localStorage.getItem("domus:pinned-devices");
+      if (savedPins) {
+        setPinnedIds(JSON.parse(savedPins));
+      }
+      const savedOrder = localStorage.getItem("domus:device-order");
+      if (savedOrder) {
+        setDeviceOrder(JSON.parse(savedOrder));
+      }
+    } catch (e) {
+      console.error("Failed to load dashboard device preferences", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
+    const pinned = devices.filter((d) => pinnedIds.includes(d.id));
+    const unpinned = devices.filter((d) => !pinnedIds.includes(d.id));
+
+    pinned.sort((a, b) => {
+      const idxA = pinnedIds.indexOf(a.id);
+      const idxB = pinnedIds.indexOf(b.id);
+      return idxA - idxB;
+    });
+
+    unpinned.sort((a, b) => {
+      const idxA = deviceOrder.indexOf(a.id);
+      const idxB = deviceOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) {
+        return idxA - idxB;
+      }
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    setOrderedDevices([...pinned, ...unpinned]);
+  }, [devices, pinnedIds, deviceOrder, isClient]);
+
+  const handleTogglePin = (deviceId: string) => {
+    setPinnedIds((prev) => {
+      let next: string[];
+      if (prev.includes(deviceId)) {
+        next = prev.filter((id) => id !== deviceId);
+      } else {
+        next = [...prev, deviceId];
+      }
+      localStorage.setItem("domus:pinned-devices", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const handleReorder = (newOrder: DeviceOut[]) => {
+    setOrderedDevices(newOrder);
+
+    const newPinned = newOrder.filter((d) => pinnedIds.includes(d.id));
+    const newUnpinned = newOrder.filter((d) => !pinnedIds.includes(d.id));
+    const newPinnedIds = newPinned.map((d) => d.id);
+    const newUnpinnedIds = newUnpinned.map((d) => d.id);
+
+    const pinnedChanged =
+      JSON.stringify(newPinnedIds) !== JSON.stringify(pinnedIds);
+    const orderChanged =
+      JSON.stringify(newUnpinnedIds) !== JSON.stringify(deviceOrder);
+
+    if (pinnedChanged) {
+      setPinnedIds(newPinnedIds);
+      localStorage.setItem(
+        "domus:pinned-devices",
+        JSON.stringify(newPinnedIds),
+      );
+    }
+    if (orderChanged) {
+      setDeviceOrder(newUnpinnedIds);
+      localStorage.setItem(
+        "domus:device-order",
+        JSON.stringify(newUnpinnedIds),
+      );
+    }
+  };
+
   useEffect(() => {
     setChartsReady(true);
   }, []);
@@ -142,13 +233,6 @@ export function DashboardPage() {
   const activeRooms = rooms.filter((room) =>
     devices.some((device) => device.room_id === room.id),
   );
-  const recentDevices = [...devices]
-    .sort(
-      (a, b) =>
-        new Date(b.last_seen || b.created_at).getTime() -
-        new Date(a.last_seen || a.created_at).getTime(),
-    )
-    .slice(0, 6);
 
   // Live power draw, built only from devices actually reporting consumption.
   const powerByDevice = devices
@@ -610,12 +694,12 @@ export function DashboardPage() {
         </DashboardCard>
 
         <DashboardCard
-          title="Device Control"
-          description="Recently observed device endpoints"
+          title="Devices"
+          description="Control, pin, and organize your smart devices"
           action={<MiniLink href="/devices">All devices</MiniLink>}
         >
-          <div className="grid gap-3">
-            {recentDevices.length === 0 ? (
+          <div className="max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin">
+            {devices.length === 0 ? (
               <EmptyPanel
                 icon={Cpu}
                 label="No devices discovered"
@@ -623,14 +707,30 @@ export function DashboardPage() {
                 action="Discover devices"
               />
             ) : (
-              recentDevices.map((device) => (
-                <DeviceRow
-                  key={device.id}
-                  device={device}
-                  state={deviceStates[device.id]?.state || "unknown"}
-                  onToggle={() => handleDeviceToggle(device)}
-                />
-              ))
+              <Reorder.Group
+                axis="y"
+                values={orderedDevices.length > 0 ? orderedDevices : devices}
+                onReorder={handleReorder}
+                className="grid gap-3"
+              >
+                {(orderedDevices.length > 0 ? orderedDevices : devices).map(
+                  (device) => (
+                    <Reorder.Item
+                      value={device}
+                      key={device.id}
+                      className="touch-none"
+                    >
+                      <DeviceRow
+                        device={device}
+                        state={deviceStates[device.id]?.state || "unknown"}
+                        onToggle={() => handleDeviceToggle(device)}
+                        isPinned={pinnedIds.includes(device.id)}
+                        onTogglePin={() => handleTogglePin(device.id)}
+                      />
+                    </Reorder.Item>
+                  ),
+                )}
+              </Reorder.Group>
             )}
           </div>
         </DashboardCard>
@@ -1071,16 +1171,21 @@ function DeviceRow({
   device,
   state,
   onToggle,
+  isPinned,
+  onTogglePin,
 }: {
   device: DeviceOut;
   state: string;
   onToggle: () => void;
+  isPinned: boolean;
+  onTogglePin: () => void;
 }) {
   const Icon = deviceIconMap[device.device_type] || CircuitBoard;
 
   return (
-    <div className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3">
+    <div className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
       <div className="flex min-w-0 items-center gap-3">
+        <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing" />
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
         >
@@ -1099,13 +1204,30 @@ function DeviceRow({
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-      >
-        Toggle
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin();
+          }}
+          className={`inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring/40 ${
+            isPinned
+              ? "border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+              : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+          title={isPinned ? "Unpin device" : "Pin device"}
+        >
+          <Pin className={`h-3.5 w-3.5 ${isPinned ? "fill-amber-500" : ""}`} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+        >
+          Toggle
+        </button>
+      </div>
     </div>
   );
 }
