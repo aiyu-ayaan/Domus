@@ -25,6 +25,31 @@ async def list_available(_: CurrentUser) -> list[str]:
     return available_integrations()
 
 
+@router.get("/tuya/scan", response_model=list[dict])
+async def scan_tuya_lan(_: CurrentUser) -> list[dict]:
+    """Broadcast-scan the LAN for Tuya devices (id/ip/version, no local_key).
+
+    Mirrors Home Assistant's ``localtuya`` scan step: this only finds devices and
+    their basic identity, never a usable key — the local_key still has to come
+    from the Tuya IoT Platform (see tuya_local.py docstring).
+    """
+    import asyncio
+
+    import tinytuya
+
+    found = await asyncio.to_thread(
+        tinytuya.deviceScan, False, 6, False, False, False
+    )
+    return [
+        {
+            "id": info.get("gwId") or info.get("id"),
+            "ip": ip,
+            "version": str(info.get("version") or "3.3"),
+        }
+        for ip, info in found.items()
+    ]
+
+
 @router.get("", response_model=list[IntegrationOut])
 async def list_integrations(
     user: CurrentUser, session: Session, home_id: UUID | None = None

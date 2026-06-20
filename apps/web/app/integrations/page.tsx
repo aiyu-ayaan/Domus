@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useHomeStore } from "@/stores/home-store";
@@ -46,7 +46,23 @@ const integrationSchema = z.object({
     token: z.string().optional(),
     country_code: z.string().optional(),
     platform: z.string().optional(),
+    access_id: z.string().optional(),
+    access_secret: z.string().optional(),
+    region: z.string().optional(),
   }),
+  devices: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        ip: z.string().optional(),
+        local_key: z.string().optional(),
+        version: z.string().optional(),
+        name: z.string().optional(),
+        type: z.string().optional(),
+        topic: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 type IntegrationFormValues = z.infer<typeof integrationSchema>;
@@ -87,6 +103,8 @@ export default function IntegrationsPage() {
     register,
     handleSubmit,
     reset,
+    control,
+    watch,
     formState: { errors },
   } = useForm<IntegrationFormValues>({
     resolver: zodResolver(integrationSchema),
@@ -94,19 +112,45 @@ export default function IntegrationsPage() {
       name: "",
       type: "tapo",
       enabled: true,
-      config: { host: "", username: "", token: "", country_code: "", platform: "smart_life" },
+      config: {
+        host: "",
+        username: "",
+        token: "",
+        country_code: "",
+        platform: "smart_life",
+        access_id: "",
+        access_secret: "",
+        region: "us",
+      },
+      devices: [],
     },
   });
+
+  const { fields: deviceFields, append: appendDevice, remove: removeDevice } =
+    useFieldArray({ control, name: "devices" });
+  const selectedType = watch("type");
+  const isTuyaFamily = ["tuya", "wipro", "syska"].includes(selectedType);
+  const isMqtt = selectedType === "mqtt";
 
   const handleCreateSubmit = async (data: IntegrationFormValues) => {
     if (!activeHomeId) return;
     try {
+      let devices: Record<string, unknown>[] | undefined;
+      if (isTuyaFamily) {
+        devices = (data.devices || [])
+          .filter((d) => d.id && d.local_key)
+          .map((d) => ({ id: d.id, ip: d.ip, local_key: d.local_key, version: d.version, name: d.name, type: d.type }));
+      } else if (isMqtt) {
+        devices = (data.devices || [])
+          .filter((d) => d.topic)
+          .map((d) => ({ topic: d.topic, name: d.name, type: d.type }));
+      }
       await createIntegration({
         home_id: activeHomeId,
         name: data.name,
         type: data.type as IntegrationType,
         enabled: data.enabled,
-        config: data.config,
+        config: devices?.length ? { ...data.config, devices } : data.config,
       });
       toast.success("Integration configured successfully!");
       setIsCreateOpen(false);
@@ -244,6 +288,175 @@ export default function IntegrationsPage() {
                   )}
                 </div>
               </div>
+
+              {isTuyaFamily && (
+                <div className="space-y-2 rounded-xl border border-primary/40 p-3">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Tuya Cloud Project (official, like Home Assistant)
+                  </label>
+                  <p className="text-[10px] text-muted-foreground/70">
+                    iot.tuya.com → Cloud → Create Project → Devices → Link Tuya App
+                    Account (scan QR in SmartLife app) → copy Access ID/Secret from
+                    the project Overview. This replaces the legacy username/password
+                    login below, which Tuya has shut off for most accounts.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      placeholder="Access ID (Client ID)"
+                      className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                      {...register("config.access_id")}
+                    />
+                    <input
+                      placeholder="Access Secret"
+                      type="password"
+                      className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                      {...register("config.access_secret")}
+                    />
+                    <select
+                      className="col-span-2 rounded-lg border border-border bg-background py-2 px-2.5 text-xs outline-none focus:border-primary cursor-pointer"
+                      {...register("config.region")}
+                    >
+                      <option value="us">Americas (us)</option>
+                      <option value="eu">Europe (eu)</option>
+                      <option value="in">India (in)</option>
+                      <option value="cn">China (cn)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {isTuyaFamily && (
+                <div className="space-y-2 rounded-xl border border-border/60 p-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Local Devices (tinytuya) — fallback if no cloud project
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        appendDevice({
+                          id: "",
+                          ip: "",
+                          local_key: "",
+                          version: "3.3",
+                          name: "",
+                          type: "light",
+                        })
+                      }
+                      className="text-xs font-semibold text-primary cursor-pointer"
+                    >
+                      + Add Device
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/70">
+                    Tuya&apos;s legacy cloud login is dead for most accounts now. Add
+                    devices by id/ip/local_key (pulled once via the Tuya IoT Platform
+                    or <code>tinytuya wizard</code>) for direct LAN control instead.
+                  </p>
+                  {deviceFields.map((field, idx) => (
+                    <div key={field.id} className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2">
+                      <input
+                        placeholder="Device ID"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.id`)}
+                      />
+                      <input
+                        placeholder="Local IP (192.168.x.x)"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.ip`)}
+                      />
+                      <input
+                        placeholder="Local Key"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.local_key`)}
+                      />
+                      <input
+                        placeholder="Name"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.name`)}
+                      />
+                      <select
+                        className="rounded-lg border border-border bg-background py-2 px-2.5 text-xs outline-none focus:border-primary cursor-pointer"
+                        {...register(`devices.${idx}.type`)}
+                      >
+                        <option value="light">Light</option>
+                        <option value="switch">Switch</option>
+                        <option value="plug">Plug</option>
+                        <option value="other">Other</option>
+                      </select>
+                      <select
+                        className="rounded-lg border border-border bg-background py-2 px-2.5 text-xs outline-none focus:border-primary cursor-pointer"
+                        {...register(`devices.${idx}.version`)}
+                      >
+                        <option value="3.1">v3.1</option>
+                        <option value="3.3">v3.3</option>
+                        <option value="3.4">v3.4</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => removeDevice(idx)}
+                        className="col-span-2 text-[11px] font-semibold text-rose-500 text-left cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {isMqtt && (
+                <div className="space-y-2 rounded-xl border border-border/60 p-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Tasmota Devices
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        appendDevice({ topic: "", name: "", type: "light" })
+                      }
+                      className="text-xs font-semibold text-primary cursor-pointer"
+                    >
+                      + Add Device
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/70">
+                    For devices flashed off the Tuya cloud with Tasmota — Connector IP
+                    above is the MQTT broker address. Topic is each device&apos;s
+                    Tasmota MQTT topic (cmnd/&lt;topic&gt;/POWER).
+                  </p>
+                  {deviceFields.map((field, idx) => (
+                    <div key={field.id} className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2">
+                      <input
+                        placeholder="Tasmota Topic"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.topic`)}
+                      />
+                      <input
+                        placeholder="Name"
+                        className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
+                        {...register(`devices.${idx}.name`)}
+                      />
+                      <select
+                        className="rounded-lg border border-border bg-background py-2 px-2.5 text-xs outline-none focus:border-primary cursor-pointer"
+                        {...register(`devices.${idx}.type`)}
+                      >
+                        <option value="light">Light</option>
+                        <option value="switch">Switch</option>
+                        <option value="plug">Plug</option>
+                        <option value="other">Other</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => removeDevice(idx)}
+                        className="col-span-2 text-[11px] font-semibold text-rose-500 text-left cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

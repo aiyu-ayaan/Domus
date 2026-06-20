@@ -111,9 +111,31 @@ class RealTuyaAdapter(DeviceAdapter):
         # device list with fresh state. Adapters are built per request, so each call
         # path re-logs in and sees current state — no separate poll needed.
         try:
-            return self._ensure_api().get_all_devices()
+            api = self._ensure_api()
+            devices = api.get_all_devices()
         except Exception as exc:  # tuyapy raises bare Exceptions on auth/network fail
             raise ConflictError(f"Tuya cloud request failed: {exc}") from exc
+        if not devices:
+            # ponytail: empty list usually isn't "no devices", it's the cloud
+            # 'homeassistant skill' discovery endpoint returning nothing because the
+            # account never linked the Alexa/Google Smart Home skill for these
+            # devices (common for Wipro/Syska). Surface the raw response instead of
+            # silently reporting zero devices, so it's diagnosable without guessing.
+            try:
+                raw = api._request("Discovery", "discovery")
+            except Exception:
+                raw = None
+            detail = (raw or {}).get("header", {}).get("code") or (raw or {}).get("payload")
+            raise ConflictError(
+                "Tuya/SmartLife cloud login succeeded but Discovery returned no devices "
+                f"(cloud response: {detail!r}). This account likely never linked the "
+                "Alexa/Google Smart Home skill for these devices on Tuya's side — the "
+                "legacy homeassistant-skill API only sees devices that went through that "
+                "linking flow. Re-check in the Tuya/SmartLife app under "
+                "'Skills & Services' / Alexa linking, or switch to local control via "
+                "tinytuya with the device's local key."
+            )
+        return devices
 
     def _find(self, external_id: str) -> Any:
         for dev in self._all_devices():

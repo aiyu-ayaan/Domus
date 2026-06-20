@@ -51,6 +51,15 @@ def get_adapter(integration) -> DeviceAdapter:
         config = decrypt_json(integration.config_encrypted)
 
     kind = IntegrationType(integration.type)
+    if kind is IntegrationType.mqtt:
+        from backend.integrations.adapters.mqtt_tasmota import (
+            TasmotaMqttAdapter,
+            has_real_config as has_mqtt_config,
+        )
+
+        if has_mqtt_config(config):
+            return TasmotaMqttAdapter(config)
+
     if kind is IntegrationType.tapo:
         from backend.integrations.adapters.tapo_kasa import (
             RealTapoAdapter,
@@ -60,14 +69,35 @@ def get_adapter(integration) -> DeviceAdapter:
         if has_real_config(config):
             return RealTapoAdapter(config)
 
-    # Wipro/Syska/Tuya are all SmartLife cloud devices (see HA's legacy smart_life).
+    # Wipro/Syska/Tuya are all SmartLife/Tuya devices. Priority:
+    #   1. Tuya OpenAPI v2 (access_id/access_secret) — the official path HA's
+    #      current Tuya integration uses; works from anywhere, no LAN needed.
+    #   2. Local tinytuya (per-device local_key) — no cloud at all.
+    #   3. Legacy tuyapy cloud (username/password) — dead for most accounts,
+    #      kept only so old configs don't hard-break.
     if kind in _TUYA_FAMILY:
-        from backend.integrations.adapters.tuya_cloud import (
-            RealTuyaAdapter,
-            has_real_config,
+        from backend.integrations.adapters.tuya_openapi import (
+            RealTuyaOpenApiAdapter,
+            has_real_config as has_openapi_config,
         )
 
-        if has_real_config(config):
+        if has_openapi_config(config):
+            return RealTuyaOpenApiAdapter(config, kind)
+
+        from backend.integrations.adapters.tuya_local import (
+            RealTuyaLocalAdapter,
+            has_real_config as has_local_config,
+        )
+
+        if has_local_config(config):
+            return RealTuyaLocalAdapter(config, kind)
+
+        from backend.integrations.adapters.tuya_cloud import (
+            RealTuyaAdapter,
+            has_real_config as has_cloud_config,
+        )
+
+        if has_cloud_config(config):
             return RealTuyaAdapter(config, kind)
 
     return adapter_class(kind)(config)
