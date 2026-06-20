@@ -342,7 +342,9 @@ export default function DeviceDetailPage() {
                   )}
 
                   {device.device_type === "light" && (
-                    <div className={`space-y-4 ${!isChecked ? "opacity-40 pointer-events-none" : ""}`}>
+                    <div
+                      className={`space-y-4 ${!isChecked ? "opacity-40 pointer-events-none" : ""}`}
+                    >
                       {/* Brightness Control */}
                       <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-3">
                         <div className="flex justify-between items-center text-sm">

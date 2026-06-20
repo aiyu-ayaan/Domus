@@ -36,11 +36,15 @@ export function AmbientSync({
 
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
   const primaryId = ids[0];
-  const deviceState = useDeviceStore((s) => primaryId ? s.deviceStates[primaryId] : undefined);
+  const deviceState = useDeviceStore((s) =>
+    primaryId ? s.deviceStates[primaryId] : undefined,
+  );
 
   // Bind active states and selected theme
   const isSceneBuilder = !!onSetAttrs;
-  const currentAttrs = isSceneBuilder ? targetAttributes || {} : deviceState?.attributes || {};
+  const currentAttrs = isSceneBuilder
+    ? targetAttributes || {}
+    : deviceState?.attributes || {};
 
   const screen = currentAttrs.ambient_sync === "screen";
   const music = currentAttrs.ambient_sync === "music";
@@ -57,7 +61,11 @@ export function AmbientSync({
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
       }
-      await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
+      await Promise.all(
+        ids.map((id) =>
+          setDeviceAttributes(id, { ambient_sync: null }).catch(() => {}),
+        ),
+      );
     } else {
       if (isSceneBuilder) {
         // Clear normal color/temp attributes to prioritize sync
@@ -72,7 +80,11 @@ export function AmbientSync({
         if (isSceneBuilder) {
           onSetAttrs({ ambient_sync: null });
         }
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, { ambient_sync: null }).catch(() => {}),
+          ),
+        );
       }
     }
   };
@@ -82,21 +94,37 @@ export function AmbientSync({
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
       }
-      await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
+      await Promise.all(
+        ids.map((id) =>
+          setDeviceAttributes(id, { ambient_sync: null }).catch(() => {}),
+        ),
+      );
     } else {
       if (isSceneBuilder) {
-        onSetAttrs({ ambient_sync: "music", music_theme: theme, color: null, color_temp: 0 });
+        onSetAttrs({
+          ambient_sync: "music",
+          music_theme: theme,
+          color: null,
+          color_temp: 0,
+        });
       }
       // Optimistic store update synchronously first to register in ambientMusicDevices
       ids.forEach((id) => {
-        setDeviceAttributes(id, { ambient_sync: "music", music_theme: theme }).catch(() => {});
+        setDeviceAttributes(id, {
+          ambient_sync: "music",
+          music_theme: theme,
+        }).catch(() => {});
       });
       const success = await startAudioSharing();
       if (!success) {
         if (isSceneBuilder) {
           onSetAttrs({ ambient_sync: null });
         }
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { ambient_sync: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, { ambient_sync: null }).catch(() => {}),
+          ),
+        );
       }
     }
   };
@@ -105,7 +133,11 @@ export function AmbientSync({
     if (isSceneBuilder) {
       onSetAttrs({ music_theme: themeId });
     }
-    await Promise.all(ids.map((id) => setDeviceAttributes(id, { music_theme: themeId }).catch(() => {})));
+    await Promise.all(
+      ids.map((id) =>
+        setDeviceAttributes(id, { music_theme: themeId }).catch(() => {}),
+      ),
+    );
   };
 
   return (

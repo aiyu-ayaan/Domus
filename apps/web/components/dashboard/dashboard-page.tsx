@@ -663,7 +663,9 @@ export function DashboardPage() {
                         {scene.name}
                       </p>
                       <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
-                        {scene.states.length} {scene.states.length === 1 ? "device" : "devices"} · {scene.description || "No description"}
+                        {scene.states.length}{" "}
+                        {scene.states.length === 1 ? "device" : "devices"} ·{" "}
+                        {scene.description || "No description"}
                       </p>
                     </div>
                   </div>

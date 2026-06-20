@@ -49,7 +49,9 @@ export function LightPatterns({
 
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
   const primaryId = ids[0];
-  const deviceState = useDeviceStore((s) => primaryId ? s.deviceStates[primaryId] : undefined);
+  const deviceState = useDeviceStore((s) =>
+    primaryId ? s.deviceStates[primaryId] : undefined,
+  );
   const [customs, setCustoms] = useState<Custom[]>([]);
 
   // Builder state
@@ -60,7 +62,9 @@ export function LightPatterns({
   const [draft, setDraft] = useState("#ff4040");
 
   const isSceneBuilder = !!onSetAttrs;
-  const currentAttrs = isSceneBuilder ? targetAttributes || {} : deviceState?.attributes || {};
+  const currentAttrs = isSceneBuilder
+    ? targetAttributes || {}
+    : deviceState?.attributes || {};
   const active = currentAttrs.light_scene || null;
 
   useEffect(() => {
@@ -81,15 +85,41 @@ export function LightPatterns({
   const handleTogglePattern = async (p: Pattern) => {
     if (active === p.id) {
       if (isSceneBuilder) {
-        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        onSetAttrs({
+          light_scene: null,
+          light_scene_gap: null,
+          custom_scene_colors: null,
+        });
       } else {
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, {
+              light_scene: null,
+              light_scene_gap: null,
+              custom_scene_colors: null,
+            }).catch(() => {}),
+          ),
+        );
       }
     } else {
       if (isSceneBuilder) {
-        onSetAttrs({ light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null, color: null, color_temp: 0 });
+        onSetAttrs({
+          light_scene: p.id,
+          light_scene_gap: p.gap,
+          custom_scene_colors: null,
+          color: null,
+          color_temp: 0,
+        });
       } else {
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: p.id, light_scene_gap: p.gap, custom_scene_colors: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, {
+              light_scene: p.id,
+              light_scene_gap: p.gap,
+              custom_scene_colors: null,
+            }).catch(() => {}),
+          ),
+        );
       }
     }
   };
@@ -97,15 +127,41 @@ export function LightPatterns({
   const handleToggleCustom = async (c: Custom) => {
     if (active === c.id) {
       if (isSceneBuilder) {
-        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        onSetAttrs({
+          light_scene: null,
+          light_scene_gap: null,
+          custom_scene_colors: null,
+        });
       } else {
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, {
+              light_scene: null,
+              light_scene_gap: null,
+              custom_scene_colors: null,
+            }).catch(() => {}),
+          ),
+        );
       }
     } else {
       if (isSceneBuilder) {
-        onSetAttrs({ light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors, color: null, color_temp: 0 });
+        onSetAttrs({
+          light_scene: c.id,
+          light_scene_gap: c.gap,
+          custom_scene_colors: c.colors,
+          color: null,
+          color_temp: 0,
+        });
       } else {
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: c.id, light_scene_gap: c.gap, custom_scene_colors: c.colors }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, {
+              light_scene: c.id,
+              light_scene_gap: c.gap,
+              custom_scene_colors: c.colors,
+            }).catch(() => {}),
+          ),
+        );
       }
     }
   };
@@ -113,9 +169,21 @@ export function LightPatterns({
   const handleDeleteCustom = async (c: Custom) => {
     if (active === c.id) {
       if (isSceneBuilder) {
-        onSetAttrs({ light_scene: null, light_scene_gap: null, custom_scene_colors: null });
+        onSetAttrs({
+          light_scene: null,
+          light_scene_gap: null,
+          custom_scene_colors: null,
+        });
       } else {
-        await Promise.all(ids.map((id) => setDeviceAttributes(id, { light_scene: null, light_scene_gap: null, custom_scene_colors: null }).catch(() => {})));
+        await Promise.all(
+          ids.map((id) =>
+            setDeviceAttributes(id, {
+              light_scene: null,
+              light_scene_gap: null,
+              custom_scene_colors: null,
+            }).catch(() => {}),
+          ),
+        );
       }
     }
     persist(customs.filter((x) => x.id !== c.id));

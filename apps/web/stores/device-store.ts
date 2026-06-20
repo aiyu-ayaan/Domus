@@ -236,7 +236,13 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       );
 
       // Preserve virtual UI attributes so they are not wiped out
-      const virtualKeys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"];
+      const virtualKeys = [
+        "ambient_sync",
+        "music_theme",
+        "light_scene",
+        "light_scene_gap",
+        "custom_scene_colors",
+      ];
       const preservedAttributes = { ...finalState.attributes };
       virtualKeys.forEach((key) => {
         if (key in attributes) {
@@ -311,7 +317,13 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     set((prev) => {
       const originalState = prev.deviceStates[deviceId];
       const originalAttributes = originalState?.attributes || {};
-      const virtualKeys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"];
+      const virtualKeys = [
+        "ambient_sync",
+        "music_theme",
+        "light_scene",
+        "light_scene_gap",
+        "custom_scene_colors",
+      ];
 
       const preservedAttributes = { ...newState.attributes };
       virtualKeys.forEach((key) => {

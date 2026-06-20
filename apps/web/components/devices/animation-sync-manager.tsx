@@ -15,7 +15,8 @@ const PATTERNS: Record<string, { gap: number; tick: (t: number) => string }> = {
   },
   breathe: {
     gap: 350,
-    tick: (t) => hueToHex(265, 0.7, 0.12 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6))),
+    tick: (t) =>
+      hueToHex(265, 0.7, 0.12 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6))),
   },
   strobe: {
     gap: 250,
@@ -110,7 +111,9 @@ export function AnimationSyncManager() {
   // Global runner in-flight checks to prevent queueing commands
   const inFlight = useRef<Record<string, boolean>>({});
   const lastColor = useRef<Record<string, string>>({});
-  const timers = useRef<Record<string, { intervalId: number; start: number }>>({});
+  const timers = useRef<Record<string, { intervalId: number; start: number }>>(
+    {},
+  );
 
   // 1. Compute devices in Screen Sync
   const ambientScreenDevices = React.useMemo(() => {
@@ -219,7 +222,9 @@ export function AnimationSyncManager() {
   useEffect(() => {
     const currentTimers = timers.current;
     return () => {
-      Object.values(currentTimers).forEach((t) => window.clearInterval(t.intervalId));
+      Object.values(currentTimers).forEach((t) =>
+        window.clearInterval(t.intervalId),
+      );
     };
   }, []);
 
@@ -290,12 +295,7 @@ export function AnimationSyncManager() {
       const now = performance.now();
 
       // 1. Process Screen Sync
-      if (
-        screenActive &&
-        video &&
-        ctx &&
-        ambientScreenDevices.length > 0
-      ) {
+      if (screenActive && video && ctx && ambientScreenDevices.length > 0) {
         ctx.drawImage(video, 0, 0, 24, 24);
         const target = avgColor(ctx, 24, 24);
 
@@ -398,8 +398,10 @@ export function AnimationSyncManager() {
     setDeviceAttributes,
   ]);
 
-  const needsScreenShare = ambientScreenDevices.length > 0 && !screenActive && !screenPending;
-  const needsAudioShare = ambientMusicDevices.length > 0 && !audioActive && !audioPending;
+  const needsScreenShare =
+    ambientScreenDevices.length > 0 && !screenActive && !screenPending;
+  const needsAudioShare =
+    ambientMusicDevices.length > 0 && !audioActive && !audioPending;
 
   if (!mounted) return null;
 

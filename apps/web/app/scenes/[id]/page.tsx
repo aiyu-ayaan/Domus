@@ -55,7 +55,9 @@ export default function SceneBuilderPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [targets, setTargets] = useState<Record<string, Target>>({});
-  const [master, setMaster] = useState<Record<string, any>>({ brightness: 100 });
+  const [master, setMaster] = useState<Record<string, any>>({
+    brightness: 100,
+  });
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -100,7 +102,11 @@ export default function SceneBuilderPage() {
         const seeded = Object.fromEntries(
           scene.states.map((s) => [
             s.device_id,
-            { device_id: s.device_id, state: s.state, attributes: { ...s.attributes } },
+            {
+              device_id: s.device_id,
+              state: s.state,
+              attributes: { ...s.attributes },
+            },
           ]),
         );
         setName(scene.name);
@@ -308,7 +314,8 @@ export default function SceneBuilderPage() {
               {isNew ? "New Scene" : name || "Edit Scene"}
             </h1>
             <p className="text-xs text-muted-foreground mt-2 font-mono tracking-wide uppercase">
-              {selectedCount} device{selectedCount === 1 ? "" : "s"} in this scene
+              {selectedCount} device{selectedCount === 1 ? "" : "s"} in this
+              scene
             </p>
           </div>
         </div>
@@ -409,9 +416,7 @@ export default function SceneBuilderPage() {
           </div>
 
           <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/40 px-4 py-3">
-            <p className="text-sm font-semibold">
-              All {allOn ? "On" : "Off"}
-            </p>
+            <p className="text-sm font-semibold">All {allOn ? "On" : "Off"}</p>
             <Switch
               checked={allOn}
               onCheckedChange={(v) => setAllState(v ? "on" : "off")}
@@ -460,7 +465,9 @@ export default function SceneBuilderPage() {
                 key={device.id}
                 device={device}
                 target={targets[device.id]}
-                wattage={deviceStates[device.id]?.attributes?.current_consumption}
+                wattage={
+                  deviceStates[device.id]?.attributes?.current_consumption
+                }
                 onRemove={() => removeDevice(device.id)}
                 onSetState={(state) => patchTarget(device.id, { state })}
                 onSetAttrs={(attrs) => patchAttrs(device.id, attrs)}
@@ -504,7 +511,9 @@ export default function SceneBuilderPage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold truncate">{device.name}</p>
+                    <p className="text-sm font-semibold truncate">
+                      {device.name}
+                    </p>
                     <p className="text-[11px] text-muted-foreground capitalize">
                       {device.device_type}
                       {!device.online && " · offline"}
@@ -538,7 +547,8 @@ function DeviceTargetRow({
 }) {
   const isOn = target.state === "on";
   const isLight = device.device_type === "light";
-  const isMeter = device.device_type === "plug" || device.device_type === "switch";
+  const isMeter =
+    device.device_type === "plug" || device.device_type === "switch";
 
   return (
     <div className="rounded-2xl border border-primary/40 bg-card/25 backdrop-blur-sm">
@@ -639,7 +649,9 @@ function LightTargetControls({
   const tempPercent = Math.round(((tempKelvin - 2700) / (6500 - 2700)) * 100);
 
   return (
-    <div className={`space-y-4 ${!isOn ? "opacity-40 pointer-events-none" : ""}`}>
+    <div
+      className={`space-y-4 ${!isOn ? "opacity-40 pointer-events-none" : ""}`}
+    >
       {note && (
         <p className="text-[11px] text-muted-foreground -mb-1">{note}</p>
       )}
@@ -647,7 +659,9 @@ function LightTargetControls({
       <div className="rounded-xl border border-border/50 bg-background/30 p-4 space-y-2">
         <div className="flex justify-between items-center text-sm">
           <span className="font-semibold">Brightness Level</span>
-          <span className="font-mono text-primary font-bold">{brightness}%</span>
+          <span className="font-mono text-primary font-bold">
+            {brightness}%
+          </span>
         </div>
         <input
           type="range"
@@ -689,7 +703,10 @@ function LightTargetControls({
               type="button"
               onClick={() => {
                 setMode("color");
-                onSetAttrs({ color: attributes.color || "#ffd27f", color_temp: 0 });
+                onSetAttrs({
+                  color: attributes.color || "#ffd27f",
+                  color_temp: 0,
+                });
               }}
               className={`py-1 px-3 rounded-lg text-xs font-semibold transition cursor-pointer ${
                 mode === "color"
@@ -710,7 +727,9 @@ function LightTargetControls({
                   key={p.kelvin}
                   type="button"
                   title={`${p.name} (${p.kelvin}K)`}
-                  onClick={() => onSetAttrs({ color_temp: p.kelvin, color: null })}
+                  onClick={() =>
+                    onSetAttrs({ color_temp: p.kelvin, color: null })
+                  }
                   className={`h-9 w-9 rounded-full border cursor-pointer hover:scale-110 transition ${p.bg} ${
                     tempKelvin === p.kelvin
                       ? "border-primary ring-2 ring-primary/45"
@@ -744,7 +763,9 @@ function LightTargetControls({
                     key={preset.hex}
                     type="button"
                     title={preset.name}
-                    onClick={() => onSetAttrs({ color: preset.hex, color_temp: 0 })}
+                    onClick={() =>
+                      onSetAttrs({ color: preset.hex, color_temp: 0 })
+                    }
                     style={{ backgroundColor: preset.hex }}
                     className={`h-8 w-8 rounded-full border cursor-pointer hover:scale-110 transition flex items-center justify-center ${
                       active
@@ -780,8 +801,18 @@ function LightTargetControls({
           device control screen. Only shown for an online device. */}
       {(deviceId || (deviceIds && deviceIds.length > 0)) && (
         <>
-          <AmbientSync deviceId={deviceId} deviceIds={deviceIds} attributes={attributes} onSetAttrs={onSetAttrs} />
-          <LightPatterns deviceId={deviceId} deviceIds={deviceIds} attributes={attributes} onSetAttrs={onSetAttrs} />
+          <AmbientSync
+            deviceId={deviceId}
+            deviceIds={deviceIds}
+            attributes={attributes}
+            onSetAttrs={onSetAttrs}
+          />
+          <LightPatterns
+            deviceId={deviceId}
+            deviceIds={deviceIds}
+            attributes={attributes}
+            onSetAttrs={onSetAttrs}
+          />
         </>
       )}
     </div>
