@@ -1,9 +1,11 @@
 import asyncio
+
 from sqlalchemy import select
-from backend.core.logging import get_logger
+
 from backend.core.database import SessionMaker
-from backend.devices.service import DeviceService
+from backend.core.logging import get_logger
 from backend.devices.models import Device
+from backend.devices.service import DeviceService
 from backend.integrations.models import Integration
 from backend.integrations.registry import get_adapter
 

@@ -215,7 +215,7 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   setDeviceAttributes: async (deviceId, attributes) => {
     const originalState = get().deviceStates[deviceId];
     const originalAttributes = originalState?.attributes || {};
-    
+
     set((prev) => ({
       deviceStates: {
         ...prev.deviceStates,

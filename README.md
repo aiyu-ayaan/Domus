@@ -26,6 +26,7 @@ Domus is a self-hosted, local-first smart home platform for discovering, managin
 ## System Architecture & Event Flow
 
 ### Architecture Topology
+
 ```mermaid
 graph TD
     subgraph Frontend (Next.js 15 & React 19)
@@ -48,6 +49,7 @@ graph TD
 ```
 
 ### Real-Time Telemetry Sequence
+
 ```mermaid
 sequenceDiagram
     participant Hardware as Physical Tapo Device (LAN)
@@ -117,7 +119,7 @@ sequenceDiagram
 
 ### API (Backend)
 
-*Make sure your Python virtual environment is activated before running backend commands.*
+_Make sure your Python virtual environment is activated before running backend commands._
 
 - `bun run dev:api` — Start FastAPI dev server on port `8000`
 - `bun --filter @domus/api test` — Run backend pytest test suite
@@ -136,17 +138,17 @@ sequenceDiagram
 
 Detailed design specifications and architectural guidelines are available in the [docs/](file:///d:/VS-Code/AI%20Expermients/Domus/docs) directory:
 
-*   [Core Architecture](file:///d:/VS-Code/AI%20Expermients/Domus/docs/architecture.md) — Modular monolith structure, domain-driven boundaries, and coding rules.
-*   [Frontend Guide](file:///d:/VS-Code/AI%20Expermients/Domus/docs/frontend/README.md) — Design system tokens, state management (Zustand), and repository layer patterns.
-*   [Backend Guide](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/README.md) — FastAPI design, DB connections, and device adapter implementations.
-*   [Automations Engine](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/automations.md) — Logic behind rule triggers, trigger types, and system execution.
-*   [Real-time Events](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/realtime.md) — Event broker setup, event publishing, and WebSocket managers.
+- [Core Architecture](file:///d:/VS-Code/AI%20Expermients/Domus/docs/architecture.md) — Modular monolith structure, domain-driven boundaries, and coding rules.
+- [Frontend Guide](file:///d:/VS-Code/AI%20Expermients/Domus/docs/frontend/README.md) — Design system tokens, state management (Zustand), and repository layer patterns.
+- [Backend Guide](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/README.md) — FastAPI design, DB connections, and device adapter implementations.
+- [Automations Engine](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/automations.md) — Logic behind rule triggers, trigger types, and system execution.
+- [Real-time Events](file:///d:/VS-Code/AI%20Expermients/Domus/docs/backend/realtime.md) — Event broker setup, event publishing, and WebSocket managers.
 
 ---
 
 ## Live Real-Time Polling & WebSockets
 
-Domus supports live, real-time telemetry streaming for active online devices. 
+Domus supports live, real-time telemetry streaming for active online devices.
 
 - **Background Polling Loop**: A background worker (located in `apps/api/backend/devices/poller.py`) runs continuously every 2 seconds. It fetches online devices, queries their physical hardware adapters (like TP-Link Tapo L900/P110 devices) for live attributes (e.g. brightness, color, current power draw in Watts), and records state snapshots in PostgreSQL.
 - **WebSocket Streaming**: Updates are published to the event bus and instantly broadcasted to connected browser clients over WebSockets (`device.state_changed` event). The frontend dashboard page and history charts update reactively in real-time.
@@ -155,6 +157,6 @@ Domus supports live, real-time telemetry streaming for active online devices.
 
 ## License
 
-This project is licensed under the **Domus Personal Use License**. 
+This project is licensed under the **Domus Personal Use License**.
 
 **Free to Use, Not Free to Copy**. You are free to self-host and run this software for your own personal, non-commercial use. However, you may not distribute, sublicense, sell, copy, or redistribute the source code or binaries to any third party. See the [LICENSE](file:///d:/VS-Code/AI%20Expermients/Domus/LICENSE) file for details.

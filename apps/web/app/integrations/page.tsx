@@ -126,8 +126,11 @@ export default function IntegrationsPage() {
     },
   });
 
-  const { fields: deviceFields, append: appendDevice, remove: removeDevice } =
-    useFieldArray({ control, name: "devices" });
+  const {
+    fields: deviceFields,
+    append: appendDevice,
+    remove: removeDevice,
+  } = useFieldArray({ control, name: "devices" });
   const selectedType = watch("type");
   const isTuyaFamily = ["tuya", "wipro", "syska"].includes(selectedType);
   const isMqtt = selectedType === "mqtt";
@@ -139,7 +142,14 @@ export default function IntegrationsPage() {
       if (isTuyaFamily) {
         devices = (data.devices || [])
           .filter((d) => d.id && d.local_key)
-          .map((d) => ({ id: d.id, ip: d.ip, local_key: d.local_key, version: d.version, name: d.name, type: d.type }));
+          .map((d) => ({
+            id: d.id,
+            ip: d.ip,
+            local_key: d.local_key,
+            version: d.version,
+            name: d.name,
+            type: d.type,
+          }));
       } else if (isMqtt) {
         devices = (data.devices || [])
           .filter((d) => d.topic)
@@ -295,10 +305,11 @@ export default function IntegrationsPage() {
                     Tuya Cloud Project (official, like Home Assistant)
                   </label>
                   <p className="text-[10px] text-muted-foreground/70">
-                    iot.tuya.com → Cloud → Create Project → Devices → Link Tuya App
-                    Account (scan QR in SmartLife app) → copy Access ID/Secret from
-                    the project Overview. This replaces the legacy username/password
-                    login below, which Tuya has shut off for most accounts.
+                    iot.tuya.com → Cloud → Create Project → Devices → Link Tuya
+                    App Account (scan QR in SmartLife app) → copy Access
+                    ID/Secret from the project Overview. This replaces the
+                    legacy username/password login below, which Tuya has shut
+                    off for most accounts.
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -349,12 +360,16 @@ export default function IntegrationsPage() {
                     </button>
                   </div>
                   <p className="text-[10px] text-muted-foreground/70">
-                    Tuya&apos;s legacy cloud login is dead for most accounts now. Add
-                    devices by id/ip/local_key (pulled once via the Tuya IoT Platform
-                    or <code>tinytuya wizard</code>) for direct LAN control instead.
+                    Tuya&apos;s legacy cloud login is dead for most accounts
+                    now. Add devices by id/ip/local_key (pulled once via the
+                    Tuya IoT Platform or <code>tinytuya wizard</code>) for
+                    direct LAN control instead.
                   </p>
                   {deviceFields.map((field, idx) => (
-                    <div key={field.id} className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2">
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2"
+                    >
                       <input
                         placeholder="Device ID"
                         className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
@@ -421,12 +436,15 @@ export default function IntegrationsPage() {
                     </button>
                   </div>
                   <p className="text-[10px] text-muted-foreground/70">
-                    For devices flashed off the Tuya cloud with Tasmota — Connector IP
-                    above is the MQTT broker address. Topic is each device&apos;s
-                    Tasmota MQTT topic (cmnd/&lt;topic&gt;/POWER).
+                    For devices flashed off the Tuya cloud with Tasmota —
+                    Connector IP above is the MQTT broker address. Topic is each
+                    device&apos;s Tasmota MQTT topic (cmnd/&lt;topic&gt;/POWER).
                   </p>
                   {deviceFields.map((field, idx) => (
-                    <div key={field.id} className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2">
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2"
+                    >
                       <input
                         placeholder="Tasmota Topic"
                         className="rounded-lg border border-border bg-background/50 py-2 px-2.5 text-xs outline-none focus:border-primary"
@@ -513,8 +531,9 @@ export default function IntegrationsPage() {
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground/70">
-                Country code + platform are for SmartLife cloud bulbs (Wipro, Syska,
-                Tuya) — the same fields as Home Assistant&apos;s smart_life config.
+                Country code + platform are for SmartLife cloud bulbs (Wipro,
+                Syska, Tuya) — the same fields as Home Assistant&apos;s
+                smart_life config.
               </p>
 
               <button

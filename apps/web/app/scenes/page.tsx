@@ -81,12 +81,19 @@ export default function ScenesPage() {
     defaultValues: {
       name: "",
       description: "",
-      states: [{ device_ids: [], state: "off", color: "#ffffff", brightness: 100 }],
+      states: [
+        { device_ids: [], state: "off", color: "#ffffff", brightness: 100 },
+      ],
     },
   });
 
   const watchedStates = watch("states");
-  const newRow = () => ({ device_ids: [], state: "off", color: "#ffffff", brightness: 100 });
+  const newRow = () => ({
+    device_ids: [],
+    state: "off",
+    color: "#ffffff",
+    brightness: 100,
+  });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -336,15 +343,19 @@ export default function ScenesPage() {
                             </div>
                             <div>
                               <label className="text-[10px] text-muted-foreground">
-                                Brightness {watchedStates?.[idx]?.brightness ?? 100}%
+                                Brightness{" "}
+                                {watchedStates?.[idx]?.brightness ?? 100}%
                               </label>
                               <input
                                 type="range"
                                 min={1}
                                 max={100}
-                                {...register(`states.${idx}.brightness` as const, {
-                                  valueAsNumber: true,
-                                })}
+                                {...register(
+                                  `states.${idx}.brightness` as const,
+                                  {
+                                    valueAsNumber: true,
+                                  },
+                                )}
                                 className="w-full h-1.5 rounded-lg bg-muted accent-primary cursor-pointer"
                               />
                             </div>

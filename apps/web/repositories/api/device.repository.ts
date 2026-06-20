@@ -74,7 +74,10 @@ export class ApiDeviceRepository implements IDeviceRepository {
     return apiClient.post(`/devices/${id}/attributes`, attributes);
   }
 
-  public async getState(id: string, refresh?: boolean): Promise<DeviceStateOut> {
+  public async getState(
+    id: string,
+    refresh?: boolean,
+  ): Promise<DeviceStateOut> {
     return apiClient.get(`/devices/${id}/state`, {
       params: refresh !== undefined ? { refresh } : undefined,
     });

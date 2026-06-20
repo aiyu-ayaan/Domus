@@ -219,7 +219,7 @@ export class MockDeviceRepository implements IDeviceRepository {
       created_at: new Date().toISOString(),
     };
     mockDb.set("deviceStates", { ...states, [id]: newState });
-    
+
     // Add to history
     const histories = mockDb.get("deviceHistory");
     const history = histories[id] || [];
@@ -231,7 +231,10 @@ export class MockDeviceRepository implements IDeviceRepository {
     return newState;
   }
 
-  public async getState(id: string, refresh?: boolean): Promise<DeviceStateOut> {
+  public async getState(
+    id: string,
+    refresh?: boolean,
+  ): Promise<DeviceStateOut> {
     await this.delay(50);
     const states = mockDb.get("deviceStates");
     const state = states[id];

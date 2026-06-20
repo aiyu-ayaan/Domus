@@ -8,18 +8,29 @@ import { Plus, Trash2, Play } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
 import { hueToHex, lerpPalette } from "@/lib/color";
 
-type Pattern = { id: string; label: string; gap: number; tick: (t: number) => string };
+type Pattern = {
+  id: string;
+  label: string;
+  gap: number;
+  tick: (t: number) => string;
+};
 
 // ponytail: gaps are device-realistic and the runner dedupes identical colors,
 // so discrete patterns only write on an actual change.
 const PATTERNS: Pattern[] = [
-  { id: "rainbow", label: "Rainbow Loop", gap: 500, tick: (t) => hueToHex((t * 60) % 360) },
+  {
+    id: "rainbow",
+    label: "Rainbow Loop",
+    gap: 500,
+    tick: (t) => hueToHex((t * 60) % 360),
+  },
   {
     id: "breathe",
     label: "Breathe",
     gap: 350,
     // Pulse via color lightness so brightness stays user-controlled.
-    tick: (t) => hueToHex(265, 0.7, 0.12 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6))),
+    tick: (t) =>
+      hueToHex(265, 0.7, 0.12 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6))),
   },
   {
     id: "strobe",
@@ -32,7 +43,14 @@ const PATTERNS: Pattern[] = [
     label: "Party",
     gap: 600,
     tick: (t) => {
-      const palette = ["#ff0040", "#ff8800", "#ffee00", "#22ff44", "#00ccff", "#cc00ff"];
+      const palette = [
+        "#ff0040",
+        "#ff8800",
+        "#ffee00",
+        "#22ff44",
+        "#00ccff",
+        "#cc00ff",
+      ];
       return palette[Math.floor(t * 1.6) % palette.length];
     },
   },
@@ -47,7 +65,8 @@ const PATTERNS: Pattern[] = [
     id: "sunrise",
     label: "Sunrise",
     gap: 1000,
-    tick: (t) => lerpPalette(["#3a1d00", "#ff6a00", "#ffd27f", "#fff4e6"], (t % 30) / 30),
+    tick: (t) =>
+      lerpPalette(["#3a1d00", "#ff6a00", "#ffd27f", "#fff4e6"], (t % 30) / 30),
   },
 ];
 
@@ -125,11 +144,18 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
   };
 
   const runCustom = (c: Custom) =>
-    run(c.id, c.gap, (t) => c.colors[Math.floor((t * 1000) / c.gap) % c.colors.length]);
+    run(
+      c.id,
+      c.gap,
+      (t) => c.colors[Math.floor((t * 1000) / c.gap) % c.colors.length],
+    );
 
   const saveCustom = () => {
     if (!name.trim() || colors.length < 2) return;
-    persist([...customs, { id: "c" + Date.now(), name: name.trim(), gap, colors }]);
+    persist([
+      ...customs,
+      { id: "c" + Date.now(), name: name.trim(), gap, colors },
+    ]);
     setName("");
     setColors([]);
     setBuilding(false);
@@ -191,7 +217,9 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
                       />
                     ))}
                   </span>
-                  <span className="truncate">{active === c.id ? "■ Stop" : c.name}</span>
+                  <span className="truncate">
+                    {active === c.id ? "■ Stop" : c.name}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -256,7 +284,10 @@ export function LightPatterns({ deviceId }: { deviceId: string }) {
                   key={i}
                   className="flex items-center gap-1 rounded-md border border-border/60 px-1.5 py-1 text-[10px] font-mono"
                 >
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: col }} />
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: col }}
+                  />
                   {col}
                   <button
                     type="button"

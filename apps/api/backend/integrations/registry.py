@@ -54,6 +54,8 @@ def get_adapter(integration) -> DeviceAdapter:
     if kind is IntegrationType.mqtt:
         from backend.integrations.adapters.mqtt_tasmota import (
             TasmotaMqttAdapter,
+        )
+        from backend.integrations.adapters.mqtt_tasmota import (
             has_real_config as has_mqtt_config,
         )
 
@@ -78,6 +80,8 @@ def get_adapter(integration) -> DeviceAdapter:
     if kind in _TUYA_FAMILY:
         from backend.integrations.adapters.tuya_openapi import (
             RealTuyaOpenApiAdapter,
+        )
+        from backend.integrations.adapters.tuya_openapi import (
             has_real_config as has_openapi_config,
         )
 
@@ -86,6 +90,8 @@ def get_adapter(integration) -> DeviceAdapter:
 
         from backend.integrations.adapters.tuya_local import (
             RealTuyaLocalAdapter,
+        )
+        from backend.integrations.adapters.tuya_local import (
             has_real_config as has_local_config,
         )
 
@@ -94,6 +100,8 @@ def get_adapter(integration) -> DeviceAdapter:
 
         from backend.integrations.adapters.tuya_cloud import (
             RealTuyaAdapter,
+        )
+        from backend.integrations.adapters.tuya_cloud import (
             has_real_config as has_cloud_config,
         )
 

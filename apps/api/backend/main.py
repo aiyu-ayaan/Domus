@@ -17,13 +17,14 @@ log = get_logger("main")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    import sys
     import asyncio
+    import sys
+
     from backend.automations.engine import register as register_automations
+    from backend.devices.poller import poll_devices_loop
     from backend.mqtt.service import mqtt_service
     from backend.websocket import manager as ws_manager
     from backend.websocket import redis_bridge
-    from backend.devices.poller import poll_devices_loop
 
     log.info("Starting %s (%s)", settings.app_name, settings.environment)
     register_automations()  # automation engine subscribes to the event bus

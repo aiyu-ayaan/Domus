@@ -34,7 +34,10 @@ export function hexToRgb(hex: string): [number, number, number] {
 }
 
 export const rgbToHex = (r: number, g: number, b: number) =>
-  "#" + [r, g, b].map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0")).join("");
+  "#" +
+  [r, g, b]
+    .map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0"))
+    .join("");
 
 // Linear interpolate across an evenly-spaced list of hex stops; t in [0,1].
 export function lerpPalette(stops: string[], t: number): string {

@@ -285,7 +285,10 @@ export function DashboardPage() {
       animate="show"
       className="min-h-[calc(100vh-7rem)] space-y-4 sm:space-y-5"
     >
-      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
+      <motion.section
+        variants={itemVariants}
+        className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]"
+      >
         <div className="relative overflow-hidden rounded-none border-2 border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
           <div className="absolute inset-x-0 top-0 h-1 bg-[#E61919]" />
           <div
@@ -402,7 +405,10 @@ export function DashboardPage() {
         </div>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid gap-4 lg:grid-cols-4">
+      <motion.section
+        variants={itemVariants}
+        className="grid gap-4 lg:grid-cols-4"
+      >
         <MetricPanel
           icon={Cpu}
           label="Devices"
@@ -429,7 +435,10 @@ export function DashboardPage() {
         />
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+      <motion.section
+        variants={itemVariants}
+        className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]"
+      >
         <DashboardCard
           title="Live Power Draw"
           description="Real-time consumption reported by metered devices"
@@ -568,7 +577,10 @@ export function DashboardPage() {
         </DashboardCard>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid gap-4 2xl:grid-cols-[0.9fr_1fr_1.1fr]">
+      <motion.section
+        variants={itemVariants}
+        className="grid gap-4 2xl:grid-cols-[0.9fr_1fr_1.1fr]"
+      >
         <DashboardCard
           title="Room Health"
           description="Availability grouped by location"
@@ -620,7 +632,7 @@ export function DashboardPage() {
                   className="group flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 text-left transition duration-200 hover:border-primary/50 hover:bg-accent/60 focus:outline-none focus:ring-2 focus:ring-ring/40"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary">
                       <Sparkles className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -667,7 +679,10 @@ export function DashboardPage() {
         </DashboardCard>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+      <motion.section
+        variants={itemVariants}
+        className="grid gap-4 xl:grid-cols-[1fr_1fr]"
+      >
         <DashboardCard
           title="Automation Stack"
           description="Enabled rules ready for manual test runs"

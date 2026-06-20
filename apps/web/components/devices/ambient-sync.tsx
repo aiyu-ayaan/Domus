@@ -16,7 +16,12 @@ const COLOR_DELTA = 5; // min RGB distance before re-sending a color
 const FADE = 0.7;
 
 // Music color themes (color only — no brightness). `spectrum` rotates the hue wheel.
-const THEMES: { id: string; label: string; stops: string[]; spectrum?: boolean }[] = [
+const THEMES: {
+  id: string;
+  label: string;
+  stops: string[];
+  spectrum?: boolean;
+}[] = [
   { id: "spectrum", label: "Spectrum", stops: [], spectrum: true },
   { id: "fire", label: "Fire", stops: ["#ff2200", "#ff7700", "#ffdd00"] },
   { id: "ocean", label: "Ocean", stops: ["#0033ff", "#00aaff", "#00ffcc"] },
@@ -24,7 +29,11 @@ const THEMES: { id: string; label: string; stops: string[]; spectrum?: boolean }
   { id: "sunset", label: "Sunset", stops: ["#ff0066", "#ff6600", "#ffcc00"] },
 ];
 
-function avgColor(ctx: CanvasRenderingContext2D, w: number, h: number): [number, number, number] {
+function avgColor(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+): [number, number, number] {
   const { data } = ctx.getImageData(0, 0, w, h);
   let r = 0,
     g = 0,
@@ -156,7 +165,11 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
         if (inFlight.current) return;
 
         const [lr, lg, lb] = lastRGB.current;
-        if (Math.abs(r - lr) + Math.abs(g - lg) + Math.abs(b - lb) <= COLOR_DELTA) return;
+        if (
+          Math.abs(r - lr) + Math.abs(g - lg) + Math.abs(b - lb) <=
+          COLOR_DELTA
+        )
+          return;
 
         lastRGB.current = [r, g, b];
         lastPushTime.current = now;
@@ -198,7 +211,9 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
     if (stream.current && !analyser.current) stop();
     if (await ensureStream(true)) {
       if (!analyser.current) {
-        toast.error('Enable "Share tab/system audio" in the share dialog for music sync.');
+        toast.error(
+          'Enable "Share tab/system audio" in the share dialog for music sync.',
+        );
         return;
       }
       setMusic(true);
@@ -222,7 +237,9 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
               title="Live color"
             />
           )}
-          {starting && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+          {starting && (
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          )}
         </div>
       </div>
 

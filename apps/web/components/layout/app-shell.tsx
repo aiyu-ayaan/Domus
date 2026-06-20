@@ -118,9 +118,13 @@ function SidebarNavItem({
         )}
 
         {isCollapsed && item.badge && unreadCount > 0 && (
-          <span className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
-            isActive ? "bg-background animate-pulse" : "bg-destructive animate-pulse"
-          }`} />
+          <span
+            className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
+              isActive
+                ? "bg-background animate-pulse"
+                : "bg-destructive animate-pulse"
+            }`}
+          />
         )}
       </Link>
 
@@ -477,9 +481,7 @@ export function AppShell({
       <aside className="hidden lg:block w-20 flex-shrink-0 h-screen bg-transparent" />
 
       {/* Desktop Sidebar (Floating Vertical Dock) */}
-      <aside
-        className="fixed left-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full p-1.5 py-3.5 gap-2.5 w-14 h-fit max-h-[90vh] select-none"
-      >
+      <aside className="fixed left-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full p-1.5 py-3.5 gap-2.5 w-14 h-fit max-h-[90vh] select-none">
         {/* Brand/Logo */}
         <Link
           href="/"
@@ -696,9 +698,13 @@ export function AppShell({
               strokeWidth={pathname.startsWith("/notifications") ? 2.25 : 1.75}
             />
             {unreadCount > 0 && (
-              <span className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
-                pathname.startsWith("/notifications") ? "bg-background animate-pulse" : "bg-destructive animate-pulse"
-              }`} />
+              <span
+                className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
+                  pathname.startsWith("/notifications")
+                    ? "bg-background animate-pulse"
+                    : "bg-destructive animate-pulse"
+                }`}
+              />
             )}
           </Link>
 
@@ -793,7 +799,7 @@ export function AppShell({
                             className="text-[9px] font-mono font-semibold text-muted-foreground hover:text-foreground cursor-pointer flex-shrink-0"
                           >
                             Dismiss
-                        </button>
+                          </button>
                         )}
                       </div>
                       <p className="text-muted-foreground/90 mt-1.5 leading-relaxed">
