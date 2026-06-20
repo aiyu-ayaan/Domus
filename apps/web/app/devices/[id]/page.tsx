@@ -32,6 +32,8 @@ import {
   Check,
 } from "lucide-react";
 import type { DeviceOut, DeviceStateOut } from "@/types/api";
+import { AmbientSync } from "@/components/devices/ambient-sync";
+import { LightPatterns } from "@/components/devices/light-patterns";
 import { LIGHT_COLOR_PRESETS, hexToRgb } from "@/lib/color";
 
 const deviceSettingsSchema = z.object({
@@ -699,6 +701,11 @@ export default function DeviceDetailPage() {
                         )}
                       </div>
 
+                      {/* Live ambient modes (screen color + music sync) */}
+                      <AmbientSync deviceId={device.id} />
+
+                      {/* Animated LED-style color patterns */}
+                      <LightPatterns deviceId={device.id} />
                     </div>
                   )}
                 </div>
