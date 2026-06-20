@@ -72,31 +72,38 @@ sequenceDiagram
 
 ## Quick Start
 
-1. **Install Prerequisites**: Install Bun, Node.js, Python 3.12+, PostgreSQL, and Redis.
-2. **Setup Workspaces**: Run `bun install` at the root to set up all node workspaces.
-3. **Setup Backend**:
-   - Create a Python virtual environment in `apps/api`:
-     ```bash
-     cd apps/api
-     python -m venv .venv
-     ```
-   - Activate it (e.g. on Windows PowerShell):
-     ```powershell
-     & .venv/Scripts/Activate.ps1
-     ```
-   - Install dependencies in editable mode:
-     ```bash
-     pip install -e ".[dev]"
-     ```
-4. **Local Services**: Start PostgreSQL and Redis:
-   ```bash
-   docker-compose up -d postgres redis
-   ```
-5. **Database Migrations**: Run the migrations using Alembic:
-   ```bash
-   cd apps/api
-   alembic upgrade head
-   ```
+1. Install Bun, Node.js, Python 3.12+, PostgreSQL, and Redis.
+2. Run `bun install` to set up all workspaces.
+3. For the API, create a Python virtual environment in `apps/api` and install with `pip install -e ".[dev]"`.
+4. PostgreSQL and Redis are required — use `docker-compose up postgres redis` for local development.
+5. Copy environment files as needed and start `web` and `api`.
+
+## Commands
+
+### To Activate Python Virtual Environment
+
+```
+& apps/api/.venv/Scripts/Activate.ps1
+```
+
+### Web (Frontend)
+
+- `bun run dev:web` — Start Next.js dev server on port 3000
+- `bun --filter @domus/web build` — Build for production
+- `bun --filter @domus/web lint` — Run ESLint
+
+### API (Backend)
+
+- `bun run dev:api` — Start FastAPI dev server on port 8000 (requires Python venv)
+- `bun --filter @domus/api test` — Run pytest tests
+- `bun --filter @domus/api lint` — Run ruff and black checks
+
+### Full Stack
+
+- `docker-compose up` — Spin up web, api, postgres, and redis
+- `bun run build` — Build both web and api
+- `bun run lint` — Lint all workspaces
+- `bun run format` — Format code with prettier (Node) and black (Python)
 
 ---
 
