@@ -4,6 +4,8 @@ Adding a real integration = add a class + one line here. ``get_adapter`` decrypt
 stored credentials before handing them to the adapter.
 """
 
+import logging
+
 from backend.common.enums import IntegrationType
 from backend.core.crypto import decrypt_json
 from backend.integrations.adapters import brands
@@ -14,6 +16,9 @@ from backend.integrations.adapters.tuya import TuyaAdapter
 from backend.integrations.adapters.xiaomi import XiaomiAdapter
 from backend.integrations.adapters.zigbee import ZigbeeAdapter
 from backend.integrations.base import DeviceAdapter
+
+logger = logging.getLogger(__name__)
+
 
 _REGISTRY: dict[IntegrationType, type[DeviceAdapter]] = {
     IntegrationType.tapo: TapoAdapter,
@@ -48,7 +53,18 @@ def get_adapter(integration) -> DeviceAdapter:
     """
     config: dict = {}
     if integration.config_encrypted:
-        config = decrypt_json(integration.config_encrypted)
+        try:
+            config = decrypt_json(integration.config_encrypted)
+        except ValueError:
+            # ponytail: stale ENCRYPTION_KEY (e.g. rotated, or .env path bug) leaves
+            # undecryptable rows in the DB — fall back to the mock adapter instead of
+            # 500ing; re-saving the integration's credentials re-encrypts under the
+            # current key and clears this up.
+            logger.warning(
+                "Could not decrypt config for integration %s; falling back to defaults. "
+                "Re-save the integration's credentials to fix.",
+                integration.id,
+            )
 
     kind = IntegrationType(integration.type)
     if kind is IntegrationType.mqtt:

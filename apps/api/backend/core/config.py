@@ -1,13 +1,20 @@
 import os
 from functools import lru_cache
+from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# ponytail: absolute path to the repo-root .env, not a ".env" relative to cwd — uvicorn's
+# cwd differs depending on how it's launched (repo root vs apps/api), so a relative path
+# was silently loading no file at all and falling back to the default ENCRYPTION_KEY,
+# which made previously-encrypted integration secrets undecryptable.
+_REPO_ROOT_ENV = Path(__file__).resolve().parents[4] / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=str(_REPO_ROOT_ENV), env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Domus API"
     environment: str = "development"
