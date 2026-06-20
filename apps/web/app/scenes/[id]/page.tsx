@@ -1,5 +1,7 @@
 // Scene mixer/builder — create (id === "new") or edit a multi-device scene.
-// Bulbs get brightness + color targets; switches/plugs get on/off + a live
+// The Master Control drives every device in the scene at once; the device list
+// shows only the scene's members, with an "Add devices" panel to bring in more.
+// Bulbs get brightness + colour targets; switches/plugs get on/off + a live
 // wattage readout. Saved targets are applied together on activate.
 "use client";
 
@@ -12,7 +14,17 @@ import { useSceneStore } from "@/stores/scene-store";
 import { sceneRepository } from "@/repositories";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Play, Loader2, Lightbulb, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Play,
+  Loader2,
+  Lightbulb,
+  Zap,
+  Plus,
+  X,
+  SlidersHorizontal,
+} from "lucide-react";
 import { LIGHT_COLOR_PRESETS } from "@/lib/color";
 import type { DeviceOut } from "@/types/api";
 
@@ -40,6 +52,8 @@ export default function SceneBuilderPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [targets, setTargets] = useState<Record<string, Target>>({});
+  const [master, setMaster] = useState<Record<string, any>>({ brightness: 100 });
+  const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
 
@@ -50,7 +64,10 @@ export default function SceneBuilderPage() {
 
   // Seed name/description/targets from the saved scene when editing.
   useEffect(() => {
-    if (isNew) return;
+    if (isNew) {
+      setShowAdd(true); // nothing added yet — open the picker
+      return;
+    }
     let active = true;
     sceneRepository
       .get(id)
@@ -77,21 +94,22 @@ export default function SceneBuilderPage() {
     };
   }, [id, isNew, router]);
 
-  const toggleInclude = (device: DeviceOut) => {
+  const addDevice = (device: DeviceOut) =>
+    setTargets((prev) => ({
+      ...prev,
+      [device.id]: {
+        device_id: device.id,
+        state: "on",
+        attributes: device.device_type === "light" ? { ...master } : {},
+      },
+    }));
+
+  const removeDevice = (deviceId: string) =>
     setTargets((prev) => {
       const next = { ...prev };
-      if (next[device.id]) {
-        delete next[device.id];
-      } else {
-        next[device.id] = {
-          device_id: device.id,
-          state: "on",
-          attributes: device.device_type === "light" ? { brightness: 100 } : {},
-        };
-      }
+      delete next[deviceId];
       return next;
     });
-  };
 
   const patchTarget = (deviceId: string, patch: Partial<Target>) =>
     setTargets((prev) => ({
@@ -107,6 +125,27 @@ export default function SceneBuilderPage() {
         attributes: { ...prev[deviceId].attributes, ...attrs },
       },
     }));
+
+  // ---- Master control: drive every device in the scene at once -------------
+  const setAllState = (state: string) =>
+    setTargets((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).map(([k, t]) => [k, { ...t, state }]),
+      ),
+    );
+
+  const setAllLightAttrs = (attrs: Record<string, any>) => {
+    setMaster((m) => ({ ...m, ...attrs }));
+    setTargets((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).map(([k, t]) => {
+          const dev = devices.find((d) => d.id === k);
+          if (dev?.device_type !== "light") return [k, t];
+          return [k, { ...t, attributes: { ...t.attributes, ...attrs } }];
+        }),
+      ),
+    );
+  };
 
   const handleSave = async (): Promise<string | null> => {
     if (!activeHomeId) return null;
@@ -169,7 +208,15 @@ export default function SceneBuilderPage() {
     );
   }
 
-  const selectedCount = Object.keys(targets).length;
+  const includedDevices = devices.filter((d) => targets[d.id]);
+  const availableDevices = devices.filter((d) => !targets[d.id]);
+  const selectedCount = includedDevices.length;
+  const lightCount = includedDevices.filter(
+    (d) => d.device_type === "light",
+  ).length;
+  const allOn =
+    selectedCount > 0 &&
+    includedDevices.every((d) => targets[d.id].state === "on");
 
   return (
     <div className="space-y-6">
@@ -243,24 +290,71 @@ export default function SceneBuilderPage() {
         </div>
       </div>
 
-      {/* Device list */}
+      {/* Master control — drives every device in the scene at once */}
+      {selectedCount > 0 && (
+        <div className="rounded-3xl border border-primary/30 bg-primary/[0.04] p-5 backdrop-blur-sm space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="rounded-xl border border-primary/40 bg-background/70 p-2 text-primary">
+              <SlidersHorizontal className="h-4.5 w-4.5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold">Master Control</h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Set every device in this scene together.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/40 px-4 py-3">
+            <p className="text-sm font-semibold">
+              All {allOn ? "On" : "Off"}
+            </p>
+            <Switch
+              checked={allOn}
+              onCheckedChange={(v) => setAllState(v ? "on" : "off")}
+            />
+          </div>
+
+          {lightCount > 0 && (
+            <LightTargetControls
+              attributes={master}
+              onSetAttrs={setAllLightAttrs}
+              note={`Applies to all ${lightCount} light${lightCount === 1 ? "" : "s"} in the scene`}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Scene devices — only the ones saved in this scene */}
       <div className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
-          Devices
-        </h2>
-        {devices.length === 0 ? (
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Scene Devices
+          </h2>
+          {availableDevices.length > 0 && (
+            <button
+              onClick={() => setShowAdd((s) => !s)}
+              className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add devices
+            </button>
+          )}
+        </div>
+
+        {selectedCount === 0 ? (
           <div className="rounded-3xl border border-dashed border-border/80 bg-card/15 p-8 text-center text-sm text-muted-foreground">
-            No devices found. Add devices before building a scene.
+            No devices yet — add devices below to build this scene.
           </div>
         ) : (
           <div className="space-y-3">
-            {devices.map((device) => (
+            {includedDevices.map((device) => (
               <DeviceTargetRow
                 key={device.id}
                 device={device}
                 target={targets[device.id]}
                 wattage={deviceStates[device.id]?.attributes?.current_consumption}
-                onToggleInclude={() => toggleInclude(device)}
+                onRemove={() => removeDevice(device.id)}
                 onSetState={(state) => patchTarget(device.id, { state })}
                 onSetAttrs={(attrs) => patchAttrs(device.id, attrs)}
               />
@@ -268,6 +362,54 @@ export default function SceneBuilderPage() {
           </div>
         )}
       </div>
+
+      {/* Add devices panel — devices not yet in the scene */}
+      {showAdd && (
+        <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Add Devices
+            </h2>
+            <button
+              onClick={() => setShowAdd(false)}
+              className="rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          {availableDevices.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">
+              All your devices are already in this scene.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {availableDevices.map((device) => (
+                <button
+                  key={device.id}
+                  onClick={() => addDevice(device)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border/50 bg-background/30 p-3 text-left hover:border-primary/40 transition cursor-pointer"
+                >
+                  <div className="rounded-lg border border-border/70 bg-background/70 p-1.5 text-primary flex-shrink-0">
+                    {device.device_type === "light" ? (
+                      <Lightbulb className="h-4 w-4" />
+                    ) : (
+                      <Zap className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate">{device.name}</p>
+                    <p className="text-[11px] text-muted-foreground capitalize">
+                      {device.device_type}
+                      {!device.online && " · offline"}
+                    </p>
+                  </div>
+                  <Plus className="h-4 w-4 text-primary flex-shrink-0" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -276,36 +418,25 @@ function DeviceTargetRow({
   device,
   target,
   wattage,
-  onToggleInclude,
+  onRemove,
   onSetState,
   onSetAttrs,
 }: {
   device: DeviceOut;
-  target: Target | undefined;
+  target: Target;
   wattage: number | undefined;
-  onToggleInclude: () => void;
+  onRemove: () => void;
   onSetState: (state: string) => void;
   onSetAttrs: (attrs: Record<string, any>) => void;
 }) {
-  const included = !!target;
-  const isOn = target?.state === "on";
+  const isOn = target.state === "on";
   const isLight = device.device_type === "light";
   const isMeter = device.device_type === "plug" || device.device_type === "switch";
 
   return (
-    <div
-      className={`rounded-2xl border bg-card/25 backdrop-blur-sm transition ${
-        included ? "border-primary/40" : "border-border/60"
-      }`}
-    >
+    <div className="rounded-2xl border border-primary/40 bg-card/25 backdrop-blur-sm">
       {/* Row header */}
-      <label className="flex items-center gap-3 p-4 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={included}
-          onChange={onToggleInclude}
-          className="h-4 w-4 accent-primary cursor-pointer"
-        />
+      <div className="flex items-center gap-3 p-4">
         <div className="rounded-xl border border-border/70 bg-background/70 p-2 text-primary flex-shrink-0">
           {isLight ? (
             <Lightbulb className="h-4.5 w-4.5" />
@@ -320,50 +451,53 @@ function DeviceTargetRow({
             {!device.online && " · offline"}
           </p>
         </div>
-        {included && (
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
-            {isOn ? "On" : "Off"}
-          </span>
-        )}
-      </label>
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
+          {isOn ? "On" : "Off"}
+        </span>
+        <button
+          onClick={onRemove}
+          className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
+          title="Remove from scene"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
 
       {/* Target controls */}
-      {included && (
-        <div className="border-t border-border/40 p-4 space-y-4">
-          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/30 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold">Power Target</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                State to apply when the scene runs
-              </p>
-            </div>
-            <Switch
-              checked={isOn}
-              onCheckedChange={(v) => onSetState(v ? "on" : "off")}
-            />
+      <div className="border-t border-border/40 p-4 space-y-4">
+        <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/30 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold">Power Target</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              State to apply when the scene runs
+            </p>
           </div>
-
-          {/* Live wattage meter for plugs/switches */}
-          {isMeter && (
-            <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/30 px-4 py-3">
-              <p className="text-sm font-semibold">Power Meter</p>
-              <span className="font-mono text-sm font-bold text-primary">
-                {device.online && wattage != null
-                  ? `${Number(wattage).toFixed(1)} W`
-                  : "—"}
-              </span>
-            </div>
-          )}
-
-          {/* Bulb controls — only meaningful when the target is "on" */}
-          {isLight && isOn && (
-            <LightTargetControls
-              attributes={target!.attributes}
-              onSetAttrs={onSetAttrs}
-            />
-          )}
+          <Switch
+            checked={isOn}
+            onCheckedChange={(v) => onSetState(v ? "on" : "off")}
+          />
         </div>
-      )}
+
+        {/* Live wattage meter for plugs/switches */}
+        {isMeter && (
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-background/30 px-4 py-3">
+            <p className="text-sm font-semibold">Power Meter</p>
+            <span className="font-mono text-sm font-bold text-primary">
+              {device.online && wattage != null
+                ? `${Number(wattage).toFixed(1)} W`
+                : "—"}
+            </span>
+          </div>
+        )}
+
+        {/* Bulb controls — only meaningful when the target is "on" */}
+        {isLight && isOn && (
+          <LightTargetControls
+            attributes={target.attributes}
+            onSetAttrs={onSetAttrs}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -371,9 +505,11 @@ function DeviceTargetRow({
 function LightTargetControls({
   attributes,
   onSetAttrs,
+  note,
 }: {
   attributes: Record<string, any>;
   onSetAttrs: (attrs: Record<string, any>) => void;
+  note?: string;
 }) {
   const isWhiteMode = (attributes.color_temp ?? 0) > 0;
   const [mode, setMode] = useState<"white" | "color">(
@@ -385,6 +521,9 @@ function LightTargetControls({
 
   return (
     <div className="space-y-4">
+      {note && (
+        <p className="text-[11px] text-muted-foreground -mb-1">{note}</p>
+      )}
       {/* Brightness */}
       <div className="rounded-xl border border-border/50 bg-background/30 p-4 space-y-2">
         <div className="flex justify-between items-center text-sm">
