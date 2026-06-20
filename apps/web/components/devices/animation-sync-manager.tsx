@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Monitor, Music, Volume2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceStore } from "@/stores/device-store";
@@ -83,6 +83,11 @@ function avgColor(
 }
 
 export function AnimationSyncManager() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const devices = useDeviceStore((s) => s.devices);
   const deviceStates = useDeviceStore((s) => s.deviceStates);
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
@@ -91,6 +96,8 @@ export function AnimationSyncManager() {
   const {
     screenActive,
     audioActive,
+    screenPending,
+    audioPending,
     video,
     ctx,
     analyser,
@@ -391,8 +398,10 @@ export function AnimationSyncManager() {
     setDeviceAttributes,
   ]);
 
-  const needsScreenShare = ambientScreenDevices.length > 0 && !screenActive;
-  const needsAudioShare = ambientMusicDevices.length > 0 && !audioActive;
+  const needsScreenShare = ambientScreenDevices.length > 0 && !screenActive && !screenPending;
+  const needsAudioShare = ambientMusicDevices.length > 0 && !audioActive && !audioPending;
+
+  if (!mounted) return null;
 
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none">

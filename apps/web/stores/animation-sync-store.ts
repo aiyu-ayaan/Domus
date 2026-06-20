@@ -6,9 +6,12 @@ import { toast } from "sonner";
 interface AnimationSyncState {
   screenActive: boolean;
   audioActive: boolean;
+  screenPending: boolean;
+  audioPending: boolean;
   stream: MediaStream | null;
   audioStream: MediaStream | null;
   video: HTMLVideoElement | null;
+  canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | null;
   analyser: AnalyserNode | null;
   audioCtx: AudioContext | null;
@@ -22,15 +25,19 @@ interface AnimationSyncState {
 export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
   screenActive: false,
   audioActive: false,
+  screenPending: false,
+  audioPending: false,
   stream: null,
   audioStream: null,
   video: null,
+  canvas: null,
   ctx: null,
   analyser: null,
   audioCtx: null,
 
   startScreenSharing: async () => {
     if (get().screenActive) return true;
+    set({ screenPending: true });
     try {
       const s = await navigator.mediaDevices.getDisplayMedia({
         video: true,
@@ -53,13 +60,16 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
 
       set({
         screenActive: true,
+        screenPending: false,
         stream: s,
         video,
+        canvas,
         ctx,
       });
       return true;
     } catch (err) {
       toast.error("Screen share permission denied or unavailable.");
+      set({ screenPending: false });
       get().stopScreenSharing();
       return false;
     }
@@ -74,14 +84,17 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
     }
     set({
       screenActive: false,
+      screenPending: false,
       stream: null,
       video: null,
+      canvas: null,
       ctx: null,
     });
   },
 
   startAudioSharing: async () => {
     if (get().audioActive) return true;
+    set({ audioPending: true });
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -95,6 +108,7 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
 
       set({
         audioActive: true,
+        audioPending: false,
         audioStream: s,
         audioCtx: ac,
         analyser: an,
@@ -102,6 +116,7 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
       return true;
     } catch (err) {
       toast.error("Microphone permission denied or unavailable.");
+      set({ audioPending: false });
       get().stopAudioSharing();
       return false;
     }
@@ -113,6 +128,7 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
     audioCtx?.close().catch(() => {});
     set({
       audioActive: false,
+      audioPending: false,
       audioStream: null,
       audioCtx: null,
       analyser: null,
