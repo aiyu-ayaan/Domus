@@ -1,17 +1,28 @@
 // Live ambient light modes: mirror the screen's dominant color and/or pulse
-// brightness to system audio. Both ride a single getDisplayMedia stream.
+// to system audio with a color theme. Both ride a single getDisplayMedia stream.
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import { Monitor, Music, Loader2 } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
+import { lerpPalette, hueToHex, rgbToHex } from "@/lib/color";
 import { toast } from "sonner";
 
-// ponytail: push at ~5fps with a change threshold so we don't flood the API/websocket.
-// Bump PUSH_MS / loosen the thresholds if the light feels laggy or jumpy.
-const PUSH_MS = 200;
-const COLOR_DELTA = 18; // min RGB distance before re-sending a color
-const BRIGHT_DELTA = 6; // min brightness % change before re-sending
+// ponytail: push as fast as the backend allows via an in-flight guard, capped at
+// MIN_GAP so a fast API doesn't spam. Drop MIN_GAP / thresholds for snappier sync.
+const MIN_GAP = 90; // ms floor between pushes
+const COLOR_DELTA = 10; // min RGB distance before re-sending a color
+const BRIGHT_DELTA = 5; // min brightness % change before re-sending
+
+// Music color themes. `null` stops = "pulse only" (keep current color, vary brightness).
+const THEMES: { id: string; label: string; stops: string[] | null; spectrum?: boolean }[] = [
+  { id: "pulse", label: "Pulse", stops: null },
+  { id: "spectrum", label: "Spectrum", stops: [], spectrum: true },
+  { id: "fire", label: "Fire", stops: ["#ff2200", "#ff7700", "#ffdd00"] },
+  { id: "ocean", label: "Ocean", stops: ["#0033ff", "#00aaff", "#00ffcc"] },
+  { id: "neon", label: "Neon", stops: ["#ff00ff", "#00ffff", "#39ff14"] },
+  { id: "sunset", label: "Sunset", stops: ["#ff0066", "#ff6600", "#ffcc00"] },
+];
 
 function avgColor(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const { data } = ctx.getImageData(0, 0, w, h);
@@ -27,26 +38,28 @@ function avgColor(ctx: CanvasRenderingContext2D, w: number, h: number) {
   return [Math.round(r / px), Math.round(g / px), Math.round(b / px)] as const;
 }
 
-const toHex = (r: number, g: number, b: number) =>
-  "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
-
 export function AmbientSync({ deviceId }: { deviceId: string }) {
   const setDeviceAttributes = useDeviceStore((s) => s.setDeviceAttributes);
 
   const [screen, setScreen] = useState(false);
   const [music, setMusic] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [theme, setTheme] = useState("spectrum");
+  const [preview, setPreview] = useState<string | null>(null); // instant visual feedback
 
   // Live refs read inside the rAF loop without re-subscribing it.
   const screenRef = useRef(false);
   const musicRef = useRef(false);
+  const themeRef = useRef(theme);
   screenRef.current = screen;
   musicRef.current = music;
+  themeRef.current = theme;
 
   const stream = useRef<MediaStream | null>(null);
   const audioCtx = useRef<AudioContext | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
   const raf = useRef<number | null>(null);
+  const inFlight = useRef(false);
   const lastPush = useRef(0);
   const lastRGB = useRef<readonly [number, number, number]>([0, 0, 0]);
   const lastBright = useRef(-1);
@@ -59,8 +72,10 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
     audioCtx.current?.close().catch(() => {});
     audioCtx.current = null;
     analyser.current = null;
+    inFlight.current = false;
     setScreen(false);
     setMusic(false);
+    setPreview(null);
   };
 
   // Stop everything when the device page unmounts.
@@ -100,12 +115,35 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
       }
 
       const bins = new Uint8Array(128);
+      const push = (attrs: Record<string, number | string>) => {
+        inFlight.current = true;
+        lastPush.current = performance.now();
+        setDeviceAttributes(deviceId, attrs)
+          .catch(() => {})
+          .finally(() => {
+            inFlight.current = false;
+          });
+      };
+
       const loop = () => {
         raf.current = requestAnimationFrame(loop);
-        const now = performance.now();
-        if (now - lastPush.current < PUSH_MS) return;
+        // Drive as fast as the API drains, but never tighter than MIN_GAP.
+        if (inFlight.current || performance.now() - lastPush.current < MIN_GAP) return;
 
         const attrs: Record<string, number | string> = {};
+        let level = 0;
+
+        if (musicRef.current && analyser.current) {
+          analyser.current.getByteFrequencyData(bins);
+          let sum = 0;
+          for (let i = 0; i < bins.length; i++) sum += bins[i];
+          level = sum / bins.length / 255; // 0..1
+          const brightness = Math.max(10, Math.round(level * 100));
+          if (Math.abs(brightness - lastBright.current) > BRIGHT_DELTA) {
+            attrs.brightness = brightness;
+            lastBright.current = brightness;
+          }
+        }
 
         if (screenRef.current && video.readyState >= 2) {
           ctx.drawImage(video, 0, 0, w, h);
@@ -114,27 +152,26 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
           const dist =
             Math.abs(rgb[0] - pr) + Math.abs(rgb[1] - pg) + Math.abs(rgb[2] - pb);
           if (dist > COLOR_DELTA) {
-            attrs.color = toHex(rgb[0], rgb[1], rgb[2]);
+            const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+            attrs.color = hex;
             lastRGB.current = rgb;
+            setPreview(hex);
+          }
+        } else if (musicRef.current) {
+          // Screen off → music theme drives the color.
+          const t = THEMES.find((x) => x.id === themeRef.current);
+          if (t?.spectrum) {
+            const hex = hueToHex((performance.now() / 18 + level * 140) % 360);
+            attrs.color = hex;
+            setPreview(hex);
+          } else if (t?.stops && t.stops.length) {
+            const hex = lerpPalette(t.stops, level);
+            attrs.color = hex;
+            setPreview(hex);
           }
         }
 
-        if (musicRef.current && analyser.current) {
-          analyser.current.getByteFrequencyData(bins);
-          let sum = 0;
-          for (let i = 0; i < bins.length; i++) sum += bins[i];
-          const level = sum / bins.length / 255; // 0..1
-          const brightness = Math.max(10, Math.round(level * 100));
-          if (Math.abs(brightness - lastBright.current) > BRIGHT_DELTA) {
-            attrs.brightness = brightness;
-            lastBright.current = brightness;
-          }
-        }
-
-        if (Object.keys(attrs).length) {
-          lastPush.current = now;
-          setDeviceAttributes(deviceId, attrs).catch(() => {});
-        }
+        if (Object.keys(attrs).length) push(attrs);
       };
       loop();
       return true;
@@ -150,6 +187,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
   const toggleScreen = async () => {
     if (screen) {
       setScreen(false);
+      setPreview(null);
       if (!musicRef.current) stop();
       return;
     }
@@ -166,7 +204,7 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
     if (stream.current && !analyser.current) stop();
     if (await ensureStream(true)) {
       if (!analyser.current) {
-        toast.error('Enable "Share system/tab audio" in the share dialog for music sync.');
+        toast.error('Enable "Share tab/system audio" in the share dialog for music sync.');
         return;
       }
       setMusic(true);
@@ -176,13 +214,24 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
   return (
     <div className="rounded-2xl border border-border/50 bg-background/30 p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold">Ambient Sync</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Mirror your screen color or pulse to system audio (live).
-          </p>
+        <div className="flex items-center gap-2.5">
+          <div>
+            <p className="text-sm font-semibold">Ambient Sync</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Mirror your screen color or pulse to system audio (live).
+            </p>
+          </div>
         </div>
-        {starting && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+        <div className="flex items-center gap-2">
+          {preview && (
+            <span
+              className="h-4 w-4 rounded-full border border-border/60 shadow-sm transition-colors"
+              style={{ backgroundColor: preview }}
+              title="Live color"
+            />
+          )}
+          {starting && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -221,10 +270,38 @@ export function AmbientSync({ deviceId }: { deviceId: string }) {
           <div>
             <p className="text-xs font-semibold">Music Sync</p>
             <p className="text-[10px] text-muted-foreground">
-              {music ? "Live — pulsing to audio" : "Brightness to beat"}
+              {music ? "Live — pulsing to audio" : "Color + brightness to beat"}
             </p>
           </div>
         </button>
+      </div>
+
+      {/* Music color theme — applied when Music Sync drives color (screen off). */}
+      <div className="space-y-1.5">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Music Theme
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTheme(t.id)}
+              className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer ${
+                theme === t.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {screen && music && (
+          <p className="text-[10px] text-muted-foreground">
+            Screen Color overrides the theme while both are on.
+          </p>
+        )}
       </div>
     </div>
   );
