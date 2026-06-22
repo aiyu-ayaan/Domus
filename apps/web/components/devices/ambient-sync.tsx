@@ -3,10 +3,9 @@
 "use client";
 
 import React from "react";
-import { Camera, Monitor, Music } from "lucide-react";
+import { Monitor, Music } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
 import { useAnimationSyncStore } from "@/stores/animation-sync-store";
-import { isNativeMobilePlatform } from "@/lib/server-url";
 
 // Music color themes (color only — no brightness).
 const THEMES = [
@@ -55,13 +54,9 @@ export function AmbientSync({
   // Retrieve global stream controls
   const { startScreenSharing, startAudioSharing } = useAnimationSyncStore();
 
-  const isMobile = isNativeMobilePlatform();
-  const screenShareUnsupported = false; // Supported via camera on mobile
-
   if (ids.length === 0) return null;
 
   const toggleScreen = async () => {
-    if (screenShareUnsupported) return;
     if (screen) {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
@@ -169,41 +164,20 @@ export function AmbientSync({
         <button
           type="button"
           onClick={toggleScreen}
-          disabled={screenShareUnsupported}
-          title={
-            isMobile
-              ? "Sync light color using your device's camera"
-              : "Mirror screen color"
-          }
+          title="Share your screen to sync light color"
           className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
-            screenShareUnsupported
-              ? "border-border/40 opacity-50 cursor-not-allowed"
-              : screen
-                ? "border-primary bg-primary/10 ring-1 ring-primary/40 cursor-pointer"
-                : "border-border/60 hover:border-border cursor-pointer"
+            screen
+              ? "border-primary bg-primary/10 ring-1 ring-primary/40 cursor-pointer"
+              : "border-border/60 hover:border-border cursor-pointer"
           }`}
         >
-          {isMobile ? (
-            <Camera
-              className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
-            />
-          ) : (
-            <Monitor
-              className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
-            />
-          )}
+          <Monitor
+            className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
+          />
           <div>
-            <p className="text-xs font-semibold">
-              {isMobile ? "Camera Sync" : "Screen Color"}
-            </p>
+            <p className="text-xs font-semibold">Screen Color</p>
             <p className="text-[10px] text-muted-foreground">
-              {screen
-                ? isMobile
-                  ? "Live — using camera"
-                  : "Live — following screen"
-                : isMobile
-                  ? "Match camera input"
-                  : "Match dominant hue"}
+              {screen ? "Live — following screen" : "Match dominant hue"}
             </p>
           </div>
         </button>

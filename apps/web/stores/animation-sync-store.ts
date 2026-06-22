@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import { toast } from "sonner";
-import { isNativeMobilePlatform } from "@/lib/server-url";
 
 interface AnimationSyncState {
   screenActive: boolean;
@@ -40,20 +39,10 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
     if (get().screenActive) return true;
     set({ screenPending: true });
     try {
-      let s: MediaStream;
-
-      if (isNativeMobilePlatform()) {
-        toast.info("Screen capture unavailable on mobile. Using camera sync (point at TV/monitor).");
-        s = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false,
-        });
-      } else {
-        s = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: false,
-        });
-      }
+      const s = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
 
       const video = document.createElement("video");
       video.srcObject = s;
@@ -78,9 +67,19 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
         ctx,
       });
       return true;
-    } catch (err) {
-      console.error("[Animation Sync Store] Error starting screen/camera share:", err);
-      toast.error("Screen/camera share permission denied or unavailable.");
+    } catch (err: unknown) {
+      console.error("[AmbientSync] Screen share error:", err);
+      // Distinguish "not supported" from "user denied / cancelled"
+      const isUnsupported =
+        err instanceof TypeError ||
+        (err instanceof DOMException && err.name === "NotSupportedError");
+      if (isUnsupported) {
+        toast.error(
+          "Screen sharing is not supported on this device. Use the desktop app or a browser.",
+        );
+      } else {
+        toast.error("Screen share permission denied or cancelled.");
+      }
       set({ screenPending: false });
       get().stopScreenSharing();
       return false;
