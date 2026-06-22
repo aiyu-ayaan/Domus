@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev": "node dev.js",
     "build": "python -m compileall backend",
     "lint": "ruff check . && black --check .",
     "test": "pytest"
