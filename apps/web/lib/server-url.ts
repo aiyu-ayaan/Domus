@@ -13,6 +13,11 @@ const ENV_DEFAULT =
 /** True on Android, iOS, and the Electron desktop shell — false in a browser. */
 export function isNativePlatform(): boolean {
   try {
+    if (typeof window !== "undefined" && window.navigator && window.navigator.userAgent) {
+      if (/electron/i.test(window.navigator.userAgent)) {
+        return true;
+      }
+    }
     return Capacitor.isNativePlatform();
   } catch {
     return false;

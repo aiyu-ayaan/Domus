@@ -37,7 +37,9 @@ class Settings(BaseSettings):
     # Native apps (Capacitor Android/iOS/desktop) call the API from fixed local
     # origins, not http://host:port. Allow them by pattern so users don't have to
     # list every one. Matches capacitor://localhost, http(s)://localhost, etc.
-    cors_origin_regex: str = r"^(https?|capacitor|ionic)://localhost(:\d+)?$"
+    # electron-serve loads the app from "<scheme>://-" (literal dash host), so that
+    # host form must be matched too or the Electron desktop app's CORS preflight fails.
+    cors_origin_regex: str = r"^(https?|capacitor|ionic|capacitor-electron)://(localhost|-)?(:\d+)?$"
 
     # Rate limiting (auth endpoints)
     auth_rate_limit: str = "10/minute"
