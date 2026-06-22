@@ -17,7 +17,7 @@ Runs from one codebase on **web, installable PWA, Android, iOS, Windows, and mac
 
 **Demo:** Ambient Sync screen share — mirror your screen's ambient lighting to your smart lights in real time.
 
-<video src="./pic/demo.mp4" controls width="600"></video>
+[![Ambient Sync demo](./pic/desktop.png)](./pic/demo.mp4)
 
 ## Stack
 
