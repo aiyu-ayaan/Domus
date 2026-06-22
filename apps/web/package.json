@@ -9,7 +9,8 @@
     "lint": "next lint",
     "build:native": "NEXT_OUTPUT=export next build && cap sync",
     "android": "bun run build:native && cap open android",
-    "ios": "bun run build:native && cap open ios"
+    "ios": "bun run build:native && cap open ios",
+    "desktop": "bun run build:native && cd electron && npm run electron:start"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -41,6 +42,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@capacitor-community/electron": "^5.0.1",
     "@capacitor/cli": "^8.4.1",
     "@types/node": "^22.7.4",
     "@types/react": "^19.0.0-rc.1",
