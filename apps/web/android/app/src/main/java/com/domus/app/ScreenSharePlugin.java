@@ -66,19 +66,30 @@ public class ScreenSharePlugin extends Plugin {
                 return;
             }
 
-            Context context = getContext();
-            Intent serviceIntent = new Intent(context, ScreenCaptureService.class);
+            final Context context = getContext();
+            final Intent serviceIntent = new Intent(context, ScreenCaptureService.class);
             serviceIntent.setAction(ScreenCaptureService.ACTION_START);
             serviceIntent.putExtra(ScreenCaptureService.EXTRA_RESULT_CODE, result.getResultCode());
             serviceIntent.putExtra(ScreenCaptureService.EXTRA_RESULT_DATA, data);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(serviceIntent);
-            } else {
-                context.startService(serviceIntent);
-            }
-
-            call.resolve();
+            // A tiny delay ensures the system permission dialog is fully dismissed,
+            // focus returns to the MainActivity, and the OS registers the app as in-foreground
+            // and permission granted before starting the foreground service.
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(serviceIntent);
+                        } else {
+                            context.startService(serviceIntent);
+                        }
+                        call.resolve();
+                    } catch (Exception e) {
+                        call.reject("Failed to start screen capture service: " + e.getMessage());
+                    }
+                }
+            }, 200);
         } else {
             call.reject("Screen capture permission denied by user");
         }
