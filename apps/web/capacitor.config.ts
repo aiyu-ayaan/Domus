@@ -9,6 +9,17 @@ const config: CapacitorConfig = {
   appName: "Domus",
   webDir: "out",
   backgroundColor: "#0a0e17",
+  // Self-hosted Domus servers are usually plain HTTP on the LAN. Serve the app
+  // over http://localhost (not the https default) so calling http:// APIs and
+  // opening ws:// sockets isn't blocked as mixed content. cleartext lets the
+  // webview reach those http origins; Android also needs usesCleartextTraffic
+  // in AndroidManifest.xml (set), and iOS needs an ATS exception (add when you
+  // build for iOS).
+  server: {
+    androidScheme: "http",
+    iosScheme: "http",
+    cleartext: true,
+  },
 };
 
 export default config;

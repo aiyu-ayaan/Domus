@@ -118,6 +118,13 @@ cd apps/web/android
 
 Sideload that APK, or `./gradlew bundleRelease` for a signed Play Store AAB.
 
+**Connecting to a plain-HTTP server** (e.g. `http://192.168.1.x:8000`): Android
+blocks cleartext + mixed content by default, so the app is configured to load
+over `http://localhost` (`androidScheme: "http"` + `usesCleartextTraffic`), and
+the API allows the Capacitor origin via `cors_origin_regex`. This is already set
+up — just **restart the API** after pulling these changes so the new CORS rule
+applies, and rebuild/reinstall the APK. For a production server prefer HTTPS.
+
 ---
 
 ## 6. iOS (macOS only)

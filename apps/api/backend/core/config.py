@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 30
 
     cors_origins: list[str] = ["http://localhost:3000"]
+    # Native apps (Capacitor Android/iOS/desktop) call the API from fixed local
+    # origins, not http://host:port. Allow them by pattern so users don't have to
+    # list every one. Matches capacitor://localhost, http(s)://localhost, etc.
+    cors_origin_regex: str = r"^(https?|capacitor|ionic)://localhost(:\d+)?$"
 
     # Rate limiting (auth endpoints)
     auth_rate_limit: str = "10/minute"
