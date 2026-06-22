@@ -57,9 +57,13 @@ mobile, and desktop client will call.
 - Reachable from anywhere: point it at your self-hosted backend's public
   HTTPS address, e.g. `https://domus.example.com`.
 
-Set it in `apps/web/.env.local` (copy from `.env.example`) or inline per build:
+All env lives in the **repo root** `.env` (copy from root `.env.example`) — one
+file shared by the API and the web/mobile/desktop clients. `apps/web` pulls the
+`NEXT_PUBLIC_*` keys up from the root via `next.config.mjs`, so you don't keep a
+separate web env file. A shell variable still overrides the file:
 
 ```bash
+# edit root .env, or override inline for one build:
 NEXT_PUBLIC_API_URL=https://domus.example.com bun run build:native
 ```
 
