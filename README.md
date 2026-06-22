@@ -3,6 +3,8 @@
 Domus is a self-hosted, local-first smart home platform for discovering, managing, automating, and controlling devices from a unified dashboard.
 ![Home Screenshots](./pic/home.png)
 
+Runs from one codebase on **web, installable PWA, Android, iOS, Windows, and macOS** (via Capacitor). See **[RUNNING.md](./RUNNING.md)** for build & run instructions for every platform.
+
 ## Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zustand, React Hook Form, Zod, Socket.IO client
