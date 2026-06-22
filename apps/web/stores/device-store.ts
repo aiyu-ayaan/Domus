@@ -1,7 +1,7 @@
 // Zustand Device Store implementation
 import { create } from "zustand";
 import { deviceRepository } from "@/repositories";
-import type { DeviceOut, DeviceStateOut, DeviceCreate } from "@/types/api";
+import type { DeviceOut, DeviceStateOut, DeviceCreate, DeviceUpdate } from "@/types/api";
 
 interface DeviceState {
   devices: DeviceOut[];
@@ -38,6 +38,7 @@ interface DeviceState {
     attributes: Record<string, any>,
   ) => Promise<void>;
   createDevice: (req: DeviceCreate) => Promise<DeviceOut>;
+  updateDevice: (deviceId: string, req: DeviceUpdate) => Promise<DeviceOut>;
   deleteDevice: (deviceId: string) => Promise<void>;
 
   // Realtime events callbacks
@@ -278,6 +279,24 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       set({
         isLoading: false,
         error: err?.error?.message || err?.message || "Failed to create device",
+      });
+      throw err;
+    }
+  },
+
+  updateDevice: async (deviceId, req) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updated = await deviceRepository.update(deviceId, req);
+      set((state) => ({
+        devices: state.devices.map((d) => (d.id === deviceId ? updated : d)),
+        isLoading: false,
+      }));
+      return updated;
+    } catch (err: any) {
+      set({
+        isLoading: false,
+        error: err?.error?.message || err?.message || "Failed to update device",
       });
       throw err;
     }
