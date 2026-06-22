@@ -219,10 +219,53 @@ export class ElectronCapacitorApp {
 // Electron has no native Chromium screen-picker UI, so getDisplayMedia() in the
 // renderer (used by Ambient Sync's "Screen Color") hangs/rejects unless we answer
 // the request ourselves. Auto-grant the primary screen.
+// We also register permission request and check handlers to auto-grant display/media access
+// since custom URL schemes are treated as untrusted and blocked by default in Electron.
 export function setupDisplayMediaHandler(): void {
+  // Automatically grant permissions for media and screen capture
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    const url = webContents.getURL();
+    console.log(`[Electron Main] Permission request for '${permission}' from ${url}`);
+    const permStr = permission as string;
+    if (
+      permStr === 'media' ||
+      permStr === 'display-capture' ||
+      permStr === 'audio-capture' ||
+      permStr === 'video-capture'
+    ) {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) => {
+    console.log(`[Electron Main] Permission check for '${permission}' from ${requestingOrigin}`);
+    const permStr = permission as string;
+    if (
+      permStr === 'media' ||
+      permStr === 'display-capture' ||
+      permStr === 'audio-capture' ||
+      permStr === 'video-capture'
+    ) {
+      return true;
+    }
+    return false;
+  });
+
   session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
-    desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
-      callback(sources[0] ? { video: sources[0] } : {});
+    desktopCapturer.getSources({ types: ['screen', 'window'] }).then((sources) => {
+      console.log(`[Electron Main] DisplayMediaRequest: found ${sources.length} sources`);
+      if (sources.length > 0) {
+        console.log(`[Electron Main] Auto-selecting source: ${sources[0].name} (${sources[0].id})`);
+        callback({ video: sources[0] });
+      } else {
+        console.warn('[Electron Main] No screen capture sources found');
+        callback({});
+      }
+    }).catch((err) => {
+      console.error('[Electron Main] Error in setDisplayMediaRequestHandler:', err);
+      callback({});
     });
   });
 }
