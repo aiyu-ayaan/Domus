@@ -6,9 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:native": "NEXT_OUTPUT=export next build && cap sync",
+    "android": "bun run build:native && cap open android",
+    "ios": "bun run build:native && cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "@domus/shared-types": "workspace:*",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-dialog": "^1.1.17",
@@ -36,6 +41,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
     "@types/node": "^22.7.4",
     "@types/react": "^19.0.0-rc.1",
     "@types/react-dom": "^19.0.0-rc.1",
