@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAvatarUrl } from "@/lib/avatar";
+import { needsServerSetup } from "@/lib/server-url";
+import { ServerUrlScreen } from "@/components/server-url-screen";
 
 // Navigation Items Configuration
 const navItems = [
@@ -184,6 +186,14 @@ export function AppShell({
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
+  // Native apps (Android/iOS/desktop) must pick a server on first launch. Start
+  // ready (web and prerender never need it, so no hydration divergence) and flip
+  // to the setup screen on mount only when a native app has no server stored.
+  const [serverReady, setServerReady] = useState(true);
+  useEffect(() => {
+    if (needsServerSetup()) setServerReady(false);
+  }, []);
+
   // 1. Initialize Authentication session on mount
   useEffect(() => {
     console.log("[AppShell] Mount: calling initializeAuth()");
@@ -230,6 +240,11 @@ export function AppShell({
     setMobileSidebarOpen(false);
     setNotifDrawerOpen(false);
   }, [pathname]);
+
+  // Native first-launch: choose a server before anything else (incl. auth).
+  if (!serverReady) {
+    return <ServerUrlScreen onConnected={() => setServerReady(true)} />;
+  }
 
   // Render loading screen if auth is initializing
   if (authLoading && !isAuthRoute) {

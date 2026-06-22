@@ -49,13 +49,18 @@ Open http://localhost:3000. The browser bundle reads the API address from
 
 ## 3. The API URL — this is what makes it work "from anywhere"
 
-`NEXT_PUBLIC_API_URL` is **baked into the bundle at build time** (it's a
-`NEXT_PUBLIC_*` var). Whatever value is set when you build is what every web,
-mobile, and desktop client will call.
+There are **two ways** the client learns its server, by platform:
 
-- Local only: leave it as `http://localhost:8000`.
-- Reachable from anywhere: point it at your self-hosted backend's public
-  HTTPS address, e.g. `https://domus.example.com`.
+- **Web** (Docker bundle or dev): `NEXT_PUBLIC_API_URL` is baked into the bundle
+  at build time, so the page connects automatically with no setup screen. Local
+  only → leave `http://localhost:8000`; reachable from anywhere → set it to your
+  backend's public address, e.g. `https://domus.example.com`.
+- **Native** (Android / iOS / desktop): there is no bundled server, so on first
+  launch the app shows a **"Connect to your server"** screen, you enter the URL
+  once, it's saved on-device, then you reach the login screen. No per-server
+  rebuild — one APK/app works against any Domus server. Switch servers later via
+  **Change server** on the login screen. (`NEXT_PUBLIC_API_URL` is only used as
+  the prefilled default for native.)
 
 All env lives in the **repo root** `.env` (copy from root `.env.example`) — one
 file shared by the API and the web/mobile/desktop clients. `apps/web` pulls the

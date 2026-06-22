@@ -8,6 +8,7 @@ import { useDeviceStore } from "@/stores/device-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useHomeStore } from "@/stores/home-store";
 import { useIntegrationStore } from "@/stores/integration-store";
+import { getServerUrl } from "@/lib/server-url";
 import type { DeviceStateOut, NotificationOut } from "@/types/api";
 
 interface RealtimeContextType {
@@ -195,13 +196,10 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         clearInterval(interval);
       };
     } else {
-      // Real WebSocket Client implementation
-      let wsHost = process.env.NEXT_PUBLIC_WS_URL;
-      if (!wsHost) {
-        const apiURL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        wsHost = apiURL.replace(/^http/, "ws");
-      }
+      // Real WebSocket Client implementation. Derive the socket origin from the
+      // active server URL (runtime-selected on native, baked env on web).
+      const wsHost =
+        process.env.NEXT_PUBLIC_WS_URL || getServerUrl().replace(/^http/, "ws");
       const wsUrl = `${wsHost}/ws?token=${accessToken}`;
 
       const connect = () => {

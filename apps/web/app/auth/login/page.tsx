@@ -10,6 +10,11 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
 import { Shield, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import {
+  isNativePlatform,
+  getServerUrl,
+  clearServerUrl,
+} from "@/lib/server-url";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,6 +28,15 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, setRememberMe, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = React.useState(false);
+  // Mounted guard so the native-only server line doesn't cause SSR/hydration
+  // divergence (it reads localStorage / the Capacitor platform).
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  const handleChangeServer = () => {
+    clearServerUrl();
+    window.location.reload();
+  };
 
   const {
     register,
@@ -171,6 +185,21 @@ export default function LoginPage() {
             Register Home Owner
           </Link>
         </div>
+
+        {/* Native apps: show the connected server with an option to switch. */}
+        {mounted && isNativePlatform() && (
+          <div className="text-center text-[11px] text-muted-foreground/80">
+            <span className="font-mono">{getServerUrl()}</span>
+            {" · "}
+            <button
+              type="button"
+              onClick={handleChangeServer}
+              className="font-semibold text-primary hover:underline cursor-pointer"
+            >
+              Change server
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

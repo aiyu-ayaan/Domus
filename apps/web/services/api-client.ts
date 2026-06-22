@@ -1,7 +1,6 @@
 // Domus API client wrapper with JWT token insertion and auto-refresh logic
 import { useAuthStore } from "@/stores/auth-store";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { getServerUrl } from "@/lib/server-url";
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
@@ -18,7 +17,7 @@ class ApiClient {
     const prefixed = normalized.startsWith("/api/v1")
       ? normalized
       : `/api/v1${normalized}`;
-    const url = new URL(`${API_BASE_URL}${prefixed}`);
+    const url = new URL(`${getServerUrl()}${prefixed}`);
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, val]) => {
@@ -109,7 +108,7 @@ class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const url = `${API_BASE_URL}/api/v1/auth/refresh`;
+      const url = `${getServerUrl()}/api/v1/auth/refresh`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
