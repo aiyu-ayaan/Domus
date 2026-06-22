@@ -184,7 +184,16 @@ export function AppShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
+  const [mobileHomeDropdownOpen, setMobileHomeDropdownOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+
+  const getPageTitle = () => {
+    const activeItem = navItems.find((item) => {
+      if (item.href === "/") return pathname === "/";
+      return pathname.startsWith(item.href);
+    });
+    return activeItem ? activeItem.label : "Domus";
+  };
 
   // Native apps (Android/iOS/desktop) must pick a server on first launch. Start
   // ready (web and prerender never need it, so no hydration divergence) and flip
@@ -627,173 +636,324 @@ export function AppShell({
       <AnimatePresence>
         {mobileSidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Overlay backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-              onClick={() => setMobileSidebarOpen(false)}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm animate-fade-in"
+              onClick={() => {
+                setMobileSidebarOpen(false);
+                setMobileHomeDropdownOpen(false);
+              }}
             />
+            {/* Navigation Drawer (Material Design 3 style) */}
             <motion.aside
               initial={shouldReduceMotion ? { opacity: 0 } : { x: "-100%" }}
               animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
               exit={shouldReduceMotion ? { opacity: 0 } : { x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border shadow-glow flex flex-col"
+              className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border shadow-glow flex flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
             >
-              <button
-                type="button"
-                onClick={() => setMobileSidebarOpen(false)}
-                className="absolute top-4 right-4 rounded-full h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
-              >
-                <X className="h-4.5 w-4.5" />
-              </button>
-              {renderSidebarContent(false)}
+              {/* Drawer Header (User profile details + Workspace/Home picker) */}
+              <div className="p-5 border-b border-border/60 flex flex-col bg-muted/10 relative">
+                {/* User avatar and info card */}
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary border border-border/80 text-foreground font-mono font-bold text-sm overflow-hidden flex-shrink-0">
+                    {user?.avatar_url ? (
+                      <img
+                        src={getAvatarUrl(user.avatar_url)}
+                        alt={user.full_name || "Avatar"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      user?.full_name?.charAt(0) || <User className="h-5 w-5" />
+                    )}
+                  </div>
+                  <div className="truncate">
+                    <p className="text-sm font-semibold truncate leading-none text-foreground">
+                      {user?.full_name}
+                    </p>
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mt-1.5 leading-none">
+                      {user?.role}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Android-style Account Switcher for Homes/Workspaces */}
+                <div className="mt-4 relative">
+                  <button
+                    type="button"
+                    onClick={() => setMobileHomeDropdownOpen(!mobileHomeDropdownOpen)}
+                    className="flex w-full items-center justify-between rounded-full border border-border bg-card hover:bg-muted/40 px-3.5 py-1.5 text-left transition duration-150 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0 animate-pulse" />
+                      <span className="font-mono text-[10px] font-bold tracking-wide text-foreground truncate uppercase">
+                        {activeHome?.name || "Select Workspace"}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 text-muted-foreground flex-shrink-0 transition-transform duration-200 ${
+                        mobileHomeDropdownOpen ? "rotate-180" : ""
+                      }`}
+                      strokeWidth={2.5}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {mobileHomeDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setMobileHomeDropdownOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          className="absolute left-0 right-0 mt-1.5 z-20 rounded-2xl border border-border bg-card p-1 shadow-lg max-h-36 overflow-y-auto font-mono text-xs"
+                        >
+                          {homes.map((home) => (
+                            <button
+                              key={home.id}
+                              onClick={() => {
+                                handleHomeSwitch(home.id);
+                                setMobileHomeDropdownOpen(false);
+                              }}
+                              className="flex w-full items-center justify-between rounded-xl px-3 py-1.5 text-left transition hover:bg-muted cursor-pointer"
+                            >
+                              <span className="truncate">{home.name}</span>
+                              {home.id === activeHomeId && (
+                                <Check
+                                  className="h-3.5 w-3.5 text-primary"
+                                  strokeWidth={2.5}
+                                />
+                              )}
+                            </button>
+                          ))}
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Drawer Body (Full Navigation List with MD3 style active pill) */}
+              <nav className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    item.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-4 px-4 py-3 rounded-full text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-bold shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                          isActive ? "text-primary scale-105" : "text-muted-foreground/80"
+                        }`}
+                        strokeWidth={isActive ? 2.25 : 1.75}
+                      />
+                      <span>{item.label}</span>
+                      {item.badge && unreadCount > 0 && (
+                        <span className="ml-auto rounded-full bg-foreground px-1.5 py-0.5 text-[8px] font-mono font-bold text-background">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Drawer Footer (Theme Selector & Logout Trigger) */}
+              <div className="p-4 border-t border-border bg-muted/10 space-y-3">
+                <ThemeToggle compact={false} />
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
             </motion.aside>
           </div>
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
         {/* Top Navbar */}
-        <header className="h-14 border-b border-border bg-card sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-3 sm:gap-4 truncate">
-            <nav className="flex items-center gap-1.5 text-xs font-mono tracking-wide uppercase truncate text-muted-foreground">
-              {breadcrumbs.map((crumb, idx) => (
-                <React.Fragment key={crumb.href}>
-                  {idx > 0 && <span className="text-border/80">/</span>}
-                  {idx === breadcrumbs.length - 1 ? (
-                    <span className="text-foreground font-semibold truncate max-w-[120px] sm:max-w-xs">
-                      {crumb.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={crumb.href}
-                      className="hover:text-foreground transition cursor-pointer truncate max-w-[100px]"
-                    >
-                      {crumb.label}
-                    </Link>
-                  )}
-                </React.Fragment>
-              ))}
-            </nav>
-          </div>
-
-          {/* Right side actions */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* WebSocket connection status indicator */}
-            <div
-              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-mono transition ${
-                isConnected
-                  ? "border-[#EDF3EC] bg-[#EDF3EC] text-[#346538] dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/15"
-                  : "border-[#FDEBEC] bg-[#FDEBEC] text-[#9F2F2D] dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/15"
-              }`}
-              title={
-                isConnected
-                  ? "WebSocket connected"
-                  : "WebSocket offline, reconnecting..."
-              }
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-[#346538] dark:bg-emerald-400 animate-pulse" : "bg-[#9F2F2D] dark:bg-rose-400 animate-ping"}`}
-              />
-              <span className="hidden sm:inline font-semibold">
-                {isConnected ? "Connected" : "Offline"}
+        <header className="border-b border-border bg-card sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]">
+          {/* Mobile Header (Hamburger + Page Title + Status Dot) */}
+          <div className="flex lg:hidden items-center justify-between w-full h-full">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                className="p-2 -ml-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
+                title="Menu"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <span className="font-mono text-xs font-bold tracking-wider uppercase text-foreground">
+                {getPageTitle()}
               </span>
             </div>
 
-            {/* Notifications Bell */}
-            <button
-              type="button"
-              onClick={() => setNotifDrawerOpen(true)}
-              className="relative rounded p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition cursor-pointer"
-            >
-              <Bell className="h-4.5 w-4.5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-foreground" />
-              )}
-            </button>
+            <div className="flex items-center gap-2.5">
+              {/* Connection Status indicator */}
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  isConnected
+                    ? "bg-[#346538] dark:bg-emerald-400 shadow-glow"
+                    : "bg-[#9F2F2D] dark:bg-rose-400 animate-pulse"
+                }`}
+                title={isConnected ? "WebSocket connected" : "WebSocket offline"}
+              />
+
+              {/* Notification Center Trigger */}
+              <button
+                type="button"
+                onClick={() => setNotifDrawerOpen(true)}
+                className="relative rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition cursor-pointer"
+              >
+                <Bell className="h-4.5 w-4.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Header Layout */}
+          <div className="hidden lg:flex items-center justify-between w-full h-full gap-4">
+            {/* Breadcrumbs */}
+            <div className="flex items-center gap-3 sm:gap-4 truncate">
+              <nav className="flex items-center gap-1.5 text-xs font-mono tracking-wide uppercase truncate text-muted-foreground">
+                {breadcrumbs.map((crumb, idx) => (
+                  <React.Fragment key={crumb.href}>
+                    {idx > 0 && <span className="text-border/80">/</span>}
+                    {idx === breadcrumbs.length - 1 ? (
+                      <span className="text-foreground font-semibold truncate max-w-[120px] sm:max-w-xs">
+                        {crumb.label}
+                      </span>
+                    ) : (
+                      <Link
+                        href={crumb.href}
+                        className="hover:text-foreground transition cursor-pointer truncate max-w-[100px]"
+                      >
+                        {crumb.label}
+                      </Link>
+                    )}
+                  </React.Fragment>
+                ))}
+              </nav>
+            </div>
+
+            {/* Right side actions */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* WebSocket connection status indicator */}
+              <div
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-mono transition ${
+                  isConnected
+                    ? "border-[#EDF3EC] bg-[#EDF3EC] text-[#346538] dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/15"
+                    : "border-[#FDEBEC] bg-[#FDEBEC] text-[#9F2F2D] dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/15"
+                }`}
+                title={
+                  isConnected
+                    ? "WebSocket connected"
+                    : "WebSocket offline, reconnecting..."
+                }
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-[#346538] dark:bg-emerald-400 animate-pulse" : "bg-[#9F2F2D] dark:bg-rose-400 animate-ping"}`}
+                />
+                <span className="hidden sm:inline font-semibold">
+                  {isConnected ? "Connected" : "Offline"}
+                </span>
+              </div>
+
+              {/* Notifications Bell */}
+              <button
+                type="button"
+                onClick={() => setNotifDrawerOpen(true)}
+                className="relative rounded p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition cursor-pointer"
+              >
+                <Bell className="h-4.5 w-4.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-foreground" />
+                )}
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 w-full max-w-[1600px] mx-auto p-3 sm:p-5 lg:p-6 xl:p-8 pb-24 lg:pb-8 animate-fade-in">
+        <main className="flex-1 w-full max-w-[1600px] mx-auto p-3 sm:p-5 lg:p-6 xl:p-8 pb-28 lg:pb-8 animate-fade-in overflow-x-hidden">
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <nav className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full flex items-center gap-1.5 p-1.5 select-none w-fit max-w-[95vw]">
-          <Link
-            href="/"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
-              pathname === "/"
-                ? "bg-foreground text-background shadow-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            }`}
-            title="Dashboard"
-          >
-            <LayoutDashboard
-              className="h-4.5 w-4.5"
-              strokeWidth={pathname === "/" ? 2.25 : 1.75}
-            />
-          </Link>
+        {/* Mobile Bottom Navigation Bar (Material Design 3 Docked style) */}
+        <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md shadow-[0_-4px_16px_rgba(0,0,0,0.05)] px-2 pt-2.5 pb-[calc(0.5rem+env(safe-area-inset-bottom))] select-none">
+          <div className="grid grid-cols-5 w-full max-w-md mx-auto">
+            {[
+              { href: "/", label: "Home", icon: LayoutDashboard },
+              { href: "/devices", label: "Devices", icon: Cpu },
+              { href: "/scenes", label: "Scenes", icon: Sparkles },
+              { href: "/automations", label: "Automations", icon: Zap },
+              { href: "/settings", label: "Settings", icon: Settings },
+            ].map((tab) => {
+              const isActive =
+                tab.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(tab.href);
+              const Icon = tab.icon;
 
-          <Link
-            href="/devices"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
-              pathname.startsWith("/devices")
-                ? "bg-foreground text-background shadow-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            }`}
-            title="Devices"
-          >
-            <Cpu
-              className="h-4.5 w-4.5"
-              strokeWidth={pathname.startsWith("/devices") ? 2.25 : 1.75}
-            />
-          </Link>
-
-          <Link
-            href="/notifications"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 relative cursor-pointer ${
-              pathname.startsWith("/notifications")
-                ? "bg-foreground text-background shadow-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            }`}
-            title="Alerts"
-          >
-            <Bell
-              className="h-4.5 w-4.5"
-              strokeWidth={pathname.startsWith("/notifications") ? 2.25 : 1.75}
-            />
-            {unreadCount > 0 && (
-              <span
-                className={`absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full ${
-                  pathname.startsWith("/notifications")
-                    ? "bg-background animate-pulse"
-                    : "bg-destructive animate-pulse"
-                }`}
-              />
-            )}
-          </Link>
-
-          {/* Divider */}
-          <div className="h-5 w-px bg-border/80 mx-0.5" />
-
-          <button
-            type="button"
-            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
-              mobileSidebarOpen
-                ? "bg-foreground text-background shadow-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            }`}
-            title="Menu"
-          >
-            <Menu className="h-4.5 w-4.5" strokeWidth={1.75} />
-          </button>
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className="flex flex-col items-center justify-center cursor-pointer group"
+                >
+                  <div
+                    className={`relative w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary/20 text-primary shadow-sm"
+                        : "text-muted-foreground group-hover:text-foreground"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                        isActive ? "scale-105" : "group-hover:scale-105"
+                      }`}
+                      strokeWidth={isActive ? 2.25 : 1.75}
+                    />
+                  </div>
+                  <span
+                    className={`text-[9px] font-mono mt-1 uppercase tracking-widest leading-none transition-colors duration-200 ${
+                      isActive
+                        ? "text-foreground font-bold"
+                        : "text-muted-foreground group-hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         </nav>
       </div>
 
