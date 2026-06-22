@@ -3,7 +3,7 @@
 "use client";
 
 import React from "react";
-import { Monitor, Music } from "lucide-react";
+import { Camera, Monitor, Music } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
 import { useAnimationSyncStore } from "@/stores/animation-sync-store";
 import { isNativeMobilePlatform } from "@/lib/server-url";
@@ -55,8 +55,8 @@ export function AmbientSync({
   // Retrieve global stream controls
   const { startScreenSharing, startAudioSharing } = useAnimationSyncStore();
 
-  // Android/iOS WebViews don't expose getDisplayMedia(); only Electron and browsers do.
-  const screenShareUnsupported = isNativeMobilePlatform();
+  const isMobile = isNativeMobilePlatform();
+  const screenShareUnsupported = false; // Supported via camera on mobile
 
   if (ids.length === 0) return null;
 
@@ -171,9 +171,9 @@ export function AmbientSync({
           onClick={toggleScreen}
           disabled={screenShareUnsupported}
           title={
-            screenShareUnsupported
-              ? "Screen capture isn't available in the mobile app — use the desktop app or a browser"
-              : undefined
+            isMobile
+              ? "Sync light color using your device's camera"
+              : "Mirror screen color"
           }
           className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
             screenShareUnsupported
@@ -183,16 +183,26 @@ export function AmbientSync({
                 : "border-border/60 hover:border-border cursor-pointer"
           }`}
         >
-          <Monitor
-            className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
-          />
+          {isMobile ? (
+            <Camera
+              className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
+            />
+          ) : (
+            <Monitor
+              className={`h-5 w-5 flex-shrink-0 ${screen ? "text-primary" : "text-muted-foreground"}`}
+            />
+          )}
           <div>
-            <p className="text-xs font-semibold">Screen Color</p>
+            <p className="text-xs font-semibold">
+              {isMobile ? "Camera Sync" : "Screen Color"}
+            </p>
             <p className="text-[10px] text-muted-foreground">
-              {screenShareUnsupported
-                ? "Not supported on mobile"
-                : screen
-                  ? "Live — following screen"
+              {screen
+                ? isMobile
+                  ? "Live — using camera"
+                  : "Live — following screen"
+                : isMobile
+                  ? "Match camera input"
                   : "Match dominant hue"}
             </p>
           </div>
