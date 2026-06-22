@@ -9,8 +9,7 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@domus/shared-types": ["../../packages/shared-types/src"]
+      "@/*": ["./*"]
     },
     "incremental": true
   },

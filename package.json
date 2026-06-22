@@ -3,17 +3,20 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev:web": "bun run scripts/run-dev.ts 3000 bun --cwd apps/web dev",
     "dev:api": "bun run scripts/run-dev.ts 8000 bun --cwd apps/api dev",
     "build": "bun --filter \"*\" build",
+    "build:web": "bun --filter @domus/web build",
     "build:native": "bun --cwd apps/web build:native",
     "android": "bun --cwd apps/web android",
     "ios": "bun --cwd apps/web ios",
     "desktop": "bun --cwd apps/web desktop",
+    "start": "bun --cwd apps/web start",
+    "prod": "docker-compose -f docker-compose.yml up -d",
+    "prod:stop": "docker-compose -f docker-compose.yml down",
     "lint": "bun --filter \"*\" lint",
     "format": "prettier . --write",
     "prepare": "husky"

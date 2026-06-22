@@ -12,10 +12,6 @@
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@domus/shared-types": ["packages/shared-types/src"],
-      "@domus/shared-config": ["packages/shared-config/src"]
-    }
+    "baseUrl": "."
   }
 }

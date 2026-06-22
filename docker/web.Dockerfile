@@ -4,8 +4,6 @@ WORKDIR /app
 # Copy package files for the workspace
 COPY package.json ./
 COPY apps/web/package.json ./apps/web/
-COPY packages/shared-types/package.json ./packages/shared-types/
-COPY packages/shared-config/package.json ./packages/shared-config/
 COPY bun.lockb* ./
 
 RUN bun install
@@ -14,7 +12,6 @@ FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web ./apps/web
-COPY packages ./packages
 COPY package.json tsconfig.base.json ./
 # NEXT_PUBLIC_* vars are inlined into the bundle at build time, so they must be
 # present here — not at runtime. Defaults connect to the real API (not mock).
