@@ -70,14 +70,20 @@
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    min-height: 100vh;
-    margin: 0;
-    background:
-      linear-gradient(180deg, rgba(34, 197, 94, 0.06), transparent 22rem),
-      hsl(var(--background));
-  }
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(34, 197, 94, 0.06), transparent 22rem),
+    hsl(var(--background));
+}
   .dark body {
     background:
       linear-gradient(180deg, rgba(34, 197, 94, 0.08), transparent 28rem),
