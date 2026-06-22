@@ -25,6 +25,7 @@ import {
   Bell,
   Clock,
   AlertCircle,
+  Pencil,
 } from "lucide-react";
 import type { TriggerType, ActionType, ConditionOp } from "@/types/api";
 
@@ -105,12 +106,14 @@ export default function AutomationsPage() {
   const {
     automations,
     createAutomation,
+    updateAutomation,
     deleteAutomation,
     triggerAutomation,
     toggleAutomation,
   } = useAutomationStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingAutomationId, setEditingAutomationId] = useState<string | null>(null);
 
   const {
     register,
@@ -152,7 +155,33 @@ export default function AutomationsPage() {
   const watchTriggerType = watch("trigger.type");
   const watchActions = watch("actions");
 
-  const handleCreateSubmit = async (data: AutomationFormValues) => {
+  const handleEditClick = (auto: any) => {
+    setEditingAutomationId(auto.id);
+    reset({
+      name: auto.name,
+      enabled: auto.enabled,
+      trigger: {
+        type: auto.trigger.type,
+        device_id: auto.trigger.device_id || "",
+        state: auto.trigger.state || "on",
+        at: auto.trigger.at || "",
+      },
+      conditions: (auto.conditions || []).map((c: any) => ({
+        field: c.field,
+        op: c.op,
+        value: String(c.value),
+      })),
+      actions: (auto.actions || []).map((a: any) => ({
+        type: a.type,
+        device_id: a.device_id || "",
+        title: a.title || "",
+        body: a.body || "",
+      })),
+    });
+    setIsCreateOpen(true);
+  };
+
+  const handleFormSubmit = async (data: AutomationFormValues) => {
     if (!activeHomeId) return;
 
     // Sanitize trigger fields based on selected trigger type
@@ -174,19 +203,31 @@ export default function AutomationsPage() {
     }));
 
     try {
-      await createAutomation({
-        home_id: activeHomeId,
-        name: data.name,
-        enabled: data.enabled,
-        trigger: triggerPayload,
-        conditions: conditionsPayload,
-        actions: data.actions,
-      });
-      toast.success("Automation rule created successfully!");
+      if (editingAutomationId) {
+        await updateAutomation(editingAutomationId, {
+          name: data.name,
+          enabled: data.enabled,
+          trigger: triggerPayload,
+          conditions: conditionsPayload,
+          actions: data.actions as any,
+        });
+        toast.success("Automation rule updated successfully!");
+      } else {
+        await createAutomation({
+          home_id: activeHomeId,
+          name: data.name,
+          enabled: data.enabled,
+          trigger: triggerPayload,
+          conditions: conditionsPayload,
+          actions: data.actions as any,
+        });
+        toast.success("Automation rule created successfully!");
+      }
       setIsCreateOpen(false);
+      setEditingAutomationId(null);
       reset();
     } catch (err: any) {
-      toast.error(err?.error?.message || "Failed to create automation");
+      toast.error(err?.error?.message || `Failed to ${editingAutomationId ? "update" : "create"} automation`);
     }
   };
 
@@ -235,10 +276,22 @@ export default function AutomationsPage() {
         title="Automations"
         description="Visual builder for smart local-first event triggers."
       >
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <Dialog open={isCreateOpen} onOpenChange={(open) => {
+          setIsCreateOpen(open);
+          if (!open) setEditingAutomationId(null);
+        }}>
           <DialogTrigger asChild>
             <button
-              onClick={() => reset()}
+              onClick={() => {
+                setEditingAutomationId(null);
+                reset({
+                  name: "",
+                  enabled: true,
+                  trigger: { type: "device_state", device_id: "", state: "on", at: "" },
+                  conditions: [],
+                  actions: [{ type: "device.turn_on", device_id: "" }],
+                });
+              }}
               className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground px-4 py-2.5 text-xs font-semibold transition cursor-pointer shadow-lg shadow-primary/20"
             >
               <Plus className="h-4 w-4" />
@@ -246,11 +299,11 @@ export default function AutomationsPage() {
             </button>
           </DialogTrigger>
           <DialogContent
-            title="Visual Automation Builder"
-            description="Configure IF-THEN triggers and local actions."
+            title={editingAutomationId ? "Edit Automation Rule" : "Visual Automation Builder"}
+            description={editingAutomationId ? "Modify IF-THEN triggers and local actions." : "Configure IF-THEN triggers and local actions."}
           >
             <form
-              onSubmit={handleSubmit(handleCreateSubmit)}
+              onSubmit={handleSubmit(handleFormSubmit)}
               className="space-y-4 mt-2 max-h-[72vh] overflow-y-auto pr-1"
             >
               <div className="space-y-1">
@@ -539,7 +592,7 @@ export default function AutomationsPage() {
                 type="submit"
                 className="w-full rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-2.5 mt-2 text-sm transition cursor-pointer"
               >
-                Save Rule
+                {editingAutomationId ? "Save Changes" : "Save Rule"}
               </button>
             </form>
           </DialogContent>
@@ -619,6 +672,13 @@ export default function AutomationsPage() {
                       title="Run automation now"
                     >
                       <Play className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleEditClick(auto)}
+                      className="rounded-lg p-1.5 border border-border bg-background/70 text-muted-foreground hover:text-foreground hover:bg-accent transition cursor-pointer"
+                      title="Edit automation"
+                    >
+                      <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(auto.id, auto.name)}
