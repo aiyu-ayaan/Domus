@@ -105,6 +105,14 @@ public class ScreenCaptureService extends Service {
         handlerThread.start();
         backgroundHandler = new Handler(handlerThread.getLooper());
 
+        // Android 14+ requires a registered callback before createVirtualDisplay, or it throws IllegalStateException.
+        mediaProjection.registerCallback(new MediaProjection.Callback() {
+            @Override
+            public void onStop() {
+                stopScreenCapture();
+            }
+        }, backgroundHandler);
+
         // Low resolution is extremely CPU-efficient and perfectly sufficient for ambient light color averaging.
         final int width = 24;
         final int height = 24;
