@@ -10,6 +10,10 @@
     "dev:web": "bun run scripts/run-dev.ts 3000 bun --cwd apps/web dev",
     "dev:api": "bun run scripts/run-dev.ts 8000 bun --cwd apps/api dev",
     "build": "bun --filter \"*\" build",
+    "build:native": "bun --cwd apps/web build:native",
+    "android": "bun --cwd apps/web android",
+    "ios": "bun --cwd apps/web ios",
+    "desktop": "bun --cwd apps/web desktop",
     "lint": "bun --filter \"*\" lint",
     "format": "prettier . --write",
     "prepare": "husky"
