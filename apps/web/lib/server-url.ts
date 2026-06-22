@@ -10,18 +10,32 @@ const STORAGE_KEY = "domus:server-url";
 const ENV_DEFAULT =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+/** True when running inside the Electron desktop shell. */
+export function isElectron(): boolean {
+  try {
+    return (
+      typeof window !== "undefined" &&
+      !!window.navigator &&
+      /electron/i.test(window.navigator.userAgent)
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** True on Android, iOS, and the Electron desktop shell — false in a browser. */
 export function isNativePlatform(): boolean {
   try {
-    if (typeof window !== "undefined" && window.navigator && window.navigator.userAgent) {
-      if (/electron/i.test(window.navigator.userAgent)) {
-        return true;
-      }
-    }
+    if (isElectron()) return true;
     return Capacitor.isNativePlatform();
   } catch {
     return false;
   }
+}
+
+/** True on Android/iOS specifically — embedded WebViews that lack getDisplayMedia(). */
+export function isNativeMobilePlatform(): boolean {
+  return isNativePlatform() && !isElectron();
 }
 
 export function getStoredServerUrl(): string | null {

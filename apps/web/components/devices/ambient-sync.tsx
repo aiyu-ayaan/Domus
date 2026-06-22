@@ -6,6 +6,7 @@ import React from "react";
 import { Monitor, Music } from "lucide-react";
 import { useDeviceStore } from "@/stores/device-store";
 import { useAnimationSyncStore } from "@/stores/animation-sync-store";
+import { isNativeMobilePlatform } from "@/lib/server-url";
 
 // Music color themes (color only — no brightness).
 const THEMES = [
@@ -54,9 +55,13 @@ export function AmbientSync({
   // Retrieve global stream controls
   const { startScreenSharing, startAudioSharing } = useAnimationSyncStore();
 
+  // Android/iOS WebViews don't expose getDisplayMedia(); only Electron and browsers do.
+  const screenShareUnsupported = isNativeMobilePlatform();
+
   if (ids.length === 0) return null;
 
   const toggleScreen = async () => {
+    if (screenShareUnsupported) return;
     if (screen) {
       if (isSceneBuilder) {
         onSetAttrs({ ambient_sync: null });
@@ -164,10 +169,18 @@ export function AmbientSync({
         <button
           type="button"
           onClick={toggleScreen}
-          className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition cursor-pointer ${
-            screen
-              ? "border-primary bg-primary/10 ring-1 ring-primary/40"
-              : "border-border/60 hover:border-border"
+          disabled={screenShareUnsupported}
+          title={
+            screenShareUnsupported
+              ? "Screen capture isn't available in the mobile app — use the desktop app or a browser"
+              : undefined
+          }
+          className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
+            screenShareUnsupported
+              ? "border-border/40 opacity-50 cursor-not-allowed"
+              : screen
+                ? "border-primary bg-primary/10 ring-1 ring-primary/40 cursor-pointer"
+                : "border-border/60 hover:border-border cursor-pointer"
           }`}
         >
           <Monitor
@@ -176,7 +189,11 @@ export function AmbientSync({
           <div>
             <p className="text-xs font-semibold">Screen Color</p>
             <p className="text-[10px] text-muted-foreground">
-              {screen ? "Live — following screen" : "Match dominant hue"}
+              {screenShareUnsupported
+                ? "Not supported on mobile"
+                : screen
+                  ? "Live — following screen"
+                  : "Match dominant hue"}
             </p>
           </div>
         </button>

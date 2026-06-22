@@ -6,7 +6,7 @@ import {
 } from '@capacitor-community/electron';
 import chokidar from 'chokidar';
 import type { MenuItemConstructorOptions } from 'electron';
-import { app, BrowserWindow, Menu, MenuItem, nativeImage, Tray, session } from 'electron';
+import { app, BrowserWindow, Menu, MenuItem, nativeImage, Tray, session, desktopCapturer } from 'electron';
 import electronIsDev from 'electron-is-dev';
 import electronServe from 'electron-serve';
 import windowStateKeeper from 'electron-window-state';
@@ -214,6 +214,17 @@ export class ElectronCapacitorApp {
       }, 400);
     });
   }
+}
+
+// Electron has no native Chromium screen-picker UI, so getDisplayMedia() in the
+// renderer (used by Ambient Sync's "Screen Color") hangs/rejects unless we answer
+// the request ourselves. Auto-grant the primary screen.
+export function setupDisplayMediaHandler(): void {
+  session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
+    desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+      callback(sources[0] ? { video: sources[0] } : {});
+    });
+  });
 }
 
 // Set a CSP up for our application based on the custom scheme

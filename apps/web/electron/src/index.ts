@@ -6,7 +6,12 @@ import electronIsDev from 'electron-is-dev';
 import unhandled from 'electron-unhandled';
 import { autoUpdater } from 'electron-updater';
 
-import { ElectronCapacitorApp, setupContentSecurityPolicy, setupReloadWatcher } from './setup';
+import {
+  ElectronCapacitorApp,
+  setupContentSecurityPolicy,
+  setupDisplayMediaHandler,
+  setupReloadWatcher,
+} from './setup';
 
 // Graceful handling of unhandled errors.
 unhandled();
@@ -43,6 +48,8 @@ if (electronIsDev) {
   await app.whenReady();
   // Security - Set Content-Security-Policy based on whether or not we are in dev mode.
   setupContentSecurityPolicy(myCapacitorApp.getCustomURLScheme());
+  // Screen capture for Ambient Sync's "Screen Color" feature (no native picker in Electron).
+  setupDisplayMediaHandler();
   // Initialize our app, build windows, and load content.
   await myCapacitorApp.init();
   // Check for updates if we are in a packaged app.
