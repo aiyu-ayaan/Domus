@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceStore } from "@/stores/device-store";
 import { useAnimationSyncStore } from "@/stores/animation-sync-store";
 import { hueToHex, lerpPalette, rgbToHex } from "@/lib/color";
+import { isNativeMobilePlatform } from "@/lib/server-url";
 
 // Predefined patterns matching light-patterns.tsx
 const PATTERNS: Record<string, { gap: number; tick: (t: number) => string }> = {
@@ -397,6 +398,71 @@ export function AnimationSyncManager() {
     ambientMusicDevices,
     setDeviceAttributes,
   ]);
+
+  // Manage Native Android Screen Sync
+  useEffect(() => {
+    if (!screenActive || !isNativeMobilePlatform() || ambientScreenDevices.length === 0) return;
+
+    let lastPushTime = 0;
+    const lastRGB = { r: 0, g: 0, b: 0 };
+    const COLOR_DELTA = 5;
+    const MIN_GAP = 90;
+
+    let active = true;
+    let listenerPromise: Promise<any> | null = null;
+
+    import("@capacitor/core").then(({ registerPlugin }) => {
+      if (!active) return;
+      const ScreenShare = registerPlugin<any>("ScreenShare");
+      listenerPromise = ScreenShare.addListener("screenColor", (data: { color: string }) => {
+        const hex = data.color;
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+
+        const now = performance.now();
+        if (now - lastPushTime >= MIN_GAP) {
+          if (
+            Math.abs(r - lastRGB.r) +
+              Math.abs(g - lastRGB.g) +
+              Math.abs(b - lastRGB.b) >
+            COLOR_DELTA
+          ) {
+            lastRGB.r = r;
+            lastRGB.g = g;
+            lastRGB.b = b;
+            lastPushTime = now;
+
+            const targetIds = ambientScreenDevices.filter(
+              (id) => !inFlight.current[id]
+            );
+            if (targetIds.length === 0) return;
+
+            targetIds.forEach((id) => {
+              inFlight.current[id] = true;
+            });
+
+            Promise.all(
+              targetIds.map((id) =>
+                setDeviceAttributes(id, { color: hex })
+                  .catch(() => {})
+                  .finally(() => {
+                    inFlight.current[id] = false;
+                  })
+              )
+            );
+          }
+        }
+      });
+    });
+
+    return () => {
+      active = false;
+      if (listenerPromise) {
+        listenerPromise.then((h) => h.remove());
+      }
+    };
+  }, [screenActive, ambientScreenDevices, setDeviceAttributes]);
 
   const needsScreenShare =
     ambientScreenDevices.length > 0 && !screenActive && !screenPending;

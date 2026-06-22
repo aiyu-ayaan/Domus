@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { toast } from "sonner";
+import { isNativeMobilePlatform } from "@/lib/server-url";
 
 interface AnimationSyncState {
   screenActive: boolean;
@@ -39,6 +40,28 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
     if (get().screenActive) return true;
     set({ screenPending: true });
     try {
+      if (isNativeMobilePlatform()) {
+        const { registerPlugin } = await import("@capacitor/core");
+        const ScreenShare = registerPlugin<any>("ScreenShare");
+        await ScreenShare.start();
+
+        // Listen for stop events if native capture stops unexpectedly
+        const listener = ScreenShare.addListener("screenStopped", () => {
+          get().stopScreenSharing();
+          listener.then((h: any) => h.remove());
+        });
+
+        set({
+          screenActive: true,
+          screenPending: false,
+          stream: null,
+          video: null,
+          canvas: null,
+          ctx: null,
+        });
+        return true;
+      }
+
       const s = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: false,
@@ -87,6 +110,22 @@ export const useAnimationSyncStore = create<AnimationSyncState>((set, get) => ({
   },
 
   stopScreenSharing: () => {
+    if (isNativeMobilePlatform()) {
+      import("@capacitor/core").then(({ registerPlugin }) => {
+        const ScreenShare = registerPlugin<any>("ScreenShare");
+        ScreenShare.stop().catch((err: any) => console.error("[AmbientSync] Stop error:", err));
+      });
+      set({
+        screenActive: false,
+        screenPending: false,
+        stream: null,
+        video: null,
+        canvas: null,
+        ctx: null,
+      });
+      return;
+    }
+
     const { stream, video } = get();
     stream?.getTracks().forEach((t) => t.stop());
     if (video) {
