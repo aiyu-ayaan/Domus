@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose what to share</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+      background: #09090b;
+      color: #e4e4e7;
+      overflow-y: auto;
+      user-select: none;
+      -webkit-app-region: no-drag;
+    }
+
+    .container {
+      padding: 28px 28px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: #fafafa;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #71717a;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .source {
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #18181b;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+      outline: none;
+    }
+
+    .source:hover {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.25), 0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+    }
+
+    .source:focus-visible {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.4);
+    }
+
+    .source:active {
+      transform: translateY(0);
+    }
+
+    .source .thumb {
+      width: 100%;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0f;
+      overflow: hidden;
+    }
+
+    .source .thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .source .label {
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #a1a1aa;
+      border-top: 1px solid #27272a;
+    }
+
+    .source:hover .label {
+      color: #e4e4e7;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 16px;
+      border-top: 1px solid #1e1e22;
+      margin-top: auto;
+    }
+
+    .btn-cancel {
+      padding: 8px 22px;
+      border-radius: 8px;
+      border: 1px solid #3f3f46;
+      background: #27272a;
+      color: #d4d4d8;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      outline: none;
+    }
+
+    .btn-cancel:hover {
+      background: #3f3f46;
+      border-color: #52525b;
+    }
+
+    .btn-cancel:focus-visible {
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.4);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: #52525b;
+      font-size: 14px;
+      gap: 10px;
+    }
+
+    .loading .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #27272a;
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty {
+      text-align: center;
+      padding: 48px 0;
+      color: #52525b;
+      font-size: 14px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Choose what to share</h1>
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+        Loading available sources…
+      </div>
+    </div>
+    <div class="footer">
+      <button class="btn-cancel" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      window.screenPicker.cancel();
+    });
+
+    window.screenPicker.onSources(function(sources) {
+      var content = document.getElementById('content');
+
+      if (!sources || sources.length === 0) {
+        content.innerHTML = '<div class="empty">No screens or windows found.</div>';
+        return;
+      }
+
+      var screens = sources.filter(function(s) { return s.id.startsWith('screen:'); });
+      var windows = sources.filter(function(s) { return s.id.startsWith('window:'); });
+
+      var html = '';
+
+      if (screens.length > 0) {
+        html += '<div class="section-label">Screens</div>';
+        html += '<div class="grid">';
+        screens.forEach(function(s) {
+          html += '<div class="source" tabindex="0" data-id="' + s.id + '">';
+          html += '  <div class="thumb"><img src="' + s.thumbnail + '" alt="' + s.name + '" /></div>';
+          html += '  <div class="label">' + s.name + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      if (windows.length > 0) {
+        html += '<div class="section-label">Application Windows</div>';
+        html += '<div class="grid">';
+        windows.forEach(function(s) {
+          html += '<div class="source" tabindex="0" data-id="' + s.id + '">';
+          html += '  <div class="thumb"><img src="' + s.thumbnail + '" alt="' + s.name + '" /></div>';
+          html += '  <div class="label">' + s.name + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      content.innerHTML = html;
+
+      document.querySelectorAll('.source').forEach(function(el) {
+        el.addEventListener('click', function() {
+          window.screenPicker.selectSource(el.getAttribute('data-id'));
+        });
+        el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.screenPicker.selectSource(el.getAttribute('data-id'));
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ import {
 } from '@capacitor-community/electron';
 import chokidar from 'chokidar';
 import type { MenuItemConstructorOptions } from 'electron';
-import { app, BrowserWindow, Menu, MenuItem, nativeImage, Tray, session, desktopCapturer } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, nativeImage, Tray, session, desktopCapturer } from 'electron';
 import electronIsDev from 'electron-is-dev';
 import electronServe from 'electron-serve';
 import windowStateKeeper from 'electron-window-state';
@@ -218,14 +218,13 @@ export class ElectronCapacitorApp {
 
 // Electron has no native Chromium screen-picker UI, so getDisplayMedia() in the
 // renderer (used by Ambient Sync's "Screen Color") hangs/rejects unless we answer
-// the request ourselves. Auto-grant the primary screen.
-// We also register permission request and check handlers to auto-grant display/media access
-// since custom URL schemes are treated as untrusted and blocked by default in Electron.
+// the request ourselves.
+// We register permission handlers to auto-grant display/media access (custom URL
+// schemes are treated as untrusted by default) and show a picker window so the
+// user can choose which screen or window to share.
 export function setupDisplayMediaHandler(): void {
-  // Automatically grant permissions for media and screen capture
+  // ── Permission handlers ──────────────────────────────────────────────
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    const url = webContents.getURL();
-    console.log(`[Electron Main] Permission request for '${permission}' from ${url}`);
     const permStr = permission as string;
     if (
       permStr === 'media' ||
@@ -239,32 +238,93 @@ export function setupDisplayMediaHandler(): void {
     }
   });
 
-  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) => {
-    console.log(`[Electron Main] Permission check for '${permission}' from ${requestingOrigin}`);
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
     const permStr = permission as string;
-    if (
+    return (
       permStr === 'media' ||
       permStr === 'display-capture' ||
       permStr === 'audio-capture' ||
       permStr === 'video-capture'
-    ) {
-      return true;
-    }
-    return false;
+    );
   });
 
+  // ── Display-media request → open picker window ───────────────────────
   session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
     desktopCapturer.getSources({ types: ['screen', 'window'] }).then((sources) => {
-      console.log(`[Electron Main] DisplayMediaRequest: found ${sources.length} sources`);
-      if (sources.length > 0) {
-        console.log(`[Electron Main] Auto-selecting source: ${sources[0].name} (${sources[0].id})`);
-        callback({ video: sources[0] });
-      } else {
-        console.warn('[Electron Main] No screen capture sources found');
+      if (sources.length === 0) {
+        console.warn('[ScreenPicker] No sources found');
         callback({});
+        return;
       }
+
+      // Resolve the parent window for the modal
+      const parent =
+        BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0] || undefined;
+
+      const pickerPreload = join(app.getAppPath(), 'build', 'src', 'screen-picker-preload.js');
+
+      const picker = new BrowserWindow({
+        width: 720,
+        height: 540,
+        resizable: true,
+        minimizable: false,
+        maximizable: false,
+        fullscreenable: false,
+        modal: !!parent,
+        parent: parent || undefined,
+        show: false,
+        title: 'Choose what to share',
+        autoHideMenuBar: true,
+        webPreferences: {
+          contextIsolation: true,
+          nodeIntegration: false,
+          preload: pickerPreload,
+        },
+      });
+
+      picker.setMenuBarVisibility(false);
+      picker.loadFile(join(app.getAppPath(), 'assets', 'screen-picker.html'));
+
+      // Guard against calling `callback` more than once
+      let resolved = false;
+      const finish = (selected?: Electron.DesktopCapturerSource) => {
+        if (resolved) return;
+        resolved = true;
+        callback(selected ? { video: selected } : {});
+        if (!picker.isDestroyed()) picker.close();
+        // Clean up one-shot listeners
+        ipcMain.removeAllListeners('screen-picker-selected');
+        ipcMain.removeAllListeners('screen-picker-cancel');
+      };
+
+      // Send thumbnails to the picker once it has loaded
+      picker.webContents.on('did-finish-load', () => {
+        const payload = sources.map((s) => ({
+          id: s.id,
+          name: s.name,
+          thumbnail: s.thumbnail.toDataURL(),
+        }));
+        picker.webContents.send('screen-picker-sources', payload);
+        picker.show();
+      });
+
+      // User clicked a source
+      ipcMain.once('screen-picker-selected', (_evt, sourceId: string) => {
+        const selected = sources.find((s) => s.id === sourceId);
+        finish(selected);
+      });
+
+      // User clicked Cancel
+      ipcMain.once('screen-picker-cancel', () => {
+        finish();
+      });
+
+      // User closed the window via OS chrome
+      picker.on('closed', () => {
+        finish();
+      });
     }).catch((err) => {
-      console.error('[Electron Main] Error in setDisplayMediaRequestHandler:', err);
+      console.error('[ScreenPicker] Error fetching sources:', err);
       callback({});
     });
   });
