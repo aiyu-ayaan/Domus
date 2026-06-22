@@ -34,13 +34,21 @@ import { needsServerSetup } from "@/lib/server-url";
 import { ServerUrlScreen } from "@/components/server-url-screen";
 
 // Navigation Items Configuration
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  badge?: boolean;
+  beta?: boolean;
+}
+
+const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/homes", label: "Homes", icon: Home },
   { href: "/rooms", label: "Rooms", icon: FolderKanban },
   { href: "/devices", label: "Devices", icon: Cpu },
-  { href: "/scenes", label: "Scenes", icon: Sparkles },
-  { href: "/automations", label: "Automations", icon: Zap },
+  { href: "/scenes", label: "Scenes", icon: Sparkles, beta: true },
+  { href: "/automations", label: "Automations", icon: Zap, beta: true },
   { href: "/integrations", label: "Integrations", icon: Plug },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: true },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -105,8 +113,14 @@ function SidebarNavItem({
               animate={{ opacity: 1, x: 0 }}
               exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -4 }}
               transition={{ duration: 0.15 }}
+              className="flex items-center gap-1.5"
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.beta && (
+                <span className="rounded bg-primary/10 text-primary border border-primary/20 text-[8px] px-1 py-0.5 font-bold tracking-wider leading-none uppercase">
+                  Beta
+                </span>
+              )}
             </motion.span>
           )}
         </div>
@@ -149,7 +163,12 @@ function SidebarNavItem({
             transition={{ type: "spring", stiffness: 380, damping: 26 }}
             className="absolute left-full top-1/2 ml-3.5 z-50 rounded border border-border bg-card shadow-subtle px-2.5 py-1.5 text-[9px] font-mono font-bold tracking-wider text-foreground whitespace-nowrap pointer-events-none uppercase"
           >
-            {item.label}
+            <span>{item.label}</span>
+            {item.beta && (
+              <span className="ml-1.5 rounded bg-primary/10 text-primary border border-primary/20 px-1 py-0.5 text-[7px] font-bold">
+                BETA
+              </span>
+            )}
             {item.badge && unreadCount > 0 && (
               <span className="ml-2 rounded-full bg-foreground px-1 py-0.5 text-[8px] font-bold text-background">
                 {unreadCount}
@@ -766,6 +785,11 @@ export function AppShell({
                         strokeWidth={isActive ? 2.25 : 1.75}
                       />
                       <span>{item.label}</span>
+                      {item.beta && (
+                        <span className="rounded bg-primary/10 text-primary border border-primary/20 text-[8px] px-1 py-0.5 font-bold tracking-wider leading-none uppercase ml-2">
+                          Beta
+                        </span>
+                      )}
                       {item.badge && unreadCount > 0 && (
                         <span className="ml-auto rounded-full bg-foreground px-1.5 py-0.5 text-[8px] font-mono font-bold text-background">
                           {unreadCount}
@@ -910,8 +934,8 @@ export function AppShell({
           {[
             { href: "/", label: "Home", icon: LayoutDashboard },
             { href: "/devices", label: "Devices", icon: Cpu },
-            { href: "/scenes", label: "Scenes", icon: Sparkles },
-            { href: "/automations", label: "Automations", icon: Zap },
+            { href: "/scenes", label: "Scenes", icon: Sparkles, beta: true },
+            { href: "/automations", label: "Automations", icon: Zap, beta: true },
             { href: "/settings", label: "Settings", icon: Settings },
           ].map((tab) => {
             const isActive =
@@ -941,13 +965,18 @@ export function AppShell({
                   />
                 </div>
                 <span
-                  className={`text-[8.5px] font-mono mt-1 uppercase tracking-wider leading-none transition-colors duration-200 ${
+                  className={`text-[8.5px] font-mono mt-1 uppercase tracking-wider leading-none transition-colors duration-200 flex items-center gap-0.5 ${
                     isActive
                       ? "text-foreground font-bold"
                       : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.beta && (
+                    <span className="text-[7.5px] font-bold text-primary lowercase -mt-0.5">
+                      β
+                    </span>
+                  )}
                 </span>
               </Link>
             );
