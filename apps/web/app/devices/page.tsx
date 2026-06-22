@@ -283,7 +283,7 @@ function DevicesPageContent() {
               <motion.div
                 key={dev.id}
                 variants={itemVariants}
-                onClick={() => router.push(`/devices/${dev.id}`)}
+                onClick={() => router.push(`/devices/detail?id=${dev.id}`)}
                 className={`rounded-3xl border p-5 backdrop-blur-sm flex flex-col justify-between h-48 transition hover:bg-card/30 cursor-pointer ${
                   dev.online
                     ? "border-border/60 bg-card/20"
@@ -485,7 +485,7 @@ function DevicesPageContent() {
                             </div>
                           )}
                           <Link
-                            href={`/devices/${dev.id}`}
+                            href={`/devices/detail?id=${dev.id}`}
                             className="rounded-lg border border-border bg-background/50 hover:bg-accent hover:text-foreground p-1 text-muted-foreground transition cursor-pointer"
                             title="View Details"
                           >

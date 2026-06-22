@@ -759,7 +759,7 @@ export function DashboardPage() {
               <EmptyPanel
                 icon={Sparkles}
                 label="No scenes configured"
-                href="/scenes/new"
+                href="/scenes/detail?id=new"
                 action="Create scene"
               />
             ) : (
@@ -1295,7 +1295,7 @@ export function DashboardPage() {
                   {/* Option to go to detail screen of the device */}
                   <div className="pt-4 border-t border-border/50 flex justify-end">
                     <Link
-                      href={`/devices/${controlDevice.id}`}
+                      href={`/devices/detail?id=${controlDevice.id}`}
                       className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-ring/40"
                     >
                       Open Full Detail Screen →
@@ -1601,7 +1601,7 @@ function DeviceRow({
       <div className="flex min-w-0 items-center gap-3">
         <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing" />
         <Link
-          href={`/devices/${device.id}`}
+          href={`/devices/detail?id=${device.id}`}
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border hover:scale-105 transition-transform ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
           title="View device details"
         >
@@ -1613,7 +1613,7 @@ function DeviceRow({
         </Link>
         <div className="min-w-0">
           <Link
-            href={`/devices/${device.id}`}
+            href={`/devices/detail?id=${device.id}`}
             className="block truncate text-sm font-semibold text-foreground hover:text-primary transition hover:underline"
           >
             {device.name}

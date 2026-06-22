@@ -4,6 +4,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
+import { App as CapacitorApp } from "@capacitor/app";
 import { useAuthStore } from "@/stores/auth-store";
 import { useHomeStore } from "@/stores/home-store";
 import { useNotificationStore } from "@/stores/notification-store";
@@ -27,6 +29,7 @@ import {
   User,
   ChevronDown,
   Check,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAvatarUrl } from "@/lib/avatar";
@@ -214,6 +217,11 @@ export function AppShell({
     return activeItem ? activeItem.label : "Domus";
   };
 
+  // Sub-screens (device/scene detail, etc.) aren't a nav item's exact path —
+  // show a back button there instead of relying on hardware/OS back, since
+  // desktop has no browser chrome and not every native back gesture is reliable.
+  const isSubScreen = pathname !== "/" && !navItems.some((item) => item.href === pathname);
+
   // Native apps (Android/iOS/desktop) must pick a server on first launch. Start
   // ready (web and prerender never need it, so no hydration divergence) and flip
   // to the setup screen on mount only when a native app has no server stored.
@@ -268,6 +276,26 @@ export function AppShell({
     setMobileSidebarOpen(false);
     setNotifDrawerOpen(false);
   }, [pathname]);
+
+  // Android hardware/gesture back: navigate the SPA instead of exiting the
+  // app. Default Capacitor behavior exits whenever there's no WebView history
+  // entry to pop to, which happens after any full-page navigation (e.g. a
+  // fallback reload) — so route explicitly instead of relying on WebView history.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const listener = CapacitorApp.addListener("backButton", () => {
+      if (isSubScreen) {
+        router.back();
+      } else if (pathname === "/") {
+        CapacitorApp.minimizeApp().catch(() => {});
+      } else {
+        router.push("/");
+      }
+    });
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, [isSubScreen, pathname, router]);
 
   // Native first-launch: choose a server before anything else (incl. auth).
   if (!serverReady) {
@@ -825,11 +853,15 @@ export function AppShell({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setMobileSidebarOpen(true)}
+                onClick={() => (isSubScreen ? router.back() : setMobileSidebarOpen(true))}
                 className="p-2 -ml-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/40 transition cursor-pointer"
-                title="Menu"
+                title={isSubScreen ? "Back" : "Menu"}
               >
-                <Menu className="h-5 w-5" />
+                {isSubScreen ? (
+                  <ArrowLeft className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </button>
               <span className="font-mono text-xs font-bold tracking-wider uppercase text-foreground">
                 {getPageTitle()}
@@ -865,6 +897,16 @@ export function AppShell({
           <div className="hidden lg:flex items-center justify-between w-full h-full gap-4">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-3 sm:gap-4 truncate">
+              {isSubScreen && (
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="flex-shrink-0 rounded p-1.5 -ml-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition cursor-pointer"
+                  title="Back"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
               <nav className="flex items-center gap-1.5 text-xs font-mono tracking-wide uppercase truncate text-muted-foreground">
                 {breadcrumbs.map((crumb, idx) => (
                   <React.Fragment key={crumb.href}>

@@ -72,7 +72,7 @@ export default function ScenesPage() {
         description="Mix multiple devices into one tap — lights, switches and more."
       >
         <Link
-          href="/scenes/new"
+          href="/scenes/detail?id=new"
           className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground px-4 py-2.5 text-xs font-semibold transition cursor-pointer shadow-lg shadow-primary/20"
         >
           <Plus className="h-4 w-4" />
@@ -86,7 +86,7 @@ export default function ScenesPage() {
           description="Group device states into a scene to control lights and switches together with a single tap."
           icon={Sparkles}
           actionLabel="Build Scene"
-          onAction={() => router.push("/scenes/new")}
+          onAction={() => router.push("/scenes/detail?id=new")}
         />
       ) : (
         <motion.div
@@ -103,7 +103,7 @@ export default function ScenesPage() {
             >
               <div className="flex justify-between items-start">
                 <Link
-                  href={`/scenes/${scene.id}`}
+                  href={`/scenes/detail?id=${scene.id}`}
                   className="flex items-center gap-3 group flex-1 min-w-0"
                 >
                   <div className="rounded-xl border border-border/80 p-2.5 bg-background/80 text-primary flex-shrink-0">

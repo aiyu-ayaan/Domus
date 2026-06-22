@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useHomeStore } from "@/stores/home-store";
 import { useDeviceStore } from "@/stores/device-store";
 import { useSceneStore } from "@/stores/scene-store";
@@ -44,7 +44,7 @@ const TEMP_PRESETS = [
 ];
 
 export default function SceneBuilderPage() {
-  const { id } = useParams() as { id: string };
+  const id = useSearchParams().get("id") || "new";
   const router = useRouter();
   const isNew = id === "new";
 
@@ -232,7 +232,7 @@ export default function SceneBuilderPage() {
       toast.error("Saved, but failed to apply");
     }
     // Stay on the details screen; just switch a freshly-created scene to edit mode.
-    if (isNew) router.replace(`/scenes/${savedId}`);
+    if (isNew) router.replace(`/scenes/detail?id=${savedId}`);
   };
 
   // Debounced auto-save / auto-apply (edit mode only) when a toggle is enabled.
@@ -349,7 +349,7 @@ export default function SceneBuilderPage() {
           <button
             onClick={async () => {
               const savedId = await handleSave();
-              if (savedId && isNew) router.replace(`/scenes/${savedId}`);
+              if (savedId && isNew) router.replace(`/scenes/detail?id=${savedId}`);
             }}
             disabled={saving}
             className="flex items-center gap-1.5 rounded-xl border border-border bg-background/50 hover:bg-muted/40 px-4 py-2.5 text-xs font-semibold transition cursor-pointer disabled:opacity-50"

@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -44,7 +44,7 @@ const deviceSettingsSchema = z.object({
 type DeviceSettingsFormValues = z.infer<typeof deviceSettingsSchema>;
 
 export default function DeviceDetailPage() {
-  const { id } = useParams() as { id: string };
+  const id = useSearchParams().get("id") || "";
   const router = useRouter();
 
   const { rooms } = useRoomStore();
