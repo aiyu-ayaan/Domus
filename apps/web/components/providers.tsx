@@ -2,12 +2,19 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 
 export function Providers({ children }: Readonly<{ children: ReactNode }>) {
+  // Register the PWA service worker for installability + offline shell.
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({

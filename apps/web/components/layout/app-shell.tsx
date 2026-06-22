@@ -642,7 +642,7 @@ export function AppShell({
 
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Navbar */}
-        <header className="h-14 border-b border-border bg-card sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
+        <header className="h-14 border-b border-border bg-card sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-3 sm:gap-4 truncate">
             <nav className="flex items-center gap-1.5 text-xs font-mono tracking-wide uppercase truncate text-muted-foreground">
@@ -709,7 +709,7 @@ export function AppShell({
         </main>
 
         {/* Mobile Bottom Navigation Bar */}
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full flex items-center gap-1.5 p-1.5 select-none w-fit max-w-[95vw]">
+        <nav className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 lg:hidden border border-border bg-card/85 backdrop-blur-md shadow-glow rounded-full flex items-center gap-1.5 p-1.5 select-none w-fit max-w-[95vw]">
           <Link
             href="/"
             className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${

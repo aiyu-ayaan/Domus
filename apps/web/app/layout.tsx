@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fira_Code, Fira_Sans } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
@@ -32,6 +32,23 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Domus",
+  },
+};
+
+// viewport-fit=cover lets content extend under notches; theme-color tints the
+// mobile browser/PWA chrome to match the dark and light backgrounds.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0e17" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f8fc" },
+  ],
 };
 
 export default function RootLayout({
