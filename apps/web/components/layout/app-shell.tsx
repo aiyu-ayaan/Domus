@@ -905,55 +905,53 @@ export function AppShell({
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation Bar (Material Design 3 Docked style) */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md shadow-[0_-4px_16px_rgba(0,0,0,0.05)] px-2 pt-2.5 pb-[calc(0.5rem+env(safe-area-inset-bottom))] select-none">
-          <div className="grid grid-cols-5 w-full max-w-md mx-auto">
-            {[
-              { href: "/", label: "Home", icon: LayoutDashboard },
-              { href: "/devices", label: "Devices", icon: Cpu },
-              { href: "/scenes", label: "Scenes", icon: Sparkles },
-              { href: "/automations", label: "Automations", icon: Zap },
-              { href: "/settings", label: "Settings", icon: Settings },
-            ].map((tab) => {
-              const isActive =
-                tab.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(tab.href);
-              const Icon = tab.icon;
+        {/* Mobile Bottom Navigation Bar (Floating Pill style) */}
+        <nav className="fixed bottom-[calc(1.2rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 lg:hidden border border-border bg-card/90 backdrop-blur-md shadow-glow rounded-3xl flex items-center justify-around gap-1 p-1.5 select-none w-[92vw] max-w-[420px]">
+          {[
+            { href: "/", label: "Home", icon: LayoutDashboard },
+            { href: "/devices", label: "Devices", icon: Cpu },
+            { href: "/scenes", label: "Scenes", icon: Sparkles },
+            { href: "/automations", label: "Automations", icon: Zap },
+            { href: "/settings", label: "Settings", icon: Settings },
+          ].map((tab) => {
+            const isActive =
+              tab.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(tab.href);
+            const Icon = tab.icon;
 
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  className="flex flex-col items-center justify-center cursor-pointer group"
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className="flex flex-col items-center justify-center cursor-pointer flex-1 py-1 group"
+              >
+                <div
+                  className={`relative w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary/20 text-primary shadow-sm"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  }`}
                 >
-                  <div
-                    className={`relative w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
-                      isActive
-                        ? "bg-primary/20 text-primary shadow-sm"
-                        : "text-muted-foreground group-hover:text-foreground"
+                  <Icon
+                    className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                      isActive ? "scale-105" : "group-hover:scale-105"
                     }`}
-                  >
-                    <Icon
-                      className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                        isActive ? "scale-105" : "group-hover:scale-105"
-                      }`}
-                      strokeWidth={isActive ? 2.25 : 1.75}
-                    />
-                  </div>
-                  <span
-                    className={`text-[9px] font-mono mt-1 uppercase tracking-widest leading-none transition-colors duration-200 ${
-                      isActive
-                        ? "text-foreground font-bold"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+                    strokeWidth={isActive ? 2.25 : 1.75}
+                  />
+                </div>
+                <span
+                  className={`text-[8.5px] font-mono mt-1 uppercase tracking-wider leading-none transition-colors duration-200 ${
+                    isActive
+                      ? "text-foreground font-bold"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 

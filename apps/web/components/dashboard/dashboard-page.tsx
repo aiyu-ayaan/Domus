@@ -1507,7 +1507,7 @@ function DashboardCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-none border-2 border-border bg-card p-4 shadow-subtle sm:p-5">
+    <div className="rounded-none border-2 border-border bg-card p-4 shadow-subtle sm:p-5 w-full min-w-0">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-foreground">
@@ -1597,7 +1597,7 @@ function DeviceRow({
   const Icon = deviceIconMap[device.device_type] || CircuitBoard;
 
   return (
-    <div className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
       <div className="flex min-w-0 items-center gap-3">
         <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing" />
         <Link
@@ -1623,7 +1623,7 @@ function DeviceRow({
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-auto">
         {device.device_type === "light" && device.online && (
           <button
             type="button"
@@ -1631,7 +1631,7 @@ function DeviceRow({
               e.stopPropagation();
               onOpenControl();
             }}
-            className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40"
+            className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40"
             title="Adjust brightness & color"
           >
             <SlidersHorizontal className="h-4 w-4" />
@@ -1643,7 +1643,7 @@ function DeviceRow({
             e.stopPropagation();
             onTogglePin();
           }}
-          className={`inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring/40 ${
+          className={`inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring/40 ${
             isPinned
               ? "border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
               : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -1655,7 +1655,7 @@ function DeviceRow({
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+          className="inline-flex h-9 sm:h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-2.5 sm:px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
         >
           Toggle
         </button>
