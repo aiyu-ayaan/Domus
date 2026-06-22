@@ -1,8 +1,7 @@
 // Rooms dashboard page implementation
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -88,12 +87,36 @@ export default function RoomsPage() {
   };
 
   const { activeHomeId } = useHomeStore();
-  const { rooms, createRoom, updateRoom, deleteRoom } = useRoomStore();
-  const { devices } = useDeviceStore();
+  const { rooms, fetchRooms, createRoom, updateRoom, deleteRoom } = useRoomStore();
+  const { devices, fetchDevices, updateDevice } = useDeviceStore();
 
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // States for Manage Devices popup
+  const [managingRoom, setManagingRoom] = useState<any | null>(null);
+  const [selectedDeviceIds, setSelectedDeviceIds] = useState<Record<string, boolean>>({});
+  const [isSavingDevices, setIsSavingDevices] = useState(false);
+
+  // Fetch rooms and devices when home selection changes
+  useEffect(() => {
+    if (activeHomeId) {
+      fetchRooms(activeHomeId);
+      fetchDevices(activeHomeId);
+    }
+  }, [activeHomeId, fetchRooms, fetchDevices]);
+
+  // Sync checkbox state when opening device manager for a room
+  useEffect(() => {
+    if (managingRoom) {
+      const initial: Record<string, boolean> = {};
+      devices.forEach((d) => {
+        initial[d.id] = d.room_id === managingRoom.id;
+      });
+      setSelectedDeviceIds(initial);
+    }
+  }, [managingRoom, devices]);
 
   const {
     register,
@@ -160,6 +183,42 @@ export default function RoomsPage() {
       } catch (err: any) {
         toast.error(err?.error?.message || "Failed to delete room");
       }
+    }
+  };
+
+  const handleCheckboxChange = (deviceId: string, checked: boolean) => {
+    setSelectedDeviceIds((prev) => ({
+      ...prev,
+      [deviceId]: checked,
+    }));
+  };
+
+  const handleSaveDevices = async () => {
+    if (!managingRoom) return;
+    setIsSavingDevices(true);
+    try {
+      const promises = [];
+      for (const device of devices) {
+        const wasInRoom = device.room_id === managingRoom.id;
+        const shouldBeInRoom = !!selectedDeviceIds[device.id];
+
+        if (shouldBeInRoom && !wasInRoom) {
+          promises.push(updateDevice(device.id, { room_id: managingRoom.id }));
+        } else if (!shouldBeInRoom && wasInRoom) {
+          promises.push(updateDevice(device.id, { room_id: null }));
+        }
+      }
+
+      await Promise.all(promises);
+      toast.success("Room devices updated successfully!");
+      setManagingRoom(null);
+      if (activeHomeId) {
+        await fetchDevices(activeHomeId);
+      }
+    } catch (err: any) {
+      toast.error(err?.error?.message || "Failed to update room devices");
+    } finally {
+      setIsSavingDevices(false);
     }
   };
 
@@ -310,12 +369,12 @@ export default function RoomsPage() {
                     <span>{onlineDevCount} Online</span>
                   </span>
 
-                  <Link
-                    href={`/devices?room=${room.id}`}
-                    className="text-primary hover:underline cursor-pointer font-semibold"
+                  <button
+                    onClick={() => setManagingRoom(room)}
+                    className="text-primary hover:underline cursor-pointer font-semibold bg-transparent border-none p-0 outline-none text-xs"
                   >
                     Manage Devices
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             );
@@ -385,6 +444,77 @@ export default function RoomsPage() {
               Save Changes
             </button>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* Manage Devices Dialog */}
+      <Dialog open={managingRoom !== null} onOpenChange={(open) => !open && setManagingRoom(null)}>
+        <DialogContent
+          title={`Manage Devices - ${managingRoom?.name || ""}`}
+          description="Select which smart accessories belong to this room partition."
+        >
+          <div className="space-y-4 mt-2">
+            {devices.length === 0 ? (
+              <p className="text-center text-xs text-muted-foreground py-6">
+                No devices found in this home. Add some devices first.
+              </p>
+            ) : (
+              <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1">
+                {devices.map((device) => {
+                  const isChecked = !!selectedDeviceIds[device.id];
+                  const currentRoomName = device.room_id
+                    ? rooms.find((r) => r.id === device.room_id)?.name
+                    : null;
+
+                  return (
+                    <label
+                      key={device.id}
+                      className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-background/30 hover:bg-accent/20 cursor-pointer transition select-none"
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => handleCheckboxChange(device.id, e.target.checked)}
+                          className="h-4.5 w-4.5 rounded border-border text-primary focus:ring-primary bg-background/50 accent-primary cursor-pointer"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold">{device.name}</span>
+                          {currentRoomName && device.room_id !== managingRoom?.id && (
+                            <span className="text-[10px] text-muted-foreground mt-0.5">
+                              Assigned to: <span className="font-semibold text-accent-foreground">{currentRoomName}</span>
+                            </span>
+                          )}
+                          {device.room_id === managingRoom?.id && (
+                            <span className="text-[10px] text-primary mt-0.5 font-semibold">
+                              In this room
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider bg-muted border border-border px-1.5 py-0.5 rounded">
+                        {device.device_type}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+
+            <button
+              onClick={handleSaveDevices}
+              disabled={isSavingDevices}
+              className="w-full rounded-xl bg-primary hover:bg-primary/95 disabled:bg-primary/50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-2.5 mt-2 text-sm transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              {isSavingDevices ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  <span>Saving Changes...</span>
+                </>
+              ) : (
+                <span>Save Changes</span>
+              )}
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
