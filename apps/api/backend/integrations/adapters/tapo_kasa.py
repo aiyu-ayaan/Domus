@@ -162,112 +162,154 @@ class RealTapoAdapter(DeviceAdapter):
             raise ConflictError(f"Tapo discovery failed: {exc}") from exc
 
         devices: list[DiscoveredDevice] = []
-        for host, dev in found.items():
-            await dev.update()
-            devices.append(
-                DiscoveredDevice(
-                    # ponytail: IP as identity; re-discover if it changes.
-                    # Upgrade: persist MAC and resolve via discovery.
-                    external_id=host,
-                    name=dev.alias or dev.model or host,
-                    device_type=_device_type(dev),
-                    manufacturer="TP-Link",
-                    model=dev.model,
-                    serial_number=getattr(dev, "mac", None),
-                    attributes={"host": host, "mac": getattr(dev, "mac", None)},
+        try:
+            for host, dev in found.items():
+                await dev.update()
+                devices.append(
+                    DiscoveredDevice(
+                        # ponytail: IP as identity; re-discover if it changes.
+                        # Upgrade: persist MAC and resolve via discovery.
+                        external_id=host,
+                        name=dev.alias or dev.model or host,
+                        device_type=_device_type(dev),
+                        manufacturer="TP-Link",
+                        model=dev.model,
+                        serial_number=getattr(dev, "mac", None),
+                        attributes={"host": host, "mac": getattr(dev, "mac", None)},
+                    )
                 )
-            )
+        finally:
+            for dev in found.values():
+                if hasattr(dev, "disconnect"):
+                    try:
+                        await dev.disconnect()
+                    except Exception:
+                        pass
         return devices
 
     async def get_state(self, external_id: str) -> StateSnapshot:
         dev = await self._connect(external_id)
-        return self._snapshot(dev)
+        try:
+            return self._snapshot(dev)
+        finally:
+            if hasattr(dev, "disconnect"):
+                try:
+                    await dev.disconnect()
+                except Exception:
+                    pass
 
     async def turn_on(self, external_id: str) -> StateSnapshot:
         dev = await self._connect(external_id)
-        await dev.turn_on()
-        await dev.update()
-        return self._snapshot(dev)
+        try:
+            await dev.turn_on()
+            await dev.update()
+            return self._snapshot(dev)
+        finally:
+            if hasattr(dev, "disconnect"):
+                try:
+                    await dev.disconnect()
+                except Exception:
+                    pass
 
     async def turn_off(self, external_id: str) -> StateSnapshot:
         dev = await self._connect(external_id)
-        await dev.turn_off()
-        await dev.update()
-        return self._snapshot(dev)
+        try:
+            await dev.turn_off()
+            await dev.update()
+            return self._snapshot(dev)
+        finally:
+            if hasattr(dev, "disconnect"):
+                try:
+                    await dev.disconnect()
+                except Exception:
+                    pass
 
     async def toggle(self, external_id: str) -> StateSnapshot:
         # One connection instead of the base class's get_state + turn_* round-trips.
         dev = await self._connect(external_id)
-        if dev.is_on:
-            await dev.turn_off()
-        else:
-            await dev.turn_on()
-        await dev.update()
-        return self._snapshot(dev)
+        try:
+            if dev.is_on:
+                await dev.turn_off()
+            else:
+                await dev.turn_on()
+            await dev.update()
+            return self._snapshot(dev)
+        finally:
+            if hasattr(dev, "disconnect"):
+                try:
+                    await dev.disconnect()
+                except Exception:
+                    pass
 
     async def set_attributes(self, external_id: str, attributes: dict[str, Any]) -> StateSnapshot:
         dev = await self._connect(external_id)
-        
-        # Extract transition (ms), default to 0 to prevent overlapping firmware
-        # fades from causing stutter/breaking.
-        transition = attributes.get("transition", 0)
+        try:
+            # Extract transition (ms), default to 0 to prevent overlapping firmware
+            # fades from causing stutter/breaking.
+            transition = attributes.get("transition", 0)
 
-        # Set brightness (0-100)
-        target_brightness = None
-        if "brightness" in attributes:
-            try:
-                target_brightness = int(attributes["brightness"])
-                target_brightness = max(1, min(100, target_brightness))
-            except (ValueError, TypeError):
-                pass
-
-        if target_brightness is not None and hasattr(dev, "set_brightness"):
-            try:
-                await dev.set_brightness(target_brightness, transition=transition)
-            except Exception:
+            # Set brightness (0-100)
+            target_brightness = None
+            if "brightness" in attributes:
                 try:
-                    await dev.set_brightness(target_brightness)
+                    target_brightness = int(attributes["brightness"])
+                    target_brightness = max(1, min(100, target_brightness))
+                except (ValueError, TypeError):
+                    pass
+
+            if target_brightness is not None and hasattr(dev, "set_brightness"):
+                try:
+                    await dev.set_brightness(target_brightness, transition=transition)
+                except Exception:
+                    try:
+                        await dev.set_brightness(target_brightness)
+                    except Exception:
+                        pass
+                    
+            # Set color temperature (Kelvin)
+            if "color_temp" in attributes and hasattr(dev, "set_color_temp"):
+                try:
+                    color_temp = int(attributes["color_temp"])
+                    await dev.set_color_temp(color_temp)
                 except Exception:
                     pass
-                
-        # Set color temperature (Kelvin)
-        if "color_temp" in attributes and hasattr(dev, "set_color_temp"):
-            try:
-                color_temp = int(attributes["color_temp"])
-                await dev.set_color_temp(color_temp)
-            except Exception:
-                pass
-                
-        # Set color (hex string like "#ff0000")
-        if "color" in attributes and attributes["color"] is not None and hasattr(dev, "set_hsv"):
-            try:
-                color_hex = attributes["color"].lstrip("#")
-                r = int(color_hex[0:2], 16) / 255.0
-                g = int(color_hex[2:4], 16) / 255.0
-                b = int(color_hex[4:6], 16) / 255.0
-                
-                import colorsys
-                h, s, v = colorsys.rgb_to_hsv(r, g, b)
-                h_deg = int(h * 360)
-                s_pct = int(s * 100)
-                
-                # Keep value/brightness at target brightness, current brightness level, or 100
-                if target_brightness is not None:
-                    v_pct = target_brightness
-                elif hasattr(dev, "brightness") and dev.brightness is not None:
-                    v_pct = dev.brightness
-                elif hasattr(dev, "hsv") and dev.hsv and len(dev.hsv) > 2:
-                    v_pct = dev.hsv[2]
-                else:
-                    v_pct = int(v * 100) if v > 0 else 100
-                v_pct = max(1, min(100, v_pct))
-                
+                    
+            # Set color (hex string like "#ff0000")
+            if "color" in attributes and attributes["color"] is not None and hasattr(dev, "set_hsv"):
                 try:
-                    await dev.set_hsv(h_deg, s_pct, v_pct, transition=transition)
+                    color_hex = attributes["color"].lstrip("#")
+                    r = int(color_hex[0:2], 16) / 255.0
+                    g = int(color_hex[2:4], 16) / 255.0
+                    b = int(color_hex[4:6], 16) / 255.0
+                    
+                    import colorsys
+                    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+                    h_deg = int(h * 360)
+                    s_pct = int(s * 100)
+                    
+                    # Keep value/brightness at target brightness, current brightness level, or 100
+                    if target_brightness is not None:
+                        v_pct = target_brightness
+                    elif hasattr(dev, "brightness") and dev.brightness is not None:
+                        v_pct = dev.brightness
+                    elif hasattr(dev, "hsv") and dev.hsv and len(dev.hsv) > 2:
+                        v_pct = dev.hsv[2]
+                    else:
+                        v_pct = int(v * 100) if v > 0 else 100
+                    v_pct = max(1, min(100, v_pct))
+                    
+                    try:
+                        await dev.set_hsv(h_deg, s_pct, v_pct, transition=transition)
+                    except Exception:
+                        await dev.set_hsv(h_deg, s_pct, v_pct)
                 except Exception:
-                    await dev.set_hsv(h_deg, s_pct, v_pct)
-            except Exception:
-                pass
-                
-        await dev.update()
-        return self._snapshot(dev)
+                    pass
+                    
+            await dev.update()
+            return self._snapshot(dev)
+        finally:
+            if hasattr(dev, "disconnect"):
+                try:
+                    await dev.disconnect()
+                except Exception:
+                    pass

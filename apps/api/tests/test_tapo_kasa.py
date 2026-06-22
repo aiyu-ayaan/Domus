@@ -50,6 +50,9 @@ class _FakeDevice:
     async def turn_off(self):
         self._on = False
 
+    async def disconnect(self):
+        pass
+
 
 @pytest.fixture
 def fake_device(monkeypatch):
@@ -145,6 +148,9 @@ class _FakeLight:
     async def set_hsv(self, h, s, v):
         self.hsv = (h, s, v)
         self.brightness = v
+
+    async def disconnect(self):
+        pass
 
 
 @pytest.mark.asyncio
