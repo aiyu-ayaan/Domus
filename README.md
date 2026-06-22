@@ -15,6 +15,8 @@ Runs from one codebase on **web, installable PWA, Android, iOS, Windows, and mac
 | --- | --- |
 | ![Desktop](./pic/desktop.png) | ![Mobile](./pic/Mobile.png) |
 
+**Demo:** [Ambient Sync screen share](./pic/demo.mp4) — mirror your screen's ambient lighting to your smart lights in real time.
+
 ## Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zustand, React Hook Form, Zod, Socket.IO client
