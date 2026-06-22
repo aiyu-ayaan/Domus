@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useHomeStore } from "@/stores/home-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useDeviceStore } from "@/stores/device-store";
@@ -71,6 +71,7 @@ function DevicesPageContent() {
   };
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const roomQuery = searchParams.get("room");
 
   const { activeHomeId } = useHomeStore();
@@ -282,7 +283,8 @@ function DevicesPageContent() {
               <motion.div
                 key={dev.id}
                 variants={itemVariants}
-                className={`rounded-3xl border p-5 backdrop-blur-sm flex flex-col justify-between h-48 transition hover:bg-card/30 ${
+                onClick={() => router.push(`/devices/${dev.id}`)}
+                className={`rounded-3xl border p-5 backdrop-blur-sm flex flex-col justify-between h-48 transition hover:bg-card/30 cursor-pointer ${
                   dev.online
                     ? "border-border/60 bg-card/20"
                     : "border-border/40 bg-card/5 opacity-60"
@@ -303,15 +305,6 @@ function DevicesPageContent() {
                         {roomName}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Link
-                      href={`/devices/${dev.id}`}
-                      className="rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition cursor-pointer"
-                      title="View Details"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Link>
                   </div>
                 </div>
 
@@ -386,7 +379,7 @@ function DevicesPageContent() {
                     </span>
                   </div>
                   {isToggleable && dev.online && (
-                    <div className="scale-85">
+                    <div className="scale-85" onClick={(e) => e.stopPropagation()}>
                       <Switch
                         checked={isChecked}
                         onCheckedChange={() => handleToggle(dev.id, dev.name)}
