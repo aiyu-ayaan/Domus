@@ -8,6 +8,7 @@ full control + discovery + state-history path is exercisable without hardware. R
 adapters (Tapo, Tuya, ...) would replace the network calls; the mocks ship working.
 """
 
+import random
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -69,7 +70,20 @@ _MOCK_STATE: dict[str, str] = {}
 _MOCK_ATTRIBUTES: dict[str, dict[str, Any]] = {}
 
 
+def _power_reading(state: str, attrs: dict[str, Any]) -> dict[str, float]:
+    """Instantaneous draw for an energy-monitoring plug (real P110 reports this).
 
+    Energy (kWh) is integrated from these power samples downstream, so the adapter
+    only has to report watts. ``current_consumption`` is kept as an alias the
+    existing device-detail chart already reads.
+    """
+    if state != "on":
+        return {"power_w": 0.0, "current_consumption": 0.0}
+    rated = float(attrs.get("rated_power_w", 60.0))
+    # ponytail: ±8% jitter so the live load curve looks real, not a flat line.
+    # Deterministic under pytest so energy assertions don't flake.
+    w = rated if "pytest" in sys.modules else round(rated * random.uniform(0.92, 1.08), 1)
+    return {"power_w": w, "current_consumption": w}
 
 
 class MockDeviceAdapter(DeviceAdapter):
@@ -92,6 +106,8 @@ class MockDeviceAdapter(DeviceAdapter):
         dev = next((d for d in self.catalog if d.external_id == external_id), None)
         default_attrs = dict(dev.attributes) if dev else {}
         attrs = _MOCK_ATTRIBUTES.get(key, default_attrs)
+        if attrs.get("energy_monitoring"):
+            attrs = {**attrs, **_power_reading(state, attrs)}
         return StateSnapshot(state=state, attributes=attrs)
 
     async def turn_on(self, external_id: str) -> StateSnapshot:
@@ -110,24 +126,21 @@ class MockDeviceAdapter(DeviceAdapter):
         if "state" in attributes:
             _MOCK_STATE[key] = attributes["state"]
             state = attributes["state"]
-            
+
         # Get current/default attributes
         dev = next((d for d in self.catalog if d.external_id == external_id), None)
         default_attrs = dict(dev.attributes) if dev else {}
         current_attrs = _MOCK_ATTRIBUTES.get(key, default_attrs)
-        
+
         # Merge new attributes
         new_attrs = {**current_attrs, **attributes}
-        has_temp = (
-            "color_temp" in attributes
-            and attributes["color_temp"] is not None
-        )
+        has_temp = "color_temp" in attributes and attributes["color_temp"] is not None
         if has_temp and int(attributes["color_temp"]) > 0:
             new_attrs["color"] = None
             new_attrs["hsv"] = None
         elif "color" in attributes and attributes["color"] is not None:
             new_attrs["color_temp"] = 0
-            
+
         _MOCK_ATTRIBUTES[key] = new_attrs
-        
+
         return StateSnapshot(state=state, attributes=new_attrs)

@@ -12,7 +12,7 @@ class TapoAdapter(MockDeviceAdapter):
             manufacturer="TP-Link",
             model="Tapo P110",
             serial_number="TAPO0001",
-            attributes={"energy_monitoring": True},
+            attributes={"energy_monitoring": True, "rated_power_w": 220},
         ),
         DiscoveredDevice(
             external_id="tapo-l530-01",
