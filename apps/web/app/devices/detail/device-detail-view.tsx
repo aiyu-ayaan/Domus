@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRoomStore } from "@/stores/room-store";
 import { useDeviceStore } from "@/stores/device-store";
-import { deviceRepository } from "@/repositories";
+import { deviceRepository, energyRepository } from "@/repositories";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -30,11 +30,21 @@ import {
   Settings as SettingsIcon,
   Trash2,
   Check,
+  Zap,
+  Wallet,
+  Gauge,
 } from "lucide-react";
 import type { DeviceOut, DeviceStateOut } from "@/types/api";
 import { AmbientSync } from "@/components/devices/ambient-sync";
 import { LightPatterns } from "@/components/devices/light-patterns";
 import { LIGHT_COLOR_PRESETS, hexToRgb } from "@/lib/color";
+import {
+  type Tariff,
+  DEFAULT_TARIFF,
+  computeCost,
+  formatMoney,
+  loadTariff,
+} from "@/lib/energy";
 
 const deviceSettingsSchema = z.object({
   name: z.string().min(2, "Device name must be at least 2 characters"),
@@ -63,8 +73,27 @@ export default function DeviceDetailPage() {
   const [localBrightness, setLocalBrightness] = useState<number | null>(null);
   const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("temp");
   const [localTempPercent, setLocalTempPercent] = useState<number | null>(null);
+  const [energy, setEnergy] = useState<{
+    power_w: number;
+    energy_kwh: number;
+  } | null>(null);
+  const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
 
   const state = device ? deviceStates[device.id] : undefined;
+
+  // Metered plugs: pull 24h energy for this device so the overview can show cost.
+  useEffect(() => {
+    if (!device) return;
+    setTariff(loadTariff(device.home_id));
+    if (device.device_type !== "plug") return;
+    energyRepository
+      .summary({ home_id: device.home_id, hours: 24 })
+      .then((s) => {
+        const d = s.devices.find((x) => x.device_id === device.id);
+        setEnergy(d ? { power_w: d.power_w, energy_kwh: d.energy_kwh } : null);
+      })
+      .catch(() => {});
+  }, [device]);
 
   // Helper to get Euclidean distance between two hex colors
   const getColorDistance = (color1: string, color2: string) => {
@@ -758,6 +787,63 @@ export default function DeviceDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Energy & cost (metered plugs only) */}
+          {device.device_type === "plug" && (
+            <div className="mt-6 rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-base">Energy & Cost</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Last 24 hours at this home&apos;s {tariff.type} tariff.
+                  </p>
+                </div>
+                <Link
+                  href="/electricity"
+                  className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                >
+                  View all →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  {
+                    label: "Current Draw",
+                    value: `${(energy?.power_w ?? state?.attributes?.power_w ?? 0).toFixed(0)} W`,
+                    icon: Zap,
+                  },
+                  {
+                    label: "Energy (24h)",
+                    value: `${(energy?.energy_kwh ?? 0).toFixed(3)} kWh`,
+                    icon: Gauge,
+                  },
+                  {
+                    label: "Est. Cost (24h)",
+                    value: formatMoney(
+                      computeCost(energy?.energy_kwh ?? 0, tariff),
+                      tariff.currency,
+                    ),
+                    icon: Wallet,
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-2xl border border-border/50 bg-background/30 p-4"
+                  >
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <stat.icon className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">
+                        {stat.label}
+                      </span>
+                    </div>
+                    <p className="mt-2 font-mono text-2xl font-semibold text-foreground">
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         {/* HISTORY CHART TAB */}

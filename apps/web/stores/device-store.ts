@@ -377,8 +377,13 @@ function oldAttributes(
   nextState: string,
 ): Record<string, any> {
   const attrs = { ...(state?.attributes || {}) };
-  if ("current_consumption" in attrs) {
-    attrs.current_consumption = nextState === "on" ? 45.2 : 0;
+  // Optimistic power for a metered plug: carry the last known draw when turning
+  // on (the real reading replaces it on the next state), zero when off.
+  if ("current_consumption" in attrs || "power_w" in attrs) {
+    const prior = attrs.power_w ?? attrs.current_consumption ?? 0;
+    const w = nextState === "on" ? prior : 0;
+    attrs.current_consumption = w;
+    attrs.power_w = w;
   }
   return attrs;
 }
