@@ -18,7 +18,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Zap, Gauge, Wallet, Plug, Plus, Trash2, Save } from "lucide-react";
+import { Zap, Gauge, Wallet, Plug, Plus, Trash2, Save, History, ChevronDown } from "lucide-react";
 import type { EnergySummary } from "@/types/api";
 import {
   type Tariff,
@@ -34,17 +34,23 @@ import {
   saveBillingCycle,
 } from "@/lib/energy";
 
-const RANGES = [
-  { label: "24h", hours: 24 },
-  { label: "7d", hours: 168 },
-  { label: "30d", hours: 720 },
+type RangeKey = "1m" | "1h" | "12h" | "24h" | "7d" | "30d" | "billing";
+
+const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
+  { key: "1m", label: "1 minute" },
+  { key: "1h", label: "1 hour" },
+  { key: "12h", label: "12 hours" },
+  { key: "24h", label: "24 hours" },
+  { key: "7d", label: "1 week" },
+  { key: "30d", label: "30 days" },
+  { key: "billing", label: "Billing Cycle" },
 ];
 
 export default function ElectricityPage() {
   const { activeHomeId } = useHomeStore();
   const [summary, setSummary] = useState<EnergySummary | null>(null);
-  const [hours, setHours] = useState(24);
-  const [useBillingCycle, setUseBillingCycle] = useState(false);
+  const [range, setRange] = useState<RangeKey>("24h");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [billingCycleStartDay, setBillingCycleStartDay] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
@@ -69,14 +75,17 @@ export default function ElectricityPage() {
     return Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
   }, [billingPeriod]);
 
-  // Set up background polling (running in the browser thread) to keep the graph and current draw live
+  // Set up background polling (running in the browser thread) to keep the graph and current draw live.
+  // When range is 1m, poll every 2 seconds to make the 1-minute graph extremely live.
+  // For other ranges, poll every 5 seconds.
   useEffect(() => {
     if (!activeHomeId) return;
+    const intervalTime = range === "1m" ? 2000 : 5000;
     const interval = setInterval(() => {
       setRefreshTrigger((prev) => prev + 1);
-    }, 5000); // Poll/re-calculate every 5 seconds
+    }, intervalTime);
     return () => clearInterval(interval);
-  }, [activeHomeId]);
+  }, [activeHomeId, range]);
 
   // Immediately trigger a recalculation/refetch when device states change (e.g., via WebSocket status updates)
   useEffect(() => {
@@ -85,40 +94,75 @@ export default function ElectricityPage() {
     }
   }, [deviceStates, activeHomeId]);
 
-  // Trigger full loading state when the active home or filters change, to avoid layout shift on initial load
+  // Trigger full loading state when the active home or range changes, to avoid layout shift on initial load
   useEffect(() => {
     setIsLoading(true);
-  }, [activeHomeId, hours, useBillingCycle]);
+  }, [activeHomeId, range]);
+
+  const queryParams = useMemo(() => {
+    switch (range) {
+      case "1m":
+        return { minutes: 1 };
+      case "1h":
+        return { hours: 1 };
+      case "12h":
+        return { hours: 12 };
+      case "24h":
+        return { hours: 24 };
+      case "7d":
+        return { hours: 168 };
+      case "30d":
+        return { hours: 720 };
+      case "billing":
+        return { hours: billingCycleHours };
+    }
+  }, [range, billingCycleHours]);
 
   // Background recalculation/fetch effect
   useEffect(() => {
     if (!activeHomeId) return;
     let active = true;
-    const queryHours = useBillingCycle ? billingCycleHours : hours;
     energyRepository
-      .summary({ home_id: activeHomeId, hours: queryHours })
+      .summary({ home_id: activeHomeId, ...queryParams })
       .then((res) => active && setSummary(res))
       .catch(() => active && toast.error("Failed to load energy usage."))
       .finally(() => active && setIsLoading(false));
     return () => {
       active = false;
     };
-  }, [activeHomeId, hours, useBillingCycle, billingCycleHours, refreshTrigger]);
+  }, [activeHomeId, queryParams, refreshTrigger]);
 
   const totalKwh = summary?.total_kwh ?? 0;
   const totalCost = useMemo(() => computeCost(totalKwh, tariff), [totalKwh, tariff]);
   const rate = useMemo(() => effectiveRate(totalKwh, tariff), [totalKwh, tariff]);
 
-  const chartData = (summary?.series ?? []).map((p) => ({
-    time: new Date(p.t).toLocaleString([], {
-      month: hours > 48 ? "short" : undefined,
-      day: hours > 48 ? "numeric" : undefined,
-      hour: "2-digit",
-      minute: hours > 48 ? undefined : "2-digit",
-    }),
-    kwh: p.kwh,
-    cost: computeCost(p.kwh, tariff),
-  }));
+  const chartData = (summary?.series ?? []).map((p) => {
+    const d = new Date(p.t);
+    let timeLabel = "";
+    if (range === "1m") {
+      timeLabel = d.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } else if (range === "1h" || range === "12h" || range === "24h") {
+      timeLabel = d.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else {
+      timeLabel = d.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+      });
+    }
+    return {
+      time: timeLabel,
+      kwh: p.kwh,
+      cost: computeCost(p.kwh, tariff),
+    };
+  });
 
   const handleSaveTariff = () => {
     if (!activeHomeId) return;
@@ -140,33 +184,45 @@ export default function ElectricityPage() {
         title="Electricity"
         description="Live consumption, energy history, and cost at your unit price."
       >
-        <div className="flex items-center gap-1 rounded-xl border border-border bg-card/40 p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r.hours}
-              onClick={() => {
-                setUseBillingCycle(false);
-                setHours(r.hours);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                !useBillingCycle && hours === r.hours
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+        <div className="relative">
           <button
-            onClick={() => setUseBillingCycle(true)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              useBillingCycle
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border bg-card/40 hover:bg-card/75 text-xs font-semibold transition cursor-pointer text-foreground shadow-sm animate-in"
           >
-            Billing Cycle
+            <History className="h-4 w-4 text-muted-foreground animate-pulse" />
+            <span>{RANGE_OPTIONS.find((o) => o.key === range)?.label}</span>
+            <ChevronDown className="h-3 w-3 text-muted-foreground ml-1" />
           </button>
+          
+          {isDropdownOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-popover p-1 shadow-lg z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                {RANGE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setRange(opt.key);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition text-left cursor-pointer ${
+                      range === opt.key
+                        ? "bg-accent text-accent-foreground font-semibold"
+                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {range === opt.key && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </PageHeader>
 
@@ -176,12 +232,24 @@ export default function ElectricityPage() {
           label="Energy Used"
           value={`${totalKwh.toFixed(2)} kWh`}
           description={
-            useBillingCycle
+            range === "billing"
               ? `Billing cycle (since ${billingPeriod.start.toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
                 })})`
-              : `Last ${hours <= 48 ? `${hours}h` : `${Math.round(hours / 24)}d`}`
+              : `Last ${
+                  range === "1m"
+                    ? "1 minute"
+                    : range === "1h"
+                      ? "1 hour"
+                      : range === "12h"
+                        ? "12 hours"
+                        : range === "24h"
+                          ? "24 hours"
+                          : range === "7d"
+                            ? "7 days"
+                            : "30 days"
+                }`
           }
           icon={Gauge}
           statusColor="cyan"
@@ -210,7 +278,7 @@ export default function ElectricityPage() {
       </div>
 
       {/* Billing Cycle Progress Card */}
-      {useBillingCycle && (
+      {range === "billing" && (
         <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -267,7 +335,15 @@ export default function ElectricityPage() {
         <div>
           <h3 className="font-semibold text-base">Consumption Curve</h3>
           <p className="text-xs text-muted-foreground mt-1">
-            Energy per {hours <= 48 ? "hour" : "day"} (kWh)
+            Energy per {
+              range === "1m"
+                ? "2 seconds"
+                : range === "1h"
+                  ? "minute"
+                  : range === "12h" || range === "24h"
+                    ? "hour"
+                    : "day"
+            } (kWh)
           </p>
         </div>
         {isLoading ? (

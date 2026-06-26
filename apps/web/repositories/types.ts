@@ -123,7 +123,11 @@ export interface IAutomationRepository {
 }
 
 export interface IEnergyRepository {
-  summary(params: { home_id: string; hours?: number }): Promise<EnergySummary>;
+  summary(params: {
+    home_id: string;
+    hours?: number;
+    minutes?: number;
+  }): Promise<EnergySummary>;
 }
 
 export interface INotificationRepository {

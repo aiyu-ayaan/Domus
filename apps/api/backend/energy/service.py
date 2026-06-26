@@ -43,15 +43,30 @@ class EnergyService:
         self.session = session
         self.homes = HomeService(session)
 
-    async def summary(self, user: User, home_id: UUID | None, hours: int) -> EnergySummary:
-        hours = max(1, min(hours, 24 * 31))  # 1h .. 31d
+    async def summary(
+        self,
+        user: User,
+        home_id: UUID | None,
+        hours: int,
+        minutes: int | None = None,
+    ) -> EnergySummary:
+        if minutes is not None:
+            minutes = max(1, min(minutes, 60 * 24 * 31))  # 1m .. 31d
+            delta = timedelta(minutes=minutes)
+            total_hours = minutes / 60.0
+        else:
+            hours = max(1, min(hours, 24 * 31))  # 1h .. 31d
+            delta = timedelta(hours=hours)
+            total_hours = float(hours)
+            minutes = hours * 60
+
         home_ids = (
             [home_id] if home_id is not None else [h.id for h in await self.homes.list_for(user)]
         )
         if home_id is not None:
             await self.homes.get_for(home_id, user)
 
-        origin = datetime.now(UTC) - timedelta(hours=hours)
+        origin = datetime.now(UTC) - delta
         rows = (
             await self.session.execute(
                 select(Device, DeviceState)
@@ -76,7 +91,26 @@ class EnergyService:
             per_device.setdefault(device.id, []).append((ts, float(power)))
             meta[device.id] = device
 
-        bucket_seconds = 3600 if hours <= 48 else 86400
+        # Determine bucket size dynamically based on duration in minutes:
+        # 1m: bucket by 2s
+        # <= 5m: bucket by 10s
+        # <= 60m: bucket by 60s
+        # <= 24h: bucket by 10m (600s)
+        # <= 48h: bucket by 1h (3600s)
+        # > 48h: bucket by 1d (86400s)
+        if minutes <= 1:
+            bucket_seconds = 2
+        elif minutes <= 5:
+            bucket_seconds = 10
+        elif minutes <= 60:
+            bucket_seconds = 60
+        elif minutes <= 1440:
+            bucket_seconds = 600
+        elif minutes <= 2880:
+            bucket_seconds = 3600
+        else:
+            bucket_seconds = 86400
+
         buckets: dict[datetime, float] = {}
         devices_out: list[EnergyDevice] = []
         total_kwh = 0.0
@@ -105,7 +139,7 @@ class EnergyService:
         devices_out.sort(key=lambda d: d.energy_kwh, reverse=True)
         series = [EnergyPoint(t=t, kwh=round(v, 4)) for t, v in sorted(buckets.items())]
         return EnergySummary(
-            range_hours=hours,
+            range_hours=round(total_hours, 3),
             total_power_w=round(total_power, 1),
             total_kwh=round(total_kwh, 4),
             devices=devices_out,

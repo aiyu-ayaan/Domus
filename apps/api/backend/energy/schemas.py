@@ -18,7 +18,7 @@ class EnergyPoint(BaseModel):
 
 
 class EnergySummary(BaseModel):
-    range_hours: int
+    range_hours: float
     total_power_w: float
     total_kwh: float
     devices: list[EnergyDevice]

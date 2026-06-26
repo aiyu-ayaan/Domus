@@ -7,10 +7,32 @@ export class MockEnergyRepository implements IEnergyRepository {
   public async summary(params: {
     home_id: string;
     hours?: number;
+    minutes?: number;
   }): Promise<EnergySummary> {
-    const hours = params.hours ?? 24;
-    const bucketSeconds = hours <= 48 ? 3600 : 86400;
-    const buckets = Math.max(1, Math.round((hours * 3600) / bucketSeconds));
+    let hours = params.hours ?? 24;
+    let minutes = params.minutes;
+    if (minutes !== undefined) {
+      hours = minutes / 60;
+    } else {
+      minutes = hours * 60;
+    }
+
+    let bucketSeconds = 3600;
+    if (minutes <= 1) {
+      bucketSeconds = 2;
+    } else if (minutes <= 5) {
+      bucketSeconds = 10;
+    } else if (minutes <= 60) {
+      bucketSeconds = 60;
+    } else if (minutes <= 1440) {
+      bucketSeconds = 600;
+    } else if (minutes <= 2880) {
+      bucketSeconds = 3600;
+    } else {
+      bucketSeconds = 86400;
+    }
+
+    const buckets = Math.max(1, Math.round((minutes * 60) / bucketSeconds));
     const now = Date.now();
 
     // 1. Fetch registered devices for this home from the mock database

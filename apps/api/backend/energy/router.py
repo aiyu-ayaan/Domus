@@ -20,5 +20,6 @@ async def energy_summary(
     session: Session,
     home_id: UUID | None = None,
     hours: int = 24,
+    minutes: int | None = None,
 ) -> EnergySummary:
-    return await EnergyService(session).summary(user, home_id, hours)
+    return await EnergyService(session).summary(user, home_id, hours, minutes)
