@@ -86,3 +86,44 @@ export function saveTariff(homeId: string, tariff: Tariff): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key(homeId), JSON.stringify(tariff));
 }
+
+export function getCurrentBillingCyclePeriod(startDay: number, now: Date = new Date()) {
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth(); // 0-11
+  
+  const getDateClamped = (year: number, month: number, day: number) => {
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const clampedDay = Math.min(day, lastDay);
+    return new Date(year, month, clampedDay, 0, 0, 0, 0);
+  };
+
+  let cycleStart = getDateClamped(currentYear, currentMonth, startDay);
+  let cycleEnd: Date;
+
+  if (now >= cycleStart) {
+    cycleEnd = getDateClamped(currentYear, currentMonth + 1, startDay);
+  } else {
+    cycleStart = getDateClamped(currentYear, currentMonth - 1, startDay);
+    cycleEnd = getDateClamped(currentYear, currentMonth, startDay);
+  }
+
+  return {
+    start: cycleStart,
+    end: cycleEnd,
+  };
+}
+
+export function loadBillingCycle(homeId: string): number {
+  if (typeof window === "undefined") return 1;
+  try {
+    const val = window.localStorage.getItem(`domus.billing-cycle.${homeId}`);
+    if (val) return parseInt(val) || 1;
+  } catch {}
+  return 1;
+}
+
+export function saveBillingCycle(homeId: string, day: number): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(`domus.billing-cycle.${homeId}`, day.toString());
+}
+
