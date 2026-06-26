@@ -21,24 +21,10 @@ class Settings(BaseSettings):
     debug: bool = True
     api_v1_prefix: str = "/api/v1"
 
-    # --- Database connection ---
-    # Set DATABASE_URL explicitly to override auto-construction from components.
-    # Docker compose sets this via environment with the correct internal host.
-    database_url: str | None = None
-
-    # Individual components — change POSTGRES_PORT / POSTGRES_HOST etc. in .env
-    # and database_url follows automatically (when not explicitly set).
-    postgres_host: str = "localhost"
-    postgres_port: int = 5432
-    postgres_user: str = "domus"
-    postgres_password: str = "domus"
-    postgres_db: str = "domus"
-
-    # --- Redis connection ---
-    redis_url: str | None = None
-
-    redis_host: str = "localhost"
-    redis_port: int = 6379
+    # Database — async driver (psycopg3 speaks both async and sync).
+    # Docker compose overrides this with the correct internal hostname + port.
+    database_url: str = "postgresql+psycopg://domus:domus@localhost:5432/domus"
+    redis_url: str = "redis://localhost:6379/0"
 
     # Auth
     jwt_secret: str = "change-me"
@@ -65,17 +51,6 @@ class Settings(BaseSettings):
     mqtt_port: int = 1883
     mqtt_username: str | None = None
     mqtt_password: str | None = None
-
-    @model_validator(mode="after")
-    def build_urls(self) -> "Settings":
-        if self.database_url is None:
-            self.database_url = (
-                f"postgresql+psycopg://{self.postgres_user}:{self.postgres_password}"
-                f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
-            )
-        if self.redis_url is None:
-            self.redis_url = f"redis://{self.redis_host}:{self.redis_port}/0"
-        return self
 
     @model_validator(mode="after")
     def adjust_urls_for_local_dev(self) -> "Settings":
