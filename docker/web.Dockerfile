@@ -20,7 +20,7 @@ ARG NEXT_PUBLIC_USE_MOCK_API=false
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_USE_MOCK_API=$NEXT_PUBLIC_USE_MOCK_API
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-RUN bun --filter @domus/web build
+RUN cd apps/web && bunx --no-install next build
 
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
@@ -28,6 +28,6 @@ ENV NODE_ENV=production
 COPY --from=builder /app/apps/web/.next ./.next
 COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web/node_modules ./node_modules
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+CMD ["bunx", "--no-install", "next", "start"]
