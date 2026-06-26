@@ -2,6 +2,10 @@ node_modules
 .next
 dist
 build
+# Release signing keystores — never commit.
+release-keys
+*.keystore
+*.jks
 coverage
 .turbo
 .venv
@@ -18,6 +22,12 @@ alembic/versions/*.pyc
 .vscode/settings.json
 *.tsbuildinfo
 *.log
+
+# Android / Capacitor native build outputs
+apps/web/android/app/release
+apps/web/android/.gradle
+apps/web/android/local.properties
+apps/web/android/app/src/main/assets/public
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*

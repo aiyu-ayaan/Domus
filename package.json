@@ -17,6 +17,10 @@
     "start": "bun --cwd apps/web start",
     "prod": "docker-compose -f docker-compose.yml up -d",
     "prod:stop": "docker-compose -f docker-compose.yml down",
+    "release:web": "docker compose -f docker-compose.release.yml run --rm --build web",
+    "release:android": "docker compose -f docker-compose.release.yml run --rm --build android",
+    "release:desktop": "docker compose -f docker-compose.release.yml run --rm --build desktop",
+    "release": "bun run release:web && bun run release:android && bun run release:desktop",
     "lint": "bun --filter \"*\" lint",
     "format": "prettier . --write",
     "prepare": "husky"

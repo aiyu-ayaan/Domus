@@ -1,0 +1,25 @@
+# Android builder context: KEEP apps/web/android (root .dockerignore drops it).
+# Exclude everything heavy/irrelevant; do NOT exclude apps/web/android source.
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.gradle
+.git
+.github
+.venv
+__pycache__
+*.pyc
+*.log
+*.tsbuildinfo
+apps/web/out
+apps/web/android/local.properties
+apps/web/electron
+apps/api
+docs
+pic
+.claude
+.agents
+.codex
+.codegraph
+.impeccable

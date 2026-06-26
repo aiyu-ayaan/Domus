@@ -1,0 +1,46 @@
+# One-shot release builders. Each writes installable artifacts to ./dist.
+#
+#   docker compose -f docker-compose.release.yml run --rm --build web
+#   docker compose -f docker-compose.release.yml run --rm --build android
+#   docker compose -f docker-compose.release.yml run --rm --build desktop
+#
+# --build re-snapshots the source each release. Set PUBLIC_API_URL in .env to
+# your server's PUBLIC address FIRST — it is baked into every build.
+#
+# NOT here (require a Mac/Xcode, impossible in Docker): iOS, and macOS .dmg.
+# Build those with `bun run ios` / electron-builder --mac on a Mac.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/release.web.Dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-http://localhost:${API_PORT:-8000}}
+    volumes:
+      - ./dist:/dist
+
+  android:
+    build:
+      context: .
+      dockerfile: docker/release.android.Dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-http://localhost:${API_PORT:-8000}}
+      # Optional release signing. Without these a throwaway key is used (the APK
+      # installs for sideloading but is NOT valid for Play upload).
+      - ANDROID_KEYSTORE=${ANDROID_KEYSTORE:-/keys/release.keystore}
+      - ANDROID_KEY_ALIAS=${ANDROID_KEY_ALIAS:-}
+      - ANDROID_KEYSTORE_PASSWORD=${ANDROID_KEYSTORE_PASSWORD:-}
+      - ANDROID_KEY_PASSWORD=${ANDROID_KEY_PASSWORD:-}
+    volumes:
+      - ./dist:/dist
+      # Drop your release.keystore in ./release-keys to get signed builds.
+      - ./release-keys:/keys:ro
+
+  desktop:
+    build:
+      context: .
+      dockerfile: docker/release.desktop.Dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-http://localhost:${API_PORT:-8000}}
+    volumes:
+      - ./dist:/dist
