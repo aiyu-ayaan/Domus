@@ -64,7 +64,12 @@ export function normalizeServerUrl(input: string): string {
   let s = input.trim();
   if (!s) return "";
   if (!/^https?:\/\//i.test(s)) s = `http://${s}`;
-  return s.replace(/\/+$/, "");
+  s = s.replace(/\/+(:\d+)/, "$1"); // "host/:6010" typo → "host:6010"
+  try {
+    return new URL(s).origin; // scheme + host + port only; drops stray path/slash
+  } catch {
+    return s.replace(/\/+$/, "");
+  }
 }
 
 export function setServerUrl(input: string): string {
