@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { motion, useReducedMotion, Reorder } from "framer-motion";
+import { motion, useReducedMotion, Reorder, useDragControls } from "framer-motion";
 import {
   Activity,
   ArrowUpRight,
@@ -728,12 +728,8 @@ export function DashboardPage() {
               >
                 {(orderedDevices.length > 0 ? orderedDevices : devices).map(
                   (device) => (
-                    <Reorder.Item
-                      value={device}
-                      key={device.id}
-                      className="touch-none"
-                    >
                       <DeviceRow
+                        key={device.id}
                         device={device}
                         state={deviceStates[device.id]?.state || "unknown"}
                         onToggle={() => handleDeviceToggle(device)}
@@ -741,7 +737,6 @@ export function DashboardPage() {
                         onTogglePin={() => handleTogglePin(device.id)}
                         onOpenControl={() => setControlDevice(device)}
                       />
-                    </Reorder.Item>
                   ),
                 )}
               </Reorder.Group>
@@ -1595,72 +1590,84 @@ function DeviceRow({
   onOpenControl: () => void;
 }) {
   const Icon = deviceIconMap[device.device_type] || CircuitBoard;
+  const dragControls = useDragControls();
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
-      <div className="flex min-w-0 items-center gap-3">
-        <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing" />
-        <Link
-          href={`/devices/detail?id=${device.id}`}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border hover:scale-105 transition-transform ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
-          title="View device details"
-        >
-          {device.online ? (
-            <Icon className="h-4 w-4" />
-          ) : (
-            <WifiOff className="h-4 w-4" />
-          )}
-        </Link>
-        <div className="min-w-0">
+    <Reorder.Item
+      value={device}
+      dragListener={false}
+      dragControls={dragControls}
+      className="touch-none"
+      style={{ listStyle: "none" }}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 select-none">
+        <div className="flex min-w-0 items-center gap-3">
+          <GripVertical
+            className="h-4 w-4 shrink-0 text-muted-foreground/35 cursor-grab active:cursor-grabbing touch-none"
+            onPointerDown={(e) => dragControls.start(e)}
+          />
           <Link
             href={`/devices/detail?id=${device.id}`}
-            className="block truncate text-sm font-semibold text-foreground hover:text-primary transition hover:underline"
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border hover:scale-105 transition-transform ${device.online ? "border-primary/30 bg-accent text-primary" : "border-border bg-secondary text-muted-foreground"}`}
+            title="View device details"
           >
-            {device.name}
+            {device.online ? (
+              <Icon className="h-4 w-4" />
+            ) : (
+              <WifiOff className="h-4 w-4" />
+            )}
           </Link>
-          <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
-            {device.manufacturer} · {state}
-          </p>
+          <div className="min-w-0">
+            <Link
+              href={`/devices/detail?id=${device.id}`}
+              className="block truncate text-sm font-semibold text-foreground hover:text-primary transition hover:underline"
+            >
+              {device.name}
+            </Link>
+            <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+              {device.manufacturer} · {state}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-auto">
-        {device.device_type === "light" && device.online && (
+        <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-auto">
+          {device.device_type === "light" && device.online && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenControl();
+              }}
+              className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40"
+              title="Adjust brightness & color"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </button>
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onOpenControl();
+              onTogglePin();
             }}
-            className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40"
-            title="Adjust brightness & color"
+            className={`inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring/40 ${
+              isPinned
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={isPinned ? "Unpin device" : "Pin device"}
           >
-            <SlidersHorizontal className="h-4 w-4" />
+            <Pin className={`h-3.5 w-3.5 ${isPinned ? "fill-amber-500" : ""}`} />
           </button>
-        )}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onTogglePin();
-          }}
-          className={`inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring/40 ${
-            isPinned
-              ? "border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
-              : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-          title={isPinned ? "Unpin device" : "Pin device"}
-        >
-          <Pin className={`h-3.5 w-3.5 ${isPinned ? "fill-amber-500" : ""}`} />
-        </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="inline-flex h-9 sm:h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-2.5 sm:px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-        >
-          Toggle
-        </button>
+          <button
+            type="button"
+            onClick={onToggle}
+            className="inline-flex h-9 sm:h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-2.5 sm:px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+          >
+            Toggle
+          </button>
+        </div>
       </div>
-    </div>
+    </Reorder.Item>
   );
 }
 
