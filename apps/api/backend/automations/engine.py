@@ -15,7 +15,12 @@ from sqlalchemy import select
 
 from backend.common.enums import NotificationType
 from backend.core.database import SessionMaker
-from backend.core.events import DEVICE_STATE_CHANGED, Event, event_bus
+from backend.core.events import (
+    DEVICE_ONLINE_CHANGED,
+    DEVICE_STATE_CHANGED,
+    Event,
+    event_bus,
+)
 from backend.core.logging import get_logger
 from backend.integrations.service import NEW_DEVICE_FOUND
 
@@ -66,6 +71,14 @@ def _trigger_matches(trigger: dict[str, Any], event: Event) -> bool:
         if trigger.get("device_id") and str(trigger["device_id"]) != event.data.get("device_id"):
             return False
         if trigger.get("state") and trigger["state"] != event.data.get("state"):
+            return False
+        return True
+    if event.type == DEVICE_ONLINE_CHANGED and ttype == "device_offline":
+        # Only the offline edge fires this trigger; an online->online or recovery
+        # event must not.
+        if event.data.get("online") is not False:
+            return False
+        if trigger.get("device_id") and str(trigger["device_id"]) != event.data.get("device_id"):
             return False
         return True
     if event.type == NEW_DEVICE_FOUND and ttype == "new_device":

@@ -1,6 +1,23 @@
 import pytest
 
-from backend.automations.engine import evaluate_conditions
+from backend.automations.engine import _trigger_matches, evaluate_conditions
+from backend.core.events import DEVICE_ONLINE_CHANGED, Event
+
+
+def test_device_offline_trigger_matches_only_offline_edge():
+    offline = Event(
+        type=DEVICE_ONLINE_CHANGED, home_id="h", data={"device_id": "d1", "online": False}
+    )
+    online = Event(
+        type=DEVICE_ONLINE_CHANGED, home_id="h", data={"device_id": "d1", "online": True}
+    )
+    # Any-device offline rule fires on the offline edge.
+    assert _trigger_matches({"type": "device_offline"}, offline)
+    # Targeted rule fires only for its device.
+    assert _trigger_matches({"type": "device_offline", "device_id": "d1"}, offline)
+    assert not _trigger_matches({"type": "device_offline", "device_id": "other"}, offline)
+    # The recovery (online) edge must NOT fire an offline rule.
+    assert not _trigger_matches({"type": "device_offline"}, online)
 
 
 def test_evaluate_conditions_and_semantics():
