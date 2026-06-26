@@ -3,6 +3,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useHomeStore } from "@/stores/home-store";
+import { useDeviceStore } from "@/stores/device-store";
 import { energyRepository } from "@/repositories";
 import { PageHeader } from "@/components/shared/page-header";
 import { MetricCard } from "@/components/shared/metric-card";
@@ -47,6 +48,10 @@ export default function ElectricityPage() {
   const [billingCycleStartDay, setBillingCycleStartDay] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Subscribe to device states in Zustand to capture real-time WebSocket updates
+  const deviceStates = useDeviceStore((s) => s.deviceStates);
 
   useEffect(() => {
     if (activeHomeId) {
@@ -64,10 +69,31 @@ export default function ElectricityPage() {
     return Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
   }, [billingPeriod]);
 
+  // Set up background polling (running in the browser thread) to keep the graph and current draw live
+  useEffect(() => {
+    if (!activeHomeId) return;
+    const interval = setInterval(() => {
+      setRefreshTrigger((prev) => prev + 1);
+    }, 5000); // Poll/re-calculate every 5 seconds
+    return () => clearInterval(interval);
+  }, [activeHomeId]);
+
+  // Immediately trigger a recalculation/refetch when device states change (e.g., via WebSocket status updates)
+  useEffect(() => {
+    if (activeHomeId) {
+      setRefreshTrigger((prev) => prev + 1);
+    }
+  }, [deviceStates, activeHomeId]);
+
+  // Trigger full loading state when the active home or filters change, to avoid layout shift on initial load
+  useEffect(() => {
+    setIsLoading(true);
+  }, [activeHomeId, hours, useBillingCycle]);
+
+  // Background recalculation/fetch effect
   useEffect(() => {
     if (!activeHomeId) return;
     let active = true;
-    setIsLoading(true);
     const queryHours = useBillingCycle ? billingCycleHours : hours;
     energyRepository
       .summary({ home_id: activeHomeId, hours: queryHours })
@@ -77,7 +103,7 @@ export default function ElectricityPage() {
     return () => {
       active = false;
     };
-  }, [activeHomeId, hours, useBillingCycle, billingCycleHours]);
+  }, [activeHomeId, hours, useBillingCycle, billingCycleHours, refreshTrigger]);
 
   const totalKwh = summary?.total_kwh ?? 0;
   const totalCost = useMemo(() => computeCost(totalKwh, tariff), [totalKwh, tariff]);
