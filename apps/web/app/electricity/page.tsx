@@ -28,6 +28,9 @@ import {
   loadTariff,
   saveTariff,
   DEFAULT_TARIFF,
+  getCurrentBillingCyclePeriod,
+  loadBillingCycle,
+  saveBillingCycle,
 } from "@/lib/energy";
 
 const RANGES = [
@@ -40,26 +43,41 @@ export default function ElectricityPage() {
   const { activeHomeId } = useHomeStore();
   const [summary, setSummary] = useState<EnergySummary | null>(null);
   const [hours, setHours] = useState(24);
+  const [useBillingCycle, setUseBillingCycle] = useState(false);
+  const [billingCycleStartDay, setBillingCycleStartDay] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
 
   useEffect(() => {
-    if (activeHomeId) setTariff(loadTariff(activeHomeId));
+    if (activeHomeId) {
+      setTariff(loadTariff(activeHomeId));
+      setBillingCycleStartDay(loadBillingCycle(activeHomeId));
+    }
   }, [activeHomeId]);
+
+  const billingPeriod = useMemo(() => {
+    return getCurrentBillingCyclePeriod(billingCycleStartDay);
+  }, [billingCycleStartDay]);
+
+  const billingCycleHours = useMemo(() => {
+    const ms = Date.now() - billingPeriod.start.getTime();
+    return Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
+  }, [billingPeriod]);
 
   useEffect(() => {
     if (!activeHomeId) return;
     let active = true;
     setIsLoading(true);
+    const queryHours = useBillingCycle ? billingCycleHours : hours;
     energyRepository
-      .summary({ home_id: activeHomeId, hours })
+      .summary({ home_id: activeHomeId, hours: queryHours })
       .then((res) => active && setSummary(res))
       .catch(() => active && toast.error("Failed to load energy usage."))
       .finally(() => active && setIsLoading(false));
     return () => {
       active = false;
     };
-  }, [activeHomeId, hours]);
+  }, [activeHomeId, hours, useBillingCycle, billingCycleHours]);
 
   const totalKwh = summary?.total_kwh ?? 0;
   const totalCost = useMemo(() => computeCost(totalKwh, tariff), [totalKwh, tariff]);
@@ -82,6 +100,14 @@ export default function ElectricityPage() {
     toast.success("Tariff saved for this home.");
   };
 
+  const handleBillingCycleStartDayChange = (day: number) => {
+    setBillingCycleStartDay(day);
+    if (activeHomeId) {
+      saveBillingCycle(activeHomeId, day);
+      toast.success("Billing cycle configuration updated.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -92,9 +118,12 @@ export default function ElectricityPage() {
           {RANGES.map((r) => (
             <button
               key={r.hours}
-              onClick={() => setHours(r.hours)}
+              onClick={() => {
+                setUseBillingCycle(false);
+                setHours(r.hours);
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                hours === r.hours
+                !useBillingCycle && hours === r.hours
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
@@ -102,6 +131,16 @@ export default function ElectricityPage() {
               {r.label}
             </button>
           ))}
+          <button
+            onClick={() => setUseBillingCycle(true)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              useBillingCycle
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Billing Cycle
+          </button>
         </div>
       </PageHeader>
 
@@ -110,7 +149,14 @@ export default function ElectricityPage() {
         <MetricCard
           label="Energy Used"
           value={`${totalKwh.toFixed(2)} kWh`}
-          description={`Last ${hours <= 48 ? `${hours}h` : `${Math.round(hours / 24)}d`}`}
+          description={
+            useBillingCycle
+              ? `Billing cycle (since ${billingPeriod.start.toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })})`
+              : `Last ${hours <= 48 ? `${hours}h` : `${Math.round(hours / 24)}d`}`
+          }
           icon={Gauge}
           statusColor="cyan"
         />
@@ -136,6 +182,59 @@ export default function ElectricityPage() {
           statusColor="neutral"
         />
       </div>
+
+      {/* Billing Cycle Progress Card */}
+      {useBillingCycle && (
+        <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Current Billing Cycle Progress
+              </p>
+              <p className="mt-1.5 text-sm font-semibold">
+                {billingPeriod.start.toLocaleDateString(undefined, {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}{" "}
+                -{" "}
+                {billingPeriod.end.toLocaleDateString(undefined, {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+            {(() => {
+              const totalDays = Math.round(
+                (billingPeriod.end.getTime() - billingPeriod.start.getTime()) / (1000 * 3600 * 24),
+              );
+              const elapsedDays = Math.min(
+                totalDays,
+                Math.max(
+                  0,
+                  Math.floor((Date.now() - billingPeriod.start.getTime()) / (1000 * 3600 * 24)),
+                ),
+              );
+              const percent = Math.round((elapsedDays / totalDays) * 100);
+              return (
+                <div className="flex-1 max-w-md">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1.5 font-mono">
+                    <span>Day {elapsedDays} of {totalDays}</span>
+                    <span>{percent}% Complete</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Usage chart */}
       <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
@@ -266,7 +365,13 @@ export default function ElectricityPage() {
         </div>
 
         {/* Tariff editor */}
-        <TariffEditor tariff={tariff} setTariff={setTariff} onSave={handleSaveTariff} />
+        <TariffEditor
+          tariff={tariff}
+          setTariff={setTariff}
+          onSave={handleSaveTariff}
+          billingCycleStartDay={billingCycleStartDay}
+          onBillingCycleStartDayChange={handleBillingCycleStartDayChange}
+        />
       </div>
     </div>
   );
@@ -276,10 +381,14 @@ function TariffEditor({
   tariff,
   setTariff,
   onSave,
+  billingCycleStartDay,
+  onBillingCycleStartDayChange,
 }: {
   tariff: Tariff;
   setTariff: (t: Tariff) => void;
   onSave: () => void;
+  billingCycleStartDay: number;
+  onBillingCycleStartDayChange: (day: number) => void;
 }) {
   const setType = (type: "flat" | "tiered") => {
     if (type === tariff.type) return;
@@ -362,6 +471,33 @@ function TariffEditor({
       ) : (
         <TierEditor tariff={tariff} setTariff={setTariff} />
       )}
+
+      {/* Billing Cycle Day Selector */}
+      <div className="border-t border-border/30 pt-4 mt-2">
+        <h4 className="font-semibold text-xs text-foreground uppercase tracking-wider mb-2 font-mono">
+          [ Billing Cycle ]
+        </h4>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Cycle Start Day">
+            <input
+              type="number"
+              min={1}
+              max={31}
+              value={billingCycleStartDay}
+              onChange={(e) => {
+                const val = Math.max(1, Math.min(31, parseInt(e.target.value) || 1));
+                onBillingCycleStartDayChange(val);
+              }}
+              className="w-full rounded-lg border border-border bg-background/50 py-1.5 px-2.5 text-xs outline-none focus:border-primary"
+            />
+          </Field>
+          <div className="flex flex-col justify-end">
+            <p className="text-[10px] text-muted-foreground leading-normal font-mono">
+              Cycle restarts on day {billingCycleStartDay} of each month.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <button
         type="button"
