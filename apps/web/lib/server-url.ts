@@ -7,8 +7,9 @@
 import { Capacitor } from "@capacitor/core";
 
 const STORAGE_KEY = "domus:server-url";
+const FALLBACK_PORT = process.env.API_PORT || "8000";
 const ENV_DEFAULT =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL || `http://localhost:${FALLBACK_PORT}`;
 
 /** True when running inside the Electron desktop shell. */
 export function isElectron(): boolean {

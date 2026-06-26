@@ -87,7 +87,7 @@ export function ServerUrlScreen({
                 />
               </div>
               <p className="font-mono text-[10px] text-muted-foreground/80">
-                e.g. http://192.168.1.50:8000 on your home network
+                e.g. http://192.168.1.50:$API_PORT on your home network
               </p>
               {error && (
                 <p className="text-xs font-semibold text-rose-500">{error}</p>

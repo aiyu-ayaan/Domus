@@ -11,6 +11,8 @@ const pythonBin = fs.existsSync(venvPython) ? venvPython : "python";
 
 console.log(`[API Dev] Using python executable: ${pythonBin}`);
 
+const apiPort = process.env.API_PORT || "8000";
+
 // We construct the command to run uvicorn backend.main:app
 const args = [
   "-u",
@@ -21,7 +23,7 @@ const args = [
   "--host",
   "0.0.0.0",
   "--port",
-  "8000"
+  apiPort,
 ];
 
 const child = spawn(pythonBin, args, {
