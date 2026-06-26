@@ -68,6 +68,8 @@ class EnergyService:
             attrs = st.attributes if isinstance(st.attributes, dict) else {}
             power = attrs.get("power_w")
             if power is None:
+                power = attrs.get("current_consumption")
+            if power is None:
                 continue
             # SQLite drops tzinfo on read; treat stored timestamps as UTC.
             ts = st.created_at if st.created_at.tzinfo else st.created_at.replace(tzinfo=UTC)
