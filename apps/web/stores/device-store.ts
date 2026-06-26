@@ -120,15 +120,31 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
           [deviceId]: state,
         },
       }));
+      if (refresh) {
+        const device = await deviceRepository.get(deviceId);
+        set((prev) => ({
+          devices: prev.devices.map((d) => (d.id === deviceId ? device : d)),
+        }));
+      }
       return state;
     } catch (err) {
+      if (refresh) {
+        try {
+          const device = await deviceRepository.get(deviceId);
+          set((prev) => ({
+            devices: prev.devices.map((d) => (d.id === deviceId ? device : d)),
+          }));
+        } catch {}
+      }
       throw err;
     }
   },
 
   turnOnDevice: async (deviceId) => {
-    // Optimistic UI update
     const originalState = get().deviceStates[deviceId];
+    const originalDevices = get().devices;
+
+    // Optimistic UI update
     set((prev) => ({
       deviceStates: {
         ...prev.deviceStates,
@@ -148,8 +164,10 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     try {
       const finalState = await deviceRepository.turnOn(deviceId);
       get().updateDeviceStateInStore(deviceId, finalState);
+      get().updateDeviceInStore(deviceId, { online: true });
     } catch (err) {
       // Revert state on error
+      set({ devices: originalDevices });
       if (originalState) {
         get().updateDeviceStateInStore(deviceId, originalState);
       }
@@ -158,8 +176,10 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   },
 
   turnOffDevice: async (deviceId) => {
-    // Optimistic UI update
     const originalState = get().deviceStates[deviceId];
+    const originalDevices = get().devices;
+
+    // Optimistic UI update
     set((prev) => ({
       deviceStates: {
         ...prev.deviceStates,
@@ -176,7 +196,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     try {
       const finalState = await deviceRepository.turnOff(deviceId);
       get().updateDeviceStateInStore(deviceId, finalState);
+      get().updateDeviceInStore(deviceId, { online: true });
     } catch (err) {
+      set({ devices: originalDevices });
       if (originalState) {
         get().updateDeviceStateInStore(deviceId, originalState);
       }
@@ -187,6 +209,7 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   toggleDevice: async (deviceId) => {
     const currentState = get().deviceStates[deviceId];
     const nextStateStr = currentState?.state === "on" ? "off" : "on";
+    const originalDevices = get().devices;
 
     // Optimistic UI update
     set((prev) => ({
@@ -205,7 +228,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     try {
       const finalState = await deviceRepository.toggle(deviceId);
       get().updateDeviceStateInStore(deviceId, finalState);
+      get().updateDeviceInStore(deviceId, { online: true });
     } catch (err) {
+      set({ devices: originalDevices });
       if (currentState) {
         get().updateDeviceStateInStore(deviceId, currentState);
       }
@@ -216,6 +241,7 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   setDeviceAttributes: async (deviceId, attributes) => {
     const originalState = get().deviceStates[deviceId];
     const originalAttributes = originalState?.attributes || {};
+    const originalDevices = get().devices;
 
     set((prev) => ({
       deviceStates: {
@@ -255,7 +281,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       finalState.attributes = preservedAttributes;
 
       get().updateDeviceStateInStore(deviceId, finalState);
+      get().updateDeviceInStore(deviceId, { online: true });
     } catch (err) {
+      set({ devices: originalDevices });
       if (originalState) {
         get().updateDeviceStateInStore(deviceId, originalState);
       }
@@ -361,12 +389,6 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
           ...prev.deviceStates,
           [deviceId]: updatedState,
         },
-        // Also mark as online since it reported state
-        devices: prev.devices.map((d) =>
-          d.id === deviceId
-            ? { ...d, online: true, last_seen: new Date().toISOString() }
-            : d,
-        ),
       };
     });
   },

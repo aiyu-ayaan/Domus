@@ -10,6 +10,7 @@ import { useHomeStore } from "@/stores/home-store";
 import { useIntegrationStore } from "@/stores/integration-store";
 import { getServerUrl } from "@/lib/server-url";
 import type { DeviceStateOut, NotificationOut } from "@/types/api";
+import { mockDb } from "@/mocks/mock-db";
 
 interface RealtimeContextType {
   isConnected: boolean;
@@ -265,6 +266,15 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       case "device.online_changed": {
         const { device_id, online } = msg.data;
         useDeviceStore.getState().updateDeviceInStore(device_id, { online });
+
+        // Update mock database if in mock mode
+        if (process.env.NEXT_PUBLIC_USE_MOCK_API !== "false") {
+          const devices = mockDb.get("devices");
+          mockDb.set(
+            "devices",
+            devices.map((d) => (d.id === device_id ? { ...d, online } : d)),
+          );
+        }
 
         // Show offline status notifications
         if (!online) {
