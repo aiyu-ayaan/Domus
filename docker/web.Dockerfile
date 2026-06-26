@@ -4,13 +4,14 @@ WORKDIR /app
 # Copy package files for the workspace
 COPY package.json ./
 COPY apps/web/package.json ./apps/web/
-COPY bun.lockb* ./
+COPY apps/api/package.json ./apps/api/
+COPY bun.lock ./
 
-RUN bun install
+RUN bun install --frozen-lockfile
 
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app ./
 COPY apps/web ./apps/web
 COPY package.json tsconfig.base.json ./
 # NEXT_PUBLIC_* vars are inlined into the bundle at build time, so they must be

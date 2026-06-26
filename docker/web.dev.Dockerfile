@@ -4,9 +4,10 @@ WORKDIR /app
 # Copy package files for dependencies caching
 COPY package.json ./
 COPY apps/web/package.json ./apps/web/
-COPY bun.lockb* ./
+COPY apps/api/package.json ./apps/api/
+COPY bun.lock ./
 
-RUN bun install
+RUN bun install --frozen-lockfile
 
 EXPOSE 3000
 
