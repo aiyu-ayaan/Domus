@@ -12,6 +12,7 @@ import pytest
 kasa = pytest.importorskip("kasa")
 
 from backend.common.enums import IntegrationType  # noqa: E402
+from backend.core import config  # noqa: E402
 from backend.integrations.adapters import tapo_kasa  # noqa: E402
 from backend.integrations.adapters.tapo_kasa import (  # noqa: E402
     RealTapoAdapter,
@@ -58,12 +59,10 @@ class _FakeDevice:
 def fake_device(monkeypatch):
     dev = _FakeDevice()
 
-    async def _discover_single(host, credentials=None):
+    async def _discover_single(host, credentials=None, timeout=None):
         return dev
 
-    monkeypatch.setattr(
-        tapo_kasa.Discover, "discover_single", staticmethod(_discover_single)
-    )
+    monkeypatch.setattr(tapo_kasa.Discover, "discover_single", staticmethod(_discover_single))
     return dev
 
 
@@ -78,9 +77,7 @@ def test_has_real_config_routing():
 
 @pytest.mark.asyncio
 async def test_turn_on_off_toggle_and_energy(fake_device):
-    adapter = RealTapoAdapter(
-        {"username": "u@e.com", "password": "p", "hosts": ["192.168.1.50"]}
-    )
+    adapter = RealTapoAdapter({"username": "u@e.com", "password": "p", "hosts": ["192.168.1.50"]})
     assert adapter.kind is IntegrationType.tapo
 
     on = await adapter.turn_on("192.168.1.50")
@@ -111,6 +108,58 @@ async def test_discover_maps_host_to_external_id(fake_device):
     assert discovered[0].external_id == "192.168.1.50"
     assert discovered[0].device_type.value == "plug"
     assert discovered[0].manufacturer == "TP-Link"
+
+
+def test_expand_targets_cidr_and_literals():
+    # CIDR explodes into usable host IPs (network/broadcast excluded by .hosts()).
+    expanded = RealTapoAdapter._expand_targets(["192.168.1.0/30"])
+    assert expanded == ["192.168.1.1", "192.168.1.2"]
+    # Literal IPs/hostnames pass through; junk "CIDR" falls back to a literal.
+    assert RealTapoAdapter._expand_targets(["192.168.1.50", "  10.0.0.9  "]) == [
+        "192.168.1.50",
+        "10.0.0.9",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_cidr_sweep_keeps_only_responders(monkeypatch):
+    """A subnet sweep probes every host but returns only the ones that answer —
+    the bridge-friendly unicast path that replaces blocked broadcast."""
+    dev = _FakeDevice()
+
+    async def _discover_single(host, credentials=None, timeout=None):
+        if host == "192.168.1.2":
+            return dev
+        raise Exception("no device here")  # unreachable IP — must be swallowed
+
+    monkeypatch.setattr(tapo_kasa.Discover, "discover_single", staticmethod(_discover_single))
+
+    adapter = RealTapoAdapter({"host": "192.168.1.0/30"})
+    discovered = await adapter.discover_devices()
+    assert [d.external_id for d in discovered] == ["192.168.1.2"]
+
+
+@pytest.mark.asyncio
+async def test_empty_broadcast_falls_back_to_configured_subnet(monkeypatch):
+    """No explicit host + empty broadcast (the Docker-bridge case) → unicast sweep
+    of DISCOVERY_SUBNETS. This is the path that makes the scan work in Docker."""
+    dev = _FakeDevice()
+
+    async def _discover(credentials=None, **kw):
+        return {}  # broadcast escapes nothing inside a bridge container
+
+    async def _discover_single(host, credentials=None, timeout=None):
+        if host == "192.168.1.2":
+            return dev
+        raise Exception("unreachable")
+
+    monkeypatch.setattr(tapo_kasa.Discover, "discover", staticmethod(_discover))
+    monkeypatch.setattr(tapo_kasa.Discover, "discover_single", staticmethod(_discover_single))
+    monkeypatch.setattr(config.settings, "discovery_subnets", "192.168.1.0/30")
+
+    adapter = RealTapoAdapter({"username": "u@e.com", "password": "p"})  # no host
+    discovered = await adapter.discover_devices()
+    assert [d.external_id for d in discovered] == ["192.168.1.2"]
 
 
 class _FakeLight:
@@ -157,12 +206,10 @@ class _FakeLight:
 async def test_set_attributes_preserves_brightness(monkeypatch):
     light = _FakeLight()
 
-    async def _discover_single(host, credentials=None):
+    async def _discover_single(host, credentials=None, timeout=None):
         return light
 
-    monkeypatch.setattr(
-        tapo_kasa.Discover, "discover_single", staticmethod(_discover_single)
-    )
+    monkeypatch.setattr(tapo_kasa.Discover, "discover_single", staticmethod(_discover_single))
 
     adapter = RealTapoAdapter({"hosts": ["192.168.1.51"]})
 
@@ -182,4 +229,3 @@ async def test_set_attributes_preserves_brightness(monkeypatch):
     await adapter.set_attributes("192.168.1.51", {"color": "#ff0000", "brightness": 42})
     assert light.hsv[2] == 42
     assert light.brightness == 42
-

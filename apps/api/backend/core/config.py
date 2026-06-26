@@ -14,7 +14,9 @@ _REPO_ROOT_ENV = Path(__file__).resolve().parents[4] / ".env"
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=str(_REPO_ROOT_ENV), env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(_REPO_ROOT_ENV), env_file_encoding="utf-8", extra="ignore"
+    )
 
     app_name: str = "Domus API"
     environment: str = "development"
@@ -34,13 +36,21 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
 
+    # LAN subnet(s) to unicast-sweep when discovering local devices (Tapo/Kasa, …)
+    # from inside Docker, where UDP broadcast can't escape the bridge network.
+    # Comma-separated CIDRs, e.g. "192.168.1.0/24". Empty = broadcast only (which
+    # needs the API on the LAN: run locally or with Docker host networking).
+    discovery_subnets: str = ""
+
     cors_origins: list[str] = ["http://localhost:3000"]
     # Native apps (Capacitor Android/iOS/desktop) call the API from fixed local
     # origins, not http://host:port. Allow them by pattern so users don't have to
     # list every one. Matches capacitor://localhost, http(s)://localhost, etc.
     # electron-serve loads the app from "<scheme>://-" (literal dash host), so that
     # host form must be matched too or the Electron desktop app's CORS preflight fails.
-    cors_origin_regex: str = r"^(https?|capacitor|ionic|capacitor-electron)://(localhost|-)?(:\d+)?$"
+    cors_origin_regex: str = (
+        r"^(https?|capacitor|ionic|capacitor-electron)://(localhost|-)?(:\d+)?$"
+    )
 
     # Rate limiting (auth endpoints)
     auth_rate_limit: str = "10/minute"
@@ -55,7 +65,11 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def adjust_urls_for_local_dev(self) -> "Settings":
         # Check if we are running inside a Docker container.
-        is_docker = os.path.exists("/.dockerenv") or os.environ.get("IS_DOCKER") == "true" or os.path.exists("/run/.containerenv")
+        is_docker = (
+            os.path.exists("/.dockerenv")
+            or os.environ.get("IS_DOCKER") == "true"
+            or os.path.exists("/run/.containerenv")
+        )
         if not is_docker:
             # If running locally on host, resolve container hostnames to 127.0.0.1
             try:

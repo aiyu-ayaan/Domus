@@ -123,6 +123,17 @@ class IntegrationService:
                 )
             )
 
+        # A subnet sweep can take seconds; if the integration was deleted in that
+        # window, flushing the new devices would 500 with a raw FK violation.
+        # Re-check existence against the DB (bypassing the identity map) and fail
+        # clean. ponytail: closes the race to ~microseconds, not absolutely — a
+        # delete landing between this check and flush is acceptably rare.
+        still_exists = await self.session.scalar(
+            select(Integration.id).where(Integration.id == integration_id)
+        )
+        if still_exists is None:
+            raise NotFoundError("Integration was removed during discovery")
+
         integration.last_sync_at = datetime.now(UTC)
         await self.session.flush()
         return DiscoveryResult(

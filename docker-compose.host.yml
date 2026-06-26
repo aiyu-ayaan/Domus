@@ -1,0 +1,22 @@
+# Opt-in overlay that puts the api on the host network so real LAN device
+# discovery works (Tapo/Kasa, WiZ, LIFX, ...). python-kasa's Discover.discover()
+# uses UDP broadcast, which Docker's default bridge network silently drops — so
+# discovery finds nothing from inside the container. Host networking places the
+# api directly on the LAN, where the broadcast reaches your devices.
+#
+# Linux Docker hosts ONLY. Docker Desktop (Windows/Mac) runs the engine in a VM
+# that can't see LAN broadcast even in host mode — there, skip discovery and add
+# devices by explicit IP (the Tapo adapter's "host"/"hosts" config).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.host.yml up
+services:
+  api:
+    network_mode: host
+    environment:
+      # Host mode bypasses Compose DNS and port publishing: reach postgres/redis
+      # on localhost at their published ports, and bind the API on the published
+      # port directly (no container->host port remap exists in host mode).
+      - DATABASE_URL=postgresql+psycopg://domus:domus@localhost:${POSTGRES_PORT:-5432}/domus
+      - REDIS_URL=redis://localhost:${REDIS_PORT:-6379}/0
+      - UVICORN_PORT=${API_PORT:-8000}
