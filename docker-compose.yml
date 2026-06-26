@@ -3,12 +3,13 @@ services:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
-      # Browser-side vars: baked in at build time. The browser reaches the API on
-      # the host (PUBLIC_HOST) at the published API_PORT — never the internal
-      # api:8000. Composed from .env so the port lives in exactly one place.
+      # Browser-side vars: baked in at build time. Defaults to the host
+      # (PUBLIC_HOST) at the published API_PORT; set PUBLIC_API_URL to a full URL
+      # (e.g. https://api.example.com) for a reverse proxy / external domain.
+      # Rebuild web after changing it — NEXT_PUBLIC_* is baked, not runtime.
       args:
         NEXT_PUBLIC_USE_MOCK_API: ${NEXT_PUBLIC_USE_MOCK_API:-false}
-        NEXT_PUBLIC_API_URL: http://${PUBLIC_HOST:-localhost}:${API_PORT:-8000}
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://${PUBLIC_HOST:-localhost}:${API_PORT:-8000}}
     ports:
       - "${WEB_PORT:-3000}:3000"
     depends_on:
@@ -23,9 +24,9 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://domus:domus@postgres:${POSTGRES_PORT:-5432}/domus
       - REDIS_URL=redis://redis:${REDIS_PORT:-6379}/0
-      # Allow the web UI from this host on both localhost and PUBLIC_HOST (LAN IP),
-      # composed from the same port var the web service is published on.
-      - CORS_ORIGINS=["http://localhost:${WEB_PORT:-3000}","http://${PUBLIC_HOST:-localhost}:${WEB_PORT:-3000}"]
+      # CORS is assembled by the API from WEB_PORT + PUBLIC_HOST + EXTRA_CORS_ORIGINS
+      # (all injected via env_file: .env). Add your public web origin to
+      # EXTRA_CORS_ORIGINS, e.g. https://domus.example.com.
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:

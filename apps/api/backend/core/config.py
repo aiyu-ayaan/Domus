@@ -42,7 +42,19 @@ class Settings(BaseSettings):
     # needs the API on the LAN: run locally or with Docker host networking).
     discovery_subnets: str = ""
 
-    cors_origins: list[str] = ["http://localhost:3000"]
+    # Where browsers reach the web UI. localhost + public_host:web_port are always
+    # allowed through CORS (derived below). public_host defaults to localhost; set
+    # it to your LAN IP for multi-device access.
+    public_host: str = "localhost"
+    web_port: int = 3000
+    # Extra browser origins to allow through CORS, comma-separated — e.g. your
+    # public web URL behind a reverse proxy: "https://domus.example.com". This is
+    # how an external/custom domain gets past CORS without a code change.
+    extra_cors_origins: str = ""
+
+    # Final allow-list (assembled in _assemble_cors_origins). Seed extras here too
+    # via the CORS_ORIGINS env var (JSON array) if you prefer.
+    cors_origins: list[str] = []
     # Native apps (Capacitor Android/iOS/desktop) call the API from fixed local
     # origins, not http://host:port. Allow them by pattern so users don't have to
     # list every one. Matches capacitor://localhost, http(s)://localhost, etc.
@@ -61,6 +73,24 @@ class Settings(BaseSettings):
     mqtt_port: int = 1883
     mqtt_username: str | None = None
     mqtt_password: str | None = None
+
+    @model_validator(mode="after")
+    def _assemble_cors_origins(self) -> "Settings":
+        """Build the CORS allow-list from the host/port knobs + explicit extras.
+
+        Lets a public/reverse-proxy deployment whitelist its domain via the
+        EXTRA_CORS_ORIGINS env var instead of editing code or a JSON blob.
+        """
+        origins = set(self.cors_origins)
+        for host in ("localhost", self.public_host):
+            if host:
+                origins.add(f"http://{host}:{self.web_port}")
+        for origin in self.extra_cors_origins.split(","):
+            origin = origin.strip().rstrip("/")
+            if origin:
+                origins.add(origin)
+        self.cors_origins = sorted(origins)
+        return self
 
     @model_validator(mode="after")
     def adjust_urls_for_local_dev(self) -> "Settings":
