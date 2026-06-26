@@ -9,16 +9,17 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: domus-dev-postgres
+    command: -p ${POSTGRES_PORT:-5432}
     environment:
       POSTGRES_USER: domus
       POSTGRES_PASSWORD: domus
       POSTGRES_DB: domus
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
     volumes:
       - domus-dev-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U domus"]
+      test: ["CMD-SHELL", "pg_isready -U domus -p ${POSTGRES_PORT:-5432}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,10 +27,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: domus-dev-redis
+    command: --port ${REDIS_PORT:-6379}
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-p", "${REDIS_PORT:-6379}", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
