@@ -71,6 +71,7 @@ export default function DeviceDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [localBrightness, setLocalBrightness] = useState<number | null>(null);
+  const [localTargetTemp, setLocalTargetTemp] = useState<number | null>(null);
   const [colorModeTab, setColorModeTab] = useState<"color" | "temp">("temp");
   const [localTempPercent, setLocalTempPercent] = useState<number | null>(null);
   const [energy, setEnergy] = useState<{
@@ -338,7 +339,9 @@ export default function DeviceDetailPage() {
                       <div className="flex justify-between items-center text-sm">
                         <span className="font-semibold">Target Climate</span>
                         <span className="font-mono text-primary font-bold">
-                          {state?.attributes?.target_temperature || "22.0"}°C
+                          {localTargetTemp !== null
+                            ? localTargetTemp.toFixed(1)
+                            : (state?.attributes?.target_temperature || 22.0).toFixed(1)}°C
                         </span>
                       </div>
                       <input
@@ -346,24 +349,37 @@ export default function DeviceDetailPage() {
                         min="16"
                         max="28"
                         step="0.5"
-                        defaultValue={
-                          state?.attributes?.target_temperature || "22"
+                        value={
+                          localTargetTemp !== null
+                            ? localTargetTemp
+                            : state?.attributes?.target_temperature || 22.0
                         }
-                        onChange={async (e) => {
-                          const targetVal = parseFloat(e.target.value);
+                        onChange={(e) => {
+                          setLocalTargetTemp(parseFloat(e.target.value));
+                        }}
+                        onMouseUp={async (e) => {
+                          const val = parseFloat((e.target as HTMLInputElement).value);
                           try {
-                            await deviceRepository.update(device.id, {
-                              online: true,
+                            await setDeviceAttributes(device.id, {
+                              target_temperature: val,
                             });
-                            // Update attributes
-                            await deviceRepository.getState(device.id);
-                            const updatedState = await deviceRepository.turnOn(
-                              device.id,
-                            ); // turn-on updates
-                            updatedState.attributes.target_temperature =
-                              targetVal;
-                            updateDeviceStateInStore(device.id, updatedState);
-                          } catch {}
+                            setLocalTargetTemp(null);
+                            toast.success(`Target temperature set to ${val.toFixed(1)}°C`);
+                          } catch {
+                            toast.error("Failed to set temperature");
+                          }
+                        }}
+                        onTouchEnd={async (e) => {
+                          const val = parseFloat((e.target as HTMLInputElement).value);
+                          try {
+                            await setDeviceAttributes(device.id, {
+                              target_temperature: val,
+                            });
+                            setLocalTargetTemp(null);
+                            toast.success(`Target temperature set to ${val.toFixed(1)}°C`);
+                          } catch {
+                            toast.error("Failed to set temperature");
+                          }
                         }}
                         className="w-full h-1.5 rounded-lg bg-muted border-none outline-none accent-primary cursor-pointer"
                       />

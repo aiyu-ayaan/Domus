@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
 
@@ -7,7 +8,8 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/api/package.json ./apps/api/
 COPY bun.lock ./
 
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
 
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
@@ -20,14 +22,17 @@ ARG NEXT_PUBLIC_USE_MOCK_API=false
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_USE_MOCK_API=$NEXT_PUBLIC_USE_MOCK_API
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-RUN cd apps/web && bunx --no-install next build
+ENV NEXT_OUTPUT=standalone
+RUN --mount=type=cache,target=/app/apps/web/.next/cache \
+    cd apps/web && bunx --no-install next build
 
-FROM oven/bun:1-alpine AS runner
-WORKDIR /app
+FROM node:22-alpine AS runner
+WORKDIR /app/apps/web
 ENV NODE_ENV=production
-COPY --from=builder /app/apps/web/.next ./.next
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+COPY --from=builder /app/apps/web/.next/standalone /app
+COPY --from=builder /app/apps/web/.next/static ./.next/static
 COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/package.json ./package.json
-COPY --from=builder /app/apps/web/node_modules ./node_modules
 EXPOSE 3000
-CMD ["bunx", "--no-install", "next", "start"]
+CMD ["node", "server.js"]

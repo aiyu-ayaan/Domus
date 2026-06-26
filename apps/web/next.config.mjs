@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Env lives in the repo root (.env + .env.local), shared by api and web. Next
@@ -21,11 +22,22 @@ for (const file of [".env", ".env.local"]) {
 
 /** @type {import('next').NextConfig} */
 // Set NEXT_OUTPUT=export to emit a static bundle in `out/` for the native
-// (Capacitor) Android/iOS/desktop builds. Unset for the normal web/server build.
+// (Capacitor) Android/iOS/desktop builds. Set NEXT_OUTPUT=standalone for the
+// production Docker image. Leave unset for the normal local web build.
 const isExport = process.env.NEXT_OUTPUT === "export";
+const isStandalone = process.env.NEXT_OUTPUT === "standalone";
 
 const nextConfig = {
-  ...(isExport ? { output: "export", images: { unoptimized: true } } : {}),
+  ...(isExport
+    ? { output: "export", images: { unoptimized: true } }
+    : isStandalone
+      ? {
+          output: "standalone",
+          outputFileTracingRoot: resolve(
+            fileURLToPath(new URL("../..", import.meta.url)),
+          ),
+        }
+      : {}),
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM oven/bun:1-alpine
 WORKDIR /app
 
@@ -7,7 +8,8 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/api/package.json ./apps/api/
 COPY bun.lock ./
 
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
 
 EXPOSE 3000
 

@@ -24,3 +24,6 @@ __pycache__
 .codegraph
 .impeccable
 pic
+apps/web/android
+apps/web/electron
+docs
