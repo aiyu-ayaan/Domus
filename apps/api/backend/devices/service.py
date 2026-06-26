@@ -115,15 +115,19 @@ class DeviceService:
         if integration is None or not integration.enabled:
             raise ConflictError("Integration is missing or disabled")
         adapter = get_adapter(integration)
-        snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
-        
-        # Merge virtual UI attributes to preserve them
-        virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
-        for key in virtual_keys:
-            if key in attributes:
-                snapshot.attributes[key] = attributes[key]
-                
-        return await self._record(device, snapshot)
+        try:
+            snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+            
+            # Merge virtual UI attributes to preserve them
+            virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
+            for key in virtual_keys:
+                if key in attributes:
+                    snapshot.attributes[key] = attributes[key]
+                    
+            return await self._record(device, snapshot)
+        except Exception as e:
+            await self.mark_offline(device)
+            raise e
 
     async def control_system(self, device_id: UUID, action: str) -> DeviceState:
         """Unauthenticated control for system actors (automation engine, scenes)."""
@@ -141,15 +145,44 @@ class DeviceService:
         if integration is None or not integration.enabled:
             raise ConflictError("Integration is missing or disabled")
         adapter = get_adapter(integration)
-        snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+        try:
+            snapshot: StateSnapshot = await adapter.set_attributes(device.external_id, attributes)
+            
+            # Merge virtual UI attributes to preserve them
+            virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
+            for key in virtual_keys:
+                if key in attributes:
+                    snapshot.attributes[key] = attributes[key]
+                    
+            return await self._record(device, snapshot)
+        except Exception as e:
+            await self.mark_offline(device)
+            raise e
+
+    async def mark_offline(self, device: Device) -> None:
+        """Flip an online device to offline, notify, and fire device_offline automations."""
+        if not device.online:
+            return
+        device.online = False
+        await self.session.flush()
         
-        # Merge virtual UI attributes to preserve them
-        virtual_keys = ["ambient_sync", "music_theme", "light_scene", "light_scene_gap", "custom_scene_colors"]
-        for key in virtual_keys:
-            if key in attributes:
-                snapshot.attributes[key] = attributes[key]
-                
-        return await self._record(device, snapshot)
+        from backend.common.enums import NotificationType
+        from backend.core.events import DEVICE_ONLINE_CHANGED, Event, event_bus
+        from backend.notifications.service import NotificationService
+
+        await event_bus.publish(
+            Event(
+                type=DEVICE_ONLINE_CHANGED,
+                home_id=str(device.home_id),
+                data={"device_id": str(device.id), "online": False},
+            )
+        )
+        await NotificationService(self.session).create(
+            device.home_id,
+            NotificationType.device_offline,
+            title=f"{device.name} is offline",
+            body="Device stopped responding to status polls.",
+        )
 
     async def _apply(self, device: Device, action: str) -> DeviceState:
         if action not in ACTIONS:
@@ -158,8 +191,12 @@ class DeviceService:
         if integration is None or not integration.enabled:
             raise ConflictError("Integration is missing or disabled")
         adapter = get_adapter(integration)
-        snapshot: StateSnapshot = await getattr(adapter, action)(device.external_id)
-        return await self._record(device, snapshot)
+        try:
+            snapshot: StateSnapshot = await getattr(adapter, action)(device.external_id)
+            return await self._record(device, snapshot)
+        except Exception as e:
+            await self.mark_offline(device)
+            raise e
 
     async def _record(self, device: Device, snapshot: StateSnapshot) -> DeviceState:
         now = datetime.now(UTC)
@@ -169,10 +206,22 @@ class DeviceService:
             attributes=snapshot.attributes,
             created_at=now,
         )
+        was_offline = not device.online
         device.online = True
         device.last_seen = now
         self.session.add(state)
         await self.session.flush()
+        
+        if was_offline:
+            from backend.core.events import DEVICE_ONLINE_CHANGED
+            await event_bus.publish(
+                Event(
+                    type=DEVICE_ONLINE_CHANGED,
+                    home_id=str(device.home_id),
+                    data={"device_id": str(device.id), "online": True},
+                )
+            )
+            
         await event_bus.publish(
             Event(
                 type=DEVICE_STATE_CHANGED,
@@ -209,8 +258,8 @@ class DeviceService:
                             if key in last_state.attributes and key not in snapshot.attributes:
                                 snapshot.attributes[key] = last_state.attributes[key]
                     return await self._record(device, snapshot)
-            except Exception:
-                pass
+            except Exception as e:
+                await self.mark_offline(device)
 
         res = await self.session.execute(
             select(DeviceState)
