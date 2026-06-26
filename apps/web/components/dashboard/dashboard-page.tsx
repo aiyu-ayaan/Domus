@@ -32,6 +32,7 @@ import {
   TriangleAlert,
   WifiOff,
   Zap,
+  Settings,
 } from "lucide-react";
 import {
   Bar,
@@ -53,6 +54,17 @@ import type { DeviceOut, RoomOut } from "@/types/api";
 import { LIGHT_COLOR_PRESETS } from "@/lib/color";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { energyRepository } from "@/repositories";
+import type { EnergySummary } from "@/types/api";
+import {
+  type Tariff,
+  computeCost,
+  formatMoney,
+  loadTariff,
+  DEFAULT_TARIFF,
+  getCurrentBillingCyclePeriod,
+  loadBillingCycle,
+} from "@/lib/energy";
 
 const triggerLabels: Record<string, string> = {
   device_state: "STATE",
@@ -85,6 +97,24 @@ const deviceIconMap = {
 export function DashboardPage() {
   const [chartsReady, setChartsReady] = useState(false);
   const { activeHomeId, homes, isLoading: homesLoading } = useHomeStore();
+  const [sectionVisibility, setSectionVisibility] = useState({
+    healthHeader: true,
+    systemTiles: true,
+    quickStats: true,
+    livePowerDraw: true,
+    ruleDistribution: true,
+    electricity: true,
+    plugTelemetry: true,
+    roomHealth: true,
+    deviceList: true,
+    savedScenes: true,
+    automationStack: true,
+    activityFeed: true,
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [electricitySummary, setElectricitySummary] = useState<EnergySummary | null>(null);
+  const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
+  const [billingCycleStartDay, setBillingCycleStartDay] = useState(1);
   const {
     devices,
     deviceStates,
@@ -119,10 +149,20 @@ export function DashboardPage() {
       if (savedOrder) {
         setDeviceOrder(JSON.parse(savedOrder));
       }
+      const savedVisibility = localStorage.getItem("domus:dashboard-section-visibility");
+      if (savedVisibility) {
+        setSectionVisibility(JSON.parse(savedVisibility));
+      }
     } catch (e) {
       console.error("Failed to load dashboard device preferences", e);
     }
   }, []);
+
+  const handleToggleVisibility = (sectionKey: keyof typeof sectionVisibility) => {
+    const next = { ...sectionVisibility, [sectionKey]: !sectionVisibility[sectionKey] };
+    setSectionVisibility(next);
+    localStorage.setItem("domus:dashboard-section-visibility", JSON.stringify(next));
+  };
 
   useEffect(() => {
     if (!isClient) return;
@@ -204,6 +244,21 @@ export function DashboardPage() {
     fetchNotifications(activeHomeId);
     fetchAutomations(activeHomeId);
     fetchScenes(activeHomeId);
+
+    // Fetch electricity summary for the current cycle
+    const activeTariff = loadTariff(activeHomeId);
+    setTariff(activeTariff);
+    const startDay = loadBillingCycle(activeHomeId);
+    setBillingCycleStartDay(startDay);
+
+    const period = getCurrentBillingCyclePeriod(startDay);
+    const ms = Date.now() - period.start.getTime();
+    const queryHours = Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
+
+    energyRepository
+      .summary({ home_id: activeHomeId, hours: queryHours })
+      .then((res) => setElectricitySummary(res))
+      .catch((err) => console.error("Failed to load dashboard energy summary", err));
   }, [
     activeHomeId,
     fetchAutomations,
@@ -287,12 +342,21 @@ export function DashboardPage() {
   const handleRefresh = async () => {
     if (!activeHomeId) return;
 
+    const startDay = loadBillingCycle(activeHomeId);
+    const period = getCurrentBillingCyclePeriod(startDay);
+    const ms = Date.now() - period.start.getTime();
+    const queryHours = Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
+
     await Promise.all([
       fetchDevices(activeHomeId),
       fetchRooms(activeHomeId),
       fetchNotifications(activeHomeId),
       fetchAutomations(activeHomeId),
       fetchScenes(activeHomeId),
+      energyRepository
+        .summary({ home_id: activeHomeId, hours: queryHours })
+        .then((res) => setElectricitySummary(res))
+        .catch(() => {}),
     ]);
     toast.success("Command center refreshed");
   };
@@ -381,529 +445,787 @@ export function DashboardPage() {
       animate="show"
       className="min-h-[calc(100vh-7rem)] space-y-4 sm:space-y-5"
     >
-      <motion.section
-        variants={itemVariants}
-        className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]"
-      >
-        <div className="relative overflow-hidden rounded-none border-2 border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
-          <div className="absolute inset-x-0 top-0 h-1 bg-[#E61919]" />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0px, hsl(var(--foreground)) 1px, transparent 1px, transparent 4px)",
-            }}
-          />
-          <span className="pointer-events-none absolute right-3 top-3 font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-            UNIT / D-01
-          </span>
-          <div className="relative grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-end">
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusPill
-                  tone={offlineDevices > 0 ? "warning" : "success"}
-                  icon={offlineDevices > 0 ? TriangleAlert : ShieldCheck}
-                >
-                  {offlineDevices > 0
-                    ? `${offlineDevices} offline`
-                    : "All systems nominal"}
-                </StatusPill>
-                <StatusPill tone="neutral" icon={Home}>
-                  {activeHome?.name || "No active home"}
-                </StatusPill>
-              </div>
-
-              <div className="max-w-3xl">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                  Domus command center
-                </p>
-                <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                  Your home is running at {uptimeScore}% operational health.
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                  Watch device availability, power load, automation coverage,
-                  and security events from a single real-time operator surface.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <LinkButton href="/devices" icon={Cpu}>
-                  Manage devices
-                </LinkButton>
-                <LinkButton
-                  href="/automations"
-                  icon={SlidersHorizontal}
-                  variant="secondary"
-                >
-                  Tune automations
-                </LinkButton>
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold text-foreground transition duration-200 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/40"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Sync now
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
-              <HeroStat
-                label="Online"
-                value={onlineDevices}
-                suffix={`/${totalDevices}`}
-                tone="success"
-              />
-              <HeroStat
-                label="Load"
-                value={currentPowerLoad.toFixed(1)}
-                suffix="W"
-                tone="energy"
-              />
-              <HeroStat
-                label="Automated"
-                value={automationCoverage}
-                suffix="%"
-                tone="success"
-              />
-              <HeroStat
-                label="Unread"
-                value={unreadAlerts.length}
-                suffix="events"
-                tone={unreadAlerts.length > 0 ? "warning" : "neutral"}
-              />
-            </div>
-          </div>
+      {/* Dashboard Customize top bar */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground font-mono uppercase">
+            Domus Panel
+          </h2>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsSettingsOpen(true)}
+          className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-border bg-card p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer"
+          title="Customize dashboard layout"
+        >
+          <Settings className="h-4.5 w-4.5" />
+          <span className="hidden sm:inline ml-2 text-xs font-semibold font-mono uppercase">Customize</span>
+        </button>
+      </div>
 
-        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-          <SystemTile
-            icon={Router}
-            label="Network Mesh"
-            value={`${onlineDevices} nodes`}
-            detail="Socket.IO event bridge"
-          />
-          <SystemTile
-            icon={Zap}
-            label="Active States"
-            value={activeDeviceStates}
-            detail="Devices currently on"
-          />
-          <SystemTile
-            icon={ShieldCheck}
-            label="Security Queue"
-            value={securityAlerts.length}
-            detail="Unread critical alerts"
-            warning={securityAlerts.length > 0}
-          />
-        </div>
-      </motion.section>
-
-      <motion.section
-        variants={itemVariants}
-        className="grid gap-4 lg:grid-cols-4"
+      <Dialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
       >
-        <MetricPanel
-          icon={Cpu}
-          label="Devices"
-          value={totalDevices}
-          detail={`${onlineDevices} online, ${offlineDevices} offline`}
-        />
-        <MetricPanel
-          icon={Layers3}
-          label="Rooms"
-          value={rooms.length}
-          detail={`${activeRooms.length} with live devices`}
-        />
-        <MetricPanel
-          icon={Activity}
-          label="Automations"
-          value={activeAutomations.length}
-          detail={`${automations.length} total rules`}
-        />
-        <MetricPanel
-          icon={Sparkles}
-          label="Scenes"
-          value={scenes.length}
-          detail="Multi-device preset configurations"
-        />
-      </motion.section>
-
-      <motion.section
-        variants={itemVariants}
-        className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]"
-      >
-        <DashboardCard
-          title="Live Power Draw"
-          description="Real-time consumption reported by metered devices"
-          action={<MiniLink href="/devices">Inspect load</MiniLink>}
+        <DialogContent
+          title="Customize Dashboard"
+          description="Select which sections to show or hide on your homescreen."
         >
-          <ChartFrame ready={chartsReady}>
-            {powerByDevice.length === 0 ? (
-              <ChartEmpty
-                icon={PlugZap}
-                label="No live power telemetry"
-                detail="Connect a smart plug or meter that reports consumption"
-              />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={powerByDevice}
-                  margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
+          <div className="space-y-4 pt-4">
+            <div className="grid gap-3 sm:grid-cols-2 max-h-[50vh] overflow-y-auto pr-1">
+              {[
+                { key: "healthHeader", label: "Operational Health Card" },
+                { key: "systemTiles", label: "System Status Tiles" },
+                { key: "quickStats", label: "Quick Stats Panel" },
+                { key: "livePowerDraw", label: "Live Power Draw Chart" },
+                { key: "ruleDistribution", label: "Rule Distribution Chart" },
+                { key: "electricity", label: "Electricity & Billing Card" },
+                { key: "plugTelemetry", label: "Smart Plug Telemetry" },
+                { key: "roomHealth", label: "Room Health Grid" },
+                { key: "deviceList", label: "Devices List" },
+                { key: "savedScenes", label: "Saved Scenes Card" },
+                { key: "automationStack", label: "Automation Stack" },
+                { key: "activityFeed", label: "Activity Feed" },
+              ].map((sec) => (
+                <div
+                  key={sec.key}
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 p-3"
                 >
-                  <CartesianGrid
-                    stroke="hsl(var(--border))"
-                    strokeDasharray="3 3"
-                    vertical={false}
+                  <span className="text-xs font-semibold text-foreground font-sans">
+                    {sec.label}
+                  </span>
+                  <Switch
+                    checked={sectionVisibility[sec.key as keyof typeof sectionVisibility]}
+                    onCheckedChange={() =>
+                      handleToggleVisibility(sec.key as keyof typeof sectionVisibility)
+                    }
                   />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={chartTick}
-                    interval={0}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={chartTick}
-                    tickFormatter={(value) => `${value}W`}
-                  />
-                  <Tooltip
-                    contentStyle={tooltipStyle}
-                    labelStyle={tooltipLabelStyle}
-                    cursor={{ fill: "hsl(var(--muted))" }}
-                  />
-                  <Bar
-                    dataKey="watts"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 0, 0, 0]}
-                    maxBarSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </ChartFrame>
-        </DashboardCard>
-
-        <DashboardCard
-          title="Rule Distribution"
-          description="Configured automations grouped by trigger type"
-          action={<MiniLink href="/automations">Open rules</MiniLink>}
-        >
-          <ChartFrame ready={chartsReady}>
-            {automationsByTrigger.length === 0 ? (
-              <ChartEmpty
-                icon={SlidersHorizontal}
-                label="No automations configured"
-                detail="Create a rule to map its trigger distribution"
-              />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={automationsByTrigger}
-                  margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
-                >
-                  <CartesianGrid
-                    stroke="hsl(var(--border))"
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="trigger"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={chartTick}
-                    interval={0}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={chartTick}
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={tooltipStyle}
-                    labelStyle={tooltipLabelStyle}
-                    cursor={{ fill: "hsl(var(--muted))" }}
-                  />
-                  <Bar
-                    dataKey="rules"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 0, 0, 0]}
-                    maxBarSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </ChartFrame>
-        </DashboardCard>
-      </motion.section>
-
-      <motion.section variants={itemVariants}>
-        <DashboardCard
-          title="Smart Plug Telemetry"
-          description="Live voltage, current, and energy draw from metered plugs"
-          action={<MiniLink href="/devices">All devices</MiniLink>}
-        >
-          {meteredDevices.length === 0 ? (
-            <div className="flex min-h-40 flex-col items-center justify-center border border-dashed border-border bg-background/35 p-6 text-center">
-              <PlugZap className="h-7 w-7 text-muted-foreground" />
-              <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
-                No metered plugs reporting
-              </p>
-              <p className="mt-1 max-w-md text-xs text-muted-foreground">
-                Voltage, current, and energy appear here once a Tapo plug
-                reports telemetry.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-3 lg:grid-cols-2">
-              {meteredDevices.map(({ device, attrs }) => (
-                <PlugTelemetryRow
-                  key={device.id}
-                  name={device.name}
-                  attrs={attrs}
-                />
+                </div>
               ))}
             </div>
-          )}
-        </DashboardCard>
-      </motion.section>
-
-      <motion.section
-        variants={itemVariants}
-        className="grid gap-4 2xl:grid-cols-[0.9fr_1fr_1.1fr]"
-      >
-        <DashboardCard
-          title="Room Health"
-          description="Availability grouped by location"
-          action={<MiniLink href="/rooms">Rooms</MiniLink>}
-        >
-          <div className="grid gap-3">
-            {rooms.length === 0 ? (
-              <EmptyPanel
-                icon={DoorOpen}
-                label="No rooms configured"
-                href="/rooms"
-                action="Create room"
-              />
-            ) : (
-              rooms
-                .slice(0, 5)
-                .map((room) => (
-                  <RoomHealthRow
-                    key={room.id}
-                    room={room}
-                    devices={devices.filter(
-                      (device) => device.room_id === room.id,
-                    )}
-                  />
-                ))
-            )}
-          </div>
-        </DashboardCard>
-
-        <DashboardCard
-          title="Devices"
-          description="Control, pin, and organize your smart devices"
-          action={<MiniLink href="/devices">All devices</MiniLink>}
-        >
-          <div className="max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin">
-            {devices.length === 0 ? (
-              <EmptyPanel
-                icon={Cpu}
-                label="No devices discovered"
-                href="/integrations"
-                action="Discover devices"
-              />
-            ) : (
-              <Reorder.Group
-                axis="y"
-                values={orderedDevices.length > 0 ? orderedDevices : devices}
-                onReorder={handleReorder}
-                className="grid gap-3"
+            <div className="pt-4 border-t border-border/50 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const resetVisibility = {
+                    healthHeader: true,
+                    systemTiles: true,
+                    quickStats: true,
+                    livePowerDraw: true,
+                    ruleDistribution: true,
+                    electricity: true,
+                    plugTelemetry: true,
+                    roomHealth: true,
+                    deviceList: true,
+                    savedScenes: true,
+                    automationStack: true,
+                    activityFeed: true,
+                  };
+                  setSectionVisibility(resetVisibility);
+                  localStorage.setItem("domus:dashboard-section-visibility", JSON.stringify(resetVisibility));
+                  toast.success("Dashboard layout reset to default");
+                }}
+                className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer font-mono uppercase"
               >
-                {(orderedDevices.length > 0 ? orderedDevices : devices).map(
-                  (device) => (
-                      <DeviceRow
-                        key={device.id}
-                        device={device}
-                        state={deviceStates[device.id]?.state || "unknown"}
-                        onToggle={() => handleDeviceToggle(device)}
-                        isPinned={pinnedIds.includes(device.id)}
-                        onTogglePin={() => handleTogglePin(device.id)}
-                        onOpenControl={() => setControlDevice(device)}
-                      />
-                  ),
-                )}
-              </Reorder.Group>
-            )}
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(false)}
+                className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 text-xs font-semibold hover:bg-primary/95 transition focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer font-mono uppercase"
+              >
+                Done
+              </button>
+            </div>
           </div>
-        </DashboardCard>
+        </DialogContent>
+      </Dialog>
 
-        <DashboardCard
-          title="Saved Scenes"
-          description="Activate pre-configured multi-device environments"
-          action={<MiniLink href="/scenes">All scenes</MiniLink>}
+      {(sectionVisibility.healthHeader || sectionVisibility.systemTiles) && (
+        <motion.section
+          variants={itemVariants}
+          className={`grid gap-4 ${
+            sectionVisibility.healthHeader && sectionVisibility.systemTiles
+              ? "xl:grid-cols-[1.4fr_0.6fr]"
+              : "grid-cols-1"
+          }`}
         >
-          <div className="grid gap-3">
-            {scenes.length === 0 ? (
-              <EmptyPanel
-                icon={Sparkles}
-                label="No scenes configured"
-                href="/scenes/detail?id=new"
-                action="Create scene"
+          {sectionVisibility.healthHeader && (
+            <div className="relative overflow-hidden rounded-none border-2 border-border bg-card p-5 shadow-subtle sm:p-6 lg:p-7">
+              <div className="absolute inset-x-0 top-0 h-1 bg-[#E61919]" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.06]"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0px, hsl(var(--foreground)) 1px, transparent 1px, transparent 4px)",
+                }}
               />
-            ) : (
-              scenes.slice(0, 6).map((scene) => (
-                <div
-                  key={scene.id}
-                  className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-accent text-primary">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {scene.name}
-                      </p>
-                      <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
-                        {scene.states.length}{" "}
-                        {scene.states.length === 1 ? "device" : "devices"} ·{" "}
-                        {scene.description || "No description"}
-                      </p>
-                    </div>
+              <span className="pointer-events-none absolute right-3 top-3 font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                UNIT / D-01
+              </span>
+              <div className="relative grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-end">
+                <div className="space-y-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusPill
+                      tone={offlineDevices > 0 ? "warning" : "success"}
+                      icon={offlineDevices > 0 ? TriangleAlert : ShieldCheck}
+                    >
+                      {offlineDevices > 0
+                        ? `${offlineDevices} offline`
+                        : "All systems nominal"}
+                    </StatusPill>
+                    <StatusPill tone="neutral" icon={Home}>
+                      {activeHome?.name || "No active home"}
+                    </StatusPill>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleActivateScene(scene.id, scene.name)}
-                    className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-                  >
-                    Apply
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </DashboardCard>
-      </motion.section>
 
-      <motion.section
-        variants={itemVariants}
-        className="grid gap-4 xl:grid-cols-[1fr_1fr]"
-      >
-        <DashboardCard
-          title="Automation Stack"
-          description="Enabled rules ready for manual test runs"
-          action={<MiniLink href="/automations">New rule</MiniLink>}
-        >
-          <div className="grid gap-3">
-            {automations.length === 0 ? (
-              <EmptyPanel
-                icon={SlidersHorizontal}
-                label="No automations configured"
-                href="/automations"
-                action="Create automation"
-              />
-            ) : (
-              automations.slice(0, 5).map((automation) => (
-                <button
-                  key={automation.id}
-                  type="button"
-                  onClick={() =>
-                    handleAutomationRun(automation.id, automation.name)
-                  }
-                  className="flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 text-left transition duration-200 hover:border-primary/50 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/40"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`h-2 w-2 rounded-full ${automation.enabled ? "bg-primary" : "bg-muted-foreground"}`}
-                      />
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {automation.name}
-                      </p>
-                    </div>
-                    <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
-                      {automation.trigger.type.replaceAll("_", " ")} ·{" "}
-                      {automation.actions.length} action
-                      {automation.actions.length === 1 ? "" : "s"}
+                  <div className="max-w-3xl">
+                    <p className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                      Domus command center
+                    </p>
+                    <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                      Your home is running at {uptimeScore}% operational health.
+                    </h1>
+                    <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                      Watch device availability, power load, automation coverage,
+                      and security events from a single real-time operator surface.
                     </p>
                   </div>
-                  <span className="rounded border border-border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase text-muted-foreground">
-                    Test
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
-        </DashboardCard>
 
-        <DashboardCard
-          title="Activity Feed"
-          description="Newest events from the home event broker"
-          action={<MiniLink href="/notifications">Open feed</MiniLink>}
-        >
-          <div className="grid gap-3">
-            {notifications.length === 0 ? (
-              <EmptyPanel
-                icon={Bell}
-                label="No recent activity"
-                href="/notifications"
-                action="View feed"
-              />
-            ) : (
-              notifications.slice(0, 6).map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`rounded-md border p-3 ${
-                    notification.read
-                      ? "border-border bg-background/35"
-                      : "border-primary/40 bg-accent/60"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="truncate text-sm font-semibold text-foreground">
-                          {notification.title}
-                        </p>
-                        {!notification.read && (
-                          <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                        )}
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                        {notification.body}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        {new Date(notification.created_at).toLocaleTimeString(
-                          [],
-                          { hour: "2-digit", minute: "2-digit" },
-                        )}
-                      </span>
-                      {!notification.read && (
-                        <button
-                          type="button"
-                          onClick={() => markAsRead(notification.id)}
-                          className="cursor-pointer rounded border border-border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    <LinkButton href="/devices" icon={Cpu}>
+                      Manage devices
+                    </LinkButton>
+                    <LinkButton href="/electricity" icon={Gauge} variant="secondary">
+                      Electricity
+                    </LinkButton>
+                    <LinkButton
+                      href="/automations"
+                      icon={SlidersHorizontal}
+                      variant="secondary"
+                    >
+                      Tune automations
+                    </LinkButton>
+                    <button
+                      type="button"
+                      onClick={handleRefresh}
+                      className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold text-foreground transition duration-200 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Sync now
+                    </button>
                   </div>
                 </div>
-              ))
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
+                  <HeroStat
+                    label="Online"
+                    value={onlineDevices}
+                    suffix={`/${totalDevices}`}
+                    tone="success"
+                  />
+                  <HeroStat
+                    label="Load"
+                    value={currentPowerLoad.toFixed(1)}
+                    suffix="W"
+                    tone="energy"
+                  />
+                  <HeroStat
+                    label="Automated"
+                    value={automationCoverage}
+                    suffix="%"
+                    tone="success"
+                  />
+                  <HeroStat
+                    label="Unread"
+                    value={unreadAlerts.length}
+                    suffix="events"
+                    tone={unreadAlerts.length > 0 ? "warning" : "neutral"}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {sectionVisibility.systemTiles && (
+            <div
+              className={`grid gap-4 ${
+                sectionVisibility.healthHeader
+                  ? "sm:grid-cols-3 xl:grid-cols-1"
+                  : "grid-cols-1 sm:grid-cols-3"
+              }`}
+            >
+              <SystemTile
+                icon={Router}
+                label="Network Mesh"
+                value={`${onlineDevices} nodes`}
+                detail="Socket.IO event bridge"
+              />
+              <SystemTile
+                icon={Zap}
+                label="Active States"
+                value={activeDeviceStates}
+                detail="Devices currently on"
+              />
+              <SystemTile
+                icon={ShieldCheck}
+                label="Security Queue"
+                value={securityAlerts.length}
+                detail="Unread critical alerts"
+                warning={securityAlerts.length > 0}
+              />
+            </div>
+          )}
+        </motion.section>
+      )}
+
+      {sectionVisibility.quickStats && (
+        <motion.section
+          variants={itemVariants}
+          className="grid gap-4 lg:grid-cols-4"
+        >
+          <MetricPanel
+            icon={Cpu}
+            label="Devices"
+            value={totalDevices}
+            detail={`${onlineDevices} online, ${offlineDevices} offline`}
+          />
+          <MetricPanel
+            icon={Layers3}
+            label="Rooms"
+            value={rooms.length}
+            detail={`${activeRooms.length} with live devices`}
+          />
+          <MetricPanel
+            icon={Activity}
+            label="Automations"
+            value={activeAutomations.length}
+            detail={`${automations.length} total rules`}
+          />
+          <MetricPanel
+            icon={Sparkles}
+            label="Scenes"
+            value={scenes.length}
+            detail="Multi-device preset configurations"
+          />
+        </motion.section>
+      )}
+
+      {(sectionVisibility.livePowerDraw || sectionVisibility.ruleDistribution) && (
+        <motion.section
+          variants={itemVariants}
+          className={`grid gap-4 ${
+            sectionVisibility.livePowerDraw && sectionVisibility.ruleDistribution
+              ? "xl:grid-cols-[1.05fr_0.95fr]"
+              : "grid-cols-1"
+          }`}
+        >
+          {sectionVisibility.livePowerDraw && (
+            <DashboardCard
+              title="Live Power Draw"
+              description="Real-time consumption reported by metered devices"
+              action={<MiniLink href="/devices">Inspect load</MiniLink>}
+            >
+              <ChartFrame ready={chartsReady}>
+                {powerByDevice.length === 0 ? (
+                  <ChartEmpty
+                    icon={PlugZap}
+                    label="No live power telemetry"
+                    detail="Connect a smart plug or meter that reports consumption"
+                  />
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={powerByDevice}
+                      margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
+                    >
+                      <CartesianGrid
+                        stroke="hsl(var(--border))"
+                        strokeDasharray="3 3"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={chartTick}
+                        interval={0}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={chartTick}
+                        tickFormatter={(value) => `${value}W`}
+                      />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        labelStyle={tooltipLabelStyle}
+                        cursor={{ fill: "hsl(var(--muted))" }}
+                      />
+                      <Bar
+                        dataKey="watts"
+                        fill="hsl(var(--primary))"
+                        radius={[0, 0, 0, 0]}
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartFrame>
+            </DashboardCard>
+          )}
+
+          {sectionVisibility.ruleDistribution && (
+            <DashboardCard
+              title="Rule Distribution"
+              description="Configured automations grouped by trigger type"
+              action={<MiniLink href="/automations">Open rules</MiniLink>}
+            >
+              <ChartFrame ready={chartsReady}>
+                {automationsByTrigger.length === 0 ? (
+                  <ChartEmpty
+                    icon={SlidersHorizontal}
+                    label="No automations configured"
+                    detail="Create a rule to map its trigger distribution"
+                  />
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={automationsByTrigger}
+                      margin={{ top: 16, right: 12, bottom: 0, left: -18 }}
+                    >
+                      <CartesianGrid
+                        stroke="hsl(var(--border))"
+                        strokeDasharray="3 3"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="trigger"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={chartTick}
+                        interval={0}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={chartTick}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        labelStyle={tooltipLabelStyle}
+                        cursor={{ fill: "hsl(var(--muted))" }}
+                      />
+                      <Bar
+                        dataKey="rules"
+                        fill="hsl(var(--primary))"
+                        radius={[0, 0, 0, 0]}
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartFrame>
+            </DashboardCard>
+          )}
+        </motion.section>
+      )}
+
+      {sectionVisibility.electricity && (
+        <motion.section variants={itemVariants}>
+          <DashboardCard
+            title="Electricity & Billing"
+            description="Active billing cycle consumption, estimated cost, and instantaneous load"
+            action={<MiniLink href="/electricity">Full details</MiniLink>}
+          >
+            {electricitySummary === null ? (
+              <div className="flex min-h-28 flex-col items-center justify-center border border-dashed border-border bg-background/35 p-6 text-center">
+                <Gauge className="h-7 w-7 text-muted-foreground animate-pulse" />
+                <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+                  Loading electricity data...
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-[1.5fr_1fr] items-center">
+                <div className="grid gap-3 grid-cols-3">
+                  <div className="rounded-none border border-border bg-background/45 p-3">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Energy Used
+                    </p>
+                    <p className="mt-1 text-base sm:text-lg font-bold text-foreground font-mono">
+                      {electricitySummary.total_kwh.toFixed(2)}
+                      <span className="text-[10px] text-muted-foreground ml-1">kWh</span>
+                    </p>
+                  </div>
+                  <div className="rounded-none border border-border bg-background/45 p-3">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Est. Cost
+                    </p>
+                    <p className="mt-1 text-base sm:text-lg font-bold text-primary font-mono">
+                      {formatMoney(
+                        computeCost(electricitySummary.total_kwh, tariff),
+                        tariff.currency,
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-none border border-border bg-background/45 p-3">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Live Draw
+                    </p>
+                    <p className="mt-1 text-base sm:text-lg font-bold text-amber-500 font-mono">
+                      {electricitySummary.total_power_w.toFixed(0)}
+                      <span className="text-[10px] text-muted-foreground ml-1">W</span>
+                    </p>
+                  </div>
+                </div>
+
+                {(() => {
+                  const period = getCurrentBillingCyclePeriod(billingCycleStartDay);
+                  const totalDays = Math.round(
+                    (period.end.getTime() - period.start.getTime()) / (1000 * 3600 * 24),
+                  );
+                  const elapsedDays = Math.min(
+                    totalDays,
+                    Math.max(
+                      0,
+                      Math.floor((Date.now() - period.start.getTime()) / (1000 * 3600 * 24)),
+                    ),
+                  );
+                  const percent = Math.round((elapsedDays / totalDays) * 100);
+
+                  return (
+                    <div className="space-y-2 border-t md:border-t-0 md:border-l border-border/40 pt-3 md:pt-0 md:pl-4">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground leading-none">
+                        <span className="font-semibold uppercase text-foreground">Cycle Progress</span>
+                        <span>Day {elapsedDays} of {totalDays}</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-secondary">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground font-mono leading-none">
+                        Period: {period.start.toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                        })} - {period.end.toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
             )}
-          </div>
-        </DashboardCard>
-      </motion.section>
+          </DashboardCard>
+        </motion.section>
+      )}
+
+      {sectionVisibility.plugTelemetry && (
+        <motion.section variants={itemVariants}>
+          <DashboardCard
+            title="Smart Plug Telemetry"
+            description="Live voltage, current, and energy draw from metered plugs"
+            action={<MiniLink href="/devices">All devices</MiniLink>}
+          >
+            {meteredDevices.length === 0 ? (
+              <div className="flex min-h-40 flex-col items-center justify-center border border-dashed border-border bg-background/35 p-6 text-center">
+                <PlugZap className="h-7 w-7 text-muted-foreground" />
+                <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+                  No metered plugs reporting
+                </p>
+                <p className="mt-1 max-w-md text-xs text-muted-foreground">
+                  Voltage, current, and energy appear here once a Tapo plug
+                  reports telemetry.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 lg:grid-cols-2">
+                {meteredDevices.map(({ device, attrs }) => (
+                  <PlugTelemetryRow
+                    key={device.id}
+                    name={device.name}
+                    attrs={attrs}
+                  />
+                ))}
+              </div>
+            )}
+          </DashboardCard>
+        </motion.section>
+      )}
+
+      {(() => {
+        const roomHealthVis = sectionVisibility.roomHealth;
+        const deviceListVis = sectionVisibility.deviceList;
+        const savedScenesVis = sectionVisibility.savedScenes;
+        const visibleCount = [roomHealthVis, deviceListVis, savedScenesVis].filter(Boolean).length;
+
+        if (visibleCount === 0) return null;
+
+        return (
+          <motion.section
+            variants={itemVariants}
+            className={`grid gap-4 ${
+              visibleCount === 3
+                ? "2xl:grid-cols-[0.9fr_1fr_1.1fr]"
+                : visibleCount === 2
+                  ? "2xl:grid-cols-2"
+                  : "grid-cols-1"
+            }`}
+          >
+            {roomHealthVis && (
+              <DashboardCard
+                title="Room Health"
+                description="Availability grouped by location"
+                action={<MiniLink href="/rooms">Rooms</MiniLink>}
+              >
+                <div className="grid gap-3">
+                  {rooms.length === 0 ? (
+                    <EmptyPanel
+                      icon={DoorOpen}
+                      label="No rooms configured"
+                      href="/rooms"
+                      action="Create room"
+                    />
+                  ) : (
+                    rooms
+                      .slice(0, 5)
+                      .map((room) => (
+                        <RoomHealthRow
+                          key={room.id}
+                          room={room}
+                          devices={devices.filter(
+                            (device) => device.room_id === room.id,
+                          )}
+                        />
+                      ))
+                  )}
+                </div>
+              </DashboardCard>
+            )}
+
+            {deviceListVis && (
+              <DashboardCard
+                title="Devices"
+                description="Control, pin, and organize your smart devices"
+                action={<MiniLink href="/devices">All devices</MiniLink>}
+              >
+                <div className="max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin">
+                  {devices.length === 0 ? (
+                    <EmptyPanel
+                      icon={Cpu}
+                      label="No devices discovered"
+                      href="/integrations"
+                      action="Discover devices"
+                    />
+                  ) : (
+                    <Reorder.Group
+                      axis="y"
+                      values={orderedDevices.length > 0 ? orderedDevices : devices}
+                      onReorder={handleReorder}
+                      className="grid gap-3"
+                    >
+                      {(orderedDevices.length > 0 ? orderedDevices : devices).map(
+                        (device) => (
+                          <DeviceRow
+                            key={device.id}
+                            device={device}
+                            state={deviceStates[device.id]?.state || "unknown"}
+                            onToggle={() => handleDeviceToggle(device)}
+                            isPinned={pinnedIds.includes(device.id)}
+                            onTogglePin={() => handleTogglePin(device.id)}
+                            onOpenControl={() => setControlDevice(device)}
+                          />
+                        ),
+                      )}
+                    </Reorder.Group>
+                  )}
+                </div>
+              </DashboardCard>
+            )}
+
+            {savedScenesVis && (
+              <DashboardCard
+                title="Saved Scenes"
+                description="Activate pre-configured multi-device environments"
+                action={<MiniLink href="/scenes">All scenes</MiniLink>}
+              >
+                <div className="grid gap-3">
+                  {scenes.length === 0 ? (
+                    <EmptyPanel
+                      icon={Sparkles}
+                      label="No scenes configured"
+                      href="/scenes/detail?id=new"
+                      action="Create scene"
+                    />
+                  ) : (
+                    scenes.slice(0, 6).map((scene) => (
+                      <div
+                        key={scene.id}
+                        className="flex min-h-16 items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-accent text-primary">
+                            <Sparkles className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {scene.name}
+                            </p>
+                            <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+                              {scene.states.length}{" "}
+                              {scene.states.length === 1 ? "device" : "devices"} ·{" "}
+                              {scene.description || "No description"}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleActivateScene(scene.id, scene.name)}
+                          className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DashboardCard>
+            )}
+          </motion.section>
+        );
+      })()}
+
+      {(() => {
+        const autoStackVis = sectionVisibility.automationStack;
+        const actFeedVis = sectionVisibility.activityFeed;
+        const visibleCount = [autoStackVis, actFeedVis].filter(Boolean).length;
+
+        if (visibleCount === 0) return null;
+
+        return (
+          <motion.section
+            variants={itemVariants}
+            className={`grid gap-4 ${visibleCount === 2 ? "xl:grid-cols-[1fr_1fr]" : "grid-cols-1"}`}
+          >
+            {autoStackVis && (
+              <DashboardCard
+                title="Automation Stack"
+                description="Enabled rules ready for manual test runs"
+                action={<MiniLink href="/automations">New rule</MiniLink>}
+              >
+                <div className="grid gap-3">
+                  {automations.length === 0 ? (
+                    <EmptyPanel
+                      icon={SlidersHorizontal}
+                      label="No automations configured"
+                      href="/automations"
+                      action="Create automation"
+                    />
+                  ) : (
+                    automations.slice(0, 5).map((automation) => (
+                      <button
+                        key={automation.id}
+                        type="button"
+                        onClick={() =>
+                          handleAutomationRun(automation.id, automation.name)
+                        }
+                        className="flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-background/45 p-3 text-left transition duration-200 hover:border-primary/50 hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 cursor-pointer"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`h-2 w-2 rounded-full ${automation.enabled ? "bg-primary" : "bg-muted-foreground"}`}
+                            />
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {automation.name}
+                            </p>
+                          </div>
+                          <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+                            {automation.trigger.type.replaceAll("_", " ")} ·{" "}
+                            {automation.actions.length} action
+                            {automation.actions.length === 1 ? "" : "s"}
+                          </p>
+                        </div>
+                        <span className="rounded border border-border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase text-muted-foreground">
+                          Test
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </DashboardCard>
+            )}
+
+            {actFeedVis && (
+              <DashboardCard
+                title="Activity Feed"
+                description="Newest events from the home event broker"
+                action={<MiniLink href="/notifications">Open feed</MiniLink>}
+              >
+                <div className="grid gap-3">
+                  {notifications.length === 0 ? (
+                    <EmptyPanel
+                      icon={Bell}
+                      label="No recent activity"
+                      href="/notifications"
+                      action="View feed"
+                    />
+                  ) : (
+                    notifications.slice(0, 6).map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`rounded-md border p-3 ${
+                          notification.read
+                            ? "border-border bg-background/35"
+                            : "border-primary/40 bg-accent/60"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-semibold text-foreground">
+                                {notification.title}
+                              </p>
+                              {!notification.read && (
+                                <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                              )}
+                            </div>
+                            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                              {notification.body}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-2">
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              {new Date(notification.created_at).toLocaleTimeString(
+                                [],
+                                { hour: "2-digit", minute: "2-digit" },
+                              )}
+                            </span>
+                            {!notification.read && (
+                              <button
+                                type="button"
+                                onClick={() => markAsRead(notification.id)}
+                                className="cursor-pointer rounded border border-border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase text-muted-foreground transition hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DashboardCard>
+            )}
+          </motion.section>
+        );
+      })()}
 
       {controlDevice && (
         <Dialog
