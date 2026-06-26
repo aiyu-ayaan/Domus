@@ -55,6 +55,7 @@ export default function ElectricityPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [tariff, setTariff] = useState<Tariff>(DEFAULT_TARIFF);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [chartUnit, setChartUnit] = useState<"kwh" | "watt">("kwh");
 
   // Subscribe to device states in Zustand to capture real-time WebSocket updates
   const deviceStates = useDeviceStore((s) => s.deviceStates);
@@ -136,7 +137,24 @@ export default function ElectricityPage() {
   const totalCost = useMemo(() => computeCost(totalKwh, tariff), [totalKwh, tariff]);
   const rate = useMemo(() => effectiveRate(totalKwh, tariff), [totalKwh, tariff]);
 
-  const chartData = (summary?.series ?? []).map((p) => {
+  // Find bucket size in seconds from series data to calculate average power in Watts
+  const series = summary?.series ?? [];
+  const bucketSeconds = useMemo(() => {
+    if (series.length < 2) {
+      switch (range) {
+        case "1m": return 2;
+        case "1h": return 60;
+        case "12h": case "24h": return 600;
+        case "7d": case "30d": return 86400;
+        default: return 3600;
+      }
+    }
+    const t0 = new Date(series[0].t).getTime();
+    const t1 = new Date(series[1].t).getTime();
+    return Math.max(1, Math.round((t1 - t0) / 1000));
+  }, [series, range]);
+
+  const chartData = series.map((p) => {
     const d = new Date(p.t);
     let timeLabel = "";
     if (range === "1m") {
@@ -157,9 +175,15 @@ export default function ElectricityPage() {
         hour: "2-digit",
       });
     }
+
+    // Convert kWh to Watts if the user selects Watt
+    const value = chartUnit === "kwh"
+      ? p.kwh
+      : +((p.kwh * 3600000) / bucketSeconds).toFixed(1);
+
     return {
       time: timeLabel,
-      kwh: p.kwh,
+      value: value,
       cost: computeCost(p.kwh, tariff),
     };
   });
@@ -332,19 +356,45 @@ export default function ElectricityPage() {
 
       {/* Usage chart */}
       <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
-        <div>
-          <h3 className="font-semibold text-base">Consumption Curve</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Energy per {
-              range === "1m"
-                ? "2 seconds"
-                : range === "1h"
-                  ? "minute"
-                  : range === "12h" || range === "24h"
-                    ? "hour"
-                    : "day"
-            } (kWh)
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-base">Consumption Curve</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              {chartUnit === "kwh" ? "Energy" : "Power"} per {
+                range === "1m"
+                  ? "2 seconds"
+                  : range === "1h"
+                    ? "minute"
+                    : range === "12h" || range === "24h"
+                      ? "hour"
+                      : "day"
+              } ({chartUnit === "kwh" ? "kWh" : "W"})
+            </p>
+          </div>
+
+          {/* Unit Toggle Switch */}
+          <div className="flex p-0.5 bg-muted/40 rounded-lg border border-border/20 text-[10px]">
+            <button
+              onClick={() => setChartUnit("kwh")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${
+                chartUnit === "kwh"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              kWh
+            </button>
+            <button
+              onClick={() => setChartUnit("watt")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${
+                chartUnit === "watt"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Watt
+            </button>
+          </div>
         </div>
         {isLoading ? (
           <div className="h-72 flex items-center justify-center text-muted-foreground">
@@ -392,14 +442,17 @@ export default function ElectricityPage() {
                   }}
                   formatter={(value, name) => {
                     const v = typeof value === "number" ? value : Number(value);
-                    return name === "cost"
-                      ? [formatMoney(v, tariff.currency), "Cost"]
-                      : [`${v.toFixed(3)} kWh`, "Energy"];
+                    if (name === "cost") {
+                      return [formatMoney(v, tariff.currency), "Cost"];
+                    }
+                    return chartUnit === "kwh"
+                      ? [`${v.toFixed(3)} kWh`, "Energy"]
+                      : [`${v.toFixed(1)} W`, "Power"];
                   }}
                 />
                 <Area
                   type="monotone"
-                  dataKey="kwh"
+                  dataKey="value"
                   stroke="#10b981"
                   strokeWidth={2}
                   fillOpacity={1}
