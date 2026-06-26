@@ -243,6 +243,31 @@ export interface Page<T> {
 }
 
 // ==========================================
+// Energy
+// ==========================================
+
+export interface EnergyDeviceOut {
+  device_id: string;
+  name: string;
+  model: string | null;
+  power_w: number;
+  energy_kwh: number;
+}
+
+export interface EnergyPoint {
+  t: string; // bucket start (ISO)
+  kwh: number;
+}
+
+export interface EnergySummary {
+  range_hours: number;
+  total_power_w: number;
+  total_kwh: number;
+  devices: EnergyDeviceOut[];
+  series: EnergyPoint[];
+}
+
+// ==========================================
 // Scenes
 // ==========================================
 

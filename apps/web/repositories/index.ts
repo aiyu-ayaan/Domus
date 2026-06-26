@@ -9,6 +9,7 @@ import { MockIntegrationRepository } from "./mock/integration.mock";
 import { MockSceneRepository } from "./mock/scene.mock";
 import { MockAutomationRepository } from "./mock/automation.mock";
 import { MockNotificationRepository } from "./mock/notification.mock";
+import { MockEnergyRepository } from "./mock/energy.mock";
 
 import { ApiAuthRepository } from "./api/auth.repository";
 import { ApiHomeRepository } from "./api/home.repository";
@@ -18,6 +19,7 @@ import { ApiIntegrationRepository } from "./api/integration.repository";
 import { ApiSceneRepository } from "./api/scene.repository";
 import { ApiAutomationRepository } from "./api/automation.repository";
 import { ApiNotificationRepository } from "./api/notification.repository";
+import { ApiEnergyRepository } from "./api/energy.repository";
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API !== "false";
 
@@ -45,6 +47,9 @@ export const automationRepository = useMock
 export const notificationRepository = useMock
   ? new MockNotificationRepository()
   : new ApiNotificationRepository();
+export const energyRepository = useMock
+  ? new MockEnergyRepository()
+  : new ApiEnergyRepository();
 
 // Type helper for the UI
 export type Repositories = {
@@ -56,4 +61,5 @@ export type Repositories = {
   scene: typeof sceneRepository;
   automation: typeof automationRepository;
   notification: typeof notificationRepository;
+  energy: typeof energyRepository;
 };

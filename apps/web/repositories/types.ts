@@ -32,6 +32,7 @@ import type {
   AutomationUpdate,
   AutomationRunResult,
   NotificationOut,
+  EnergySummary,
 } from "@/types/api";
 
 export interface IAuthRepository {
@@ -119,6 +120,10 @@ export interface IAutomationRepository {
     id: string,
     context?: Record<string, any>,
   ): Promise<AutomationRunResult>;
+}
+
+export interface IEnergyRepository {
+  summary(params: { home_id: string; hours?: number }): Promise<EnergySummary>;
 }
 
 export interface INotificationRepository {
