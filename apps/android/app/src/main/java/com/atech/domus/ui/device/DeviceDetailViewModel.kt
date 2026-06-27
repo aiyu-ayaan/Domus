@@ -89,18 +89,26 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
 
                 when (event.type) {
                     DomusEventType.DEVICE_STATE_CHANGED -> {
-                        when (val stateRes = core.devices.state(id)) {
-                            is DomusResult.Success -> {
-                                _uiState.update { s ->
-                                    val exists = s.history.any { it.id == stateRes.data.id || it.created_at == stateRes.data.created_at }
-                                    val newHistory = if (exists) s.history else (listOf(stateRes.data) + s.history)
-                                    s.copy(
-                                        deviceState = stateRes.data,
-                                        history = newHistory.take(100)
-                                    )
-                                }
-                            }
-                            else -> {}
+                        val stateStr = event.data["state"]?.jsonPrimitive?.content ?: return@collect
+                        val attributesObj = event.data["attributes"]?.jsonObject ?: JsonObject(emptyMap())
+                        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }
+                        val createdAtStr = formatter.format(java.util.Date())
+                        val devState = DeviceState(
+                            id = "",
+                            device_id = id,
+                            state = stateStr,
+                            attributes = attributesObj,
+                            created_at = createdAtStr
+                        )
+                        _uiState.update { s ->
+                            val exists = s.history.any { it.id == devState.id || it.created_at == devState.created_at }
+                            val newHistory = if (exists) s.history else (listOf(devState) + s.history)
+                            s.copy(
+                                deviceState = devState,
+                                history = newHistory.take(100)
+                            )
                         }
                     }
                     DomusEventType.DEVICE_ONLINE_CHANGED -> {

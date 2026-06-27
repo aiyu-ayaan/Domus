@@ -38,6 +38,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -405,8 +406,13 @@ private fun QuickControlsCard(
             // Light Brightness & Color Controls
             if (dev.device_type == DeviceType.LIGHT) {
                 // Brightness slider
-                val brightness = attributes["brightness"]?.jsonPrimitive?.intOrNull ?: 100
-                var brightnessSlider by remember(brightness) { mutableStateOf(brightness.toFloat()) }
+                val brightness = attributes["brightness"]?.jsonPrimitive?.intOrNull
+                var brightnessSlider by remember { mutableStateOf(100f) }
+                LaunchedEffect(brightness) {
+                    if (brightness != null) {
+                        brightnessSlider = brightness.toFloat()
+                    }
+                }
 
                 Column(
                     modifier = Modifier
@@ -450,355 +456,364 @@ private fun QuickControlsCard(
                     )
                 }
 
-                // Color Selection Area
-                if (isPowerOn) {
-                    var colorTab by rememberSaveable { mutableStateOf("temp") } // temp vs color
+                // Color Selection Area (visible at all times but greyed out when off)
+                var colorTab by rememberSaveable { mutableStateOf("temp") } // temp vs color
+                val colorTemp = attributes["color_temp"]?.jsonPrimitive?.intOrNull
+                var tempSlider by remember { mutableStateOf(4000f) }
+                LaunchedEffect(colorTemp) {
+                    if (colorTemp != null && colorTemp > 0) {
+                        tempSlider = colorTemp.toFloat()
+                    }
+                }
 
-                    Column(
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .alpha(if (isPowerOn) 1f else 0.4f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Column {
+                            Text("Color Configuration", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                if (colorTab == "temp") "White light color temperature" else "Select color presets",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Sub tabs selector
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        ) {
+                            Row(modifier = Modifier.padding(2.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            if (colorTab == "temp") MaterialTheme.colorScheme.surface else Color.Transparent,
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .clickable(enabled = isEnabled && isPowerOn) { colorTab = "temp" }
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text("White", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            if (colorTab == "color") MaterialTheme.colorScheme.surface else Color.Transparent,
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .clickable(enabled = isEnabled && isPowerOn) { colorTab = "color" }
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text("Colors", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    if (colorTab == "temp") {
+                        // Temperature control
+                        val activeColorTemp = colorTemp ?: 4000
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column {
-                                Text("Color Configuration", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                                Text(
-                                    if (colorTab == "temp") "White light color temperature" else "Select color presets",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            // Sub tabs selector
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                            ) {
-                                Row(modifier = Modifier.padding(2.dp)) {
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                if (colorTab == "temp") MaterialTheme.colorScheme.surface else Color.Transparent,
-                                                RoundedCornerShape(6.dp)
+                            listOf(
+                                Pair("Warm", 2700),
+                                Pair("Neutral", 4000),
+                                Pair("Cool", 6500)
+                            ).forEach { (name, kelvin) ->
+                                val active = activeColorTemp == kelvin
+                                val bg = when(kelvin) {
+                                    2700 -> Color(0xFFFFB347)
+                                    4000 -> Color(0xFFFFFAED)
+                                    else -> Color(0xFFA8D3FF)
+                                }
+                                Surface(
+                                    color = bg,
+                                    shape = CircleShape,
+                                    border = if (active) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clickable(enabled = isEnabled && isPowerOn) {
+                                            vm.setAttributes(buildJsonObject {
+                                                put("color_temp", JsonPrimitive(kelvin))
+                                                put("color", JsonNull)
+                                            })
+                                        }
+                                ) {
+                                    if (active) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Rounded.Check,
+                                                null,
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(16.dp)
                                             )
-                                            .clickable { colorTab = "temp" }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Text("White", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                if (colorTab == "color") MaterialTheme.colorScheme.surface else Color.Transparent,
-                                                RoundedCornerShape(6.dp)
-                                            )
-                                            .clickable { colorTab = "color" }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Text("Colors", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        val colorTemp = attributes["color_temp"]?.jsonPrimitive?.intOrNull ?: 4000
-                        if (colorTab == "temp") {
-                            // Temperature control
-                            var tempSlider by remember(colorTemp) { mutableStateOf(colorTemp.toFloat()) }
+                        // Kelvin Warm-to-Cool Slider with colored background
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color(0xFFFFB347),
+                                            Color(0xFFFFDFA9),
+                                            Color(0xFFFFFAED),
+                                            Color(0xFFD8EBFF),
+                                            Color(0xFFA8D3FF)
+                                        )
+                                    ),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Slider(
+                                value = tempSlider,
+                                onValueChange = { tempSlider = it },
+                                onValueChangeFinished = {
+                                    vm.setAttributes(buildJsonObject {
+                                        put("color_temp", JsonPrimitive(tempSlider.toInt()))
+                                        put("color", JsonNull)
+                                    })
+                                },
+                                valueRange = 2700f..6500f,
+                                enabled = isEnabled && isPowerOn,
+                                colors = SliderDefaults.colors(
+                                    activeTrackColor = Color.Transparent,
+                                    inactiveTrackColor = Color.Transparent,
+                                    thumbColor = Color.White
+                                )
+                            )
+                            Text(
+                                "${tempSlider.toInt()} K",
+                                color = Color.DarkGray,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(top = 4.dp, end = 12.dp)
+                            )
+                        }
+                    } else {
+                        // Colors grid presets
+                        val activeColorHex = attributes["color"]?.jsonPrimitive?.contentOrNull
+                        val isColorsActive = (colorTemp ?: 4000) == 0 && activeColorHex != null
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf(
-                                    Pair("Warm", 2700),
-                                    Pair("Neutral", 4000),
-                                    Pair("Cool", 6500)
-                                ).forEach { (name, kelvin) ->
-                                    val active = colorTemp == kelvin
-                                    val bg = when(kelvin) {
-                                        2700 -> Color(0xFFFFB347)
-                                        4000 -> Color(0xFFFFFAED)
-                                        else -> Color(0xFFA8D3FF)
-                                    }
-                                    Surface(
-                                        color = bg,
-                                        shape = CircleShape,
-                                        border = if (active) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .clickable(enabled = isEnabled) {
-                                                vm.setAttributes(buildJsonObject {
-                                                    put("color_temp", JsonPrimitive(kelvin))
-                                                    put("color", JsonNull)
-                                                })
-                                            }
-                                    ) {
-                                        if (active) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Icon(
-                                                    Icons.Rounded.Check,
-                                                    null,
-                                                    tint = Color.Black,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            LIGHT_COLOR_PRESETS.forEach { preset ->
+                                val active = isColorsActive && activeColorHex?.lowercase() == preset.hex.lowercase()
+                                Surface(
+                                    color = preset.color,
+                                    shape = CircleShape,
+                                    border = if (active) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clickable(enabled = isEnabled && isPowerOn) {
+                                            vm.setAttributes(buildJsonObject {
+                                                put("color", JsonPrimitive(preset.hex))
+                                                put("color_temp", JsonPrimitive(0))
+                                            })
+                                        }
+                                ) {
+                                    if (active) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Rounded.Check,
+                                                null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp)
+                                            )
                                         }
                                     }
                                 }
                             }
+                        }
 
-                            // Kelvin Warm-to-Cool Slider with colored background
+                        // Custom color Hue slider picker
+                        var customHue by remember { mutableStateOf(180f) }
+                        val rgbColor = remember(customHue) {
+                            val hsv = floatArrayOf(customHue, 1f, 1f)
+                            Color(android.graphics.Color.HSVToColor(hsv))
+                        }
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Custom Rainbow Palette", style = MaterialTheme.typography.labelMedium)
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .background(rgbColor, CircleShape)
+                                        .border(1.dp, Color.White, CircleShape)
+                                )
+                            }
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(48.dp)
+                                    .height(36.dp)
                                     .background(
                                         Brush.horizontalGradient(
                                             colors = listOf(
-                                                Color(0xFFFFB347),
-                                                Color(0xFFFFDFA9),
-                                                Color(0xFFFFFAED),
-                                                Color(0xFFD8EBFF),
-                                                Color(0xFFA8D3FF)
+                                                Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red
                                             )
                                         ),
-                                        RoundedCornerShape(12.dp)
+                                        RoundedCornerShape(8.dp)
                                     )
                                     .padding(horizontal = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Slider(
-                                    value = tempSlider,
-                                    onValueChange = { tempSlider = it },
+                                    value = customHue,
+                                    onValueChange = { customHue = it },
                                     onValueChangeFinished = {
+                                        val hsv = floatArrayOf(customHue, 1f, 1f)
+                                        val rgbHex = String.format("#%06X", 0xFFFFFF and android.graphics.Color.HSVToColor(hsv))
                                         vm.setAttributes(buildJsonObject {
-                                            put("color_temp", JsonPrimitive(tempSlider.toInt()))
-                                            put("color", JsonNull)
+                                            put("color", JsonPrimitive(rgbHex))
+                                            put("color_temp", JsonPrimitive(0))
                                         })
                                     },
-                                    valueRange = 2700f..6500f,
-                                    enabled = isEnabled,
+                                    valueRange = 0f..360f,
+                                    enabled = isEnabled && isPowerOn,
                                     colors = SliderDefaults.colors(
                                         activeTrackColor = Color.Transparent,
                                         inactiveTrackColor = Color.Transparent,
                                         thumbColor = Color.White
                                     )
                                 )
-                                Text(
-                                    "${tempSlider.toInt()} K",
-                                    color = Color.DarkGray,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(top = 4.dp, end = 12.dp)
-                                )
                             }
-                        } else {
-                            // Colors grid presets
-                            val activeColorHex = attributes["color"]?.jsonPrimitive?.contentOrNull
-                            val isColorsActive = colorTemp == 0 && activeColorHex != null
+                        }
+                    }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Ambient Sync & Pattern controls (like web)
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    
+                    val ambientSync = attributes["ambient_sync"]?.jsonPrimitive?.contentOrNull
+                    val isScreenSync = ambientSync == "screen"
+                    val isMusicSync = ambientSync == "music"
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Ambient Sync Modes", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Screen Sync
+                            InputChip(
+                                selected = isScreenSync,
+                                onClick = {
+                                    val nextVal = if (isScreenSync) null else "screen"
+                                    vm.setAttributes(buildJsonObject {
+                                        put("ambient_sync", nextVal?.let { JsonPrimitive(it) } ?: JsonNull)
+                                        put("color", JsonNull)
+                                        put("color_temp", JsonPrimitive(0))
+                                    })
+                                },
+                                label = { Text("Screen Sync") },
+                                leadingIcon = { Icon(Icons.Rounded.Monitor, "Screen") },
+                                enabled = isEnabled && isPowerOn
+                            )
+
+                            // Music Sync
+                            InputChip(
+                                selected = isMusicSync,
+                                onClick = {
+                                    val nextVal = if (isMusicSync) null else "music"
+                                    vm.setAttributes(buildJsonObject {
+                                        put("ambient_sync", nextVal?.let { JsonPrimitive(it) } ?: JsonNull)
+                                        put("music_theme", if (nextVal == "music") JsonPrimitive("spectrum") else JsonNull)
+                                        put("color", JsonNull)
+                                        put("color_temp", JsonPrimitive(0))
+                                    })
+                                },
+                                label = { Text("Music Sync") },
+                                leadingIcon = { Icon(Icons.Rounded.MusicNote, "Music") },
+                                enabled = isEnabled && isPowerOn
+                            )
+                        }
+
+                        if (isMusicSync) {
+                            val musicTheme = attributes["music_theme"]?.jsonPrimitive?.contentOrNull ?: "spectrum"
+                            ScrollableTabRow(
+                                selectedTabIndex = listOf("spectrum", "fire", "ocean", "neon", "sunset").indexOf(musicTheme).coerceAtLeast(0),
+                                containerColor = Color.Transparent,
+                                edgePadding = 0.dp
                             ) {
-                                LIGHT_COLOR_PRESETS.forEach { preset ->
-                                    val active = isColorsActive && activeColorHex?.lowercase() == preset.hex.lowercase()
-                                    Surface(
-                                        color = preset.color,
-                                        shape = CircleShape,
-                                        border = if (active) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .clickable(enabled = isEnabled) {
-                                                vm.setAttributes(buildJsonObject {
-                                                    put("color", JsonPrimitive(preset.hex))
-                                                    put("color_temp", JsonPrimitive(0))
-                                                })
-                                            }
-                                    ) {
-                                        if (active) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Icon(
-                                                    Icons.Rounded.Check,
-                                                    null,
-                                                    tint = Color.White,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Custom color Hue slider picker
-                            var customHue by remember { mutableStateOf(180f) }
-                            val rgbColor = remember(customHue) {
-                                val hsv = floatArrayOf(customHue, 1f, 1f)
-                                Color(android.graphics.Color.HSVToColor(hsv))
-                            }
-
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text("Custom Rainbow Palette", style = MaterialTheme.typography.labelMedium)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .background(rgbColor, CircleShape)
-                                            .border(1.dp, Color.White, CircleShape)
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(36.dp)
-                                        .background(
-                                            Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red
-                                                )
-                                            ),
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(horizontal = 8.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Slider(
-                                        value = customHue,
-                                        onValueChange = { customHue = it },
-                                        onValueChangeFinished = {
-                                            val hsv = floatArrayOf(customHue, 1f, 1f)
-                                            val rgbHex = String.format("#%06X", 0xFFFFFF and android.graphics.Color.HSVToColor(hsv))
-                                            vm.setAttributes(buildJsonObject {
-                                                put("color", JsonPrimitive(rgbHex))
-                                                put("color_temp", JsonPrimitive(0))
-                                            })
+                                listOf("spectrum", "fire", "ocean", "neon", "sunset").forEach { t ->
+                                    Tab(
+                                        selected = musicTheme == t,
+                                        onClick = {
+                                            vm.setAttribute("music_theme", JsonPrimitive(t))
                                         },
-                                        valueRange = 0f..360f,
-                                        enabled = isEnabled,
-                                        colors = SliderDefaults.colors(
-                                            activeTrackColor = Color.Transparent,
-                                            inactiveTrackColor = Color.Transparent,
-                                            thumbColor = Color.White
-                                        )
+                                        text = { Text(t.replaceFirstChar { it.uppercase() }) },
+                                        enabled = isEnabled && isPowerOn
                                     )
                                 }
                             }
                         }
 
-                        // Ambient Sync & Pattern controls (like web)
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        Text("Animated Loop Patterns", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
                         
-                        val ambientSync = attributes["ambient_sync"]?.jsonPrimitive?.contentOrNull
-                        val isScreenSync = ambientSync == "screen"
-                        val isMusicSync = ambientSync == "music"
-
-                        Column(
+                        val activePattern = attributes["light_scene"]?.jsonPrimitive?.contentOrNull
+                        
+                        FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text("Ambient Sync Modes", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                            
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                // Screen Sync
-                                InputChip(
-                                    selected = isScreenSync,
+                            listOf(
+                                Triple("rainbow", "Rainbow Loop", 500),
+                                Triple("breathe", "Breathe", 350),
+                                Triple("strobe", "Strobe", 250),
+                                Triple("party", "Party", 600),
+                                Triple("candle", "Candle", 450),
+                                Triple("sunrise", "Sunrise", 1000)
+                            ).forEach { (id, label, gap) ->
+                                val isSelected = activePattern == id
+                                FilterChip(
+                                    selected = isSelected,
                                     onClick = {
-                                        val nextVal = if (isScreenSync) null else "screen"
                                         vm.setAttributes(buildJsonObject {
-                                            put("ambient_sync", nextVal?.let { JsonPrimitive(it) } ?: JsonNull)
+                                            put("light_scene", if (isSelected) JsonNull else JsonPrimitive(id))
+                                            put("light_scene_gap", if (isSelected) JsonNull else JsonPrimitive(gap))
+                                            put("custom_scene_colors", JsonNull)
                                             put("color", JsonNull)
                                             put("color_temp", JsonPrimitive(0))
                                         })
                                     },
-                                    label = { Text("Screen Sync") },
-                                    leadingIcon = { Icon(Icons.Rounded.Monitor, "Screen") }
+                                    label = { Text(label) },
+                                    enabled = isEnabled && isPowerOn
                                 )
-
-                                // Music Sync
-                                InputChip(
-                                    selected = isMusicSync,
-                                    onClick = {
-                                        val nextVal = if (isMusicSync) null else "music"
-                                        vm.setAttributes(buildJsonObject {
-                                            put("ambient_sync", nextVal?.let { JsonPrimitive(it) } ?: JsonNull)
-                                            put("music_theme", if (nextVal == "music") JsonPrimitive("spectrum") else JsonNull)
-                                            put("color", JsonNull)
-                                            put("color_temp", JsonPrimitive(0))
-                                        })
-                                    },
-                                    label = { Text("Music Sync") },
-                                    leadingIcon = { Icon(Icons.Rounded.MusicNote, "Music") }
-                                )
-                            }
-
-                            if (isMusicSync) {
-                                val musicTheme = attributes["music_theme"]?.jsonPrimitive?.contentOrNull ?: "spectrum"
-                                ScrollableTabRow(
-                                    selectedTabIndex = listOf("spectrum", "fire", "ocean", "neon", "sunset").indexOf(musicTheme).coerceAtLeast(0),
-                                    containerColor = Color.Transparent,
-                                    edgePadding = 0.dp
-                                ) {
-                                    listOf("spectrum", "fire", "ocean", "neon", "sunset").forEach { t ->
-                                        Tab(
-                                            selected = musicTheme == t,
-                                            onClick = {
-                                                vm.setAttribute("music_theme", JsonPrimitive(t))
-                                            },
-                                            text = { Text(t.replaceFirstChar { it.uppercase() }) }
-                                        )
-                                    }
-                                }
-                            }
-
-                            Text("Animated Loop Patterns", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
-                            
-                            val activePattern = attributes["light_scene"]?.jsonPrimitive?.contentOrNull
-                            
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                listOf(
-                                    Triple("rainbow", "Rainbow Loop", 500),
-                                    Triple("breathe", "Breathe", 350),
-                                    Triple("strobe", "Strobe", 250),
-                                    Triple("party", "Party", 600),
-                                    Triple("candle", "Candle", 450),
-                                    Triple("sunrise", "Sunrise", 1000)
-                                ).forEach { (id, label, gap) ->
-                                    val isSelected = activePattern == id
-                                    FilterChip(
-                                        selected = isSelected,
-                                        onClick = {
-                                            vm.setAttributes(buildJsonObject {
-                                                put("light_scene", if (isSelected) JsonNull else JsonPrimitive(id))
-                                                put("light_scene_gap", if (isSelected) JsonNull else JsonPrimitive(gap))
-                                                put("custom_scene_colors", JsonNull)
-                                                put("color", JsonNull)
-                                                put("color_temp", JsonPrimitive(0))
-                                            })
-                                        },
-                                        label = { Text(label) }
-                                    )
-                                }
                             }
                         }
                     }
