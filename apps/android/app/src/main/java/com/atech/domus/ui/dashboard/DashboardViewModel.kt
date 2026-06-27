@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.atech.core.common.DomusResult
 import com.atech.core.model.Device
 import com.atech.core.model.DeviceType
+import com.atech.core.realtime.DomusEventType
 import com.atech.domus.DomusApp
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /** A device plus its resolved on/off state for the UI. */
 data class DeviceUi(
@@ -47,7 +50,29 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
     private val _state = MutableStateFlow<DashboardState>(DashboardState.Loading)
     val state: StateFlow<DashboardState> = _state.asStateFlow()
 
-    init { load() }
+    init {
+        load()
+        observeRealtime()
+    }
+
+    /** Reflect device state/online changes pushed over the WebSocket, live. */
+    private fun observeRealtime() {
+        viewModelScope.launch {
+            core.realtime.events().collect { event ->
+                val id = (event.data["device_id"]?.jsonPrimitive)?.content ?: return@collect
+                when (event.type) {
+                    DomusEventType.DEVICE_STATE_CHANGED -> {
+                        val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
+                        updateDevice(id) { it.copy(isOn = on, busy = false) }
+                    }
+                    DomusEventType.DEVICE_ONLINE_CHANGED -> {
+                        val online = event.data["online"]?.jsonPrimitive?.booleanOrNull ?: return@collect
+                        updateDevice(id) { it.copy(device = it.device.copy(online = online)) }
+                    }
+                }
+            }
+        }
+    }
 
     fun load(isRefresh: Boolean = false) {
         if (isRefresh) {

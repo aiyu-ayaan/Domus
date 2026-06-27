@@ -41,6 +41,7 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kotlinx.serialization.json) // read JsonObject from realtime events
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

@@ -11,6 +11,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+/** Event `type` values the server emits (mirrors `backend/core/events.py`). */
+object DomusEventType {
+    const val DEVICE_STATE_CHANGED = "device.state_changed"   // data: {device_id, state, attributes}
+    const val DEVICE_ONLINE_CHANGED = "device.online_changed" // data: {device_id, online}
+    const val NOTIFICATION_CREATED = "notification.created"
+    const val DASHBOARD_UPDATED = "dashboard.updated"
+}
+
 /**
  * Live updates from the server's `/ws` endpoint. The server pushes
  * `{type, data, home_id, ts}` envelopes for device state changes, new devices,
