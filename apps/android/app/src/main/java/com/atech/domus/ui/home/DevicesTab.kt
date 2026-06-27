@@ -30,6 +30,9 @@ import androidx.compose.material.icons.rounded.ToggleOn
 import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,61 +52,76 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atech.core.model.DeviceType
 import com.atech.ui_shared.theme.DomusGreen
+import com.atech.ui_shared.component.DomusLogo
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues, onDeviceClick: (String) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
 
-    when (val s = state) {
-        is DevicesState.Loading -> Centered(contentPadding) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        is DevicesState.Error -> Centered(contentPadding) {
-            Message("Couldn't load devices", s.message, vm::load)
-        }
-        is DevicesState.Empty -> Centered(contentPadding) {
-            Message(
-                s.homeName?.let { "No devices in $it yet" } ?: "No home set up yet",
-                "Add devices from the Domus web dashboard, then pull to refresh.",
-                vm::load,
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { DomusLogo() },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
-        is DevicesState.Content -> PullToRefreshBox(
-            isRefreshing = s.refreshing,
-            onRefresh = { vm.load(isRefresh = true) },
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 16.dp, end = 16.dp,
-                    top = contentPadding.calculateTopPadding() + 8.dp,
-                    bottom = contentPadding.calculateBottomPadding() + 16.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        when (val s = state) {
+            is DevicesState.Loading -> Centered(contentPadding) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            is DevicesState.Error -> Centered(contentPadding) {
+                Message("Couldn't load devices", s.message, vm::load)
+            }
+            is DevicesState.Empty -> Centered(contentPadding) {
+                Message(
+                    s.homeName?.let { "No devices in $it yet" } ?: "No home set up yet",
+                    "Add devices from the Domus web dashboard, then pull to refresh.",
+                    vm::load,
+                )
+            }
+            is DevicesState.Content -> PullToRefreshBox(
+                isRefreshing = s.refreshing,
+                onRefresh = { vm.load(isRefresh = true) },
+                modifier = Modifier.fillMaxSize().padding(top = innerPadding.calculateTopPadding()),
             ) {
-                item {
-                    Column(Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
-                        Text(
-                            s.homeName,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Text(
-                            "${s.devices.size} device${if (s.devices.size == 1) "" else "s"} · ${s.onlineCount} online",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp, end = 16.dp,
+                        top = 8.dp,
+                        bottom = contentPadding.calculateBottomPadding() + 16.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item {
+                        Column(Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
+                            Text(
+                                s.homeName,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                "${s.devices.size} device${if (s.devices.size == 1) "" else "s"} · ${s.onlineCount} online",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    items(s.devices, key = { it.device.id }) { d ->
+                        DeviceCard(
+                            d = d,
+                            onToggle = { vm.toggle(d.device.id) },
+                            onClick = { onDeviceClick(d.device.id) }
                         )
                     }
-                }
-                items(s.devices, key = { it.device.id }) { d ->
-                    DeviceCard(
-                        d = d,
-                        onToggle = { vm.toggle(d.device.id) },
-                        onClick = { onDeviceClick(d.device.id) }
-                    )
                 }
             }
         }

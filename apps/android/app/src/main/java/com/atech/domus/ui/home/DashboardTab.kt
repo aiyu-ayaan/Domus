@@ -45,6 +45,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,6 +84,7 @@ import com.atech.core.model.Notification
 import com.atech.core.model.NotificationType
 import com.atech.core.model.Scene
 import com.atech.ui_shared.theme.DomusGreen
+import com.atech.ui_shared.component.DomusLogo
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.roundToInt
 
@@ -93,55 +97,78 @@ fun DashboardTab(
     val state by dashboardVm.state.collectAsState()
     val isSettingsOpen by dashboardVm.isSettingsOpen.collectAsState()
 
-    when (val s = state) {
-        is DashboardState.Loading -> Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        is DashboardState.Error -> Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Couldn't load dashboard",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.error
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { DomusLogo() },
+                actions = {
+                    IconButton(onClick = { dashboardVm.setSettingsOpen(true) }) {
+                        Icon(
+                            Icons.Rounded.Settings,
+                            contentDescription = "Customize Dashboard",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
                 )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = s.message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = { dashboardVm.loadAll() }) {
-                    Text("Retry")
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        when (val s = state) {
+            is DashboardState.Loading -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .padding(bottom = contentPadding.calculateBottomPadding()),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            is DashboardState.Error -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .padding(bottom = contentPadding.calculateBottomPadding())
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Couldn't load dashboard",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = s.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = { dashboardVm.loadAll() }) {
+                        Text("Retry")
+                    }
                 }
             }
-        }
-        is DashboardState.Content -> {
-            PullToRefreshBox(
-                isRefreshing = s.refreshing,
-                onRefresh = { dashboardVm.loadAll(isRefresh = true) },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = contentPadding.calculateTopPadding() + 8.dp,
-                        bottom = contentPadding.calculateBottomPadding() + 24.dp
-                    ),
+            is DashboardState.Content -> {
+                PullToRefreshBox(
+                    isRefreshing = s.refreshing,
+                    onRefresh = { dashboardVm.loadAll(isRefresh = true) },
+                    modifier = Modifier.fillMaxSize().padding(top = innerPadding.calculateTopPadding())
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 8.dp,
+                            bottom = contentPadding.calculateBottomPadding() + 24.dp
+                        ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
@@ -250,6 +277,7 @@ fun DashboardTab(
             }
         }
     }
+}
 }
 
 @Composable

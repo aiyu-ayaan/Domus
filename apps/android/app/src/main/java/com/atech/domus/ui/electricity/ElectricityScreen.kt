@@ -21,6 +21,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.atech.ui_shared.component.DomusLogo
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,28 +41,51 @@ import com.atech.core.model.EnergySummary
 import com.atech.ui_shared.theme.DomusGreen
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElectricityScreen(vm: ElectricityViewModel, contentPadding: PaddingValues) {
     val state by vm.state.collectAsStateWithLifecycle()
 
-    when (val s = state) {
-        is ElectricityState.Loading -> Box(
-            Modifier.fillMaxSize().padding(contentPadding), contentAlignment = Alignment.Center,
-        ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { DomusLogo() },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        when (val s = state) {
+            is ElectricityState.Loading -> Box(
+                Modifier.fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .padding(bottom = contentPadding.calculateBottomPadding()),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
 
-        is ElectricityState.Error -> Box(
-            Modifier.fillMaxSize().padding(contentPadding).padding(24.dp), contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Couldn't load usage", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(8.dp))
-                Text(s.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(16.dp))
-                TextButton(onClick = vm::retry) { Text("Retry", color = MaterialTheme.colorScheme.primary) }
+            is ElectricityState.Error -> Box(
+                Modifier.fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .padding(bottom = contentPadding.calculateBottomPadding())
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Couldn't load usage", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+                    Spacer(Modifier.height(8.dp))
+                    Text(s.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(16.dp))
+                    TextButton(onClick = vm::retry) { Text("Retry", color = MaterialTheme.colorScheme.primary) }
+                }
+            }
+
+            is ElectricityState.Content -> Box(Modifier.padding(top = innerPadding.calculateTopPadding())) {
+                Content(s.summary, contentPadding)
             }
         }
-
-        is ElectricityState.Content -> Content(s.summary, contentPadding)
     }
 }
 
@@ -66,7 +95,7 @@ private fun Content(summary: EnergySummary, contentPadding: PaddingValues) {
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp, end = 16.dp,
-            top = contentPadding.calculateTopPadding() + 8.dp,
+            top = 8.dp,
             bottom = contentPadding.calculateBottomPadding() + 16.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
