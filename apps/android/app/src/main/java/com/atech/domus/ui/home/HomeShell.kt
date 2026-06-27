@@ -45,6 +45,7 @@ private enum class HomeTab(val label: String, val icon: ImageVector) {
 @Composable
 fun HomeShell() {
     // Shared across the tabs that need them, so live state is consistent.
+    val dashboardVm: DashboardViewModel = viewModel()
     val devicesVm: DevicesViewModel = viewModel()
     val electricityVm: ElectricityViewModel = viewModel()
     val profileVm: ProfileViewModel = viewModel()
@@ -82,7 +83,7 @@ fun HomeShell() {
         Crossfade(targetState = tab, animationSpec = tween(200), label = "home-tab") { current ->
             Box(Modifier.fillMaxSize()) {
                 when (current) {
-                    HomeTab.DASHBOARD -> DashboardTab(devicesVm, electricityVm, padding)
+                    HomeTab.DASHBOARD -> DashboardTab(dashboardVm, padding)
                     HomeTab.DEVICES -> DevicesTab(devicesVm, padding)
                     HomeTab.ELECTRICITY -> ElectricityScreen(electricityVm, padding)
                     HomeTab.PROFILE -> ProfileScreen(profileVm, padding)
