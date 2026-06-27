@@ -15,8 +15,13 @@ import com.atech.core.data.SceneRepository
 import com.atech.core.data.UserRepository
 import com.atech.core.network.DomusHttp
 import com.atech.core.realtime.DomusRealtime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /**
  * Single entry point to the Domus backend. Build it once (e.g. in [android.app.Application])
@@ -32,6 +37,8 @@ class DomusCore private constructor(
     private val tokenStore: TokenStore,
     val enableLogging: Boolean,
 ) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     val auth: AuthRepository = AuthRepository(http, tokenStore)
     val users: UserRepository = UserRepository(http)
     val homes: HomeRepository = HomeRepository(http)
@@ -69,15 +76,19 @@ class DomusCore private constructor(
         http.resetAuthCache()
     }
 
-    fun close() = http.close()
+    fun close() {
+        scope.cancel()
+        http.close()
+    }
 
     companion object {
         /**
-         * Creates the container, restoring the previously configured URL if any.
-         * Falls back to [fallbackUrl] (the Android-emulator host alias) until the user
-         * configures a real one in the UI.
+         * Builds the container synchronously (safe to call from [android.app.Application]).
+         * Starts on [fallbackUrl] — the Android-emulator alias for the host's localhost —
+         * then asynchronously swaps to the previously configured URL if one is persisted.
+         * Observe [isConfigured] before issuing requests on first launch.
          */
-        suspend fun create(
+        fun create(
             context: Context,
             fallbackUrl: String = "http://10.0.2.2:8000",
             enableLogging: Boolean = false,
@@ -85,9 +96,12 @@ class DomusCore private constructor(
             val appContext = context.applicationContext
             val serverStore = ServerStore(appContext)
             val tokenStore = TokenStore(appContext)
-            val startUrl = serverStore.current() ?: fallbackUrl
-            val http = DomusHttp(DomusConfig(startUrl, enableLogging), tokenStore)
-            return DomusCore(http, serverStore, tokenStore, enableLogging)
+            val http = DomusHttp(DomusConfig(fallbackUrl, enableLogging), tokenStore)
+            val core = DomusCore(http, serverStore, tokenStore, enableLogging)
+            core.scope.launch {
+                serverStore.current()?.let { http.updateConfig(DomusConfig(it, enableLogging)) }
+            }
+            return core
         }
     }
 }
