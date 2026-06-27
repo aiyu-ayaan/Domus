@@ -40,6 +40,19 @@ import com.atech.core.model.EnergyDevice
 import com.atech.core.model.EnergySummary
 import com.atech.ui_shared.theme.DomusGreen
 import kotlin.math.roundToInt
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+import androidx.compose.foundation.BorderStroke
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,38 +178,170 @@ private fun PowerHero(summary: EnergySummary) {
 
 @Composable
 private fun UsageChart(summary: EnergySummary) {
-    val bars = summary.series.map { it.kwh.toFloat() }
-    val max = (bars.maxOrNull() ?: 0f).coerceAtLeast(0.0001f)
+    val series = summary.series
+    val points = remember(series) {
+        series.map { point ->
+            val timeString = try {
+                val clean = point.t.replace("Z", "").split(".")[0]
+                val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+                val date = parser.parse(clean) ?: return@map Pair("", point.kwh.toFloat())
+                val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+                formatter.format(date)
+            } catch (e: Exception) {
+                ""
+            }
+            Pair(timeString, point.kwh.toFloat())
+        }
+    }
+
+    val maxVal = remember(points) {
+        points.maxOfOrNull { it.second }?.coerceAtLeast(0.0001f) ?: 0.0001f
+    }
+    val minVal = 0f
+    val valRange = maxVal - minVal
+
     val barColor = DomusGreen
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("Usage over time", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(12.dp))
-            Canvas(Modifier.fillMaxWidth().height(120.dp)) {
-                val n = bars.size
-                if (n == 0) return@Canvas
-                val gap = 3.dp.toPx()
-                val barWidth = ((size.width - gap * (n - 1)) / n).coerceAtLeast(1f)
-                bars.forEachIndexed { i, v ->
-                    val h = (v / max) * size.height
-                    val x = i * (barWidth + gap)
-                    drawRoundRect(
-                        color = trackColor,
-                        topLeft = Offset(x, 0f),
-                        size = Size(barWidth, size.height),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2),
+            Text(
+                "Usage over time",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+            Canvas(Modifier.fillMaxWidth().height(160.dp)) {
+                val paddingLeft = 55.dp.toPx()
+                val paddingRight = 10.dp.toPx()
+                val paddingTop = 10.dp.toPx()
+                val paddingBottom = 20.dp.toPx()
+
+                val chartWidth = size.width - paddingLeft - paddingRight
+                val chartHeight = size.height - paddingTop - paddingBottom
+
+                val count = points.size
+                if (count == 0) return@Canvas
+
+                // 1. Draw horizontal grid lines and Y-axis labels
+                val gridLinesCount = 3
+                val textPaint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.GRAY
+                    textSize = 9.sp.toPx()
+                    textAlign = android.graphics.Paint.Align.RIGHT
+                    isAntiAlias = true
+                }
+
+                for (i in 0..gridLinesCount) {
+                    val ratio = i.toFloat() / gridLinesCount
+                    val y = paddingTop + (1f - ratio) * chartHeight
+
+                    // Grid line
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(paddingLeft, y),
+                        end = Offset(size.width - paddingRight, y),
+                        strokeWidth = 1.dp.toPx()
                     )
-                    drawRoundRect(
+
+                    // Y-axis Label
+                    val labelValue = minVal + ratio * valRange
+                    val labelText = if (labelValue >= 1f) "%.1f kWh".format(labelValue) else "%.3f kWh".format(labelValue)
+                    drawContext.canvas.nativeCanvas.drawText(
+                        labelText,
+                        paddingLeft - 8.dp.toPx(),
+                        y + 4.dp.toPx(),
+                        textPaint
+                    )
+                }
+
+                // 2. Draw smooth area and line chart
+                val stepX = if (count > 1) chartWidth / (count - 1) else chartWidth
+                val path = Path()
+                val areaPath = Path()
+
+                points.forEachIndexed { idx, pair ->
+                    val x = paddingLeft + idx * stepX
+                    val ratioY = (pair.second - minVal) / valRange
+                    val y = size.height - paddingBottom - ratioY * chartHeight
+
+                    if (idx == 0) {
+                        path.moveTo(x, y)
+                        areaPath.moveTo(x, size.height - paddingBottom)
+                        areaPath.lineTo(x, y)
+                    } else {
+                        path.lineTo(x, y)
+                        areaPath.lineTo(x, y)
+                    }
+
+                    if (idx == count - 1) {
+                        areaPath.lineTo(x, size.height - paddingBottom)
+                        areaPath.close()
+                    }
+                }
+
+                if (count > 0) {
+                    // Fill area
+                    drawPath(
+                        path = areaPath,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(barColor.copy(alpha = 0.2f), Color.Transparent),
+                            startY = paddingTop,
+                            endY = size.height - paddingBottom
+                        )
+                    )
+
+                    // Draw stroke line
+                    drawPath(
+                        path = path,
                         color = barColor,
-                        topLeft = Offset(x, size.height - h),
-                        size = Size(barWidth, h),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2),
+                        style = Stroke(
+                            width = 2.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
                     )
+                }
+
+                // 3. Draw X-axis timestamps (Start, Mid, End)
+                val timePaint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.GRAY
+                    textSize = 9.sp.toPx()
+                    textAlign = android.graphics.Paint.Align.CENTER
+                    isAntiAlias = true
+                }
+
+                val labelY = size.height - 2.dp.toPx()
+                if (count > 0 && points.first().first.isNotEmpty()) {
+                    drawContext.canvas.nativeCanvas.drawText(
+                        points.first().first,
+                        paddingLeft,
+                        labelY,
+                        timePaint
+                    )
+                    if (count > 2 && points[count / 2].first.isNotEmpty()) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            points[count / 2].first,
+                            paddingLeft + chartWidth / 2,
+                            labelY,
+                            timePaint
+                        )
+                    }
+                    if (count > 1 && points.last().first.isNotEmpty()) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            points.last().first,
+                            size.width - paddingRight,
+                            labelY,
+                            timePaint
+                        )
+                    }
                 }
             }
         }
