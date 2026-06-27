@@ -91,7 +91,7 @@ fun DashboardTab(
     contentPadding: PaddingValues
 ) {
     val state by dashboardVm.state.collectAsState()
-    var isSettingsOpen by remember { mutableStateOf(false) }
+    val isSettingsOpen by dashboardVm.isSettingsOpen.collectAsState()
 
     when (val s = state) {
         is DashboardState.Loading -> Box(
@@ -144,48 +144,7 @@ fun DashboardTab(
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Top Title Bar
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "DOMUS PANEL",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                                )
-                                Text(
-                                    text = "COMMAND CENTER",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                            }
 
-                            IconButton(
-                                onClick = { isSettingsOpen = true },
-                                modifier = Modifier
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceVariant,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .size(40.dp)
-                            ) {
-                                Icon(
-                                    Icons.Rounded.Settings,
-                                    contentDescription = "Customize Dashboard",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
 
                     // 1. Operational Health Header
                     if (s.sectionVisibility["healthHeader"] == true) {
@@ -286,7 +245,7 @@ fun DashboardTab(
                     visibility = s.sectionVisibility,
                     onToggle = { dashboardVm.toggleSectionVisibility(it) },
                     onReset = { dashboardVm.resetSectionVisibility() },
-                    onClose = { isSettingsOpen = false }
+                    onClose = { dashboardVm.setSettingsOpen(false) }
                 )
             }
         }

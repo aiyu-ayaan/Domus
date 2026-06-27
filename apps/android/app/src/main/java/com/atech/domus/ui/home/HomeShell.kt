@@ -9,8 +9,10 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atech.domus.ui.electricity.ElectricityScreen
 import com.atech.domus.ui.electricity.ElectricityViewModel
@@ -52,12 +55,31 @@ fun HomeShell() {
 
     var tab by rememberSaveable { mutableStateOf(HomeTab.DASHBOARD) }
 
+    // Collapses/Hides on scroll
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { DomusLogo() },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                actions = {
+                    if (tab == HomeTab.DASHBOARD) {
+                        IconButton(onClick = { dashboardVm.setSettingsOpen(true) }) {
+                            Icon(
+                                Icons.Rounded.Settings,
+                                contentDescription = "Customize Dashboard",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
         },
         bottomBar = {

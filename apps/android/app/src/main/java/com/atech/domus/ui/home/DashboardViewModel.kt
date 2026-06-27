@@ -73,6 +73,13 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
     private val _state = MutableStateFlow<DashboardState>(DashboardState.Loading)
     val state: StateFlow<DashboardState> = _state.asStateFlow()
 
+    private val _isSettingsOpen = MutableStateFlow(false)
+    val isSettingsOpen = _isSettingsOpen.asStateFlow()
+
+    fun setSettingsOpen(open: Boolean) {
+        _isSettingsOpen.value = open
+    }
+
     init {
         loadAll()
         observeRealtime()
