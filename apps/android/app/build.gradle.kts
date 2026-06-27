@@ -6,9 +6,7 @@ plugins {
 android {
     namespace = "com.atech.domus"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
@@ -39,6 +37,10 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":ui-shared"))
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

@@ -13,8 +13,11 @@ import com.atech.core.data.NotificationRepository
 import com.atech.core.data.RoomRepository
 import com.atech.core.data.SceneRepository
 import com.atech.core.data.UserRepository
+import com.atech.core.common.DomusResult
 import com.atech.core.network.DomusHttp
+import com.atech.core.network.safeApiCall
 import com.atech.core.realtime.DomusRealtime
+import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -74,6 +77,22 @@ class DomusCore private constructor(
         http.updateConfig(DomusConfig(cleaned, enableLogging))
         tokenStore.clear()
         http.resetAuthCache()
+    }
+
+    /** Forget the configured server (and session) — sends the user back to setup. */
+    suspend fun clearServer() {
+        serverStore.clear()
+        tokenStore.clear()
+        http.resetAuthCache()
+    }
+
+    /**
+     * Probe a candidate backend's `/health` endpoint without persisting it — lets the
+     * server-config screen tell the user "reachable" before they commit the URL.
+     */
+    suspend fun testConnection(url: String): DomusResult<Unit> {
+        val origin = url.trim().trimEnd('/')
+        return safeApiCall { http.client.get("$origin/health") }
     }
 
     fun close() {

@@ -23,4 +23,8 @@ class ServerStore(private val context: Context) {
     suspend fun save(url: String) {
         context.serverDataStore.edit { it[urlKey] = url.trim().trimEnd('/') }
     }
+
+    suspend fun clear() {
+        context.serverDataStore.edit { it.remove(urlKey) }
+    }
 }
