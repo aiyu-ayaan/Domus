@@ -285,9 +285,25 @@ export function DashboardPage() {
   const activeDeviceStates = Object.values(deviceStates).filter(
     (state) => state.state === "on",
   ).length;
-  const currentPowerLoad = Object.values(deviceStates).reduce((sum, state) => {
-    const load = state.attributes?.current_consumption;
-    return typeof load === "number" ? sum + load : sum;
+
+  const getDevicePower = (device: DeviceOut) => {
+    const stateObj = deviceStates[device.id];
+    const isOn = stateObj?.state === "on";
+    const isOnline = device.online;
+    if (!isOnline) return 0;
+    const watts = stateObj?.attributes?.current_consumption;
+    if (typeof watts === "number" && watts > 0) {
+      return watts;
+    }
+    if (isOn && device.device_type === "light") {
+      return 12.0;
+    }
+    return 0;
+  };
+
+  const currentPowerLoad = devices.reduce((sum, device) => {
+    const load = getDevicePower(device);
+    return load > 0 ? sum + load : sum;
   }, 0);
   const uptimeScore =
     totalDevices === 0 ? 100 : Math.round((onlineDevices / totalDevices) * 100);
@@ -302,11 +318,11 @@ export function DashboardPage() {
     devices.some((device) => device.room_id === room.id),
   );
 
-  // Live power draw, built only from devices actually reporting consumption.
+  // Live power draw, built only from devices actually reporting consumption or active lights.
   const powerByDevice = devices
     .map((device) => {
-      const watts = deviceStates[device.id]?.attributes?.current_consumption;
-      return typeof watts === "number" && watts > 0
+      const watts = getDevicePower(device);
+      return watts > 0
         ? { name: device.name, watts: Number(watts.toFixed(1)) }
         : null;
     })
@@ -875,7 +891,7 @@ export function DashboardPage() {
                       Live Draw
                     </p>
                     <p className="mt-1 text-base sm:text-lg font-bold text-amber-500 font-mono">
-                      {electricitySummary.total_power_w.toFixed(0)}
+                      {currentPowerLoad.toFixed(0)}
                       <span className="text-[10px] text-muted-foreground ml-1">W</span>
                     </p>
                   </div>

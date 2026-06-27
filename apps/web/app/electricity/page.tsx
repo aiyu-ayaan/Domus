@@ -19,7 +19,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Zap, Gauge, Wallet, Plug, Plus, Trash2, Save, History, ChevronDown } from "lucide-react";
-import type { EnergySummary } from "@/types/api";
+import type { EnergySummary, DeviceOut, DeviceStateOut } from "@/types/api";
 import {
   type Tariff,
   type TieredTariff,
@@ -59,7 +59,13 @@ export default function ElectricityPage() {
   const [chartUnit, setChartUnit] = useState<"kwh" | "watt">("kwh");
 
   // Subscribe to device states in Zustand to capture real-time WebSocket updates
-  const deviceStates = useDeviceStore((s) => s.deviceStates);
+  const { devices, deviceStates, fetchDevices } = useDeviceStore();
+
+  useEffect(() => {
+    if (activeHomeId) {
+      fetchDevices(activeHomeId);
+    }
+  }, [activeHomeId, fetchDevices]);
 
   // Source tariff + billing cycle from the synced home object (server source of truth).
   useEffect(() => {
@@ -138,6 +144,16 @@ export default function ElectricityPage() {
   const totalKwh = summary?.total_kwh ?? 0;
   const totalCost = useMemo(() => computeCost(totalKwh, tariff), [totalKwh, tariff]);
   const rate = useMemo(() => effectiveRate(totalKwh, tariff), [totalKwh, tariff]);
+
+  const currentPowerLoad = useMemo(() => {
+    return devices.reduce((sum, device) => {
+      const stateObj = deviceStates[device.id];
+      const isOn = stateObj?.state === "on";
+      const isOnline = device.online;
+      const watts = stateObj?.attributes?.current_consumption ?? (isOn && isOnline && device.device_type === "light" ? 12.0 : 0.0);
+      return typeof watts === "number" && watts > 0 ? sum + watts : sum;
+    }, 0);
+  }, [devices, deviceStates]);
 
   // Find bucket size in seconds from series data to calculate average power in Watts
   const series = summary?.series ?? [];
@@ -296,8 +312,8 @@ export default function ElectricityPage() {
         />
         <MetricCard
           label="Current Draw"
-          value={`${(summary?.total_power_w ?? 0).toFixed(0)} W`}
-          description="Across all metered devices"
+          value={`${currentPowerLoad.toFixed(0)} W`}
+          description="Across all active devices"
           icon={Zap}
           statusColor="amber"
         />
@@ -474,7 +490,7 @@ export default function ElectricityPage() {
       </div>
 
       {/* Live power draw by device */}
-      <LivePowerDraw summary={summary} />
+      <LivePowerDraw devices={devices} deviceStates={deviceStates} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Per-device breakdown */}
@@ -544,12 +560,28 @@ export default function ElectricityPage() {
   );
 }
 
-function LivePowerDraw({ summary }: { summary: EnergySummary | null }) {
-  const devices = (summary?.devices ?? [])
-    .filter((d) => d.power_w > 0)
-    .sort((a, b) => b.power_w - a.power_w);
-  if (devices.length === 0) return null;
-  const max = Math.max(...devices.map((d) => d.power_w), 1);
+function LivePowerDraw({
+  devices,
+  deviceStates,
+}: {
+  devices: DeviceOut[];
+  deviceStates: Record<string, DeviceStateOut>;
+}) {
+  const powerDevices = devices
+    .map((device) => {
+      const stateObj = deviceStates[device.id];
+      const isOn = stateObj?.state === "on";
+      const isOnline = device.online;
+      const watts = stateObj?.attributes?.current_consumption ?? (isOn && isOnline && device.device_type === "light" ? 12.0 : 0.0);
+      return typeof watts === "number" && watts > 0
+        ? { id: device.id, name: device.name, watts: Number(watts.toFixed(1)) }
+        : null;
+    })
+    .filter((d): d is { id: string; name: string; watts: number } => d !== null)
+    .sort((a, b) => b.watts - a.watts);
+
+  if (powerDevices.length === 0) return null;
+  const max = Math.max(...powerDevices.map((d) => d.watts), 1);
 
   return (
     <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
@@ -558,18 +590,18 @@ function LivePowerDraw({ summary }: { summary: EnergySummary | null }) {
         <h3 className="font-semibold text-base">Live Power Draw by Device</h3>
       </div>
       <div className="space-y-3">
-        {devices.map((d) => (
-          <div key={d.device_id} className="space-y-1.5">
+        {powerDevices.map((d) => (
+          <div key={d.id} className="space-y-1.5">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-sm font-medium text-foreground truncate">{d.name}</span>
               <span className="font-mono text-sm font-semibold text-amber-400 shrink-0">
-                {d.power_w.toFixed(0)} W
+                {d.watts.toFixed(0)} W
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full rounded-full bg-amber-400 transition-[width] duration-500"
-                style={{ width: `${Math.max(4, (d.power_w / max) * 100)}%` }}
+                style={{ width: `${Math.max(4, (d.watts / max) * 100)}%` }}
               />
             </div>
           </div>

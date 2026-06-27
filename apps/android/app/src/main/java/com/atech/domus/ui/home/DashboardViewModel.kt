@@ -52,7 +52,13 @@ sealed interface DashboardState {
         val activeAutomations: Int get() = automations.count { it.enabled }
         val securityAlertsCount: Int get() = notifications.count { it.type == NotificationType.SECURITY_ALERT && !it.read }
         val uptimeScore: Int get() = if (totalDevices == 0) 100 else (onlineDevices * 100) / totalDevices
-        val totalPowerW: Double get() = energySummary?.total_power_w ?: 0.0
+        val totalPowerW: Double get() {
+            return devices.sumOf { dev ->
+                val watts = dev.device.meta["current_consumption"]?.jsonPrimitive?.content?.toDoubleOrNull()
+                    ?: (if (dev.isOn == true && dev.device.device_type == DeviceType.LIGHT) 12.0 else 0.0)
+                if (dev.device.online && watts > 0.0) watts else 0.0
+            }
+        }
         val totalKwh: Double get() = energySummary?.total_kwh ?: 0.0
     }
 
