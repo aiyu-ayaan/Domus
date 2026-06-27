@@ -38,6 +38,11 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
 
     private var deviceId: String? = null
 
+    // In-flight user commands. While > 0, realtime state events are ignored so a poll
+    // echo can't revert the user's just-issued action — this is what caused the toggle
+    // to flicker off/on. The command's own result is the source of truth meanwhile.
+    private var pendingCommands = 0
+
     fun loadDevice(id: String) {
         if (deviceId == id) return
         deviceId = id
@@ -89,6 +94,9 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
 
                 when (event.type) {
                     DomusEventType.DEVICE_STATE_CHANGED -> {
+                        // A user command is mid-flight; its result wins. Ignore echoes so
+                        // the optimistic toggle doesn't flip back and forth.
+                        if (pendingCommands > 0) return@collect
                         val stateStr = event.data["state"]?.jsonPrimitive?.content ?: return@collect
                         val attributesObj = event.data["attributes"]?.jsonObject ?: JsonObject(emptyMap())
                         val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
@@ -126,33 +134,38 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
 
     fun togglePower() {
         val id = deviceId ?: return
+        val current = _uiState.value.deviceState
+        // Flip immediately so the switch tracks the tap with no round-trip lag.
+        val optimistic = when (current?.state?.lowercase()) {
+            "on" -> "off"
+            "off" -> "on"
+            else -> null
+        }
+        if (current != null && optimistic != null) {
+            _uiState.update { it.copy(deviceState = current.copy(state = optimistic)) }
+        }
+        pendingCommands++
         viewModelScope.launch {
-            val result = core.devices.toggle(id)
-            if (result is DomusResult.Success) {
-                _uiState.update { s ->
+            when (val result = core.devices.toggle(id)) {
+                is DomusResult.Success -> _uiState.update { s ->
                     s.copy(deviceState = s.deviceState?.copy(state = result.data.state) ?: result.data)
                 }
+                is DomusResult.Failure -> if (current != null) {
+                    // Command failed — undo the optimistic flip.
+                    _uiState.update { it.copy(deviceState = current, errorMessage = result.error.message) }
+                }
             }
+            pendingCommands--
         }
     }
 
     fun setAttribute(key: String, value: JsonElement) {
-        val id = deviceId ?: return
-        viewModelScope.launch {
-            val attributes = buildJsonObject {
-                put(key, value)
-            }
-            val result = core.devices.setAttributes(id, attributes)
-            if (result is DomusResult.Success) {
-                _uiState.update { s ->
-                    s.copy(deviceState = result.data)
-                }
-            }
-        }
+        setAttributes(buildJsonObject { put(key, value) })
     }
 
     fun setAttributes(attrs: JsonObject) {
         val id = deviceId ?: return
+        pendingCommands++
         viewModelScope.launch {
             val result = core.devices.setAttributes(id, attrs)
             if (result is DomusResult.Success) {
@@ -160,6 +173,7 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
                     s.copy(deviceState = result.data)
                 }
             }
+            pendingCommands--
         }
     }
 
