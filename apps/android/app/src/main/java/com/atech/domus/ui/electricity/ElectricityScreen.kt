@@ -29,6 +29,8 @@ import com.atech.ui_shared.component.DomusLogo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -52,12 +54,20 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material3.Icon
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElectricityScreen(vm: ElectricityViewModel, contentPadding: PaddingValues) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val selectedRange by vm.selectedRange.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -96,14 +106,24 @@ fun ElectricityScreen(vm: ElectricityViewModel, contentPadding: PaddingValues) {
             }
 
             is ElectricityState.Content -> Box(Modifier.padding(top = innerPadding.calculateTopPadding())) {
-                Content(s.summary, contentPadding)
+                Content(
+                    summary = s.summary,
+                    contentPadding = contentPadding,
+                    selectedRange = selectedRange,
+                    onRangeSelected = vm::setRange
+                )
             }
         }
     }
 }
 
 @Composable
-private fun Content(summary: EnergySummary, contentPadding: PaddingValues) {
+private fun Content(
+    summary: EnergySummary,
+    contentPadding: PaddingValues,
+    selectedRange: EnergyRange,
+    onRangeSelected: (EnergyRange) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -114,15 +134,21 @@ private fun Content(summary: EnergySummary, contentPadding: PaddingValues) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text(
-                "Electricity",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Electricity",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                RangeSelector(selectedRange, onRangeSelected)
+            }
         }
-        item { PowerHero(summary) }
+        item { PowerHero(summary, selectedRange) }
         if (summary.series.isNotEmpty()) {
             item { UsageChart(summary) }
         }
@@ -141,7 +167,77 @@ private fun Content(summary: EnergySummary, contentPadding: PaddingValues) {
 }
 
 @Composable
-private fun PowerHero(summary: EnergySummary) {
+private fun RangeSelector(
+    selectedRange: EnergyRange,
+    onRangeSelected: (EnergyRange) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Surface(
+            onClick = { expanded = true },
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.History,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = selectedRange.label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "▼",
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            EnergyRange.values().forEach { range ->
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(range.label)
+                            if (range == selectedRange) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(DomusGreen, shape = CircleShape)
+                                )
+                            }
+                        }
+                    },
+                    onClick = {
+                        onRangeSelected(range)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PowerHero(summary: EnergySummary, selectedRange: EnergyRange) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.large,
@@ -163,7 +259,16 @@ private fun PowerHero(summary: EnergySummary) {
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("Last ${summary.range_hours.roundToInt()}h", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val rangeLabel = when (selectedRange) {
+                    EnergyRange.ONE_MINUTE -> "Last 1 min"
+                    EnergyRange.ONE_HOUR -> "Last 1h"
+                    EnergyRange.TWELVE_HOURS -> "Last 12h"
+                    EnergyRange.TWENTY_FOUR_HOURS -> "Last 24h"
+                    EnergyRange.ONE_WEEK -> "Last 7d"
+                    EnergyRange.THIRTY_DAYS -> "Last 30d"
+                    EnergyRange.BILLING_CYCLE -> "Billing cycle"
+                }
+                Text(rangeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "%.2f kWh".format(summary.total_kwh),
