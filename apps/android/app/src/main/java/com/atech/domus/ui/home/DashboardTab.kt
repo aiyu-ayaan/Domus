@@ -44,6 +44,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
@@ -96,12 +98,37 @@ fun DashboardTab(
 ) {
     val state by dashboardVm.state.collectAsState()
     val isSettingsOpen by dashboardVm.isSettingsOpen.collectAsState()
+    var isNotificationsOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { DomusLogo() },
                 actions = {
+                    val contentState = state as? DashboardState.Content
+                    if (contentState != null) {
+                        val unreadCount = contentState.notifications.count { !it.read }
+                        IconButton(onClick = { isNotificationsOpen = true }) {
+                            BadgedBox(
+                                badge = {
+                                    if (unreadCount > 0) {
+                                        Badge(
+                                            containerColor = Color(0xFFEF4444),
+                                            contentColor = Color.White
+                                        ) {
+                                            Text(unreadCount.toString())
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
                     IconButton(onClick = { dashboardVm.setSettingsOpen(true) }) {
                         Icon(
                             Icons.Rounded.Settings,
@@ -254,16 +281,6 @@ fun DashboardTab(
                             )
                         }
                     }
-
-                    // 7. Activity Feed
-                    if (s.sectionVisibility["activityFeed"] == true && s.notifications.isNotEmpty()) {
-                        item {
-                            ActivityFeedCard(
-                                notifications = s.notifications,
-                                onMarkRead = { dashboardVm.markNotificationRead(it.id) }
-                            )
-                        }
-                    }
                 }
             }
 
@@ -274,6 +291,15 @@ fun DashboardTab(
                     onToggle = { dashboardVm.toggleSectionVisibility(it) },
                     onReset = { dashboardVm.resetSectionVisibility() },
                     onClose = { dashboardVm.setSettingsOpen(false) }
+                )
+            }
+
+            // Notifications Dialog
+            if (isNotificationsOpen) {
+                NotificationsDialog(
+                    notifications = s.notifications,
+                    onMarkRead = { dashboardVm.markNotificationRead(it.id) },
+                    onClose = { isNotificationsOpen = false }
                 )
             }
         }
@@ -878,92 +904,120 @@ fun AutomationStackCard(
 
 
 @Composable
-fun ActivityFeedCard(
+fun NotificationsDialog(
     notifications: List<Notification>,
-    onMarkRead: (Notification) -> Unit
+    onMarkRead: (Notification) -> Unit,
+    onClose: () -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    Dialog(onDismissRequest = onClose) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "ACTIVITY FEED",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-            )
-
-            Spacer(Modifier.height(12.dp))
-
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(16.dp)
             ) {
-                notifications.take(8).forEach { notification ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(enabled = !notification.read) { onMarkRead(notification) }
-                            .padding(vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "NOTIFICATIONS",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Rounded.Close, contentDescription = "Close")
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
+
+                if (notifications.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            val tint = when (notification.type) {
-                                NotificationType.SECURITY_ALERT -> Color(0xFFEF4444)
-                                NotificationType.DEVICE_OFFLINE -> Color(0xFFF59E0B)
-                                NotificationType.AUTOMATION_FAILED -> Color(0xFFEF4444)
-                                else -> MaterialTheme.colorScheme.primary
-                            }
-
-                            Icon(
-                                imageVector = when (notification.type) {
-                                    NotificationType.SECURITY_ALERT -> Icons.Rounded.Warning
-                                    NotificationType.DEVICE_OFFLINE -> Icons.Rounded.Bolt
-                                    else -> Icons.Rounded.Notifications
-                                },
-                                contentDescription = null,
-                                tint = tint,
-                                modifier = Modifier.size(16.dp)
-                            )
-
-                            Spacer(Modifier.width(10.dp))
-
-                            Column {
-                                Text(
-                                    text = notification.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (notification.read) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                            else MaterialTheme.colorScheme.onSurface,
-                                    textDecoration = if (notification.read) TextDecoration.LineThrough else null,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = notification.body,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-
-                        if (!notification.read) {
-                            Box(
+                        Text(
+                            text = "No notifications",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.height(300.dp)
+                    ) {
+                        items(notifications) { notification ->
+                            Row(
                                 modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .size(6.dp)
-                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-                            )
+                                    .fillMaxWidth()
+                                    .clickable(enabled = !notification.read) { onMarkRead(notification) }
+                                    .padding(vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    val tint = when (notification.type) {
+                                        NotificationType.SECURITY_ALERT -> Color(0xFFEF4444)
+                                        NotificationType.DEVICE_OFFLINE -> Color(0xFFF59E0B)
+                                        NotificationType.AUTOMATION_FAILED -> Color(0xFFEF4444)
+                                        else -> MaterialTheme.colorScheme.primary
+                                    }
+
+                                    Icon(
+                                        imageVector = when (notification.type) {
+                                            NotificationType.SECURITY_ALERT -> Icons.Rounded.Warning
+                                            NotificationType.DEVICE_OFFLINE -> Icons.Rounded.Bolt
+                                            else -> Icons.Rounded.Notifications
+                                        },
+                                        contentDescription = null,
+                                        tint = tint,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+
+                                    Spacer(Modifier.width(10.dp))
+
+                                    Column {
+                                        Text(
+                                            text = notification.title,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (notification.read) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                                    else MaterialTheme.colorScheme.onSurface,
+                                            textDecoration = if (notification.read) TextDecoration.LineThrough else null,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = notification.body,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+
+                                if (!notification.read) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(start = 8.dp)
+                                            .size(6.dp)
+                                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1016,8 +1070,7 @@ fun CustomizeDashboardDialog(
                     "electricity" to "Electricity & Billing Card",
                     "livePowerDraw" to "Live Power Draw List",
                     "savedScenes" to "Saved Scenes Card",
-                    "automationStack" to "Automation Stack",
-                    "activityFeed" to "Activity Feed"
+                    "automationStack" to "Automation Stack"
                 )
 
                 Column(

@@ -71,8 +71,7 @@ sealed interface DashboardState {
             "livePowerDraw" to true,
             "electricity" to true,
             "savedScenes" to true,
-            "automationStack" to true,
-            "activityFeed" to true
+            "automationStack" to true
         )
     }
 }
