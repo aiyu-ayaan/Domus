@@ -2,6 +2,7 @@ package com.atech.domus.ui.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,7 +52,7 @@ import com.atech.ui_shared.theme.DomusGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues) {
+fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues, onDeviceClick: (String) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
 
     when (val s = state) {
@@ -98,7 +99,11 @@ fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues) {
                     }
                 }
                 items(s.devices, key = { it.device.id }) { d ->
-                    DeviceCard(d, onToggle = { vm.toggle(d.device.id) })
+                    DeviceCard(
+                        d = d,
+                        onToggle = { vm.toggle(d.device.id) },
+                        onClick = { onDeviceClick(d.device.id) }
+                    )
                 }
             }
         }
@@ -106,13 +111,13 @@ fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues) {
 }
 
 @Composable
-fun DeviceCard(d: DeviceUi, onToggle: () -> Unit) {
+fun DeviceCard(d: DeviceUi, onToggle: () -> Unit, onClick: () -> Unit) {
     val on = d.isOn == true
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             val iconTint = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant

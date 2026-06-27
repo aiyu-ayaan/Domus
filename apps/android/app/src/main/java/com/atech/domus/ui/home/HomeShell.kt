@@ -1,7 +1,13 @@
 package com.atech.domus.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import com.atech.domus.ui.device.DeviceDetailScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -54,6 +60,7 @@ fun HomeShell() {
     val profileVm: ProfileViewModel = viewModel()
 
     var tab by rememberSaveable { mutableStateOf(HomeTab.DASHBOARD) }
+    var activeDeviceDetailId by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Collapses/Hides on scroll
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -102,13 +109,30 @@ fun HomeShell() {
             }
         },
     ) { padding ->
-        Crossfade(targetState = tab, animationSpec = tween(200), label = "home-tab") { current ->
-            Box(Modifier.fillMaxSize()) {
-                when (current) {
-                    HomeTab.DASHBOARD -> DashboardTab(dashboardVm, padding)
-                    HomeTab.DEVICES -> DevicesTab(devicesVm, padding)
-                    HomeTab.ELECTRICITY -> ElectricityScreen(electricityVm, padding)
-                    HomeTab.PROFILE -> ProfileScreen(profileVm, padding)
+        Box(Modifier.fillMaxSize()) {
+            Crossfade(targetState = tab, animationSpec = tween(200), label = "home-tab") { current ->
+                Box(Modifier.fillMaxSize()) {
+                    when (current) {
+                        HomeTab.DASHBOARD -> DashboardTab(dashboardVm, padding)
+                        HomeTab.DEVICES -> DevicesTab(devicesVm, padding) { id ->
+                            activeDeviceDetailId = id
+                        }
+                        HomeTab.ELECTRICITY -> ElectricityScreen(electricityVm, padding)
+                        HomeTab.PROFILE -> ProfileScreen(profileVm, padding)
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = activeDeviceDetailId != null,
+                enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+            ) {
+                activeDeviceDetailId?.let { deviceId ->
+                    DeviceDetailScreen(
+                        deviceId = deviceId,
+                        onBack = { activeDeviceDetailId = null }
+                    )
                 }
             }
         }
