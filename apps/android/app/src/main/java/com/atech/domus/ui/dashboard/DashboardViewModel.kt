@@ -1,0 +1,123 @@
+package com.atech.domus.ui.dashboard
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.atech.core.common.DomusResult
+import com.atech.core.model.Device
+import com.atech.core.model.DeviceType
+import com.atech.domus.DomusApp
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/** A device plus its resolved on/off state for the UI. */
+data class DeviceUi(
+    val device: Device,
+    val isOn: Boolean?,      // null = unknown / not controllable
+    val busy: Boolean = false,
+) {
+    val controllable: Boolean
+        get() = device.device_type in CONTROLLABLE
+
+    companion object {
+        val CONTROLLABLE = setOf(DeviceType.LIGHT, DeviceType.PLUG, DeviceType.SWITCH, DeviceType.FAN)
+    }
+}
+
+sealed interface DashboardState {
+    data object Loading : DashboardState
+    data class Error(val message: String) : DashboardState
+    data class Empty(val homeName: String?) : DashboardState
+    data class Content(
+        val homeName: String,
+        val devices: List<DeviceUi>,
+        val refreshing: Boolean = false,
+    ) : DashboardState
+}
+
+class DashboardViewModel(app: Application) : AndroidViewModel(app) {
+    private val core = (app as DomusApp).core
+
+    private val _state = MutableStateFlow<DashboardState>(DashboardState.Loading)
+    val state: StateFlow<DashboardState> = _state.asStateFlow()
+
+    init { load() }
+
+    fun load(isRefresh: Boolean = false) {
+        if (isRefresh) {
+            _state.update { if (it is DashboardState.Content) it.copy(refreshing = true) else it }
+        } else {
+            _state.value = DashboardState.Loading
+        }
+        viewModelScope.launch {
+            when (val homes = core.homes.list()) {
+                is DomusResult.Failure -> _state.value = DashboardState.Error(homes.error.message)
+                is DomusResult.Success -> {
+                    val home = homes.data.firstOrNull()
+                    if (home == null) {
+                        _state.value = DashboardState.Empty(null)
+                        return@launch
+                    }
+                    when (val devices = core.devices.list(homeId = home.id, limit = 200)) {
+                        is DomusResult.Failure -> _state.value = DashboardState.Error(devices.error.message)
+                        is DomusResult.Success -> {
+                            val items = devices.data.items
+                            if (items.isEmpty()) {
+                                _state.value = DashboardState.Empty(home.name)
+                            } else {
+                                _state.value = DashboardState.Content(home.name, resolveStates(items))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Fetch current on/off for each controllable device, in parallel. */
+    private suspend fun resolveStates(devices: List<Device>): List<DeviceUi> = coroutineScope {
+        devices.map { device ->
+            async {
+                val controllable = device.device_type in DeviceUi.CONTROLLABLE
+                val isOn = if (controllable) {
+                    (core.devices.state(device.id) as? DomusResult.Success)
+                        ?.data?.state?.equals("on", ignoreCase = true)
+                } else null
+                DeviceUi(device, isOn)
+            }
+        }.awaitAll()
+    }
+
+    fun toggle(deviceId: String) {
+        val content = _state.value as? DashboardState.Content ?: return
+        setBusy(deviceId, true)
+        viewModelScope.launch {
+            when (val result = core.devices.toggle(deviceId)) {
+                is DomusResult.Success -> updateDevice(deviceId) {
+                    it.copy(isOn = result.data.state.equals("on", ignoreCase = true), busy = false)
+                }
+                is DomusResult.Failure -> setBusy(deviceId, false)
+            }
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch { core.auth.logout() }
+    }
+
+    private fun setBusy(deviceId: String, busy: Boolean) =
+        updateDevice(deviceId) { it.copy(busy = busy) }
+
+    private inline fun updateDevice(deviceId: String, crossinline change: (DeviceUi) -> DeviceUi) {
+        _state.update { s ->
+            if (s !is DashboardState.Content) s
+            else s.copy(devices = s.devices.map { if (it.device.id == deviceId) change(it) else it })
+        }
+    }
+}
