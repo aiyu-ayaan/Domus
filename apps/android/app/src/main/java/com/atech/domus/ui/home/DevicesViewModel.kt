@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /** A device plus its resolved on/off state for the UI. */
@@ -24,6 +26,7 @@ data class DeviceUi(
     val device: Device,
     val isOn: Boolean?,      // null = unknown / not controllable
     val busy: Boolean = false,
+    val powerW: Double? = null, // live draw for metered devices (plugs), else null
 ) {
     val controllable: Boolean
         get() = device.device_type in CONTROLLABLE
@@ -94,11 +97,9 @@ class DevicesViewModel(app: Application) : AndroidViewModel(app) {
         devices.map { device ->
             async {
                 val controllable = device.device_type in DeviceUi.CONTROLLABLE
-                val isOn = if (controllable) {
-                    (core.devices.state(device.id) as? DomusResult.Success)
-                        ?.data?.state?.equals("on", ignoreCase = true)
-                } else null
-                DeviceUi(device, isOn)
+                val st = (core.devices.state(device.id) as? DomusResult.Success)?.data
+                val isOn = if (controllable) st?.state?.equals("on", ignoreCase = true) else null
+                DeviceUi(device, isOn, powerW = powerOf(st?.attributes))
             }
         }.awaitAll()
     }
@@ -124,7 +125,8 @@ class DevicesViewModel(app: Application) : AndroidViewModel(app) {
                 when (event.type) {
                     DomusEventType.DEVICE_STATE_CHANGED -> {
                         val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
-                        updateDevice(id) { it.copy(isOn = on) }
+                        val power = powerOf(event.data["attributes"] as? kotlinx.serialization.json.JsonObject)
+                        updateDevice(id) { it.copy(isOn = on, powerW = power ?: it.powerW) }
                     }
                     DomusEventType.DEVICE_ONLINE_CHANGED -> {
                         val online = event.data["online"]?.jsonPrimitive?.booleanOrNull ?: return@collect
@@ -137,6 +139,13 @@ class DevicesViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun setBusy(deviceId: String, busy: Boolean) =
         updateDevice(deviceId) { it.copy(busy = busy) }
+
+    /** Live watts from a device state's attributes, if it's a metered device. */
+    private fun powerOf(attrs: kotlinx.serialization.json.JsonObject?): Double? {
+        if (attrs == null) return null
+        val w = (attrs["power_w"] ?: attrs["current_consumption"])?.jsonPrimitive?.doubleOrNull
+        return w?.takeIf { it > 0.0 }
+    }
 
     private inline fun updateDevice(deviceId: String, crossinline change: (DeviceUi) -> DeviceUi) {
         _state.update { s ->

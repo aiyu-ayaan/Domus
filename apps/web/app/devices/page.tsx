@@ -316,7 +316,7 @@ function DevicesPageContent() {
                         state?.attributes?.current_consumption !==
                           undefined && (
                           <p className="font-semibold text-foreground/90">
-                            Load: {state.attributes.current_consumption} W
+                            Load: {Math.round(Number(state.attributes.current_consumption))} W
                           </p>
                         )}
                       {dev.device_type === "light" &&

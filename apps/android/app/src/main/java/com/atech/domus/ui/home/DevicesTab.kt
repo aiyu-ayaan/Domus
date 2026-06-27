@@ -54,6 +54,7 @@ import com.atech.core.model.DeviceType
 import com.atech.ui_shared.theme.DomusGreen
 import com.atech.ui_shared.component.DomusLogo
 import androidx.compose.ui.graphics.Color
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -203,7 +204,9 @@ private fun subtitle(d: DeviceUi): String {
         d.controllable && d.isOn == false -> "Off"
         else -> "Online"
     }
-    return "$type · $status"
+    // Show live draw for metered devices (plugs) when they're on.
+    val power = d.powerW?.takeIf { d.device.online && d.isOn == true }
+    return if (power != null) "$type · $status · ${power.roundToInt()} W" else "$type · $status"
 }
 
 private fun iconFor(type: DeviceType): ImageVector = when (type) {
