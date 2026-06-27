@@ -64,6 +64,17 @@ class Settings(BaseSettings):
         r"^(https?|capacitor|ionic|capacitor-electron)://(localhost|-)?(:\d+)?$"
     )
 
+    # Background device poller. Lower = snappier live state, higher = lighter CPU.
+    # The poller only writes history / emits events when state actually changes, so
+    # a moderate interval keeps the API lightweight without losing responsiveness.
+    device_poll_interval: float = 5.0
+    # Min seconds between recorded energy power samples per device (the live watt
+    # reading jitters every poll; without this the history table grows unbounded).
+    energy_sample_min_interval: float = 30.0
+    # Drop DeviceState history older than this so the table — and the per-request
+    # energy integration that scans it — stay bounded. 0 disables pruning.
+    device_history_retention_days: int = 14
+
     # Rate limiting (auth endpoints)
     auth_rate_limit: str = "10/minute"
 

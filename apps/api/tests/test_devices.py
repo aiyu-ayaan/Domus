@@ -23,6 +23,53 @@ async def test_turn_on_off_toggle_and_history(client, owner, device):
 
 
 @pytest.mark.asyncio
+async def test_poller_dedup_skips_redundant_rows_and_events(client, owner, device, sessionmaker):
+    """A from_poll _record with no real change must not write history or emit events.
+
+    This is what keeps the API lightweight (no per-tick row/event spam) and stops the
+    Android device-detail toggle from flickering off/on.
+    """
+    from uuid import UUID
+
+    from backend.core.events import DEVICE_STATE_CHANGED, event_bus
+    from backend.devices.models import Device
+    from backend.devices.service import DeviceService
+    from backend.integrations.models import Integration
+    from backend.integrations.registry import get_adapter
+
+    did = UUID(device["device"]["id"])
+    H = owner["headers"]
+
+    # Control path establishes a known state (records + emits, as before).
+    await client.post(f"/api/v1/devices/{did}/turn-on", headers=H)
+    n_before = len((await client.get(f"/api/v1/devices/{did}/history", headers=H)).json())
+
+    events = []
+
+    async def spy(ev):
+        if ev.type == DEVICE_STATE_CHANGED and ev.data.get("device_id") == str(did):
+            events.append(ev)
+
+    event_bus.subscribe(spy)
+    try:
+        async with sessionmaker() as session:
+            service = DeviceService(session)
+            dev = await session.get(Device, did)
+            integ = await session.get(Integration, dev.integration_id)
+            adapter = get_adapter(integ)
+            snap = await adapter.get_state(dev.external_id)  # same state -> no change
+            await service._record(dev, snap, from_poll=True)
+            await service._record(dev, snap, from_poll=True)
+            await session.commit()
+    finally:
+        event_bus.unsubscribe(spy)
+
+    n_after = len((await client.get(f"/api/v1/devices/{did}/history", headers=H)).json())
+    assert n_after == n_before, "idle polls must not append history rows"
+    assert events == [], "idle polls must not emit state-changed events"
+
+
+@pytest.mark.asyncio
 async def test_state_404_when_never_controlled(client, owner, device):
     did = device["device"]["id"]
     r = await client.get(f"/api/v1/devices/{did}/state", headers=owner["headers"])
@@ -57,11 +104,14 @@ async def test_list_devices_filtered_by_type(client, owner, device, home):
 
 
 @pytest.mark.asyncio
-async def test_device_mark_offline_publishes_event_and_notification(client, owner, device, sessionmaker):
-    from backend.devices.service import DeviceService
+async def test_device_mark_offline_publishes_event_and_notification(
+    client, owner, device, sessionmaker
+):
+    from uuid import UUID
+
     from backend.core.events import DEVICE_ONLINE_CHANGED, event_bus
     from backend.devices.models import Device
-    from uuid import UUID
+    from backend.devices.service import DeviceService
 
     did = UUID(device["device"]["id"])
     events = []
@@ -94,11 +144,14 @@ async def test_device_mark_offline_publishes_event_and_notification(client, owne
 
 
 @pytest.mark.asyncio
-async def test_refresh_state_failure_marks_offline(client, owner, device, monkeypatch, sessionmaker):
-    from backend.devices.service import DeviceService
-    from backend.devices.models import Device, DeviceState
-    from datetime import datetime, UTC
+async def test_refresh_state_failure_marks_offline(
+    client, owner, device, monkeypatch, sessionmaker
+):
+    from datetime import UTC, datetime
     from uuid import UUID
+
+    from backend.devices.models import Device, DeviceState
+    from backend.devices.service import DeviceService
 
     did = UUID(device["device"]["id"])
 
@@ -107,6 +160,7 @@ async def test_refresh_state_failure_marks_offline(client, owner, device, monkey
         raise RuntimeError("Device unreachable")
 
     from backend.integrations.adapters.tapo import TapoAdapter
+
     monkeypatch.setattr(TapoAdapter, "get_state", mock_get_state)
 
     async with sessionmaker() as session:
@@ -116,17 +170,14 @@ async def test_refresh_state_failure_marks_offline(client, owner, device, monkey
         dev.online = True
         # Insert a dummy state row
         state = DeviceState(
-            device_id=did,
-            state="on",
-            attributes={"brightness": 100},
-            created_at=datetime.now(UTC)
+            device_id=did, state="on", attributes={"brightness": 100}, created_at=datetime.now(UTC)
         )
         session.add(state)
         await session.commit()
 
     # Request state refresh
     await client.get(f"/api/v1/devices/{did}/state?refresh=true", headers=owner["headers"])
-    
+
     async with sessionmaker() as session:
         dev = await session.get(Device, did)
         assert dev.online is False
