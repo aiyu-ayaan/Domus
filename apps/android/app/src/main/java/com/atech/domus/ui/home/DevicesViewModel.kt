@@ -124,7 +124,7 @@ class DevicesViewModel(app: Application) : AndroidViewModel(app) {
                 when (event.type) {
                     DomusEventType.DEVICE_STATE_CHANGED -> {
                         val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
-                        updateDevice(id) { it.copy(isOn = on, busy = false) }
+                        updateDevice(id) { it.copy(isOn = on) }
                     }
                     DomusEventType.DEVICE_ONLINE_CHANGED -> {
                         val online = event.data["online"]?.jsonPrimitive?.booleanOrNull ?: return@collect

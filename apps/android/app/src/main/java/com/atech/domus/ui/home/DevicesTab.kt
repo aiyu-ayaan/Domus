@@ -148,18 +148,24 @@ fun DeviceCard(d: DeviceUi, onToggle: () -> Unit) {
                 }
             }
             Spacer(Modifier.size(8.dp))
-            when {
-                d.busy -> CircularProgressIndicator(
-                    Modifier.size(24.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary,
-                )
-                d.controllable -> Switch(
+            if (d.controllable) {
+                Switch(
                     checked = on,
                     onCheckedChange = { onToggle() },
-                    enabled = d.device.online,
+                    enabled = d.device.online && !d.busy,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                         checkedTrackColor = MaterialTheme.colorScheme.primary,
                     ),
+                    thumbContent = if (d.busy) {
+                        {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 1.5.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    } else null
                 )
             }
         }
