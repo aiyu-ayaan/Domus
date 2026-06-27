@@ -851,7 +851,9 @@ private fun EnergyCostCard(state: DeviceDetailUiState) {
 
     val currentDraw = energyDevice?.power_w ?: attributes["current_consumption"]?.jsonPrimitive?.doubleOrNull ?: attributes["power_w"]?.jsonPrimitive?.doubleOrNull ?: 0.0
     val energy24h = energyDevice?.energy_kwh ?: 0.0
-    val cost24h = energy24h * 8.0 // default flat rate ₹8.0/kWh
+    val billing = state.billingSettings
+    val unitRate = if (billing.type == "flat") billing.rate else (billing.tiers.firstOrNull()?.rate ?: 0.0)
+    val cost24h = energy24h * unitRate // synced per-home unit rate
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -935,10 +937,13 @@ private fun EnergyCostCard(state: DeviceDetailUiState) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.Wallet, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Est. Cost (Flat ₹8.0/kWh)", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "Est. Cost (${billing.currency}${unitRate.let { if (it == it.toLong().toDouble()) it.toLong().toString() else String.format(Locale.US, "%.2f", it) }}/kWh)",
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                     Text(
-                        text = String.format(Locale.US, "₹%.2f", cost24h),
+                        text = "${billing.currency}${String.format(Locale.US, "%.2f", cost24h)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = DomusGreen,

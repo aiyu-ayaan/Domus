@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.atech.core.common.DomusResult
 import com.atech.core.model.Automation
 import com.atech.core.model.AutomationUpdate
+import com.atech.core.model.BillingSettings
 import com.atech.core.model.Device
 import com.atech.core.model.DeviceType
 import com.atech.core.model.EnergySummary
@@ -35,7 +36,8 @@ sealed interface DashboardState {
         val automations: List<Automation> = emptyList(),
         val notifications: List<Notification> = emptyList(),
         val energySummary: EnergySummary? = null,
-        
+        val billingSettings: BillingSettings = BillingSettings(),
+
         // UI Action States
         val refreshing: Boolean = false,
         val activatingScenes: Set<String> = emptySet(),
@@ -130,6 +132,7 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                                 automations = automationsRes.data,
                                 notifications = notificationsRes.data,
                                 energySummary = energySummary,
+                                billingSettings = home.billing_settings ?: BillingSettings(),
                                 refreshing = false
                             )
                         } else {

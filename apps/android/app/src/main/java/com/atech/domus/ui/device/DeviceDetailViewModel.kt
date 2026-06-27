@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.atech.core.common.DomusResult
+import com.atech.core.model.BillingSettings
 import com.atech.core.model.Device
 import com.atech.core.model.DeviceState
 import com.atech.core.model.DeviceUpdate
@@ -24,6 +25,7 @@ data class DeviceDetailUiState(
     val history: List<DeviceState> = emptyList(),
     val rooms: List<Room> = emptyList(),
     val energySummary: EnergySummary? = null,
+    val billingSettings: BillingSettings = BillingSettings(),
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
@@ -59,7 +61,8 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
                     val stateResult = core.devices.state(id)
                     val historyResult = core.devices.history(id, limit = 50)
                     val roomsResult = core.rooms.list(homeId = device.home_id)
-                    
+                    val homeResult = core.homes.get(device.home_id)
+
                     val energyResult = if (device.device_type.name.equals("plug", ignoreCase = true)) {
                         core.energy.summary(homeId = device.home_id, hours = 24)
                     } else null
@@ -68,6 +71,8 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
                     val resolvedHistory = (historyResult as? DomusResult.Success)?.data ?: emptyList()
                     val resolvedRooms = (roomsResult as? DomusResult.Success)?.data ?: emptyList()
                     val resolvedEnergy = (energyResult as? DomusResult.Success)?.data
+                    val resolvedBilling = (homeResult as? DomusResult.Success)?.data?.billing_settings
+                        ?: BillingSettings()
 
                     _uiState.update {
                         it.copy(
@@ -76,6 +81,7 @@ class DeviceDetailViewModel(app: Application) : AndroidViewModel(app) {
                             history = resolvedHistory,
                             rooms = resolvedRooms,
                             energySummary = resolvedEnergy,
+                            billingSettings = resolvedBilling,
                             isLoading = false
                         )
                     }

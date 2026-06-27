@@ -202,7 +202,8 @@ fun DashboardTab(
                         item {
                             ElectricityBillingCard(
                                 totalKwh = s.totalKwh,
-                                activeHomeName = s.homeName
+                                activeHomeName = s.homeName,
+                                billing = s.billingSettings
                             )
                         }
                     }
@@ -537,7 +538,8 @@ fun BentoTile(
 @Composable
 fun ElectricityBillingCard(
     totalKwh: Double,
-    activeHomeName: String
+    activeHomeName: String,
+    billing: com.atech.core.model.BillingSettings = com.atech.core.model.BillingSettings()
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -581,10 +583,10 @@ fun ElectricityBillingCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // Compute cost based on default tariff of $0.15/kWh
-                    val cost = totalKwh * 0.15
+                    // Cost from the home's synced tariff (currency-aware).
+                    val cost = com.atech.core.util.computeCost(totalKwh, billing)
                     Text(
-                        text = String.format("$%.2f", cost),
+                        text = com.atech.core.util.formatMoney(cost, billing.currency),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = DomusGreen

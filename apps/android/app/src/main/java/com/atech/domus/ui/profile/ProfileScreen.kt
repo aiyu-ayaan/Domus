@@ -96,6 +96,9 @@ fun ProfileScreen(vm: ProfileViewModel, contentPadding: PaddingValues) {
             InfoRow(Icons.Rounded.MailOutline, "Email", it)
         }
 
+        Spacer(Modifier.height(24.dp))
+        MoneySettingsCard()
+
         Spacer(Modifier.height(28.dp))
         OutlinedButton(
             onClick = vm::changeServer,
