@@ -111,7 +111,17 @@ class EnergyService:
         else:
             bucket_seconds = 86400
 
+        # Pre-seed every bucket across the window so the series is continuous and evenly
+        # spaced in time. Without this, buckets exist only where samples happened, so gaps
+        # (device off, API restart) leave a sparse, irregular series that the web and
+        # Android charts render as a single spike / scattered bars — i.e. "broken".
         buckets: dict[datetime, float] = {}
+        cursor = _bucket_start(origin, bucket_seconds, origin)
+        last_bucket = _bucket_start(datetime.now(UTC), bucket_seconds, origin)
+        while cursor <= last_bucket:
+            buckets[cursor] = 0.0
+            cursor += timedelta(seconds=bucket_seconds)
+
         devices_out: list[EnergyDevice] = []
         total_kwh = 0.0
         total_power = 0.0

@@ -36,10 +36,60 @@ async def test_plug_reports_power_and_energy_summary(client, owner, device, home
 
 
 @pytest.mark.asyncio
-async def test_energy_summary_uses_current_consumption_fallback(client, owner, device, home, sessionmaker):
-    from backend.devices.models import DeviceState
-    from datetime import datetime, UTC, timedelta
+async def test_energy_series_is_continuous_despite_sparse_samples(
+    client, owner, device, home, sessionmaker
+):
+    """The chart series must be continuous + evenly time-spaced even when samples are
+    sparse (device off, restart). Otherwise the graph renders as a single spike / gaps."""
+    from datetime import UTC, datetime, timedelta
     from uuid import UUID
+
+    from backend.devices.models import DeviceState
+
+    did = UUID(device["device"]["id"])
+    H = owner["headers"]
+
+    async with sessionmaker() as session:
+        now = datetime.now(UTC)
+        # Two samples an hour apart, ~20h ago — a big gap to "now".
+        session.add_all(
+            [
+                DeviceState(
+                    device_id=did,
+                    state="on",
+                    attributes={"power_w": 100.0},
+                    created_at=now - timedelta(hours=20),
+                ),
+                DeviceState(
+                    device_id=did,
+                    state="on",
+                    attributes={"power_w": 100.0},
+                    created_at=now - timedelta(hours=19),
+                ),
+            ]
+        )
+        await session.commit()
+
+    body = (
+        await client.get(
+            "/api/v1/energy/summary", params={"home_id": home["id"], "hours": 24}, headers=H
+        )
+    ).json()
+    series = body["series"]
+    assert len(series) > 100, "24h at 10-min buckets should be a continuous ~144-point series"
+    ts = [datetime.fromisoformat(p["t"]) for p in series]
+    gaps = {round((b - a).total_seconds()) for a, b in zip(ts, ts[1:])}
+    assert gaps == {600}, f"buckets must be uniform 10-min steps, got {gaps}"
+
+
+@pytest.mark.asyncio
+async def test_energy_summary_uses_current_consumption_fallback(
+    client, owner, device, home, sessionmaker
+):
+    from datetime import UTC, datetime, timedelta
+    from uuid import UUID
+
+    from backend.devices.models import DeviceState
 
     did = UUID(device["device"]["id"])
     H = owner["headers"]
@@ -51,21 +101,23 @@ async def test_energy_summary_uses_current_consumption_fallback(client, owner, d
             device_id=did,
             state="on",
             attributes={"current_consumption": 100.0},
-            created_at=now - timedelta(hours=2)
+            created_at=now - timedelta(hours=2),
         )
         s2 = DeviceState(
             device_id=did,
             state="on",
             attributes={"current_consumption": 200.0},
-            created_at=now - timedelta(hours=1)
+            created_at=now - timedelta(hours=1),
         )
         session.add_all([s1, s2])
         await session.commit()
 
-    res = await client.get("/api/v1/energy/summary", params={"home_id": home["id"], "hours": 24}, headers=H)
+    res = await client.get(
+        "/api/v1/energy/summary", params={"home_id": home["id"], "hours": 24}, headers=H
+    )
     assert res.status_code == 200
     body = res.json()
-    
+
     # Check that our device was found in the energy summary list and has energy calculated
     dev_summary = next((d for d in body["devices"] if d["device_id"] == str(did)), None)
     assert dev_summary is not None
