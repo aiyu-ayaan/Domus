@@ -1,11 +1,13 @@
 import asyncio
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
+from backend.core.config import settings
 from backend.core.database import SessionMaker
 from backend.core.logging import get_logger
-from backend.devices.models import Device
+from backend.devices.models import Device, DeviceState
 from backend.devices.service import DeviceService
 from backend.integrations.models import Integration
 from backend.integrations.registry import get_adapter
@@ -18,13 +20,32 @@ _OFFLINE_THRESHOLD = 3
 _failures: dict[UUID, int] = {}
 
 
+async def _prune_history(session) -> None:
+    """Drop DeviceState rows past the retention window so the table — and the
+    per-request energy integration that scans it — stay bounded."""
+    days = settings.device_history_retention_days
+    if days <= 0:
+        return
+    cutoff = datetime.now(UTC) - timedelta(days=days)
+    await session.execute(delete(DeviceState).where(DeviceState.created_at < cutoff))
+    await session.commit()
+
+
 async def poll_devices_loop():
     log.info("Starting background device poller loop")
+    interval = max(0.5, settings.device_poll_interval)
+    # Prune roughly every 5 minutes regardless of poll cadence.
+    prune_every = max(1, int(300 / interval))
+    tick = 0
     while True:
         try:
-            await asyncio.sleep(2.0)
+            await asyncio.sleep(interval)
+            tick += 1
 
             async with SessionMaker() as session:
+                if tick % prune_every == 0:
+                    await _prune_history(session)
+
                 # Poll all devices (not just online ones) so an offline device can
                 # recover automatically once it starts responding again.
                 res = await session.execute(select(Device))
@@ -52,7 +73,8 @@ async def poll_devices_loop():
                         continue
 
                     _failures.pop(device.id, None)
-                    await service._record(device, snapshot)  # sets online=True and triggers events
+                    # from_poll: only writes/emits on a real change (keeps the API light)
+                    await service._record(device, snapshot, from_poll=True)
 
                 await session.commit()
         except asyncio.CancelledError:
