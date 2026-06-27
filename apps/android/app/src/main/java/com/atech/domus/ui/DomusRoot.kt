@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atech.domus.DomusApp
-import com.atech.domus.ui.dashboard.DashboardScreen
+import com.atech.domus.ui.home.HomeShell
 import com.atech.domus.ui.login.LoginScreen
 import com.atech.domus.ui.server.ServerConfigScreen
 import com.atech.ui_shared.component.DomusBackground
@@ -47,7 +47,7 @@ fun DomusRoot() {
                 }
                 Destination.SERVER -> ServerConfigScreen()
                 Destination.LOGIN -> LoginScreen()
-                Destination.DASHBOARD -> DashboardScreen()
+                Destination.DASHBOARD -> HomeShell()
             }
         }
     }

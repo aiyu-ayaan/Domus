@@ -1,5 +1,6 @@
-package com.atech.domus.ui.dashboard
+package com.atech.domus.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,11 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AcUnit
 import androidx.compose.material.icons.rounded.DeviceUnknown
-import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Power
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.Thermostat
 import androidx.compose.material.icons.rounded.ToggleOn
@@ -31,122 +30,91 @@ import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atech.core.model.DeviceType
-import com.atech.ui_shared.component.DomusLogo
 import com.atech.ui_shared.theme.DomusGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(vm: DashboardViewModel = viewModel()) {
+fun DevicesTab(vm: DevicesViewModel, contentPadding: PaddingValues) {
     val state by vm.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = { DomusLogo(showName = true) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                actions = {
-                    IconButton(onClick = { vm.load(isRefresh = true) }) {
-                        Icon(Icons.Rounded.Refresh, "Refresh", tint = MaterialTheme.colorScheme.onBackground)
-                    }
-                    IconButton(onClick = vm::signOut) {
-                        Icon(Icons.AutoMirrored.Rounded.Logout, "Sign out", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        when (val s = state) {
-            is DashboardState.Loading -> Centered(padding) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-            is DashboardState.Error -> Centered(padding) {
-                Message("Couldn't load devices", s.message, onRetry = vm::load)
-            }
-            is DashboardState.Empty -> Centered(padding) {
-                Message(
-                    s.homeName?.let { "No devices in $it yet" } ?: "No home set up yet",
-                    "Add devices from the Domus web dashboard, then pull to refresh.",
-                    onRetry = vm::load,
-                )
-            }
-            is DashboardState.Content -> DeviceList(s, padding, vm)
+    when (val s = state) {
+        is DevicesState.Loading -> Centered(contentPadding) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DeviceList(s: DashboardState.Content, padding: PaddingValues, vm: DashboardViewModel) {
-    PullToRefreshBox(
-        isRefreshing = s.refreshing,
-        onRefresh = { vm.load(isRefresh = true) },
-        modifier = Modifier.padding(padding).fillMaxSize(),
-    ) {
-        LazyColumn(
+        is DevicesState.Error -> Centered(contentPadding) {
+            Message("Couldn't load devices", s.message, vm::load)
+        }
+        is DevicesState.Empty -> Centered(contentPadding) {
+            Message(
+                s.homeName?.let { "No devices in $it yet" } ?: "No home set up yet",
+                "Add devices from the Domus web dashboard, then pull to refresh.",
+                vm::load,
+            )
+        }
+        is DevicesState.Content -> PullToRefreshBox(
+            isRefreshing = s.refreshing,
+            onRefresh = { vm.load(isRefresh = true) },
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                Column(Modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
-                    Text(
-                        s.homeName,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Text(
-                        "${s.devices.size} device${if (s.devices.size == 1) "" else "s"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 16.dp, end = 16.dp,
+                    top = contentPadding.calculateTopPadding() + 8.dp,
+                    bottom = contentPadding.calculateBottomPadding() + 16.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item {
+                    Column(Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
+                        Text(
+                            s.homeName,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            "${s.devices.size} device${if (s.devices.size == 1) "" else "s"} · ${s.onlineCount} online",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                items(s.devices, key = { it.device.id }) { d ->
+                    DeviceCard(d, onToggle = { vm.toggle(d.device.id) })
                 }
             }
-            items(s.devices, key = { it.device.id }) { d ->
-                DeviceCard(d, onToggle = { vm.toggle(d.device.id) })
-            }
-            item { Spacer(Modifier.height(24.dp)) }
         }
     }
 }
 
 @Composable
-private fun DeviceCard(d: DeviceUi, onToggle: () -> Unit) {
+fun DeviceCard(d: DeviceUi, onToggle: () -> Unit) {
     val on = d.isOn == true
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.large,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             val iconTint = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             val iconBg = if (on) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
             else MaterialTheme.colorScheme.surfaceVariant
@@ -232,22 +200,10 @@ private fun Centered(padding: PaddingValues, content: @Composable () -> Unit) {
 @Composable
 private fun Message(title: String, body: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-        )
+        Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
-        Text(
-            body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onRetry) {
-            Text("Retry", color = MaterialTheme.colorScheme.primary)
-        }
+        TextButton(onClick = onRetry) { Text("Retry", color = MaterialTheme.colorScheme.primary) }
     }
 }

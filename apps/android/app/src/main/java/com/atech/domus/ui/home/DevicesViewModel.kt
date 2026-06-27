@@ -1,4 +1,4 @@
-package com.atech.domus.ui.dashboard
+package com.atech.domus.ui.home
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -33,70 +33,55 @@ data class DeviceUi(
     }
 }
 
-sealed interface DashboardState {
-    data object Loading : DashboardState
-    data class Error(val message: String) : DashboardState
-    data class Empty(val homeName: String?) : DashboardState
+sealed interface DevicesState {
+    data object Loading : DevicesState
+    data class Error(val message: String) : DevicesState
+    data class Empty(val homeName: String?) : DevicesState
     data class Content(
         val homeName: String,
         val devices: List<DeviceUi>,
         val refreshing: Boolean = false,
-    ) : DashboardState
+    ) : DevicesState {
+        val onlineCount: Int get() = devices.count { it.device.online }
+        val onCount: Int get() = devices.count { it.isOn == true }
+    }
 }
 
-class DashboardViewModel(app: Application) : AndroidViewModel(app) {
+/** Shared by the Dashboard (overview) and Devices (list) tabs; keeps device state live. */
+class DevicesViewModel(app: Application) : AndroidViewModel(app) {
     private val core = (app as DomusApp).core
 
-    private val _state = MutableStateFlow<DashboardState>(DashboardState.Loading)
-    val state: StateFlow<DashboardState> = _state.asStateFlow()
+    private val _state = MutableStateFlow<DevicesState>(DevicesState.Loading)
+    val state: StateFlow<DevicesState> = _state.asStateFlow()
 
     init {
         load()
         observeRealtime()
     }
 
-    /** Reflect device state/online changes pushed over the WebSocket, live. */
-    private fun observeRealtime() {
-        viewModelScope.launch {
-            core.realtime.events().collect { event ->
-                val id = (event.data["device_id"]?.jsonPrimitive)?.content ?: return@collect
-                when (event.type) {
-                    DomusEventType.DEVICE_STATE_CHANGED -> {
-                        val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
-                        updateDevice(id) { it.copy(isOn = on, busy = false) }
-                    }
-                    DomusEventType.DEVICE_ONLINE_CHANGED -> {
-                        val online = event.data["online"]?.jsonPrimitive?.booleanOrNull ?: return@collect
-                        updateDevice(id) { it.copy(device = it.device.copy(online = online)) }
-                    }
-                }
-            }
-        }
-    }
-
     fun load(isRefresh: Boolean = false) {
         if (isRefresh) {
-            _state.update { if (it is DashboardState.Content) it.copy(refreshing = true) else it }
+            _state.update { if (it is DevicesState.Content) it.copy(refreshing = true) else it }
         } else {
-            _state.value = DashboardState.Loading
+            _state.value = DevicesState.Loading
         }
         viewModelScope.launch {
             when (val homes = core.homes.list()) {
-                is DomusResult.Failure -> _state.value = DashboardState.Error(homes.error.message)
+                is DomusResult.Failure -> _state.value = DevicesState.Error(homes.error.message)
                 is DomusResult.Success -> {
                     val home = homes.data.firstOrNull()
                     if (home == null) {
-                        _state.value = DashboardState.Empty(null)
+                        _state.value = DevicesState.Empty(null)
                         return@launch
                     }
                     when (val devices = core.devices.list(homeId = home.id, limit = 200)) {
-                        is DomusResult.Failure -> _state.value = DashboardState.Error(devices.error.message)
+                        is DomusResult.Failure -> _state.value = DevicesState.Error(devices.error.message)
                         is DomusResult.Success -> {
                             val items = devices.data.items
                             if (items.isEmpty()) {
-                                _state.value = DashboardState.Empty(home.name)
+                                _state.value = DevicesState.Empty(home.name)
                             } else {
-                                _state.value = DashboardState.Content(home.name, resolveStates(items))
+                                _state.value = DevicesState.Content(home.name, resolveStates(items))
                             }
                         }
                     }
@@ -105,7 +90,6 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Fetch current on/off for each controllable device, in parallel. */
     private suspend fun resolveStates(devices: List<Device>): List<DeviceUi> = coroutineScope {
         devices.map { device ->
             async {
@@ -120,7 +104,7 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun toggle(deviceId: String) {
-        val content = _state.value as? DashboardState.Content ?: return
+        if (_state.value !is DevicesState.Content) return
         setBusy(deviceId, true)
         viewModelScope.launch {
             when (val result = core.devices.toggle(deviceId)) {
@@ -132,8 +116,23 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun signOut() {
-        viewModelScope.launch { core.auth.logout() }
+    /** Reflect device state/online changes pushed over the WebSocket, live. */
+    private fun observeRealtime() {
+        viewModelScope.launch {
+            core.realtime.events().collect { event ->
+                val id = event.data["device_id"]?.jsonPrimitive?.content ?: return@collect
+                when (event.type) {
+                    DomusEventType.DEVICE_STATE_CHANGED -> {
+                        val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
+                        updateDevice(id) { it.copy(isOn = on, busy = false) }
+                    }
+                    DomusEventType.DEVICE_ONLINE_CHANGED -> {
+                        val online = event.data["online"]?.jsonPrimitive?.booleanOrNull ?: return@collect
+                        updateDevice(id) { it.copy(device = it.device.copy(online = online)) }
+                    }
+                }
+            }
+        }
     }
 
     private fun setBusy(deviceId: String, busy: Boolean) =
@@ -141,7 +140,7 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
 
     private inline fun updateDevice(deviceId: String, crossinline change: (DeviceUi) -> DeviceUi) {
         _state.update { s ->
-            if (s !is DashboardState.Content) s
+            if (s !is DevicesState.Content) s
             else s.copy(devices = s.devices.map { if (it.device.id == deviceId) change(it) else it })
         }
     }
