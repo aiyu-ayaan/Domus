@@ -212,7 +212,7 @@ fun DashboardTab(
                     if (s.sectionVisibility["livePowerDraw"] == true) {
                         val activePowerDraw = s.devices
                             .mapNotNull { dev ->
-                                val watts = dev.device.meta["current_consumption"]?.jsonPrimitive?.content?.toDoubleOrNull()
+                                val watts = dev.powerW
                                     ?: (if (dev.isOn == true && dev.device.device_type == DeviceType.LIGHT) 12.0 else 0.0) // Mock default if on
                                 if (dev.device.online && watts > 0.0) {
                                     dev.device.name to watts

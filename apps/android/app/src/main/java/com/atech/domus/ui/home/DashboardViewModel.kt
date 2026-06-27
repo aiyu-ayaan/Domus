@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 sealed interface DashboardState {
@@ -54,7 +56,7 @@ sealed interface DashboardState {
         val uptimeScore: Int get() = if (totalDevices == 0) 100 else (onlineDevices * 100) / totalDevices
         val totalPowerW: Double get() {
             return devices.sumOf { dev ->
-                val watts = dev.device.meta["current_consumption"]?.jsonPrimitive?.content?.toDoubleOrNull()
+                val watts = dev.powerW
                     ?: (if (dev.isOn == true && dev.device.device_type == DeviceType.LIGHT) 12.0 else 0.0)
                 if (dev.device.online && watts > 0.0) watts else 0.0
             }
@@ -161,11 +163,9 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
         devices.map { device ->
             async {
                 val controllable = device.device_type in DeviceUi.CONTROLLABLE
-                val isOn = if (controllable) {
-                    (core.devices.state(device.id) as? DomusResult.Success)
-                        ?.data?.state?.equals("on", ignoreCase = true)
-                } else null
-                DeviceUi(device, isOn)
+                val st = (core.devices.state(device.id) as? DomusResult.Success)?.data
+                val isOn = if (controllable) st?.state?.equals("on", ignoreCase = true) else null
+                DeviceUi(device, isOn, powerW = powerOf(st?.attributes))
             }
         }.awaitAll()
     }
@@ -322,8 +322,9 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                 when (event.type) {
                     DomusEventType.DEVICE_STATE_CHANGED -> {
                         val on = event.data["state"]?.jsonPrimitive?.content?.equals("on", ignoreCase = true)
+                        val power = powerOf(event.data["attributes"] as? kotlinx.serialization.json.JsonObject)
                         if (id.isNotEmpty()) {
-                            updateDevice(id) { it.copy(isOn = on) }
+                            updateDevice(id) { it.copy(isOn = on, powerW = power ?: it.powerW) }
                         }
                         reloadEnergy()
                     }
@@ -339,6 +340,13 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
         }
+    }
+
+    /** Live watts from a device state's attributes, if it's a metered device. */
+    private fun powerOf(attrs: kotlinx.serialization.json.JsonObject?): Double? {
+        if (attrs == null) return null
+        val w = (attrs["power_w"] ?: attrs["current_consumption"])?.jsonPrimitive?.doubleOrNull
+        return w?.takeIf { it > 0.0 }
     }
 
     private fun updateDeviceBusy(deviceId: String, busy: Boolean) {
