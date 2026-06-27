@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { homeRepository } from "@/repositories";
 import type { HomeOut, HomeCreate, HomeUpdate } from "@/types/api";
+import { hydrateTariffCache } from "@/lib/energy";
 
 interface HomeState {
   homes: HomeOut[];
@@ -27,6 +28,8 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     try {
       const list = await homeRepository.list();
       set({ homes: list, isLoading: false });
+      // Mirror each home's synced tariff into the local cache the readers use.
+      list.forEach((h) => hydrateTariffCache(h.id, h.billing_settings));
 
       // Auto select active home if none selected
       if (list.length > 0 && !get().activeHomeId) {
@@ -82,6 +85,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
         homes: state.homes.map((h) => (h.id === id ? updated : h)),
         isLoading: false,
       }));
+      hydrateTariffCache(updated.id, updated.billing_settings);
       return updated;
     } catch (err: any) {
       set({

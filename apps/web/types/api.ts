@@ -98,6 +98,21 @@ export interface UserUpdateRequest {
 // Homes
 // ==========================================
 
+export interface TariffTier {
+  up_to: number | null; // slab ceiling in kWh; null = unbounded top slab
+  rate: number;
+}
+
+// Per-home money settings, synced across web + Android via the home API.
+export interface BillingSettings {
+  type: "flat" | "tiered";
+  currency: string;
+  rate: number; // flat price per kWh
+  fixed_charge: number;
+  tiers: TariffTier[];
+  billing_cycle_start_day: number;
+}
+
 export interface HomeOut {
   id: string;
   name: string;
@@ -105,6 +120,7 @@ export interface HomeOut {
   timezone: string;
   owner_id: string;
   created_at: string;
+  billing_settings: BillingSettings;
 }
 
 export interface HomeCreate {
@@ -117,6 +133,7 @@ export interface HomeUpdate {
   name?: string;
   description?: string | null;
   timezone?: string;
+  billing_settings?: BillingSettings;
 }
 
 // ==========================================

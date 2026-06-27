@@ -26,12 +26,12 @@ import {
   computeCost,
   effectiveRate,
   formatMoney,
-  loadTariff,
   saveTariff,
   DEFAULT_TARIFF,
   getCurrentBillingCyclePeriod,
-  loadBillingCycle,
   saveBillingCycle,
+  tariffFromSettings,
+  settingsFromTariff,
 } from "@/lib/energy";
 
 type RangeKey = "1m" | "1h" | "12h" | "24h" | "7d" | "30d" | "billing";
@@ -47,7 +47,8 @@ const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
 ];
 
 export default function ElectricityPage() {
-  const { activeHomeId } = useHomeStore();
+  const { activeHomeId, updateHome } = useHomeStore();
+  const activeHome = useHomeStore((s) => s.homes.find((h) => h.id === s.activeHomeId));
   const [summary, setSummary] = useState<EnergySummary | null>(null);
   const [range, setRange] = useState<RangeKey>("24h");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -60,12 +61,13 @@ export default function ElectricityPage() {
   // Subscribe to device states in Zustand to capture real-time WebSocket updates
   const deviceStates = useDeviceStore((s) => s.deviceStates);
 
+  // Source tariff + billing cycle from the synced home object (server source of truth).
   useEffect(() => {
-    if (activeHomeId) {
-      setTariff(loadTariff(activeHomeId));
-      setBillingCycleStartDay(loadBillingCycle(activeHomeId));
+    if (activeHome) {
+      setTariff(tariffFromSettings(activeHome.billing_settings));
+      setBillingCycleStartDay(activeHome.billing_settings?.billing_cycle_start_day ?? 1);
     }
-  }, [activeHomeId]);
+  }, [activeHome]);
 
   const billingPeriod = useMemo(() => {
     return getCurrentBillingCyclePeriod(billingCycleStartDay);
@@ -190,14 +192,21 @@ export default function ElectricityPage() {
 
   const handleSaveTariff = () => {
     if (!activeHomeId) return;
-    saveTariff(activeHomeId, tariff);
-    toast.success("Tariff saved for this home.");
+    saveTariff(activeHomeId, tariff); // instant local cache
+    updateHome(activeHomeId, {
+      billing_settings: settingsFromTariff(tariff, billingCycleStartDay),
+    })
+      .then(() => toast.success("Tariff saved & synced for this home."))
+      .catch(() => toast.error("Saved locally, but failed to sync to server."));
   };
 
   const handleBillingCycleStartDayChange = (day: number) => {
     setBillingCycleStartDay(day);
     if (activeHomeId) {
       saveBillingCycle(activeHomeId, day);
+      updateHome(activeHomeId, {
+        billing_settings: settingsFromTariff(tariff, day),
+      }).catch(() => {});
       toast.success("Billing cycle configuration updated.");
     }
   };
@@ -464,6 +473,9 @@ export default function ElectricityPage() {
         )}
       </div>
 
+      {/* Live power draw by device */}
+      <LivePowerDraw summary={summary} />
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Per-device breakdown */}
         <div className="lg:col-span-2 rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
@@ -527,6 +539,41 @@ export default function ElectricityPage() {
           billingCycleStartDay={billingCycleStartDay}
           onBillingCycleStartDayChange={handleBillingCycleStartDayChange}
         />
+      </div>
+    </div>
+  );
+}
+
+function LivePowerDraw({ summary }: { summary: EnergySummary | null }) {
+  const devices = (summary?.devices ?? [])
+    .filter((d) => d.power_w > 0)
+    .sort((a, b) => b.power_w - a.power_w);
+  if (devices.length === 0) return null;
+  const max = Math.max(...devices.map((d) => d.power_w), 1);
+
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card/25 p-5 backdrop-blur-sm space-y-4">
+      <div className="flex items-center gap-2">
+        <Zap className="h-4 w-4 text-amber-400" />
+        <h3 className="font-semibold text-base">Live Power Draw by Device</h3>
+      </div>
+      <div className="space-y-3">
+        {devices.map((d) => (
+          <div key={d.device_id} className="space-y-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-sm font-medium text-foreground truncate">{d.name}</span>
+              <span className="font-mono text-sm font-semibold text-amber-400 shrink-0">
+                {d.power_w.toFixed(0)} W
+              </span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-amber-400 transition-[width] duration-500"
+                style={{ width: `${Math.max(4, (d.power_w / max) * 100)}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

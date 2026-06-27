@@ -10,6 +10,7 @@ import type {
   AutomationOut,
   NotificationOut,
 } from "@/types/api";
+import { DEFAULT_BILLING_SETTINGS } from "@/lib/energy";
 
 const STORAGE_KEY = "domus_mock_db";
 
@@ -45,6 +46,7 @@ const DEFAULT_DB: MockDatabase = {
       timezone: "Europe/Berlin",
       owner_id: "user-1",
       created_at: new Date("2026-06-19T12:00:00Z").toISOString(),
+      billing_settings: DEFAULT_BILLING_SETTINGS,
     },
     {
       id: "home-2",
@@ -53,6 +55,7 @@ const DEFAULT_DB: MockDatabase = {
       timezone: "Europe/Lisbon",
       owner_id: "user-1",
       created_at: new Date("2026-06-19T12:00:00Z").toISOString(),
+      billing_settings: DEFAULT_BILLING_SETTINGS,
     },
   ],
   rooms: [

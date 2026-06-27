@@ -2,6 +2,7 @@
 import type { IHomeRepository } from "../types";
 import type { HomeOut, HomeCreate, HomeUpdate } from "@/types/api";
 import { mockDb } from "@/mocks/mock-db";
+import { DEFAULT_BILLING_SETTINGS } from "@/lib/energy";
 
 export class MockHomeRepository implements IHomeRepository {
   private delay(ms: number = 100) {
@@ -35,6 +36,7 @@ export class MockHomeRepository implements IHomeRepository {
       timezone: req.timezone || "Europe/Berlin",
       owner_id: mockDb.get("user").id,
       created_at: new Date().toISOString(),
+      billing_settings: DEFAULT_BILLING_SETTINGS,
     };
     mockDb.set("homes", [...homes, newHome]);
     return newHome;

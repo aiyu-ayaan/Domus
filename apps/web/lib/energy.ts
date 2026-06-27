@@ -3,6 +3,8 @@
 // Two tariff shapes: flat (one rate /unit) and tiered (slab rates /range), the
 // standard residential billing models.
 
+import type { BillingSettings } from "@/types/api";
+
 export interface FlatTariff {
   type: "flat";
   currency: string;
@@ -125,5 +127,59 @@ export function loadBillingCycle(homeId: string): number {
 export function saveBillingCycle(homeId: string, day: number): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(`domus.billing-cycle.${homeId}`, day.toString());
+}
+
+// --- server sync (home.billing_settings is the source of truth) --------------
+// The API stores tariff settings per home (snake_case) so web + Android share one
+// copy. We mirror it into the same localStorage keys the sync readers above use, so
+// existing callers keep working while the data actually syncs through the server.
+
+// Matches the API's HomeOut default (backend/homes/schemas.py BillingSettings).
+export const DEFAULT_BILLING_SETTINGS: BillingSettings = {
+  type: "flat",
+  currency: "₹",
+  rate: 8,
+  fixed_charge: 0,
+  tiers: [],
+  billing_cycle_start_day: 1,
+};
+
+/** API billing settings -> the web Tariff shape (camelCase). */
+export function tariffFromSettings(bs?: BillingSettings | null): Tariff {
+  if (!bs) return DEFAULT_TARIFF;
+  if (bs.type === "tiered") {
+    return {
+      type: "tiered",
+      currency: bs.currency,
+      fixedCharge: bs.fixed_charge,
+      tiers: (bs.tiers ?? []).map((t) => ({ upTo: t.up_to, rate: t.rate })),
+    };
+  }
+  return { type: "flat", currency: bs.currency, rate: bs.rate, fixedCharge: bs.fixed_charge };
+}
+
+/** Web Tariff + cycle day -> API billing settings (snake_case) for PATCH /homes. */
+export function settingsFromTariff(tariff: Tariff, billingCycleStartDay: number): BillingSettings {
+  const base = {
+    currency: tariff.currency,
+    fixed_charge: tariff.fixedCharge || 0,
+    billing_cycle_start_day: billingCycleStartDay,
+  };
+  if (tariff.type === "tiered") {
+    return {
+      ...base,
+      type: "tiered",
+      rate: 0,
+      tiers: tariff.tiers.map((t) => ({ up_to: t.upTo, rate: t.rate })),
+    };
+  }
+  return { ...base, type: "flat", rate: tariff.rate, tiers: [] };
+}
+
+/** Mirror the server's settings into the localStorage cache the readers use. */
+export function hydrateTariffCache(homeId: string, bs?: BillingSettings | null): void {
+  if (typeof window === "undefined" || !bs) return;
+  saveTariff(homeId, tariffFromSettings(bs));
+  saveBillingCycle(homeId, bs.billing_cycle_start_day ?? 1);
 }
 
