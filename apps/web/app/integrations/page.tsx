@@ -207,9 +207,13 @@ export default function IntegrationsPage() {
         fetchDevices(activeHomeId); // refresh devices store
       }
 
-      toast.success("Discovery scan completed!", {
-        description: `Found ${res.new_count} new devices.`,
-      });
+      if (res.error) {
+        toast.error("Discovery failed", { description: res.error });
+      } else {
+        toast.success("Discovery scan completed!", {
+          description: `Found ${res.new_count} new devices.`,
+        });
+      }
     } catch (err: any) {
       setScanningStep(0);
       setIsDiscoverOpen(false);
@@ -650,8 +654,8 @@ export default function IntegrationsPage() {
       {/* Local network discovery modal */}
       <Dialog open={isDiscoverOpen} onOpenChange={setIsDiscoverOpen}>
         <DialogContent
-          title="SSDP Subnet Discovery Scan"
-          description="Searching local network subnet for broadcasting device nodes..."
+          title="Device Discovery"
+          description="Searching for devices linked to this integration..."
         >
           <div className="p-2 space-y-6">
             {/* Scanning Step loaders */}
@@ -660,10 +664,10 @@ export default function IntegrationsPage() {
                 <RefreshCw className="h-10 w-10 text-primary animate-spin" />
                 <div>
                   <p className="text-sm font-semibold">
-                    Broadcasting SSDP Discovery Packets...
+                    Scanning for devices...
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Checking subnet IPs for responsive ports.
+                    Contacting integration API, this may take a few seconds.
                   </p>
                 </div>
               </div>
@@ -685,24 +689,40 @@ export default function IntegrationsPage() {
 
             {scanningStep === 3 && discoveryResult && (
               <div className="space-y-4 mt-2">
-                <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 flex items-center gap-3">
-                  <div className="rounded-full bg-emerald-500/20 p-1.5 text-emerald-500">
-                    <Check className="h-4.5 w-4.5" />
+                {discoveryResult.error ? (
+                  <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4 flex items-start gap-3">
+                    <div className="rounded-full bg-destructive/20 p-1.5 text-destructive flex-shrink-0 mt-0.5">
+                      <AlertTriangle className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        Discovery Failed
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 break-all">
+                        {discoveryResult.error}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      Scan Complete
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Found {discoveryResult.new_count} new accessories and
-                      identified {discoveryResult.existing_count} existing
-                      nodes.
-                    </p>
+                ) : (
+                  <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 flex items-center gap-3">
+                    <div className="rounded-full bg-emerald-500/20 p-1.5 text-emerald-500">
+                      <Check className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        Scan Complete
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Found {discoveryResult.new_count} new accessories and
+                        identified {discoveryResult.existing_count} existing
+                        nodes.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Discovered list */}
-                <div className="space-y-2 max-h-56 overflow-y-auto border border-border/50 rounded-xl p-2 bg-background/30">
+                {!discoveryResult.error && <div className="space-y-2 max-h-56 overflow-y-auto border border-border/50 rounded-xl p-2 bg-background/30">
                   {discoveryResult.discovered.map((d, idx) => (
                     <div
                       key={idx}
@@ -725,7 +745,7 @@ export default function IntegrationsPage() {
                       </span>
                     </div>
                   ))}
-                </div>
+                </div>}
 
                 <button
                   onClick={() => {

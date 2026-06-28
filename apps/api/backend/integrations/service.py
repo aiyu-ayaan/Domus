@@ -86,7 +86,13 @@ class IntegrationService:
 
         discovered: list[DiscoveredDeviceOut] = []
         new_count = 0
-        for found in await adapter.discover_devices():
+        discovery_error: str | None = None
+        try:
+            found_devices = await adapter.discover_devices()
+        except Exception as exc:
+            discovery_error = str(exc)
+            found_devices = []
+        for found in found_devices:
             is_new = found.external_id not in known
             if is_new:
                 self.session.add(
@@ -141,4 +147,5 @@ class IntegrationService:
             discovered=discovered,
             new_count=new_count,
             existing_count=len(discovered) - new_count,
+            error=discovery_error,
         )

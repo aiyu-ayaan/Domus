@@ -35,7 +35,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 try:
     import tinytuya
@@ -103,6 +106,7 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
 
     def _devices(self) -> list[dict[str, Any]]:
         result = self._ensure_cloud().getdevices()
+        log.warning("Tuya getdevices raw: type=%s value=%r", type(result).__name__, result)
         # tinytuya ≥1.12 wraps the list in {'result': [...], 'success': True}.
         # Older builds return the list directly. Handle both so discovery isn't
         # silently empty when the library version changed.

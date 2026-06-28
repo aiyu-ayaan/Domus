@@ -52,3 +52,4 @@ class DiscoveryResult(BaseModel):
     discovered: list[DiscoveredDeviceOut]
     new_count: int
     existing_count: int
+    error: str | None = None

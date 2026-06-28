@@ -203,6 +203,7 @@ export interface DiscoveryResult {
   new_count: number;
   existing_count: number;
   discovered: DiscoveredDevice[];
+  error?: string | null;
 }
 
 // ==========================================
