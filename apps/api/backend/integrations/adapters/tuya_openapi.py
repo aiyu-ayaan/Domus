@@ -103,9 +103,21 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
 
     def _devices(self) -> list[dict[str, Any]]:
         result = self._ensure_cloud().getdevices()
-        if isinstance(result, dict) and result.get("Error"):
-            raise ConflictError(f"Tuya OpenAPI device list failed: {result}")
-        return result if isinstance(result, list) else []
+        # tinytuya ≥1.12 wraps the list in {'result': [...], 'success': True}.
+        # Older builds return the list directly. Handle both so discovery isn't
+        # silently empty when the library version changed.
+        if isinstance(result, list):
+            return result
+        if isinstance(result, dict):
+            if result.get("Error") or result.get("success") is False:
+                raise ConflictError(f"Tuya OpenAPI getdevices failed: {result}")
+            inner = result.get("result")
+            if isinstance(inner, list):
+                return inner
+            if isinstance(inner, dict):
+                # Some builds: {'result': {'devices': [...]}}
+                return inner.get("devices") or inner.get("list") or []
+        return []
 
     def _status_codes(self, device_id: str) -> dict[str, Any]:
         response = self._raise_if_error(
