@@ -7,7 +7,7 @@ from a raw scan result to DiscoveredDevices — the path the Integrations
 
 import pytest
 
-from backend.common.enums import IntegrationType
+from backend.common.enums import DeviceType, IntegrationType
 from backend.integrations import lan_discovery
 
 
@@ -51,6 +51,7 @@ async def test_tuya_lan_discovery_maps_scan_results(monkeypatch):
     dev = found[0]
     assert dev.external_id == "bfabc"
     assert dev.name == "Bulb"
+    assert dev.device_type == DeviceType.light
     assert dev.attributes == {"ip": "192.168.1.50", "version": "3.4", "needs_local_key": True}
     # Kind tracks the concrete family (Wipro/Syska are Tuya devices).
     assert adapter.kind is IntegrationType.wipro
