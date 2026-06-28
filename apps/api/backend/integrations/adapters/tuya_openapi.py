@@ -200,7 +200,19 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
     # --- DeviceAdapter contract ----------------------------------------------
 
     async def discover_devices(self) -> list[DiscoveredDevice]:
-        devices = await asyncio.to_thread(self._devices)
+        try:
+            devices = await asyncio.to_thread(self._devices)
+        except Exception as exc:
+            log.warning("Tuya OpenAPI discovery failed, falling back to LAN discovery: %s", exc)
+            from backend.integrations.adapters.tuya_lan import (
+                TINYTUYA_AVAILABLE,
+                RealTuyaLanAdapter,
+            )
+            if TINYTUYA_AVAILABLE:
+                lan_adapter = RealTuyaLanAdapter(self.config, self.kind)
+                return await lan_adapter.discover_devices()
+            raise
+
         out: list[DiscoveredDevice] = []
         for dev in devices:
             category = dev.get("category", "")
