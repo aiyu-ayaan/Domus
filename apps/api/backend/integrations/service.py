@@ -95,6 +95,12 @@ class IntegrationService:
         for found in found_devices:
             is_new = found.external_id not in known
             if is_new:
+                is_online = True
+                if "needs_local_key" in found.attributes:
+                    is_online = not bool(found.attributes.get("needs_local_key"))
+                elif "online" in found.attributes:
+                    is_online = bool(found.attributes.get("online"))
+
                 self.session.add(
                     Device(
                         home_id=integration.home_id,
@@ -105,6 +111,7 @@ class IntegrationService:
                         model=found.model,
                         serial_number=found.serial_number,
                         device_type=found.device_type.value,
+                        online=is_online,
                         meta=found.attributes,
                     )
                 )
