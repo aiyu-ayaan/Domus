@@ -30,8 +30,6 @@ to that address.
 
 from __future__ import annotations
 
-import asyncio
-import ipaddress
 from typing import Any
 
 # python-kasa is an optional/heavy dependency. Importing this module must stay
@@ -48,6 +46,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - exercised without the d
 
 from backend.common.enums import DeviceType, IntegrationType
 from backend.core.exceptions import ConflictError
+from backend.integrations import lan_discovery
 from backend.integrations.base import (
     DeviceAdapter,
     DiscoveredDevice,
@@ -161,63 +160,24 @@ class RealTapoAdapter(DeviceAdapter):
             attributes=attributes,
         )
 
+    # The CIDR-expand / subnet-sweep machinery is shared with every other local
+    # integration, so it lives in backend.integrations.lan_discovery. These thin
+    # wrappers keep the adapter's surface (and its tests) stable.
     @staticmethod
     def _expand_targets(hosts: list[str]) -> list[str]:
-        """Expand any CIDR entries (e.g. "192.168.1.0/24") to their host IPs.
-
-        Plain IPs/hostnames pass through unchanged. A CIDR turns discovery into a
-        unicast subnet sweep — the only thing that reaches LAN devices from inside
-        a Docker bridge container, which silently drops the normal UDP broadcast
-        that ``Discover.discover()`` relies on.
-        """
-        targets: list[str] = []
-        for raw in hosts:
-            entry = raw.strip()
-            if "/" in entry:
-                try:
-                    net = ipaddress.ip_network(entry, strict=False)
-                    targets.extend(str(ip) for ip in net.hosts())
-                    continue
-                except ValueError:
-                    pass  # not a CIDR — fall through and treat as a literal host
-            if entry:
-                targets.append(entry)
-        return targets
+        return lan_discovery.expand_targets(hosts)
 
     async def _scan(self, targets: list[str]) -> dict[str, Any]:
-        """Unicast-probe each target concurrently; keep only the ones that answer.
+        async def probe(host: str) -> Any:
+            return await Discover.discover_single(
+                host, credentials=self._credentials, timeout=3
+            )
 
-        Best-effort by design: unreachable IPs in a swept subnet are the common
-        case, so per-host failures are swallowed rather than raised.
-        """
-        # ponytail: 256 in-flight covers a whole /24 in one ~timeout-long wave
-        # (most IPs don't answer, so the timeout dominates). A /16 would still
-        # batch — raise the cap or shard the range if that ever matters.
-        sem = asyncio.Semaphore(256)
-
-        async def probe(host: str) -> tuple[str, Any]:
-            async with sem:
-                try:
-                    return host, await Discover.discover_single(
-                        host, credentials=self._credentials, timeout=3
-                    )
-                except Exception:
-                    return host, None
-
-        results = await asyncio.gather(*(probe(h) for h in targets))
-        return {host: dev for host, dev in results if dev is not None}
+        return await lan_discovery.sweep(probe, targets, concurrency=256)
 
     @staticmethod
     def _discovery_subnets() -> list[str]:
-        """Server-wide LAN subnets to unicast-sweep, from DISCOVERY_SUBNETS in .env.
-
-        This is what makes the Integrations "scan" button find devices from inside
-        Docker without per-integration setup: broadcast can't cross the bridge, so
-        we sweep these instead. Lazy import keeps module load kasa-/settings-free.
-        """
-        from backend.core.config import settings
-
-        return [s.strip() for s in settings.discovery_subnets.split(",") if s.strip()]
+        return lan_discovery.discovery_subnets()
 
     async def _broadcast(self) -> dict[str, Any]:
         """UDP-broadcast discovery. Works when the API is on the LAN (run locally
