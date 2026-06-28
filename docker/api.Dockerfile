@@ -18,4 +18,4 @@ EXPOSE 8000
 # API_PORT — that's the *host* published port (in .env, injected via env_file) and would
 # otherwise move the in-container bind. The host-networking overlay sets UVICORN_PORT
 # instead, so uvicorn binds the published port directly on the host.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.main:app --host 0.0.0.0 --port ${UVICORN_PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn backend.main:app --host 0.0.0.0 --port ${UVICORN_PORT:-8000} --log-level ${UVICORN_LOG_LEVEL:-warning} --timeout-keep-alive 30"]
