@@ -124,6 +124,18 @@ def get_adapter(integration) -> DeviceAdapter:
         if has_cloud_config(config):
             return RealTuyaAdapter(config, kind)
 
+        # No credentials/keys: fall back to a LAN scan so the Discover button still
+        # finds devices (id/ip/version) — including from inside Docker via the
+        # DISCOVERY_SUBNETS unicast sweep — instead of the mock's empty list. If
+        # tinytuya somehow isn't installed, drop through to the in-memory mock.
+        from backend.integrations.adapters.tuya_lan import (
+            TINYTUYA_AVAILABLE,
+            RealTuyaLanAdapter,
+        )
+
+        if TINYTUYA_AVAILABLE:
+            return RealTuyaLanAdapter(config, kind)
+
     return adapter_class(kind)(config)
 
 
