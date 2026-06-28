@@ -27,6 +27,10 @@ ACTIONS = ("turn_on", "turn_off", "toggle")
 # the liveness poller would emit an event + write a history row on every tick.
 _VOLATILE_ATTRS = ("power_w", "current_consumption")
 
+# Sentinel: distinguishes "caller passed None (device has no history)" from
+# "caller didn't pre-load, go fetch from DB".
+_UNSET: DeviceState | None = object()  # type: ignore[assignment]
+
 
 def _stable(attrs: dict[str, Any] | None) -> dict[str, Any]:
     """Attributes with the volatile (per-poll jitter) keys removed, for change detection."""
@@ -234,7 +238,12 @@ class DeviceService:
         return res.scalar_one_or_none()
 
     async def _record(
-        self, device: Device, snapshot: StateSnapshot, *, from_poll: bool = False
+        self,
+        device: Device,
+        snapshot: StateSnapshot,
+        *,
+        from_poll: bool = False,
+        _preloaded_last: DeviceState | None = _UNSET,  # type: ignore[assignment]
     ) -> DeviceState:
         """Persist a device state and notify clients.
 
@@ -249,7 +258,12 @@ class DeviceService:
         device.online = True
         device.last_seen = now
 
-        last = await self._last_state(device.id)
+        # _preloaded_last lets the poller pass a batch-loaded state to skip a DB round-trip.
+        last = (
+            _preloaded_last
+            if _preloaded_last is not _UNSET
+            else await self._last_state(device.id)
+        )
         changed = (
             last is None
             or last.state != snapshot.state

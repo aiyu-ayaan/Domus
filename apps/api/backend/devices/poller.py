@@ -2,7 +2,7 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from backend.core.config import settings
 from backend.core.database import SessionMaker
@@ -31,6 +31,26 @@ async def _prune_history(session) -> None:
     await session.commit()
 
 
+async def _batch_last_states(session, device_ids: list[UUID]) -> dict[UUID, DeviceState]:
+    """Load the most recent DeviceState per device in one query instead of N."""
+    if not device_ids:
+        return {}
+    subq = (
+        select(DeviceState.device_id, func.max(DeviceState.created_at).label("max_ts"))
+        .where(DeviceState.device_id.in_(device_ids))
+        .group_by(DeviceState.device_id)
+        .subquery()
+    )
+    res = await session.execute(
+        select(DeviceState).join(
+            subq,
+            (DeviceState.device_id == subq.c.device_id)
+            & (DeviceState.created_at == subq.c.max_ts),
+        )
+    )
+    return {s.device_id: s for s in res.scalars()}
+
+
 async def poll_devices_loop():
     log.info("Starting background device poller loop")
     interval = max(0.5, settings.device_poll_interval)
@@ -53,9 +73,15 @@ async def poll_devices_loop():
                 if not devices:
                     continue
 
+                # ponytail: 2 queries instead of N+1 — batch-load integrations and last
+                # states up-front so the per-device loop has zero DB round-trips for reads.
+                integ_res = await session.execute(select(Integration))
+                integrations: dict[UUID, Integration] = {i.id: i for i in integ_res.scalars()}
+                last_states = await _batch_last_states(session, [d.id for d in devices])
+
                 service = DeviceService(session)
                 for device in devices:
-                    integration = await session.get(Integration, device.integration_id)
+                    integration = integrations.get(device.integration_id)
                     # If integration is missing or disabled, mark device offline immediately
                     if not (integration and integration.enabled):
                         await service.mark_offline(device)
@@ -73,8 +99,11 @@ async def poll_devices_loop():
                         continue
 
                     _failures.pop(device.id, None)
-                    # from_poll: only writes/emits on a real change (keeps the API light)
-                    await service._record(device, snapshot, from_poll=True)
+                    # Pass the pre-loaded last state to avoid a per-device SELECT in _record
+                    await service._record(
+                        device, snapshot, from_poll=True,
+                        _preloaded_last=last_states.get(device.id),
+                    )
 
                 await session.commit()
         except asyncio.CancelledError:
