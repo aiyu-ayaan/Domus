@@ -254,8 +254,9 @@ class DeviceService:
         real change, plus a throttled energy sample to keep power history flowing.
         """
         now = datetime.now(UTC)
-        was_offline = not device.online
-        device.online = True
+        is_online = not bool(snapshot.attributes.get("needs_local_key"))
+        was_online = device.online
+        device.online = is_online
         device.last_seen = now
 
         # _preloaded_last lets the poller pass a batch-loaded state to skip a DB round-trip.
@@ -294,14 +295,14 @@ class DeviceService:
 
         await self.session.flush()
 
-        if was_offline:
+        if was_online != is_online:
             from backend.core.events import DEVICE_ONLINE_CHANGED
 
             await event_bus.publish(
                 Event(
                     type=DEVICE_ONLINE_CHANGED,
                     home_id=str(device.home_id),
-                    data={"device_id": str(device.id), "online": True},
+                    data={"device_id": str(device.id), "online": is_online},
                 )
             )
 
