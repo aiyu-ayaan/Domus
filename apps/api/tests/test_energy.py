@@ -101,13 +101,13 @@ async def test_energy_summary_uses_current_consumption_fallback(
             device_id=did,
             state="on",
             attributes={"current_consumption": 100.0},
-            created_at=now - timedelta(hours=2),
+            created_at=now - timedelta(minutes=4),
         )
         s2 = DeviceState(
             device_id=did,
             state="on",
             attributes={"current_consumption": 200.0},
-            created_at=now - timedelta(hours=1),
+            created_at=now - timedelta(minutes=2),
         )
         session.add_all([s1, s2])
         await session.commit()
@@ -122,4 +122,4 @@ async def test_energy_summary_uses_current_consumption_fallback(
     dev_summary = next((d for d in body["devices"] if d["device_id"] == str(did)), None)
     assert dev_summary is not None
     assert dev_summary["power_w"] == 200.0  # latest power reading (from s2)
-    assert dev_summary["energy_kwh"] > 0.0  # 150W average over 1h = 0.15 kWh
+    assert dev_summary["energy_kwh"] > 0.0  # 150W average over 2 mins = 0.005 kWh
