@@ -106,7 +106,9 @@ class RealTapoAdapter(DeviceAdapter):
 
     async def _connect(self, host: str) -> Any:
         try:
-            dev = await Discover.discover_single(host, credentials=self._credentials)
+            # ponytail: explicit 5 s timeout — the kasa default is unspecified and can
+            # hang for tens of seconds on an unreachable device, blocking the poller loop.
+            dev = await Discover.discover_single(host, credentials=self._credentials, timeout=5)
             await dev.update()
             return dev
         except KasaException as exc:
