@@ -21,15 +21,22 @@ from backend.homes.service import HomeService
 
 Sample = tuple[datetime, float]
 
+# ponytail: if two consecutive power samples are more than 5 minutes apart the
+# device was off (or the API was down) during that gap. Don't integrate across it
+# or a single 100 W plug left off overnight creates a fake multi-kWh spike.
+_MAX_GAP_S = 300.0
+
 
 def integrate_energy_kwh(samples: list[Sample]) -> float:
-    """Trapezoidal integral of watt samples over time -> kWh (Wh = W * h)."""
+    """Trapezoidal integral of watt samples over time -> kWh, skipping gaps."""
     if len(samples) < 2:
         return 0.0
     wh = 0.0
     for (t0, w0), (t1, w1) in zip(samples, samples[1:], strict=False):
-        hours = (t1 - t0).total_seconds() / 3600.0
-        wh += (w0 + w1) / 2.0 * hours
+        delta_s = (t1 - t0).total_seconds()
+        if delta_s > _MAX_GAP_S:
+            continue
+        wh += (w0 + w1) / 2.0 * (delta_s / 3600.0)
     return wh / 1000.0
 
 
@@ -51,11 +58,11 @@ class EnergyService:
         minutes: int | None = None,
     ) -> EnergySummary:
         if minutes is not None:
-            minutes = max(1, min(minutes, 60 * 24 * 31))  # 1m .. 31d
+            minutes = max(1, min(minutes, 60 * 24 * 31))
             delta = timedelta(minutes=minutes)
             total_hours = minutes / 60.0
         else:
-            hours = max(1, min(hours, 24 * 31))  # 1h .. 31d
+            hours = max(1, min(hours, 24 * 31))
             delta = timedelta(hours=hours)
             total_hours = float(hours)
             minutes = hours * 60
@@ -67,37 +74,37 @@ class EnergyService:
             await self.homes.get_for(home_id, user)
 
         origin = datetime.now(UTC) - delta
-        rows = (
-            await self.session.execute(
-                select(Device, DeviceState)
-                .join(DeviceState, DeviceState.device_id == Device.id)
-                .where(Device.home_id.in_(home_ids), DeviceState.created_at >= origin)
-                .order_by(DeviceState.created_at)
-            )
-        ).all()
 
-        # Group power samples per device (global time order is preserved per device).
+        # ponytail: two small queries instead of one large JOIN that constructs a full
+        # Device ORM object for every DeviceState row (N_devices × N_states objects).
+        # Step 1: device metadata (tiny).
+        dev_res = await self.session.execute(
+            select(Device.id, Device.name, Device.model).where(Device.home_id.in_(home_ids))
+        )
+        device_meta = {row.id: row for row in dev_res.all()}
+
+        # Step 2: only the columns we actually use from device_states (no full ORM load).
+        state_res = await self.session.execute(
+            select(DeviceState.device_id, DeviceState.created_at, DeviceState.attributes)
+            .where(
+                DeviceState.device_id.in_(list(device_meta.keys())),
+                DeviceState.created_at >= origin,
+            )
+            .order_by(DeviceState.created_at)
+        )
+        rows = state_res.all()
+
         per_device: dict[UUID, list[Sample]] = {}
-        meta: dict[UUID, Device] = {}
-        for device, st in rows:
-            attrs = st.attributes if isinstance(st.attributes, dict) else {}
-            power = attrs.get("power_w")
-            if power is None:
-                power = attrs.get("current_consumption")
+        for row in rows:
+            attrs = row.attributes if isinstance(row.attributes, dict) else {}
+            power = attrs.get("power_w") or attrs.get("current_consumption")
             if power is None:
                 continue
-            # SQLite drops tzinfo on read; treat stored timestamps as UTC.
-            ts = st.created_at if st.created_at.tzinfo else st.created_at.replace(tzinfo=UTC)
-            per_device.setdefault(device.id, []).append((ts, float(power)))
-            meta[device.id] = device
+            ts = row.created_at
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=UTC)
+            per_device.setdefault(row.device_id, []).append((ts, float(power)))
 
-        # Determine bucket size dynamically based on duration in minutes:
-        # 1m: bucket by 2s
-        # <= 5m: bucket by 10s
-        # <= 60m: bucket by 60s
-        # <= 24h: bucket by 10m (600s)
-        # <= 48h: bucket by 1h (3600s)
-        # > 48h: bucket by 1d (86400s)
         if minutes <= 1:
             bucket_seconds = 2
         elif minutes <= 5:
@@ -111,10 +118,7 @@ class EnergyService:
         else:
             bucket_seconds = 86400
 
-        # Pre-seed every bucket across the window so the series is continuous and evenly
-        # spaced in time. Without this, buckets exist only where samples happened, so gaps
-        # (device off, API restart) leave a sparse, irregular series that the web and
-        # Android charts render as a single spike / scattered bars — i.e. "broken".
+        # Pre-seed every bucket so the series is continuous (gaps render as zero, not missing).
         buckets: dict[datetime, float] = {}
         cursor = _bucket_start(origin, bucket_seconds, origin)
         last_bucket = _bucket_start(datetime.now(UTC), bucket_seconds, origin)
@@ -131,18 +135,21 @@ class EnergyService:
             latest = samples[-1][1]
             total_kwh += kwh
             total_power += latest
-            dev = meta[did]
+            meta = device_meta[did]
             devices_out.append(
                 EnergyDevice(
                     device_id=did,
-                    name=dev.name,
-                    model=dev.model,
+                    name=meta.name,
+                    model=meta.model,
                     power_w=round(latest, 1),
                     energy_kwh=round(kwh, 4),
                 )
             )
             for (t0, w0), (t1, w1) in zip(samples, samples[1:], strict=False):
-                wh = (w0 + w1) / 2.0 * ((t1 - t0).total_seconds() / 3600.0)
+                delta_s = (t1 - t0).total_seconds()
+                if delta_s > _MAX_GAP_S:
+                    continue  # same gap guard as integrate_energy_kwh
+                wh = (w0 + w1) / 2.0 * (delta_s / 3600.0)
                 b = _bucket_start(t0, bucket_seconds, origin)
                 buckets[b] = buckets.get(b, 0.0) + wh / 1000.0
 

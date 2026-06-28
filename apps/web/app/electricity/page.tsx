@@ -84,24 +84,20 @@ export default function ElectricityPage() {
     return Math.max(1, Math.ceil(ms / (1000 * 60 * 60)));
   }, [billingPeriod]);
 
-  // Set up background polling (running in the browser thread) to keep the graph and current draw live.
-  // When range is 1m, poll every 2 seconds to make the 1-minute graph extremely live.
-  // For other ranges, poll every 5 seconds.
+  // Background polling — interval is range-aware so the 24h view doesn't hammer
+  // the energy API every 5 s for data that changes at most every 30 s.
   useEffect(() => {
     if (!activeHomeId) return;
-    const intervalTime = range === "1m" ? 2000 : 5000;
+    const intervalTime =
+      range === "1m" ? 2_000 :
+      range === "1h" ? 10_000 :
+      range === "12h" || range === "24h" ? 30_000 :
+      60_000; // 7d / 30d / billing
     const interval = setInterval(() => {
       setRefreshTrigger((prev) => prev + 1);
     }, intervalTime);
     return () => clearInterval(interval);
   }, [activeHomeId, range]);
-
-  // Immediately trigger a recalculation/refetch when device states change (e.g., via WebSocket status updates)
-  useEffect(() => {
-    if (activeHomeId) {
-      setRefreshTrigger((prev) => prev + 1);
-    }
-  }, [deviceStates, activeHomeId]);
 
   // Trigger full loading state when the active home or range changes, to avoid layout shift on initial load
   useEffect(() => {
