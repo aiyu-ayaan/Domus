@@ -105,8 +105,18 @@ class RealTuyaOpenApiAdapter(DeviceAdapter):
         return response
 
     def _devices(self) -> list[dict[str, Any]]:
-        result = self._ensure_cloud().getdevices()
+        cloud = self._ensure_cloud()
+        result = cloud.getdevices()
         log.warning("Tuya getdevices raw: type=%s value=%r", type(result).__name__, result)
+        
+        # Check if the raw response from tinytuya indicates an error/failure
+        raw = getattr(cloud, "getdevices_raw", None)
+        if isinstance(raw, dict):
+            if raw.get("Error"):
+                raise ConflictError(f"Tuya OpenAPI getdevices failed: {raw.get('Error')} ({raw.get('Payload')})")
+            if raw.get("success") is False:
+                raise ConflictError(f"Tuya OpenAPI getdevices failed: {raw.get('msg')} (code: {raw.get('code')})")
+
         # tinytuya ≥1.12 wraps the list in {'result': [...], 'success': True}.
         # Older builds return the list directly. Handle both so discovery isn't
         # silently empty when the library version changed.
