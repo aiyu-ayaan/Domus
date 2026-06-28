@@ -88,7 +88,7 @@ class RealTuyaLanAdapter(DeviceAdapter):
                 DiscoveredDevice(
                     external_id=str(dev_id),
                     name=info.get("name") or str(dev_id),
-                    device_type=DeviceType.other,
+                    device_type=DeviceType.light,
                     manufacturer="Tuya/SmartLife (LAN)",
                     model="tuya",
                     serial_number=str(dev_id),
