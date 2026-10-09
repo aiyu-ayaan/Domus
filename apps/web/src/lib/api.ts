@@ -13,6 +13,8 @@ import type {
   Notification,
   Room,
   Scene,
+  SceneKind,
+  ScreenSyncConfig,
   User,
 } from './types'
 
@@ -88,10 +90,23 @@ const del = <T>(p: string) => request<T>('DELETE', p)
 
 type Ok = { success: boolean }
 type AuthResponse = { token: string; user: User }
+export type SceneBody = {
+  name: string
+  icon?: string
+  actions: Scene['actions']
+  kind?: SceneKind
+  config?: Partial<ScreenSyncConfig>
+}
 
 export const wsUrl = () => {
   const origin = BASE || window.location.origin
   return `${origin.replace(/^http/, 'ws')}/api/v1/ws?token=${encodeURIComponent(session.token ?? '')}`
+}
+
+/** Live colour stream of a Screen Sync scene. */
+export const sceneSyncUrl = (sceneId: string) => {
+  const origin = BASE || window.location.origin
+  return `${origin.replace(/^http/, 'ws')}/api/v1/scenes/${encodeURIComponent(sceneId)}/sync?token=${encodeURIComponent(session.token ?? '')}`
 }
 
 export const api = {
@@ -140,8 +155,8 @@ export const api = {
   removeAutomation: (id: string) => del<Ok>(`/automations/${id}`),
 
   scenes: () => get<Scene[]>('/scenes'),
-  createScene: (b: { name: string; icon?: string; actions: Scene['actions'] }) => post<Scene>('/scenes', b),
-  updateScene: (id: string, b: { name: string; icon?: string; actions: Scene['actions'] }) => put<Ok>(`/scenes/${id}`, b),
+  createScene: (b: SceneBody) => post<Scene>('/scenes', b),
+  updateScene: (id: string, b: SceneBody) => put<Ok>(`/scenes/${id}`, b),
   activateScene: (id: string) => post<{ success: boolean; errors: string[] }>(`/scenes/${id}/activate`),
   deactivateScene: (id: string) => post<{ success: boolean; errors: string[] }>(`/scenes/${id}/deactivate`),
   toggleScene: (id: string, on?: boolean) =>

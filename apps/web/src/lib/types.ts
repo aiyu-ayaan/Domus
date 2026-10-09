@@ -168,12 +168,33 @@ export interface Automation {
   created_at: string
 }
 
+export type SceneKind = 'standard' | 'screen_sync'
+
+/** Settings of a Screen Sync scene (mirrors the shared screen's colour onto lights). */
+export interface ScreenSyncConfig {
+  device_ids: string[]
+  group_ids: string[]
+  /** vivid: most saturated dominant hue · dominant: most common colour · average: mean colour */
+  style: 'vivid' | 'dominant' | 'average'
+  region: 'full' | 'edges'
+  follow_brightness: boolean
+  min_brightness: number
+  max_brightness: number
+  /** 0 = instant, 100 = very smooth */
+  smoothing: number
+  fps: number
+  restore_on_stop: boolean
+}
+
 export interface Scene {
   id: string
   name: string
   icon: string | null
   actions: Action[]
   is_active: boolean
+  kind: SceneKind
+  /** `ScreenSyncConfig` for screen_sync scenes, `{}` otherwise. */
+  config: Partial<ScreenSyncConfig>
 }
 
 export interface ElectricitySettings {

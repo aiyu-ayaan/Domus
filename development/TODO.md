@@ -61,6 +61,20 @@
 - [x] Dynamic category filtering in Devices card: `All`, `Power`, `Lights`, `Air quality`, and `Climate` pills that only show when matching devices exist
 - [x] Scene & group one-touch toggling: backend endpoints `/scenes/:id/toggle` and `/scenes/:id/deactivate`, front-end scene toggle switches in Automations & Overview, and segmented device groups quick toggle on the Overview dashboard
 
+## Milestone 8: Screen Sync & Dynamic Ambilight (DONE — 2026-10-10)
+- [x] Client capture pipeline: `getDisplayMedia` / `desktopCapturer` support in Web and Electron
+- [x] Background frame analysis worker (`screenSync.worker.ts`): zero-copy `MediaStreamTrackProcessor` (Chromium/Electron) with fallback HTML `<video>` canvas pump (Firefox/Safari)
+- [x] Real-time color extraction (`colorAnalysis.ts`): Vivid (36-bin hue histogram with saturation-squared weighting and 1.2x boost), Dominant (4,096-bin RGB mode), and Average modes
+- [x] Screen region selection: full screen vs edges band (20% perimeter margin for TV ambilight bias lighting)
+- [x] Cut-aware exponential smoothing (`Smoother`): non-linear color-distance dynamic step scaling for flicker-free drift and instant scene cut transitions
+- [x] Dynamic brightness following: gamma curve luminance follower ($L^{0.75}$) clamped within user-defined min/max bounds
+- [x] Streaming backend (`screen_sync.rs`): WebSocket `/api/v1/scenes/:id/sync` with per-device `watch` channels for zero-queue latest-frame-wins delivery
+- [x] Heterogeneous transport pacing: local LAN devices (Tapo KLAP & Xiaomi) at 150ms (~7 Hz) vs cloud devices (Tuya) at 1200ms (~1 Hz) with frame deduplication and adaptive backoff
+- [x] State preservation & restoration: pre-sync snapshotting with automatic restoration or final-color commitment on session teardown
+- [x] Global live session UI (`ScreenSyncProvider` & `ScreenSyncPill`): floating pill indicator with live color orb, device counters, and lag alerts
+- [x] Overview Quick Controls integration (`OverviewView.tsx`): Screen Sync scene badges, target light count resolution, live pulsing status, one-touch Sync/Stop, and remote session deactivation
+- [x] Architecture documentation: comprehensive specification and sequence/state diagrams in `development/docs/SCREEN_SYNC.md`
+
 ## Next
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback

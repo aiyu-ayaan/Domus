@@ -326,6 +326,19 @@ impl DeviceManager {
         plugin.send_command(&self.context(&rec, &accounts), cmd).await?;
 
         // Optimistic update so the UI reacts instantly; a refresh follows.
+        self.record_command(&rec, cmd).await?;
+
+        let this = self.clone();
+        let id = rec.id.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1500)).await;
+            let _ = this.refresh(&id).await;
+        });
+        Ok(())
+    }
+
+    /// Apply an already-sent command to the cached state, store it and tell the UI.
+    pub async fn record_command(&self, rec: &DeviceRecord, cmd: &DeviceCommand) -> Result<(), ApiError> {
         let previous = rec.state();
         let mut state = previous.clone();
         cmd.apply_to(&mut state);
@@ -338,16 +351,39 @@ impl DeviceManager {
             previous: Some(previous),
             was_online: rec.is_online,
         });
-
-        let this = self.clone();
-        let id = rec.id.clone();
-        tokio::spawn(async move {
-            tokio::time::sleep(Duration::from_millis(1500)).await;
-            let _ = this.refresh(&id).await;
-        });
         Ok(())
     }
 
+    /// Resolve a device once for high-rate streaming (Screen Sync). The returned
+    /// target talks to the plugin directly: no database round-trip per frame.
+    pub async fn stream_target(&self, device_id: &str) -> Result<StreamTarget, ApiError> {
+        let record = self.get(device_id).await?;
+        let plugin = self.plugin(&record.integration_type)?.clone();
+        let accounts = self.account_map(&record.integration_type).await;
+        let context = self.context(&record, &accounts);
+        Ok(StreamTarget { record, plugin, context })
+    }
+}
+
+/// A device resolved for streaming commands; see [`DeviceManager::stream_target`].
+pub struct StreamTarget {
+    pub record: DeviceRecord,
+    pub plugin: Arc<dyn IntegrationPlugin>,
+    pub context: DeviceContext,
+}
+
+impl StreamTarget {
+    /// Cloud integrations are rate-limited and slow; local ones can take several updates a second.
+    pub fn is_cloud(&self) -> bool {
+        self.record.integration_type == IntegrationType::Tuya.as_str()
+    }
+
+    pub async fn send(&self, cmd: &DeviceCommand) -> Result<(), CoreError> {
+        self.plugin.send_command(&self.context, cmd).await
+    }
+}
+
+impl DeviceManager {
     pub async fn group_device_ids(&self, group_id: &str) -> Result<Vec<String>, ApiError> {
         let rows: Vec<(String,)> = sqlx::query_as("SELECT device_id FROM device_group_members WHERE group_id = ?")
             .bind(group_id)

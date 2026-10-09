@@ -6,6 +6,7 @@ import { AuthProvider } from '@/lib/auth'
 import { ToastProvider } from '@/lib/toast'
 import { Toaster } from '@/components/ui/Toaster'
 import { applyStoredTheme } from '@/lib/theme'
+import { ScreenSyncProvider } from '@/features/screensync/ScreenSync'
 import './index.css'
 
 applyStoredTheme()
@@ -20,7 +21,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <AuthProvider>
-          <App />
+          <ScreenSyncProvider>
+            <App />
+          </ScreenSyncProvider>
         </AuthProvider>
         <Toaster />
       </ToastProvider>

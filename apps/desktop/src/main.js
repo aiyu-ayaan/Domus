@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require('electron')
+const { app, BrowserWindow, shell, session, desktopCapturer } = require('electron')
 const path = require('path')
 
 // Where the Docus server lives. In development the Vite dev server proxies the
@@ -62,6 +62,20 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (session.defaultSession && session.defaultSession.setDisplayMediaRequestHandler) {
+    session.defaultSession.setDisplayMediaRequestHandler(async (_request, callback) => {
+      try {
+        const sources = await desktopCapturer.getSources({ types: ['screen', 'window'] })
+        if (sources.length > 0) {
+          callback({ video: sources[0] })
+        } else {
+          callback({})
+        }
+      } catch {
+        callback({})
+      }
+    })
+  }
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

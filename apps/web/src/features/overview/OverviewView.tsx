@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PlugsConnected } from '@phosphor-icons/react'
-import { Card, CardHeader, EmptyState, Metric, Notice, PageHeader, Skeleton } from '@/components/ui/Card'
+import { Monitor, PlugsConnected, StopCircle } from '@phosphor-icons/react'
+import { Badge, Card, CardHeader, EmptyState, Metric, Notice, PageHeader, Skeleton } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Switch, Segmented } from '@/components/ui/Controls'
 import { DeviceRow } from '@/components/devices/DeviceRow'
 import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
 import { OverviewInsights } from './OverviewInsights'
+import { useScreenSync } from '@/features/screensync/ScreenSync'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useDiscovered, useEnergy, useGroups, useRooms, useScenes } from '@/lib/queries'
@@ -31,6 +32,7 @@ export function OverviewView() {
   const { data: scenes = [] } = useScenes()
   const { data: pending = [] } = useDiscovered('pending')
   const history = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
+  const { start: startScreenSync, stop: stopScreenSync, isRunning: isScreenSyncRunning } = useScreenSync()
   const [room, setRoom] = useState('all')
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [quickTab, setQuickTab] = useState<'scenes' | 'groups'>('scenes')
@@ -404,33 +406,84 @@ export function OverviewView() {
                 ) : (
                   <ul className="divide-y divide-border">
                     {scenes.map((s) => {
-                      const active = isSceneActive(s, list, groups)
+                      const isScreenSync = s.kind === 'screen_sync'
+                      const isLocalRunning = isScreenSync && isScreenSyncRunning(s.id)
+                      const active = isLocalRunning || isSceneActive(s, list, groups)
                       const targetCount = getSceneTargetCount(s, groups)
                       return (
                         <li key={s.id} className="flex min-h-12 items-center gap-3 px-4 py-2.5">
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-body font-medium">{s.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-body font-medium">
+                                {isScreenSync && <Monitor size={14} className="text-primary inline mr-1.5" />}
+                                {s.name}
+                              </p>
+                              {isScreenSync && <Badge tone="info">Screen Sync</Badge>}
+                            </div>
                             <p className="text-caption text-muted">
                               {targetCount > 0 ? `${targetCount} device${targetCount === 1 ? '' : 's'}` : 'Actions'}
-                              {active && ' · currently active'}
+                              {active && (isLocalRunning ? ' · syncing screen live' : ' · currently active')}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={active}
-                              disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
-                              label={`Toggle ${s.name}`}
-                              onChange={(on) => toggleScene.mutate({ id: s.id, on })}
-                            />
-                            <Button
-                              size="sm"
-                              disabled={!control}
-                              loading={runScene.isPending && runScene.variables === s.id}
-                              onClick={() => runScene.mutate(s.id)}
-                            >
-                              Run
-                            </Button>
-                          </div>
+                          {isScreenSync ? (
+                            <div className="flex items-center gap-2">
+                              {isLocalRunning ? (
+                                <>
+                                  <span className="relative flex h-2 w-2" aria-hidden title="Live screen sync in progress">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-info opacity-75" />
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-info" />
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="danger"
+                                    icon={<StopCircle size={14} weight="fill" />}
+                                    onClick={stopScreenSync}
+                                  >
+                                    Stop
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  {s.is_active && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
+                                      loading={toggleScene.isPending && toggleScene.variables?.id === s.id}
+                                      onClick={() => toggleScene.mutate({ id: s.id, on: false })}
+                                    >
+                                      Turn off
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    disabled={!control}
+                                    icon={<Monitor size={14} />}
+                                    onClick={() => startScreenSync(s)}
+                                  >
+                                    Sync
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={active}
+                                disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
+                                label={`Toggle ${s.name}`}
+                                onChange={(on) => toggleScene.mutate({ id: s.id, on })}
+                              />
+                              <Button
+                                size="sm"
+                                disabled={!control}
+                                loading={runScene.isPending && runScene.variables === s.id}
+                                onClick={() => runScene.mutate(s.id)}
+                              >
+                                Run
+                              </Button>
+                            </div>
+                          )}
                         </li>
                       )
                     })}
@@ -485,6 +538,9 @@ function summarizeClimate(devices: Device[]) {
 }
 
 function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolean {
+  if (scene.kind === 'screen_sync') {
+    return scene.is_active
+  }
   const targetIds = new Set<string>()
   for (const action of scene.actions) {
     if (action.type === 'device_command' && action.device_id) {
@@ -503,6 +559,14 @@ function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolea
 
 function getSceneTargetCount(scene: Scene, groups: Group[]): number {
   const targetIds = new Set<string>()
+  if (scene.kind === 'screen_sync') {
+    scene.config?.device_ids?.forEach((id) => targetIds.add(id))
+    scene.config?.group_ids?.forEach((gid) => {
+      const g = groups.find((grp) => grp.id === gid)
+      g?.device_ids.forEach((id) => targetIds.add(id))
+    })
+    return targetIds.size
+  }
   for (const action of scene.actions) {
     if (action.type === 'device_command' && action.device_id) {
       targetIds.add(action.device_id)
