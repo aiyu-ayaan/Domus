@@ -43,13 +43,23 @@
 - [ ] Verify Xiaomi 2FA end to end with a real account (SMS path unconfirmed)
 - [ ] Time-of-use tariffs (per-hour rates) on top of slabs
 
+## Milestone 6: Lighting & Bulb Color Control (DONE — 2026-10-10)
+- [x] Shared domain model: `color` (hex #RRGGBB) and `color_mode` ("white" / "color") in `DeviceState` and `DeviceCommand`
+- [x] Color conversion utilities (hex <-> rgb <-> hsv <-> kelvin <-> int) with test suite in `home-core`
+- [x] Tapo integration: color mode (hue 0-360, saturation 0-100) and white mode (2500K-6500K) commands and status mapping
+- [x] Tuya integration: `colour_data_v2`, `colour_data_hsv`, `colour_data` DP encoding/decoding and `work_mode` switching
+- [x] Xiaomi MIoT: `color` prop integer conversion, state decoding and command encoding
+- [x] Liquid glass UI (`LightColorControls.tsx`): White mode with blackbody Kelvin temperature gradient and presets (Candle, Soft White, Daylight, Cool White); Color mode with curated swatches and interactive color wheel/picker; Apple liquid glass radiance glow orb indicator
+- [x] Automations support: setting light color and temperature in `RuleEditor`
+
 ## Next
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback
 - [ ] Tuya realtime MQTT push instead of polling
-- [ ] Tapo: hub child devices, light-strip colours
+- [ ] Tapo: hub child devices
 - [ ] Xiaomi: legacy (non-MIoT) devices
 - [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
 - [ ] Packaged Electron builds; Docker image for the home server
 - [ ] Native Android app (out of scope for now)
+
