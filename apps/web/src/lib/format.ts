@@ -15,7 +15,7 @@ export const formatKwh = (kwh?: number | null) => {
 export const formatMoney = (value: number, currency: string) => {
   value = Math.abs(value) < 0.005 ? 0 : value
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 2 }).format(value)
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 2 }).format(value)
   } catch {
     return `${nf(2).format(value)} ${currency}`
   }

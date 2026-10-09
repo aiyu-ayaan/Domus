@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
 import { Segmented } from '@/components/ui/Controls'
-import { Field } from '@/components/ui/Field'
+import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
@@ -90,6 +90,23 @@ export function EnergyView() {
   )
 }
 
+/** Every ISO 4217 currency the browser knows, labelled with its name. */
+function useCurrencies(current: string) {
+  return useMemo(() => {
+    const intl = Intl as unknown as { supportedValuesOf?: (k: string) => string[] }
+    const codes = intl.supportedValuesOf?.('currency') ?? ['EUR', 'GBP', 'INR', 'USD']
+    let names: Intl.DisplayNames | null = null
+    try {
+      names = new Intl.DisplayNames(undefined, { type: 'currency' })
+    } catch {
+      /* older browsers: codes only */
+    }
+    return [...new Set([...codes, current])].sort().map((c) => ({ code: c, label: `${c} — ${names?.of(c) ?? c}` }))
+  }, [current])
+}
+
+type SlabRow = { up_to_kwh: string; rate: string }
+
 function Plan({ initial }: { initial: ElectricitySettings }) {
   const qc = useQueryClient()
   const toast = useToast()
@@ -100,6 +117,17 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
     billing_cycle_day: String(initial.billing_cycle_day),
     fixed_monthly_charge: String(initial.fixed_monthly_charge),
   })
+  const [slabbed, setSlabbed] = useState(initial.slabs.length > 0)
+  const [slabs, setSlabs] = useState<SlabRow[]>(
+    initial.slabs.length
+      ? initial.slabs.map((x) => ({ up_to_kwh: x.up_to_kwh == null ? '' : String(x.up_to_kwh), rate: String(x.rate) }))
+      : [
+          { up_to_kwh: '100', rate: '' },
+          { up_to_kwh: '', rate: '' },
+        ],
+  )
+  const currencies = useCurrencies(s.currency)
+  const setSlab = (i: number, k: keyof SlabRow, v: string) => setSlabs(slabs.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const save = useMutation({
     mutationFn: () =>
       api.saveEnergySettings({
@@ -108,6 +136,9 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
         monthly_budget: s.monthly_budget ? Number(s.monthly_budget) : null,
         billing_cycle_day: Number(s.billing_cycle_day),
         fixed_monthly_charge: Number(s.fixed_monthly_charge || 0),
+        slabs: slabbed
+          ? slabs.map((x, i) => ({ up_to_kwh: x.up_to_kwh === '' || i === slabs.length - 1 ? null : Number(x.up_to_kwh), rate: Number(x.rate) }))
+          : [],
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['energy'] })
@@ -126,8 +157,55 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
           save.mutate()
         }}
       >
-        <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
-        <Field label="Currency" required maxLength={3} value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value.toUpperCase() })} hint="ISO code, e.g. INR, USD, EUR." />
+        <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-3">
+          <span className="text-label font-medium text-fg">Pricing</span>
+          <Segmented
+            size="sm"
+            label="Pricing"
+            value={slabbed ? 'slabs' : 'flat'}
+            onChange={(v) => setSlabbed(v === 'slabs')}
+            options={[
+              { value: 'flat', label: 'Flat rate' },
+              { value: 'slabs', label: 'Slabs (per units)' },
+            ]}
+          />
+        </div>
+        {slabbed ? (
+          <fieldset className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
+            <legend className="mb-1 text-label text-muted">Units (kWh) per billing cycle, billed slab by slab — e.g. MSEDCL: 0–100, 101–300, 301–500, above 500.</legend>
+            {slabs.map((x, i) => {
+              const last = i === slabs.length - 1
+              const from = i === 0 ? 0 : Number(slabs[i - 1].up_to_kwh || 0)
+              return (
+                <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-3">
+                  {last ? (
+                    <Field label={i === 0 ? 'Units' : `Above ${formatNumber(from, 0)} units`} disabled value="" placeholder="and above" />
+                  ) : (
+                    <Field label={`From ${formatNumber(from, 0)} up to`} type="number" min="0" step="1" required value={x.up_to_kwh} onChange={(e) => setSlab(i, 'up_to_kwh', e.target.value)} />
+                  )}
+                  <Field label="Price per unit" type="number" step="0.0001" min="0" required value={x.rate} onChange={(e) => setSlab(i, 'rate', e.target.value)} />
+                  <Button variant="ghost" size="sm" aria-label="Remove slab" disabled={slabs.length < 2} onClick={() => setSlabs(slabs.filter((_, j) => j !== i))}>
+                    Remove
+                  </Button>
+                </div>
+              )
+            })}
+            <div>
+              <Button size="sm" onClick={() => setSlabs([...slabs.slice(0, -1), { up_to_kwh: '', rate: '' }, slabs[slabs.length - 1]])}>
+                Add slab
+              </Button>
+            </div>
+          </fieldset>
+        ) : (
+          <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
+        )}
+        <SelectField label="Currency" required value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value })}>
+          {currencies.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.label}
+            </option>
+          ))}
+        </SelectField>
         <Field label="Fixed monthly charge" type="number" step="0.01" min="0" value={s.fixed_monthly_charge} onChange={set('fixed_monthly_charge')} hint="Meter rent and fixed fees." />
         <Field label="Monthly budget" type="number" step="0.01" min="0" value={s.monthly_budget} onChange={set('monthly_budget')} hint="Optional." />
         <Field label="Billing cycle starts on day" type="number" min="1" max="28" required value={s.billing_cycle_day} onChange={set('billing_cycle_day')} hint="1–28." />

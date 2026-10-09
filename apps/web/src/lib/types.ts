@@ -178,6 +178,8 @@ export interface ElectricitySettings {
   monthly_budget: number | null
   billing_cycle_day: number
   fixed_monthly_charge: number
+  /** Usage slabs per billing cycle; empty = flat rate_per_kwh. */
+  slabs: { up_to_kwh: number | null; rate: number }[]
 }
 
 export interface EnergyOverview {

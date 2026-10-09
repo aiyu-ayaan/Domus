@@ -24,6 +24,37 @@ pub struct ElectricitySettings {
     pub monthly_budget: Option<f64>,
     pub billing_cycle_day: i64,
     pub fixed_monthly_charge: f64,
+    /// Ordered usage slabs per billing cycle; empty = flat `rate_per_kwh`.
+    #[sqlx(json)]
+    #[serde(default)]
+    pub slabs: Vec<Slab>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Slab {
+    /// Upper bound of this slab in kWh (units); `None` = everything above.
+    pub up_to_kwh: Option<f64>,
+    pub rate: f64,
+}
+
+impl ElectricitySettings {
+    /// Energy charge for `kwh` units used in one billing cycle.
+    pub fn energy_cost(&self, kwh: f64) -> f64 {
+        if self.slabs.is_empty() {
+            return kwh * self.rate_per_kwh;
+        }
+        let (mut cost, mut floor) = (0.0, 0.0);
+        for slab in &self.slabs {
+            let top = slab.up_to_kwh.unwrap_or(f64::INFINITY);
+            cost += (kwh.min(top) - floor).max(0.0) * slab.rate;
+            if kwh <= top {
+                return cost;
+            }
+            floor = top;
+        }
+        // Past the last bounded slab: bill the rest at its rate.
+        cost + (kwh - floor) * self.slabs.last().map_or(0.0, |s| s.rate)
+    }
 }
 
 impl Default for ElectricitySettings {
@@ -34,6 +65,7 @@ impl Default for ElectricitySettings {
             monthly_budget: None,
             billing_cycle_day: 1,
             fixed_monthly_charge: 0.0,
+            slabs: vec![],
         }
     }
 }
@@ -47,7 +79,7 @@ pub fn energy_routes() -> Router<AppState> {
 
 pub async fn load_settings(pool: &SqlitePool) -> ElectricitySettings {
     sqlx::query_as(
-        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge FROM electricity_settings LIMIT 1",
+        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs FROM electricity_settings LIMIT 1",
     )
     .fetch_optional(pool)
     .await
@@ -72,17 +104,37 @@ async fn put_settings(
     if !(1..=28).contains(&req.billing_cycle_day) {
         return Err(ApiError::BadRequest("Billing day must be between 1 and 28".into()));
     }
+    if req.currency.trim().len() != 3 || !req.currency.trim().chars().all(|c| c.is_ascii_alphabetic()) {
+        return Err(ApiError::BadRequest("Currency must be a 3-letter ISO code".into()));
+    }
+    let mut prev = 0.0;
+    for (i, slab) in req.slabs.iter().enumerate() {
+        if slab.rate < 0.0 {
+            return Err(ApiError::BadRequest("Rates cannot be negative".into()));
+        }
+        match slab.up_to_kwh {
+            Some(top) if top <= prev => {
+                return Err(ApiError::BadRequest("Each slab must end above the previous one".into()))
+            }
+            Some(top) => prev = top,
+            None if i + 1 != req.slabs.len() => {
+                return Err(ApiError::BadRequest("Only the last slab can be open-ended".into()))
+            }
+            None => {}
+        }
+    }
     let mut tx = s.pool.begin().await?;
     sqlx::query("DELETE FROM electricity_settings").execute(&mut *tx).await?;
     sqlx::query(
-        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, updated_at)
-         VALUES ('default', ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, updated_at)
+         VALUES ('default', ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(req.rate_per_kwh)
     .bind(req.currency.trim().to_uppercase())
     .bind(req.monthly_budget.filter(|b| *b > 0.0))
     .bind(req.billing_cycle_day)
     .bind(req.fixed_monthly_charge)
+    .bind(sqlx::types::Json(&req.slabs))
     .bind(Utc::now())
     .execute(&mut *tx)
     .await?;
@@ -168,7 +220,7 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
                 name: d.name.clone(),
                 current_watts: watts,
                 kwh,
-                cost: kwh * settings.rate_per_kwh,
+                cost: 0.0,
             })
         })
         .collect();
@@ -183,13 +235,21 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     // Days elapsed including a fraction of today, so early-cycle projections stay sane.
     let elapsed = (now - local_midnight(cycle_start)).num_minutes() as f64 / 1440.0;
     let projected_kwh = if elapsed > 0.25 { cycle_kwh / elapsed * cycle_days as f64 } else { cycle_kwh };
-    let cycle_cost = cycle_kwh * settings.rate_per_kwh + settings.fixed_monthly_charge;
-    let projected_cost = projected_kwh * settings.rate_per_kwh + settings.fixed_monthly_charge;
+    let energy_cost = settings.energy_cost(cycle_kwh);
+    let cycle_cost = energy_cost + settings.fixed_monthly_charge;
+    let projected_cost = settings.energy_cost(projected_kwh) + settings.fixed_monthly_charge;
+    // Today's units are the latest in the cycle, so they sit in the highest slabs reached.
+    let today_cost = energy_cost - settings.energy_cost((cycle_kwh - today_kwh).max(0.0));
+    // Devices share the cycle's energy charge at the average rate.
+    let avg_rate = if cycle_kwh > 0.0 { energy_cost / cycle_kwh } else { settings.energy_cost(1.0) };
+    for u in &mut usage {
+        u.cost = u.kwh * avg_rate;
+    }
 
     Ok(Json(Overview {
         current_watts: usage.iter().map(|u| u.current_watts).sum::<f64>() + 0.0,
         today_kwh,
-        today_cost: today_kwh * settings.rate_per_kwh,
+        today_cost,
         cycle_start,
         cycle_days,
         cycle_day: (today - cycle_start).num_days() + 1,
@@ -277,8 +337,11 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
             p.kwh += kwh;
         }
     }
+    // shortcut: slabs priced at the range's average rate, exact only for a month-long range.
+    let total: f64 = points.iter().map(|p| p.kwh).sum();
+    let rate = if total > 0.0 { settings.energy_cost(total) / total } else { settings.energy_cost(1.0) };
     for p in &mut points {
-        p.cost = p.kwh * settings.rate_per_kwh;
+        p.cost = p.kwh * rate;
     }
     Ok(Json(points))
 }
@@ -293,5 +356,25 @@ mod tests {
         assert_eq!(billing_cycle(d(2026, 10, 9), 15), (d(2026, 9, 15), 30));
         assert_eq!(billing_cycle(d(2026, 10, 20), 15), (d(2026, 10, 15), 31));
         assert_eq!(billing_cycle(d(2026, 1, 3), 5), (d(2025, 12, 5), 31));
+    }
+
+    fn with(slabs: &[(Option<f64>, f64)]) -> ElectricitySettings {
+        ElectricitySettings {
+            slabs: slabs.iter().map(|&(up_to_kwh, rate)| Slab { up_to_kwh, rate }).collect(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn slab_costs() {
+        let s = with(&[(Some(100.0), 5.0), (Some(300.0), 10.0), (None, 15.0)]);
+        assert_eq!(s.energy_cost(0.0), 0.0);
+        assert_eq!(s.energy_cost(50.0), 250.0);
+        assert_eq!(s.energy_cost(150.0), 500.0 + 500.0);
+        assert_eq!(s.energy_cost(400.0), 500.0 + 2000.0 + 1500.0);
+        // No open-ended slab: the last rate continues.
+        assert_eq!(with(&[(Some(100.0), 5.0)]).energy_cost(120.0), 600.0);
+        // Flat rate when no slabs.
+        assert!((with(&[]).energy_cost(10.0) - 1.5).abs() < 1e-9);
     }
 }
