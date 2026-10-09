@@ -17,6 +17,7 @@
     ]
   },
   "enabledPlugins": {
-    "ponytail@ponytail": true
+    "ponytail@ponytail": true,
+    "liquid-glass@liquid-glass-skills": true
   }
 }
