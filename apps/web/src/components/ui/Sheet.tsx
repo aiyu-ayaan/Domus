@@ -26,6 +26,9 @@ export function Sheet({
   size?: 'md' | 'lg'
 }) {
   const panel = useRef<HTMLDivElement>(null)
+  // Callers pass inline handlers; depending on them would re-run the effect (and steal focus) every render.
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
 
   useEffect(() => {
     if (!open) return
@@ -34,7 +37,7 @@ export function Sheet({
       panel.current?.querySelector<HTMLElement>('[data-autofocus], input, select, textarea')?.focus() ?? panel.current?.focus()
     }, 30)
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
       if (e.key !== 'Tab' || !panel.current) return
       const items = panel.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select, textarea')
       if (!items.length) return
@@ -56,7 +59,7 @@ export function Sheet({
       document.body.style.overflow = ''
       trigger?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   return createPortal(
@@ -108,12 +111,14 @@ export function Confirm({
   confirmLabel?: string
   loading?: boolean
 }) {
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open])
   if (!open) return null
   return createPortal(
     <div className="fixed inset-0 z-sheet flex items-center justify-center p-4">
