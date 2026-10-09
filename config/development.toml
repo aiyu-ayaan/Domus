@@ -1,0 +1,8 @@
+[server]
+host = "127.0.0.1"
+port = 8080
+env = "development"
+
+[database]
+url = "sqlite://docus.db?mode=rwc"
+max_connections = 5

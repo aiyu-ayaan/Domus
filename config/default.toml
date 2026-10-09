@@ -1,0 +1,28 @@
+[server]
+host = "127.0.0.1"
+port = 8080
+env = "development"
+
+[database]
+url = "sqlite://docus.db?mode=rwc"
+max_connections = 10
+
+[security]
+jwt_secret = "super-secret-jwt-key-replace-in-production-min-32-chars"
+token_expiry_hours = 24
+
+[mqtt]
+enabled = false
+host = "127.0.0.1"
+port = 1883
+client_id = "docus_backend"
+keep_alive_secs = 60
+
+[integrations.tuya]
+enabled = true
+
+[integrations.tapo]
+enabled = true
+
+[integrations.xiaomi]
+enabled = true

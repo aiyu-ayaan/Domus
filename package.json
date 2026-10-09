@@ -1,0 +1,21 @@
+{
+  "name": "docus-root",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Docus - Modern smart home assistant platform",
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"backend,web\" -c \"cyan,magenta\" \"pnpm run dev:backend\" \"pnpm run dev:web\"",
+    "dev:backend": "cargo run --manifest-path backend/Cargo.toml",
+    "dev:web": "pnpm --filter @docus/web dev",
+    "dev:desktop": "pnpm --filter @docus/desktop dev",
+    "build": "pnpm --filter @docus/web build && cargo build --release --manifest-path backend/Cargo.toml",
+    "build:web": "pnpm --filter @docus/web build",
+    "build:desktop": "pnpm --filter @docus/desktop build",
+    "build:backend": "cargo build --release --manifest-path backend/Cargo.toml",
+    "lint": "pnpm --filter @docus/web lint && cargo clippy --manifest-path backend/Cargo.toml",
+    "test": "cargo test && pnpm --filter @docus/web test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
