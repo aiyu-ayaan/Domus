@@ -116,6 +116,8 @@ impl KlapClient {
         Self {
             http: reqwest::Client::builder()
                 .timeout(Duration::from_secs(5))
+                // Tapo's "SHIP 2.0" HTTP server answers 400 to lowercase header names.
+                .http1_title_case_headers()
                 .build()
                 .expect("http client"),
             sessions: Mutex::new(HashMap::new()),
