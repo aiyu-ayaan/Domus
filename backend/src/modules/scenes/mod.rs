@@ -1,101 +1,142 @@
-use crate::api::error::ApiError;
+use crate::api::error::{ApiError, ApiResult};
+use crate::api::middleware::AuthUser;
+use crate::api::AppState;
 use axum::{
     extract::{Path, State},
-    routing::{delete, get, post},
+    routing::{get, post, put},
     Json, Router,
 };
 use chrono::{DateTime, Utc};
+use home_core::Action;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::SqlitePool;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
-pub struct SceneRecord {
+#[derive(sqlx::FromRow)]
+struct SceneRow {
+    id: String,
+    name: String,
+    icon: Option<String>,
+    actions_json: String,
+    is_active: bool,
+    created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize)]
+pub struct SceneDto {
     pub id: String,
     pub name: String,
     pub icon: Option<String>,
-    pub actions_json: String,
+    pub actions: Value,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct CreateSceneRequest {
+impl From<SceneRow> for SceneDto {
+    fn from(r: SceneRow) -> Self {
+        Self {
+            actions: serde_json::from_str(&r.actions_json).unwrap_or(Value::Array(vec![])),
+            id: r.id,
+            name: r.name,
+            icon: r.icon,
+            is_active: r.is_active,
+            created_at: r.created_at,
+        }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct SceneRequest {
     pub name: String,
     pub icon: Option<String>,
-    pub actions: Value,
+    pub actions: Vec<Action>,
 }
 
-pub fn scene_routes(pool: SqlitePool) -> Router {
+pub fn scene_routes() -> Router<AppState> {
     Router::new()
-        .route("/", get(list_scenes).post(create_scene))
-        .route("/:id/activate", post(activate_scene))
-        .route("/:id", delete(delete_scene))
-        .with_state(pool)
+        .route("/", get(list).post(create))
+        .route("/:id", put(update).delete(remove))
+        .route("/:id/activate", post(activate))
 }
 
-async fn list_scenes(State(pool): State<SqlitePool>) -> Result<Json<Vec<SceneRecord>>, ApiError> {
-    let scenes = sqlx::query_as::<_, SceneRecord>("SELECT * FROM scenes ORDER BY name ASC")
-        .fetch_all(&pool)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
-    Ok(Json(scenes))
+async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Vec<SceneDto>>> {
+    let rows: Vec<SceneRow> = sqlx::query_as("SELECT * FROM scenes ORDER BY name COLLATE NOCASE")
+        .fetch_all(&s.pool)
+        .await?;
+    Ok(Json(rows.into_iter().map(Into::into).collect()))
 }
 
-async fn create_scene(
-    State(pool): State<SqlitePool>,
-    Json(payload): Json<CreateSceneRequest>,
-) -> Result<Json<SceneRecord>, ApiError> {
+fn validate(req: &SceneRequest) -> ApiResult<String> {
+    if req.name.trim().is_empty() {
+        return Err(ApiError::BadRequest("Name is required".into()));
+    }
+    if req.actions.is_empty() {
+        return Err(ApiError::BadRequest("Add at least one action".into()));
+    }
+    Ok(serde_json::to_string(&req.actions).unwrap_or_else(|_| "[]".into()))
+}
+
+async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<SceneRequest>) -> ApiResult<Json<SceneDto>> {
+    user.require_admin()?;
+    let actions = validate(&req)?;
     let id = Uuid::new_v4().to_string();
     let now = Utc::now();
-    let actions = serde_json::to_string(&payload.actions).unwrap_or_else(|_| "[]".into());
-
-    sqlx::query(
-        "INSERT INTO scenes (id, name, icon, actions_json, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-    )
-    .bind(&id)
-    .bind(&payload.name)
-    .bind(&payload.icon)
-    .bind(&actions)
-    .bind(false)
-    .bind(&now)
-    .execute(&pool)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
-
-    Ok(Json(SceneRecord {
+    sqlx::query("INSERT INTO scenes (id, name, icon, actions_json, is_active, created_at) VALUES (?, ?, ?, ?, 0, ?)")
+        .bind(&id)
+        .bind(req.name.trim())
+        .bind(&req.icon)
+        .bind(&actions)
+        .bind(now)
+        .execute(&s.pool)
+        .await?;
+    Ok(Json(SceneDto {
         id,
-        name: payload.name,
-        icon: payload.icon,
-        actions_json: actions,
+        name: req.name.trim().into(),
+        icon: req.icon,
+        actions: serde_json::from_str(&actions).unwrap_or_default(),
         is_active: false,
         created_at: now,
     }))
 }
 
-async fn activate_scene(
-    State(pool): State<SqlitePool>,
+async fn update(
+    State(s): State<AppState>,
+    user: AuthUser,
     Path(id): Path<String>,
-) -> Result<Json<Value>, ApiError> {
-    sqlx::query("UPDATE scenes SET is_active = CASE WHEN id = ? THEN 1 ELSE 0 END")
+    Json(req): Json<SceneRequest>,
+) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    let actions = validate(&req)?;
+    let res = sqlx::query("UPDATE scenes SET name = ?, icon = ?, actions_json = ? WHERE id = ?")
+        .bind(req.name.trim())
+        .bind(&req.icon)
+        .bind(&actions)
         .bind(&id)
-        .execute(&pool)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
-
-    // In a full executor, we trigger each action in actions_json
-    Ok(Json(json!({ "activated": true, "scene_id": id })))
+        .execute(&s.pool)
+        .await?;
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound("Scene not found".into()));
+    }
+    Ok(Json(json!({ "success": true })))
 }
 
-async fn delete_scene(
-    State(pool): State<SqlitePool>,
-    Path(id): Path<String>,
-) -> Result<Json<Value>, ApiError> {
-    sqlx::query("DELETE FROM scenes WHERE id = ?")
-        .bind(&id)
-        .execute(&pool)
+async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+    user.require_control()?;
+    let actions = s
+        .automations
+        .scene_actions(&id)
         .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
+        .ok_or_else(|| ApiError::NotFound("Scene not found".into()))?;
+    let errors = s.automations.execute(&actions, 1).await;
+    sqlx::query("UPDATE scenes SET is_active = CASE WHEN id = ? THEN 1 ELSE 0 END")
+        .bind(&id)
+        .execute(&s.pool)
+        .await?;
+    Ok(Json(json!({ "success": errors.is_empty(), "errors": errors })))
+}
+
+async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    sqlx::query("DELETE FROM scenes WHERE id = ?").bind(&id).execute(&s.pool).await?;
     Ok(Json(json!({ "success": true })))
 }

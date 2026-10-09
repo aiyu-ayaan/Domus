@@ -1,71 +1,123 @@
+use crate::api::middleware::JwtKeys;
 use crate::api::{create_router, AppState};
+use crate::automation_engine::AutomationEngine;
 use crate::config::AppConfig;
 use crate::infrastructure::{
-    database::init_pool, event_bus::EventBus, logging::init_logging, mqtt_client::MqttService,
+    crypto::{read_or_create_secret, Vault},
+    database::init_pool,
+    event_bus::EventBus,
+    logging::init_logging,
+    mqtt_client::MqttService,
+    tls,
 };
-use crate::integrations::tuya::TuyaIntegration;
-use crate::modules::auth::{repository::AuthRepository, AuthService};
-use crate::modules::devices::{repository::DeviceRepository, DeviceService};
-use crate::workers::{DeviceWorker, SchedulerWorker};
+use crate::integrations::{
+    accounts::AccountStore, broadcast_addresses, tapo::TapoIntegration, tuya::TuyaIntegration,
+    virtual_devices::VirtualIntegration, xiaomi::XiaomiIntegration, DeviceManager,
+};
+use crate::modules::notifications::Notifier;
+use crate::workers::{DeviceWorker, DiscoveryWorker, SchedulerWorker};
+use home_core::IntegrationPlugin;
+use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::TcpListener;
+use std::time::Duration;
 use tracing::info;
 
 pub async fn bootstrap() -> anyhow::Result<()> {
-    // 1. Initialize logging
     init_logging();
+    let _ = rustls::crypto::ring::default_provider().install_default();
     info!("Starting Docus Smart Home Core Server...");
 
-    // 2. Load configuration
     let config = AppConfig::load()?;
-    info!("Configuration loaded successfully. Environment: {}", config.server.env);
+    std::fs::create_dir_all(&config.server.data_dir)?;
+    info!("Environment: {}, data dir: {}", config.server.env, config.server.data_dir.display());
 
-    // 3. Initialize database
+    // Secrets live outside the database.
+    let vault = Vault::load_or_create(&config.server.data_dir)?;
+    let jwt_secret = if config.security.jwt_secret.is_empty() {
+        read_or_create_secret(&config.server.data_dir.join("jwt.secret"), 64)?
+    } else {
+        config.security.jwt_secret.as_bytes().to_vec()
+    };
+    let jwt = Arc::new(JwtKeys::new(&jwt_secret, config.security.token_expiry_hours));
+
     let pool = init_pool(&config.database.url, config.database.max_connections).await?;
+    let bus = EventBus::default();
+    let notifier = Notifier::new(pool.clone(), bus.clone());
 
-    // 4. Initialize event bus
-    let event_bus = EventBus::default();
-
-    // 5. Initialize MQTT if enabled
     if config.mqtt.enabled {
-        match MqttService::start(&config.mqtt, event_bus.clone()).await {
-            Ok(_) => info!("MQTT service connected successfully."),
-            Err(e) => tracing::warn!("MQTT service failed to connect (continuing): {}", e),
+        match MqttService::start(&config.mqtt, bus.clone()).await {
+            Ok(_) => info!("MQTT service connected."),
+            Err(e) => tracing::warn!("MQTT service failed to connect (continuing): {e}"),
         }
     }
 
-    // 6. Initialize services
-    let auth_repo = AuthRepository::new(pool.clone());
-    let auth_service = Arc::new(AuthService::new(auth_repo, config.security.jwt_secret));
+    // Integration plugins
+    let accounts = AccountStore::new(pool.clone(), vault.clone());
+    let store: Arc<dyn home_core::CredentialStore> = Arc::new(accounts.clone());
+    let broadcast = broadcast_addresses();
+    let mut plugins: Vec<Arc<dyn IntegrationPlugin>> = Vec::new();
+    let mut tuya = None;
+    if config.integrations.tuya.enabled {
+        let t = Arc::new(TuyaIntegration::new(store.clone()));
+        tuya = Some(t.clone());
+        plugins.push(t);
+    }
+    if config.integrations.tapo.enabled {
+        plugins.push(Arc::new(TapoIntegration::new(broadcast.clone())));
+    }
+    if config.integrations.xiaomi.enabled {
+        plugins.push(Arc::new(XiaomiIntegration::new(store.clone(), broadcast.clone())));
+    }
+    if config.integrations.virtual_devices.enabled {
+        plugins.push(Arc::new(VirtualIntegration::new()));
+    }
+    info!(
+        "Integrations: {}",
+        plugins.iter().map(|p| p.integration_type().as_str()).collect::<Vec<_>>().join(", ")
+    );
 
-    let device_repo = DeviceRepository::new(pool.clone());
-    let device_service = Arc::new(DeviceService::new(device_repo, event_bus.clone()));
+    let manager = Arc::new(DeviceManager::new(
+        pool.clone(),
+        accounts,
+        vault,
+        bus.clone(),
+        notifier.clone(),
+        plugins,
+        Duration::from_secs(config.workers.energy_sample_secs.max(10)),
+    ));
 
-    let tuya_integration = Arc::new(TuyaIntegration::new(true));
+    let automations = Arc::new(AutomationEngine::new(pool.clone(), manager.clone(), notifier.clone(), bus.clone()));
+    automations.reload().await;
 
-    // 7. Spawn background workers
-    let device_worker = DeviceWorker::new(event_bus.clone());
-    tokio::spawn(device_worker.run());
+    tokio::spawn(automations.clone().run());
+    tokio::spawn(DeviceWorker::new(manager.clone(), Duration::from_secs(config.workers.poll_interval_secs.max(5))).run());
+    tokio::spawn(DiscoveryWorker::new(manager.clone()).run());
+    tokio::spawn(SchedulerWorker::new(automations.clone(), pool.clone(), config.workers.energy_retention_days).run());
 
-    let scheduler_worker = SchedulerWorker::new();
-    tokio::spawn(scheduler_worker.run());
-
-    // 8. Assemble application state & routes
-    let app_state = AppState {
+    let state = AppState {
         pool,
-        auth_service,
-        device_service,
-        tuya_integration,
+        jwt,
+        bus,
+        manager,
+        notifier,
+        automations,
+        tuya,
+        tuya_logins: Default::default(),
     };
+    let app = create_router(state, &config.server.web_dir, config.tls.enabled);
 
-    let app = create_router(app_state);
-
-    // 9. Start HTTP Server
-    let bind_addr = format!("{}:{}", config.server.host, config.server.port);
-    let listener = TcpListener::bind(&bind_addr).await?;
-    info!("Server listening on http://{}", bind_addr);
-
-    axum::serve(listener, app).await?;
-
+    let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
+    if config.tls.enabled {
+        let rustls = tls::load_rustls(&config.tls, &config.server).await?;
+        info!("Listening on https://{addr}");
+        axum_server::bind_rustls(addr, rustls)
+            .serve(app.into_make_service())
+            .await?;
+    } else {
+        tracing::warn!("TLS is disabled — traffic is unencrypted. Only do this behind a TLS-terminating proxy.");
+        info!("Listening on http://{addr}");
+        let listener = tokio::net::TcpListener::bind(addr).await?;
+        axum::serve(listener, app).await?;
+    }
     Ok(())
 }

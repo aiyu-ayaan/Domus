@@ -42,3 +42,6 @@ Thumbs.db
 # Build outputs
 apps/web/dist/
 apps/desktop/dist/
+
+# Runtime data (database, master key, TLS)
+data/

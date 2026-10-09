@@ -1,21 +1,25 @@
-use crate::infrastructure::event_bus::EventBus;
+use crate::integrations::DeviceManager;
+use std::sync::Arc;
 use std::time::Duration;
-use tracing::info;
 
+/// Polls every adopted device on a fixed interval.
 pub struct DeviceWorker {
-    _event_bus: EventBus,
+    manager: Arc<DeviceManager>,
+    interval: Duration,
 }
 
 impl DeviceWorker {
-    pub fn new(event_bus: EventBus) -> Self {
-        Self { _event_bus: event_bus }
+    pub fn new(manager: Arc<DeviceManager>, interval: Duration) -> Self {
+        Self { manager, interval }
     }
 
     pub async fn run(self) {
-        info!("Device polling & heartbeat worker started.");
+        tracing::info!("Device poller started ({}s interval)", self.interval.as_secs());
+        let mut tick = tokio::time::interval(self.interval);
+        tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
         loop {
-            tokio::time::sleep(Duration::from_secs(30)).await;
-            // Poll periodic status / offline checks
+            tick.tick().await;
+            self.manager.poll_all().await;
         }
     }
 }

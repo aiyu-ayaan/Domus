@@ -1,15 +1,30 @@
+# Docus server configuration. Every key can be overridden with an environment
+# variable: DOCUS__<SECTION>__<KEY>, e.g. DOCUS__SERVER__PORT=9443.
+
 [server]
-host = "127.0.0.1"
-port = 8080
-env = "development"
+host = "0.0.0.0"
+port = 8443
+# Database, master key, JWT secret and TLS certificate live here.
+data_dir = "data"
+# Built web UI served by the backend (production).
+web_dir = "apps/web/dist"
+
+[tls]
+# HTTPS for all API traffic. Without cert_path/key_path a self-signed
+# certificate is generated in <data_dir>/tls.
+enabled = true
+# cert_path = "/etc/docus/cert.pem"
+# key_path = "/etc/docus/key.pem"
 
 [database]
-url = "sqlite://docus.db?mode=rwc"
-max_connections = 10
+# Empty = sqlite://<data_dir>/docus.db
+url = ""
+max_connections = 8
 
 [security]
-jwt_secret = "super-secret-jwt-key-replace-in-production-min-32-chars"
-token_expiry_hours = 24
+# Empty = generated once and stored in <data_dir>/jwt.secret
+jwt_secret = ""
+token_expiry_hours = 168
 
 [mqtt]
 enabled = false
@@ -26,3 +41,12 @@ enabled = true
 
 [integrations.xiaomi]
 enabled = true
+
+# Simulated devices for trying Docus without hardware.
+[integrations.virtual]
+enabled = false
+
+[workers]
+poll_interval_secs = 15
+energy_sample_secs = 60
+energy_retention_days = 400

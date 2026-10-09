@@ -4,5 +4,4 @@ pub mod routes;
 pub mod service;
 
 pub use repository::DeviceRepository;
-pub use routes::device_routes;
-pub use service::DeviceService;
+pub use routes::{device_routes, discovery_routes};

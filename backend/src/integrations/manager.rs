@@ -1,0 +1,654 @@
+//! The device manager owns every integration plugin and is the only place that
+//! talks to them: discovery, adoption, polling, commands and energy sampling.
+
+use super::accounts::AccountStore;
+use crate::api::error::ApiError;
+use crate::infrastructure::crypto::Vault;
+use crate::infrastructure::database::{get_setting, set_setting};
+use crate::infrastructure::event_bus::{EventBus, SystemEvent};
+use crate::modules::devices::model::{AdoptRequest, DeviceRecord, DiscoveryRecord, ManualAddRequest};
+use crate::modules::devices::repository::DeviceRepository;
+use crate::modules::notifications::Notifier;
+use chrono::Utc;
+use futures::future::join_all;
+use home_core::{
+    AccountContext, CoreError, DeviceCommand, DeviceContext, DeviceType, DiscoveredDevice,
+    IntegrationPlugin, IntegrationType, PolledState,
+};
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+use sqlx::SqlitePool;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
+use uuid::Uuid;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct DiscoverySettings {
+    /// Scan the network and linked accounts in the background.
+    pub enabled: bool,
+    pub interval_minutes: u64,
+    /// Add newly found devices without asking.
+    pub auto_adopt: bool,
+    /// Send a notification when a new device is found.
+    pub notify: bool,
+}
+
+impl Default for DiscoverySettings {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_minutes: 5,
+            auto_adopt: false,
+            notify: true,
+        }
+    }
+}
+
+const SETTINGS_KEY: &str = "discovery";
+/// Consecutive poll failures before a device is marked offline.
+const OFFLINE_AFTER: u32 = 2;
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct DiscoveryReport {
+    pub found: usize,
+    pub new: usize,
+    pub adopted: usize,
+    pub errors: Vec<IntegrationIssue>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct IntegrationIssue {
+    pub integration: String,
+    pub message: String,
+}
+
+pub struct DeviceManager {
+    pool: SqlitePool,
+    pub repo: DeviceRepository,
+    pub accounts: AccountStore,
+    vault: Vault,
+    bus: EventBus,
+    notifier: Notifier,
+    plugins: HashMap<IntegrationType, Arc<dyn IntegrationPlugin>>,
+    discovery_lock: Mutex<()>,
+    poll_lock: Mutex<()>,
+    energy_sample: Duration,
+    last_sample: Mutex<HashMap<String, Instant>>,
+    failures: Mutex<HashMap<String, u32>>,
+}
+
+impl DeviceManager {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        pool: SqlitePool,
+        accounts: AccountStore,
+        vault: Vault,
+        bus: EventBus,
+        notifier: Notifier,
+        plugins: Vec<Arc<dyn IntegrationPlugin>>,
+        energy_sample: Duration,
+    ) -> Self {
+        Self {
+            repo: DeviceRepository::new(pool.clone()),
+            pool,
+            accounts,
+            vault,
+            bus,
+            notifier,
+            plugins: plugins.into_iter().map(|p| (p.integration_type(), p)).collect(),
+            discovery_lock: Mutex::new(()),
+            poll_lock: Mutex::new(()),
+            energy_sample,
+            last_sample: Mutex::new(HashMap::new()),
+            failures: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn enabled_integrations(&self) -> Vec<IntegrationType> {
+        self.plugins.keys().copied().collect()
+    }
+
+    fn plugin(&self, integration: &str) -> Result<&Arc<dyn IntegrationPlugin>, ApiError> {
+        IntegrationType::parse(integration)
+            .and_then(|t| self.plugins.get(&t))
+            .ok_or_else(|| ApiError::BadRequest(format!("integration '{integration}' is not enabled")))
+    }
+
+    pub async fn settings(&self) -> DiscoverySettings {
+        get_setting(&self.pool, SETTINGS_KEY).await.unwrap_or_default()
+    }
+
+    pub async fn save_settings(&self, s: &DiscoverySettings) -> Result<(), ApiError> {
+        set_setting(&self.pool, SETTINGS_KEY, s).await?;
+        Ok(())
+    }
+
+    fn open_secrets(&self, sealed: Option<&str>) -> Value {
+        sealed
+            .and_then(|s| self.vault.open_json(s).ok())
+            .unwrap_or_else(|| json!({}))
+    }
+
+    fn seal_secrets(&self, secrets: &Value) -> Result<Option<String>, ApiError> {
+        match secrets {
+            Value::Object(m) if !m.is_empty() => Ok(Some(self.vault.seal_json(secrets)?)),
+            _ => Ok(None),
+        }
+    }
+
+    fn context(&self, rec: &DeviceRecord, accounts: &HashMap<String, AccountContext>) -> DeviceContext {
+        DeviceContext {
+            device_id: rec.id.clone(),
+            external_id: rec.external_id.clone().unwrap_or_default(),
+            device_type: DeviceType::parse(&rec.device_type),
+            model: rec.model.clone(),
+            ip_address: rec.ip_address.clone(),
+            config: rec.config(),
+            secrets: self.open_secrets(rec.secrets_enc.as_deref()),
+            account: rec.account_id.as_ref().and_then(|id| accounts.get(id).cloned()),
+        }
+    }
+
+    async fn account_map(&self, integration: &str) -> HashMap<String, AccountContext> {
+        self.accounts
+            .contexts(integration)
+            .await
+            .unwrap_or_default()
+            .into_iter()
+            .map(|a| (a.id.clone(), a))
+            .collect()
+    }
+
+    // ------------------------------------------------------------------
+    // Polling
+    // ------------------------------------------------------------------
+
+    pub async fn poll_all(&self) {
+        let Ok(_guard) = self.poll_lock.try_lock() else { return };
+        let devices = match self.repo.list_all().await {
+            Ok(d) => d,
+            Err(e) => {
+                tracing::error!("poll: cannot list devices: {e}");
+                return;
+            }
+        };
+        let mut by_type: HashMap<String, Vec<DeviceRecord>> = HashMap::new();
+        for d in devices {
+            by_type.entry(d.integration_type.clone()).or_default().push(d);
+        }
+        join_all(by_type.into_iter().map(|(t, recs)| self.poll_group(t, recs))).await;
+    }
+
+    async fn poll_group(&self, integration: String, recs: Vec<DeviceRecord>) {
+        let Ok(plugin) = self.plugin(&integration) else { return };
+        let accounts = self.account_map(&integration).await;
+        let contexts: Vec<DeviceContext> = recs.iter().map(|r| self.context(r, &accounts)).collect();
+        let mut results = plugin.fetch_states(&contexts).await;
+        for rec in recs {
+            let res = results
+                .remove(&rec.id)
+                .unwrap_or_else(|| Err(CoreError::Internal("no poll result".into())));
+            self.apply_poll(&rec, res).await;
+        }
+    }
+
+    async fn apply_poll(&self, rec: &DeviceRecord, res: home_core::Result<PolledState>) {
+        match res {
+            Ok(p) => {
+                self.failures.lock().await.remove(&rec.id);
+                let previous = rec.state();
+                let changed = p.state != previous || p.online != rec.is_online;
+                let stale_seen = rec
+                    .last_seen
+                    .is_none_or(|t| (Utc::now() - t).num_seconds() >= 60);
+                let ip_changed = p.ip_address.is_some() && p.ip_address != rec.ip_address;
+                if changed || stale_seen || ip_changed {
+                    let json = serde_json::to_string(&p.state).unwrap_or_else(|_| "{}".into());
+                    if let Err(e) = self
+                        .repo
+                        .update_runtime(&rec.id, &json, p.online, p.ip_address.as_deref(), true)
+                        .await
+                    {
+                        tracing::warn!("poll: cannot store state for {}: {e}", rec.id);
+                    }
+                }
+                if changed {
+                    self.bus.publish(SystemEvent::DeviceStateChanged {
+                        device_id: rec.id.clone(),
+                        state: p.state.clone(),
+                        is_online: p.online,
+                        previous: Some(previous),
+                        was_online: rec.is_online,
+                    });
+                }
+                if p.online {
+                    if let Some(w) = p.state.current_power_watts {
+                        self.sample_energy(&rec.id, w as f64).await;
+                    }
+                }
+            }
+            Err(e) => {
+                let count = {
+                    let mut f = self.failures.lock().await;
+                    let c = f.entry(rec.id.clone()).or_insert(0);
+                    *c += 1;
+                    *c
+                };
+                if count == OFFLINE_AFTER && rec.is_online {
+                    tracing::warn!("device '{}' is offline: {e}", rec.name);
+                    let _ = self
+                        .repo
+                        .update_runtime(&rec.id, &rec.state_json, false, None, false)
+                        .await;
+                    self.bus.publish(SystemEvent::DeviceStateChanged {
+                        device_id: rec.id.clone(),
+                        state: rec.state(),
+                        is_online: false,
+                        previous: Some(rec.state()),
+                        was_online: true,
+                    });
+                } else {
+                    tracing::debug!("poll of '{}' failed ({count}): {e}", rec.name);
+                }
+            }
+        }
+    }
+
+    /// Store incremental energy (kWh since the last sample) for this device.
+    async fn sample_energy(&self, device_id: &str, watts: f64) {
+        let now = Instant::now();
+        let dt = {
+            let mut last = self.last_sample.lock().await;
+            match last.get(device_id) {
+                Some(t) if now.duration_since(*t) < self.energy_sample => return,
+                Some(t) => {
+                    let dt = now.duration_since(*t).min(self.energy_sample * 2);
+                    last.insert(device_id.to_string(), now);
+                    dt
+                }
+                None => {
+                    last.insert(device_id.to_string(), now);
+                    self.energy_sample
+                }
+            }
+        };
+        let kwh = watts.max(0.0) * dt.as_secs_f64() / 3_600_000.0;
+        let res = sqlx::query(
+            "INSERT INTO energy_metrics (id, device_id, power_watts, energy_kwh, recorded_at) VALUES (?, ?, ?, ?, ?)",
+        )
+        .bind(Uuid::new_v4().to_string())
+        .bind(device_id)
+        .bind(watts)
+        .bind(kwh)
+        .bind(Utc::now())
+        .execute(&self.pool)
+        .await;
+        if let Err(e) = res {
+            tracing::warn!("energy sample failed: {e}");
+        }
+    }
+
+    pub async fn refresh(&self, device_id: &str) -> Result<(), ApiError> {
+        let rec = self.get(device_id).await?;
+        let plugin = self.plugin(&rec.integration_type)?;
+        let accounts = self.account_map(&rec.integration_type).await;
+        let res = plugin.fetch_state(&self.context(&rec, &accounts)).await;
+        self.apply_poll(&rec, res).await;
+        Ok(())
+    }
+
+    // ------------------------------------------------------------------
+    // Commands
+    // ------------------------------------------------------------------
+
+    pub async fn get(&self, device_id: &str) -> Result<DeviceRecord, ApiError> {
+        self.repo
+            .find_by_id(device_id)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Device not found".into()))
+    }
+
+    pub async fn command(self: &Arc<Self>, device_id: &str, cmd: &DeviceCommand) -> Result<(), ApiError> {
+        if cmd.is_empty() {
+            return Err(ApiError::BadRequest("empty command".into()));
+        }
+        let rec = self.get(device_id).await?;
+        let plugin = self.plugin(&rec.integration_type)?;
+        let accounts = self.account_map(&rec.integration_type).await;
+        plugin.send_command(&self.context(&rec, &accounts), cmd).await?;
+
+        // Optimistic update so the UI reacts instantly; a refresh follows.
+        let previous = rec.state();
+        let mut state = previous.clone();
+        cmd.apply_to(&mut state);
+        let json = serde_json::to_string(&state).unwrap_or_else(|_| "{}".into());
+        self.repo.update_runtime(&rec.id, &json, true, None, true).await?;
+        self.bus.publish(SystemEvent::DeviceStateChanged {
+            device_id: rec.id.clone(),
+            state,
+            is_online: true,
+            previous: Some(previous),
+            was_online: rec.is_online,
+        });
+
+        let this = self.clone();
+        let id = rec.id.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1500)).await;
+            let _ = this.refresh(&id).await;
+        });
+        Ok(())
+    }
+
+    pub async fn group_device_ids(&self, group_id: &str) -> Result<Vec<String>, ApiError> {
+        let rows: Vec<(String,)> = sqlx::query_as("SELECT device_id FROM device_group_members WHERE group_id = ?")
+            .bind(group_id)
+            .fetch_all(&self.pool)
+            .await?;
+        Ok(rows.into_iter().map(|r| r.0).collect())
+    }
+
+    /// Run a command on several devices concurrently; returns per-device errors.
+    pub async fn command_many(self: &Arc<Self>, ids: &[String], cmd: &DeviceCommand) -> Vec<(String, String)> {
+        let results = join_all(ids.iter().map(|id| async move { (id.clone(), self.command(id, cmd).await) })).await;
+        results
+            .into_iter()
+            .filter_map(|(id, r)| r.err().map(|e| (id, e.to_string())))
+            .collect()
+    }
+
+    // ------------------------------------------------------------------
+    // Discovery
+    // ------------------------------------------------------------------
+
+    pub async fn discover(self: &Arc<Self>) -> Result<DiscoveryReport, ApiError> {
+        let Ok(_guard) = self.discovery_lock.try_lock() else {
+            return Err(ApiError::Conflict("A scan is already running".into()));
+        };
+        let settings = self.settings().await;
+        let runs = self.plugins.iter().map(|(t, plugin)| async move {
+            let accounts = self.accounts.contexts(t.as_str()).await.unwrap_or_default();
+            (*t, accounts.clone(), plugin.discover(&accounts).await)
+        });
+
+        let mut report = DiscoveryReport::default();
+        for (t, accounts, result) in join_all(runs).await {
+            match result {
+                Ok(list) => {
+                    for a in &accounts {
+                        self.accounts.set_status(&a.id, None).await;
+                    }
+                    for d in list {
+                        report.found += 1;
+                        match self.ingest(t, d, &settings).await {
+                            Ok(Ingest::New) => report.new += 1,
+                            Ok(Ingest::Adopted) => {
+                                report.new += 1;
+                                report.adopted += 1;
+                            }
+                            Ok(Ingest::Known) => {}
+                            Err(e) => report.errors.push(IntegrationIssue {
+                                integration: t.as_str().into(),
+                                message: e.to_string(),
+                            }),
+                        }
+                    }
+                }
+                Err(e) => {
+                    let msg = e.to_string();
+                    tracing::warn!("{} discovery failed: {msg}", t.as_str());
+                    for a in &accounts {
+                        self.accounts.set_status(&a.id, Some(&msg)).await;
+                    }
+                    report.errors.push(IntegrationIssue {
+                        integration: t.as_str().into(),
+                        message: msg,
+                    });
+                }
+            }
+        }
+        self.bus.publish(SystemEvent::DiscoveryFinished {
+            found: report.found,
+            new: report.new,
+        });
+        Ok(report)
+    }
+
+    async fn ingest(
+        self: &Arc<Self>,
+        t: IntegrationType,
+        d: DiscoveredDevice,
+        settings: &DiscoverySettings,
+    ) -> Result<Ingest, ApiError> {
+        let integration = t.as_str();
+        if d.external_id.is_empty() {
+            return Ok(Ingest::Known);
+        }
+
+        // Already adopted: keep connection details (IP, keys) fresh.
+        if let Some(existing) = self.repo.find_by_external(integration, &d.external_id).await? {
+            let config = match &d.config {
+                Value::Object(m) if !m.is_empty() => d.config.to_string(),
+                _ => existing.config_json.clone(),
+            };
+            self.repo
+                .update_connection(
+                    &existing.id,
+                    d.ip_address.as_deref(),
+                    &config,
+                    self.seal_secrets(&d.secrets)?.as_deref(),
+                    d.account_id.as_deref(),
+                )
+                .await?;
+            return Ok(Ingest::Known);
+        }
+
+        let previous = self.repo.discovery_by_external(integration, &d.external_id).await?;
+        let now = Utc::now();
+        let status = match previous.as_ref().map(|p| p.status.as_str()) {
+            Some("ignored") => "ignored",
+            _ => "pending",
+        };
+        let rec = DiscoveryRecord {
+            id: previous.as_ref().map_or_else(|| Uuid::new_v4().to_string(), |p| p.id.clone()),
+            integration_type: integration.into(),
+            external_id: d.external_id.clone(),
+            account_id: d.account_id.clone(),
+            name: d.name.clone(),
+            device_type: d.device_type.as_str().into(),
+            model: d.model.clone(),
+            ip_address: d.ip_address.clone(),
+            mac_address: d.mac_address.clone(),
+            config_json: d.config.to_string(),
+            secrets_enc: self.seal_secrets(&d.secrets)?,
+            note: d.note.clone(),
+            status: status.into(),
+            discovered_at: previous.as_ref().map_or(now, |p| p.discovered_at),
+            last_seen: now,
+        };
+        self.repo.upsert_discovery(&rec).await?;
+
+        let is_new = previous.is_none() || previous.as_ref().is_some_and(|p| p.status == "adopted");
+        if !is_new || status != "pending" {
+            return Ok(Ingest::Known);
+        }
+
+        if settings.auto_adopt && rec.note.is_none() {
+            let device = self.adopt(&rec.id, AdoptRequest::default()).await?;
+            if settings.notify {
+                self.notifier
+                    .notify(
+                        "success",
+                        "New device added",
+                        &format!("{} ({}) was found and added automatically", device.name, integration),
+                        Some(&format!("/devices/{}", device.id)),
+                    )
+                    .await;
+            }
+            return Ok(Ingest::Adopted);
+        }
+
+        self.bus.publish(SystemEvent::DeviceDiscovered {
+            discovery_id: rec.id.clone(),
+            name: rec.name.clone(),
+            integration: integration.into(),
+        });
+        if settings.notify {
+            self.notifier
+                .notify(
+                    "info",
+                    "New device found",
+                    &format!("{} ({}) is ready to add", rec.name, integration),
+                    Some("/devices?tab=discovered"),
+                )
+                .await;
+        }
+        Ok(Ingest::New)
+    }
+
+    pub async fn adopt(self: &Arc<Self>, discovery_id: &str, req: AdoptRequest) -> Result<DeviceRecord, ApiError> {
+        let rec = self
+            .repo
+            .discovery(discovery_id)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Discovered device not found".into()))?;
+        if self.repo.find_by_external(&rec.integration_type, &rec.external_id).await?.is_some() {
+            return Err(ApiError::Conflict("This device is already added".into()));
+        }
+        let plugin = self.plugin(&rec.integration_type)?.clone();
+
+        let mut secrets = self.open_secrets(rec.secrets_enc.as_deref());
+        let mut config: Value = serde_json::from_str(&rec.config_json).unwrap_or(Value::Null);
+        let mut model = rec.model.clone();
+        let mut device_type = rec.device_type.clone();
+        let mut account_id = rec.account_id.clone();
+        let mut mac = rec.mac_address.clone();
+        let mut name = rec.name.clone();
+
+        // Devices that could not be identified during the scan (missing token or
+        // account) are probed again now, with whatever the user supplied.
+        if req.token.is_some() || rec.note.is_some() {
+            if let Some(token) = &req.token {
+                secrets["token"] = Value::String(token.trim().to_string());
+            }
+            let ip = rec
+                .ip_address
+                .as_deref()
+                .ok_or_else(|| ApiError::BadRequest(rec.note.clone().unwrap_or_default()))?;
+            let accounts = self.accounts.contexts(&rec.integration_type).await?;
+            let d = plugin.probe(ip, &secrets, &accounts).await.map_err(|e| match e {
+                CoreError::Unsupported(_) => ApiError::BadRequest(rec.note.clone().unwrap_or_default()),
+                other => other.into(),
+            })?;
+            config = d.config;
+            secrets = d.secrets;
+            model = d.model.or(model);
+            device_type = d.device_type.as_str().into();
+            account_id = d.account_id.or(account_id);
+            mac = d.mac_address.or(mac);
+            if name.starts_with("Xiaomi device") || name.starts_with("Tapo ") {
+                name = d.name;
+            }
+        }
+
+        let now = Utc::now();
+        let device = DeviceRecord {
+            id: Uuid::new_v4().to_string(),
+            name: req.name.filter(|n| !n.trim().is_empty()).unwrap_or(name),
+            room_id: req.room_id.filter(|r| !r.is_empty()),
+            integration_type: rec.integration_type.clone(),
+            device_type,
+            model,
+            ip_address: rec.ip_address.clone(),
+            mac_address: mac,
+            config_json: config.to_string(),
+            state_json: "{}".into(),
+            is_online: true,
+            created_at: now,
+            updated_at: now,
+            external_id: Some(rec.external_id.clone()),
+            account_id,
+            secrets_enc: self.seal_secrets(&secrets)?,
+            icon: None,
+            last_seen: Some(now),
+        };
+        self.repo.insert(&device).await?;
+        self.repo.set_discovery_status(&rec.id, "adopted").await?;
+        self.after_add(&device.id);
+        Ok(device)
+    }
+
+    pub async fn ignore(&self, discovery_id: &str) -> Result<(), ApiError> {
+        self.repo.set_discovery_status(discovery_id, "ignored").await?;
+        Ok(())
+    }
+
+    pub async fn add_manual(self: &Arc<Self>, req: ManualAddRequest) -> Result<DeviceRecord, ApiError> {
+        let plugin = self.plugin(&req.integration_type)?.clone();
+        let accounts = self.accounts.contexts(&req.integration_type).await?;
+        let secrets = match &req.token {
+            Some(t) => json!({ "token": t.trim() }),
+            None => json!({}),
+        };
+        let d = plugin.probe(req.host.trim(), &secrets, &accounts).await?;
+        if self.repo.find_by_external(&req.integration_type, &d.external_id).await?.is_some() {
+            return Err(ApiError::Conflict("This device is already added".into()));
+        }
+        let now = Utc::now();
+        let device = DeviceRecord {
+            id: Uuid::new_v4().to_string(),
+            name: req.name.filter(|n| !n.trim().is_empty()).unwrap_or(d.name),
+            room_id: req.room_id.filter(|r| !r.is_empty()),
+            integration_type: req.integration_type.clone(),
+            device_type: d.device_type.as_str().into(),
+            model: d.model,
+            ip_address: d.ip_address.or(Some(req.host.trim().to_string())),
+            mac_address: d.mac_address,
+            config_json: d.config.to_string(),
+            state_json: d.state.map(|s| serde_json::to_string(&s).unwrap_or_default()).unwrap_or_else(|| "{}".into()),
+            is_online: true,
+            created_at: now,
+            updated_at: now,
+            external_id: Some(d.external_id.clone()),
+            account_id: d.account_id,
+            secrets_enc: self.seal_secrets(&d.secrets)?,
+            icon: None,
+            last_seen: Some(now),
+        };
+        self.repo.insert(&device).await?;
+        self.repo.delete_discovery_for(&req.integration_type, &d.external_id).await?;
+        self.after_add(&device.id);
+        Ok(device)
+    }
+
+    fn after_add(self: &Arc<Self>, device_id: &str) {
+        self.bus.publish(SystemEvent::DeviceAdded { device_id: device_id.into() });
+        let this = self.clone();
+        let id = device_id.to_string();
+        tokio::spawn(async move {
+            if let Err(e) = this.refresh(&id).await {
+                tracing::debug!("initial refresh failed: {e}");
+            }
+        });
+    }
+
+    pub async fn remove(&self, device_id: &str) -> Result<(), ApiError> {
+        let rec = self.get(device_id).await?;
+        self.repo.delete(&rec.id).await?;
+        if let Some(ext) = &rec.external_id {
+            // Forget the discovery entry so the device can be found again.
+            self.repo.delete_discovery_for(&rec.integration_type, ext).await?;
+        }
+        self.bus.publish(SystemEvent::DeviceRemoved { device_id: rec.id });
+        Ok(())
+    }
+}
+
+enum Ingest {
+    Known,
+    New,
+    Adopted,
+}
