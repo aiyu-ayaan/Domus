@@ -1,98 +1,74 @@
-# Docus Smart Home Assistant
+# Docus
 
-Docus is a high-performance smart home assistant platform built with Rust, SQLite, MQTT, React, and Electron. Designed for local-first execution on home servers, Docus brings pluggable integrations for Tuya (via zero-admin QR pairing), Xiaomi, and Tapo, coupled with an Apple Liquid Glass user interface.
+A local-first smart-home hub for your home server. Rust backend, SQLite,
+React web UI (with an Electron desktop shell), and pluggable integrations for
+**Tuya / Smart Life** (QR-code login, no developer account), **TP-Link Tapo**
+(local) and **Xiaomi Mi Home** (local, tokens from your Mi account).
 
-## Tech Stack
+- Automatic discovery of new devices, with an inbox or auto-add
+- Live dashboard: power draw, bill so far and projected bill, air quality
+- Rooms, device groups, scenes and automations
+- Multiple users with admin / member / guest roles and per-room access
+- HTTPS by default; credentials and device keys encrypted at rest
 
-- **Backend**: Rust (Axum, SQLx, Tokio, Rumqttc, Argon2, JWT)
-- **Shared Logic**: `crates/home-core` (Domain models, device abstractions, traits)
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS (Apple Liquid Glass styling)
-- **Desktop**: Electron wrapper (`apps/desktop`)
-- **Database**: SQLite (local encrypted storage)
-- **Message Broker**: Embedded / Mosquitto MQTT
+Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs/ARCHITECTURE.md).
+Progress: [`development/TODO.md`](development/TODO.md).
 
-## Architecture Overview
+## Requirements
 
-```mermaid
-flowchart TD
-    subgraph UI ["Client Layer"]
-        Web["React 18 Web UI (Apple Liquid Glass)"]
-        Desktop["Electron Desktop App"]
-    end
+- Rust 1.80+ (`cargo`)
+- Node.js 18+ and `pnpm`
 
-    subgraph Backend ["Rust Modular Monolith (backend/)"]
-        API["Axum API & Auth Middleware"]
-        EventBus["Tokio Broadcast EventBus"]
-        Engine["Automation & Rules Engine"]
-        
-        subgraph Modules ["Core Modules"]
-            Auth["Auth & Multi-Account"]
-            Devices["Device Registry"]
-            Rooms["Rooms & Zones"]
-            Energy["Energy & Tariff Billing"]
-            Automations["Automations & Triggers"]
-        end
-
-        subgraph Integrations ["Hardware Integrations"]
-            Tuya["Tuya (QR Pairing)"]
-            Tapo["TP-Link Tapo (LAN)"]
-            Xiaomi["Xiaomi MiHome"]
-            MQTT["MQTT / Zigbee2MQTT"]
-        end
-
-        Workers["Device & Scheduler Workers"]
-    end
-
-    subgraph Storage ["Persistence & Broker"]
-        DB[(SQLite Database)]
-        Broker[("Mosquitto MQTT Broker")]
-    end
-
-    Web -->|HTTP / REST| API
-    Desktop -->|HTTP / REST| API
-    API --> Modules
-    Modules --> DB
-    Modules --> EventBus
-    EventBus --> Engine
-    Engine --> Integrations
-    Integrations --> Broker
-    Workers --> EventBus
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18+)
-- `pnpm` (v9+)
-- Rust toolchain (`cargo` 1.80+)
-
-### Setup
+## Run in development
 
 ```bash
-# Install frontend dependencies
 pnpm install
+npm run dev            # backend (https://127.0.0.1:8443) + web (http://localhost:3000)
 
-# Build & verify backend
-cargo check
+npm run dev:backend    # backend only
+npm run dev:web        # web only (proxies /api to the backend)
+npm run dev:desktop    # Electron, loads http://localhost:3000
 ```
 
-### Running in Development
+Open http://localhost:3000. The first visit asks you to create the
+administrator account. Development mode enables simulated **demo devices** so
+you can try everything without hardware (`config/development.toml`).
+
+## Run on the home server
 
 ```bash
-# Run both backend and frontend concurrently
-pnpm run dev
-
-# Or run individually:
-pnpm run dev:backend   # Rust server on http://127.0.0.1:8080
-pnpm run dev:web       # React web app on http://localhost:3000
-pnpm run dev:desktop   # Electron desktop app
+pnpm build:web                     # builds apps/web/dist, served by the backend
+APP_ENV=production cargo run --release --manifest-path backend/Cargo.toml
 ```
 
-### Configuration
+Then open `https://<server-ip>:8443`. Desktop: `DOCUS_URL=https://<server-ip>:8443 pnpm dev:desktop`.
 
-Copy `.env.example` to `.env`:
+On first start Docus creates `data/` with:
+
+| File | Purpose |
+|---|---|
+| `docus.db` | SQLite database |
+| `master.key` | encrypts integration credentials and device keys — **back it up** |
+| `jwt.secret` | signs sessions |
+| `tls/` | self-signed certificate (replace via `tls.cert_path` / `tls.key_path`) |
+
+Settings live in `config/default.toml`; any key can be overridden with
+`DOCUS__SECTION__KEY` environment variables (see `.env.example`).
+
+## Connecting devices
+
+| Brand | How |
+|---|---|
+| Tuya / Smart Life | Plugins → *Scan QR to link*. Enter the **User Code** from Smart Life (Me → Settings → Account and Security → User Code), then scan the QR in the app. |
+| Tapo | Plugins → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. |
+| Xiaomi | Plugins → *Link account* with your Mi account and server region. Tokens are fetched once; control is local. Devices can also be added with a token. |
+
+New devices appear under **Devices → Discovered**. Turn on *Add new devices
+automatically* there to skip the inbox.
+
+## Tests
+
 ```bash
-cp .env.example .env
+cargo test --workspace
+pnpm --filter @docus/web exec tsc -b
 ```
-Config files are located in `config/default.toml` and `config/development.toml`.

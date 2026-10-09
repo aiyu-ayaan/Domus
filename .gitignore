@@ -45,3 +45,4 @@ apps/desktop/dist/
 
 # Runtime data (database, master key, TLS)
 data/
+__pycache__/
