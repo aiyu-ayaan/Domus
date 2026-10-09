@@ -35,10 +35,6 @@ export const deviceIcons: Record<DeviceType, Icon> = {
   other: Cpu,
 }
 
-/** Token used to tint an "on" device. */
-export const deviceTone = (t: DeviceType): 'light' | 'air' | 'power' | 'accent' =>
-  t === 'light' ? 'light' : t === 'air_purifier' || t === 'fan' || t === 'climate' ? 'air' : t === 'plug' || t === 'switch' ? 'power' : 'accent'
-
 export const deviceTypeLabel: Record<DeviceType, string> = {
   switch: 'Switch',
   plug: 'Smart plug',
@@ -55,7 +51,6 @@ export const integrationLabel: Record<string, string> = {
   tuya: 'Smart Life',
   tapo: 'Tapo',
   xiaomi: 'Mi Home',
-  virtual: 'Demo',
   mqtt: 'MQTT',
 }
 

@@ -1,72 +1,67 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PencilSimple, Plus, Trash, UserCircle } from '@phosphor-icons/react'
-import { Badge, Card, PageHeader, SectionTitle } from '@/components/Layout'
-import { Button } from '@/components/Button'
-import { Segmented, Switch } from '@/components/Controls'
-import { Field, SelectField } from '@/components/Field'
-import { Sheet, Confirm } from '@/components/Sheet'
+import { PencilSimple, Plus, Trash } from '@phosphor-icons/react'
+import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Segmented, Switch } from '@/components/ui/Controls'
+import { Checkbox, Field, SelectField } from '@/components/ui/Field'
+import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { api } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useRooms } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
-import { stagger } from '@/lib/motion'
-import type { Role, User } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
+import type { Role, User } from '@/lib/types'
 
-const roleTone: Record<Role, 'accent' | 'info' | 'muted'> = { admin: 'accent', member: 'info', guest: 'muted' }
 const roleHelp: Record<Role, string> = {
-  admin: 'Full access: devices, plugins, users and settings',
-  member: 'Can control devices in their rooms',
-  guest: 'Can view devices in their rooms',
+  admin: 'Full access, including devices, integrations, people and settings.',
+  member: 'Can view and control devices in their rooms.',
+  guest: 'Can view devices in their rooms.',
 }
 
 export function SettingsView() {
   const { user } = useAuth()
   const admin = useIsAdmin()
   const [theme, setTheme] = useTheme()
-
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show">
+    <>
       <PageHeader title="Settings" />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <div className="flex items-center gap-4">
-            <UserCircle size={56} weight="duotone" className="text-accent" aria-hidden />
-            <div>
-              <p className="text-lg font-bold">{user?.username}</p>
-              <p className="text-sm text-muted">{user?.email}</p>
-              <div className="mt-1">{user && <Badge tone={roleTone[user.role]}>{user.role}</Badge>}</div>
+          <CardHeader title="Account" />
+          <div className="divide-y divide-border">
+            <div className="flex min-h-12 items-center justify-between px-4">
+              <span className="text-muted">Username</span>
+              <span>{user?.username}</span>
+            </div>
+            <div className="flex min-h-12 items-center justify-between px-4">
+              <span className="text-muted">Email</span>
+              <span className="truncate">{user?.email || '—'}</span>
+            </div>
+            <div className="flex min-h-12 items-center justify-between px-4">
+              <span className="text-muted">Role</span>
+              <Badge>{user?.role}</Badge>
             </div>
           </div>
-          <PasswordForm />
         </Card>
         <Card>
-          <h2 className="text-lg font-bold">Appearance</h2>
-          <p className="mt-1 text-sm text-muted">Follows your device by default.</p>
-          <Segmented
-            label="Theme"
-            className="mt-4"
-            value={theme}
-            onChange={setTheme}
-            options={[
-              { value: 'system', label: 'System' },
-              { value: 'dark', label: 'Dark' },
-              { value: 'light', label: 'Light' },
-            ]}
-          />
-          <p className="mt-4 text-sm text-muted">
-            Reduced motion and reduced transparency from your system settings are respected automatically.
-          </p>
+          <CardHeader title="Appearance" />
+          <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
+            <div>
+              <p>Theme</p>
+              <p className="text-label text-muted">System follows your device setting.</p>
+            </div>
+            <Segmented size="sm" label="Theme" value={theme} onChange={setTheme} options={[{ value: 'system', label: 'System' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+          </div>
         </Card>
+        <PasswordCard />
       </div>
-      {admin && <UsersSection />}
-    </motion.div>
+      {admin && <People />}
+    </>
   )
 }
 
-function PasswordForm() {
+function PasswordCard() {
   const toast = useToast()
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
@@ -80,24 +75,26 @@ function PasswordForm() {
     onError: (e) => toast.push({ tone: 'error', title: 'Could not change password', message: errorMessage(e) }),
   })
   return (
-    <form
-      className="mt-6 flex flex-col gap-3 border-t border-line/10 pt-5"
-      onSubmit={(e) => {
-        e.preventDefault()
-        change.mutate()
-      }}
-    >
-      <h3 className="font-bold">Change password</h3>
-      <Field label="Current password" type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} />
-      <Field label="New password" type="password" autoComplete="new-password" required minLength={8} hint="At least 8 characters." value={next} onChange={(e) => setNext(e.target.value)} />
-      <Button type="submit" variant="glass" loading={change.isPending} disabled={!current || next.length < 8} className="self-start">
-        Update password
-      </Button>
-    </form>
+    <Card>
+      <CardHeader title="Password" />
+      <form
+        className="flex flex-col gap-4 p-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          change.mutate()
+        }}
+      >
+        <Field label="Current password" type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} />
+        <Field label="New password" type="password" autoComplete="new-password" required minLength={8} hint="At least 8 characters." value={next} onChange={(e) => setNext(e.target.value)} />
+        <Button type="submit" loading={change.isPending} disabled={!current || next.length < 8} className="self-start">
+          Update password
+        </Button>
+      </form>
+    </Card>
   )
 }
 
-function UsersSection() {
+function People() {
   const { user: me } = useAuth()
   const qc = useQueryClient()
   const toast = useToast()
@@ -111,52 +108,33 @@ function UsersSection() {
       qc.invalidateQueries({ queryKey: keys.users })
       setDeleting(null)
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not remove user', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not remove', message: errorMessage(e) }),
   })
   return (
-    <>
-      <SectionTitle
-        action={
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => setEditing('new')}>
-            Add person
-          </Button>
-        }
-      >
-        People & access
-      </SectionTitle>
-      <Card className="p-2 sm:p-3">
-        <ul className="flex flex-col">
-          {users.map((u) => (
-            <li key={u.id} className="flex flex-wrap items-center gap-3 rounded-3xl p-3 hover:bg-line/[0.03]">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-line/[0.08] font-bold uppercase">{u.username.slice(0, 1)}</span>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">
-                  {u.username} {u.id === me?.id && <span className="text-sm font-normal text-muted">(you)</span>}
-                </p>
-                <p className="truncate text-sm text-muted">
-                  {u.role === 'admin' || u.all_rooms
-                    ? 'All rooms'
-                    : u.room_ids.map((id) => rooms.find((r) => r.id === id)?.name).filter(Boolean).join(', ') || 'No rooms'}
-                </p>
-              </div>
-              <Badge tone={roleTone[u.role]}>{u.role}</Badge>
-              <Button variant="ghost" size="sm" aria-label={`Edit ${u.username}`} icon={<PencilSimple size={18} />} onClick={() => setEditing(u)} />
-              {u.id !== me?.id && <Button variant="ghost" size="sm" aria-label={`Remove ${u.username}`} icon={<Trash size={18} />} onClick={() => setDeleting(u)} />}
-            </li>
-          ))}
-        </ul>
-      </Card>
+    <Card className="mt-6">
+      <CardHeader title={`People and access · ${users.length}`} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>Add person</Button>} />
+      <ul className="divide-y divide-border">
+        {users.map((u) => (
+          <li key={u.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase">{u.username.slice(0, 1)}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-body font-medium">
+                {u.username}
+                {u.id === me?.id && <span className="font-normal text-subtle"> (you)</span>}
+              </p>
+              <p className="truncate text-label text-muted">
+                {u.role === 'admin' || u.all_rooms ? 'All rooms' : u.room_ids.map((id) => rooms.find((r) => r.id === id)?.name).filter(Boolean).join(', ') || 'No rooms'}
+              </p>
+            </div>
+            <Badge tone={u.role === 'admin' ? 'info' : 'neutral'}>{u.role}</Badge>
+            <Button variant="ghost" size="sm" aria-label={`Edit ${u.username}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(u)} />
+            {u.id !== me?.id && <Button variant="ghost" size="sm" aria-label={`Remove ${u.username}`} icon={<Trash size={16} />} onClick={() => setDeleting(u)} />}
+          </li>
+        ))}
+      </ul>
       <UserSheet user={editing} onClose={() => setEditing(null)} />
-      <Confirm
-        open={!!deleting}
-        onClose={() => setDeleting(null)}
-        onConfirm={() => deleting && remove.mutate(deleting.id)}
-        loading={remove.isPending}
-        title={`Remove ${deleting?.username}?`}
-        message="They will be signed out and lose access immediately."
-        confirmLabel="Remove"
-      />
-    </>
+      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => deleting && remove.mutate(deleting.id)} loading={remove.isPending} title={`Remove ${deleting?.username}?`} message="They lose access immediately." confirmLabel="Remove" />
+    </Card>
   )
 }
 
@@ -172,26 +150,16 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
   if (current !== key) {
     setKey(current)
     setError(null)
-    setForm({
-      username: existing?.username ?? '',
-      email: existing?.email ?? '',
-      password: '',
-      role: existing?.role ?? 'member',
-      all_rooms: existing?.all_rooms ?? true,
-      room_ids: existing?.room_ids ?? [],
-    })
+    setForm({ username: existing?.username ?? '', email: existing?.email ?? '', password: '', role: existing?.role ?? 'member', all_rooms: existing?.all_rooms ?? true, room_ids: existing?.room_ids ?? [] })
   }
   const save = useMutation({
-    mutationFn: () =>
-      existing
-        ? api.updateUser(existing.id, {
-            email: form.email,
-            role: form.role,
-            all_rooms: form.all_rooms,
-            room_ids: form.room_ids,
-            ...(form.password ? { password: form.password } : {}),
-          })
-        : api.createUser(form),
+    mutationFn: async () => {
+      if (existing) {
+        await api.updateUser(existing.id, { email: form.email, role: form.role, all_rooms: form.all_rooms, room_ids: form.room_ids, ...(form.password ? { password: form.password } : {}) })
+      } else {
+        await api.createUser(form)
+      }
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.users })
       toast.push({ tone: 'success', title: existing ? 'Access updated' : `${form.username} added` })
@@ -199,9 +167,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     },
     onError: (e) => setError(errorMessage(e)),
   })
-  const toggleRoom = (id: string) =>
-    setForm((f) => ({ ...f, room_ids: f.room_ids.includes(id) ? f.room_ids.filter((x) => x !== id) : [...f.room_ids, id] }))
-
+  const toggleRoom = (id: string) => setForm((f) => ({ ...f, room_ids: f.room_ids.includes(id) ? f.room_ids.filter((x) => x !== id) : [...f.room_ids, id] }))
   return (
     <Sheet
       open={!!user}
@@ -209,15 +175,10 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       title={existing ? `Edit ${existing.username}` : 'Add person'}
       footer={
         <>
-          {error && (
-            <p role="alert" className="mr-auto self-center text-sm text-danger">
-              {error}
-            </p>
-          )}
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" loading={save.isPending} onClick={() => save.mutate()} disabled={!existing && (!form.username || form.password.length < 8)}>
+          <Button variant="primary" loading={save.isPending} disabled={!existing && (!form.username || form.password.length < 8)} onClick={() => save.mutate()}>
             Save
           </Button>
         </>
@@ -226,43 +187,35 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       <div className="flex flex-col gap-4">
         {!existing && <Field label="Username" required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
         <Field label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <Field
-          label={existing ? 'New password (optional)' : 'Password'}
-          type="password"
-          autoComplete="new-password"
-          required={!existing}
-          hint="At least 8 characters."
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+        <Field label={existing ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing} hint={existing ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
           <option value="admin">Admin</option>
           <option value="member">Member</option>
           <option value="guest">Guest</option>
         </SelectField>
         {form.role !== 'admin' && (
-          <div className="flex flex-col gap-3 rounded-3xl bg-line/[0.04] p-4">
-            <div className="flex items-center justify-between gap-3">
+          <div className="rounded-lg border border-border">
+            <div className="flex min-h-12 items-center justify-between gap-3 px-3">
               <div>
-                <p className="font-semibold">Access to all rooms</p>
-                <p className="text-sm text-muted">Turn off to choose specific rooms</p>
+                <p>All rooms</p>
+                <p className="text-label text-muted">Turn off to choose specific rooms.</p>
               </div>
               <Switch checked={form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: v })} label="Access to all rooms" />
             </div>
             {!form.all_rooms && (
-              <fieldset className="flex flex-col gap-1">
+              <fieldset className="border-t border-border p-1">
                 <legend className="sr-only">Rooms</legend>
-                {rooms.length === 0 && <p className="text-sm text-muted">Create rooms first.</p>}
+                {rooms.length === 0 && <p className="p-2 text-label text-muted">Create rooms first.</p>}
                 {rooms.map((r) => (
-                  <label key={r.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-2 hover:bg-line/[0.05]">
-                    <input type="checkbox" className="h-5 w-5 accent-[rgb(var(--accent))]" checked={form.room_ids.includes(r.id)} onChange={() => toggleRoom(r.id)} />
+                  <Checkbox key={r.id} checked={form.room_ids.includes(r.id)} onChange={() => toggleRoom(r.id)}>
                     {r.name}
-                  </label>
+                  </Checkbox>
                 ))}
               </fieldset>
             )}
           </div>
         )}
+        <ErrorText>{error}</ErrorText>
       </div>
     </Sheet>
   )

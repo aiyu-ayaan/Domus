@@ -1,140 +1,95 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { motion } from 'motion/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  ArrowCounterClockwise,
-  MagnifyingGlass,
-  Plus,
-  Power,
-  Broadcast,
-  SquaresFour,
-  Stack,
-  Trash,
-  PencilSimple,
-  WarningCircle,
-} from '@phosphor-icons/react'
-import { PageHeader, EmptyState, Badge, Card, Skeleton, SectionTitle } from '@/components/Layout'
-import { Button } from '@/components/Button'
-import { Segmented, Switch } from '@/components/Controls'
-import { DeviceTile } from '@/components/DeviceTile'
-import { DeviceSheet } from '@/components/DeviceSheet'
-import { Sheet, Confirm } from '@/components/Sheet'
-import { Field, SelectField } from '@/components/Field'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Broadcast, MagnifyingGlass, PencilSimple, Plus, SquaresFour, Stack, Trash, WarningCircle } from '@phosphor-icons/react'
+import { Badge, Card, CardHeader, EmptyState, ErrorText, PageHeader, Skeleton } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Segmented, Switch } from '@/components/ui/Controls'
+import { Sheet, Confirm } from '@/components/ui/Sheet'
+import { Checkbox, Field, SelectField, inputCls } from '@/components/ui/Field'
+import { DeviceRow } from '@/components/devices/DeviceRow'
+import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useDiscovered, useGroups, useRooms } from '@/lib/queries'
 import { deviceIcons, deviceTypeLabel, integrationLabel } from '@/lib/devices'
 import { errorMessage, useToast } from '@/lib/toast'
 import { timeAgo } from '@/lib/format'
-import { stagger, rise } from '@/lib/motion'
+import { cn } from '@/lib/cn'
 import type { Discovered, DiscoverySettings, Group } from '@/lib/types'
-import { useQuery } from '@tanstack/react-query'
 
-type Tab = 'mine' | 'discovered' | 'groups'
+type Tab = 'all' | 'discovered' | 'groups'
 
 export function DevicesView() {
   const admin = useIsAdmin()
   const [params, setParams] = useSearchParams()
-  const tab = (params.get('tab') as Tab) || 'mine'
+  const tab = (params.get('tab') as Tab) || 'all'
   const { data: pending = [] } = useDiscovered('pending')
   const [manual, setManual] = useState(false)
-
   const tabs: { value: Tab; label: string }[] = [
-    { value: 'mine', label: 'My devices' },
-    ...(admin ? [{ value: 'discovered' as Tab, label: `Discovered${pending.length ? ` (${pending.length})` : ''}` }] : []),
+    { value: 'all', label: 'All devices' },
+    ...(admin ? [{ value: 'discovered' as Tab, label: pending.length ? `Discovered · ${pending.length}` : 'Discovered' }] : []),
     { value: 'groups', label: 'Groups' },
   ]
-
   return (
-    <div>
+    <>
       <PageHeader
         title="Devices"
-        subtitle="Everything connected to your home"
-        actions={
-          admin && (
-            <Button variant="glass" icon={<Plus size={18} />} onClick={() => setManual(true)}>
-              Add by IP
-            </Button>
-          )
-        }
+        description="Everything connected to your home."
+        actions={admin && <Button icon={<Plus size={16} />} onClick={() => setManual(true)}>Add by IP</Button>}
       />
-      <Segmented label="Device sections" value={tab} options={tabs} onChange={(v) => setParams(v === 'mine' ? {} : { tab: v })} className="mb-6" />
-      {tab === 'mine' && <MyDevices />}
+      <Segmented label="Sections" value={tab} options={tabs} onChange={(v) => setParams(v === 'all' ? {} : { tab: v })} className="mb-6" />
+      {tab === 'all' && <AllDevices />}
       {tab === 'discovered' && admin && <DiscoveredTab />}
       {tab === 'groups' && <GroupsTab />}
       <ManualAddSheet open={manual} onClose={() => setManual(false)} />
-    </div>
-  )
-}
-
-function MyDevices() {
-  const { data: devices, isLoading } = useDevices()
-  const { data: rooms = [] } = useRooms()
-  const [q, setQ] = useState('')
-  const [open, setOpen] = useState<string | null>(null)
-  const list = (devices ?? []).filter((d) => `${d.name} ${d.model ?? ''} ${d.device_type}`.toLowerCase().includes(q.toLowerCase()))
-  const selected = devices?.find((d) => d.id === open) ?? null
-
-  // Group by room, unassigned last.
-  const sections = useMemo(() => {
-    const out = rooms.map((r) => ({ id: r.id, name: r.name, items: list.filter((d) => d.room_id === r.id) }))
-    out.push({ id: 'none', name: 'No room', items: list.filter((d) => !d.room_id || !rooms.some((r) => r.id === d.room_id)) })
-    return out.filter((s) => s.items.length)
-  }, [list, rooms])
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }, (_, i) => (
-          <Skeleton key={i} className="h-[148px]" />
-        ))}
-      </div>
-    )
-  }
-  if (!devices?.length) {
-    return (
-      <EmptyState
-        icon={<SquaresFour size={30} />}
-        title="No devices yet"
-        message="Link an account in Plugins or check the Discovered tab — Docus scans your network automatically."
-      />
-    )
-  }
-  return (
-    <>
-      <div className="relative mb-2 max-w-md">
-        <MagnifyingGlass size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
-        <input
-          type="search"
-          aria-label="Search devices"
-          placeholder="Search devices"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="glass-thin h-12 w-full rounded-2xl pl-12 pr-4 text-base placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent/50"
-        />
-      </div>
-      {sections.length === 0 && <p className="py-10 text-center text-muted">No devices match “{q}”.</p>}
-      {sections.map((s) => (
-        <section key={s.id} aria-label={s.name}>
-          <SectionTitle>
-            {s.name} <span className="ml-1 text-sm font-semibold text-subtle">{s.items.length}</span>
-          </SectionTitle>
-          <motion.div variants={stagger} initial="hidden" animate="show" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-            {s.items.map((d) => (
-              <DeviceTile key={d.id} device={d} onOpen={() => setOpen(d.id)} />
-            ))}
-          </motion.div>
-        </section>
-      ))}
-      <DeviceSheet device={selected} onClose={() => setOpen(null)} />
     </>
   )
 }
 
-// --------------------------------------------------------------------------
-// Discovery inbox
-// --------------------------------------------------------------------------
+function AllDevices() {
+  const { data: devices, isLoading } = useDevices()
+  const { data: rooms = [] } = useRooms()
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState<string | null>(null)
+  const list = (devices ?? []).filter((d) => `${d.name} ${d.model ?? ''} ${deviceTypeLabel[d.device_type]}`.toLowerCase().includes(q.trim().toLowerCase()))
+  const sections = useMemo(() => {
+    const out = rooms.map((r) => ({ id: r.id, name: r.name, items: list.filter((d) => d.room_id === r.id) }))
+    out.push({ id: 'none', name: 'Unassigned', items: list.filter((d) => !d.room_id || !rooms.some((r) => r.id === d.room_id)) })
+    return out.filter((s) => s.items.length)
+  }, [list, rooms])
+
+  if (isLoading) return <Skeleton className="h-64" />
+  if (!devices?.length) {
+    return <EmptyState icon={<SquaresFour size={28} />} title="No devices" message="Link an integration or check Discovered — Docus scans your network automatically." />
+  }
+  return (
+    <>
+      <div className="relative mb-4 max-w-sm">
+        <MagnifyingGlass size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
+        <input type="search" aria-label="Search devices" placeholder="Search devices" value={q} onChange={(e) => setQ(e.target.value)} className={cn(inputCls, 'pl-9')} />
+      </div>
+      {sections.length === 0 && <p className="py-10 text-center text-muted">No devices match “{q}”.</p>}
+      <div className="flex flex-col gap-6">
+        {sections.map((s) => (
+          <Card key={s.id}>
+            <CardHeader title={`${s.name} · ${s.items.length}`} />
+            <ul className="divide-y divide-border">
+              {s.items.map((d) => (
+                <DeviceRow key={d.id} device={d} onOpen={() => setOpen(d.id)} />
+              ))}
+            </ul>
+          </Card>
+        ))}
+      </div>
+      <DeviceDrawer device={devices.find((d) => d.id === open) ?? null} onClose={() => setOpen(null)} />
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Discovery
+// ---------------------------------------------------------------------------
 
 function DiscoveredTab() {
   const qc = useQueryClient()
@@ -143,111 +98,110 @@ function DiscoveredTab() {
   const { data: ignored = [] } = useDiscovered('ignored')
   const [adopting, setAdopting] = useState<Discovered | null>(null)
   const [showIgnored, setShowIgnored] = useState(false)
+  const refresh = () => qc.invalidateQueries({ queryKey: ['discovered'] })
 
   const scan = useMutation({
     mutationFn: api.scan,
     onSuccess: (r) => {
-      qc.invalidateQueries({ queryKey: ['discovered'] })
+      refresh()
       toast.push({
         tone: r.errors.length ? 'warning' : 'success',
-        title: r.new ? `Found ${r.new} new ${r.new === 1 ? 'device' : 'devices'}` : 'Scan complete — nothing new',
+        title: r.new ? `${r.new} new ${r.new === 1 ? 'device' : 'devices'} found` : 'Scan complete. Nothing new.',
         message: r.errors.map((e) => `${integrationLabel[e.integration] ?? e.integration}: ${e.message}`).join('\n') || undefined,
       })
     },
     onError: (e) => toast.push({ tone: 'error', title: 'Scan failed', message: errorMessage(e) }),
   })
-  const ignore = useMutation({
-    mutationFn: api.ignore,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['discovered'] }),
-  })
-  const restore = useMutation({
-    mutationFn: api.restore,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['discovered'] }),
-  })
+  const ignore = useMutation({ mutationFn: api.ignore, onSuccess: refresh })
+  const restore = useMutation({ mutationFn: api.restore, onSuccess: refresh })
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <DiscoverySettingsCard onScan={() => scan.mutate()} scanning={scan.isPending} />
-
-      {isLoading ? (
-        <Skeleton className="h-24" />
-      ) : pending.length === 0 ? (
-        <EmptyState
-          icon={<Broadcast size={30} />}
-          title="No new devices"
-          message="Docus listens on your network and checks linked accounts. New devices appear here as soon as they're found."
-        />
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {pending.map((d) => (
-            <DiscoveredRow
-              key={d.id}
-              d={d}
-              actions={
-                <>
-                  <Button variant="ghost" size="sm" onClick={() => ignore.mutate(d.id)}>
-                    Ignore
-                  </Button>
-                  <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={() => setAdopting(d)}>
-                    Add
-                  </Button>
-                </>
-              }
-            />
-          ))}
-        </ul>
-      )}
-
+      <Card>
+        <CardHeader title={`Waiting to be added · ${pending.length}`} />
+        {isLoading ? (
+          <div className="p-4">
+            <Skeleton className="h-12" />
+          </div>
+        ) : pending.length === 0 ? (
+          <p className="px-4 py-8 text-center text-muted">No new devices. They appear here as soon as they are found.</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {pending.map((d) => (
+              <DiscoveredRow
+                key={d.id}
+                d={d}
+                actions={
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => ignore.mutate(d.id)}>
+                      Ignore
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={() => setAdopting(d)}>
+                      Add
+                    </Button>
+                  </>
+                }
+              />
+            ))}
+          </ul>
+        )}
+      </Card>
       {ignored.length > 0 && (
         <div>
-          <button onClick={() => setShowIgnored((v) => !v)} className="cursor-pointer text-sm font-semibold text-muted hover:text-fg" aria-expanded={showIgnored}>
-            {showIgnored ? 'Hide' : 'Show'} {ignored.length} ignored
-          </button>
+          <Button variant="ghost" size="sm" aria-expanded={showIgnored} onClick={() => setShowIgnored((v) => !v)}>
+            {showIgnored ? 'Hide' : 'Show'} ignored ({ignored.length})
+          </Button>
           {showIgnored && (
-            <ul className="mt-3 flex flex-col gap-3">
-              {ignored.map((d) => (
-                <DiscoveredRow
-                  key={d.id}
-                  d={d}
-                  actions={
-                    <Button variant="ghost" size="sm" icon={<ArrowCounterClockwise size={16} />} onClick={() => restore.mutate(d.id)}>
-                      Restore
-                    </Button>
-                  }
-                />
-              ))}
-            </ul>
+            <Card className="mt-2">
+              <ul className="divide-y divide-border">
+                {ignored.map((d) => (
+                  <DiscoveredRow key={d.id} d={d} actions={<Button size="sm" onClick={() => restore.mutate(d.id)}>Restore</Button>} />
+                ))}
+              </ul>
+            </Card>
           )}
         </div>
       )}
       <AdoptSheet item={adopting} onClose={() => setAdopting(null)} />
-    </motion.div>
+    </div>
   )
 }
 
 function DiscoveredRow({ d, actions }: { d: Discovered; actions: React.ReactNode }) {
   const Icon = deviceIcons[d.device_type]
   return (
-    <motion.li variants={rise} layout className="surface flex flex-wrap items-center gap-4 rounded-4xl p-4">
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-line/[0.08] text-muted">
-        <Icon size={24} aria-hidden />
-      </span>
-      <div className="min-w-0 flex-1 basis-48">
+    <li className="flex flex-wrap items-center gap-3 px-4 py-3">
+      <Icon size={18} className="shrink-0 text-subtle" aria-hidden />
+      <div className="min-w-0 flex-1 basis-56">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate font-semibold">{d.name}</p>
-          <Badge tone="info">{integrationLabel[d.integration_type] ?? d.integration_type}</Badge>
+          <span className="truncate text-body font-medium">{d.name}</span>
+          <Badge>{integrationLabel[d.integration_type] ?? d.integration_type}</Badge>
         </div>
-        <p className="mt-0.5 truncate text-sm text-muted">
+        <p className="truncate text-label text-muted">
           {[deviceTypeLabel[d.device_type], d.model, d.ip_address].filter(Boolean).join(' · ')} · found {timeAgo(d.discovered_at)}
         </p>
         {d.note && (
-          <p className="mt-1.5 flex items-start gap-1.5 text-sm text-warn">
-            <WarningCircle size={16} className="mt-0.5 shrink-0" aria-hidden /> {d.note}
+          <p className="mt-1 flex items-start gap-1.5 text-label text-warn">
+            <WarningCircle size={14} className="mt-0.5 shrink-0" aria-hidden />
+            {d.note}
           </p>
         )}
       </div>
       <div className="flex gap-2">{actions}</div>
-    </motion.li>
+    </li>
+  )
+}
+
+function SettingRow({ label, hint, children }: { label: string; hint: string; children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-14 items-center justify-between gap-4 px-4 py-2">
+      <div>
+        <p className="text-body">{label}</p>
+        <p className="text-label text-muted">{hint}</p>
+      </div>
+      {children}
+    </div>
   )
 }
 
@@ -261,72 +215,69 @@ function DiscoverySettingsCard({ onScan, scanning }: { onScan: () => void; scann
     onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
   })
   const update = (patch: Partial<DiscoverySettings>) => data && save.mutate({ ...data, ...patch })
-
   return (
-    <Card className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-            <Broadcast size={26} weight="fill" aria-hidden />
-            {data?.enabled && <span className="absolute inset-0 animate-ping rounded-2xl bg-accent/20 motion-reduce:animate-none" aria-hidden />}
-          </span>
-          <div>
-            <p className="font-bold">Automatic discovery</p>
-            <p className="text-sm text-muted">
-              {data?.enabled ? `Scanning every ${data.interval_minutes} min` : 'Background scanning is off'}
-            </p>
-          </div>
+    <Card>
+      <CardHeader
+        title="Automatic discovery"
+        action={
+          <Button size="sm" icon={<Broadcast size={16} />} loading={scanning} onClick={onScan}>
+            Scan now
+          </Button>
+        }
+      />
+      {data ? (
+        <div className="divide-y divide-border">
+          <SettingRow label="Scan in the background" hint="Look for new devices on the network and in linked accounts.">
+            <Switch checked={data.enabled} onChange={(v) => update({ enabled: v })} label="Scan in the background" />
+          </SettingRow>
+          <SettingRow label="Scan interval" hint="Time between background scans.">
+            <Segmented size="sm" label="Scan interval" value={String(data.interval_minutes)} options={['2', '5', '15', '60'].map((v) => ({ value: v, label: `${v} min` }))} onChange={(v) => update({ interval_minutes: Number(v) })} />
+          </SettingRow>
+          <SettingRow label="Add new devices automatically" hint="Skip review. You still get a notification.">
+            <Switch checked={data.auto_adopt} onChange={(v) => update({ auto_adopt: v })} label="Add new devices automatically" />
+          </SettingRow>
+          <SettingRow label="Notify on new devices" hint="Send a notification when something new is found.">
+            <Switch checked={data.notify} onChange={(v) => update({ notify: v })} label="Notify on new devices" />
+          </SettingRow>
         </div>
-        <Button variant="primary" icon={<Broadcast size={18} />} loading={scanning} onClick={onScan}>
-          {scanning ? 'Scanning…' : 'Scan now'}
-        </Button>
-      </div>
-      {data && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ToggleRow label="Scan in the background" hint="Find new devices on your network and linked accounts" checked={data.enabled} onChange={(v) => update({ enabled: v })} />
-          <ToggleRow label="Add new devices automatically" hint="Skip the inbox; you'll get a notification" checked={data.auto_adopt} onChange={(v) => update({ auto_adopt: v })} />
-          <ToggleRow label="Notify me" hint="Send a notification when something new is found" checked={data.notify} onChange={(v) => update({ notify: v })} />
-          <div className="flex items-center justify-between gap-3 rounded-3xl bg-line/[0.04] p-4">
-            <div>
-              <p className="font-semibold">Scan interval</p>
-              <p className="text-sm text-muted">Minutes between scans</p>
-            </div>
-            <Segmented
-              size="sm"
-              label="Scan interval"
-              value={String(data.interval_minutes)}
-              options={['2', '5', '15', '60'].map((v) => ({ value: v, label: `${v}m` }))}
-              onChange={(v) => update({ interval_minutes: Number(v) })}
-            />
-          </div>
+      ) : (
+        <div className="p-4">
+          <Skeleton className="h-40" />
         </div>
       )}
     </Card>
   )
 }
 
-function ToggleRow({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+function RoomSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data: rooms = [] } = useRooms()
   return (
-    <div className="flex items-center justify-between gap-3 rounded-3xl bg-line/[0.04] p-4">
-      <div>
-        <p className="font-semibold">{label}</p>
-        <p className="text-sm text-muted">{hint}</p>
-      </div>
-      <Switch checked={checked} onChange={onChange} label={label} />
-    </div>
+    <SelectField label="Room" value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="">No room</option>
+      {rooms.map((r) => (
+        <option key={r.id} value={r.id}>
+          {r.name}
+        </option>
+      ))}
+    </SelectField>
   )
 }
 
 function AdoptSheet({ item, onClose }: { item: Discovered | null; onClose: () => void }) {
   const qc = useQueryClient()
   const toast = useToast()
-  const { data: rooms = [] } = useRooms()
   const [name, setName] = useState('')
   const [roomId, setRoomId] = useState('')
   const [token, setToken] = useState('')
   const [error, setError] = useState<string | null>(null)
   const needsToken = item?.integration_type === 'xiaomi' && !!item.note
-
+  const close = () => {
+    setName('')
+    setRoomId('')
+    setToken('')
+    setError(null)
+    onClose()
+  }
   const adopt = useMutation({
     mutationFn: () => api.adopt(item!.id, { name: name || undefined, room_id: roomId || undefined, token: token || undefined }),
     onSuccess: (d) => {
@@ -337,26 +288,18 @@ function AdoptSheet({ item, onClose }: { item: Discovered | null; onClose: () =>
     },
     onError: (e) => setError(errorMessage(e)),
   })
-  const close = () => {
-    setName('')
-    setRoomId('')
-    setToken('')
-    setError(null)
-    onClose()
-  }
-
   return (
     <Sheet
       open={!!item}
       onClose={close}
       title={`Add ${item?.name ?? 'device'}`}
-      description={item ? `${integrationLabel[item.integration_type] ?? item.integration_type}${item.ip_address ? ` · ${item.ip_address}` : ''}` : undefined}
+      description={item ? [integrationLabel[item.integration_type] ?? item.integration_type, item.model, item.ip_address].filter(Boolean).join(' · ') : undefined}
       footer={
         <>
           <Button variant="ghost" onClick={close}>
             Cancel
           </Button>
-          <Button variant="primary" loading={adopt.isPending} onClick={() => adopt.mutate()} disabled={needsToken && token.length !== 32}>
+          <Button variant="primary" loading={adopt.isPending} disabled={needsToken && token.length !== 32} onClick={() => adopt.mutate()}>
             Add device
           </Button>
         </>
@@ -364,31 +307,12 @@ function AdoptSheet({ item, onClose }: { item: Discovered | null; onClose: () =>
     >
       <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), adopt.mutate())}>
         <Field label="Name" placeholder={item?.name} value={name} onChange={(e) => setName(e.target.value)} />
-        <SelectField label="Room" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-          <option value="">No room</option>
-          {rooms.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </SelectField>
+        <RoomSelect value={roomId} onChange={setRoomId} />
         {needsToken && (
-          <Field
-            label="Device token"
-            required
-            value={token}
-            onChange={(e) => setToken(e.target.value.trim())}
-            hint="32 hex characters. Easiest: link your Xiaomi account in Plugins and tokens are fetched for you."
-            autoComplete="off"
-            spellCheck={false}
-          />
+          <Field label="Device token" required spellCheck={false} autoComplete="off" value={token} onChange={(e) => setToken(e.target.value.trim())} hint="32 hex characters. Linking your Xiaomi account fetches tokens automatically." />
         )}
-        {item?.note && !needsToken && <p className="rounded-2xl bg-warn/10 p-3 text-sm text-warn">{item.note}</p>}
-        {error && (
-          <p role="alert" className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">
-            {error}
-          </p>
-        )}
+        {item?.note && !needsToken && <p className="text-label text-warn">{item.note}</p>}
+        <ErrorText>{error}</ErrorText>
       </form>
     </Sheet>
   )
@@ -397,7 +321,6 @@ function AdoptSheet({ item, onClose }: { item: Discovered | null; onClose: () =>
 function ManualAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const qc = useQueryClient()
   const toast = useToast()
-  const { data: rooms = [] } = useRooms()
   const [integration, setIntegration] = useState('tapo')
   const [host, setHost] = useState('')
   const [token, setToken] = useState('')
@@ -405,14 +328,7 @@ function ManualAddSheet({ open, onClose }: { open: boolean; onClose: () => void 
   const [roomId, setRoomId] = useState('')
   const [error, setError] = useState<string | null>(null)
   const add = useMutation({
-    mutationFn: () =>
-      api.addManual({
-        integration_type: integration,
-        host,
-        token: integration === 'xiaomi' ? token : undefined,
-        name: name || undefined,
-        room_id: roomId || undefined,
-      }),
+    mutationFn: () => api.addManual({ integration_type: integration, host, token: integration === 'xiaomi' ? token : undefined, name: name || undefined, room_id: roomId || undefined }),
     onSuccess: (d) => {
       qc.invalidateQueries({ queryKey: keys.devices })
       toast.push({ tone: 'success', title: `${d.name} added` })
@@ -429,7 +345,7 @@ function ManualAddSheet({ open, onClose }: { open: boolean; onClose: () => void 
       open={open}
       onClose={onClose}
       title="Add device by IP"
-      description="For devices discovery can't reach, e.g. on another subnet or VLAN."
+      description="For devices that discovery cannot reach, such as another subnet or VLAN."
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -442,42 +358,24 @@ function ManualAddSheet({ open, onClose }: { open: boolean; onClose: () => void 
       }
     >
       <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), add.mutate())}>
-        <Segmented
-          label="Integration"
-          value={integration}
-          options={[
-            { value: 'tapo', label: 'Tapo' },
-            { value: 'xiaomi', label: 'Xiaomi' },
-          ]}
-          onChange={setIntegration}
-        />
+        <Segmented label="Integration" value={integration} options={[{ value: 'tapo', label: 'Tapo' }, { value: 'xiaomi', label: 'Xiaomi' }]} onChange={setIntegration} className="self-start" />
         <Field label="IP address" required inputMode="decimal" placeholder="192.168.1.50" value={host} onChange={(e) => setHost(e.target.value.trim())} />
-        {integration === 'xiaomi' && (
-          <Field label="Device token" required value={token} onChange={(e) => setToken(e.target.value.trim())} hint="32 hex characters" spellCheck={false} />
+        {integration === 'xiaomi' ? (
+          <Field label="Device token" required spellCheck={false} value={token} onChange={(e) => setToken(e.target.value.trim())} hint="32 hex characters." />
+        ) : (
+          <p className="text-label text-muted">Uses the TP-Link account linked under Integrations.</p>
         )}
-        {integration === 'tapo' && <p className="text-sm text-muted">Uses the TP-Link account linked in Plugins.</p>}
-        <Field label="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
-        <SelectField label="Room" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-          <option value="">No room</option>
-          {rooms.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </SelectField>
-        {error && (
-          <p role="alert" className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">
-            {error}
-          </p>
-        )}
+        <Field label="Name" hint="Optional." value={name} onChange={(e) => setName(e.target.value)} />
+        <RoomSelect value={roomId} onChange={setRoomId} />
+        <ErrorText>{error}</ErrorText>
       </form>
     </Sheet>
   )
 }
 
-// --------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Groups
-// --------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 
 function GroupsTab() {
   const admin = useIsAdmin()
@@ -488,12 +386,9 @@ function GroupsTab() {
   const { data: devices = [] } = useDevices()
   const [editing, setEditing] = useState<Group | 'new' | null>(null)
   const [deleting, setDeleting] = useState<Group | null>(null)
-
   const command = useMutation({
     mutationFn: ({ id, on }: { id: string; on: boolean }) => api.groupCommand(id, { is_on: on }),
-    onSuccess: (r) => {
-      if (r.failed.length) toast.push({ tone: 'warning', title: `${r.failed.length} device(s) did not respond` })
-    },
+    onSuccess: (r) => r.failed.length && toast.push({ tone: 'warning', title: `${r.failed.length} device(s) did not respond` }),
     onError: (e) => toast.push({ tone: 'error', title: 'Group command failed', message: errorMessage(e) }),
   })
   const remove = useMutation({
@@ -503,64 +398,54 @@ function GroupsTab() {
       setDeleting(null)
     },
   })
-
   if (isLoading) return <Skeleton className="h-32" />
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show">
-      {admin && (
-        <div className="mb-4 flex justify-end">
-          <Button variant="primary" icon={<Plus size={18} />} onClick={() => setEditing('new')}>
-            New group
-          </Button>
-        </div>
-      )}
+    <>
       {groups.length === 0 ? (
-        <EmptyState icon={<Stack size={30} />} title="No groups" message="Group devices — like all downstairs lights — to switch them together." />
+        <EmptyState
+          icon={<Stack size={28} />}
+          title="No groups"
+          message="Group devices, such as all downstairs lights, to switch them together."
+          action={admin && <Button variant="primary" onClick={() => setEditing('new')}>New group</Button>}
+        />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {groups.map((g) => {
-            const members = devices.filter((d) => g.device_ids.includes(d.id))
-            const anyOn = members.some((d) => d.state.is_on)
-            return (
-              <Card key={g.id} className="flex flex-col gap-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-lg font-bold">{g.name}</p>
-                    <p className="truncate text-sm text-muted">{members.map((m) => m.name).join(', ') || 'No devices'}</p>
+        <Card>
+          <CardHeader title={`Groups · ${groups.length}`} action={admin && <Button size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>New group</Button>} />
+          <ul className="divide-y divide-border">
+            {groups.map((g) => {
+              const members = devices.filter((d) => g.device_ids.includes(d.id))
+              const on = members.filter((d) => d.state.is_on && d.is_online).length
+              return (
+                <li key={g.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                  <div className="min-w-0 flex-1 basis-48">
+                    <p className="text-body font-medium">{g.name}</p>
+                    <p className="truncate text-label text-muted">
+                      {on}/{members.length} on · {members.map((m) => m.name).join(', ') || 'No devices'}
+                    </p>
                   </div>
-                  {admin && (
-                    <div className="flex">
-                      <Button variant="ghost" size="sm" aria-label={`Edit ${g.name}`} icon={<PencilSimple size={18} />} onClick={() => setEditing(g)} />
-                      <Button variant="ghost" size="sm" aria-label={`Delete ${g.name}`} icon={<Trash size={18} />} onClick={() => setDeleting(g)} />
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button variant={anyOn ? 'glass' : 'primary'} size="sm" icon={<Power size={16} />} disabled={!control || !members.length} onClick={() => command.mutate({ id: g.id, on: true })}>
-                    All on
-                  </Button>
-                  <Button variant="glass" size="sm" disabled={!control || !members.length} onClick={() => command.mutate({ id: g.id, on: false })}>
-                    All off
-                  </Button>
-                  <span className="ml-auto self-center text-sm text-muted">
-                    {members.filter((d) => d.state.is_on).length}/{members.length} on
-                  </span>
-                </div>
-              </Card>
-            )
-          })}
-        </div>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" disabled={!control || !members.length} onClick={() => command.mutate({ id: g.id, on: true })}>
+                      On
+                    </Button>
+                    <Button size="sm" disabled={!control || !members.length} onClick={() => command.mutate({ id: g.id, on: false })}>
+                      Off
+                    </Button>
+                    {admin && (
+                      <>
+                        <Button variant="ghost" size="sm" aria-label={`Edit ${g.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(g)} />
+                        <Button variant="ghost" size="sm" aria-label={`Delete ${g.name}`} icon={<Trash size={16} />} onClick={() => setDeleting(g)} />
+                      </>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </Card>
       )}
       <GroupSheet group={editing} onClose={() => setEditing(null)} />
-      <Confirm
-        open={!!deleting}
-        onClose={() => setDeleting(null)}
-        onConfirm={() => deleting && remove.mutate(deleting.id)}
-        loading={remove.isPending}
-        title={`Delete ${deleting?.name}?`}
-        message="The devices stay; only the group is removed."
-      />
-    </motion.div>
+      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => deleting && remove.mutate(deleting.id)} loading={remove.isPending} title={`Delete ${deleting?.name}?`} message="The devices are kept. Only the group is removed." />
+    </>
   )
 }
 
@@ -590,8 +475,7 @@ function GroupSheet({ group, onClose }: { group: Group | 'new' | null; onClose: 
     },
     onError: (e) => toast.push({ tone: 'error', title: 'Could not save group', message: errorMessage(e) }),
   })
-  const toggle = (id: string) => setIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]))
-
+  const toggle = (id: string) => setIds((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]))
   return (
     <Sheet
       open={!!group}
@@ -609,20 +493,16 @@ function GroupSheet({ group, onClose }: { group: Group | 'new' | null; onClose: 
       }
     >
       <div className="flex flex-col gap-4">
-        <Field label="Group name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="All lights" />
+        <Field label="Name" required placeholder="All lights" value={name} onChange={(e) => setName(e.target.value)} />
         <fieldset>
-          <legend className="mb-2 text-sm font-semibold text-muted">Devices ({ids.length})</legend>
-          <div className="flex flex-col gap-1">
-            {devices.map((d) => {
-              const Icon = deviceIcons[d.device_type]
-              return (
-                <label key={d.id} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl px-3 hover:bg-line/[0.05]">
-                  <input type="checkbox" checked={ids.includes(d.id)} onChange={() => toggle(d.id)} className="h-5 w-5 accent-[rgb(var(--accent))]" />
-                  <Icon size={20} className="text-muted" aria-hidden />
-                  <span className="flex-1">{d.name}</span>
-                </label>
-              )
-            })}
+          <legend className="mb-2 text-label font-medium">Devices · {ids.length} selected</legend>
+          <div className="-mx-2 flex flex-col">
+            {devices.map((d) => (
+              <Checkbox key={d.id} checked={ids.includes(d.id)} onChange={() => toggle(d.id)}>
+                <span className="text-body">{d.name}</span>
+                <span className="ml-auto text-label text-subtle">{deviceTypeLabel[d.device_type]}</span>
+              </Checkbox>
+            ))}
           </div>
         </fieldset>
       </div>

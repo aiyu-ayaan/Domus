@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Plus, Trash } from '@phosphor-icons/react'
-import { Field, SelectField } from '@/components/Field'
-import { Button } from '@/components/Button'
+import { Field, SelectField } from '@/components/ui/Field'
+import { Button } from '@/components/ui/Button'
 import { useDevices, useGroups, useScenes } from '@/lib/queries'
 import { cn } from '@/lib/cn'
 import type { Action, Condition, Device, Trigger } from '@/lib/types'
@@ -65,15 +65,15 @@ export function describeAction(a: Action, devices: Device[], groups: { id: strin
 
 function Row({ children, onRemove }: { children: ReactNode; onRemove: () => void }) {
   return (
-    <div className="relative rounded-3xl bg-line/[0.05] p-4 pr-14">
+    <div className="relative rounded-lg border border-border bg-raised/40 p-4 pr-12">
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
       <button
         type="button"
         onClick={onRemove}
         aria-label="Remove"
-        className="absolute right-2 top-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted hover:bg-danger/10 hover:text-danger"
+        className="absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger"
       >
-        <Trash size={18} />
+        <Trash size={16} />
       </button>
     </div>
   )
@@ -175,7 +175,7 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
             <>
               <Field label="Time" type="time" value={t.at} onChange={(e) => set(i, { ...t, at: e.target.value })} />
               <fieldset className="sm:col-span-2">
-                <legend className="mb-2 text-sm font-semibold text-muted">Days (none = every day)</legend>
+                <legend className="mb-2 text-label font-medium">Days <span className="font-normal text-subtle">(none selected = every day)</span></legend>
                 <div className="flex flex-wrap gap-2">
                   {DAYS.map((d, n) => {
                     const on = t.days.includes(n)
@@ -185,7 +185,7 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
                         key={d}
                         aria-pressed={on}
                         onClick={() => set(i, { ...t, days: on ? t.days.filter((x) => x !== n) : [...t.days, n].sort() })}
-                        className={cn('h-10 w-12 cursor-pointer rounded-xl text-sm font-semibold', on ? 'bg-accent text-on-accent' : 'bg-line/[0.07] text-muted')}
+                        className={cn('h-8 w-11 cursor-pointer rounded-md border text-label font-medium transition-colors', on ? 'border-fg bg-fg text-bg' : 'border-border text-muted hover:text-fg')}
                       >
                         {d}
                       </button>
@@ -210,7 +210,7 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
           {t.type === 'device_offline' && <DeviceSelect value={t.device_id} onChange={(id) => set(i, { ...t, device_id: id })} />}
         </Row>
       ))}
-      <Button type="button" variant="ghost" size="sm" icon={<Plus size={16} />} onClick={() => onChange([...value, defaults.time])} className="self-start">
+      <Button type="button" variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => onChange([...value, defaults.time])} className="self-start">
         Add trigger
       </Button>
     </div>
@@ -250,7 +250,7 @@ export function ConditionEditor({ value, onChange }: { value: Condition[]; onCha
         type="button"
         variant="ghost"
         size="sm"
-        icon={<Plus size={16} />}
+        icon={<Plus size={14} />}
         onClick={() => onChange([...value, { type: 'time_between', start: '22:00', end: '06:00' }])}
         className="self-start"
       >
@@ -346,7 +346,7 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
           )}
         </Row>
       ))}
-      <Button type="button" variant="ghost" size="sm" icon={<Plus size={16} />} onClick={() => onChange([...value, defaults.device_command])} className="self-start">
+      <Button type="button" variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => onChange([...value, defaults.device_command])} className="self-start">
         Add action
       </Button>
     </div>

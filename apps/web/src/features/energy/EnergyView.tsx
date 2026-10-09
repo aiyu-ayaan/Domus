@@ -1,121 +1,96 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Receipt } from '@phosphor-icons/react'
-import { Card, PageHeader, SectionTitle, Skeleton } from '@/components/Layout'
-import { Segmented } from '@/components/Controls'
-import { EnergyChart } from '@/components/EnergyChart'
-import { AnimatedNumber } from '@/components/AnimatedNumber'
-import { Field } from '@/components/Field'
-import { Button } from '@/components/Button'
+import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
+import { Segmented } from '@/components/ui/Controls'
+import { Field } from '@/components/ui/Field'
+import { Button } from '@/components/ui/Button'
+import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
 import { useIsAdmin } from '@/lib/auth'
 import { keys, useEnergy } from '@/lib/queries'
 import { formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
-import { spring, stagger } from '@/lib/motion'
 import type { ElectricitySettings } from '@/lib/types'
 
 type Range = 'day' | 'week' | 'month'
-
-function Stat({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
-  return (
-    <Card className="p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-subtle">{label}</p>
-      <p className="mt-2 text-2xl font-extrabold tabular sm:text-3xl">{children}</p>
-      {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
-    </Card>
-  )
-}
 
 export function EnergyView() {
   const admin = useIsAdmin()
   const { data: o, isLoading } = useEnergy()
   const [range, setRange] = useState<Range>('day')
   const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range), refetchInterval: 60_000 })
-  const currency = o?.settings.currency ?? 'USD'
-  const maxKwh = Math.max(...(o?.devices.map((d) => d.kwh) ?? [0]), 0.0001)
 
-  if (isLoading || !o) {
-    return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-32" />
-        ))}
-      </div>
-    )
-  }
-  const cycleEnd = new Date(o.cycle_start)
-  cycleEnd.setDate(cycleEnd.getDate() + o.cycle_days)
+  if (isLoading || !o) return <Skeleton className="h-64" />
+  const currency = o.settings.currency
+  const end = new Date(o.cycle_start)
+  end.setDate(end.getDate() + o.cycle_days - 1)
+  const fmt = (d: Date) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+  const maxKwh = Math.max(...o.devices.map((d) => d.kwh), 0.0001)
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show">
-      <PageHeader
-        title="Energy"
-        subtitle={`Billing cycle ${new Date(o.cycle_start).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${cycleEnd.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · day ${o.cycle_day} of ${o.cycle_days}`}
-      />
+    <>
+      <PageHeader title="Energy" description={`Billing cycle ${fmt(new Date(o.cycle_start))} – ${fmt(end)} · day ${o.cycle_day} of ${o.cycle_days}`} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Using now">
-          <AnimatedNumber value={o.current_watts} format={formatWatts} />
-        </Stat>
-        <Stat label="Today" hint={formatMoney(o.today_cost, currency)}>
-          {formatKwh(o.today_kwh)}
-        </Stat>
-        <Stat label="Bill so far" hint={formatKwh(o.cycle_kwh)}>
-          {formatMoney(o.cycle_cost, currency)}
-        </Stat>
-        <Stat label="Projected bill" hint={o.budget_used_percent != null ? `${formatNumber(o.budget_used_percent, 0)}% of budget used` : `≈ ${formatKwh(o.projected_kwh)}`}>
-          {formatMoney(o.projected_cost, currency)}
-        </Stat>
+        <Metric label="Power now" live value={formatWatts(o.current_watts)} />
+        <Metric label="Today" value={formatKwh(o.today_kwh)} sub={formatMoney(o.today_cost, currency)} />
+        <Metric label="Bill so far" value={formatMoney(o.cycle_cost, currency)} sub={`${formatKwh(o.cycle_kwh)} this cycle`} />
+        <Metric
+          label="Projected bill"
+          value={formatMoney(o.projected_cost, currency)}
+          sub={o.budget_used_percent != null ? `${formatNumber(o.budget_used_percent, 0)}% of budget used` : `≈ ${formatKwh(o.projected_kwh)}`}
+        />
       </div>
 
-      <Card className="mt-4">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold">Consumption</h2>
-          <Segmented
-            label="Range"
-            size="sm"
-            value={range}
-            onChange={setRange}
-            options={[
-              { value: 'day', label: '24 h' },
-              { value: 'week', label: '7 days' },
-              { value: 'month', label: '30 days' },
-            ]}
-          />
-        </div>
-        {history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={history.data ?? []} range={range} currency={currency} height={220} />}
+      <Card className="mt-6">
+        <CardHeader
+          title="Consumption"
+          action={
+            <Segmented size="sm" label="Range" value={range} onChange={setRange} options={[{ value: 'day', label: '24 hours' }, { value: 'week', label: '7 days' }, { value: 'month', label: '30 days' }]} />
+          }
+        />
+        <div className="p-4">{history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={history.data ?? []} range={range} currency={currency} height={220} />}</div>
       </Card>
 
-      <SectionTitle>By device this cycle</SectionTitle>
-      {o.devices.length === 0 ? (
-        <p className="surface rounded-4xl p-6 text-muted">Devices with power metering (like Tapo P110 or Tuya energy plugs) show their usage here.</p>
-      ) : (
-        <Card>
-          <ul className="flex flex-col gap-4">
-            {o.devices.map((d) => (
-              <li key={d.device_id}>
-                <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                  <span className="truncate font-semibold">{d.name}</span>
-                  <span className="shrink-0 text-sm text-muted tabular">
-                    {formatWatts(d.current_watts)} now · {formatKwh(d.kwh)} · <span className="font-semibold text-fg">{formatMoney(d.cost, currency)}</span>
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-line/10">
-                  <motion.div className="h-full rounded-full bg-power" initial={{ width: 0 }} animate={{ width: `${(d.kwh / maxKwh) * 100}%` }} transition={spring.gentle} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+      <Card className="mt-6">
+        <CardHeader title="By device · this cycle" />
+        {o.devices.length === 0 ? (
+          <p className="px-4 py-6 text-label text-muted">Devices with power metering, such as the Tapo P110 or Tuya energy plugs, appear here.</p>
+        ) : (
+          <table className="w-full text-body">
+            <thead>
+              <tr className="border-b border-border text-left text-label text-muted">
+                <th className="px-4 py-2 font-medium">Device</th>
+                <th className="hidden px-4 py-2 font-medium sm:table-cell">Share</th>
+                <th className="px-4 py-2 text-right font-medium">Now</th>
+                <th className="px-4 py-2 text-right font-medium">Energy</th>
+                <th className="px-4 py-2 text-right font-medium">Cost</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border tabular">
+              {o.devices.map((d) => (
+                <tr key={d.device_id}>
+                  <td className="max-w-[10rem] truncate px-4 py-2.5">{d.name}</td>
+                  <td className="hidden w-1/3 px-4 sm:table-cell">
+                    <div className="h-1.5 rounded-full bg-raised">
+                      <div className="h-full rounded-full bg-fg/70" style={{ width: `${(d.kwh / maxKwh) * 100}%` }} />
+                    </div>
+                  </td>
+                  <td className="px-4 text-right text-muted">{formatWatts(d.current_watts)}</td>
+                  <td className="px-4 text-right">{formatKwh(d.kwh)}</td>
+                  <td className="px-4 text-right">{formatMoney(d.cost, currency)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
 
-      {admin && <BillSettings initial={o.settings} />}
-    </motion.div>
+      {admin && <Plan initial={o.settings} />}
+    </>
   )
 }
 
-function BillSettings({ initial }: { initial: ElectricitySettings }) {
+function Plan({ initial }: { initial: ElectricitySettings }) {
   const qc = useQueryClient()
   const toast = useToast()
   const [s, setS] = useState({
@@ -142,28 +117,26 @@ function BillSettings({ initial }: { initial: ElectricitySettings }) {
   })
   const set = (k: keyof typeof s) => (e: React.ChangeEvent<HTMLInputElement>) => setS({ ...s, [k]: e.target.value })
   return (
-    <>
-      <SectionTitle>Electricity plan</SectionTitle>
-      <Card>
-        <form
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          onSubmit={(e) => {
-            e.preventDefault()
-            save.mutate()
-          }}
-        >
-          <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
-          <Field label="Currency" required maxLength={3} value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value.toUpperCase() })} hint="ISO code, e.g. INR, USD, EUR" />
-          <Field label="Fixed monthly charge" type="number" step="0.01" min="0" value={s.fixed_monthly_charge} onChange={set('fixed_monthly_charge')} hint="Meter rent, fixed fees" />
-          <Field label="Monthly budget" type="number" step="0.01" min="0" value={s.monthly_budget} onChange={set('monthly_budget')} hint="Optional — get a progress bar" />
-          <Field label="Bill starts on day" type="number" min="1" max="28" required value={s.billing_cycle_day} onChange={set('billing_cycle_day')} hint="1–28" />
-          <div className="flex items-end">
-            <Button type="submit" variant="primary" icon={<Receipt size={18} />} loading={save.isPending} className="w-full">
-              Save plan
-            </Button>
-          </div>
-        </form>
-      </Card>
-    </>
+    <Card className="mt-6">
+      <CardHeader title="Electricity plan" />
+      <form
+        className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3"
+        onSubmit={(e) => {
+          e.preventDefault()
+          save.mutate()
+        }}
+      >
+        <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
+        <Field label="Currency" required maxLength={3} value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value.toUpperCase() })} hint="ISO code, e.g. INR, USD, EUR." />
+        <Field label="Fixed monthly charge" type="number" step="0.01" min="0" value={s.fixed_monthly_charge} onChange={set('fixed_monthly_charge')} hint="Meter rent and fixed fees." />
+        <Field label="Monthly budget" type="number" step="0.01" min="0" value={s.monthly_budget} onChange={set('monthly_budget')} hint="Optional." />
+        <Field label="Billing cycle starts on day" type="number" min="1" max="28" required value={s.billing_cycle_day} onChange={set('billing_cycle_day')} hint="1–28." />
+        <div className="flex items-end">
+          <Button type="submit" variant="primary" loading={save.isPending} className="w-full sm:w-auto">
+            Save plan
+          </Button>
+        </div>
+      </form>
+    </Card>
   )
 }

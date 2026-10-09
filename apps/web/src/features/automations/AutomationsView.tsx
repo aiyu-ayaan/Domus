@@ -1,18 +1,16 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Lightning, MagicWand, PencilSimple, Play, Plus, Trash } from '@phosphor-icons/react'
-import { Card, EmptyState, PageHeader, SectionTitle, Skeleton } from '@/components/Layout'
-import { Button } from '@/components/Button'
-import { Switch } from '@/components/Controls'
-import { Sheet, Confirm } from '@/components/Sheet'
-import { Field } from '@/components/Field'
+import { Lightning, PencilSimple, Play, Plus, Trash } from '@phosphor-icons/react'
+import { Card, CardHeader, EmptyState, ErrorText, PageHeader, Skeleton } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Switch } from '@/components/ui/Controls'
+import { Sheet, Confirm } from '@/components/ui/Sheet'
+import { Field } from '@/components/ui/Field'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useAutomations, useDevices, useGroups, useScenes } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { timeAgo } from '@/lib/format'
-import { stagger } from '@/lib/motion'
 import type { Action, Automation, Condition, Scene, Trigger } from '@/lib/types'
 import { ActionEditor, ConditionEditor, TriggerEditor, describeAction, describeTrigger, validateRule } from './RuleEditor'
 
@@ -36,19 +34,21 @@ export function AutomationsView() {
   })
   const run = useMutation({
     mutationFn: (a: Automation) => api.runAutomation(a.id),
-    onSuccess: (r, a) =>
-      toast.push(r.success ? { tone: 'success', title: `Ran “${a.name}”` } : { tone: 'warning', title: `“${a.name}” had problems`, message: r.errors.join('; ') }),
+    onSuccess: (r, a) => toast.push(r.success ? { tone: 'success', title: `Ran ${a.name}` } : { tone: 'warning', title: `${a.name} had problems`, message: r.errors.join('; ') }),
     onError: (e) => toast.push({ tone: 'error', title: 'Run failed', message: errorMessage(e) }),
   })
   const activate = useMutation({
     mutationFn: (s: Scene) => api.activateScene(s.id),
     onSuccess: (r, s) => {
       qc.invalidateQueries({ queryKey: keys.scenes })
-      toast.push(r.success ? { tone: 'success', title: `${s.name} activated` } : { tone: 'warning', title: `${s.name} partly applied`, message: r.errors.join('; ') })
+      toast.push(r.success ? { tone: 'success', title: `${s.name} applied` } : { tone: 'warning', title: `${s.name} partly applied`, message: r.errors.join('; ') })
     },
   })
   const remove = useMutation({
-    mutationFn: () => (deleting!.kind === 'automation' ? api.removeAutomation(deleting!.id) : api.removeScene(deleting!.id)),
+    mutationFn: async () => {
+      if (deleting!.kind === 'automation') await api.removeAutomation(deleting!.id)
+      else await api.removeScene(deleting!.id)
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: deleting!.kind === 'automation' ? keys.automations : keys.scenes })
       setDeleting(null)
@@ -56,109 +56,96 @@ export function AutomationsView() {
   })
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show">
+    <>
       <PageHeader
         title="Automations"
-        subtitle="Let your home react on its own"
-        actions={
-          admin && (
-            <Button variant="primary" icon={<Plus size={18} />} onClick={() => setEditing('new')}>
-              New automation
-            </Button>
-          )
-        }
+        description="Rules that run on their own, and scenes you trigger with one tap."
+        actions={admin && <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>New automation</Button>}
       />
+
       {isLoading ? (
         <Skeleton className="h-32" />
       ) : !automations?.length ? (
         <EmptyState
-          icon={<Lightning size={30} />}
-          title="No automations yet"
-          message="Turn the porch light on at sunset, get notified when the washer finishes, or switch the purifier on when PM2.5 rises."
+          icon={<Lightning size={28} />}
+          title="No automations"
+          message="For example: switch the purifier on when PM2.5 rises above 35, or turn everything off at midnight."
           action={admin && <Button variant="primary" onClick={() => setEditing('new')}>Create automation</Button>}
         />
       ) : (
-        <div className="flex flex-col gap-3">
-          {automations.map((a) => (
-            <Card key={a.id} className="flex flex-wrap items-center gap-4">
-              <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${a.is_enabled ? 'bg-warn/20 text-warn' : 'bg-line/[0.08] text-muted'}`}>
-                <Lightning size={24} weight={a.is_enabled ? 'fill' : 'regular'} aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1 basis-60">
-                <p className="font-bold">{a.name}</p>
-                <p className="text-sm text-muted">
-                  {a.triggers.map((t) => describeTrigger(t, devices)).join(' or ')}, {a.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', then ')}.
-                </p>
-                <p className="mt-1 text-xs text-subtle">Last ran {timeAgo(a.last_triggered_at)}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                {control && <Button variant="ghost" size="sm" aria-label={`Run ${a.name} now`} icon={<Play size={18} />} onClick={() => run.mutate(a)} />}
-                {admin && (
-                  <>
-                    <Button variant="ghost" size="sm" aria-label={`Edit ${a.name}`} icon={<PencilSimple size={18} />} onClick={() => setEditing(a)} />
-                    <Button variant="ghost" size="sm" aria-label={`Delete ${a.name}`} icon={<Trash size={18} />} onClick={() => setDeleting({ kind: 'automation', id: a.id, name: a.name })} />
-                    <Switch checked={a.is_enabled} onChange={() => toggle.mutate(a.id)} label={`${a.name} enabled`} />
-                  </>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardHeader title={`Automations · ${automations.length}`} />
+          <ul className="divide-y divide-border">
+            {automations.map((a) => (
+              <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <div className="min-w-0 flex-1 basis-64">
+                  <p className="text-body font-medium">{a.name}</p>
+                  <p className="text-label text-muted">
+                    {a.triggers.map((t) => describeTrigger(t, devices)).join(' or ')}, then {a.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', ')}.
+                  </p>
+                  <p className="mt-0.5 text-caption text-subtle">Last ran {timeAgo(a.last_triggered_at)}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {control && <Button variant="ghost" size="sm" aria-label={`Run ${a.name} now`} icon={<Play size={16} />} onClick={() => run.mutate(a)} />}
+                  {admin && (
+                    <>
+                      <Button variant="ghost" size="sm" aria-label={`Edit ${a.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(a)} />
+                      <Button variant="ghost" size="sm" aria-label={`Delete ${a.name}`} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'automation', id: a.id, name: a.name })} />
+                      <span className="ml-2">
+                        <Switch checked={a.is_enabled} onChange={() => toggle.mutate(a.id)} label={`${a.name} enabled`} />
+                      </span>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
 
-      <SectionTitle
-        action={
-          admin && (
-            <Button variant="glass" size="sm" icon={<Plus size={16} />} onClick={() => setEditingScene('new')}>
-              New scene
-            </Button>
-          )
-        }
-      >
-        Scenes
-      </SectionTitle>
-      {scenes.length === 0 ? (
-        <p className="surface rounded-4xl p-6 text-muted">Scenes set several devices at once — “Movie night” or “Leaving home”.</p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {scenes.map((s) => (
-            <Card key={s.id} className="flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-                  <MagicWand size={22} weight="fill" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold">{s.name}</p>
-                  <p className="line-clamp-2 text-sm text-muted">{s.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', ')}</p>
+      <Card className="mt-6">
+        <CardHeader title={`Scenes · ${scenes.length}`} action={admin && <Button size="sm" icon={<Plus size={14} />} onClick={() => setEditingScene('new')}>New scene</Button>} />
+        {scenes.length === 0 ? (
+          <p className="px-4 py-6 text-label text-muted">A scene sets several devices at once, for example “Movie night” or “Leaving home”.</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {scenes.map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <div className="min-w-0 flex-1 basis-64">
+                  <p className="text-body font-medium">{s.name}</p>
+                  <p className="truncate text-label text-muted">{s.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', ')}</p>
                 </div>
-              </div>
-              <div className="mt-auto flex items-center gap-1">
-                <Button variant="primary" size="sm" icon={<Play size={16} />} disabled={!control} loading={activate.isPending && activate.variables?.id === s.id} onClick={() => activate.mutate(s)}>
-                  Activate
-                </Button>
-                {admin && (
-                  <>
-                    <Button variant="ghost" size="sm" aria-label={`Edit ${s.name}`} icon={<PencilSimple size={18} />} onClick={() => setEditingScene(s)} className="ml-auto" />
-                    <Button variant="ghost" size="sm" aria-label={`Delete ${s.name}`} icon={<Trash size={18} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
-                  </>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+                <div className="flex items-center gap-1">
+                  {admin && (
+                    <>
+                      <Button variant="ghost" size="sm" aria-label={`Edit ${s.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
+                      <Button variant="ghost" size="sm" aria-label={`Delete ${s.name}`} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
+                    </>
+                  )}
+                  <Button size="sm" disabled={!control} loading={activate.isPending && activate.variables?.id === s.id} onClick={() => activate.mutate(s)}>
+                    Run
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       <AutomationSheet automation={editing} onClose={() => setEditing(null)} />
       <SceneSheet scene={editingScene} onClose={() => setEditingScene(null)} />
-      <Confirm
-        open={!!deleting}
-        onClose={() => setDeleting(null)}
-        onConfirm={() => remove.mutate()}
-        loading={remove.isPending}
-        title={`Delete ${deleting?.name}?`}
-        message="This cannot be undone."
-      />
-    </motion.div>
+      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={`Delete ${deleting?.name}?`} message="This cannot be undone." />
+    </>
+  )
+}
+
+function SheetSection({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-label font-medium">{title}</h3>
+      {hint && <p className="text-caption text-subtle">{hint}</p>}
+      <div className="mt-2">{children}</div>
+    </section>
   )
 }
 
@@ -181,11 +168,11 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
     setActions(existing?.actions ?? [{ type: 'device_command', device_id: '', command: { is_on: true } }])
     setError(null)
   }
-
   const save = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const body = { name, description: null, triggers, conditions, actions, is_enabled: existing?.is_enabled ?? true }
-      return existing ? api.updateAutomation(existing.id, body) : api.createAutomation(body)
+      if (existing) await api.updateAutomation(existing.id, body)
+      else await api.createAutomation(body)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.automations })
@@ -195,11 +182,10 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
     onError: (e) => setError(errorMessage(e)),
   })
   const submit = () => {
-    const problem = !name.trim() ? 'Give the automation a name' : validateRule(triggers, actions)
+    const problem = !name.trim() ? 'Give the automation a name.' : validateRule(triggers, actions)
     if (problem) setError(problem)
     else save.mutate()
   }
-
   return (
     <Sheet
       open={!!automation}
@@ -208,11 +194,6 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
       title={existing ? 'Edit automation' : 'New automation'}
       footer={
         <>
-          {error && (
-            <p role="alert" className="mr-auto self-center text-sm text-danger">
-              {error}
-            </p>
-          )}
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
@@ -223,20 +204,17 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
       }
     >
       <div className="flex flex-col gap-6">
-        <Field label="Name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Purifier on when air is poor" />
-        <section>
-          <h3 className="mb-3 font-bold">When</h3>
+        <Field label="Name" required placeholder="Purifier on when air is poor" value={name} onChange={(e) => setName(e.target.value)} />
+        <SheetSection title="When">
           <TriggerEditor value={triggers} onChange={setTriggers} />
-        </section>
-        <section>
-          <h3 className="mb-1 font-bold">Only if</h3>
-          <p className="mb-3 text-sm text-muted">Optional — every condition must be true.</p>
+        </SheetSection>
+        <SheetSection title="Only if" hint="Optional. All conditions must be true.">
           <ConditionEditor value={conditions} onChange={setConditions} />
-        </section>
-        <section>
-          <h3 className="mb-3 font-bold">Then</h3>
+        </SheetSection>
+        <SheetSection title="Then">
           <ActionEditor value={actions} onChange={setActions} />
-        </section>
+        </SheetSection>
+        <ErrorText>{error}</ErrorText>
       </div>
     </Sheet>
   )
@@ -270,7 +248,7 @@ function SceneSheet({ scene, onClose }: { scene: Scene | 'new' | null; onClose: 
     onError: (e) => setError(errorMessage(e)),
   })
   const submit = () => {
-    const problem = !name.trim() ? 'Give the scene a name' : validateRule(null, actions)
+    const problem = !name.trim() ? 'Give the scene a name.' : validateRule(null, actions)
     if (problem) setError(problem)
     else save.mutate()
   }
@@ -282,11 +260,6 @@ function SceneSheet({ scene, onClose }: { scene: Scene | 'new' | null; onClose: 
       title={existing ? 'Edit scene' : 'New scene'}
       footer={
         <>
-          {error && (
-            <p role="alert" className="mr-auto self-center text-sm text-danger">
-              {error}
-            </p>
-          )}
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
@@ -297,11 +270,11 @@ function SceneSheet({ scene, onClose }: { scene: Scene | 'new' | null; onClose: 
       }
     >
       <div className="flex flex-col gap-6">
-        <Field label="Name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Movie night" />
-        <section>
-          <h3 className="mb-3 font-bold">Actions</h3>
+        <Field label="Name" required placeholder="Movie night" value={name} onChange={(e) => setName(e.target.value)} />
+        <SheetSection title="Actions">
           <ActionEditor value={actions} onChange={setActions} allowScenes={false} />
-        </section>
+        </SheetSection>
+        <ErrorText>{error}</ErrorText>
       </div>
     </Sheet>
   )

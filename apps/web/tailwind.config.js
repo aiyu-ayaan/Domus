@@ -1,39 +1,45 @@
 /** @type {import('tailwindcss').Config} */
+// Tokens mirror design-system/docus/MASTER.md.
 const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
-  darkMode: 'media',
   theme: {
     extend: {
       colors: {
         bg: token('bg'),
+        panel: token('panel'),
+        raised: token('raised'),
+        border: token('border'),
+        'border-strong': token('border-strong'),
         fg: token('fg'),
         muted: token('muted'),
         subtle: token('subtle'),
-        surface: token('surface'),
-        line: token('line'),
-        accent: token('accent'),
-        'on-accent': token('on-accent'),
-        danger: token('danger'),
+        primary: token('primary'),
+        'on-primary': token('on-primary'),
+        on: token('on'),
         warn: token('warn'),
+        danger: token('danger'),
         info: token('info'),
-        light: token('light'),
-        air: token('air'),
-        power: token('power'),
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+      },
+      fontSize: {
+        caption: ['12px', '16px'],
+        label: ['13px', '18px'],
+        body: ['14px', '20px'],
+        title: ['16px', '22px'],
+        page: ['20px', '28px'],
+        metric: ['28px', '34px'],
       },
       borderRadius: {
-        '4xl': '2rem',
+        DEFAULT: '6px',
+        md: '6px',
+        lg: '10px',
       },
-      transitionTimingFunction: {
-        // Material 3 expressive: emphasized decelerate / standard
-        emphasized: 'cubic-bezier(0.05, 0.7, 0.1, 1)',
-        standard: 'cubic-bezier(0.2, 0, 0, 1)',
-      },
+      transitionTimingFunction: { std: 'cubic-bezier(0.2, 0, 0, 1)' },
+      transitionDuration: { fast: '120ms', base: '150ms', slow: '200ms' },
       zIndex: { nav: '30', sheet: '50', toast: '60' },
     },
   },
