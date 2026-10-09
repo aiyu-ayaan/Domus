@@ -27,7 +27,7 @@ export const useAutomations = () => useQuery({ queryKey: keys.automations, query
 export const useIntegrations = () => useQuery({ queryKey: keys.integrations, queryFn: api.integrations })
 export const useNotifications = () => useQuery({ queryKey: keys.notifications, queryFn: api.notifications })
 export const useEnergy = () =>
-  useQuery({ queryKey: keys.energy, queryFn: api.energyOverview, refetchInterval: 15_000 })
+  useQuery({ queryKey: keys.energy, queryFn: api.energyOverview, refetchInterval: 5_000 })
 
 export function useDiscovered(status: 'pending' | 'ignored' = 'pending') {
   const admin = useIsAdmin()

@@ -87,7 +87,12 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     automations.reload().await;
 
     tokio::spawn(automations.clone().run());
-    tokio::spawn(DeviceWorker::new(manager.clone(), Duration::from_secs(config.workers.poll_interval_secs.max(5))).run());
+    tokio::spawn(DeviceWorker::new(
+            manager.clone(),
+            Duration::from_secs(config.workers.poll_interval_secs.max(2)),
+            Duration::from_secs(config.workers.cloud_poll_interval_secs.max(5)),
+        )
+        .run());
     tokio::spawn(DiscoveryWorker::new(manager.clone()).run());
     tokio::spawn(SchedulerWorker::new(automations.clone(), pool.clone(), config.workers.energy_retention_days).run());
 

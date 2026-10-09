@@ -49,7 +49,8 @@ impl Default for DiscoverySettings {
 
 const SETTINGS_KEY: &str = "discovery";
 /// Consecutive poll failures before a device is marked offline.
-const OFFLINE_AFTER: u32 = 2;
+/// Consecutive failed polls before a device is marked offline (~15 s at the local cadence).
+const OFFLINE_AFTER: u32 = 5;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct DiscoveryReport {
@@ -166,7 +167,8 @@ impl DeviceManager {
     // Polling
     // ------------------------------------------------------------------
 
-    pub async fn poll_all(&self) {
+    /// Poll every adopted device; `include_cloud` also polls cloud integrations (Tuya).
+    pub async fn poll_all(&self, include_cloud: bool) {
         let Ok(_guard) = self.poll_lock.try_lock() else { return };
         let devices = match self.repo.list_all().await {
             Ok(d) => d,
@@ -177,6 +179,9 @@ impl DeviceManager {
         };
         let mut by_type: HashMap<String, Vec<DeviceRecord>> = HashMap::new();
         for d in devices {
+            if !include_cloud && d.integration_type == IntegrationType::Tuya.as_str() {
+                continue;
+            }
             by_type.entry(d.integration_type.clone()).or_default().push(d);
         }
         join_all(by_type.into_iter().map(|(t, recs)| self.poll_group(t, recs))).await;

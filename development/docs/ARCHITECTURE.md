@@ -205,10 +205,10 @@ the Mi Home app or a browser and retry.
 
 ```mermaid
 flowchart LR
-    Poll["DeviceWorker<br/>every 15 s"] --> FS["plugin.fetch_states"]
+    Poll["DeviceWorker<br/>local 3 s · cloud (Tuya) 15 s"] --> FS["plugin.fetch_states"]
     FS --> Diff{"state or online<br/>changed?"}
     Diff -- yes --> Save["UPDATE devices"] --> Ev["DeviceStateChanged<br/>(with previous state)"]
-    Diff -- 2 failures --> Off["mark offline"] --> Ev
+    Diff -- 5 failures --> Off["mark offline"] --> Ev
     FS --> Meter{"power reported?"}
     Meter -- "≥ 60 s since last sample" --> EM["INSERT energy_metrics<br/>kWh = W × Δt"]
     Ev --> AE["AutomationEngine<br/>edge-triggered rules"]
@@ -248,9 +248,12 @@ flowchart LR
 ```
 
 Instantaneous power (the "Power now" tiles and per-device watts) is summed on
-the client from the live device list, so it moves with every poll. Accumulated
-values (kWh, cost) come from the energy query, refetched every 15 s to match
-the poller. Linking or adopting a device refreshes every dependent view without
+the client from the live device list, so it moves with every poll. Local
+devices (Tapo, Xiaomi) are polled every 3 s (`workers.poll_interval_secs`);
+Tuya goes through the rate-limited cloud API and is polled every 15 s
+(`workers.cloud_poll_interval_secs`). A device is marked offline after 5
+consecutive failed polls. Accumulated values (kWh, cost) come from the energy
+query, refetched every 5 s. Linking or adopting a device refreshes every dependent view without
 a reload.
 
 ## 7. Security model

@@ -39,6 +39,7 @@
 - [x] Energy: any ISO currency, slab (per-units) tariffs for Pune/MSEDCL-style billing
 - [x] Live UI: device add/update/remove refreshes rooms, groups, energy and integrations; "Power now" computed from live devices
 - [x] Sheet inputs no longer lose focus on every keystroke
+- [x] Local devices polled every 3 s (cloud every 15 s) so power readings feel live
 - [ ] Verify Xiaomi 2FA end to end with a real account (SMS path unconfirmed)
 - [ ] Time-of-use tariffs (per-hour rates) on top of slabs
 

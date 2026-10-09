@@ -57,7 +57,10 @@ pub struct IntegrationsConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct WorkersConfig {
+    /// Seconds between polls of local devices (Tapo, Xiaomi).
     pub poll_interval_secs: u64,
+    /// Seconds between polls of cloud integrations (Tuya); cloud APIs are rate limited.
+    pub cloud_poll_interval_secs: u64,
     /// Seconds between energy samples written to the database.
     pub energy_sample_secs: u64,
     pub energy_retention_days: i64,
@@ -97,7 +100,8 @@ impl AppConfig {
             .set_default("integrations.tuya.enabled", true)?
             .set_default("integrations.tapo.enabled", true)?
             .set_default("integrations.xiaomi.enabled", true)?
-            .set_default("workers.poll_interval_secs", 15)?
+            .set_default("workers.poll_interval_secs", 3)?
+            .set_default("workers.cloud_poll_interval_secs", 15)?
             .set_default("workers.energy_sample_secs", 60)?
             .set_default("workers.energy_retention_days", 400)?
             .add_source(config::File::with_name("config/default").required(false))
