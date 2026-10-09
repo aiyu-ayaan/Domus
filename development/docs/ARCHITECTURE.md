@@ -10,7 +10,7 @@ offers no local alternative (Tuya) or to fetch device keys (Xiaomi).
 ```mermaid
 flowchart LR
     subgraph Clients
-        Web["React web UI<br/>(liquid glass)"]
+        Web["React web UI"]
         Desk["Electron shell"]
     end
 
@@ -37,7 +37,6 @@ flowchart LR
         Tuya["Tuya / Smart Life<br/>cloud, QR login"]
         Tapo["Tapo<br/>local KLAP + UDP 20002"]
         Xiaomi["Xiaomi<br/>Mi cloud tokens + local miIO"]
-        Virtual["Virtual demo devices"]
     end
 
     DB[("SQLite (WAL)<br/>data/docus.db")]
@@ -82,7 +81,6 @@ classDiagram
     IntegrationPlugin <|.. TuyaIntegration
     IntegrationPlugin <|.. TapoIntegration
     IntegrationPlugin <|.. XiaomiIntegration
-    IntegrationPlugin <|.. VirtualIntegration
     TuyaIntegration --> CredentialStore : persists refreshed tokens
     XiaomiIntegration --> CredentialStore : persists re-login
     DeviceManager --> IntegrationPlugin : only caller
@@ -215,25 +213,24 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    Main["main.tsx<br/>QueryClient · Toasts · MotionConfig(reducedMotion=user)"] --> AuthP["AuthProvider"]
+    Main["main.tsx<br/>QueryClient · Toasts"] --> AuthP["AuthProvider"]
     AuthP -->|no user| AuthScreen["Setup / Sign in"]
     AuthP -->|user| Router["BrowserRouter"]
-    Router --> Shell["AppShell<br/>glass sidebar · glass tab bar · toolbar<br/>useLiveEvents (WebSocket → cache)"]
-    Shell --> Home["Dashboard"]
+    Router --> Shell["AppShell<br/>sidebar · mobile tab bar · notifications<br/>useLiveEvents (WebSocket → cache)"]
+    Shell --> Home["Overview"]
     Shell --> Devices["Devices · Discovered · Groups"]
     Shell --> Rooms["Rooms / Room detail"]
     Shell --> Auto["Automations & Scenes"]
     Shell --> Energy["Energy"]
-    Shell --> Plugins["Plugins (admin)"]
+    Shell --> Plugins["Integrations (admin)"]
     Shell --> Settings["Settings · People & access"]
 ```
 
-Design rules (from the Liquid Glass guidance): glass is reserved for the
-navigation/control layer (sidebar, tab bar, toolbar, sheets, segmented
-controls); content uses calm surfaces. Selection pills morph between items
-via shared layout IDs, the web counterpart of `glassEffectID`. Reduced
-transparency swaps glass for solid surfaces; reduced motion disables springs
-and the ambient backdrop drift.
+Visual design follows the persisted profile in
+[`design-system/docus/MASTER.md`](../../design-system/docus/MASTER.md)
+(Minimalism & Swiss, generated with `ui-ux-pro-max`): neutral zinc palette,
+green only for "on/live", Inter, 6/10px radii, hairline borders, 150ms fades.
+Translucent blur is limited to the sticky mobile top bar and tab bar.
 
 ## 9. Data model
 

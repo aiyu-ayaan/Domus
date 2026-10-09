@@ -12,7 +12,6 @@
 - [x] Tuya / Smart Life via QR login (Home Assistant flow), signed + AES-GCM API, DP spec mapping
 - [x] Tapo local KLAP v1/v2 + UDP discovery, P110 energy
 - [x] Xiaomi: Mi cloud login (token fetch), miIO local protocol, MIoT spec mapping
-- [x] Virtual demo devices (`integrations.virtual.enabled`)
 - [x] WebSocket live events (room-filtered)
 - [x] Users, roles (admin/member/guest), per-room access; first-run setup lock
 - [x] Device groups, scenes, edge-triggered automations (time/state/power/offline/discovery)
@@ -27,9 +26,12 @@
 - [ ] Optional SQLCipher full-database encryption
 - [ ] Vite dev server over HTTPS (dev only; production is already HTTPS)
 
-## Milestone 4: UI redesign (DONE — 2026-10-09)
-- [x] Liquid glass navigation layer + M3 expressive motion, light/dark, reduced motion/transparency
-- [x] Dashboard, Devices/Discovered/Groups, Rooms, Automations & Scenes, Energy, Plugins, Settings
+## Milestone 4: UI (DONE — 2026-10-09)
+- [x] First pass (liquid glass) rejected as too cartoonish
+- [x] Persisted design profile `design-system/docus/MASTER.md` (Minimalism & Swiss via ui-ux-pro-max)
+- [x] Rebuilt every screen on the profile: Overview, Devices/Discovered/Groups, Rooms, Automations & Scenes, Energy, Integrations, Settings
+- [x] Demo/virtual devices removed
+- [ ] Check phone layout on a real device (375px)
 
 ## Next
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7

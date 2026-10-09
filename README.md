@@ -12,6 +12,7 @@ React web UI (with an Electron desktop shell), and pluggable integrations for
 - HTTPS by default; credentials and device keys encrypted at rest
 
 Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs/ARCHITECTURE.md).
+UI design profile: [`design-system/docus/MASTER.md`](design-system/docus/MASTER.md).
 Progress: [`development/TODO.md`](development/TODO.md).
 
 ## Requirements
@@ -31,8 +32,7 @@ npm run dev:desktop    # Electron, loads http://localhost:3000
 ```
 
 Open http://localhost:3000. The first visit asks you to create the
-administrator account. Development mode enables simulated **demo devices** so
-you can try everything without hardware (`config/development.toml`).
+administrator account.
 
 ## Run on the home server
 
@@ -59,9 +59,9 @@ Settings live in `config/default.toml`; any key can be overridden with
 
 | Brand | How |
 |---|---|
-| Tuya / Smart Life | Plugins → *Scan QR to link*. Enter the **User Code** from Smart Life (Me → Settings → Account and Security → User Code), then scan the QR in the app. |
-| Tapo | Plugins → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. |
-| Xiaomi | Plugins → *Link account* with your Mi account and server region. Tokens are fetched once; control is local. Devices can also be added with a token. |
+| Tuya / Smart Life | Integrations → *Link with QR code*. Enter the **User Code** from Smart Life (Me → Settings → Account and Security → User Code), then scan the QR in the app. |
+| Tapo | Integrations → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. |
+| Xiaomi | Integrations → *Link account* with your Mi account and server region. Tokens are fetched once; control is local. Devices can also be added with a token. |
 
 New devices appear under **Devices → Discovered**. Turn on *Add new devices
 automatically* there to skip the inbox.

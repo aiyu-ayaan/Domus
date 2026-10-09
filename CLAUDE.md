@@ -155,6 +155,6 @@ home-automation/
 
 ## UI
 
-UI will will have the transition animation and on each element same like material3-epressive but it will follow the application apple liquid glass ui.. 
+UI follows the design profile in `design-system/docus/MASTER.md` (Minimalism & Swiss, generated with `/ui-ux-pro-max`). Read it before any UI change; page overrides go in `design-system/docus/pages/`. The earlier cartoonish liquid-glass look was rejected — keep it precise: neutral palette, green only for on/live state, hairline borders, small radii, subtle 150ms motion, no coloured icon tiles or gradients. 
 
 
