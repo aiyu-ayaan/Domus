@@ -1,7 +1,9 @@
 //! MIoT spec lookup: maps a device model to the (siid, piid) pairs for the
 //! properties we understand, using the public spec at miot-spec.org.
 
-use home_core::{integration_err, DeviceCommand, DeviceState, DeviceType, Result};
+use home_core::{
+    hex_to_rgb, integration_err, rgb_to_hex, DeviceCommand, DeviceState, DeviceType, Result,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
@@ -137,6 +139,7 @@ pub fn map_spec(spec: &Value) -> MiotMap {
                 "on" if is_primary => "on",
                 "brightness" if is_primary => "brightness",
                 "color-temperature" if is_primary => "color_temp",
+                "color" => "color",
                 "fan-level" if is_primary => "fan_level",
                 "mode" if is_primary => "mode",
                 "pm2.5-density" => "pm25",
@@ -219,6 +222,16 @@ pub fn state_from(map: &MiotMap, result: &Value) -> DeviceState {
             "on" => s.is_on = v.as_bool(),
             "brightness" => s.brightness = v.as_f64().map(|x| pct(p, x)),
             "color_temp" => s.color_temp = v.as_f64().map(|x| pct(p, x)),
+            "color" => {
+                let n = v.as_u64().or_else(|| v.as_i64().map(|x| x as u64));
+                if let Some(n) = n {
+                    let r = ((n >> 16) & 0xff) as u8;
+                    let g = ((n >> 8) & 0xff) as u8;
+                    let b = (n & 0xff) as u8;
+                    s.color = Some(rgb_to_hex(r, g, b));
+                    s.color_mode = Some("color".into());
+                }
+            }
             "fan_level" => s.fan_speed = label(p, v),
             "mode" => s.mode = label(p, v),
             "pm25" => s.air_quality_pm25 = f,
@@ -228,6 +241,9 @@ pub fn state_from(map: &MiotMap, result: &Value) -> DeviceState {
             "power" => s.current_power_watts = f,
             _ => {}
         }
+    }
+    if s.color_mode.is_none() && s.color_temp.is_some() {
+        s.color_mode = Some("white".into());
     }
     for (key, opt) in [("fan_level", "fan_speed"), ("mode", "mode")] {
         if let Some(p) = map.props.get(key) {
@@ -271,6 +287,12 @@ pub fn set_params(did: &str, map: &MiotMap, cmd: &DeviceCommand) -> Vec<Value> {
         let v = scale(map.props.get("color_temp"), t);
         push("color_temp", v);
     }
+    if let Some(hex) = &cmd.color {
+        if let Some((r, g, b)) = hex_to_rgb(hex) {
+            let int_val = ((r as u32) << 16) | ((g as u32) << 8) | (b as u32);
+            push("color", json!(int_val));
+        }
+    }
     if let Some(speed) = &cmd.fan_speed {
         if let Some(p) = map.props.get("fan_level").cloned() {
             push("fan_level", enum_value(&p, speed));
@@ -304,6 +326,18 @@ mod tests {
         ]})
     }
 
+    fn light_spec() -> Value {
+        json!({ "services": [
+            { "iid": 1, "type": "urn:miot-spec-v2:service:device-information:00007801:yeelink-color:1", "properties": [] },
+            { "iid": 2, "type": "urn:miot-spec-v2:service:light:00007802:yeelink-color:1", "properties": [
+                { "iid": 1, "type": "urn:miot-spec-v2:property:on:00000006:yeelink-color:1" },
+                { "iid": 2, "type": "urn:miot-spec-v2:property:brightness:0000000D:yeelink-color:1", "value-range": [1, 100, 1] },
+                { "iid": 3, "type": "urn:miot-spec-v2:property:color-temperature:0000000F:yeelink-color:1", "value-range": [1700, 6500, 1] },
+                { "iid": 4, "type": "urn:miot-spec-v2:property:color:0000000E:yeelink-color:1", "value-range": [0, 16777215, 1] }
+            ]}
+        ]})
+    }
+
     #[test]
     fn maps_air_purifier() {
         let m = map_spec(&purifier_spec());
@@ -324,5 +358,27 @@ mod tests {
         let cmd = DeviceCommand { mode: Some("auto".into()), ..Default::default() };
         assert_eq!(set_params("x", &m, &cmd)[0]["value"], 0);
         assert_eq!(device_type(&m.service, "zhimi.airpurifier.ma4"), DeviceType::AirPurifier);
+    }
+
+    #[test]
+    fn maps_light_bulb() {
+        let m = map_spec(&light_spec());
+        assert_eq!(m.service, "light");
+        assert_eq!(m.props["color"].siid, 2);
+        assert_eq!(m.props["color"].piid, 4);
+
+        let result = json!([
+            {"did": "x|on", "siid": 2, "piid": 1, "code": 0, "value": true},
+            {"did": "x|color", "siid": 2, "piid": 4, "code": 0, "value": 16711680}
+        ]);
+        let s = state_from(&m, &result);
+        assert_eq!(s.is_on, Some(true));
+        assert_eq!(s.color.as_deref(), Some("#ff0000"));
+        assert_eq!(s.color_mode.as_deref(), Some("color"));
+
+        let cmd = DeviceCommand { color: Some("#00ff00".into()), ..Default::default() };
+        let params = set_params("x", &m, &cmd);
+        assert_eq!(params.len(), 1);
+        assert_eq!(params[0]["value"], 65280);
     }
 }

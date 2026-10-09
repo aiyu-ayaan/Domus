@@ -144,6 +144,12 @@ pub struct DeviceState {
     /// 0-100 % (warm -> cold)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_temp: Option<u8>,
+    /// Hex color `#RRGGBB`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    /// Color mode ("color" or "white")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_mode: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub temperature: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -189,6 +195,10 @@ pub struct DeviceCommand {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub color_temp: Option<u8>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color_mode: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fan_speed: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mode: Option<String>,
@@ -212,6 +222,12 @@ impl DeviceCommand {
         }
         if let Some(v) = self.color_temp {
             state.color_temp = Some(v.min(100));
+        }
+        if let Some(v) = &self.color {
+            state.color = Some(v.clone());
+        }
+        if let Some(v) = &self.color_mode {
+            state.color_mode = Some(v.clone());
         }
         if let Some(v) = &self.fan_speed {
             state.fan_speed = Some(v.clone());
@@ -423,6 +439,115 @@ pub fn parse_hhmm(s: &str) -> Option<u32> {
     (h < 24 && m < 60).then_some(h * 60 + m)
 }
 
+/// Parse a hex color string ("#RRGGBB", "RRGGBB", or "#RGB") into RGB (0-255).
+pub fn hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
+    let s = hex.trim().strip_prefix('#').unwrap_or(hex.trim());
+    if s.len() == 6 {
+        let r = u8::from_str_radix(&s[0..2], 16).ok()?;
+        let g = u8::from_str_radix(&s[2..4], 16).ok()?;
+        let b = u8::from_str_radix(&s[4..6], 16).ok()?;
+        Some((r, g, b))
+    } else if s.len() == 3 {
+        let r = u8::from_str_radix(&s[0..1], 16).ok()?;
+        let g = u8::from_str_radix(&s[1..2], 16).ok()?;
+        let b = u8::from_str_radix(&s[2..3], 16).ok()?;
+        Some((r * 17, g * 17, b * 17))
+    } else {
+        None
+    }
+}
+
+/// Convert RGB components (0-255) to a lowercase hex string ("#rrggbb").
+pub fn rgb_to_hex(r: u8, g: u8, b: u8) -> String {
+    format!("#{r:02x}{g:02x}{b:02x}")
+}
+
+/// Convert RGB (0-255) to HSV: hue in [0.0, 360.0], saturation in [0.0, 1.0], value in [0.0, 1.0].
+pub fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
+    let rf = r as f64 / 255.0;
+    let gf = g as f64 / 255.0;
+    let bf = b as f64 / 255.0;
+    let max = rf.max(gf).max(bf);
+    let min = rf.min(gf).min(bf);
+    let delta = max - min;
+
+    let h = if delta == 0.0 {
+        0.0
+    } else if (max - rf).abs() < f64::EPSILON {
+        let h = 60.0 * (((gf - bf) / delta) % 6.0);
+        if h < 0.0 { h + 360.0 } else { h }
+    } else if (max - gf).abs() < f64::EPSILON {
+        60.0 * (((bf - rf) / delta) + 2.0)
+    } else {
+        60.0 * (((rf - gf) / delta) + 4.0)
+    };
+
+    let s = if max == 0.0 { 0.0 } else { delta / max };
+    let v = max;
+
+    (h, s, v)
+}
+
+/// Convert HSV (hue: [0.0, 360.0], saturation: [0.0, 1.0], value: [0.0, 1.0]) to RGB (0-255).
+pub fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (u8, u8, u8) {
+    let s = s.clamp(0.0, 1.0);
+    let v = v.clamp(0.0, 1.0);
+    let h = (h % 360.0 + 360.0) % 360.0;
+
+    let c = v * s;
+    let x = c * (1.0 - (((h / 60.0) % 2.0) - 1.0).abs());
+    let m = v - c;
+
+    let (r1, g1, b1) = match (h / 60.0) as u32 {
+        0 => (c, x, 0.0),
+        1 => (x, c, 0.0),
+        2 => (0.0, c, x),
+        3 => (0.0, x, c),
+        4 => (x, 0.0, c),
+        _ => (c, 0.0, x),
+    };
+
+    let r = ((r1 + m) * 255.0).round().clamp(0.0, 255.0) as u8;
+    let g = ((g1 + m) * 255.0).round().clamp(0.0, 255.0) as u8;
+    let b = ((b1 + m) * 255.0).round().clamp(0.0, 255.0) as u8;
+
+    (r, g, b)
+}
+
+/// Convert a hex color string ("#RRGGBB") to HSV.
+pub fn hex_to_hsv(hex: &str) -> Option<(f64, f64, f64)> {
+    let (r, g, b) = hex_to_rgb(hex)?;
+    Some(rgb_to_hsv(r, g, b))
+}
+
+/// Convert HSV (hue: [0.0, 360.0], saturation: [0.0, 1.0], value: [0.0, 1.0]) to a hex color string.
+pub fn hsv_to_hex(h: f64, s: f64, v: f64) -> String {
+    let (r, g, b) = hsv_to_rgb(h, s, v);
+    rgb_to_hex(r, g, b)
+}
+
+/// Pack RGB components into an integer: `(r << 16) | (g << 8) | b`.
+pub fn rgb_to_int(r: u8, g: u8, b: u8) -> u32 {
+    ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
+}
+
+/// Unpack an integer `(r << 16) | (g << 8) | b` into RGB components.
+pub fn int_to_rgb(n: u32) -> (u8, u8, u8) {
+    (((n >> 16) & 0xff) as u8, ((n >> 8) & 0xff) as u8, (n & 0xff) as u8)
+}
+
+/// Convert a hex color string to packed integer `(r << 16) | (g << 8) | b`.
+pub fn hex_to_rgb_int(hex: &str) -> Option<u32> {
+    let (r, g, b) = hex_to_rgb(hex)?;
+    Some(rgb_to_int(r, g, b))
+}
+
+/// Convert packed integer `(r << 16) | (g << 8) | b` to a hex color string.
+pub fn rgb_int_to_hex(n: u32) -> String {
+    let (r, g, b) = int_to_rgb(n);
+    rgb_to_hex(r, g, b)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -437,6 +562,41 @@ mod tests {
         };
         let json = serde_json::to_string(&state).unwrap();
         assert_eq!(json, r#"{"is_on":true,"current_power_watts":120.5}"#);
+    }
+
+    #[test]
+    fn device_command_apply_to_color_and_mode() {
+        let mut state = DeviceState::default();
+        let cmd = DeviceCommand {
+            color: Some("#ff5500".into()),
+            color_mode: Some("color".into()),
+            ..Default::default()
+        };
+        cmd.apply_to(&mut state);
+        assert_eq!(state.color.as_deref(), Some("#ff5500"));
+        assert_eq!(state.color_mode.as_deref(), Some("color"));
+    }
+
+    #[test]
+    fn color_conversions() {
+        assert_eq!(hex_to_rgb("#ff0000"), Some((255, 0, 0)));
+        assert_eq!(hex_to_rgb("00ff00"), Some((0, 255, 0)));
+        assert_eq!(hex_to_rgb("#00f"), Some((0, 0, 255)));
+        assert_eq!(hex_to_rgb("invalid"), None);
+
+        assert_eq!(rgb_to_hex(255, 0, 0), "#ff0000");
+
+        let (h, s, v) = rgb_to_hsv(255, 0, 0);
+        assert!((h - 0.0).abs() < 1e-4);
+        assert!((s - 1.0).abs() < 1e-4);
+        assert!((v - 1.0).abs() < 1e-4);
+
+        let (r, g, b) = hsv_to_rgb(120.0, 1.0, 1.0);
+        assert_eq!((r, g, b), (0, 255, 0));
+
+        assert_eq!(hsv_to_hex(240.0, 1.0, 1.0), "#0000ff");
+        assert_eq!(hex_to_rgb_int("#ff0000"), Some(0xff0000));
+        assert_eq!(rgb_int_to_hex(0x00ff00), "#00ff00");
     }
 
     #[test]

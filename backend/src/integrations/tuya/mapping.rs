@@ -1,12 +1,16 @@
 //! Translate between Tuya data points (DP codes) and the normalised model.
 
-use home_core::{DeviceCommand, DeviceState, DeviceType};
+use home_core::{
+    hex_to_rgb, hsv_to_rgb, rgb_to_hex, rgb_to_hsv, DeviceCommand, DeviceState, DeviceType,
+};
 use serde_json::{json, Map, Value};
 
 const ON_CODES: &[&str] = &["switch_led", "switch", "switch_1", "power", "switch_on"];
 const BRIGHT_CODES: &[&str] = &["bright_value_v2", "bright_value", "bright_value_1"];
 const TEMP_CODES: &[&str] = &["temp_value_v2", "temp_value"];
 const FAN_CODES: &[&str] = &["fan_speed_enum", "speed", "fan_speed", "fan_speed_percent"];
+const COLOR_CODES: &[&str] = &["colour_data_v2", "colour_data_hsv", "colour_data"];
+const WORK_MODE_CODES: &[&str] = &["work_mode"];
 
 pub fn device_type(category: &str) -> DeviceType {
     match category {
@@ -79,6 +83,20 @@ fn range(config: &Value, code: &str, default: (f64, f64)) -> (f64, f64) {
     if max > min { (min, max) } else { default }
 }
 
+fn color_ranges(config: &Value, code: &str) -> (f64, f64, f64) {
+    let vals = dp(config, code).and_then(|d| d.get("values"));
+    let max_h = vals
+        .and_then(|v| v.pointer("/h/max").or_else(|| v.get("max")).and_then(Value::as_f64))
+        .unwrap_or(360.0);
+    let max_s = vals
+        .and_then(|v| v.pointer("/s/max").or_else(|| v.get("max")).and_then(Value::as_f64))
+        .unwrap_or(1000.0);
+    let max_v = vals
+        .and_then(|v| v.pointer("/v/max").or_else(|| v.get("max")).and_then(Value::as_f64))
+        .unwrap_or(1000.0);
+    (max_h, max_s, max_v)
+}
+
 fn enum_options(config: &Value, code: &str) -> Option<Vec<String>> {
     let range = dp(config, code)?.get("values")?.get("range")?.as_array()?;
     Some(range.iter().filter_map(|v| v.as_str().map(str::to_string)).collect())
@@ -101,6 +119,42 @@ fn to_pct(v: f64, (min, max): (f64, f64)) -> u8 {
     (((v - min) / (max - min)) * 100.0).round().clamp(0.0, 100.0) as u8
 }
 
+fn parse_tuya_color(v: &Value) -> Option<String> {
+    match v {
+        Value::Object(m) => {
+            let h = m.get("h").and_then(Value::as_f64)?;
+            let s = m.get("s").and_then(Value::as_f64)?;
+            let s_norm = if s > 100.0 { s / 1000.0 } else { s / 100.0 }.clamp(0.0, 1.0);
+            let (r, g, b) = hsv_to_rgb(h, s_norm, 1.0);
+            Some(rgb_to_hex(r, g, b))
+        }
+        Value::String(s) => {
+            let s = s.trim();
+            if let Ok(Value::Object(m)) = serde_json::from_str::<Value>(s) {
+                return parse_tuya_color(&Value::Object(m));
+            }
+            if s.starts_with('#') && s.len() == 7 {
+                return Some(s.to_lowercase());
+            }
+            if s.len() == 6 && s.chars().all(|c| c.is_ascii_hexdigit()) {
+                return Some(format!("#{s}").to_lowercase());
+            }
+            if s.len() == 12 && s.chars().all(|c| c.is_ascii_hexdigit()) {
+                let h = u16::from_str_radix(&s[0..4], 16).ok()?;
+                let sat = u16::from_str_radix(&s[4..8], 16).ok()?;
+                let s_norm = if sat > 100 { sat as f64 / 1000.0 } else { sat as f64 / 100.0 }.clamp(0.0, 1.0);
+                let (r, g, b) = hsv_to_rgb(h as f64, s_norm, 1.0);
+                return Some(rgb_to_hex(r, g, b));
+            }
+            if s.len() == 14 && s.chars().all(|c| c.is_ascii_hexdigit()) {
+                return Some(format!("#{}", &s[0..6]).to_lowercase());
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
 pub fn state_from_status(config: &Value, status: &Map<String, Value>) -> DeviceState {
     let mut s = DeviceState::default();
     if let Some((_, v)) = first(status, ON_CODES) {
@@ -115,6 +169,26 @@ pub fn state_from_status(config: &Value, status: &Map<String, Value>) -> DeviceS
         if let Some(n) = v.as_f64() {
             s.color_temp = Some(to_pct(n, range(config, code, (0.0, 1000.0))));
         }
+    }
+    if let Some((_, v)) = first(status, WORK_MODE_CODES) {
+        if let Some(m) = v.as_str() {
+            match m {
+                "colour" | "color" => s.color_mode = Some("color".into()),
+                "white" => s.color_mode = Some("white".into()),
+                other => s.color_mode = Some(other.to_string()),
+            }
+        }
+    }
+    if let Some((_, v)) = first(status, COLOR_CODES) {
+        if let Some(hex) = parse_tuya_color(v) {
+            s.color = Some(hex);
+            if s.color_mode.is_none() {
+                s.color_mode = Some("color".into());
+            }
+        }
+    }
+    if s.color_mode.is_none() && s.color_temp.is_some() {
+        s.color_mode = Some("white".into());
     }
     if let Some(v) = status.get("cur_power") {
         s.current_power_watts = num(v, scale(config, "cur_power", 1));
@@ -183,18 +257,56 @@ pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
             out.push(json!({ "code": code, "value": on }));
         }
     }
+    if let Some(hex) = &cmd.color {
+        if let Some((r, g, b)) = hex_to_rgb(hex) {
+            let (h, s, v) = rgb_to_hsv(r, g, b);
+            if let Some(code) = writable(config, WORK_MODE_CODES) {
+                out.push(json!({ "code": code, "value": "colour" }));
+            }
+            if let Some(code) = writable(config, COLOR_CODES) {
+                let (max_h, max_s, max_v) = color_ranges(config, code);
+                let h_val = (h / 360.0 * max_h).round() as i64;
+                let s_val = (s * max_s).round() as i64;
+                let v_val = if let Some(b) = cmd.brightness {
+                    (b.min(100) as f64 / 100.0 * max_v).round() as i64
+                } else {
+                    (v * max_v).round() as i64
+                };
+                let is_string = dp(config, code)
+                    .and_then(|d| d.get("type")?.as_str())
+                    .is_some_and(|t| t.eq_ignore_ascii_case("string"));
+                let val = if is_string {
+                    json!(format!("{h_val:04x}{s_val:04x}{v_val:04x}"))
+                } else {
+                    json!({ "h": h_val, "s": s_val, "v": v_val })
+                };
+                out.push(json!({ "code": code, "value": val }));
+            }
+        }
+    }
     if let Some(pct) = cmd.brightness {
-        if let Some(code) = writable(config, BRIGHT_CODES) {
-            let (min, max) = range(config, code, (10.0, 1000.0));
-            let v = (min + (max - min) * pct.min(100) as f64 / 100.0).round() as i64;
-            out.push(json!({ "code": code, "value": v }));
+        if cmd.color.is_none() {
+            if let Some(code) = writable(config, BRIGHT_CODES) {
+                let (min, max) = range(config, code, (10.0, 1000.0));
+                let v = (min + (max - min) * pct.min(100) as f64 / 100.0).round() as i64;
+                out.push(json!({ "code": code, "value": v }));
+            }
         }
     }
     if let Some(pct) = cmd.color_temp {
+        if cmd.color.is_none() {
+            if let Some(code) = writable(config, WORK_MODE_CODES) {
+                out.push(json!({ "code": code, "value": "white" }));
+            }
+        }
         if let Some(code) = writable(config, TEMP_CODES) {
             let (min, max) = range(config, code, (0.0, 1000.0));
             let v = (min + (max - min) * pct.min(100) as f64 / 100.0).round() as i64;
             out.push(json!({ "code": code, "value": v }));
+        }
+    } else if cmd.color_mode.as_deref() == Some("white") && cmd.color.is_none() {
+        if let Some(code) = writable(config, WORK_MODE_CODES) {
+            out.push(json!({ "code": code, "value": "white" }));
         }
     }
     if let Some(speed) = &cmd.fan_speed {
@@ -245,6 +357,33 @@ mod tests {
         (device, specs)
     }
 
+    fn bulb() -> (Value, Value) {
+        let device = json!({
+            "category": "dj",
+            "status": [
+                {"code": "switch_led", "value": true},
+                {"code": "work_mode", "value": "colour"},
+                {"code": "colour_data_v2", "value": {"h": 0, "s": 1000, "v": 1000}},
+                {"code": "temp_value_v2", "value": 500}
+            ]
+        });
+        let specs = json!({
+            "functions": [
+                {"code": "switch_led", "type": "Boolean", "values": "{}"},
+                {"code": "work_mode", "type": "Enum", "values": "{\"range\":[\"white\",\"colour\"]}"},
+                {"code": "colour_data_v2", "type": "Json", "values": "{\"h\":{\"min\":0,\"max\":360},\"s\":{\"min\":0,\"max\":1000},\"v\":{\"min\":0,\"max\":1000}}"},
+                {"code": "temp_value_v2", "type": "Integer", "values": "{\"min\":0,\"max\":1000}"}
+            ],
+            "status": [
+                {"code": "switch_led", "type": "Boolean", "values": "{}"},
+                {"code": "work_mode", "type": "Enum", "values": "{\"range\":[\"white\",\"colour\"]}"},
+                {"code": "colour_data_v2", "type": "Json", "values": "{}"},
+                {"code": "temp_value_v2", "type": "Integer", "values": "{}"}
+            ]
+        });
+        (device, specs)
+    }
+
     #[test]
     fn maps_smart_plug() {
         let (device, specs) = plug();
@@ -263,5 +402,45 @@ mod tests {
         let config = build_config(&device, &specs);
         let cmds = commands_for(&config, &DeviceCommand { is_on: Some(false), ..Default::default() });
         assert_eq!(cmds, vec![json!({"code": "switch_1", "value": false})]);
+    }
+
+    #[test]
+    fn maps_bulb_state_and_commands() {
+        let (device, specs) = bulb();
+        let config = build_config(&device, &specs);
+        let s = state_from_status(&config, &status_map(&device));
+        assert_eq!(s.is_on, Some(true));
+        assert_eq!(s.color_mode.as_deref(), Some("color"));
+        assert_eq!(s.color.as_deref(), Some("#ff0000"));
+
+        let color_cmd = commands_for(
+            &config,
+            &DeviceCommand {
+                color: Some("#00ff00".into()),
+                ..Default::default()
+            },
+        );
+        assert_eq!(
+            color_cmd,
+            vec![
+                json!({"code": "work_mode", "value": "colour"}),
+                json!({"code": "colour_data_v2", "value": {"h": 120, "s": 1000, "v": 1000}})
+            ]
+        );
+
+        let temp_cmd = commands_for(
+            &config,
+            &DeviceCommand {
+                color_temp: Some(50),
+                ..Default::default()
+            },
+        );
+        assert_eq!(
+            temp_cmd,
+            vec![
+                json!({"code": "work_mode", "value": "white"}),
+                json!({"code": "temp_value_v2", "value": 500})
+            ]
+        );
     }
 }

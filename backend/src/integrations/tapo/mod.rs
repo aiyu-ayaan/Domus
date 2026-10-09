@@ -5,8 +5,9 @@ pub mod klap;
 
 use base64::{engine::general_purpose::STANDARD as B64, Engine};
 use home_core::{
-    integration_err, AccountContext, CoreError, DeviceCommand, DeviceContext, DeviceState,
-    DeviceType, DiscoveredDevice, IntegrationPlugin, IntegrationType, PolledState, Result,
+    hex_to_rgb, hsv_to_rgb, integration_err, rgb_to_hex, rgb_to_hsv, AccountContext, CoreError,
+    DeviceCommand, DeviceContext, DeviceState, DeviceType, DiscoveredDevice, IntegrationPlugin,
+    IntegrationType, PolledState, Result,
 };
 use klap::{KlapClient, TapoCredentials};
 use serde_json::{json, Value};
@@ -146,14 +147,34 @@ fn decode_nickname(info: &Value) -> Option<String> {
 }
 
 fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
+    let raw_color_temp = info.get("color_temp").and_then(Value::as_u64).unwrap_or(0);
+    let hue = info.get("hue").and_then(Value::as_u64);
+    let sat = info.get("saturation").and_then(Value::as_u64);
+    let explicit_mode = info.get("color_mode").and_then(Value::as_str);
+
+    let (color, color_mode) = if explicit_mode == Some("color")
+        || (raw_color_temp == 0 && (hue.is_some() || sat.is_some()))
+    {
+        let h = hue.unwrap_or(0).min(360) as f64;
+        let s_norm = (sat.unwrap_or(100).min(100) as f64) / 100.0;
+        let (r, g, b) = hsv_to_rgb(h, s_norm, 1.0);
+        (Some(rgb_to_hex(r, g, b)), Some("color".into()))
+    } else if raw_color_temp > 0 || explicit_mode == Some("white") {
+        (None, Some("white".into()))
+    } else {
+        (None, None)
+    };
+
     let mut s = DeviceState {
         is_on: info.get("device_on").and_then(Value::as_bool),
         brightness: info.get("brightness").and_then(Value::as_u64).map(|b| b.min(100) as u8),
-        color_temp: info
-            .get("color_temp")
-            .and_then(Value::as_u64)
-            .filter(|k| *k > 0)
-            .map(|k| (((k as f64 - 2500.0) / 40.0).clamp(0.0, 100.0)) as u8),
+        color_temp: if raw_color_temp > 0 {
+            Some((((raw_color_temp as f64 - 2500.0) / 40.0).clamp(0.0, 100.0)) as u8)
+        } else {
+            None
+        },
+        color,
+        color_mode,
         ..Default::default()
     };
     if let Some(e) = energy {
@@ -270,8 +291,23 @@ impl IntegrationPlugin for TapoIntegration {
         if let Some(b) = command.brightness {
             params.insert("brightness".into(), json!(b.clamp(1, 100)));
         }
-        if let Some(t) = command.color_temp {
-            params.insert("color_temp".into(), json!(2500 + t.min(100) as u32 * 40));
+        if let Some(hex) = &command.color {
+            if let Some((r, g, b)) = hex_to_rgb(hex) {
+                let (h, s, _) = rgb_to_hsv(r, g, b);
+                let hue = h.round() as u32;
+                let saturation = (s * 100.0).round().clamp(0.0, 100.0) as u32;
+                params.insert("hue".into(), json!(hue));
+                params.insert("saturation".into(), json!(saturation));
+                params.insert("color_temp".into(), json!(0));
+            }
+        } else if command.color_temp.is_some() || command.color_mode.as_deref() == Some("white") {
+            let kelvin = command
+                .color_temp
+                .map(|t| 2500 + t.min(100) as u32 * 40)
+                .unwrap_or(4000);
+            params.insert("color_temp".into(), json!(kelvin));
+            params.insert("hue".into(), json!(0));
+            params.insert("saturation".into(), json!(0));
         }
         if let Some(Value::Object(raw)) = &command.raw {
             params.extend(raw.clone());
@@ -283,5 +319,42 @@ impl IntegrationPlugin for TapoIntegration {
             .request(host, &creds_of(account)?, "set_device_info", Some(Value::Object(params)))
             .await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tapo_state_from_color_mode() {
+        let info = json!({
+            "device_on": true,
+            "brightness": 80,
+            "hue": 0,
+            "saturation": 100,
+            "color_temp": 0
+        });
+        let s = state_from(&info, None);
+        assert_eq!(s.is_on, Some(true));
+        assert_eq!(s.brightness, Some(80));
+        assert_eq!(s.color.as_deref(), Some("#ff0000"));
+        assert_eq!(s.color_mode.as_deref(), Some("color"));
+        assert_eq!(s.color_temp, None);
+    }
+
+    #[test]
+    fn tapo_state_from_white_mode() {
+        let info = json!({
+            "device_on": true,
+            "brightness": 100,
+            "color_temp": 4500,
+            "hue": 0,
+            "saturation": 0
+        });
+        let s = state_from(&info, None);
+        assert_eq!(s.is_on, Some(true));
+        assert_eq!(s.color_mode.as_deref(), Some("white"));
+        assert_eq!(s.color_temp, Some(50));
     }
 }
