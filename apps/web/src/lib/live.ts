@@ -31,16 +31,21 @@ export function useLiveEvents(enabled: boolean) {
           return
         }
         switch (ev.type) {
-          case 'device_state_changed':
-            qc.setQueryData<Device[]>(keys.devices, (list) =>
-              list?.map((d) => (d.id === ev.device_id ? { ...d, state: ev.state, is_online: ev.is_online } : d)),
-            )
+          case 'device_state_changed': {
+            const list = qc.getQueryData<Device[]>(keys.devices)
+            if (list && !list.some((d) => d.id === ev.device_id)) qc.invalidateQueries({ queryKey: keys.devices })
+            else
+              qc.setQueryData<Device[]>(keys.devices, (l) =>
+                l?.map((d) => (d.id === ev.device_id ? { ...d, state: ev.state, is_online: ev.is_online } : d)),
+              )
             break
+          }
           case 'device_added':
           case 'device_updated':
           case 'device_removed':
-            qc.invalidateQueries({ queryKey: keys.devices })
-            qc.invalidateQueries({ queryKey: ['discovered'] })
+            // Rooms, groups, energy and integration cards all count devices.
+            for (const k of [keys.devices, keys.rooms, keys.groups, keys.energy, keys.integrations, ['discovered']])
+              qc.invalidateQueries({ queryKey: k })
             break
           case 'device_discovered':
             qc.invalidateQueries({ queryKey: ['discovered'] })

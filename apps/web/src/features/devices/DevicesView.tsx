@@ -282,6 +282,7 @@ function AdoptSheet({ item, onClose }: { item: Discovered | null; onClose: () =>
     mutationFn: () => api.adopt(item!.id, { name: name || undefined, room_id: roomId || undefined, token: token || undefined }),
     onSuccess: (d) => {
       qc.invalidateQueries({ queryKey: keys.devices })
+      qc.invalidateQueries({ queryKey: keys.rooms })
       qc.invalidateQueries({ queryKey: ['discovered'] })
       toast.push({ tone: 'success', title: `${d.name} added` })
       close()
