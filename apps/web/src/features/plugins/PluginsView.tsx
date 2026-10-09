@@ -1,143 +1,339 @@
-import React, { useState } from 'react';
-import { GlassCard } from '../../components/GlassCard';
-import { api } from '../../lib/api';
-import { QrCode, Smartphone, CheckCircle, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import QRCode from 'react-qr-code'
+import { CheckCircle, CloudCheck, HouseLine, Link as LinkIcon, QrCode, Trash, WarningCircle } from '@phosphor-icons/react'
+import { Badge, Card, PageHeader, Skeleton } from '@/components/Layout'
+import { Button } from '@/components/Button'
+import { Sheet, Confirm } from '@/components/Sheet'
+import { Field, SelectField } from '@/components/Field'
+import { api } from '@/lib/api'
+import { useIsAdmin } from '@/lib/auth'
+import { keys, useIntegrations } from '@/lib/queries'
+import { errorMessage, useToast } from '@/lib/toast'
+import { timeAgo } from '@/lib/format'
+import { spring, stagger } from '@/lib/motion'
+import type { Account, Integration } from '@/lib/types'
 
-export const PluginsView: React.FC = () => {
-  const [tuyaQr, setTuyaQr] = useState<string | null>(null);
-  const [loadingTuya, setLoadingTuya] = useState<boolean>(false);
+const brand: Record<string, string> = {
+  tuya: 'from-orange-400 to-rose-500',
+  tapo: 'from-teal-300 to-cyan-500',
+  xiaomi: 'from-orange-500 to-amber-400',
+  virtual: 'from-violet-400 to-indigo-500',
+}
 
-  const handleGenerateTuyaQr = async () => {
-    setLoadingTuya(true);
-    try {
-      const session = await api.createTuyaQrSession();
-      setTuyaQr(session.session_id);
-    } catch {
-      // Mock fallback session
-      setTuyaQr('tuya_mock_session_' + Date.now());
-    } finally {
-      setLoadingTuya(false);
-    }
-  };
+export function PluginsView() {
+  const admin = useIsAdmin()
+  const { data, isLoading } = useIntegrations()
+  const [linking, setLinking] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<Account | null>(null)
+  const qc = useQueryClient()
+  const toast = useToast()
+  const remove = useMutation({
+    mutationFn: (id: string) => api.removeAccount(id),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: keys.integrations })
+      qc.invalidateQueries({ queryKey: keys.devices })
+      toast.push({ tone: 'success', title: 'Account removed', message: r.removed_devices ? `${r.removed_devices} device(s) were removed too.` : undefined })
+      setRemoving(null)
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not remove', message: errorMessage(e) }),
+  })
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">Hardware Integrations & Plugins</h2>
-        <p className="text-slate-400 text-sm">
-          Connect device ecosystems: Tuya QR pairing, Tapo Smart, Xiaomi MiHome, and MQTT.
-        </p>
+    <div>
+      <PageHeader title="Plugins" subtitle="Connect your smart-home brands. Credentials are encrypted on your server." />
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-56" />
+          ))}
+        </div>
+      ) : (
+        <motion.div variants={stagger} initial="hidden" animate="show" className="grid gap-4 md:grid-cols-2">
+          {data?.map((p) => (
+            <PluginCard key={p.id} plugin={p} admin={admin} onLink={() => setLinking(p.id)} onRemove={setRemoving} />
+          ))}
+        </motion.div>
+      )}
+      <TuyaLinkSheet open={linking === 'tuya'} onClose={() => setLinking(null)} />
+      <CredentialsSheet kind={linking === 'tapo' || linking === 'xiaomi' ? linking : null} onClose={() => setLinking(null)} />
+      <Confirm
+        open={!!removing}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => removing && remove.mutate(removing.id)}
+        loading={remove.isPending}
+        title={`Unlink ${removing?.name}?`}
+        message="Devices added through this account are removed as well."
+        confirmLabel="Unlink"
+      />
+    </div>
+  )
+}
+
+function PluginCard({ plugin: p, admin, onLink, onRemove }: { plugin: Integration; admin: boolean; onLink: () => void; onRemove: (a: Account) => void }) {
+  const linked = p.accounts.length > 0
+  return (
+    <Card className="flex flex-col gap-4">
+      <div className="flex items-start gap-4">
+        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br text-xl font-extrabold text-white shadow-lg ${brand[p.id] ?? 'from-slate-400 to-slate-600'}`} aria-hidden>
+          {p.name.slice(0, 1)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-bold">{p.name}</h2>
+            {p.local ? (
+              <Badge tone="accent">
+                <HouseLine size={12} weight="bold" aria-hidden /> Local control
+              </Badge>
+            ) : (
+              <Badge tone="info">
+                <CloudCheck size={12} weight="bold" aria-hidden /> Cloud
+              </Badge>
+            )}
+            {!p.enabled && <Badge tone="warn">Disabled</Badge>}
+          </div>
+          <p className="mt-1 text-sm text-muted">{p.description}</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Tuya QR Code Pairing */}
-        <GlassCard className="p-6 md:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                <QrCode className="w-6 h-6" />
+      {p.accounts.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {p.accounts.map((a) => (
+            <li key={a.id} className="flex items-center gap-3 rounded-3xl bg-line/[0.05] p-3">
+              {a.status === 'ok' ? (
+                <CheckCircle size={22} weight="fill" className="shrink-0 text-power" aria-label="Connected" />
+              ) : (
+                <WarningCircle size={22} weight="fill" className="shrink-0 text-warn" aria-label="Problem" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold">{a.name}</p>
+                <p className="truncate text-xs text-muted" title={a.last_error ?? undefined}>
+                  {a.status === 'ok' ? `Linked ${timeAgo(a.created_at)}` : a.last_error}
+                </p>
+              </div>
+              {admin && <Button variant="ghost" size="sm" aria-label={`Unlink ${a.name}`} icon={<Trash size={18} />} onClick={() => onRemove(a)} />}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+        <span className="text-sm text-muted">
+          {p.device_count} {p.device_count === 1 ? 'device' : 'devices'}
+        </span>
+        {admin && p.enabled && p.link !== 'none' && (
+          <Button variant={linked ? 'glass' : 'primary'} size="sm" icon={p.link === 'qr' ? <QrCode size={18} /> : <LinkIcon size={18} />} onClick={onLink}>
+            {linked ? 'Link another' : p.link === 'qr' ? 'Scan QR to link' : 'Link account'}
+          </Button>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+type TuyaStep = 'code' | 'qr' | 'done'
+
+function TuyaLinkSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const qc = useQueryClient()
+  const navigate = useNavigate()
+  const [step, setStep] = useState<TuyaStep>('code')
+  const [code, setCode] = useState('')
+  const [qr, setQr] = useState<{ token: string; content: string; expires: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [linkedName, setLinkedName] = useState('')
+  const [now, setNow] = useState(Date.now())
+
+  const reset = () => {
+    setStep('code')
+    setQr(null)
+    setError(null)
+  }
+  const close = () => {
+    reset()
+    onClose()
+  }
+
+  const start = useMutation({
+    mutationFn: () => api.tuyaQr(code.trim()),
+    onSuccess: (r) => {
+      setQr({ token: r.qr_token, content: r.qr_content, expires: Date.now() + r.expires_in * 1000 })
+      setStep('qr')
+      setError(null)
+    },
+    onError: (e) => setError(errorMessage(e)),
+  })
+
+  // Poll the login result while the QR is shown.
+  const status = useQuery({
+    queryKey: ['tuya-qr', qr?.token],
+    queryFn: () => api.tuyaQrStatus(qr!.token),
+    enabled: step === 'qr' && !!qr,
+    refetchInterval: 2000,
+  })
+  useEffect(() => {
+    if (status.data?.status === 'linked') {
+      setLinkedName(status.data.name ?? '')
+      setStep('done')
+      qc.invalidateQueries({ queryKey: keys.integrations })
+    } else if (status.data?.status === 'expired') {
+      setError('The QR code expired. Generate a new one.')
+      setStep('code')
+    }
+  }, [status.data, qc])
+  useEffect(() => {
+    if (step !== 'qr') return
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [step])
+  const remaining = qr ? Math.max(0, Math.round((qr.expires - now) / 1000)) : 0
+
+  return (
+    <Sheet open={open} onClose={close} title="Link Tuya / Smart Life" description="Uses the same QR login as Home Assistant — no developer account needed.">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0, transition: spring.default }} exit={{ opacity: 0, x: -24, transition: { duration: 0.12 } }}>
+          {step === 'code' && (
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (code.trim()) start.mutate()
+              }}
+            >
+              <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-muted marker:font-bold marker:text-fg">
+                <li>Open the <b className="text-fg">Smart Life</b> or <b className="text-fg">Tuya Smart</b> app.</li>
+                <li>Go to <b className="text-fg">Me → Settings (gear) → Account and Security → User Code</b>.</li>
+                <li>Copy the code and paste it below.</li>
+              </ol>
+              <Field label="User code" required value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" spellCheck={false} data-autofocus />
+              {error && (
+                <p role="alert" className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">
+                  {error}
+                </p>
+              )}
+              <Button type="submit" variant="primary" loading={start.isPending} disabled={!code.trim()} icon={<QrCode size={18} />}>
+                Show QR code
+              </Button>
+            </form>
+          )}
+          {step === 'qr' && qr && (
+            <div className="flex flex-col items-center gap-5 text-center">
+              <div className="rounded-4xl bg-white p-5 shadow-xl">
+                <QRCode value={qr.content} size={220} aria-label="Tuya login QR code" />
               </div>
               <div>
-                <h3 className="font-semibold text-white text-lg">Tuya Smart Life (Scan QR)</h3>
-                <p className="text-xs text-slate-400">Zero-admin panel setup via official mobile app QR scan</p>
+                <p className="font-semibold">Scan with the Smart Life app</p>
+                <p className="mt-1 text-sm text-muted">
+                  Tap <b className="text-fg">+</b> or the scan icon on the Home tab, scan this code and confirm the login.
+                </p>
               </div>
+              <p className="flex items-center gap-2 text-sm text-muted" aria-live="polite">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-accent motion-reduce:animate-none" aria-hidden />
+                Waiting for confirmation · {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
+              </p>
+              <Button variant="ghost" size="sm" onClick={reset}>
+                Use a different code
+              </Button>
             </div>
-            <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-              Ready
-            </span>
-          </div>
-
-          <div className="bg-white/[0.02] p-5 rounded-2xl border border-white/5 flex flex-col md:flex-row items-center gap-6">
-            <div className="w-48 h-48 rounded-xl bg-white/10 flex flex-col items-center justify-center p-3 border border-white/10 relative">
-              {tuyaQr ? (
-                <div className="text-center p-2">
-                  {/* Visual QR placeholder */}
-                  <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center p-2 text-black font-mono text-[9px] break-all">
-                    [TUYA QR TOKEN] {tuyaQr.slice(0, 20)}...
-                  </div>
-                  <span className="text-[10px] text-emerald-400 block mt-2 font-mono">Scan in SmartLife App</span>
-                </div>
-              ) : (
-                <div className="text-center text-slate-400 text-xs p-4">
-                  <Smartphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <span>Click generate to initiate QR pairing</span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3 flex-1 text-sm text-slate-300">
-              <h4 className="font-semibold text-white">How to pair:</h4>
-              <ol className="list-decimal list-inside space-y-1.5 text-xs text-slate-400">
-                <li>Open the <span className="text-slate-200">Smart Life</span> or <span className="text-slate-200">Tuya Smart</span> mobile app.</li>
-                <li>Go to <span className="text-slate-200">Me &gt; Scan QR Code</span>.</li>
-                <li>Scan the QR code generated here and approve the authentication request.</li>
-                <li>All your Tuya switches and air purifiers sync automatically into Docus.</li>
-              </ol>
-
-              <button
-                onClick={handleGenerateTuyaQr}
-                disabled={loadingTuya}
-                className="mt-3 px-4 py-2.5 rounded-xl glass-button text-cyan-300 font-semibold border-cyan-500/30 flex items-center gap-2 text-xs"
+          )}
+          {step === 'done' && (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <motion.span initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={spring.bouncy} className="flex h-20 w-20 items-center justify-center rounded-full bg-power/15 text-power">
+                <CheckCircle size={48} weight="fill" />
+              </motion.span>
+              <div>
+                <p className="text-xl font-bold">Linked{linkedName ? ` ${linkedName}` : ''}</p>
+                <p className="mt-1 text-muted">Your Smart Life devices are being discovered now.</p>
+              </div>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  close()
+                  navigate('/devices?tab=discovered')
+                }}
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingTuya ? 'animate-spin' : ''}`} />
-                {tuyaQr ? 'Regenerate QR Code' : 'Generate Pairing QR'}
-              </button>
+                See discovered devices
+              </Button>
             </div>
-          </div>
-        </GlassCard>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </Sheet>
+  )
+}
 
-        {/* Tapo Integration */}
-        <GlassCard className="p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <CheckCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-white">TP-Link Tapo</h3>
-              <p className="text-xs text-slate-400">Local LAN device control</p>
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mb-4">
-            Direct high-speed local control for P100/P110 plugs and L530 bulbs without cloud delays.
-          </p>
-          <button className="w-full py-2.5 rounded-xl glass-button text-xs text-cyan-300 border-cyan-500/30 font-semibold">
-            Configure Tapo Credentials
-          </button>
-        </GlassCard>
+const REGIONS = [
+  { value: 'de', label: 'Europe' },
+  { value: 'i2', label: 'India' },
+  { value: 'us', label: 'United States' },
+  { value: 'sg', label: 'Singapore' },
+  { value: 'cn', label: 'China mainland' },
+  { value: 'ru', label: 'Russia' },
+  { value: 'tw', label: 'Taiwan' },
+  { value: 'in', label: 'India (legacy)' },
+]
 
-        {/* Xiaomi MiHome */}
-        <GlassCard className="p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <CheckCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-white">Xiaomi Smart</h3>
-              <p className="text-xs text-slate-400">Air purifiers & sensors</p>
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mb-4">
-            Syncs Mi Air Purifiers, temperature sensors, and robot vacuums directly.
+function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; onClose: () => void }) {
+  const qc = useQueryClient()
+  const toast = useToast()
+  const navigate = useNavigate()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [region, setRegion] = useState('de')
+  const [error, setError] = useState<string | null>(null)
+  const link = useMutation({
+    mutationFn: () => (kind === 'tapo' ? api.linkTapo({ username, password }) : api.linkXiaomi({ username, password, region })),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.integrations })
+      toast.push({ tone: 'success', title: 'Account linked', message: 'Scanning for devices…' })
+      setPassword('')
+      setError(null)
+      onClose()
+      navigate('/devices?tab=discovered')
+    },
+    onError: (e) => setError(errorMessage(e)),
+  })
+  const tapo = kind === 'tapo'
+  return (
+    <Sheet
+      open={!!kind}
+      onClose={onClose}
+      title={tapo ? 'Link TP-Link Tapo' : 'Link Xiaomi Mi Home'}
+      description={
+        tapo
+          ? 'Your TP-Link ID is only used to unlock devices on your local network — nothing is sent to the cloud.'
+          : 'Signs in once to fetch device tokens. Control then happens locally over your network.'
+      }
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" loading={link.isPending} disabled={!username || !password} onClick={() => link.mutate()}>
+            Link account
+          </Button>
+        </>
+      }
+    >
+      <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), username && password && link.mutate())}>
+        <Field label={tapo ? 'TP-Link ID (email)' : 'Xiaomi account (email, phone or ID)'} required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <Field label="Password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {!tapo && (
+          <SelectField label="Server region" value={region} onChange={(e) => setRegion(e.target.value)} hint="The region chosen in the Mi Home app.">
+            {REGIONS.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </SelectField>
+        )}
+        {error && (
+          <p role="alert" className="rounded-2xl bg-danger/10 p-3 text-sm text-danger [overflow-wrap:anywhere]">
+            {error}
           </p>
-          <button className="w-full py-2.5 rounded-xl glass-button text-xs text-cyan-300 border-cyan-500/30 font-semibold">
-            Connect Xiaomi Account
-          </button>
-        </GlassCard>
-
-        {/* Local MQTT Broker */}
-        <GlassCard className="p-6 md:col-span-2">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h3 className="font-semibold text-white">Local MQTT Broker & Zigbee2MQTT</h3>
-              <p className="text-xs text-slate-400">Embedded or external Mosquitto broker bridge</p>
-            </div>
-            <span className="font-mono text-xs text-cyan-400">127.0.0.1:1883</span>
-          </div>
-          <p className="text-xs text-slate-400">
-            Publish and listen to state topics with sub-millisecond latencies across local switches and sensors.
-          </p>
-        </GlassCard>
-      </div>
-    </div>
-  );
-};
+        )}
+      </form>
+    </Sheet>
+  )
+}

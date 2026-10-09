@@ -1,111 +1,175 @@
-import { Device, Room, EnergyOverview, ElectricitySettings, Automation } from './types';
+import type {
+  Automation,
+  Device,
+  DeviceCommand,
+  Discovered,
+  DiscoveryReport,
+  DiscoverySettings,
+  ElectricitySettings,
+  EnergyOverview,
+  EnergyPoint,
+  Group,
+  Integration,
+  Notification,
+  Room,
+  Scene,
+  User,
+} from './types'
 
-const BASE_URL = '/api/v1';
+const TOKEN_KEY = 'docus.token'
 
-function getAuthHeader(): Record<string, string> {
-  const token = localStorage.getItem('docus_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+/**
+ * API origin. Same-origin in the browser (the backend or Vite proxy serves
+ * /api); Electron's preload can point it at the home server.
+ */
+const BASE = (window as unknown as { docus?: { apiBase?: string } }).docus?.apiBase ?? ''
+
+export const session = {
+  get token() {
+    try {
+      return localStorage.getItem(TOKEN_KEY)
+    } catch {
+      return null
+    }
+  },
+  set(token: string | null) {
+    try {
+      if (token) localStorage.setItem(TOKEN_KEY, token)
+      else localStorage.removeItem(TOKEN_KEY)
+    } catch {
+      /* storage unavailable: session lasts for this tab only */
+    }
+  },
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message)
+  }
+}
+
+let onUnauthorized: (() => void) | null = null
+export const setUnauthorizedHandler = (fn: () => void) => {
+  onUnauthorized = fn
+}
+
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const headers: Record<string, string> = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const token = session.token
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  let res: Response
+  try {
+    res = await fetch(`${BASE}/api/v1${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  } catch {
+    throw new ApiError('Cannot reach the Docus server. Check that it is running.', 0)
+  }
+  const data = res.status === 204 ? null : await res.json().catch(() => null)
+  if (!res.ok) {
+    if (res.status === 401 && token) onUnauthorized?.()
+    throw new ApiError(data?.error?.message ?? `Request failed (${res.status})`, res.status)
+  }
+  return data as T
+}
+
+const get = <T>(p: string) => request<T>('GET', p)
+const post = <T>(p: string, b?: unknown) => request<T>('POST', p, b ?? {})
+const put = <T>(p: string, b: unknown) => request<T>('PUT', p, b)
+const patch = <T>(p: string, b: unknown) => request<T>('PATCH', p, b)
+const del = <T>(p: string) => request<T>('DELETE', p)
+
+type Ok = { success: boolean }
+type AuthResponse = { token: string; user: User }
+
+export const wsUrl = () => {
+  const origin = BASE || window.location.origin
+  return `${origin.replace(/^http/, 'ws')}/api/v1/ws?token=${encodeURIComponent(session.token ?? '')}`
 }
 
 export const api = {
-  async getSetupStatus(): Promise<{ needs_admin_setup: boolean }> {
-    const res = await fetch(`${BASE_URL}/auth/setup-status`);
-    return res.json();
-  },
+  setupStatus: () => get<{ needs_admin_setup: boolean }>('/auth/setup-status'),
+  setup: (b: { username: string; email: string; password: string }) => post<AuthResponse>('/auth/setup', b),
+  login: (b: { username: string; password: string }) => post<AuthResponse>('/auth/login', b),
+  me: () => get<User>('/auth/me'),
+  changePassword: (b: { current_password: string; new_password: string }) => post<Ok>('/auth/password', b),
 
-  async register(data: { username: string; email: string; password: string }): Promise<{ token: string; user: unknown }> {
-    const res = await fetch(`${BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+  devices: () => get<Device[]>('/devices'),
+  device: (id: string) => get<Device>(`/devices/${id}`),
+  updateDevice: (id: string, b: { name?: string; room_id?: string | null; icon?: string | null }) =>
+    patch<Device>(`/devices/${id}`, b),
+  removeDevice: (id: string) => del<Ok>(`/devices/${id}`),
+  command: (id: string, cmd: DeviceCommand) => post<Device>(`/devices/${id}/command`, cmd),
+  refresh: (id: string) => post<Device>(`/devices/${id}/refresh`),
+  addManual: (b: { integration_type: string; host: string; token?: string; name?: string; room_id?: string }) =>
+    post<Device>('/devices/manual', b),
 
-  async login(data: { username: string; password: string }): Promise<{ token: string; user: unknown }> {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+  discovered: (status = 'pending') => get<Discovered[]>(`/discovery?status=${status}`),
+  scan: () => post<DiscoveryReport>('/discovery/scan'),
+  adopt: (id: string, b: { name?: string; room_id?: string; token?: string }) => post<Device>(`/discovery/${id}/adopt`, b),
+  ignore: (id: string) => post<Ok>(`/discovery/${id}/ignore`),
+  restore: (id: string) => post<Ok>(`/discovery/${id}/restore`),
+  discoverySettings: () => get<DiscoverySettings>('/discovery/settings'),
+  saveDiscoverySettings: (b: DiscoverySettings) => put<DiscoverySettings>('/discovery/settings', b),
 
-  async getDevices(): Promise<Device[]> {
-    const res = await fetch(`${BASE_URL}/devices`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) return [];
-    return res.json();
-  },
+  groups: () => get<Group[]>('/groups'),
+  createGroup: (b: { name: string; description?: string; device_ids: string[] }) => post<Group>('/groups', b),
+  updateGroup: (id: string, b: { name: string; description?: string; device_ids: string[] }) => put<Ok>(`/groups/${id}`, b),
+  removeGroup: (id: string) => del<Ok>(`/groups/${id}`),
+  groupCommand: (id: string, cmd: DeviceCommand) =>
+    post<{ sent: number; failed: { device_id: string; error: string }[] }>(`/groups/${id}/command`, cmd),
 
-  async updateDeviceState(id: string, state: Record<string, unknown>): Promise<void> {
-    await fetch(`${BASE_URL}/devices/${id}/state`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-      },
-      body: JSON.stringify({ state }),
-    });
-  },
+  rooms: () => get<Room[]>('/rooms'),
+  createRoom: (b: { name: string; icon?: string; floor?: number }) => post<Room>('/rooms', b),
+  updateRoom: (id: string, b: { name: string; icon?: string; floor?: number }) => put<Ok>(`/rooms/${id}`, b),
+  removeRoom: (id: string) => del<Ok>(`/rooms/${id}`),
 
-  async getRooms(): Promise<Room[]> {
-    const res = await fetch(`${BASE_URL}/rooms`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) return [];
-    return res.json();
-  },
+  automations: () => get<Automation[]>('/automations'),
+  createAutomation: (b: Omit<Automation, 'id' | 'created_at' | 'last_triggered_at'>) => post<Automation>('/automations', b),
+  updateAutomation: (id: string, b: Omit<Automation, 'id' | 'created_at' | 'last_triggered_at'>) =>
+    put<Automation>(`/automations/${id}`, b),
+  toggleAutomation: (id: string) => post<Automation>(`/automations/${id}/toggle`),
+  runAutomation: (id: string) => post<{ success: boolean; errors: string[] }>(`/automations/${id}/run`),
+  removeAutomation: (id: string) => del<Ok>(`/automations/${id}`),
 
-  async getEnergyOverview(): Promise<EnergyOverview> {
-    const res = await fetch(`${BASE_URL}/energy/overview`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) {
-      return {
-        current_total_watts: 0,
-        total_kwh_month: 0,
-        estimated_cost_month: 0,
-        rate_per_kwh: 0.15,
-        currency: 'USD',
-      };
-    }
-    return res.json();
-  },
+  scenes: () => get<Scene[]>('/scenes'),
+  createScene: (b: { name: string; icon?: string; actions: Scene['actions'] }) => post<Scene>('/scenes', b),
+  updateScene: (id: string, b: { name: string; icon?: string; actions: Scene['actions'] }) => put<Ok>(`/scenes/${id}`, b),
+  activateScene: (id: string) => post<{ success: boolean; errors: string[] }>(`/scenes/${id}/activate`),
+  removeScene: (id: string) => del<Ok>(`/scenes/${id}`),
 
-  async getElectricitySettings(): Promise<ElectricitySettings> {
-    const res = await fetch(`${BASE_URL}/energy/settings`, {
-      headers: getAuthHeader(),
-    });
-    return res.json();
-  },
+  energyOverview: () => get<EnergyOverview>('/energy/overview'),
+  energyHistory: (range: 'day' | 'week' | 'month', deviceId?: string) =>
+    get<EnergyPoint[]>(`/energy/history?range=${range}${deviceId ? `&device_id=${deviceId}` : ''}`),
+  energySettings: () => get<ElectricitySettings>('/energy/settings'),
+  saveEnergySettings: (b: ElectricitySettings) => put<ElectricitySettings>('/energy/settings', b),
 
-  async updateElectricitySettings(settings: Partial<ElectricitySettings>): Promise<ElectricitySettings> {
-    const res = await fetch(`${BASE_URL}/energy/settings`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-      },
-      body: JSON.stringify(settings),
-    });
-    return res.json();
-  },
+  notifications: () => get<{ items: Notification[]; unread: number }>('/notifications'),
+  readNotification: (id: string) => post<Ok>(`/notifications/${id}/read`),
+  readAll: () => post<Ok>('/notifications/read-all'),
 
-  async getAutomations(): Promise<Automation[]> {
-    const res = await fetch(`${BASE_URL}/automations`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) return [];
-    return res.json();
-  },
+  users: () => get<User[]>('/users'),
+  createUser: (b: { username: string; email: string; password: string; role: string; all_rooms: boolean; room_ids: string[] }) =>
+    post<User>('/users', b),
+  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; all_rooms: boolean; room_ids: string[] }>) =>
+    put<User>(`/users/${id}`, b),
+  removeUser: (id: string) => del<Ok>(`/users/${id}`),
 
-  async createTuyaQrSession(): Promise<{ session_id: string; qr_code_url: string; expires_in_secs: number }> {
-    const res = await fetch(`${BASE_URL}/integrations/tuya/qr-session`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-    });
-    return res.json();
-  },
-};
+  integrations: () => get<Integration[]>('/integrations'),
+  removeAccount: (id: string) => del<Ok & { removed_devices: number }>(`/integrations/accounts/${id}`),
+  tuyaQr: (user_code: string) =>
+    post<{ qr_token: string; qr_content: string; expires_in: number }>('/integrations/tuya/qr', { user_code }),
+  tuyaQrStatus: (token: string) =>
+    get<{ status: 'waiting' | 'linked' | 'expired'; account_id?: string; name?: string }>(`/integrations/tuya/qr/${token}`),
+  linkTapo: (b: { username: string; password: string }) => post<{ account_id: string }>('/integrations/tapo/accounts', b),
+  linkXiaomi: (b: { username: string; password: string; region: string }) =>
+    post<{ account_id: string }>('/integrations/xiaomi/accounts', b),
+}
+

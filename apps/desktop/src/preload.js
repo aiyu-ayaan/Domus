@@ -1,6 +1,7 @@
-const { contextBridge } = require('electron');
+const { contextBridge } = require('electron')
 
-contextBridge.exposeInMainWorld('docusDesktop', {
+// The UI is loaded from the Docus server itself, so API calls stay same-origin.
+contextBridge.exposeInMainWorld('docus', {
   platform: process.platform,
-  version: '0.1.0',
-});
+  isDesktop: true,
+})
