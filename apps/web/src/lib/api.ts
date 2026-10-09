@@ -170,6 +170,7 @@ export const api = {
     get<{ status: 'waiting' | 'linked' | 'expired'; account_id?: string; name?: string }>(`/integrations/tuya/qr/${token}`),
   linkTapo: (b: { username: string; password: string }) => post<{ account_id: string }>('/integrations/tapo/accounts', b),
   linkXiaomi: (b: { username: string; password: string; region: string }) =>
-    post<{ account_id: string }>('/integrations/xiaomi/accounts', b),
+    post<{ account_id?: string; verify_id?: string; via?: 'email' | 'phone' }>('/integrations/xiaomi/accounts', b),
+  verifyXiaomi: (b: { verify_id: string; code: string }) => post<{ account_id: string }>('/integrations/xiaomi/verify', b),
 }
 

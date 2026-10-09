@@ -21,6 +21,9 @@ use std::time::{Duration, Instant};
 /// Pending Tuya QR logins: qr token -> (user code, created).
 pub type TuyaLogins = std::sync::Arc<tokio::sync::Mutex<std::collections::HashMap<String, (String, Instant)>>>;
 
+/// Xiaomi sign-ins waiting for a 2FA code: verify id -> (login, created).
+pub type XiaomiLogins = std::sync::Arc<tokio::sync::Mutex<std::collections::HashMap<String, (std::sync::Arc<cloud::PendingLogin>, Instant)>>>;
+
 const QR_TTL: Duration = Duration::from_secs(5 * 60);
 
 #[derive(Serialize)]
@@ -50,6 +53,7 @@ pub fn integration_routes() -> Router<AppState> {
         .route("/tuya/qr/:token", get(tuya_qr_poll))
         .route("/tapo/accounts", post(tapo_link))
         .route("/xiaomi/accounts", post(xiaomi_link))
+        .route("/xiaomi/verify", post(xiaomi_verify))
 }
 
 async fn catalog(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<Value>>> {
@@ -198,7 +202,38 @@ async fn xiaomi_link(State(s): State<AppState>, user: AuthUser, Json(req): Json<
     if !cloud::REGIONS.contains(&req.region.as_str()) {
         return Err(ApiError::BadRequest(format!("region must be one of {}", cloud::REGIONS.join(", "))));
     }
-    let creds = cloud::login(req.username.trim(), &req.password, &req.region).await?;
+    let creds = match cloud::login(req.username.trim(), &req.password, &req.region, None).await? {
+        cloud::Login::Done(c) => c,
+        cloud::Login::NeedsCode(pending) => {
+            let via = pending.via();
+            let verify_id = uuid::Uuid::new_v4().to_string();
+            let mut logins = s.xiaomi_logins.lock().await;
+            logins.retain(|_, (_, at)| at.elapsed() < QR_TTL);
+            logins.insert(verify_id.clone(), (std::sync::Arc::new(pending), Instant::now()));
+            return Ok(Json(json!({ "verify_id": verify_id, "via": via })));
+        }
+    };
+    save_xiaomi(&s, creds).await
+}
+
+#[derive(Deserialize)]
+struct XiaomiVerify {
+    verify_id: String,
+    code: String,
+}
+
+async fn xiaomi_verify(State(s): State<AppState>, user: AuthUser, Json(req): Json<XiaomiVerify>) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    let pending = match s.xiaomi_logins.lock().await.get(&req.verify_id) {
+        Some((p, at)) if at.elapsed() < QR_TTL => p.clone(),
+        _ => return Err(ApiError::BadRequest("Verification expired; sign in again".into())),
+    };
+    let creds = cloud::verify(&pending, req.code.trim()).await?;
+    s.xiaomi_logins.lock().await.remove(&req.verify_id);
+    save_xiaomi(&s, creds).await
+}
+
+async fn save_xiaomi(s: &AppState, creds: cloud::XiaomiCredentials) -> ApiResult<Json<Value>> {
     let value = serde_json::to_value(&creds).map_err(|e| ApiError::Internal(e.to_string()))?;
     let id = match s.manager.accounts.find_by_name("xiaomi", &creds.username).await? {
         Some(existing) => {
@@ -208,6 +243,6 @@ async fn xiaomi_link(State(s): State<AppState>, user: AuthUser, Json(req): Json<
         None => s.manager.accounts.create("xiaomi", &creds.username, &value).await?,
     };
     s.bus.publish(SystemEvent::IntegrationsChanged);
-    discover_soon(&s);
+    discover_soon(s);
     Ok(Json(json!({ "account_id": id })))
 }

@@ -226,18 +226,29 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
   const [password, setPassword] = useState('')
   const [region, setRegion] = useState('i2')
   const [error, setError] = useState<string | null>(null)
+  // Set when Xiaomi asks for a two-step verification code.
+  const [verify, setVerify] = useState<{ id: string; via: string } | null>(null)
+  const [code, setCode] = useState('')
   const tapo = kind === 'tapo'
+  const close = () => (setVerify(null), setCode(''), onClose())
   const link = useMutation({
     mutationFn: async () => {
-      if (tapo) await api.linkTapo({ username, password })
-      else await api.linkXiaomi({ username, password, region })
+      if (tapo) return void (await api.linkTapo({ username, password }))
+      if (verify) return void (await api.verifyXiaomi({ verify_id: verify.id, code }))
+      const r = await api.linkXiaomi({ username, password, region })
+      if (r.verify_id) return { id: r.verify_id, via: r.via ?? 'email' }
     },
-    onSuccess: () => {
+    onSuccess: (pending) => {
+      if (pending) {
+        setVerify(pending)
+        setError(null)
+        return
+      }
       qc.invalidateQueries({ queryKey: keys.integrations })
       toast.push({ tone: 'success', title: 'Account linked', message: 'Scanning for devices.' })
       setPassword('')
       setError(null)
-      onClose()
+      close()
       navigate('/devices?tab=discovered')
     },
     onError: (e) => setError(errorMessage(e)),
@@ -245,22 +256,22 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
   return (
     <Sheet
       open={!!kind}
-      onClose={onClose}
+      onClose={close}
       title={tapo ? 'Link TP-Link Tapo' : 'Link Xiaomi Mi Home'}
       description={tapo ? 'Your TP-Link ID only unlocks devices on your local network. Nothing is sent to the cloud.' : 'Signs in once to fetch device tokens. Control then stays on your network.'}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={close}>
             Cancel
           </Button>
-          <Button variant="primary" loading={link.isPending} disabled={!username || !password} onClick={() => link.mutate()}>
-            Link account
+          <Button variant="primary" loading={link.isPending} disabled={!username || !password || (!!verify && !code)} onClick={() => link.mutate()}>
+            {verify ? 'Verify' : 'Link account'}
           </Button>
         </>
       }
     >
-      <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), username && password && link.mutate())}>
-        <Field label={tapo ? 'TP-Link ID (email)' : 'Xiaomi account'} hint={tapo ? undefined : 'Email, phone number or Xiaomi ID.'} required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+      <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), username && password && (!verify || code) && link.mutate())}>
+        <Field label={tapo ? 'TP-Link ID (email)' : 'Xiaomi account'} hint={tapo ? undefined : 'Email, phone number with country code (e.g. +91…) or Xiaomi ID.'} required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
         <Field label="Password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {!tapo && (
           <SelectField label="Server region" value={region} onChange={(e) => setRegion(e.target.value)} hint="The region selected in the Mi Home app.">
@@ -270,6 +281,18 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
               </option>
             ))}
           </SelectField>
+        )}
+        {verify && (
+          <Field
+            label="Verification code"
+            hint={`Xiaomi sent a code to your ${verify.via === 'phone' ? 'phone by SMS' : 'email'}.`}
+            required
+            autoFocus
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
         )}
         <ErrorText>{error}</ErrorText>
       </form>

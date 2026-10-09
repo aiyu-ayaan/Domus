@@ -52,7 +52,14 @@ impl XiaomiIntegration {
             .map_err(|e| CoreError::Internal(format!("bad Xiaomi credentials: {e}")))?;
         match cloud::device_list(&creds).await {
             Err(CoreError::AuthError(_)) => {
-                let fresh = cloud::login(&creds.username, &creds.password, &creds.region).await?;
+                let fresh = match cloud::login(&creds.username, &creds.password, &creds.region, Some(&creds.device_id)).await? {
+                    cloud::Login::Done(c) => c,
+                    cloud::Login::NeedsCode(_) => {
+                        return Err(CoreError::AuthError(
+                            "Xiaomi wants a verification code; link the account again under Integrations".into(),
+                        ))
+                    }
+                };
                 self.store
                     .save_credentials(&account.id, &serde_json::to_value(&fresh).unwrap_or_default())
                     .await?;

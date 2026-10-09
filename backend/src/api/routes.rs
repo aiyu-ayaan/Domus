@@ -6,7 +6,7 @@ use crate::integrations::tuya::TuyaIntegration;
 use crate::integrations::DeviceManager;
 use crate::modules::{
     auth, automations::automation_routes, devices, energy::energy_routes, groups::group_routes,
-    integrations::{integration_routes, TuyaLogins},
+    integrations::{integration_routes, TuyaLogins, XiaomiLogins},
     notifications::{notification_routes, Notifier},
     rooms::room_routes, scenes::scene_routes, users::user_routes,
 };
@@ -37,6 +37,7 @@ pub struct AppState {
     pub automations: Arc<AutomationEngine>,
     pub tuya: Option<Arc<TuyaIntegration>>,
     pub tuya_logins: TuyaLogins,
+    pub xiaomi_logins: XiaomiLogins,
 }
 
 pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {

@@ -100,6 +100,7 @@ pub async fn bootstrap() -> anyhow::Result<()> {
         automations,
         tuya,
         tuya_logins: Default::default(),
+        xiaomi_logins: Default::default(),
     };
     let app = create_router(state, &config.server.web_dir, config.tls.enabled);
 
