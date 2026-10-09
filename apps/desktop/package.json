@@ -1,0 +1,13 @@
+{
+  "name": "@docus/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "echo 'Desktop build ready'"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1"
+  }
+}
