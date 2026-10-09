@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { PlugsConnected } from '@phosphor-icons/react'
 import { Card, CardHeader, EmptyState, Metric, Notice, PageHeader, Skeleton } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Switch, Segmented } from '@/components/ui/Controls'
 import { DeviceRow } from '@/components/devices/DeviceRow'
 import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
 import { OverviewInsights } from './OverviewInsights'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
-import { keys, useDevices, useDiscovered, useEnergy, useRooms, useScenes } from '@/lib/queries'
+import { keys, useDevices, useDiscovered, useEnergy, useGroups, useRooms, useScenes } from '@/lib/queries'
 import { airQuality, formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import { cn } from '@/lib/cn'
-import type { Device } from '@/lib/types'
+import type { Device, Group, Scene } from '@/lib/types'
 
 type CategoryFilter = 'all' | 'power' | 'lights' | 'air' | 'climate'
 
@@ -22,23 +23,53 @@ export function OverviewView() {
   const control = useCanControl()
   const navigate = useNavigate()
   const toast = useToast()
+  const qc = useQueryClient()
   const { data: devices, isLoading } = useDevices()
   const { data: rooms = [] } = useRooms()
+  const { data: groups = [] } = useGroups()
   const { data: energy } = useEnergy()
   const { data: scenes = [] } = useScenes()
   const { data: pending = [] } = useDiscovered('pending')
   const history = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
   const [room, setRoom] = useState('all')
   const [category, setCategory] = useState<CategoryFilter>('all')
+  const [quickTab, setQuickTab] = useState<'scenes' | 'groups'>('scenes')
   const [open, setOpen] = useState<string | null>(null)
 
   const runScene = useMutation({
     mutationFn: (id: string) => api.activateScene(id),
     onSuccess: (r, id) => {
+      qc.invalidateQueries({ queryKey: keys.scenes })
+      qc.invalidateQueries({ queryKey: keys.devices })
       const name = scenes.find((s) => s.id === id)?.name
       toast.push(r.success ? { tone: 'success', title: `${name} applied` } : { tone: 'warning', title: `${name} partly applied`, message: r.errors.join('; ') })
     },
     onError: (e) => toast.push({ tone: 'error', title: 'Scene failed', message: errorMessage(e) }),
+  })
+
+  const toggleScene = useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) => api.toggleScene(id, on),
+    onSuccess: (r, { id, on }) => {
+      qc.invalidateQueries({ queryKey: keys.scenes })
+      qc.invalidateQueries({ queryKey: keys.devices })
+      const name = scenes.find((s) => s.id === id)?.name ?? 'Scene'
+      toast.push(
+        r.success
+          ? { tone: 'success', title: `${name} switched ${on ? 'on' : 'off'}` }
+          : { tone: 'warning', title: `${name} partly applied`, message: r.errors.join('; ') },
+      )
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Scene toggle failed', message: errorMessage(e) }),
+  })
+
+  const toggleGroup = useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) => api.groupCommand(id, { is_on: on }),
+    onSuccess: (_r, { id, on }) => {
+      qc.invalidateQueries({ queryKey: keys.devices })
+      const name = groups.find((g) => g.id === id)?.name ?? 'Group'
+      toast.push({ tone: 'success', title: `${name} turned ${on ? 'on' : 'off'}` })
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Group toggle failed', message: errorMessage(e) }),
   })
 
   const list = devices ?? []
@@ -325,7 +356,7 @@ export function OverviewView() {
           )}
         </Card>
 
-        {(hasInsights || scenes.length > 0) && (
+        {(hasInsights || scenes.length > 0 || groups.length > 0) && (
           <div className="flex flex-col gap-6">
             {hasInsights && (
               <OverviewInsights
@@ -340,19 +371,99 @@ export function OverviewView() {
             )}
 
             <Card>
-              <CardHeader title="Scenes" action={<Link to="/automations" className="text-label text-muted hover:text-fg">Manage</Link>} />
-              {scenes.length === 0 ? (
-                <p className="px-4 py-6 text-label text-muted">No scenes. Create one under Automations.</p>
+              <CardHeader
+                title={quickTab === 'scenes' ? 'Scenes' : 'Device groups'}
+                action={
+                  <div className="flex items-center gap-2">
+                    {groups.length > 0 && scenes.length > 0 && (
+                      <Segmented
+                        label="Quick control view"
+                        value={quickTab}
+                        onChange={(v) => setQuickTab(v as 'scenes' | 'groups')}
+                        options={[
+                          { value: 'scenes', label: `Scenes (${scenes.length})` },
+                          { value: 'groups', label: `Groups (${groups.length})` },
+                        ]}
+                      />
+                    )}
+                    <Link
+                      to={quickTab === 'scenes' ? '/automations' : '/devices'}
+                      className="text-label text-muted hover:text-fg"
+                    >
+                      Manage
+                    </Link>
+                  </div>
+                }
+              />
+
+              {quickTab === 'scenes' ? (
+                scenes.length === 0 ? (
+                  <p className="px-4 py-6 text-label text-muted">
+                    No scenes. Create one under Automations.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {scenes.map((s) => {
+                      const active = isSceneActive(s, list, groups)
+                      const targetCount = getSceneTargetCount(s, groups)
+                      return (
+                        <li key={s.id} className="flex min-h-12 items-center gap-3 px-4 py-2.5">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-body font-medium">{s.name}</p>
+                            <p className="text-caption text-muted">
+                              {targetCount > 0 ? `${targetCount} device${targetCount === 1 ? '' : 's'}` : 'Actions'}
+                              {active && ' · currently active'}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={active}
+                              disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
+                              label={`Toggle ${s.name}`}
+                              onChange={(on) => toggleScene.mutate({ id: s.id, on })}
+                            />
+                            <Button
+                              size="sm"
+                              disabled={!control}
+                              loading={runScene.isPending && runScene.variables === s.id}
+                              onClick={() => runScene.mutate(s.id)}
+                            >
+                              Run
+                            </Button>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )
+              ) : groups.length === 0 ? (
+                <p className="px-4 py-6 text-label text-muted">
+                  No groups. Create a group on the Devices page.
+                </p>
               ) : (
                 <ul className="divide-y divide-border">
-                  {scenes.map((s) => (
-                    <li key={s.id} className="flex min-h-12 items-center gap-3 px-4">
-                      <span className="min-w-0 flex-1 truncate text-body">{s.name}</span>
-                      <Button size="sm" disabled={!control} loading={runScene.isPending && runScene.variables === s.id} onClick={() => runScene.mutate(s.id)}>
-                        Run
-                      </Button>
-                    </li>
-                  ))}
+                  {groups.map((g) => {
+                    const memberDevices = list.filter((d) => g.device_ids.includes(d.id))
+                    const onCount = memberDevices.filter((d) => d.is_online && d.state.is_on).length
+                    const isGroupOn = onCount > 0
+                    return (
+                      <li key={g.id} className="flex min-h-12 items-center gap-3 px-4 py-2.5">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-body font-medium">{g.name}</p>
+                          <p className="text-caption text-muted">
+                            {memberDevices.length} devices ·{' '}
+                            {onCount === 0 ? 'All off' : `${onCount} on`}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={isGroupOn}
+                          disabled={!control || (toggleGroup.isPending && toggleGroup.variables?.id === g.id)}
+                          label={`Toggle ${g.name}`}
+                          onChange={(on) => toggleGroup.mutate({ id: g.id, on })}
+                        />
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </Card>
@@ -371,4 +482,34 @@ function summarizeClimate(devices: Device[]) {
   const avg = (a: number[]) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : undefined)
   const pms = nums('air_quality_pm25')
   return { pm25: pms.length ? Math.max(...pms) : undefined, temp: avg(nums('temperature')), humidity: avg(nums('humidity')) }
+}
+
+function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolean {
+  const targetIds = new Set<string>()
+  for (const action of scene.actions) {
+    if (action.type === 'device_command' && action.device_id) {
+      targetIds.add(action.device_id)
+    } else if (action.type === 'group_command' && action.group_id) {
+      const g = groups.find((grp) => grp.id === action.group_id)
+      g?.device_ids.forEach((id) => targetIds.add(id))
+    }
+  }
+  if (targetIds.size > 0) {
+    const memberDevices = devices.filter((d) => targetIds.has(d.id))
+    return memberDevices.some((d) => d.is_online && d.state.is_on)
+  }
+  return scene.is_active
+}
+
+function getSceneTargetCount(scene: Scene, groups: Group[]): number {
+  const targetIds = new Set<string>()
+  for (const action of scene.actions) {
+    if (action.type === 'device_command' && action.device_id) {
+      targetIds.add(action.device_id)
+    } else if (action.type === 'group_command' && action.group_id) {
+      const g = groups.find((grp) => grp.id === action.group_id)
+      g?.device_ids.forEach((id) => targetIds.add(id))
+    }
+  }
+  return targetIds.size
 }

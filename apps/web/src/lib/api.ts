@@ -143,6 +143,9 @@ export const api = {
   createScene: (b: { name: string; icon?: string; actions: Scene['actions'] }) => post<Scene>('/scenes', b),
   updateScene: (id: string, b: { name: string; icon?: string; actions: Scene['actions'] }) => put<Ok>(`/scenes/${id}`, b),
   activateScene: (id: string) => post<{ success: boolean; errors: string[] }>(`/scenes/${id}/activate`),
+  deactivateScene: (id: string) => post<{ success: boolean; errors: string[] }>(`/scenes/${id}/deactivate`),
+  toggleScene: (id: string, on?: boolean) =>
+    post<{ success: boolean; errors: string[] }>(`/scenes/${id}/toggle`, on !== undefined ? { on } : undefined),
   removeScene: (id: string) => del<Ok>(`/scenes/${id}`),
 
   energyOverview: () => get<EnergyOverview>('/energy/overview'),

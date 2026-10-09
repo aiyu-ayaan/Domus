@@ -57,6 +57,8 @@ pub fn scene_routes() -> Router<AppState> {
         .route("/", get(list).post(create))
         .route("/:id", put(update).delete(remove))
         .route("/:id/activate", post(activate))
+        .route("/:id/deactivate", post(deactivate))
+        .route("/:id/toggle", post(toggle))
 }
 
 async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Vec<SceneDto>>> {
@@ -140,3 +142,77 @@ async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
     sqlx::query("DELETE FROM scenes WHERE id = ?").bind(&id).execute(&s.pool).await?;
     Ok(Json(json!({ "success": true })))
 }
+
+#[derive(Deserialize, Default)]
+pub struct ToggleRequest {
+    pub on: Option<bool>,
+}
+
+async fn deactivate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+    user.require_control()?;
+    let actions = s
+        .automations
+        .scene_actions(&id)
+        .await
+        .ok_or_else(|| ApiError::NotFound("Scene not found".into()))?;
+
+    let off_cmd = home_core::DeviceCommand {
+        is_on: Some(false),
+        ..Default::default()
+    };
+    let mut off_actions = Vec::new();
+    for action in actions {
+        match action {
+            Action::DeviceCommand { device_id, .. } => {
+                off_actions.push(Action::DeviceCommand {
+                    device_id,
+                    command: off_cmd.clone(),
+                });
+            }
+            Action::GroupCommand { group_id, .. } => {
+                off_actions.push(Action::GroupCommand {
+                    group_id,
+                    command: off_cmd.clone(),
+                });
+            }
+            Action::Scene { scene_id } => {
+                off_actions.push(Action::Scene { scene_id });
+            }
+            _ => {}
+        }
+    }
+
+    let errors = s.automations.execute(&off_actions, 1).await;
+    sqlx::query("UPDATE scenes SET is_active = 0 WHERE id = ?")
+        .bind(&id)
+        .execute(&s.pool)
+        .await?;
+    Ok(Json(json!({ "success": errors.is_empty(), "errors": errors })))
+}
+
+async fn toggle(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    payload: Option<Json<ToggleRequest>>,
+) -> ApiResult<Json<Value>> {
+    user.require_control()?;
+    let turn_on = match payload.and_then(|Json(p)| p.on) {
+        Some(explicit) => explicit,
+        None => {
+            let row: Option<(bool,)> = sqlx::query_as("SELECT is_active FROM scenes WHERE id = ?")
+                .bind(&id)
+                .fetch_optional(&s.pool)
+                .await?;
+            let is_active = row.map(|r| r.0).unwrap_or(false);
+            !is_active
+        }
+    };
+
+    if turn_on {
+        activate(State(s), user, Path(id)).await
+    } else {
+        deactivate(State(s), user, Path(id)).await
+    }
+}
+

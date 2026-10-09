@@ -11,7 +11,7 @@ import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useAutomations, useDevices, useGroups, useScenes } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { timeAgo } from '@/lib/format'
-import type { Action, Automation, Condition, Scene, Trigger } from '@/lib/types'
+import type { Action, Automation, Condition, Device, Group, Scene, Trigger } from '@/lib/types'
 import { ActionEditor, ConditionEditor, TriggerEditor, describeAction, describeTrigger, validateRule } from './RuleEditor'
 
 export function AutomationsView() {
@@ -41,8 +41,22 @@ export function AutomationsView() {
     mutationFn: (s: Scene) => api.activateScene(s.id),
     onSuccess: (r, s) => {
       qc.invalidateQueries({ queryKey: keys.scenes })
+      qc.invalidateQueries({ queryKey: keys.devices })
       toast.push(r.success ? { tone: 'success', title: `${s.name} applied` } : { tone: 'warning', title: `${s.name} partly applied`, message: r.errors.join('; ') })
     },
+  })
+  const toggleScene = useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) => api.toggleScene(id, on),
+    onSuccess: (r, { on }) => {
+      qc.invalidateQueries({ queryKey: keys.scenes })
+      qc.invalidateQueries({ queryKey: keys.devices })
+      toast.push(
+        r.success
+          ? { tone: 'success', title: `Scene switched ${on ? 'on' : 'off'}` }
+          : { tone: 'warning', title: `Scene partly applied`, message: r.errors.join('; ') },
+      )
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Scene toggle failed', message: errorMessage(e) }),
   })
   const remove = useMutation({
     mutationFn: async () => {
@@ -115,7 +129,13 @@ export function AutomationsView() {
                   <p className="text-body font-medium">{s.name}</p>
                   <p className="truncate text-label text-muted">{s.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', ')}</p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={isSceneActive(s, devices, groups)}
+                    disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
+                    label={`Toggle ${s.name}`}
+                    onChange={(on) => toggleScene.mutate({ id: s.id, on })}
+                  />
                   {admin && (
                     <>
                       <Button variant="ghost" size="sm" aria-label={`Edit ${s.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
@@ -279,3 +299,21 @@ function SceneSheet({ scene, onClose }: { scene: Scene | 'new' | null; onClose: 
     </Sheet>
   )
 }
+
+function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolean {
+  const targetIds = new Set<string>()
+  for (const action of scene.actions) {
+    if (action.type === 'device_command' && action.device_id) {
+      targetIds.add(action.device_id)
+    } else if (action.type === 'group_command' && action.group_id) {
+      const g = groups.find((grp) => grp.id === action.group_id)
+      g?.device_ids.forEach((id) => targetIds.add(id))
+    }
+  }
+  if (targetIds.size > 0) {
+    const memberDevices = devices.filter((d) => targetIds.has(d.id))
+    return memberDevices.some((d) => d.is_online && d.state.is_on)
+  }
+  return scene.is_active
+}
+
