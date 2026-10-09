@@ -4,7 +4,8 @@ import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { useDevices, useGroups, useScenes } from '@/lib/queries'
 import { cn } from '@/lib/cn'
-import type { Action, Condition, Device, Trigger } from '@/lib/types'
+import { COLOR_PRESETS, WHITE_PRESETS } from '@/components/devices/LightColorControls'
+import type { Action, Condition, Device, DeviceCommand, Trigger } from '@/lib/types'
 
 export const PROPERTIES: { value: string; label: string; kind: 'bool' | 'number' }[] = [
   { value: 'is_on', label: 'Power', kind: 'bool' },
@@ -14,6 +15,7 @@ export const PROPERTIES: { value: string; label: string; kind: 'bool' | 'number'
   { value: 'temperature', label: 'Temperature', kind: 'number' },
   { value: 'humidity', label: 'Humidity', kind: 'number' },
   { value: 'brightness', label: 'Brightness', kind: 'number' },
+  { value: 'color_temp', label: 'Color temperature', kind: 'number' },
 ]
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -47,8 +49,12 @@ export function describeTrigger(t: Trigger, devices: Device[]): string {
 }
 
 export function describeAction(a: Action, devices: Device[], groups: { id: string; name: string }[], scenes: { id: string; name: string }[]): string {
-  const cmd = (c: { is_on?: boolean; brightness?: number }) =>
-    c.brightness !== undefined ? `set brightness ${c.brightness}%` : c.is_on ? 'turn on' : 'turn off'
+  const cmd = (c: DeviceCommand) => {
+    if (c.color) return `set color ${c.color}`
+    if (c.color_temp !== undefined) return `set color temp ${c.color_temp}%`
+    if (c.brightness !== undefined) return `set brightness ${c.brightness}%`
+    return c.is_on ? 'turn on' : 'turn off'
+  }
   switch (a.type) {
     case 'device_command':
       return `${cmd(a.command)} ${deviceName(devices, a.device_id)}`
@@ -260,27 +266,161 @@ export function ConditionEditor({ value, onChange }: { value: Condition[]; onCha
   )
 }
 
-function CommandSelect({ command, onCommand }: { command: { is_on?: boolean; brightness?: number }; onCommand: (c: { is_on?: boolean; brightness?: number }) => void }) {
-  const kind = command.brightness !== undefined ? 'brightness' : command.is_on ? 'on' : 'off'
+function CommandSelect({
+  command,
+  onCommand,
+  targetDevice,
+}: {
+  command: DeviceCommand
+  onCommand: (c: DeviceCommand) => void
+  targetDevice?: Device
+}) {
+  const isLight =
+    !targetDevice ||
+    targetDevice.device_type === 'light' ||
+    targetDevice.state.color != null ||
+    targetDevice.state.color_temp != null ||
+    targetDevice.state.brightness != null
+
+  let kind = 'on'
+  if (command.color) {
+    kind = 'color'
+  } else if (command.color_temp !== undefined) {
+    kind = 'color_temp'
+  } else if (command.brightness !== undefined) {
+    kind = 'brightness'
+  } else if (command.is_on === false) {
+    kind = 'off'
+  }
+
+  const handleKindChange = (newKind: string) => {
+    switch (newKind) {
+      case 'on':
+        onCommand({ is_on: true })
+        break
+      case 'off':
+        onCommand({ is_on: false })
+        break
+      case 'brightness':
+        onCommand({ is_on: true, brightness: command.brightness ?? 50 })
+        break
+      case 'color':
+        onCommand({ is_on: true, color: command.color ?? '#F59E0B', color_mode: 'color' })
+        break
+      case 'color_temp':
+        onCommand({ is_on: true, color_temp: command.color_temp ?? 50, color_mode: 'white' })
+        break
+    }
+  }
+
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <SelectField
-        label="Do"
-        value={kind}
-        onChange={(e) => onCommand(e.target.value === 'brightness' ? { is_on: true, brightness: 50 } : { is_on: e.target.value === 'on' })}
-      >
-        <option value="on">Turn on</option>
-        <option value="off">Turn off</option>
-        <option value="brightness">Set brightness</option>
-      </SelectField>
-      {kind === 'brightness' && (
-        <Field label="Brightness %" type="number" min={1} max={100} value={String(command.brightness)} onChange={(e) => onCommand({ is_on: true, brightness: Number(e.target.value) })} />
-      )}
+    <div className="flex flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SelectField label="Do" value={kind} onChange={(e) => handleKindChange(e.target.value)}>
+          <option value="on">Turn on</option>
+          <option value="off">Turn off</option>
+          <option value="brightness">Set brightness</option>
+          {isLight && <option value="color">Set color</option>}
+          {isLight && <option value="color_temp">Set color temperature</option>}
+        </SelectField>
+
+        {kind === 'brightness' && (
+          <Field
+            label="Brightness %"
+            type="number"
+            min={1}
+            max={100}
+            value={String(command.brightness ?? 50)}
+            onChange={(e) => onCommand({ is_on: true, brightness: Number(e.target.value) })}
+          />
+        )}
+
+        {kind === 'color' && (
+          <div className="flex flex-col gap-1">
+            <span className="text-caption font-medium text-muted">Light color</span>
+            <div className="flex items-center gap-2">
+              <label className="relative flex h-9 cursor-pointer items-center gap-2 rounded-md border border-border bg-raised px-2.5 hover:bg-raised/80">
+                <span
+                  className="h-4 w-4 shrink-0 rounded-full border border-white/20 shadow-sm"
+                  style={{ backgroundColor: command.color ?? '#F59E0B' }}
+                />
+                <span className="font-mono text-caption uppercase text-fg">
+                  {command.color ?? '#F59E0B'}
+                </span>
+                <input
+                  type="color"
+                  value={command.color?.startsWith('#') ? command.color.slice(0, 7) : '#F59E0B'}
+                  onChange={(e) =>
+                    onCommand({ is_on: true, color: e.target.value.toUpperCase(), color_mode: 'color' })
+                  }
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  aria-label="Color picker"
+                />
+              </label>
+              <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                {COLOR_PRESETS.slice(0, 5).map((c) => (
+                  <button
+                    key={c.name}
+                    type="button"
+                    title={c.name}
+                    onClick={() => onCommand({ is_on: true, color: c.hex, color_mode: 'color' })}
+                    className={cn(
+                      'h-6 w-6 shrink-0 rounded-full border border-white/20 transition-transform hover:scale-110',
+                      command.color?.toLowerCase() === c.hex.toLowerCase() && 'ring-2 ring-fg ring-offset-1 ring-offset-panel',
+                    )}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {kind === 'color_temp' && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between text-caption">
+              <span className="font-medium text-muted">Temperature</span>
+              <span className="text-subtle tabular">
+                {Math.round(2000 + ((command.color_temp ?? 50) / 100) * 4500)}K ({command.color_temp ?? 50}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={command.color_temp ?? 50}
+                onChange={(e) =>
+                  onCommand({ is_on: true, color_temp: Number(e.target.value), color_mode: 'white' })
+                }
+                className="range flex-1"
+                aria-label="Color temperature slider"
+              />
+              <div className="flex shrink-0 items-center gap-1">
+                {WHITE_PRESETS.map((p) => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    title={`${p.name} (${p.kelvin}K)`}
+                    onClick={() => onCommand({ is_on: true, color_temp: p.pct, color_mode: 'white' })}
+                    className={cn(
+                      'h-5 w-5 shrink-0 rounded-full border border-white/30 transition-transform hover:scale-110',
+                      Math.abs((command.color_temp ?? 50) - p.pct) <= 7 && 'ring-2 ring-fg ring-offset-1 ring-offset-panel',
+                    )}
+                    style={{ backgroundColor: p.hex }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
 export function ActionEditor({ value, onChange, allowScenes = true }: { value: Action[]; onChange: (v: Action[]) => void; allowScenes?: boolean }) {
+  const { data: devices = [] } = useDevices()
   const { data: groups = [] } = useGroups()
   const { data: scenes = [] } = useScenes()
   const set = (i: number, a: Action) => onChange(value.map((x, j) => (j === i ? a : x)))
@@ -306,7 +446,11 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
             <>
               <DeviceSelect value={a.device_id} onChange={(id) => set(i, { ...a, device_id: id })} filter={(d) => d.device_type !== 'sensor'} />
               <div className="sm:col-span-2">
-                <CommandSelect command={a.command} onCommand={(c) => set(i, { ...a, command: c })} />
+                <CommandSelect
+                  command={a.command}
+                  onCommand={(c) => set(i, { ...a, command: c })}
+                  targetDevice={devices.find((d) => d.id === a.device_id)}
+                />
               </div>
             </>
           )}

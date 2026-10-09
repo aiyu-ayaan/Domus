@@ -7,6 +7,7 @@ import { Segmented, Slider, Switch } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/Card'
 import { EnergyChart } from './EnergyChart'
+import { LightColorControls } from './LightColorControls'
 import { api } from '@/lib/api'
 import { keys, useCommand, useEnergy, useRooms } from '@/lib/queries'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
@@ -53,8 +54,16 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
 
   const [brightness, setBrightness] = useState(s.brightness ?? 0)
   const [colorTemp, setColorTemp] = useState(s.color_temp ?? 50)
+  const [color, setColor] = useState(s.color ?? '#F59E0B')
+  const [colorMode, setColorMode] = useState<string | undefined>(s.color_mode)
   useEffect(() => setBrightness(s.brightness ?? 0), [s.brightness])
   useEffect(() => setColorTemp(s.color_temp ?? 50), [s.color_temp])
+  useEffect(() => {
+    if (s.color) setColor(s.color)
+  }, [s.color])
+  useEffect(() => {
+    if (s.color_mode) setColorMode(s.color_mode)
+  }, [s.color_mode])
   const [name, setName] = useState(device.name)
   const [roomId, setRoomId] = useState(device.room_id ?? '')
   const [confirm, setConfirm] = useState(false)
@@ -99,6 +108,8 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const fan = s.options?.fan_speed
   const modes = s.options?.mode
 
+  const isLight = device.device_type === 'light' || s.color != null || s.color_temp != null || s.brightness != null
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-2">
@@ -109,7 +120,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
         <Button variant="ghost" size="sm" aria-label="Refresh state" icon={<ArrowsClockwise size={16} />} loading={refresh.isPending} onClick={() => refresh.mutate()} />
       </div>
 
-      {(canToggle(device) || s.brightness != null || fan?.length || modes?.length) && (
+      {(canToggle(device) || isLight || fan?.length || modes?.length) && (
         <Section title="Controls">
           <div className="rounded-lg border border-border px-4">
             {canToggle(device) && (
@@ -130,13 +141,30 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
                 <Slider label="Brightness" min={1} value={brightness} onChange={setBrightness} onCommit={(v) => send({ brightness: v })} disabled={!control} />
               </div>
             )}
-            {s.color_temp != null && (
-              <div className="border-b border-border py-3 last:border-0">
-                <div className="flex justify-between text-body">
-                  <span>Colour temperature</span>
-                  <span className="text-muted">{colorTemp < 35 ? 'Warm' : colorTemp > 65 ? 'Cool' : 'Neutral'}</span>
-                </div>
-                <Slider label="Colour temperature" value={colorTemp} onChange={setColorTemp} onCommit={(v) => send({ color_temp: v })} disabled={!control} />
+            {isLight && (
+              <div className="border-b border-border py-3.5 last:border-0">
+                <LightColorControls
+                  color={color}
+                  colorTemp={colorTemp}
+                  colorMode={colorMode}
+                  brightness={s.brightness != null ? brightness : (s.is_on ? 100 : 0)}
+                  isOn={s.is_on !== false}
+                  disabled={!control}
+                  onChangeColor={(c) => setColor(c)}
+                  onCommitColor={(c) => {
+                    setColor(c)
+                    send({ color: c, color_mode: 'color' })
+                  }}
+                  onChangeColorTemp={(t) => setColorTemp(t)}
+                  onCommitColorTemp={(t) => {
+                    setColorTemp(t)
+                    send({ color_temp: t, color_mode: 'white' })
+                  }}
+                  onChangeColorMode={(m) => {
+                    setColorMode(m)
+                    send({ color_mode: m })
+                  }}
+                />
               </div>
             )}
             {fan && fan.length > 0 && (

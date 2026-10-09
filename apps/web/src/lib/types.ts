@@ -25,6 +25,8 @@ export interface DeviceState {
   is_on?: boolean
   brightness?: number
   color_temp?: number
+  color?: string
+  color_mode?: string
   temperature?: number
   humidity?: number
   air_quality_pm25?: number
@@ -59,6 +61,8 @@ export type DeviceCommand = Partial<{
   is_on: boolean
   brightness: number
   color_temp: number
+  color: string
+  color_mode: string
   fan_speed: string
   mode: string
   raw: unknown
