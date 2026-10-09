@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
 import { useIsAdmin } from '@/lib/auth'
-import { keys, useEnergy } from '@/lib/queries'
+import { keys, useDevices, useEnergy } from '@/lib/queries'
 import { formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings } from '@/lib/types'
@@ -17,6 +17,7 @@ type Range = 'day' | 'week' | 'month'
 export function EnergyView() {
   const admin = useIsAdmin()
   const { data: o, isLoading } = useEnergy()
+  const { data: devices } = useDevices()
   const [range, setRange] = useState<Range>('day')
   const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range), refetchInterval: 60_000 })
 
@@ -25,13 +26,17 @@ export function EnergyView() {
   const end = new Date(o.cycle_start)
   end.setDate(end.getDate() + o.cycle_days - 1)
   const fmt = (d: Date) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+  // Watts come from the live device list; kWh and cost from the periodic energy query.
+  const live = new Map((devices ?? []).map((d) => [d.id, d.is_online ? d.state.current_power_watts ?? 0 : 0]))
+  const watts = (id: string, fallback: number) => live.get(id) ?? fallback
+  const totalWatts = o.devices.reduce((sum, d) => sum + watts(d.device_id, d.current_watts), 0)
   const maxKwh = Math.max(...o.devices.map((d) => d.kwh), 0.0001)
 
   return (
     <>
       <PageHeader title="Energy" description={`Billing cycle ${fmt(new Date(o.cycle_start))} – ${fmt(end)} · day ${o.cycle_day} of ${o.cycle_days}`} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Power now" live value={formatWatts(o.current_watts)} />
+        <Metric label="Power now" live value={formatWatts(totalWatts)} />
         <Metric label="Today" value={formatKwh(o.today_kwh)} sub={formatMoney(o.today_cost, currency)} />
         <Metric label="Bill so far" value={formatMoney(o.cycle_cost, currency)} sub={`${formatKwh(o.cycle_kwh)} this cycle`} />
         <Metric
@@ -75,7 +80,7 @@ export function EnergyView() {
                       <div className="h-full rounded-full bg-fg/70" style={{ width: `${(d.kwh / maxKwh) * 100}%` }} />
                     </div>
                   </td>
-                  <td className="px-4 text-right text-muted">{formatWatts(d.current_watts)}</td>
+                  <td className="px-4 text-right text-muted">{formatWatts(watts(d.device_id, d.current_watts))}</td>
                   <td className="px-4 text-right">{formatKwh(d.kwh)}</td>
                   <td className="px-4 text-right">{formatMoney(d.cost, currency)}</td>
                 </tr>

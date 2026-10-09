@@ -33,12 +33,21 @@
 - [x] Demo/virtual devices removed
 - [ ] Check phone layout on a real device (375px)
 
+## Milestone 5: Fixes and billing (DONE — 2026-10-09)
+- [x] Tapo: title-case HTTP headers fix `400 Bad Request` on KLAP handshake
+- [x] Xiaomi: email/SMS two-step verification in the link sheet, trusted device id, phone-number login
+- [x] Energy: any ISO currency, slab (per-units) tariffs for Pune/MSEDCL-style billing
+- [x] Live UI: device add/update/remove refreshes rooms, groups, energy and integrations; "Power now" computed from live devices
+- [x] Sheet inputs no longer lose focus on every keystroke
+- [ ] Verify Xiaomi 2FA end to end with a real account (SMS path unconfirmed)
+- [ ] Time-of-use tariffs (per-hour rates) on top of slabs
+
 ## Next
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback
 - [ ] Tuya realtime MQTT push instead of polling
 - [ ] Tapo: hub child devices, light-strip colours
-- [ ] Xiaomi: legacy (non-MIoT) devices, 2FA flow in UI
+- [ ] Xiaomi: legacy (non-MIoT) devices
 - [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
 - [ ] Packaged Electron builds; Docker image for the home server

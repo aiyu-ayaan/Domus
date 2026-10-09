@@ -61,7 +61,14 @@ Settings live in `config/default.toml`; any key can be overridden with
 |---|---|
 | Tuya / Smart Life | Integrations → *Link with QR code*. Enter the **User Code** from Smart Life (Me → Settings → Account and Security → User Code), then scan the QR in the app. |
 | Tapo | Integrations → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. |
-| Xiaomi | Integrations → *Link account* with your Mi account and server region. Tokens are fetched once; control is local. Devices can also be added with a token. |
+| Xiaomi | Integrations → *Link account* with your Mi account and server region. If Xiaomi asks for two-step verification, enter the code it emails or texts you in the same panel. The account can be an email, a phone number with country code (`+91…`) or a Xiaomi ID. Tokens are fetched once; control is local. Devices can also be added with a token. |
+
+## Electricity billing
+
+Energy → *Electricity plan*: pick any currency, and choose a flat price per
+kWh or **slabs** for unit-based tariffs (e.g. Pune/MSEDCL: 0–100 units at one
+rate, 101–300 at the next, and so on). The bill is calculated per billing
+cycle, plus the fixed monthly charge.
 
 New devices appear under **Devices → Discovered**. Turn on *Add new devices
 automatically* there to skip the inbox.

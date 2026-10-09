@@ -156,11 +156,48 @@ Afterwards every request to the regional endpoint is signed (HMAC-SHA256 over
 headers + encrypted payload) and query/body/result are AES-128-GCM encrypted.
 Tokens refresh automatically and are written back through `CredentialStore`.
 
+## 4b. Xiaomi sign-in and two-step verification
+
+Mi cloud is only used once to fetch device tokens and LAN IPs; control is
+local. Xiaomi asks for a code whenever it sees an unknown device id, so Docus
+generates one device id per account, stores it with the credentials, and asks
+Xiaomi to trust it. Later automatic re-logins then skip the code.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as Link sheet
+    participant API as POST /integrations/xiaomi/accounts
+    participant X as account.xiaomi.com
+    participant V as POST /integrations/xiaomi/verify
+
+    UI->>API: account (email / +phone / id), password, region
+    API->>X: serviceLogin → serviceLoginAuth2 (MD5 hash, deviceId cookie)
+    alt signed in
+        X-->>API: ssecurity + location
+        API->>X: STS callback → serviceToken
+        API-->>UI: account_id, discovery starts
+    else notificationUrl (2FA)
+        API->>X: identity/list, send{Email|Phone}Ticket
+        X-->>UI: code by email or SMS
+        API-->>UI: verify_id + via (kept 5 min in memory)
+        UI->>V: verify_id + code
+        V->>X: verify{Email|Phone} (trust=true) → result/check → Auth2/end
+        X-->>V: ssecurity in `extension-pragma`, redirect to STS
+        V->>X: STS → serviceToken
+        V-->>UI: account_id
+    end
+```
+
+Cookies are kept in a per-login jar, because the identity pages set several
+session cookies. A captcha challenge is reported as an error; sign in once in
+the Mi Home app or a browser and retry.
+
 ## 5. Local protocols
 
 | Integration | Discovery | Control | Secrets |
 |---|---|---|---|
-| Tapo | UDP broadcast to :20002 | KLAP v2/v1 over HTTP: handshake proves both sides know the account hash, then AES-128-CBC with per-request sequence IV and SHA-256 signature | TP-Link email/password (sealed) |
+| Tapo | UDP broadcast to :20002 | KLAP v2/v1 over HTTP: handshake proves both sides know the account hash, then AES-128-CBC with per-request sequence IV and SHA-256 signature. Device firmware ("SHIP 2.0") answers `400` to lowercase header names, so the client sends title-case headers | TP-Link email/password (sealed) |
 | Xiaomi | Mi cloud device list (token + LAN IP) and miIO hello broadcast on :54321 | miIO UDP, AES-128-CBC keyed by MD5(token); MIoT `get/set_properties` mapped from miot-spec.org | Account password + device tokens (sealed) |
 | Tuya | Smart Life homes → devices → DP specifications | Cloud commands on DP codes, scaled using the DP spec | OAuth tokens + local keys (sealed) |
 
@@ -180,10 +217,41 @@ flowchart LR
     Send -. "1.5 s later" .-> Refresh["refresh device"]
 ```
 
-Energy samples store *incremental* kWh, so bills are plain sums: today, the
+Energy samples store *incremental* kWh, so usage is a plain sum: today, the
 current billing cycle (custom start day), a projection to cycle end, budget
 usage, and per-device breakdown. History is bucketed in 15-minute UTC slots so
 half-hour time zones (e.g. IST) aggregate correctly into local hours.
+
+### Tariffs and currency
+
+`electricity_settings` holds any 3-letter ISO currency (the UI lists every
+currency the browser knows) and either a flat `rate_per_kwh` or ordered
+**slabs** (telescopic billing, e.g. MSEDCL / Pune: 0–100 units, 101–300, …).
+`ElectricitySettings::energy_cost(kwh)` bills each slab for the units that fall
+inside it, per billing cycle; the last slab may be open-ended. Cycle bill =
+slab cost + fixed monthly charge; the projection runs the projected units
+through the same slabs. Today's cost is the cycle cost minus the cost of the
+units before today (so it lands in the highest slab reached). Per-device cost
+and the history chart use the average rate (an approximation for history ranges
+shorter than a cycle).
+
+### How the UI stays live
+
+```mermaid
+flowchart LR
+    Ev["DeviceStateChanged<br/>DeviceAdded / Updated / Removed"] --> WS["WebSocket (room-filtered)"]
+    WS --> Cache["useLiveEvents → React Query cache"]
+    Cache -- state patch --> Dev["devices list"]
+    Cache -- "add / update / remove" --> Inv["invalidate devices, rooms,<br/>groups, energy, integrations, discovered"]
+    Dev --> Power["Overview / Energy 'Power now'<br/>summed from live device watts"]
+    Energy["GET /energy/overview<br/>refetch every 15 s"] --> Bill["Today · bill · projection · kWh"]
+```
+
+Instantaneous power (the "Power now" tiles and per-device watts) is summed on
+the client from the live device list, so it moves with every poll. Accumulated
+values (kWh, cost) come from the energy query, refetched every 15 s to match
+the poller. Linking or adopting a device refreshes every dependent view without
+a reload.
 
 ## 7. Security model
 
@@ -230,6 +298,8 @@ Visual design follows the persisted profile in
 [`design-system/docus/MASTER.md`](../../design-system/docus/MASTER.md)
 (Minimalism & Swiss, generated with `ui-ux-pro-max`): neutral zinc palette,
 green only for "on/live", Inter, 6/10px radii, hairline borders, 150ms fades.
+Side panels (`Sheet`) keep their close handler in a ref so inline handlers
+never re-run the focus logic and steal focus from inputs while typing.
 Translucent blur is limited to the sticky mobile top bar and tab bar.
 
 ## 9. Data model
@@ -251,9 +321,12 @@ erDiagram
     energy_metrics { text device_id; real power_watts; real energy_kwh; datetime recorded_at }
     automations { text triggers_json; text conditions_json; text actions_json; bool is_enabled }
     scenes { text actions_json }
-    electricity_settings { real rate_per_kwh; text currency; real monthly_budget; int billing_cycle_day; real fixed_monthly_charge }
+    electricity_settings { real rate_per_kwh; text currency; real monthly_budget; int billing_cycle_day; real fixed_monthly_charge; text slabs }
     notifications { text level; text title; bool is_read }
     app_settings { text key PK; text value_json }
 ```
+
+`electricity_settings` also carries `slabs` (JSON array of
+`{up_to_kwh, rate}`, added in `0003_tariff_slabs.sql`).
 
 Migrations live in `migrations/` and run at startup (`sqlx::migrate!`).

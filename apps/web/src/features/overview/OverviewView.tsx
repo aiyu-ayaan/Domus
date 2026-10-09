@@ -44,6 +44,8 @@ export function OverviewView() {
   const currency = energy?.settings.currency ?? 'USD'
   const controllable = list.filter((d) => d.device_type !== 'sensor')
   const onCount = controllable.filter((d) => d.is_online && d.state.is_on).length
+  // From the live device list (WebSocket), not the energy query, so it moves as devices report.
+  const watts = list.reduce((sum, d) => sum + (d.is_online ? d.state.current_power_watts ?? 0 : 0), 0)
   const offline = list.filter((d) => !d.is_online).length
   const aq = airQuality(climate.pm25)
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
@@ -62,7 +64,7 @@ export function OverviewView() {
       )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Power now" live value={formatWatts(energy?.current_watts ?? 0)} sub={`${onCount} of ${controllable.length} devices on`} />
+        <Metric label="Power now" live value={formatWatts(watts)} sub={`${onCount} of ${controllable.length} devices on`} />
         <Metric label="Today" value={formatKwh(energy?.today_kwh ?? 0)} sub={formatMoney(energy?.today_cost ?? 0, currency)} />
         <Metric
           label="Bill this cycle"
