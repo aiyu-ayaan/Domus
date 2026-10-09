@@ -1,0 +1,7 @@
+{
+  "name": "Kitchen Plug",
+  "integration_type": "tuya",
+  "device_type": "plug",
+  "model": "Tuya Smart Plug 16A",
+  "ip_address": "192.168.1.105"
+}

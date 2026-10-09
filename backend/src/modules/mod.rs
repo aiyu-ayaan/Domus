@@ -1,0 +1,9 @@
+pub mod auth;
+pub mod automations;
+pub mod devices;
+pub mod energy;
+pub mod notifications;
+pub mod rooms;
+pub mod scenes;
+pub mod schedules;
+pub mod users;
