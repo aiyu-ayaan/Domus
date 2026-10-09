@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -12,11 +12,12 @@ import {
   PlugsConnected,
   SignOut,
   SquaresFour,
+  Wind,
   type Icon,
 } from '@phosphor-icons/react'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { useLiveEvents } from '@/lib/live'
-import { keys, useDiscovered, useNotifications } from '@/lib/queries'
+import { keys, useDevices, useDiscovered, useEnergy, useNotifications } from '@/lib/queries'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { timeAgo } from '@/lib/format'
@@ -30,15 +31,6 @@ interface NavItem {
   admin?: boolean
 }
 
-const nav: NavItem[] = [
-  { to: '/', label: 'Overview', icon: House },
-  { to: '/devices', label: 'Devices', icon: SquaresFour },
-  { to: '/rooms', label: 'Rooms', icon: Door },
-  { to: '/automations', label: 'Automations', icon: Lightning },
-  { to: '/energy', label: 'Energy', icon: ChartLine },
-  { to: '/plugins', label: 'Integrations', icon: PlugsConnected, admin: true },
-  { to: '/settings', label: 'Settings', icon: Gear },
-]
 
 function Mark() {
   return (
@@ -181,8 +173,31 @@ export function AppShell() {
   const [moreOpen, setMoreOpen] = useState(false)
   const { data: notifications } = useNotifications()
   const { data: pending = [] } = useDiscovered('pending')
+  const { data: devices = [] } = useDevices()
+  const { data: energy } = useEnergy()
+
+  const hasEnergy =
+    devices.some((d) => d.state.current_power_watts != null || d.state.today_energy_kwh != null) ||
+    Boolean(energy?.devices && energy.devices.length > 0) ||
+    Boolean(energy?.cycle_kwh && energy.cycle_kwh > 0)
+
+  const hasAirQuality = devices.some(
+    (d) => d.device_type === 'air_purifier' || d.state.air_quality_pm25 != null,
+  )
+
+  const items = useMemo(() => {
+    return [
+      { to: '/', label: 'Overview', icon: House },
+      { to: '/devices', label: 'Devices', icon: SquaresFour },
+      { to: '/rooms', label: 'Rooms', icon: Door },
+      { to: '/automations', label: 'Automations', icon: Lightning },
+      ...(hasAirQuality ? [{ to: '/air-quality', label: 'Air quality', icon: Wind }] : []),
+      ...(hasEnergy ? [{ to: '/energy', label: 'Energy', icon: ChartLine }] : []),
+      ...(admin ? [{ to: '/plugins', label: 'Integrations', icon: PlugsConnected, admin: true }] : []),
+      { to: '/settings', label: 'Settings', icon: Gear },
+    ]
+  }, [hasAirQuality, hasEnergy, admin])
   const unread = notifications?.unread ?? 0
-  const items = nav.filter((n) => !n.admin || admin)
 
   return (
     <div className="min-h-dvh">

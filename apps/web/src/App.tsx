@@ -11,6 +11,7 @@ const RoomsView = lazy(() => import('@/features/rooms/RoomsView').then((m) => ({
 const RoomDetailView = lazy(() => import('@/features/rooms/RoomsView').then((m) => ({ default: m.RoomDetailView })))
 const AutomationsView = lazy(() => import('@/features/automations/AutomationsView').then((m) => ({ default: m.AutomationsView })))
 const EnergyView = lazy(() => import('@/features/energy/EnergyView').then((m) => ({ default: m.EnergyView })))
+const AirQualityView = lazy(() => import('@/features/airquality/AirQualityView').then((m) => ({ default: m.AirQualityView })))
 const IntegrationsView = lazy(() => import('@/features/integrations/IntegrationsView').then((m) => ({ default: m.IntegrationsView })))
 const SettingsView = lazy(() => import('@/features/settings/SettingsView').then((m) => ({ default: m.SettingsView })))
 
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="rooms/:id" element={<Lazy><RoomDetailView /></Lazy>} />
           <Route path="automations" element={<Lazy><AutomationsView /></Lazy>} />
           <Route path="energy" element={<Lazy><EnergyView /></Lazy>} />
+          <Route path="air-quality" element={<Lazy><AirQualityView /></Lazy>} />
           <Route path="plugins" element={<AdminOnly><Lazy><IntegrationsView /></Lazy></AdminOnly>} />
           <Route path="settings" element={<Lazy><SettingsView /></Lazy>} />
           <Route path="*" element={<Navigate to="/" replace />} />

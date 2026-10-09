@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Wind, Lightning, Thermometer, DropHalf } from '@phosphor-icons/react'
 import { Card, CardHeader, Badge } from '@/components/ui/Card'
@@ -9,8 +8,6 @@ import { useCanControl } from '@/lib/auth'
 import { useCommand } from '@/lib/queries'
 import { cn } from '@/lib/cn'
 import type { Device, EnergyOverview, EnergyPoint, Room } from '@/lib/types'
-
-type InsightTab = 'energy' | 'air_quality' | 'climate'
 
 interface OverviewInsightsProps {
   devices: Device[]
@@ -38,7 +35,7 @@ export function OverviewInsights({
   const control = useCanControl()
   const command = useCommand()
 
-  // Capability checks: only show tabs if relevant devices actually exist
+  // Capability checks: only show cards if relevant devices actually exist
   const hasPowerDevices = devices.some(
     (d) => d.state.current_power_watts != null || d.state.today_energy_kwh != null,
   )
@@ -59,62 +56,198 @@ export function OverviewInsights({
   )
   const hasClimate = climateDevices.length > 0
 
-  // If no properly supported device exists for any category, hide this section entirely
   if (!hasEnergy && !hasAirQuality && !hasClimate) {
     return null
   }
 
-  const availableTabs: { id: InsightTab; label: string }[] = []
-  if (hasEnergy) availableTabs.push({ id: 'energy', label: 'Energy' })
-  if (hasAirQuality) availableTabs.push({ id: 'air_quality', label: 'Air quality' })
-  if (hasClimate) availableTabs.push({ id: 'climate', label: 'Climate' })
-
-  const [activeTab, setActiveTab] = useState<InsightTab>(availableTabs[0].id)
-  const currentTab = availableTabs.some((t) => t.id === activeTab)
-    ? activeTab
-    : availableTabs[0].id
-
   const aq = airQuality(climate.pm25)
 
   return (
-    <Card>
-      <CardHeader
-        className="gap-2 py-2"
-        title={
-          availableTabs.length > 1 ? (
-            <Segmented<InsightTab>
-              size="sm"
-              label="Insights view"
-              value={currentTab}
-              onChange={setActiveTab}
-              options={availableTabs.map((t) => ({ value: t.id, label: t.label }))}
-            />
-          ) : (
-            <span className="flex items-center gap-1.5">
-              {currentTab === 'energy' && <Lightning size={16} className="text-muted" />}
-              {currentTab === 'air_quality' && <Wind size={16} className="text-muted" />}
-              {currentTab === 'climate' && <Thermometer size={16} className="text-muted" />}
-              {availableTabs[0].label}
-            </span>
-          )
-        }
-        action={
-          currentTab === 'energy' ? (
-            <Link to="/energy" className="text-label text-muted hover:text-fg">
-              Details
-            </Link>
-          ) : currentTab === 'air_quality' && climate.pm25 != null ? (
-            <Badge tone={aq?.tone === 'text-danger' ? 'danger' : aq?.tone === 'text-warn' ? 'warn' : 'on'}>
-              PM2.5 {aq?.label}
-            </Badge>
-          ) : null
-        }
-      />
+    <>
+      {/* --- AIR QUALITY CARD (renders when air quality devices exist) --- */}
+      {hasAirQuality && (
+        <Card>
+          <CardHeader
+            title={
+              <span className="flex items-center gap-1.5">
+                <Wind size={16} className="text-muted" />
+                Air quality
+              </span>
+            }
+            action={
+              <div className="flex items-center gap-2">
+                {climate.pm25 != null && aq && (
+                  <Badge tone={aq.tone === 'text-danger' ? 'danger' : aq.tone === 'text-warn' ? 'warn' : 'on'}>
+                    PM2.5 {aq.label}
+                  </Badge>
+                )}
+                <Link to="/air-quality" className="text-label text-muted hover:text-fg">
+                  Details
+                </Link>
+              </div>
+            }
+          />
 
-      <div className="p-4">
-        {/* --- ENERGY TAB --- */}
-        {currentTab === 'energy' && (
-          <div className="space-y-4">
+          <div className="p-4 space-y-4">
+            {/* PM2.5 Gauge & Visual Scale */}
+            {climate.pm25 != null && (
+              <div className="rounded-lg border border-border bg-raised/40 p-3.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <div>
+                    <span className="text-metric font-semibold tabular">
+                      {formatNumber(climate.pm25, 0)}
+                    </span>
+                    <span className="ml-1.5 text-body text-muted">µg/m³</span>
+                  </div>
+                  {aq && (
+                    <Badge tone={aq.tone === 'text-danger' ? 'danger' : aq.tone === 'text-warn' ? 'warn' : 'on'}>
+                      {aq.label}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* 4-segment WHO scale bar */}
+                <div className="mt-3">
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-raised flex">
+                    <div className="h-full w-1/4 bg-on/40" title="0-12 Excellent" />
+                    <div className="h-full w-1/4 bg-on" title="13-35 Good" />
+                    <div className="h-full w-1/4 bg-warn" title="36-55 Moderate" />
+                    <div className="h-full w-1/4 bg-danger" title="55+ Poor" />
+                  </div>
+                  <div className="relative mt-1 h-3">
+                    <div
+                      className="absolute -top-3.5 -ml-1 h-4 w-2 rounded-full border border-bg bg-fg shadow-sm transition-[left] duration-base"
+                      style={{
+                        left: `${Math.min(Math.max(((climate.pm25) / 70) * 100, 2), 98)}%`,
+                      }}
+                    />
+                    <div className="flex justify-between text-[11px] text-subtle tabular">
+                      <span>0</span>
+                      <span>12</span>
+                      <span>35</span>
+                      <span>55+ µg/m³</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Air Purifiers Controls */}
+            {aqDevices
+              .filter((d) => d.device_type === 'air_purifier')
+              .map((d) => {
+                const s = d.state
+                const room = rooms.find((r) => r.id === d.room_id)
+                const modes = s.options?.mode
+                const fan = s.options?.fan_speed
+                const filterLife = s.filter_life
+
+                return (
+                  <div
+                    key={d.id}
+                    className="rounded-lg border border-border bg-panel p-3.5 space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div
+                        className="min-w-0 cursor-pointer flex-1"
+                        onClick={() => onOpenDevice(d.id)}
+                      >
+                        <p className="truncate text-body font-medium hover:text-muted">
+                          {d.name}
+                        </p>
+                        <p className="text-caption text-muted">
+                          {room ? `${room.name} · ` : ''}
+                          {d.is_online ? (s.is_on ? 'Active' : 'Standby') : 'Offline'}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={Boolean(s.is_on && d.is_online)}
+                        disabled={!control || !d.is_online}
+                        label={`${d.name} power`}
+                        onChange={(v) =>
+                          command.mutate({ id: d.id, cmd: { is_on: v } })
+                        }
+                      />
+                    </div>
+
+                    {modes && modes.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-caption text-muted">Mode</span>
+                        <Segmented
+                          size="sm"
+                          label={`${d.name} mode`}
+                          value={s.mode}
+                          options={modes.map((m) => ({ value: m, label: m }))}
+                          onChange={(v) =>
+                            control && command.mutate({ id: d.id, cmd: { mode: v } })
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {fan && fan.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-caption text-muted">Fan speed</span>
+                        <Segmented
+                          size="sm"
+                          label={`${d.name} fan speed`}
+                          value={s.fan_speed}
+                          options={fan.map((f) => ({ value: f, label: f }))}
+                          onChange={(v) =>
+                            control && command.mutate({ id: d.id, cmd: { fan_speed: v } })
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {filterLife != null && (
+                      <div className="border-t border-border pt-2 text-label">
+                        <div className="flex justify-between text-caption mb-1">
+                          <span className="text-muted">HEPA filter</span>
+                          <span className="tabular font-medium">
+                            {formatNumber(filterLife, 0)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-raised">
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-[width]',
+                              filterLife < 10
+                                ? 'bg-danger'
+                                : filterLife < 25
+                                ? 'bg-warn'
+                                : 'bg-on',
+                            )}
+                            style={{ width: `${Math.min(Math.max(filterLife, 0), 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+          </div>
+        </Card>
+      )}
+
+      {/* --- ENERGY CARD (renders when electronic power devices exist) --- */}
+      {hasEnergy && (
+        <Card>
+          <CardHeader
+            title={
+              <span className="flex items-center gap-1.5">
+                <Lightning size={16} className="text-muted" />
+                Energy · 24 hours
+              </span>
+            }
+            action={
+              <Link to="/energy" className="text-label text-muted hover:text-fg">
+                Details
+              </Link>
+            }
+          />
+
+          <div className="p-4 space-y-4">
             <EnergyChart points={historyPoints} range="day" currency={currency} height={110} />
 
             {energy?.settings.monthly_budget ? (
@@ -145,7 +278,6 @@ export function OverviewInsights({
               </div>
             ) : null}
 
-            {/* Active high-draw devices list */}
             {devices.some((d) => (d.state.current_power_watts ?? 0) > 0) && (
               <div className="border-t border-border pt-3">
                 <p className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
@@ -178,190 +310,21 @@ export function OverviewInsights({
               </div>
             )}
           </div>
-        )}
+        </Card>
+      )}
 
-        {/* --- AIR QUALITY TAB --- */}
-        {currentTab === 'air_quality' && (
-          <div className="space-y-5">
-            {/* PM2.5 Gauge & Visual Spectrum Bar */}
-            {climate.pm25 != null && (
-              <div className="rounded-lg border border-border bg-raised/40 p-3.5">
-                <div className="flex items-baseline justify-between gap-2">
-                  <div>
-                    <span className="text-metric font-semibold tabular">
-                      {formatNumber(climate.pm25, 0)}
-                    </span>
-                    <span className="ml-1.5 text-body text-muted">µg/m³</span>
-                  </div>
-                  <Badge tone={aq?.tone === 'text-danger' ? 'danger' : aq?.tone === 'text-warn' ? 'warn' : 'on'}>
-                    {aq?.label}
-                  </Badge>
-                </div>
-
-                {/* 4-segment WHO PM2.5 scale bar */}
-                <div className="mt-3">
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-raised flex">
-                    <div className="h-full w-1/4 bg-on/40" title="0-12 Excellent" />
-                    <div className="h-full w-1/4 bg-on" title="13-35 Good" />
-                    <div className="h-full w-1/4 bg-warn" title="36-55 Moderate" />
-                    <div className="h-full w-1/4 bg-danger" title="55+ Poor" />
-                  </div>
-                  {/* Position marker */}
-                  <div className="relative mt-1 h-3">
-                    <div
-                      className="absolute -top-3.5 -ml-1 h-4 w-2 rounded-full border border-bg bg-fg shadow-sm transition-[left] duration-base"
-                      style={{
-                        left: `${Math.min(Math.max(((climate.pm25) / 70) * 100, 2), 98)}%`,
-                      }}
-                    />
-                    <div className="flex justify-between text-[11px] text-subtle tabular">
-                      <span>0</span>
-                      <span>12</span>
-                      <span>35</span>
-                      <span>55+ µg/m³</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 text-caption text-subtle">
-                  WHO 24h standard: ≤ 15 µg/m³ · Clean indoor air
-                </p>
-              </div>
-            )}
-
-            {/* Air Purifier Devices Control Cards */}
-            {aqDevices
-              .filter((d) => d.device_type === 'air_purifier')
-              .map((d) => {
-                const s = d.state
-                const room = rooms.find((r) => r.id === d.room_id)
-                const modes = s.options?.mode
-                const fan = s.options?.fan_speed
-                const filterLife = s.filter_life
-
-                return (
-                  <div
-                    key={d.id}
-                    className="rounded-lg border border-border bg-panel p-3.5 space-y-3"
-                  >
-                    {/* Purifier Header & Power */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div
-                        className="min-w-0 cursor-pointer flex-1"
-                        onClick={() => onOpenDevice(d.id)}
-                      >
-                        <p className="truncate text-body font-medium hover:text-muted">
-                          {d.name}
-                        </p>
-                        <p className="text-caption text-muted">
-                          {room ? `${room.name} · ` : ''}
-                          {d.is_online ? (s.is_on ? 'Running' : 'Standby') : 'Offline'}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={Boolean(s.is_on && d.is_online)}
-                        disabled={!control || !d.is_online}
-                        label={`${d.name} power`}
-                        onChange={(v) =>
-                          command.mutate({ id: d.id, cmd: { is_on: v } })
-                        }
-                      />
-                    </div>
-
-                    {/* Mode selector */}
-                    {modes && modes.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-caption text-muted">Mode</span>
-                        <Segmented
-                          size="sm"
-                          label={`${d.name} mode`}
-                          value={s.mode}
-                          options={modes.map((m) => ({ value: m, label: m }))}
-                          onChange={(v) =>
-                            control && command.mutate({ id: d.id, cmd: { mode: v } })
-                          }
-                        />
-                      </div>
-                    )}
-
-                    {/* Fan speed selector */}
-                    {fan && fan.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-caption text-muted">Fan speed</span>
-                        <Segmented
-                          size="sm"
-                          label={`${d.name} fan speed`}
-                          value={s.fan_speed}
-                          options={fan.map((f) => ({ value: f, label: f }))}
-                          onChange={(v) =>
-                            control && command.mutate({ id: d.id, cmd: { fan_speed: v } })
-                          }
-                        />
-                      </div>
-                    )}
-
-                    {/* Filter life indicator */}
-                    {filterLife != null && (
-                      <div className="border-t border-border pt-2 text-label">
-                        <div className="flex justify-between text-caption mb-1">
-                          <span className="text-muted">HEPA filter</span>
-                          <span className="tabular font-medium">
-                            {formatNumber(filterLife, 0)}% remaining
-                          </span>
-                        </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-raised">
-                          <div
-                            className={cn(
-                              'h-full rounded-full transition-[width]',
-                              filterLife < 10
-                                ? 'bg-danger'
-                                : filterLife < 25
-                                ? 'bg-warn'
-                                : 'bg-on',
-                            )}
-                            style={{ width: `${Math.min(Math.max(filterLife, 0), 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-
-            {/* Room air quality breakdown if multiple sensors */}
-            {aqDevices.length > 1 && (
-              <div className="border-t border-border pt-3">
-                <p className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
-                  Readings by device
-                </p>
-                <div className="space-y-1.5">
-                  {aqDevices.map((d) => {
-                    const pm = d.state.air_quality_pm25
-                    const roomName = rooms.find((r) => r.id === d.room_id)?.name
-                    return (
-                      <div
-                        key={d.id}
-                        onClick={() => onOpenDevice(d.id)}
-                        className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 text-label transition-colors hover:bg-raised"
-                      >
-                        <span className="truncate">
-                          {d.name}
-                          {roomName && <span className="ml-1.5 text-caption text-muted">· {roomName}</span>}
-                        </span>
-                        <span className="tabular text-muted">
-                          {pm != null ? `${formatNumber(pm, 0)} µg/m³` : '—'}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* --- CLIMATE TAB --- */}
-        {currentTab === 'climate' && (
-          <div className="space-y-4">
+      {/* --- CLIMATE CARD (renders when climate sensors exist and no air quality card) --- */}
+      {hasClimate && !hasAirQuality && (
+        <Card>
+          <CardHeader
+            title={
+              <span className="flex items-center gap-1.5">
+                <Thermometer size={16} className="text-muted" />
+                Climate
+              </span>
+            }
+          />
+          <div className="p-4 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-border bg-raised/40 p-3">
                 <span className="flex items-center gap-1 text-caption text-muted">
@@ -380,42 +343,9 @@ export function OverviewInsights({
                 </p>
               </div>
             </div>
-
-            {/* Climate sensors list */}
-            <div className="border-t border-border pt-3">
-              <p className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
-                Sensors
-              </p>
-              <div className="space-y-1.5">
-                {climateDevices.map((d) => {
-                  const s = d.state
-                  const roomName = rooms.find((r) => r.id === d.room_id)?.name
-                  return (
-                    <div
-                      key={d.id}
-                      onClick={() => onOpenDevice(d.id)}
-                      className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 text-label transition-colors hover:bg-raised"
-                    >
-                      <span className="truncate">
-                        {d.name}
-                        {roomName && <span className="ml-1.5 text-caption text-muted">· {roomName}</span>}
-                      </span>
-                      <span className="tabular text-muted">
-                        {[
-                          s.temperature != null ? `${formatNumber(s.temperature)} °C` : null,
-                          s.humidity != null ? `${formatNumber(s.humidity, 0)}%` : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ') || '—'}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
           </div>
-        )}
-      </div>
-    </Card>
+        </Card>
+      )}
+    </>
   )
 }

@@ -52,10 +52,11 @@
 - [x] Liquid glass UI (`LightColorControls.tsx`): White mode with blackbody Kelvin temperature gradient and presets (Candle, Soft White, Daylight, Cool White); Color mode with curated swatches and interactive color wheel/picker; Apple liquid glass radiance glow orb indicator
 - [x] Automations support: setting light color and temperature in `RuleEditor`
 
-## Milestone 7: Dynamic Overview Dashboard (DONE — 2026-10-10)
+## Milestone 7: Dynamic Overview Dashboard & Air Quality Tab (DONE — 2026-10-10)
 - [x] Dynamic hero metrics: conditionally render Power, Today, and Bill metrics only when electronic power-measuring devices exist; render Air Quality metric only when air purifiers / PM2.5 sensors exist; auto-scaling grid columns
-- [x] Multi-tab Insights widget (`OverviewInsights.tsx`): segmented tabs for `Energy`, `Air quality`, and `Climate` that only include tabs for device types actually present
-- [x] Auto-hiding insights: entire section automatically hides when no supported analytics devices exist, letting device list cleanly occupy layout
+- [x] Dedicated Air Quality view (`/air-quality`, `AirQualityView.tsx`): full-screen air analytics mirroring `/energy`, with live PM2.5 gauge, air purifier controls, HEPA filter life, and sensor matrices
+- [x] Dynamic app navigation (`AppShell.tsx`): sidebar and mobile tab bar dynamically display `Air quality` and `Energy` tabs only when matching devices have been added
+- [x] Direct Overview insights cards (`OverviewInsights.tsx`): prominent Air Quality Card and Energy Card visible immediately on overview, auto-hidden when devices are absent
 - [x] Air quality monitoring & controls: live PM2.5 gauge with WHO 4-segment visual indicator, interactive air purifier control cards (power switch, mode, fan speed, HEPA filter life bar)
 - [x] Dynamic category filtering in Devices card: `All`, `Power`, `Lights`, `Air quality`, and `Climate` pills that only show when matching devices exist
 

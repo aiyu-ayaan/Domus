@@ -65,11 +65,21 @@ flowchart TD
 ## Components
 
 ### 1. `OverviewInsights` ([OverviewInsights.tsx](file:///media/aiyu/550E85595197DBEC/development/domus/apps/web/src/features/overview/OverviewInsights.tsx))
-- **Dynamic Tab Generation**:
-  - `Energy`: Shown if devices report `current_power_watts`, `today_energy_kwh`, or energy billing records exist. Displays 24h consumption chart, monthly budget progress bar, and real-time power consumers.
-  - `Air quality`: Shown if air purifiers or PM2.5 sensors exist. Displays PM2.5 reading, WHO 4-segment visual indicator (Excellent / Good / Moderate / Poor), interactive purifier controls (power, mode, fan speed, HEPA filter life bar with warning thresholds), and multi-sensor breakdown.
-  - `Climate`: Shown if temperature or humidity sensors exist. Displays current values, comfort assessment, and room matrix.
-- **Self-Hiding**: If none of these device categories exist, the component returns `null`, enabling the Devices card to utilize the available space cleanly.
+- **Dedicated Section Cards**:
+  - `Air quality`: Rendered directly when air quality devices (air purifiers or PM2.5 sensors) exist. Displays PM2.5 reading, WHO 4-segment visual indicator, interactive purifier controls (power switch, mode, fan speed, HEPA filter life bar), and direct navigation link to `/air-quality`.
+  - `Energy · 24 hours`: Rendered directly when power-metering devices exist. Displays 24h consumption chart, monthly budget progress bar, active power consumers, and direct navigation link to `/energy`.
+  - Auto-hides any section whose device type is not present in the home.
+
+### 2. `AirQualityView` ([AirQualityView.tsx](file:///media/aiyu/550E85595197DBEC/development/domus/apps/web/src/features/airquality/AirQualityView.tsx))
+- Dedicated full-page view accessible via `/air-quality` (mirroring the `/energy` view).
+- Real-time PM2.5 metric cards, purifier status, HEPA filter health percentage, and temperature/humidity.
+- Comprehensive Air Purifier controls (power toggle, operational modes, fan speed, filter life progress).
+- WHO Air Quality Scale breakdown and multi-room sensor readings matrix.
+
+### 3. Dynamic App Navigation ([AppShell.tsx](file:///media/aiyu/550E85595197DBEC/development/domus/apps/web/src/components/AppShell.tsx))
+- Sidebar navigation and mobile tab bar dynamically evaluate device presence:
+  - `Air quality` navigation tab is included only when air quality / purifier devices are registered.
+  - `Energy` navigation tab is included only when electronic power / energy devices are registered.
 
 ### 2. `OverviewView` ([OverviewView.tsx](file:///media/aiyu/550E85595197DBEC/development/domus/apps/web/src/features/overview/OverviewView.tsx))
 - Computes dynamic categories (`Power`, `Lights`, `Air quality`, `Climate`, `All`) and shows filter chips only for active categories.
