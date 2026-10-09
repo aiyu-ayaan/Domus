@@ -44,10 +44,10 @@ struct Envelope {
 
 impl Envelope {
     fn error(&self) -> CoreError {
+        let code = self.code.as_str().map(str::to_string).unwrap_or_else(|| self.code.to_string());
         integration_err(format!(
-            "Tuya error {}: {}",
-            self.code,
-            self.msg.clone().unwrap_or_else(|| "unknown".into())
+            "Tuya: {} ({code})",
+            self.msg.clone().unwrap_or_else(|| "unknown error".into())
         ))
     }
 }
