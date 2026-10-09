@@ -52,6 +52,13 @@
 - [x] Liquid glass UI (`LightColorControls.tsx`): White mode with blackbody Kelvin temperature gradient and presets (Candle, Soft White, Daylight, Cool White); Color mode with curated swatches and interactive color wheel/picker; Apple liquid glass radiance glow orb indicator
 - [x] Automations support: setting light color and temperature in `RuleEditor`
 
+## Milestone 7: Dynamic Overview Dashboard (DONE — 2026-10-10)
+- [x] Dynamic hero metrics: conditionally render Power, Today, and Bill metrics only when electronic power-measuring devices exist; render Air Quality metric only when air purifiers / PM2.5 sensors exist; auto-scaling grid columns
+- [x] Multi-tab Insights widget (`OverviewInsights.tsx`): segmented tabs for `Energy`, `Air quality`, and `Climate` that only include tabs for device types actually present
+- [x] Auto-hiding insights: entire section automatically hides when no supported analytics devices exist, letting device list cleanly occupy layout
+- [x] Air quality monitoring & controls: live PM2.5 gauge with WHO 4-segment visual indicator, interactive air purifier control cards (power switch, mode, fan speed, HEPA filter life bar)
+- [x] Dynamic category filtering in Devices card: `All`, `Power`, `Lights`, `Air quality`, and `Climate` pills that only show when matching devices exist
+
 ## Next
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback

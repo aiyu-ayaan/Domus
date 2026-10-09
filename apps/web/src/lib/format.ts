@@ -44,8 +44,9 @@ export const greeting = () => {
 /** PM2.5 µg/m³ → label and token colour. */
 export const airQuality = (pm?: number) => {
   if (pm == null) return null
-  if (pm <= 12) return { label: 'Excellent', tone: 'text-power' }
-  if (pm <= 35) return { label: 'Good', tone: 'text-air' }
-  if (pm <= 55) return { label: 'Moderate', tone: 'text-warn' }
-  return { label: 'Poor', tone: 'text-danger' }
+  if (pm <= 12) return { label: 'Excellent', tone: 'text-on', bg: 'bg-on' }
+  if (pm <= 35) return { label: 'Good', tone: 'text-on', bg: 'bg-on' }
+  if (pm <= 55) return { label: 'Moderate', tone: 'text-warn', bg: 'bg-warn' }
+  return { label: 'Poor', tone: 'text-danger', bg: 'bg-danger' }
 }
+

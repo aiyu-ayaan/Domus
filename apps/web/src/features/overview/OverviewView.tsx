@@ -6,7 +6,7 @@ import { Card, CardHeader, EmptyState, Metric, Notice, PageHeader, Skeleton } fr
 import { Button } from '@/components/ui/Button'
 import { DeviceRow } from '@/components/devices/DeviceRow'
 import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
-import { EnergyChart } from '@/components/devices/EnergyChart'
+import { OverviewInsights } from './OverviewInsights'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useDiscovered, useEnergy, useRooms, useScenes } from '@/lib/queries'
@@ -14,6 +14,8 @@ import { airQuality, formatKwh, formatMoney, formatNumber, formatWatts } from '@
 import { errorMessage, useToast } from '@/lib/toast'
 import { cn } from '@/lib/cn'
 import type { Device } from '@/lib/types'
+
+type CategoryFilter = 'all' | 'power' | 'lights' | 'air' | 'climate'
 
 export function OverviewView() {
   const admin = useIsAdmin()
@@ -27,6 +29,7 @@ export function OverviewView() {
   const { data: pending = [] } = useDiscovered('pending')
   const history = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
   const [room, setRoom] = useState('all')
+  const [category, setCategory] = useState<CategoryFilter>('all')
   const [open, setOpen] = useState<string | null>(null)
 
   const runScene = useMutation({
@@ -39,7 +42,6 @@ export function OverviewView() {
   })
 
   const list = devices ?? []
-  const shown = room === 'all' ? list : list.filter((d) => (room === 'none' ? !d.room_id : d.room_id === room))
   const climate = useMemo(() => summarizeClimate(list), [list])
   const currency = energy?.settings.currency ?? 'USD'
   const controllable = list.filter((d) => d.device_type !== 'sensor')
@@ -49,6 +51,179 @@ export function OverviewView() {
   const offline = list.filter((d) => !d.is_online).length
   const aq = airQuality(climate.pm25)
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+
+  // Device categories detection
+  const powerDevices = useMemo(
+    () =>
+      list.filter(
+        (d) =>
+          ['switch', 'plug'].includes(d.device_type) ||
+          d.state.current_power_watts != null ||
+          d.state.today_energy_kwh != null,
+      ),
+    [list],
+  )
+  const lightDevices = useMemo(
+    () =>
+      list.filter(
+        (d) =>
+          d.device_type === 'light' ||
+          d.state.brightness != null ||
+          d.state.color != null ||
+          d.state.color_temp != null,
+      ),
+    [list],
+  )
+  const aqDevices = useMemo(
+    () =>
+      list.filter(
+        (d) => d.device_type === 'air_purifier' || d.state.air_quality_pm25 != null,
+      ),
+    [list],
+  )
+  const climateDevices = useMemo(
+    () =>
+      list.filter(
+        (d) =>
+          (d.state.temperature != null ||
+            d.state.humidity != null ||
+            d.device_type === 'sensor' ||
+            d.device_type === 'climate') &&
+          d.device_type !== 'air_purifier',
+      ),
+    [list],
+  )
+
+  // Capability checks: only show metrics & insights when corresponding devices exist
+  const hasPowerMeasurements = list.some(
+    (d) => d.state.current_power_watts != null || d.state.today_energy_kwh != null,
+  )
+  const hasEnergyRecords =
+    Boolean(energy?.devices && energy.devices.length > 0) ||
+    Boolean(energy?.cycle_kwh && energy.cycle_kwh > 0)
+  const showEnergy = hasPowerMeasurements || hasEnergyRecords
+
+  const showAirQuality = aqDevices.length > 0
+  const showClimate = climateDevices.length > 0
+  const hasInsights = showEnergy || showAirQuality || showClimate
+
+  // Categories list for filtering
+  const categories = useMemo(() => {
+    const cats: { id: CategoryFilter; label: string; count: number }[] = [
+      { id: 'all', label: 'All', count: list.length },
+    ]
+    if (powerDevices.length > 0) {
+      cats.push({ id: 'power', label: 'Power', count: powerDevices.length })
+    }
+    if (lightDevices.length > 0) {
+      cats.push({ id: 'lights', label: 'Lights', count: lightDevices.length })
+    }
+    if (aqDevices.length > 0) {
+      cats.push({ id: 'air', label: 'Air quality', count: aqDevices.length })
+    }
+    if (climateDevices.length > 0) {
+      cats.push({ id: 'climate', label: 'Climate', count: climateDevices.length })
+    }
+    return cats
+  }, [list.length, powerDevices.length, lightDevices.length, aqDevices.length, climateDevices.length])
+
+  // Filter devices by room AND category
+  const roomFiltered = room === 'all' ? list : list.filter((d) => (room === 'none' ? !d.room_id : d.room_id === room))
+  const shown = useMemo(() => {
+    return roomFiltered.filter((d) => {
+      if (category === 'power') return powerDevices.some((p) => p.id === d.id)
+      if (category === 'lights') return lightDevices.some((l) => l.id === d.id)
+      if (category === 'air') return aqDevices.some((a) => a.id === d.id)
+      if (category === 'climate') return climateDevices.some((c) => c.id === d.id)
+      return true
+    })
+  }, [roomFiltered, category, powerDevices, lightDevices, aqDevices, climateDevices])
+
+  // Dynamically assemble metrics based on added device capabilities
+  const metricCards: React.ReactNode[] = []
+
+  if (showEnergy) {
+    metricCards.push(
+      <Metric
+        key="power"
+        label="Power now"
+        live
+        value={formatWatts(watts)}
+        sub={`${onCount} of ${controllable.length} devices on`}
+      />,
+    )
+    metricCards.push(
+      <Metric
+        key="today"
+        label="Today"
+        value={formatKwh(energy?.today_kwh ?? 0)}
+        sub={formatMoney(energy?.today_cost ?? 0, currency)}
+      />,
+    )
+    metricCards.push(
+      <Metric
+        key="bill"
+        label="Bill this cycle"
+        value={formatMoney(energy?.cycle_cost ?? 0, currency)}
+        sub={`Projected ${formatMoney(energy?.projected_cost ?? 0, currency)}`}
+      />,
+    )
+  } else if (controllable.length > 0) {
+    metricCards.push(
+      <Metric
+        key="devices-active"
+        label="Active devices"
+        live={onCount > 0}
+        value={`${onCount}`}
+        sub={`${controllable.length} devices connected`}
+      />,
+    )
+    if (lightDevices.length > 0) {
+      const lightsOn = lightDevices.filter((d) => d.is_online && d.state.is_on).length
+      metricCards.push(
+        <Metric
+          key="lights-active"
+          label="Lights on"
+          value={`${lightsOn}`}
+          sub={`${lightDevices.length} lighting devices`}
+        />,
+      )
+    }
+  }
+
+  if (showAirQuality && climate.pm25 != null) {
+    metricCards.push(
+      <Metric
+        key="air-quality"
+        label="Air quality"
+        value={
+          <span>
+            {formatNumber(climate.pm25, 0)}{' '}
+            <span className="text-title font-normal text-muted">µg/m³</span>
+          </span>
+        }
+        sub={`PM2.5 · ${aq?.label}`}
+      />,
+    )
+  } else if (showClimate && climate.temp != null) {
+    metricCards.push(
+      <Metric
+        key="climate"
+        label="Climate"
+        value={`${formatNumber(climate.temp)} °C`}
+        sub={climate.humidity != null ? `${formatNumber(climate.humidity, 0)} % humidity` : 'Sensors online'}
+      />,
+    )
+  }
+
+  const metricGridCols =
+    metricCards.length >= 4
+      ? 'grid-cols-2 lg:grid-cols-4'
+      : metricCards.length === 3
+      ? 'grid-cols-1 sm:grid-cols-3'
+      : metricCards.length === 2
+      ? 'grid-cols-2'
+      : 'grid-cols-1'
 
   return (
     <>
@@ -63,31 +238,19 @@ export function OverviewView() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Power now" live value={formatWatts(watts)} sub={`${onCount} of ${controllable.length} devices on`} />
-        <Metric label="Today" value={formatKwh(energy?.today_kwh ?? 0)} sub={formatMoney(energy?.today_cost ?? 0, currency)} />
-        <Metric
-          label="Bill this cycle"
-          value={formatMoney(energy?.cycle_cost ?? 0, currency)}
-          sub={`Projected ${formatMoney(energy?.projected_cost ?? 0, currency)}`}
-        />
-        {climate.pm25 != null ? (
-          <Metric label="Air quality" value={<span>{formatNumber(climate.pm25, 0)} <span className="text-title font-normal text-muted">µg/m³</span></span>} sub={`PM2.5 · ${aq?.label}`} />
-        ) : (
-          <Metric
-            label="Climate"
-            value={climate.temp != null ? `${formatNumber(climate.temp)} °C` : '—'}
-            sub={climate.humidity != null ? `${formatNumber(climate.humidity, 0)} % humidity` : 'No sensors'}
-          />
-        )}
-      </div>
+      {metricCards.length > 0 && (
+        <div className={cn('grid gap-3', metricGridCols)}>
+          {metricCards}
+        </div>
+      )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className={cn('mt-6 grid gap-6', hasInsights || scenes.length > 0 ? 'lg:grid-cols-3' : 'grid-cols-1')}>
+        <Card className={hasInsights || scenes.length > 0 ? 'lg:col-span-2' : 'col-span-1'}>
           <CardHeader
             title={
-              <span>
-                Devices{offline > 0 && <span className="ml-2 text-danger">{offline} offline</span>}
+              <span className="flex items-center gap-2">
+                <span>Devices</span>
+                {offline > 0 && <span className="text-caption text-danger">({offline} offline)</span>}
               </span>
             }
             action={
@@ -109,6 +272,33 @@ export function OverviewView() {
               )
             }
           />
+
+          {categories.length > 1 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border px-4 py-2.5">
+              {categories.map((c) => {
+                const active = category === c.id
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategory(c.id)}
+                    className={cn(
+                      'flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-label font-medium transition-colors',
+                      active
+                        ? 'bg-raised text-fg shadow-[0_0_0_1px_rgb(var(--border-strong))]'
+                        : 'text-muted hover:bg-raised/60 hover:text-fg',
+                    )}
+                  >
+                    <span>{c.label}</span>
+                    <span className={cn('text-caption tabular', active ? 'text-fg' : 'text-subtle')}>
+                      {c.count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[0, 1, 2, 3].map((i) => (
@@ -125,7 +315,7 @@ export function OverviewView() {
               />
             </div>
           ) : shown.length === 0 ? (
-            <p className="p-8 text-center text-muted">No devices in this room.</p>
+            <p className="p-8 text-center text-muted">No devices match the selected filter.</p>
           ) : (
             <ul className="divide-y divide-border">
               {shown.map((d) => (
@@ -135,45 +325,39 @@ export function OverviewView() {
           )}
         </Card>
 
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader title="Energy · 24 hours" action={<Link to="/energy" className="text-label text-muted hover:text-fg">Details</Link>} />
-            <div className="p-4">
-              <EnergyChart points={history.data ?? []} range="day" currency={currency} height={110} />
-              {energy?.settings.monthly_budget ? (
-                <div className="mt-5">
-                  <div className="mb-1.5 flex justify-between text-label">
-                    <span className="text-muted">Budget</span>
-                    <span className="tabular">
-                      {formatMoney(energy.cycle_cost, currency)} / {formatMoney(energy.settings.monthly_budget, currency)}
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-raised" role="progressbar" aria-label="Budget used" aria-valuenow={Math.round(energy.budget_used_percent ?? 0)} aria-valuemin={0} aria-valuemax={100}>
-                    <div className={cn('h-full rounded-full transition-[width] duration-slow', (energy.budget_used_percent ?? 0) > 90 ? 'bg-danger' : 'bg-fg')} style={{ width: `${Math.min(energy.budget_used_percent ?? 0, 100)}%` }} />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </Card>
-
-          <Card>
-            <CardHeader title="Scenes" action={<Link to="/automations" className="text-label text-muted hover:text-fg">Manage</Link>} />
-            {scenes.length === 0 ? (
-              <p className="px-4 py-6 text-label text-muted">No scenes. Create one under Automations.</p>
-            ) : (
-              <ul className="divide-y divide-border">
-                {scenes.map((s) => (
-                  <li key={s.id} className="flex min-h-12 items-center gap-3 px-4">
-                    <span className="min-w-0 flex-1 truncate text-body">{s.name}</span>
-                    <Button size="sm" disabled={!control} loading={runScene.isPending && runScene.variables === s.id} onClick={() => runScene.mutate(s.id)}>
-                      Run
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+        {(hasInsights || scenes.length > 0) && (
+          <div className="flex flex-col gap-6">
+            {hasInsights && (
+              <OverviewInsights
+                devices={list}
+                energy={energy}
+                historyPoints={history.data ?? []}
+                currency={currency}
+                climate={climate}
+                rooms={rooms}
+                onOpenDevice={(id) => setOpen(id)}
+              />
             )}
-          </Card>
-        </div>
+
+            <Card>
+              <CardHeader title="Scenes" action={<Link to="/automations" className="text-label text-muted hover:text-fg">Manage</Link>} />
+              {scenes.length === 0 ? (
+                <p className="px-4 py-6 text-label text-muted">No scenes. Create one under Automations.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {scenes.map((s) => (
+                    <li key={s.id} className="flex min-h-12 items-center gap-3 px-4">
+                      <span className="min-w-0 flex-1 truncate text-body">{s.name}</span>
+                      <Button size="sm" disabled={!control} loading={runScene.isPending && runScene.variables === s.id} onClick={() => runScene.mutate(s.id)}>
+                        Run
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </div>
+        )}
       </div>
 
       <DeviceDrawer device={list.find((d) => d.id === open) ?? null} onClose={() => setOpen(null)} />
