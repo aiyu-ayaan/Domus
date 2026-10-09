@@ -12,7 +12,7 @@ use crate::infrastructure::{
 };
 use crate::integrations::{
     accounts::AccountStore, broadcast_addresses, tapo::TapoIntegration, tuya::TuyaIntegration,
-    virtual_devices::VirtualIntegration, xiaomi::XiaomiIntegration, DeviceManager,
+    xiaomi::XiaomiIntegration, DeviceManager,
 };
 use crate::modules::notifications::Notifier;
 use crate::workers::{DeviceWorker, DiscoveryWorker, SchedulerWorker};
@@ -67,9 +67,6 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     }
     if config.integrations.xiaomi.enabled {
         plugins.push(Arc::new(XiaomiIntegration::new(store.clone(), broadcast.clone())));
-    }
-    if config.integrations.virtual_devices.enabled {
-        plugins.push(Arc::new(VirtualIntegration::new()));
     }
     info!(
         "Integrations: {}",

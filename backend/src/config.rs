@@ -53,9 +53,6 @@ pub struct IntegrationsConfig {
     pub tuya: IntegrationConfig,
     pub tapo: IntegrationConfig,
     pub xiaomi: IntegrationConfig,
-    /// Simulated devices for development and demos.
-    #[serde(rename = "virtual")]
-    pub virtual_devices: IntegrationConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -100,7 +97,6 @@ impl AppConfig {
             .set_default("integrations.tuya.enabled", true)?
             .set_default("integrations.tapo.enabled", true)?
             .set_default("integrations.xiaomi.enabled", true)?
-            .set_default("integrations.virtual.enabled", false)?
             .set_default("workers.poll_interval_secs", 15)?
             .set_default("workers.energy_sample_secs", 60)?
             .set_default("workers.energy_retention_days", 400)?

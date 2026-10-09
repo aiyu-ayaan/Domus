@@ -40,7 +40,6 @@ const CATALOG: &[(IntegrationType, &str, &str, &str, bool)] = &[
     (IntegrationType::Tuya, "Tuya / Smart Life", "Plugs, switches, lights and purifiers from the Smart Life and Tuya Smart apps. Linked by scanning a QR code — no developer account needed.", "qr", false),
     (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs and switches, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true),
     (IntegrationType::Xiaomi, "Xiaomi Mi Home", "Mi Home / MIoT devices such as air purifiers, lamps and plugs. Tokens come from your Xiaomi account; control is local.", "credentials", true),
-    (IntegrationType::Virtual, "Demo devices", "Simulated devices for trying Docus without hardware.", "none", true),
 ];
 
 pub fn integration_routes() -> Router<AppState> {
@@ -61,7 +60,6 @@ async fn catalog(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Ve
     let accounts = if user.is_admin() { s.manager.accounts.list(None).await? } else { vec![] };
     let out = CATALOG
         .iter()
-        .filter(|(t, ..)| *t != IntegrationType::Virtual || enabled.contains(t))
         .map(|(t, name, description, link, local)| {
             let entry = CatalogEntry {
                 id: t.as_str(),

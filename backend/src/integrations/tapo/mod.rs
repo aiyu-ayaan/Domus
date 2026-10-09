@@ -215,7 +215,7 @@ impl IntegrationPlugin for TapoIntegration {
                 Err(e) => out.push(DiscoveredDevice {
                     note: Some(match e {
                         CoreError::AuthError(_) if accounts.is_empty() => {
-                            "Add your TP-Link (Tapo) account in Plugins to control this device".into()
+                            "Add your TP-Link (Tapo) account under Integrations to control this device".into()
                         }
                         other => other.to_string(),
                     }),

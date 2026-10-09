@@ -65,7 +65,6 @@ pub enum IntegrationType {
     Tapo,
     Xiaomi,
     Mqtt,
-    Virtual,
 }
 
 impl IntegrationType {
@@ -75,7 +74,6 @@ impl IntegrationType {
             Self::Tapo => "tapo",
             Self::Xiaomi => "xiaomi",
             Self::Mqtt => "mqtt",
-            Self::Virtual => "virtual",
         }
     }
 
@@ -85,7 +83,6 @@ impl IntegrationType {
             "tapo" => Some(Self::Tapo),
             "xiaomi" => Some(Self::Xiaomi),
             "mqtt" => Some(Self::Mqtt),
-            "virtual" => Some(Self::Virtual),
             _ => None,
         }
     }

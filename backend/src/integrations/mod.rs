@@ -5,7 +5,6 @@ pub mod accounts;
 pub mod manager;
 pub mod tapo;
 pub mod tuya;
-pub mod virtual_devices;
 pub mod xiaomi;
 
 pub use manager::DeviceManager;

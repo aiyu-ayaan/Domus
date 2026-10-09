@@ -175,7 +175,8 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     usage.sort_by(|a, b| b.kwh.total_cmp(&a.kwh));
 
     let visible: Vec<&String> = devices.iter().map(|d| &d.id).collect();
-    let sum = |m: &HashMap<String, f64>| m.iter().filter(|(k, _)| visible.contains(k)).map(|(_, v)| v).sum::<f64>();
+    // `+ 0.0` turns the empty-sum `-0.0` into `0.0`.
+    let sum = |m: &HashMap<String, f64>| m.iter().filter(|(k, _)| visible.contains(k)).map(|(_, v)| v).sum::<f64>() + 0.0;
     let cycle_kwh = sum(&cycle);
     let today_kwh = sum(&today_map);
 
@@ -186,7 +187,7 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     let projected_cost = projected_kwh * settings.rate_per_kwh + settings.fixed_monthly_charge;
 
     Ok(Json(Overview {
-        current_watts: usage.iter().map(|u| u.current_watts).sum(),
+        current_watts: usage.iter().map(|u| u.current_watts).sum::<f64>() + 0.0,
         today_kwh,
         today_cost: today_kwh * settings.rate_per_kwh,
         cycle_start,

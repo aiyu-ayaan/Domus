@@ -42,10 +42,6 @@ enabled = true
 [integrations.xiaomi]
 enabled = true
 
-# Simulated devices for trying Docus without hardware.
-[integrations.virtual]
-enabled = false
-
 [workers]
 poll_interval_secs = 15
 energy_sample_secs = 60
