@@ -361,7 +361,7 @@ export function OverviewView() {
               <EmptyState
                 icon={<PlugsConnected size={28} />}
                 title="No devices yet"
-                message={admin ? 'Connect Tuya, Tapo or Xiaomi under Integrations. Devices on your network are discovered automatically.' : 'An administrator has not shared any devices with you yet.'}
+                message={admin ? 'Connect Tuya, Tapo, Xiaomi, Philips Hue or an MQTT broker under Integrations. Devices on your network are discovered automatically.' : 'An administrator has not shared any devices with you yet.'}
                 action={admin && <Button variant="primary" onClick={() => navigate('/plugins')}>Open integrations</Button>}
               />
             </div>

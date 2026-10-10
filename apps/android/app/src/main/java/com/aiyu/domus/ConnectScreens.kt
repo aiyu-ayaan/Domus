@@ -145,7 +145,7 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
 private class Intro(val icon: ImageVector, val shape: RoundedPolygon, val title: String, val body: String)
 
 private val Intros = listOf(
-    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, "Your whole home, one app", "Lights, plugs, purifiers and sensors from Tuya, Tapo and Xiaomi, side by side."),
+    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, "Your whole home, one app", "Lights, plugs, purifiers and sensors from Tuya, Tapo, Xiaomi, Philips Hue and MQTT, side by side."),
     Intro(Icons.Rounded.Lock, MaterialShapes.Clover4Leaf, "Private by design", "Domus talks only to the server in your home, over an encrypted connection. No cloud account."),
     Intro(Icons.Rounded.Router, MaterialShapes.Sunny, "It finds your server", "On your Wi‑Fi the app finds the server by itself. Away from home, enter its address."),
 )

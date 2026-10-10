@@ -34,7 +34,7 @@ export function AboutView() {
   return (
     <>
       <BackLink to="/settings" label="Settings" />
-      <PageHeader title="About Domus" description="Self-hosted home automation for Tuya, Tapo and Xiaomi devices." />
+      <PageHeader title="About Domus" description="Self-hosted home automation for Tuya, Tapo, Xiaomi, Philips Hue and MQTT devices." />
       <div className="grid max-w-2xl gap-6">
         <Card>
           <CardHeader title="App" />

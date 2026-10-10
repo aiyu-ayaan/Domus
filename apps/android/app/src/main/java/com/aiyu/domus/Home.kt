@@ -210,7 +210,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
             TextButton(onShowDevices) { Text("All devices") }
         }
         when {
-            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Open Devices and tap + to link Tuya, Tapo or Xiaomi." else "Ask an admin to add devices or give you access to a room.")
+            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Open Devices and tap + to link Tuya, Tapo, Xiaomi, Hue or MQTT." else "Ask an admin to add devices or give you access to a room.")
             on.isEmpty() -> Text("Everything is off.", color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
             else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
         }

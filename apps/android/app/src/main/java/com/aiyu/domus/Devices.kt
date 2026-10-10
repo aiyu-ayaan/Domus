@@ -243,7 +243,7 @@ fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit,
         when {
             loading && devices.isEmpty() -> LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
             shown.isEmpty() && devices.isNotEmpty() -> EmptyState("Nothing here", "No device matches this room and category.")
-            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Tap + to link Tuya, Tapo or Xiaomi and add what they find." else "Ask an admin to add devices or give you access to a room.")
+            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Tap + to link Tuya, Tapo, Xiaomi, Hue or MQTT and add what they find." else "Ask an admin to add devices or give you access to a room.")
             else -> {
                 // Rooms in floor order, then devices without a room.
                 val groups: List<Pair<Room?, List<Device>>> =

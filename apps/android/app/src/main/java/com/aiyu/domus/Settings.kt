@@ -110,7 +110,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         SectionTitle("Home")
         if (session.user.isAdmin) {
             RowCard("Add devices", "Find and add what your accounts and network offer", Icons.Rounded.AddHome, onClick = { open("discover") })
-            RowCard("Plugins", "Tuya, Tapo and Xiaomi accounts", Icons.Rounded.Extension, onClick = { open("plugins") })
+            RowCard("Plugins", "Tuya, Tapo, Xiaomi, Hue and MQTT", Icons.Rounded.Extension, onClick = { open("plugins") })
             RowCard("Rooms", null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
             RowCard("People", "Accounts, roles and room access", Icons.Rounded.Group, onClick = { open("people") })
             RowCard("Electricity tariff", "Rate, billing cycle and budget", Icons.Rounded.Payments, onClick = { open("tariff") })
