@@ -88,4 +88,13 @@ class CoreTest {
         assertEquals(true, (kelvinRgb(2000) and 0xFF) < 40)
         assertEquals(true, (kelvinRgb(6500) and 0xFF) >= 250)
     }
+
+    @Test
+    fun xiaomiAccountKeepsEmailsAndCleansPhoneNumbers() {
+        assertEquals("me@mail.com", xiaomiAccount("  me@mail.com "))
+        assertEquals("123456789", xiaomiAccount("123456789"))
+        assertEquals("+916268993859", xiaomiAccount("+91 62689-93859"))
+        assertEquals("+916268993859", xiaomiAccount("+91 (626) 899 3859"))
+        assertEquals("mi user 7", xiaomiAccount("mi user 7"))
+    }
 }

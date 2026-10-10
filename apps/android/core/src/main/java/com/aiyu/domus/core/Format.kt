@@ -65,3 +65,7 @@ fun kelvinRgb(kelvin: Int): Int {
     fun channel(v: Double) = v.coerceIn(0.0, 255.0).toInt()
     return (channel(r) shl 16) or (channel(g) shl 8) or channel(b)
 }
+
+/** What Xiaomi expects as the account: an email or ID as typed, a phone number without spaces, dashes or brackets. */
+fun xiaomiAccount(input: String): String =
+    input.trim().let { if (it.matches(Regex("\\+?[\\d\\s\\-()]{7,}"))) it.filter { c -> c.isDigit() || c == '+' } else it }

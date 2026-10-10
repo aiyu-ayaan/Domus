@@ -24,6 +24,7 @@ import com.aiyu.domus.core.Account
 import com.aiyu.domus.core.Discovered
 import com.aiyu.domus.core.Integration
 import com.aiyu.domus.core.TuyaQr
+import com.aiyu.domus.core.xiaomiAccount
 import com.aiyu.domus.ui.components.SectionTitle
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -141,7 +142,7 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
     }
     /** Signs in to Xiaomi; it either links at once or sends a code. Also used to ask for a new code. */
     suspend fun xiaomiSignIn() {
-        repository.request { it.linkXiaomi(username.trim(), password, region) }?.let {
+        repository.request { it.linkXiaomi(xiaomiAccount(username), password, region) }?.let {
             if (it.verifyId != null) { verifyId = it.verifyId; via = it.via; code = "" } else finish()
         }
     }
@@ -196,7 +197,8 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
             }
             else -> {
                 Text(if (integration.id == "tapo") "Sign in with your TP-Link account. It is used to talk to your Tapo devices on your network." else "Sign in with your Xiaomi account. Device tokens are fetched once; control stays local. Xiaomi may then send you a code.", color = muted)
-                Field(username, { username = it }, "Email or username", keyboard = KeyboardType.Email)
+                if (integration.id == "xiaomi") Field(username, { username = it }, "Email, phone or Xiaomi ID", supporting = "A phone number needs its country code, like +91…")
+                else Field(username, { username = it }, "Email or username", keyboard = KeyboardType.Email)
                 Field(password, { password = it }, "Password", secret = true)
                 if (integration.id == "xiaomi") Picker("Server region", XiaomiRegions, region, { region = it })
             }
