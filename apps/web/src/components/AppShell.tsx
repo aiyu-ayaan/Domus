@@ -23,6 +23,7 @@ import { cn } from '@/lib/cn'
 import { timeAgo } from '@/lib/format'
 import { Sheet } from './ui/Sheet'
 import { Button } from './ui/Button'
+import { ThemeToggle } from './ui/ThemeToggle'
 
 interface NavItem {
   to: string
@@ -32,11 +33,18 @@ interface NavItem {
 }
 
 
-function Mark() {
+function Mark({ collapsed }: { collapsed?: boolean }) {
   return (
-    <span className="flex items-center gap-2.5">
-      <img src="/favicon.svg" alt="" className="h-6 w-6" />
-      <span className="text-title font-semibold tracking-[-0.01em]">Docus</span>
+    <span className="flex items-center gap-2.5 overflow-hidden">
+      <img src="/favicon.svg" alt="Docus" className="h-6 w-6 shrink-0" />
+      <span
+        className={cn(
+          'text-title font-semibold tracking-[-0.01em] transition-all duration-base whitespace-nowrap',
+          collapsed ? 'opacity-0 w-0' : 'opacity-100',
+        )}
+      >
+        Docus
+      </span>
     </span>
   )
 }
@@ -52,41 +60,109 @@ function Count({ n, label }: { n: number; label: string }) {
 
 function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]; pending: number; unread: number; onNotifications: () => void }) {
   const { user, signOut } = useAuth()
+  const [hovered, setHovered] = useState(false)
+  const isExpanded = hovered
+
   const linkCls = (active: boolean) =>
     cn(
-      'flex h-8 items-center gap-2.5 rounded-md px-2.5 text-body transition-colors duration-fast',
+      'group/item relative flex h-9 items-center rounded-md text-body transition-colors duration-fast',
       active ? 'bg-raised font-medium text-fg' : 'text-muted hover:bg-raised/60 hover:text-fg',
+      isExpanded ? 'px-2.5' : 'justify-center px-0',
     )
+
   return (
-    <aside className="fixed bottom-0 left-0 top-[var(--titlebar)] z-nav hidden w-[232px] flex-col border-r border-border bg-panel lg:flex">
-      <div className="app-drag flex h-14 items-center px-4">
-        <Mark />
+    <aside
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={cn(
+        'fixed bottom-0 left-0 top-[var(--titlebar)] z-nav hidden flex-col border-r border-border bg-panel lg:flex',
+        'transition-[width,box-shadow] duration-base ease-std',
+        isExpanded ? 'w-[232px] shadow-2xl' : 'w-[64px]',
+      )}
+    >
+      <div className={cn('app-drag flex h-14 items-center overflow-hidden', isExpanded ? 'px-4' : 'justify-center px-0')}>
+        <Mark collapsed={!isExpanded} />
       </div>
-      <nav aria-label="Main" className="flex flex-1 flex-col gap-0.5 px-2 py-2">
+
+      <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-2.5 py-2 overflow-x-hidden">
         {items.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.to === '/'} className={({ isActive }) => linkCls(isActive)}>
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            title={!isExpanded ? item.label : undefined}
+            className={({ isActive }) => linkCls(isActive)}
+          >
             {({ isActive }) => (
               <>
-                <item.icon size={18} weight={isActive ? 'fill' : 'regular'} aria-hidden />
-                {item.label}
-                {item.to === '/devices' && <Count n={pending} label="new devices found" />}
+                <span className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+                  <item.icon size={18} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                  {item.to === '/devices' && pending > 0 && !isExpanded && (
+                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={`${pending} new devices`} />
+                  )}
+                </span>
+                <span
+                  className={cn(
+                    'min-w-0 flex-1 truncate transition-opacity duration-fast ml-2.5 whitespace-nowrap',
+                    !isExpanded && 'sr-only',
+                  )}
+                >
+                  {item.label}
+                </span>
+                {item.to === '/devices' && isExpanded && <Count n={pending} label="new devices found" />}
               </>
             )}
           </NavLink>
         ))}
-        <button onClick={onNotifications} className={cn(linkCls(false), 'mt-2 cursor-pointer')}>
-          <Bell size={18} aria-hidden />
-          Notifications
-          <Count n={unread} label="unread" />
+
+        <button
+          onClick={onNotifications}
+          title={!isExpanded ? (unread ? `Notifications (${unread} unread)` : 'Notifications') : undefined}
+          className={cn(linkCls(false), 'mt-2 cursor-pointer')}
+        >
+          <span className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+            <Bell size={18} aria-hidden />
+            {unread > 0 && !isExpanded && (
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={`${unread} unread notifications`} />
+            )}
+          </span>
+          <span
+            className={cn(
+              'min-w-0 flex-1 truncate text-left transition-opacity duration-fast ml-2.5 whitespace-nowrap',
+              !isExpanded && 'sr-only',
+            )}
+          >
+            Notifications
+          </span>
+          {isExpanded && <Count n={unread} label="unread" />}
         </button>
       </nav>
-      <div className="flex items-center gap-2.5 border-t border-border p-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase">{user?.username.slice(0, 1)}</span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-label font-medium">{user?.username}</p>
-          <p className="text-caption capitalize text-subtle">{user?.role}</p>
-        </div>
-        <Button variant="ghost" size="sm" aria-label="Sign out" icon={<SignOut size={16} />} onClick={signOut} />
+
+      {/* Footer */}
+      <div className="border-t border-border p-2">
+        {isExpanded ? (
+          <div className="flex items-center gap-2 p-1 anim-fade">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase">
+              {user?.username.slice(0, 1)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-label font-medium">{user?.username}</p>
+              <p className="text-caption capitalize text-subtle">{user?.role}</p>
+            </div>
+            <ThemeToggle size="sm" />
+            <Button variant="ghost" size="sm" aria-label="Sign out" title="Sign out" icon={<SignOut size={16} />} onClick={signOut} />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 py-1">
+            <ThemeToggle size="sm" />
+            <span
+              title={`${user?.username} (${user?.role})`}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase cursor-default"
+            >
+              {user?.username.slice(0, 1)}
+            </span>
+          </div>
+        )}
       </div>
     </aside>
   )
@@ -209,12 +285,15 @@ export function AppShell() {
 
       <header className="chrome app-drag sticky top-[var(--titlebar)] z-nav flex h-14 items-center justify-between border-b border-border px-4 pt-[env(safe-area-inset-top)] lg:hidden">
         <Mark />
-        <Button variant="ghost" size="sm" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
-          {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle size="sm" />
+          <Button variant="ghost" size="sm" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
+            {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
+          </Button>
+        </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:pl-[232px]">
+      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:pl-[64px]">
         <div key={location.pathname.split('/')[1]} className="anim-enter mx-auto max-w-[1360px] px-4 py-6 md:px-8 md:py-8">
           <Outlet />
         </div>
@@ -223,7 +302,7 @@ export function AppShell() {
       <TabBar items={items} onMore={() => setMoreOpen(true)} pending={pending.length} />
       <Notifications open={notifOpen} onClose={() => setNotifOpen(false)} />
       <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
-        <div className="-mx-2 flex flex-col">
+        <div className="-mx-2 flex flex-col gap-1">
           {items.slice(4).map((item) => (
             <NavLink
               key={item.to}
@@ -235,6 +314,10 @@ export function AppShell() {
               {item.label}
             </NavLink>
           ))}
+          <div className="flex h-11 items-center justify-between rounded-md px-2 text-body">
+            <span className="text-muted">Theme</span>
+            <ThemeToggle size="sm" showLabel />
+          </div>
           <button onClick={signOut} className="mt-2 flex h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-body text-danger hover:bg-danger/10">
             <SignOut size={18} aria-hidden /> Sign out
           </button>
