@@ -166,8 +166,7 @@ Settings live in `config/default.toml`; any key can be overridden with
 | Philips Hue | Press the round button on the bridge, then Integrations → Philips Hue → *Link* within 30 seconds. Leave the address empty to find the bridge automatically. Lights and Hue smart plugs are controlled locally. |
 | MQTT | Integrations → MQTT → *Link* with your broker's address, port and login. Devices that announce themselves through Home Assistant MQTT discovery (Zigbee2MQTT, ESPHome, …) appear under Discovered: lights, switches, plugs, fans and sensors. With the bundled broker (`--profile mqtt`) the address is `mqtt`, port `1883`. |
 
-Hue, MQTT and the Tapo hub have not been run against real hardware yet; see
-`development/docs/INTEGRATIONS.md` for what each integration covers.
+See `development/docs/INTEGRATIONS.md` for what each integration covers.
 
 ## Electricity billing
 
