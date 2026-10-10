@@ -9,7 +9,7 @@ import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Avatar } from '@/components/ui/Avatar'
 import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal'
 import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
-import { api, desktop } from '@/lib/api'
+import { api, desktop, type UpdateChannel } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
@@ -146,6 +146,7 @@ export function SettingsView() {
         </Card>
         <PasswordCard />
         <ServerCard />
+        <AboutCard />
       </div>
       {admin && <People />}
     </>
@@ -181,6 +182,69 @@ function PasswordCard() {
           Update password
         </Button>
       </form>
+    </Card>
+  )
+}
+
+const channels: { value: UpdateChannel; label: string }[] = [
+  { value: 'stable', label: 'Stable' },
+  { value: 'beta', label: 'Beta' },
+  { value: 'alpha', label: 'Alpha' },
+]
+
+/** The web UI's version, and in the desktop app its own release channel and updates. */
+function AboutCard() {
+  const toast = useToast()
+  const qc = useQueryClient()
+  const updates = desktop?.updates
+  const { data: info } = useQuery({ queryKey: ['desktop-update-info'], queryFn: () => updates!.info(), enabled: !!updates })
+  const check = useQuery({ queryKey: ['desktop-update', info?.channel], queryFn: () => updates!.check(), enabled: !!info, retry: false })
+  const install = useMutation({
+    mutationFn: () => updates!.install(),
+    onSuccess: (failed) => failed && toast.push({ tone: 'error', title: 'Update failed', message: failed }),
+  })
+  const setChannel = async (channel: UpdateChannel) => {
+    await updates!.setChannel(channel)
+    qc.invalidateQueries({ queryKey: ['desktop-update-info'] })
+  }
+  return (
+    <Card>
+      <CardHeader title="About" />
+      <div className="divide-y divide-border">
+        <div className="flex min-h-12 items-center justify-between px-4">
+          <span className="text-muted">Version</span>
+          <span>
+            {__APP_VERSION__} <span className="text-subtle">(build {__APP_BUILD__})</span>
+          </span>
+        </div>
+        {info && (
+          <>
+            <div className="flex min-h-12 items-center justify-between px-4">
+              <span className="text-muted">Desktop app</span>
+              <span>{info.version}</span>
+            </div>
+            <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
+              <div>
+                <p>Update channel</p>
+                <p className="text-label text-muted">Beta and Alpha get new builds earlier, and every stable one.</p>
+              </div>
+              <Segmented size="sm" label="Update channel" value={info.channel} onChange={setChannel} options={channels} />
+            </div>
+            <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
+              <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : check.data ? `Docus ${check.data.version} is available` : 'Up to date'}</p>
+              {check.data ? (
+                <Button size="sm" loading={install.isPending} onClick={() => install.mutate()}>
+                  {info.selfInstall ? 'Update and restart' : 'Download'}
+                </Button>
+              ) : (
+                <Button size="sm" variant="ghost" disabled={check.isFetching} onClick={() => check.refetch()}>
+                  Check now
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </Card>
   )
 }

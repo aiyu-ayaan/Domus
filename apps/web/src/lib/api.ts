@@ -37,7 +37,16 @@ interface DesktopBridge {
   chooseServer(): void
   /** 'system' | 'light' | 'dark': the window buttons follow the app theme. */
   setTheme(theme: string): void
+  /** The desktop app's own releases. Absent in desktop builds older than the update channel. */
+  updates?: {
+    info(): Promise<{ version: string; channel: UpdateChannel; selfInstall: boolean } | null>
+    check(): Promise<{ version: string } | null>
+    /** The reason it failed, or '' (the app restarts, or the browser has the download). */
+    install(): Promise<string>
+    setChannel(channel: UpdateChannel): Promise<void>
+  }
 }
+export type UpdateChannel = 'stable' | 'beta' | 'alpha'
 export const desktop = (window as unknown as { docus?: DesktopBridge }).docus
 
 /**

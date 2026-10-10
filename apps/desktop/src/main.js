@@ -6,6 +6,7 @@ const https = require('https')
 const os = require('os')
 const path = require('path')
 const { pathToFileURL } = require('url')
+const updates = require('./updates')
 
 // The window shows the web UI served by the Docus server itself. Which server
 // is chosen on the connect page (connect.html) and remembered; once signed in,
@@ -236,6 +237,77 @@ ipcMain.on('flavor:get', (event) => {
   event.returnValue = isDev ? 'dev' : 'prod'
 })
 
+// --- Updates: GitHub releases on a channel (alpha / beta / stable). See development/docs/RELEASE.md.
+// An AppImage replaces its own file and restarts; a .deb install is handed the download in the browser.
+let offer = null // the last check's answer; install takes it from here, never from the page
+const updateChannel = () => (config.channel in updates.STAGE ? config.channel : updates.channelOf(app.getVersion()))
+
+async function checkForUpdate() {
+  // A dev build updates by rebuilding it.
+  if (!app.isPackaged || isDev) return (offer = null)
+  const res = await fetch(updates.RELEASES, { headers: { Accept: 'application/vnd.github+json' } })
+  if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
+  offer = updates.pick(await res.json(), app.getVersion(), updateChannel(), process.env.APPIMAGE ? '.AppImage' : '.deb')
+  return offer
+}
+
+/** Returns the reason it failed, or '' (the app restarts, or the browser has the download). */
+async function installUpdate() {
+  if (!offer) return 'No update to install.'
+  const target = process.env.APPIMAGE
+  if (!target) {
+    shell.openExternal(offer.url)
+    return ''
+  }
+  const part = `${target}.part`
+  try {
+    const res = await fetch(offer.url)
+    if (!res.ok) throw new Error(`the download answered ${res.status}`)
+    const file = Buffer.from(await res.arrayBuffer())
+    // An error page saved under the right name must not become the app.
+    if (file.subarray(0, 4).toString('latin1') !== '\x7fELF') throw new Error('the download is not an AppImage')
+    fs.writeFileSync(part, file, { mode: 0o755 })
+    // A rename within one directory: a failure before it leaves the old build in place.
+    fs.renameSync(part, target)
+  } catch (error) {
+    fs.rmSync(part, { force: true })
+    return `Could not update: ${error.message}.`
+  }
+  app.relaunch({ execPath: target })
+  app.quit()
+  return ''
+}
+
+/** At start: offer a new release once; "Later" is remembered for that version. */
+async function offerUpdate() {
+  const found = await checkForUpdate().catch(() => null)
+  if (!found || !win || config.skipped === found.version) return
+  const { response } = await dialog.showMessageBox(win, {
+    type: 'info',
+    buttons: ['Later', process.env.APPIMAGE ? 'Update and restart' : 'Download'],
+    defaultId: 1,
+    cancelId: 0,
+    message: `Docus ${found.version} is available`,
+    detail: `You have ${app.getVersion()}. The update channel is in Settings.`,
+  })
+  if (response === 1) {
+    const failed = await installUpdate()
+    if (failed) dialog.showErrorBox('Docus update', failed)
+  } else {
+    config.skipped = found.version
+    save()
+  }
+}
+
+ipcMain.handle('update:info', (event) => (trusted(event) ? { version: app.getVersion(), channel: updateChannel(), selfInstall: !!process.env.APPIMAGE } : null))
+ipcMain.handle('update:check', (event) => (trusted(event) ? checkForUpdate() : null))
+ipcMain.handle('update:install', (event) => (trusted(event) ? installUpdate() : ''))
+ipcMain.handle('update:setChannel', (event, channel) => {
+  if (!trusted(event) || !(channel in updates.STAGE)) return
+  config.channel = channel
+  save()
+})
+
 function createWindow() {
   const iconPath = isDev
     ? (app.isPackaged ? path.join(process.resourcesPath, 'icon-dev.png') : path.join(__dirname, '../build/icon-dev.png'))
@@ -328,6 +400,7 @@ app.whenReady().then(() => {
     })
   }
   createWindow()
+  offerUpdate()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })

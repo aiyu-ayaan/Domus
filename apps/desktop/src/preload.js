@@ -15,6 +15,13 @@ contextBridge.exposeInMainWorld('docus', {
   saveLinks: (links) => ipcRenderer.send('links:save', links),
   chooseServer: () => ipcRenderer.send('server:choose'),
   setTheme: (theme) => ipcRenderer.send('theme:set', theme),
+  // This app's own releases (main.js, updates.js).
+  updates: {
+    info: () => ipcRenderer.invoke('update:info'),
+    check: () => ipcRenderer.invoke('update:check'),
+    install: () => ipcRenderer.invoke('update:install'),
+    setChannel: (channel) => ipcRenderer.invoke('update:setChannel', channel),
+  },
   // Connect page only.
   connect: (address) => ipcRenderer.invoke('server:connect', address),
   discover: () => ipcRenderer.invoke('server:discover'),
