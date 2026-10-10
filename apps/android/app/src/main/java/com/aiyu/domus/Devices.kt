@@ -317,10 +317,11 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
             s.fanPercent?.let {
-                // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as proportional to speed.
-                val cadr = (s.fanCadr ?: 0) * it / 100
+                // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
+                val (low, high) = s.fanCadr?.takeIf { r -> r.size == 2 } ?: listOf(0, 0)
+                val cadr = low + (high - low) * it / 100
                 val label = if (cadr > 0) "Speed · Coverage ${cadr * 7 / 100}–${cadr * 12 / 100} m²" else "Speed"
-                CommitSlider(label, it, 0f..100f, "$it%", enabled) { v -> send(DeviceCommand(fanPercent = v)) }
+                CommitSlider(label, it, 0f..100f, "", enabled) { v -> send(DeviceCommand(fanPercent = v)) }
             }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
@@ -566,7 +567,7 @@ private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRa
     Column {
         Row {
             Text(label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            Text(drag?.let { "${it.roundToInt()}" } ?: valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (valueText.isNotEmpty()) Text(drag?.let { "${it.roundToInt()}" } ?: valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Slider(
             value = drag ?: value.toFloat().coerceIn(range),

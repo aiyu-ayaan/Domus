@@ -52,8 +52,8 @@ data class DeviceState(
     @SerialName("fan_speed") val fanSpeed: String? = null,
     /** 0-100 %, for fans with a stepless speed. */
     @SerialName("fan_percent") val fanPercent: Int? = null,
-    /** Clean air delivery rate at full speed, m³/h. */
-    @SerialName("fan_cadr") val fanCadr: Int? = null,
+    /** Clean air delivery rate at the lowest and full speed, m³/h. */
+    @SerialName("fan_cadr") val fanCadr: List<Int>? = null,
     val mode: String? = null,
     @SerialName("filter_life") val filterLife: Float? = null,
     @SerialName("current_power_watts") val watts: Float? = null,
