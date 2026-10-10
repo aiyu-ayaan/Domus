@@ -161,6 +161,11 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
   and swatches carry descriptions; content is capped at 840dp on wide windows.
 
+### Navigation and back
+
+- Every page opened over the tabs (`MainScreen.page`) and the plugin link flow (`Onboard.kt`: list → link page → steps such as the Xiaomi code) change with the same shared-axis X transition, `sharedAxisX` in `PredictiveBack.kt`. New screens should use it rather than swapping content without motion.
+- **Predictive back** (`android:enableOnBackInvokedCallback="true"`): `rememberPredictiveBack(enabled, onBack)` drives the live preview, and `Modifier.predictiveBackEffect` shrinks the screen to 90 % with rounded corners while the gesture is held. It is used for pages, the tab → Home step, the plugin link page and the intro pager. Dialogs and `ModalBottomSheet` handle the gesture themselves. Do not add plain `BackHandler`s.
+
 ## 5. Build and run
 
 ```bash
