@@ -1,6 +1,7 @@
 {
   "name": "docus-root",
-  "version": "0.1.0",
+  "version": "0.0.0",
+  "build": 1,
   "private": true,
   "description": "Docus - Modern smart home assistant platform",
   "scripts": {
