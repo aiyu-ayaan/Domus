@@ -1,10 +1,11 @@
-//! Plugin catalog and account linking (Tuya QR login, Tapo and Xiaomi sign-in).
+//! Plugin catalog and account linking (Tuya QR login, Tapo and Xiaomi sign-in, MQTT broker form).
 
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::infrastructure::event_bus::SystemEvent;
 use crate::integrations::accounts::AccountRecord;
+use crate::integrations::mqtt;
 use crate::integrations::tapo::klap::TapoCredentials;
 use crate::integrations::tuya::api as tuya;
 use crate::integrations::xiaomi::cloud;
@@ -31,18 +32,43 @@ struct CatalogEntry {
     id: &'static str,
     name: &'static str,
     description: &'static str,
-    /// How an account is linked: "qr", "credentials" or "none".
+    /// How an account is linked: "qr", "credentials", "form" or "none".
     link: &'static str,
+    /// Inputs of a "form" link; posted as strings to `/integrations/<id>/accounts`.
+    fields: &'static [FormField],
     local: bool,
     enabled: bool,
     accounts: Vec<AccountRecord>,
     device_count: i64,
 }
 
-const CATALOG: &[(IntegrationType, &str, &str, &str, bool)] = &[
-    (IntegrationType::Tuya, "Tuya / Smart Life", "Plugs, switches, lights and purifiers from the Smart Life and Tuya Smart apps. Linked by scanning a QR code — no developer account needed.", "qr", false),
-    (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs and switches, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true),
-    (IntegrationType::Xiaomi, "Xiaomi Mi Home", "Mi Home / MIoT devices such as air purifiers, lamps and plugs. Tokens come from your Xiaomi account; control is local.", "credentials", true),
+#[derive(Serialize)]
+struct FormField {
+    key: &'static str,
+    label: &'static str,
+    /// "text", "password" or "number".
+    kind: &'static str,
+    required: bool,
+    hint: &'static str,
+    default: &'static str,
+}
+
+const fn field(key: &'static str, label: &'static str, kind: &'static str, required: bool, hint: &'static str, default: &'static str) -> FormField {
+    FormField { key, label, kind, required, hint, default }
+}
+
+const MQTT_FIELDS: &[FormField] = &[
+    field("host", "Broker address", "text", true, "IP address or hostname, e.g. 192.168.1.10.", ""),
+    field("port", "Port", "number", true, "Usually 1883. Port 8883 connects with TLS.", "1883"),
+    field("username", "Username", "text", false, "Leave empty if the broker allows anonymous clients.", ""),
+    field("password", "Password", "password", false, "", ""),
+];
+
+const CATALOG: &[(IntegrationType, &str, &str, &str, bool, &[FormField])] = &[
+    (IntegrationType::Tuya, "Tuya / Smart Life", "Plugs, switches, lights and purifiers from the Smart Life and Tuya Smart apps. Linked by scanning a QR code — no developer account needed.", "qr", false, &[]),
+    (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs and switches, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true, &[]),
+    (IntegrationType::Xiaomi, "Xiaomi Mi Home", "Mi Home / MIoT devices such as air purifiers, lamps and plugs. Tokens come from your Xiaomi account; control is local.", "credentials", true, &[]),
+    (IntegrationType::Mqtt, "MQTT", "Any device that announces itself on your MQTT broker through Home Assistant discovery: Zigbee2MQTT, ESPHome and many more brands. Lights, switches, plugs, fans and sensors.", "form", true, MQTT_FIELDS),
 ];
 
 pub fn integration_routes() -> Router<AppState> {
@@ -52,6 +78,7 @@ pub fn integration_routes() -> Router<AppState> {
         .route("/tuya/qr", post(tuya_qr_start))
         .route("/tuya/qr/:token", get(tuya_qr_poll))
         .route("/tapo/accounts", post(tapo_link))
+        .route("/mqtt/accounts", post(mqtt_link))
         .route("/xiaomi/accounts", post(xiaomi_link))
         .route("/xiaomi/verify", post(xiaomi_verify))
 }
@@ -64,12 +91,13 @@ async fn catalog(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Ve
     let accounts = if user.is_admin() { s.manager.accounts.list(None).await? } else { vec![] };
     let out = CATALOG
         .iter()
-        .map(|(t, name, description, link, local)| {
+        .map(|(t, name, description, link, local, fields)| {
             let entry = CatalogEntry {
                 id: t.as_str(),
                 name,
                 description,
                 link,
+                fields,
                 local: *local,
                 enabled: enabled.contains(t),
                 accounts: accounts.iter().filter(|a| a.integration_type == t.as_str()).cloned().collect(),
@@ -245,4 +273,39 @@ async fn save_xiaomi(s: &AppState, creds: cloud::XiaomiCredentials) -> ApiResult
     s.bus.publish(SystemEvent::IntegrationsChanged);
     discover_soon(s);
     Ok(Json(json!({ "account_id": id })))
+}
+
+// --- Form links ----------------------------------------------------------------
+
+type Form = std::collections::HashMap<String, String>;
+
+/// Store a linked account, replacing the one with the same name.
+async fn save_account(s: &AppState, kind: &str, name: &str, credentials: &impl Serialize) -> ApiResult<Json<Value>> {
+    let value = serde_json::to_value(credentials).map_err(|e| ApiError::Internal(e.to_string()))?;
+    let id = match s.manager.accounts.find_by_name(kind, name).await? {
+        Some(existing) => {
+            s.manager.accounts.update_credentials(&existing.id, &value).await?;
+            existing.id
+        }
+        None => s.manager.accounts.create(kind, name, &value).await?,
+    };
+    s.bus.publish(SystemEvent::IntegrationsChanged);
+    discover_soon(s);
+    Ok(Json(json!({ "account_id": id })))
+}
+
+async fn mqtt_link(State(s): State<AppState>, user: AuthUser, Json(form): Json<Form>) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    let get = |k: &str| form.get(k).map_or("", |v| v.trim());
+    let broker = mqtt::Broker {
+        host: get("host").into(),
+        port: if get("port").is_empty() { 1883 } else { get("port").parse().map_err(|_| ApiError::BadRequest("Port must be a number".into()))? },
+        username: get("username").into(),
+        password: form.get("password").cloned().unwrap_or_default(),
+    };
+    if broker.host.is_empty() {
+        return Err(ApiError::BadRequest("Enter the broker address".into()));
+    }
+    mqtt::check(&broker).await?;
+    save_account(&s, "mqtt", &format!("{}:{}", broker.host, broker.port), &broker).await
 }

@@ -43,6 +43,7 @@ export function IntegrationsView() {
       )}
       <TuyaSheet open={linking === 'tuya'} onClose={() => setLinking(null)} />
       <CredentialsSheet kind={linking === 'tapo' || linking === 'xiaomi' ? linking : null} onClose={() => setLinking(null)} />
+      <FormSheet plugin={data?.find((p) => p.id === linking && p.link === 'form') ?? null} onClose={() => setLinking(null)} />
       <Confirm
         open={!!removing}
         onClose={() => setRemoving(null)}
@@ -73,7 +74,7 @@ function IntegrationCard({ plugin: p, onLink, onRemove }: { plugin: Integration;
         </div>
         {p.enabled && (
           <Button variant={p.accounts.length ? 'secondary' : 'primary'} onClick={onLink}>
-            {p.accounts.length ? 'Link another account' : p.link === 'qr' ? 'Link with QR code' : 'Link account'}
+            {p.link === 'form' ? (p.accounts.length ? 'Link another' : 'Link') : p.accounts.length ? 'Link another account' : p.link === 'qr' ? 'Link with QR code' : 'Link account'}
           </Button>
         )}
       </div>
@@ -204,6 +205,65 @@ function TuyaSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           </Button>
         </div>
       )}
+    </Sheet>
+  )
+}
+
+/** Link sheet for integrations whose inputs the server lists (`link: 'form'`). */
+function FormSheet({ plugin, onClose }: { plugin: Integration | null; onClose: () => void }) {
+  const qc = useQueryClient()
+  const toast = useToast()
+  const navigate = useNavigate()
+  const [values, setValues] = useState<Record<string, string>>({})
+  const [error, setError] = useState<string | null>(null)
+  const fields = plugin?.fields ?? []
+  const value = (key: string) => values[key] ?? fields.find((f) => f.key === key)?.default ?? ''
+  const ready = fields.every((f) => !f.required || value(f.key).trim())
+  const close = () => (setValues({}), setError(null), onClose())
+  const link = useMutation({
+    mutationFn: () => api.linkForm(plugin!.id, Object.fromEntries(fields.map((f) => [f.key, value(f.key)]))),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.integrations })
+      toast.push({ tone: 'success', title: `${plugin?.name} linked`, message: 'Scanning for devices.' })
+      close()
+      navigate('/devices?tab=discovered')
+    },
+    onError: (e) => setError(errorMessage(e)),
+  })
+  return (
+    <Sheet
+      open={!!plugin}
+      onClose={close}
+      title={`Link ${plugin?.name ?? ''}`}
+      description={plugin?.description}
+      footer={
+        <>
+          <Button variant="ghost" onClick={close}>
+            Cancel
+          </Button>
+          <Button variant="primary" loading={link.isPending} disabled={!ready} onClick={() => link.mutate()}>
+            Link
+          </Button>
+        </>
+      }
+    >
+      <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), ready && link.mutate())}>
+        {fields.map((f) => (
+          <Field
+            key={f.key}
+            label={f.label}
+            hint={f.hint || undefined}
+            required={f.required}
+            type={f.kind === 'password' ? 'password' : 'text'}
+            inputMode={f.kind === 'number' ? 'numeric' : undefined}
+            autoComplete="off"
+            spellCheck={false}
+            value={value(f.key)}
+            onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+          />
+        ))}
+        <ErrorText>{error}</ErrorText>
+      </form>
     </Sheet>
   )
 }

@@ -320,6 +320,8 @@ pub struct DeviceContext {
     pub config: Value,
     pub secrets: Value,
     pub account: Option<AccountContext>,
+    /// Last stored state, for integrations that only hear changes (MQTT).
+    pub state: DeviceState,
 }
 
 #[derive(Debug, Clone)]

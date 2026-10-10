@@ -3,6 +3,7 @@
 
 pub mod accounts;
 pub mod manager;
+pub mod mqtt;
 pub mod tapo;
 pub mod tuya;
 pub mod xiaomi;

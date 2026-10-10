@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Account
 import com.aiyu.domus.core.Discovered
+import com.aiyu.domus.core.FormField
 import com.aiyu.domus.core.Integration
 import com.aiyu.domus.core.TuyaQr
 import com.aiyu.domus.core.xiaomiAccount
@@ -107,7 +108,7 @@ fun IntegrationsPage(onBack: () -> Unit, onFindDevices: () -> Unit) {
     }
 }
 
-/** Tuya: QR scanned with the Smart Life app. Tapo / Xiaomi: account sign-in (Xiaomi may then ask for an emailed or texted code). */
+/** Tuya: QR scanned with the Smart Life app. Tapo / Xiaomi: account sign-in (Xiaomi may then ask for an emailed or texted code). Others: the form the server lists. */
 @Composable
 private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () -> Unit) {
     val repository = LocalRepository.current
@@ -124,6 +125,9 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
     var via by rememberSaveable { mutableStateOf<String?>(null) }
     var code by rememberSaveable { mutableStateOf("") }
     val tuya = integration.link == "qr"
+    val form = integration.link == "form"
+    var values by remember { mutableStateOf(mapOf<String, String>()) } // may hold a password: not saved
+    fun value(field: FormField) = values[field.key] ?: field.default
 
     fun finish() {
         scope.launch { repository.change { it.scan() } } // pull the new account's devices in right away
@@ -151,6 +155,7 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
             busy = true
             when {
                 tuya -> { expired = false; qr = repository.request { it.tuyaQr(userCode.trim()) } }
+                form -> repository.request { it.linkForm(integration.id, integration.fields.associate { f -> f.key to value(f) }) }?.let { finish() }
                 verifyId != null -> repository.request { it.verifyXiaomi(verifyId.orEmpty(), code.trim()) }?.let { finish() }
                 integration.id == "tapo" -> repository.request { it.linkTapo(username.trim(), password) }?.let { finish() }
                 else -> xiaomiSignIn()
@@ -160,6 +165,7 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
     }
     val canSubmit = !busy && when {
         tuya -> qr == null && userCode.isNotBlank()
+        form -> integration.fields.all { !it.required || value(it).isNotBlank() }
         verifyId != null -> code.isNotBlank()
         else -> username.isNotBlank() && password.isNotEmpty()
     }
@@ -193,6 +199,12 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
                 Row {
                     TextButton({ scope.launch { busy = true; xiaomiSignIn(); busy = false } }, enabled = !busy) { Text("Send a new code") }
                     TextButton({ verifyId = null; code = "" }, enabled = !busy) { Text("Use another account") }
+                }
+            }
+            form -> {
+                Text(integration.description, color = muted)
+                integration.fields.forEach { f ->
+                    Field(value(f), { values = values + (f.key to it) }, f.label, keyboard = if (f.kind == "number") KeyboardType.Number else KeyboardType.Text, secret = f.kind == "password", supporting = f.hint.ifEmpty { null })
                 }
             }
             else -> {

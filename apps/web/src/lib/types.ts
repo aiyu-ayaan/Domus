@@ -149,7 +149,9 @@ export interface Integration {
   id: string
   name: string
   description: string
-  link: 'qr' | 'credentials' | 'none'
+  link: 'qr' | 'credentials' | 'form' | 'none'
+  /** Inputs of a `form` link. */
+  fields: { key: string; label: string; kind: 'text' | 'password' | 'number'; required: boolean; hint: string; default: string }[]
   local: boolean
   enabled: boolean
   accounts: Account[]

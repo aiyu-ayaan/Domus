@@ -236,6 +236,8 @@ export const api = {
   linkTapo: (b: { username: string; password: string }) => post<{ account_id: string }>('/integrations/tapo/accounts', b),
   linkXiaomi: (b: { username: string; password: string; region: string }) =>
     post<{ account_id?: string; verify_id?: string; via?: 'email' | 'phone' }>('/integrations/xiaomi/accounts', b),
+  /** Integrations linked by a form the server describes (MQTT broker, Hue bridge). */
+  linkForm: (id: string, b: Record<string, string>) => post<{ account_id: string }>(`/integrations/${id}/accounts`, b),
   verifyXiaomi: (b: { verify_id: string; code: string }) => post<{ account_id: string }>('/integrations/xiaomi/verify', b),
 }
 

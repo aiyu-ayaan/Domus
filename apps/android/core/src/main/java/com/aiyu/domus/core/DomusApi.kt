@@ -159,6 +159,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun tuyaQrStatus(token: String) = call("GET", "/integrations/tuya/qr/$token", TuyaQrStatus.serializer())
     suspend fun linkTapo(username: String, password: String) =
         write("POST", "/integrations/tapo/accounts", buildJsonObject { put("username", username); put("password", password) })
+    /** Integrations linked by a form the server describes (MQTT broker, Hue bridge). */
+    suspend fun linkForm(id: String, values: Map<String, String>) =
+        write("POST", "/integrations/$id/accounts", buildJsonObject { values.forEach { (key, value) -> put(key, value) } })
     suspend fun linkXiaomi(username: String, password: String, region: String) =
         call("POST", "/integrations/xiaomi/accounts", XiaomiLink.serializer(), fields("username" to username, "password" to password, "region" to region))
     suspend fun verifyXiaomi(verifyId: String, code: String) =

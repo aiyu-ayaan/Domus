@@ -60,6 +60,11 @@ data class DeviceState(
     val voltage: Float? = null,
     @SerialName("current_amps") val amps: Float? = null,
     @SerialName("today_energy_kwh") val todayKwh: Float? = null,
+    /** What a motion, door or leak sensor last saw. */
+    val motion: Boolean? = null,
+    /** True while a door or window is open. */
+    val contact: Boolean? = null,
+    @SerialName("water_leak") val waterLeak: Boolean? = null,
     /** Choices the UI can offer, keyed by `fan_speed` / `mode`. */
     val options: Map<String, List<String>> = emptyMap(),
 )
@@ -221,13 +226,18 @@ data class DiscoveryReport(val found: Int = 0, val new: Int = 0, val adopted: In
 @Serializable
 data class Account(val id: String, val name: String = "", val status: String = "ok", @SerialName("last_error") val lastError: String? = null)
 
+/** One input of a `form` link; [kind] is `text`, `password` or `number`. */
+@Serializable
+data class FormField(val key: String, val label: String, val kind: String = "text", val required: Boolean = false, val hint: String = "", val default: String = "")
+
 @Serializable
 data class Integration(
     val id: String,
     val name: String,
     val description: String = "",
-    /** How an account is linked: `qr`, `credentials` or `none`. */
+    /** How an account is linked: `qr`, `credentials`, `form` or `none`. */
     val link: String = "none",
+    val fields: List<FormField> = emptyList(),
     val local: Boolean = false,
     val enabled: Boolean = true,
     val accounts: List<Account> = emptyList(),

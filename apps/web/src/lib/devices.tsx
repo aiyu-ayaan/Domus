@@ -69,6 +69,10 @@ export function deviceSummary(d: Device): string {
     parts.push(`${formatNumber(s.temperature)}°`)
     if (s.humidity != null) parts.push(`${formatNumber(s.humidity, 0)}%`)
   }
+  // Sensors without a reading of their own say what they last saw.
+  if (typeof s.motion === 'boolean') parts.push(s.motion ? 'Motion' : 'Clear')
+  if (typeof s.contact === 'boolean') parts.push(s.contact ? 'Open' : 'Closed')
+  if (s.water_leak === true) parts.push('Leak')
   if (s.current_power_watts != null && s.is_on !== false && d.device_type !== 'air_purifier') {
     parts.push(formatWatts(s.current_power_watts))
   }

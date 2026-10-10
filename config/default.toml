@@ -26,13 +26,6 @@ max_connections = 8
 jwt_secret = ""
 token_expiry_hours = 168
 
-[mqtt]
-enabled = false
-host = "127.0.0.1"
-port = 1883
-client_id = "domus_backend"
-keep_alive_secs = 60
-
 [integrations.tuya]
 enabled = true
 
@@ -40,6 +33,10 @@ enabled = true
 enabled = true
 
 [integrations.xiaomi]
+enabled = true
+
+# Brokers are linked under Integrations, not here.
+[integrations.mqtt]
 enabled = true
 
 [workers]

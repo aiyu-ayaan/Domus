@@ -138,6 +138,9 @@ fun deviceStatus(device: Device): String {
         on && s.brightness != null -> "${s.brightness}%"
         s.pm25 != null -> "PM2.5 ${s.pm25!!.roundToInt()} · ${airLevel(s.pm25!!).label}"
         s.temperature != null -> "${s.temperature!!.roundToInt()}°"
+        s.waterLeak == true -> "Leak"
+        s.motion != null -> if (s.motion == true) "Motion" else "Clear"
+        s.contact != null -> if (s.contact == true) "Open" else "Closed"
         s.isOn != null -> if (on) "On" else "Off"
         else -> "Online"
     }

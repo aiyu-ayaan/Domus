@@ -35,15 +35,6 @@ pub struct SecurityConfig {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct MqttConfig {
-    pub enabled: bool,
-    pub host: String,
-    pub port: u16,
-    pub client_id: String,
-    pub keep_alive_secs: u64,
-}
-
-#[derive(Debug, Clone, Deserialize)]
 pub struct IntegrationConfig {
     pub enabled: bool,
 }
@@ -53,6 +44,7 @@ pub struct IntegrationsConfig {
     pub tuya: IntegrationConfig,
     pub tapo: IntegrationConfig,
     pub xiaomi: IntegrationConfig,
+    pub mqtt: IntegrationConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -72,7 +64,6 @@ pub struct AppConfig {
     pub tls: TlsConfig,
     pub database: DatabaseConfig,
     pub security: SecurityConfig,
-    pub mqtt: MqttConfig,
     pub integrations: IntegrationsConfig,
     pub workers: WorkersConfig,
 }
@@ -92,14 +83,10 @@ impl AppConfig {
             .set_default("database.max_connections", 8)?
             .set_default("security.jwt_secret", "")?
             .set_default("security.token_expiry_hours", 24 * 7)?
-            .set_default("mqtt.enabled", false)?
-            .set_default("mqtt.host", "127.0.0.1")?
-            .set_default("mqtt.port", 1883)?
-            .set_default("mqtt.client_id", "domus_backend")?
-            .set_default("mqtt.keep_alive_secs", 60)?
             .set_default("integrations.tuya.enabled", true)?
             .set_default("integrations.tapo.enabled", true)?
             .set_default("integrations.xiaomi.enabled", true)?
+            .set_default("integrations.mqtt.enabled", true)?
             .set_default("workers.poll_interval_secs", 3)?
             .set_default("workers.cloud_poll_interval_secs", 15)?
             .set_default("workers.energy_sample_secs", 60)?

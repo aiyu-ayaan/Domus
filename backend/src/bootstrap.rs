@@ -7,12 +7,11 @@ use crate::infrastructure::{
     database::init_pool,
     event_bus::EventBus,
     logging::init_logging,
-    mqtt_client::MqttService,
     tls,
 };
 use crate::integrations::{
-    accounts::AccountStore, broadcast_addresses, tapo::TapoIntegration, tuya::TuyaIntegration,
-    xiaomi::XiaomiIntegration, DeviceManager,
+    accounts::AccountStore, broadcast_addresses, mqtt::MqttIntegration, tapo::TapoIntegration,
+    tuya::TuyaIntegration, xiaomi::XiaomiIntegration, DeviceManager,
 };
 use crate::modules::notifications::Notifier;
 use crate::workers::{DeviceWorker, DiscoveryWorker, SchedulerWorker};
@@ -44,13 +43,6 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     let bus = EventBus::default();
     let notifier = Notifier::new(pool.clone(), bus.clone());
 
-    if config.mqtt.enabled {
-        match MqttService::start(&config.mqtt, bus.clone()).await {
-            Ok(_) => info!("MQTT service connected."),
-            Err(e) => tracing::warn!("MQTT service failed to connect (continuing): {e}"),
-        }
-    }
-
     // Integration plugins
     let accounts = AccountStore::new(pool.clone(), vault.clone());
     let store: Arc<dyn home_core::CredentialStore> = Arc::new(accounts.clone());
@@ -67,6 +59,9 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     }
     if config.integrations.xiaomi.enabled {
         plugins.push(Arc::new(XiaomiIntegration::new(store.clone(), broadcast.clone())));
+    }
+    if config.integrations.mqtt.enabled {
+        plugins.push(Arc::new(MqttIntegration::new()));
     }
     info!(
         "Integrations: {}",

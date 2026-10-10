@@ -151,6 +151,7 @@ impl DeviceManager {
             config: rec.config(),
             secrets: self.open_secrets(rec.secrets_enc.as_deref()),
             account: rec.account_id.as_ref().and_then(|id| accounts.get(id).cloned()),
+            state: rec.state(),
         }
     }
 
