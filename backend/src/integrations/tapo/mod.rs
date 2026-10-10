@@ -306,9 +306,6 @@ impl IntegrationPlugin for TapoIntegration {
     async fn discover(&self, accounts: &[AccountContext]) -> Result<Vec<DiscoveredDevice>> {
         let mut out = Vec::new();
         for b in self.scan().await? {
-            if b.device_type.contains("CAMERA") {
-                continue;
-            }
             let fallback = DiscoveredDevice {
                 external_id: b.device_id.clone(),
                 name: format!("Tapo {}", b.model),
@@ -323,6 +320,11 @@ impl IntegrationPlugin for TapoIntegration {
                 note: None,
                 state: None,
             };
+            // Cameras only accept TLS with RSA key exchange, which rustls (our TLS library) does not offer.
+            if b.device_type.contains("CAMERA") {
+                out.push(DiscoveredDevice { note: Some("Tapo cameras are not supported yet".into()), ..fallback });
+                continue;
+            }
             if b.encrypt_type != "KLAP" {
                 out.push(DiscoveredDevice {
                     note: Some(format!(
