@@ -29,6 +29,47 @@ pub struct TapoIntegration {
     playing: std::sync::Mutex<std::collections::HashSet<String>>,
 }
 
+/// TP-Link's own predefined strip effects (Aurora, Christmas, ...), exactly as the Tapo app sends
+/// them. The values are the ones the python-kasa project documents.
+static PRESETS: std::sync::LazyLock<Vec<Value>> =
+    std::sync::LazyLock::new(|| serde_json::from_str(include_str!("effects.json")).expect("effects.json is valid"));
+
+/// `tapo_` + the preset's name in snake case, e.g. `tapo_bubbling_cauldron`.
+fn preset_id(preset: &Value) -> String {
+    let name = preset["name"].as_str().unwrap_or_default().to_lowercase();
+    let slug: String = name.chars().filter(|c| c.is_ascii_alphanumeric() || *c == ' ').collect();
+    format!("tapo_{}", slug.replace(' ', "_"))
+}
+
+fn preset(id: &str) -> Option<&'static Value> {
+    PRESETS.iter().find(|p| preset_id(p) == id)
+}
+
+/// The presets as catalog entries for clients: id, name and the colours the Tapo app shows for them.
+pub fn preset_catalog() -> Vec<Value> {
+    PRESETS
+        .iter()
+        .map(|p| {
+            let colors: Vec<String> = p["display_colors"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|c| {
+                    let (r, g, b) = hsv_to_rgb(c.get(0)?.as_f64()?, c.get(1)?.as_f64()? / 100.0, c.get(2)?.as_f64()? / 100.0);
+                    Some(rgb_to_hex(r, g, b))
+                })
+                .collect();
+            json!({ "id": preset_id(p), "name": p["name"], "colors": colors })
+        })
+        .collect()
+}
+
+/// Effect ids a strip offers: TP-Link's presets, then ours that don't share a name with one.
+fn strip_effects() -> Vec<String> {
+    let ours = effects::EFFECTS.iter().filter(|e| !PRESETS.iter().any(|p| p["name"] == e.name)).map(|e| e.id.to_string());
+    PRESETS.iter().map(preset_id).chain(ours).collect()
+}
+
 /// An effect in the light strips' native form (`set_lighting_effect`, type `sequence`).
 /// The strip stores and loops it by itself.
 fn lighting_effect(e: &effects::Effect, enable: bool) -> Value {
@@ -209,10 +250,14 @@ fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
     }
     // Only light strips report a lighting effect; they are the ones that can play ours.
     if let Some(fx) = info.get("lighting_effect") {
-        s.options.insert("effect".into(), effects::effect_ids());
+        s.options.insert("effect".into(), strip_effects());
         if fx.get("enable").and_then(Value::as_u64) == Some(1) {
             let name = fx.get("name").and_then(Value::as_str);
-            s.effect = effects::EFFECTS.iter().find(|e| Some(e.name) == name).map(|e| e.id.to_string());
+            s.effect = PRESETS
+                .iter()
+                .find(|p| p["name"].as_str() == name)
+                .map(preset_id)
+                .or_else(|| effects::EFFECTS.iter().find(|e| Some(e.name) == name).map(|e| e.id.to_string()));
         }
     }
     if let Some(rssi) = info.get("rssi") {
@@ -323,7 +368,21 @@ impl IntegrationPlugin for TapoIntegration {
             .as_ref()
             .ok_or_else(|| CoreError::AuthError("TP-Link account was removed".into()))?;
         let creds = creds_of(account)?;
-        let chosen = command.effect.as_deref().map(effects::effect);
+        // None: no effect in this command. Some(None): stop. Some(Some(_)): the native effect to play.
+        let chosen = match command.effect.as_deref() {
+            None => None,
+            Some("") => Some(None),
+            Some(id) => Some(Some(
+                preset(id)
+                    .map(|p| {
+                        let mut p = p.clone();
+                        p["enable"] = json!(1);
+                        p
+                    })
+                    .or_else(|| effects::effect(id).map(|(_, e)| lighting_effect(e, true)))
+                    .ok_or_else(|| CoreError::Unsupported("this light cannot play that effect".into()))?,
+            )),
+        };
         let recolour = command.color.is_some() || command.color_temp.is_some() || command.color_mode.is_some();
         let was_playing = self.playing.lock().unwrap().contains(host);
         // Stop the running effect when asked to, or when a plain colour is about to replace it.
@@ -334,11 +393,11 @@ impl IntegrationPlugin for TapoIntegration {
                 return Ok(());
             }
         }
-        if let Some(Some((_, e))) = chosen {
+        if let Some(Some(native)) = chosen {
             if command.is_on != Some(false) {
                 self.klap.request(host, &creds, "set_device_info", Some(json!({ "device_on": true }))).await?;
             }
-            self.klap.request(host, &creds, "set_lighting_effect", Some(lighting_effect(e, true))).await?;
+            self.klap.request(host, &creds, "set_lighting_effect", Some(native)).await?;
             self.playing.lock().unwrap().insert(host.to_string());
             return Ok(());
         }
@@ -383,6 +442,28 @@ impl IntegrationPlugin for TapoIntegration {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn strips_offer_tp_links_presets() {
+        assert_eq!(PRESETS.len(), 17);
+        assert!(preset("tapo_grandmas_christmas_lights").is_some());
+        assert_eq!(preset("tapo_aurora").unwrap()["type"], "sequence");
+        let catalog = preset_catalog();
+        assert_eq!(catalog[0]["id"], "tapo_aurora");
+        assert_eq!(catalog[0]["colors"][0], "#00ff00");
+
+        // Presets first; ours only where TP-Link has none of that name (it has its own Aurora, not a Forest).
+        let offered = strip_effects();
+        assert_eq!(offered[0], "tapo_aurora");
+        assert!(offered.contains(&"forest".to_string()) && !offered.contains(&"aurora".to_string()));
+
+        let info = json!({"device_on": true, "lighting_effect": {"enable": 1, "name": "Christmas"}});
+        let s = state_from(&info, None);
+        assert_eq!(s.effect.as_deref(), Some("tapo_christmas"));
+        assert_eq!(s.options["effect"].len(), offered.len());
+        // A bulb without the field offers none.
+        assert!(!state_from(&json!({"device_on": true}), None).options.contains_key("effect"));
+    }
 
     #[test]
     fn tapo_state_from_color_mode() {

@@ -317,8 +317,9 @@ pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
                 out.push(json!({ "code": "work_mode", "value": "scene" }));
                 out.push(json!({ "code": SCENE_CODE, "value": scene_data(slot, e) }));
             }
-            // Stop: back to plain white light.
-            None => out.push(json!({ "code": "work_mode", "value": "white" })),
+            // Stop: back to plain white light. An effect this bulb can't play (another brand's) is ignored.
+            None if id.is_empty() => out.push(json!({ "code": "work_mode", "value": "white" })),
+            None => {}
         }
     }
     if let Some(hex) = &cmd.color {

@@ -140,6 +140,14 @@ flowchart LR
 | Tapo | `get_device_info` contains `lighting_effect` (light strips) | `lighting_effect.enable == 1` and its name |
 | Xiaomi | not yet | — |
 
+Tapo strips also offer TP-Link's own 17 predefined effects (Aurora, Bubbling Cauldron, Candy Cane, Christmas,
+Flicker, Grandma's Christmas Lights, Hanukkah, Haunted Mansion, Icicle, Lightning, Ocean, Rainbow, Raindrop,
+Spring, Sunrise, Sunset, Valentines). Their native definitions are data in
+`backend/src/integrations/tapo/effects.json` (values as documented by the python-kasa project), sent unchanged
+with `set_lighting_effect`. Their ids are `tapo_<name>`; `GET /devices/effects` lists them ahead of the shared
+ones, and a strip lists them in `options.effect` followed by the shared effects whose name TP-Link has no preset
+for. Any other light ignores a `tapo_` id.
+
 A Tuya bulb addresses scenes by slot 1-8, so the catalog holds at most eight effects and an effect's position is
 its slot. A Tapo strip ignores colour changes while an effect runs; the plugin remembers which hosts are playing
 and switches the effect off before a plain colour command.
