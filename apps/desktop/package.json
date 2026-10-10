@@ -10,29 +10,14 @@
   "license": "MIT",
   "main": "src/main.js",
   "scripts": {
-    "dev": "electron . --no-sandbox",
-    "build": "electron-builder --linux"
+    "dev": "DOCUS_FLAVOR=dev electron . --no-sandbox",
+    "dev:prod": "DOCUS_FLAVOR=prod electron . --no-sandbox",
+    "build": "pnpm run build:prod",
+    "build:prod": "electron-builder --linux --config electron-builder.prod.json",
+    "build:dev": "electron-builder --linux --config electron-builder.dev.json"
   },
   "devDependencies": {
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8"
-  },
-  "build": {
-    "appId": "com.aiyu.domus",
-    "productName": "Docus",
-    "executableName": "docus",
-    "files": ["src/**"],
-    "extraResources": [{ "from": "build/icon.png", "to": "icon.png" }],
-    "linux": {
-      "target": ["deb", "AppImage"],
-      "icon": "build/icon.png",
-      "category": "Utility",
-      "synopsis": "Smart home control"
-    },
-    "deb": {
-      "packageName": "docus",
-      "afterInstall": "build/after-install.sh",
-      "artifactName": "docus_${version}_${arch}.${ext}"
-    }
   }
 }

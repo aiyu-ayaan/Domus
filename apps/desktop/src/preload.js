@@ -5,6 +5,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('docus', {
   platform: process.platform,
   isDesktop: true,
+  flavor: ipcRenderer.sendSync('flavor:get'),
   // The session token lives in the app, not in per-origin web storage, so the
   // home and the remote address share one sign-in.
   token: {

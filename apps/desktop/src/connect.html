@@ -68,7 +68,13 @@
     </main>
     <script>
       const $ = (id) => document.getElementById(id)
-      $('error').textContent = new URLSearchParams(location.search).get('message') ?? ''
+      const params = new URLSearchParams(location.search)
+      if (params.get('flavor') === 'dev' || window.docus?.flavor === 'dev') {
+        document.title = 'Docus (Dev)'
+        const header = document.querySelector('header')
+        if (header) header.textContent = 'Docus (Dev)'
+      }
+      $('error').textContent = params.get('message') ?? ''
 
       async function connect(address) {
         const buttons = document.querySelectorAll('button')

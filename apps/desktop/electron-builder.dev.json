@@ -1,0 +1,21 @@
+{
+  "appId": "com.aiyu.domus.dev",
+  "productName": "Docus Dev",
+  "executableName": "docus-dev",
+  "files": ["src/**"],
+  "extraResources": [
+    { "from": "build/icon-dev.png", "to": "icon-dev.png" },
+    { "from": "build/icon-dev.png", "to": "icon.png" }
+  ],
+  "linux": {
+    "target": ["deb", "AppImage"],
+    "icon": "build/icon-dev.png",
+    "category": "Utility",
+    "synopsis": "Smart home control (Development)"
+  },
+  "deb": {
+    "packageName": "docus-dev",
+    "afterInstall": "build/after-install.sh",
+    "artifactName": "docus-dev_${version}_${arch}.${ext}"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "appId": "com.aiyu.domus",
+  "productName": "Docus",
+  "executableName": "docus",
+  "files": ["src/**"],
+  "extraResources": [{ "from": "build/icon.png", "to": "icon.png" }],
+  "linux": {
+    "target": ["deb", "AppImage"],
+    "icon": "build/icon.png",
+    "category": "Utility",
+    "synopsis": "Smart home control"
+  },
+  "deb": {
+    "packageName": "docus",
+    "afterInstall": "build/after-install.sh",
+    "artifactName": "docus_${version}_${arch}.${ext}"
+  }
+}

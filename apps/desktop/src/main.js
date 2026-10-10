@@ -18,11 +18,26 @@ const override = process.env.DOCUS_URL
 const CONNECT = path.join(__dirname, 'connect.html')
 const BEACON_PORT = 48443 // backend/src/infrastructure/beacon.rs
 
+// App Flavors: 'dev' or 'prod'.
+// In development or when explicitly requested, flavor is 'dev'.
+// When packaged or when DOCUS_FLAVOR=prod, flavor is 'prod'.
+const flavor = process.env.DOCUS_FLAVOR || (!app.isPackaged ? 'dev' : 'prod')
+const isDev = flavor === 'dev'
+
+// Set distinct app name and isolate userData per flavor so dev does not overwrite prod
+const appData = app.getPath('appData')
+const userDataName = isDev ? 'DocusDev' : 'Docus'
+app.setPath('userData', path.join(appData, userDataName))
+app.setName(isDev ? 'Docus Dev' : 'Docus')
+if (app.setAppUserModelId) {
+  app.setAppUserModelId(isDev ? 'com.aiyu.domus.dev' : 'com.aiyu.domus')
+}
+
 /** servers: origins to try in order. pins: origin -> approved self-signed certificate (SHA-256, AA:BB:..). */
 let config = { servers: [], pins: {}, token: null }
 let win = null
 
-const configFile = () => path.join(app.getPath('userData'), 'docus.json')
+const configFile = () => path.join(app.getPath('userData'), isDev ? 'docus-dev.json' : 'docus.json')
 const save = () => fs.writeFileSync(configFile(), JSON.stringify(config), { mode: 0o600 })
 
 const origin = (url) => {
@@ -94,7 +109,7 @@ ipcMain.on('theme:set', (event, theme) => {
 })
 
 function showConnect(message = '') {
-  win.loadFile(CONNECT, { query: { message } })
+  win.loadFile(CONNECT, { query: { message, flavor: isDev ? 'dev' : 'prod' } })
 }
 
 /** Opens the first saved address that answers: the home one on the home network, the remote one elsewhere. */
@@ -195,15 +210,22 @@ ipcMain.on('token:get', (event) => {
   }
   event.returnValue = token ?? null
 })
-ipcMain.on('token:set', (event, token) => {
-  if (!trusted(event)) return
-  if (typeof token !== 'string') config.token = null
-  else config.token = safeStorage.isEncryptionAvailable() ? { sealed: safeStorage.encryptString(token).toString('base64') } : { plain: token }
+  config.token = typeof token !== 'string' ? null : (safeStorage.isEncryptionAvailable() ? { sealed: safeStorage.encryptString(token).toString('base64') } : { plain: token })
   save()
+})
+ipcMain.on('flavor:get', (event) => {
+  event.returnValue = isDev ? 'dev' : 'prod'
 })
 
 function createWindow() {
+  const iconPath = isDev
+    ? (app.isPackaged ? path.join(process.resourcesPath, 'icon-dev.png') : path.join(__dirname, '../build/icon-dev.png'))
+    : (app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../build/icon.png'))
+  const defaultIcon = app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../build/icon.png')
+  const iconToUse = fs.existsSync(iconPath) ? iconPath : defaultIcon
+
   win = new BrowserWindow({
+    title: isDev ? 'Docus (Dev)' : 'Docus',
     width: 1320,
     height: 860,
     minWidth: 380,
@@ -212,7 +234,7 @@ function createWindow() {
     titleBarOverlay: titleBar(),
     backgroundColor: titleBar().color,
     // Installed builds get their icon from the desktop entry; this one is for the window itself.
-    icon: app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../build/icon.png'),
+    icon: iconToUse,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -221,6 +243,13 @@ function createWindow() {
       sandbox: true,
     },
   })
+
+  if (isDev) {
+    win.on('page-title-updated', (event, title) => {
+      event.preventDefault()
+      win.setTitle(title ? `${title} (Dev)` : 'Docus (Dev)')
+    })
+  }
 
   win.once('ready-to-show', () => win.show())
   win.on('closed', () => (win = null))
