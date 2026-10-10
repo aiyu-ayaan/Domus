@@ -9,7 +9,8 @@ use crate::infrastructure::event_bus::{EventBus, SystemEvent};
 use crate::modules::devices::model::{AdoptRequest, DeviceRecord, DiscoveryRecord, ManualAddRequest};
 use crate::modules::devices::repository::DeviceRepository;
 use crate::modules::notifications::Notifier;
-use chrono::Utc;
+use crate::modules::energy::{catch_up_rows, local_midnight, FILL_PREFIX};
+use chrono::{DateTime, Local, Utc};
 use futures::future::join_all;
 use home_core::{
     AccountContext, CoreError, DeviceCommand, DeviceContext, DeviceType, DiscoveredDevice,
@@ -231,7 +232,7 @@ impl DeviceManager {
                 }
                 if p.online {
                     if let Some(w) = p.state.current_power_watts {
-                        self.sample_energy(&rec.id, w as f64).await;
+                        self.sample_energy(&rec.id, w as f64, p.state.today_energy_kwh.map(f64::from)).await;
                     }
                     if let Some(pm) = p.state.air_quality_pm25 {
                         self.sample_air(&rec.id, pm, p.state.temperature, p.state.humidity).await;
@@ -288,8 +289,9 @@ impl DeviceManager {
         }
     }
 
-    /// Store incremental energy (kWh since the last sample) for this device.
-    async fn sample_energy(&self, device_id: &str, watts: f64) {
+    /// Store incremental energy (kWh since the last sample) for this device. `meter_today` is the
+    /// device's own counter for today, when it has one.
+    async fn sample_energy(&self, device_id: &str, watts: f64, meter_today: Option<f64>) {
         let now = Instant::now();
         let dt = {
             let mut last = self.last_sample.lock().await;
@@ -307,6 +309,9 @@ impl DeviceManager {
             }
         };
         let kwh = watts.max(0.0) * dt.as_secs_f64() / 3_600_000.0;
+        if let Some(meter) = meter_today {
+            self.catch_up(device_id, meter - kwh).await;
+        }
         let res = sqlx::query(
             "INSERT INTO energy_metrics (id, device_id, power_watts, energy_kwh, recorded_at) VALUES (?, ?, ?, ?, ?)",
         )
@@ -319,6 +324,34 @@ impl DeviceManager {
         .await;
         if let Err(e) = res {
             tracing::warn!("energy sample failed: {e}");
+        }
+    }
+
+    /// Samples only cover the time the server was polling. When the device's own meter says more was
+    /// used today than the samples add up to, store the difference over the unwatched time.
+    async fn catch_up(&self, device_id: &str, meter_today: f64) {
+        let now = Local::now();
+        let midnight = local_midnight(now.date_naive());
+        let sampled: Result<Vec<(DateTime<Utc>, f64)>, _> =
+            sqlx::query_as("SELECT recorded_at, energy_kwh FROM energy_metrics WHERE device_id = ? AND recorded_at >= ?")
+                .bind(device_id)
+                .bind(midnight.with_timezone(&Utc))
+                .fetch_all(&self.pool)
+                .await;
+        let Ok(sampled) = sampled else { return };
+        let recorded: f64 = sampled.iter().map(|r| r.1).sum();
+        let times: Vec<DateTime<Local>> = sampled.iter().map(|r| r.0.with_timezone(&Local)).collect();
+        for (at, kwh) in catch_up_rows(meter_today - recorded, &times, now, midnight) {
+            let res = sqlx::query("INSERT INTO energy_metrics (id, device_id, power_watts, energy_kwh, recorded_at) VALUES (?, ?, 0, ?, ?)")
+                .bind(format!("{FILL_PREFIX}{}", Uuid::new_v4()))
+                .bind(device_id)
+                .bind(kwh)
+                .bind(at.with_timezone(&Utc))
+                .execute(&self.pool)
+                .await;
+            if let Err(e) = res {
+                tracing::warn!("energy catch-up failed: {e}");
+            }
         }
     }
 

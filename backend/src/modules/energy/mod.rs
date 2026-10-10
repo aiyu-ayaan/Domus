@@ -1,7 +1,9 @@
 //! Energy monitoring and the electricity bill.
 //!
 //! The poll loop writes a sample per metered device every minute with the
-//! energy used since the previous sample, so sums over `energy_kwh` are exact.
+//! energy used since the previous sample, so sums over `energy_kwh` are exact while the server
+//! was polling. Devices with their own daily meter (Tapo) also get catch-up rows for the time it
+//! was not (`catch_up_rows`), so every "today" figure matches the meter.
 
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
@@ -142,11 +144,31 @@ async fn put_settings(
     Ok(Json(load_settings(&s.pool).await))
 }
 
-fn local_midnight(d: NaiveDate) -> DateTime<Local> {
+pub fn local_midnight(d: NaiveDate) -> DateTime<Local> {
     Local
         .from_local_datetime(&d.and_hms_opt(0, 0, 0).unwrap())
         .earliest()
         .unwrap_or_else(Local::now)
+}
+
+/// Id prefix of catch-up rows: they carry energy but no measured power.
+pub const FILL_PREFIX: &str = "fill-";
+
+/// Rows `(time, kWh)` that store `gap` kWh, which the device's meter counted today but no sample
+/// recorded. It is spread over today's hours without any row in `sampled`: that is when the
+/// server was not watching. With every hour covered it is small drift and goes to `now`.
+pub fn catch_up_rows(gap: f64, sampled: &[DateTime<Local>], now: DateTime<Local>, midnight: DateTime<Local>) -> Vec<(DateTime<Local>, f64)> {
+    // Under 10 Wh is rounding. Right after midnight the meter may still hold yesterday's total.
+    if gap < 0.01 || now - midnight < Duration::minutes(15) {
+        return vec![];
+    }
+    let hour = |t: DateTime<Local>| (t - midnight).num_hours();
+    let empty: Vec<i64> = (0..=hour(now)).filter(|h| !sampled.iter().any(|t| hour(*t) == *h)).collect();
+    if empty.is_empty() {
+        return vec![(now, gap)];
+    }
+    let share = gap / empty.len() as f64;
+    empty.iter().map(|h| ((midnight + Duration::hours(*h) + Duration::minutes(30)).min(now), share)).collect()
 }
 
 /// Start of the current billing cycle and its length in days.
@@ -278,6 +300,8 @@ struct Point {
     t: DateTime<Local>,
     kwh: f64,
     cost: f64,
+    /// Average measured power; `None` where nothing was measured.
+    watts: Option<f64>,
 }
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
@@ -303,12 +327,15 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
 
     // 15-minute UTC buckets ("YYYY-MM-DDTHH", quarter), regrouped into local
     // buckets below. Quarters keep half-hour time zones (e.g. IST) exact.
-    let rows: Vec<(String, String, i64, f64)> = sqlx::query_as(
+    let rows: Vec<(String, String, i64, f64, f64, i64)> = sqlx::query_as(
         "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / 15 AS q,
-                SUM(energy_kwh)
-         FROM energy_metrics WHERE recorded_at >= ? GROUP BY device_id, h, q",
+                SUM(energy_kwh),
+                COALESCE(SUM(CASE WHEN id NOT LIKE ?2 THEN power_watts END), 0.0),
+                COUNT(CASE WHEN id NOT LIKE ?2 THEN 1 END)
+         FROM energy_metrics WHERE recorded_at >= ?1 GROUP BY device_id, h, q",
     )
     .bind(start.with_timezone(&Utc))
+    .bind(format!("{FILL_PREFIX}%"))
     .fetch_all(&s.pool)
     .await?;
 
@@ -317,10 +344,13 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
             t: if hourly { start + Duration::hours(i) } else { local_midnight(start.date_naive() + Duration::days(i)) },
             kwh: 0.0,
             cost: 0.0,
+            watts: None,
         })
         .collect();
+    // (bucket, device) -> sum and count of its measured power samples.
+    let mut power: HashMap<(usize, String), (f64, i64)> = HashMap::new();
 
-    for (device_id, hour, quarter, kwh) in rows {
+    for (device_id, hour, quarter, kwh, watts, samples) in rows {
         if q.device_id.as_ref().map_or(!visible.contains(&device_id), |d| *d != device_id) {
             continue;
         }
@@ -333,9 +363,17 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
         } else {
             (local.date_naive() - start.date_naive()).num_days()
         };
-        if let Some(p) = usize::try_from(idx).ok().and_then(|i| points.get_mut(i)) {
-            p.kwh += kwh;
+        let Some(i) = usize::try_from(idx).ok().filter(|i| *i < points.len()) else { continue };
+        points[i].kwh += kwh;
+        if samples > 0 {
+            let e = power.entry((i, device_id)).or_default();
+            e.0 += watts;
+            e.1 += samples;
         }
+    }
+    // The home's power in a bucket is the sum of each device's average.
+    for ((i, _), (watts, samples)) in power {
+        *points[i].watts.get_or_insert(0.0) += watts / samples as f64;
     }
     // shortcut: slabs priced at the range's average rate, exact only for a month-long range.
     let total: f64 = points.iter().map(|p| p.kwh).sum();
@@ -363,6 +401,23 @@ mod tests {
             slabs: slabs.iter().map(|&(up_to_kwh, rate)| Slab { up_to_kwh, rate }).collect(),
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn catch_up_fills_unwatched_hours() {
+        let midnight = local_midnight(NaiveDate::from_ymd_opt(2026, 10, 10).unwrap());
+        let at = |h: i64, m: i64| midnight + Duration::hours(h) + Duration::minutes(m);
+        // Sampled during 00:00-00:59 and 03:00-03:59, now 03:20: hours 1 and 2 were missed.
+        let rows = catch_up_rows(3.0, &[at(0, 5), at(3, 10)], at(3, 20), midnight);
+        assert_eq!(rows, vec![(at(1, 30), 1.5), (at(2, 30), 1.5)]);
+        // The current hour is never dated in the future.
+        assert_eq!(catch_up_rows(1.0, &[], at(0, 20), midnight), vec![(at(0, 20), 1.0)]);
+        // Every hour covered: drift lands now.
+        assert_eq!(catch_up_rows(0.02, &[at(0, 5), at(1, 5)], at(1, 40), midnight), vec![(at(1, 40), 0.02)]);
+        // Rounding noise, a meter that is behind, and the minutes after midnight add nothing.
+        assert!(catch_up_rows(0.005, &[], at(9, 0), midnight).is_empty());
+        assert!(catch_up_rows(-1.0, &[], at(9, 0), midnight).is_empty());
+        assert!(catch_up_rows(5.0, &[], at(0, 10), midnight).is_empty());
     }
 
     #[test]
