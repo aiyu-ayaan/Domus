@@ -17,3 +17,4 @@ rootProject.name = "Domus"
 include(":app")       // screens and navigation
 include(":core")      // server discovery, TLS trust, API client, live state (no UI)
 include(":ui-shared") // Material 3 Expressive theme, motion and shared components
+include(":baselineprofile") // generates the app's baseline + startup profile on a device; not shipped

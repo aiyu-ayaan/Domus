@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 // Release signing from gitignored keystore.properties; without it the release build is unsigned.
@@ -69,6 +70,11 @@ android {
     }
 }
 
+// One profile for both flavors (same code, different applicationId): src/main/generated/baselineProfiles.
+baselineProfile {
+    mergeIntoMain = true
+}
+
 kotlin {
     compilerOptions {
         optIn.addAll(
@@ -86,4 +92,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.serialization.json) // scene / automation bodies are edited as JSON objects
     implementation(libs.zxing.core) // draws the Tuya link QR code
+    implementation(libs.androidx.profileinstaller) // compiles the baseline profile at install, also when sideloaded
+    baselineProfile(project(":baselineprofile"))
 }
