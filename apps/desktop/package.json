@@ -14,7 +14,8 @@
     "dev:prod": "DOCUS_FLAVOR=prod electron . --no-sandbox",
     "build": "pnpm run build:prod",
     "build:prod": "electron-builder --linux --config electron-builder.prod.json",
-    "build:dev": "electron-builder --linux --config electron-builder.dev.json"
+    "build:dev": "electron-builder --linux --config electron-builder.dev.json",
+    "build:win": "electron-builder --win --config electron-builder.prod.json"
   },
   "devDependencies": {
     "electron": "^33.2.1",

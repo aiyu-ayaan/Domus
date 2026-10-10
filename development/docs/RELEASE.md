@@ -14,7 +14,7 @@ flowchart TD
     M -- "!patch" --> B
     PR -- merge --> B["Build"]
     B --> I["Docker image<br/>amd64 + arm64, pushed by digest"]
-    B --> D["Linux desktop<br/>AppImage + deb"]
+    B --> D["Desktop<br/>AppImage + deb, Windows installer"]
     B --> A["Android APK<br/>signed"]
     I & D & A --> P["Publish: tag vX + GitHub Release,<br/>then Docker tags X and alpha / beta / latest"]
     P --> U1["Android app: Settings > Updates"]
@@ -77,13 +77,15 @@ stable releases, Stable gets stable releases. The default is the channel of the 
 
 | Client | Where | How it updates |
 |---|---|---|
-| Android | Settings → Updates (`core/Updates.kt`) | Opens the APK download; Android installs it |
+| Android | Settings → Updates (`core/Updates.kt`) | Downloads the APK and hands it to Android's installer, which asks to allow installs from Docus the first time (`REQUEST_INSTALL_PACKAGES`, FileProvider `<applicationId>.updates`) |
 | Desktop AppImage | Offer at start, Settings → About (`apps/desktop/src/updates.js`, `main.js`) | Downloads the AppImage over its own file and restarts |
-| Desktop deb | same | Opens the `.deb` download |
+| Desktop deb / Windows | same | Opens the `.deb` / `Docus-<version>-Setup.exe` download |
 | Server | `DOCUS_VERSION` in `docker-compose.yml` | Docker tags `latest`, `beta`, `alpha` or an exact version; `docker compose pull && docker compose up -d` |
 | `scripts/install-linux.sh` | `--channel`, `--version` | Re-run to update |
 
 Dev flavors never update this way; they are rebuilt.
+
+The Windows installer (NSIS, unsigned, so SmartScreen warns on first run) is built on `windows-latest` with `pnpm --filter @docus/desktop build:win`. Its job is `continue-on-error` until a release has shipped a working one: a failure there is a warning and the release goes out without it.
 
 ## 5. Repository setup
 

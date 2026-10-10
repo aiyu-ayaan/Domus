@@ -12,7 +12,7 @@
 #   1. A marker on master opens a release PR: version and build number bumped, CHANGELOG entry
 #      written. Nothing is built.
 #   2. Merging that PR releases: Docker image (amd64 + arm64), Linux AppImage and deb, Android
-#      APK, then the tag, the GitHub Release and the Docker channel tags.
+#      APK and the Windows installer, then the tag, the GitHub Release and the Docker channel tags.
 #
 # Images are pushed untagged (by digest) and only named in the last job, so a release that
 # fails part-way leaves no tag, no Release and no moved channel. Run the workflow by hand with
@@ -299,6 +299,32 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # shortcut: never run on a real release yet, so a failure here does not block one
+  # (continue-on-error); drop that line once a release has shipped a working installer.
+  windows:
+    name: Windows desktop app
+    needs: plan
+    if: contains(fromJSON('["release","patch"]'), needs.plan.outputs.mode) && contains(needs.plan.outputs.targets, 'desktop')
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @docus/desktop
+      - run: pnpm --filter @docus/desktop build:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: apps/desktop/dist/*-Setup.exe
+          if-no-files-found: error
+          retention-days: 1
+
   android:
     name: Android APK
     needs: plan
@@ -344,7 +370,7 @@ jobs:
   # Last, once everything exists: the Release, then the names a deployment follows.
   publish:
     name: Publish v${{ needs.plan.outputs.version }}
-    needs: [plan, image, desktop, android]
+    needs: [plan, image, desktop, windows, android]
     # Skipped builds (a scoped marker) are fine; a failed one is not.
     if: >-
       !cancelled() && contains(fromJSON('["release","patch"]'), needs.plan.outputs.mode)
@@ -359,9 +385,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - name: Say so when the Windows build is missing
+        if: needs.windows.result != 'skipped' && hashFiles('artifacts/windows/*') == ''
+        run: echo "::warning::The Windows installer failed to build; this release ships without it."
       - name: GitHub Release
         run: |
-          files="$(find artifacts/desktop artifacts/android -type f 2>/dev/null || true)"
+          files="$(find artifacts/desktop artifacts/windows artifacts/android -type f 2>/dev/null || true)"
           if gh release view "v$VERSION" > /dev/null 2>&1; then
             # !patch, or a retry: replace the files of the release that exists.
             [ -z "$files" ] || gh release upload "v$VERSION" $files --clobber

@@ -238,7 +238,7 @@ ipcMain.on('flavor:get', (event) => {
 })
 
 // --- Updates: GitHub releases on a channel (alpha / beta / stable). See development/docs/RELEASE.md.
-// An AppImage replaces its own file and restarts; a .deb install is handed the download in the browser.
+// An AppImage replaces its own file and restarts; a .deb or Windows install is handed the download in the browser.
 let offer = null // the last check's answer; install takes it from here, never from the page
 const updateChannel = () => (config.channel in updates.STAGE ? config.channel : updates.channelOf(app.getVersion()))
 
@@ -247,7 +247,9 @@ async function checkForUpdate() {
   if (!app.isPackaged || isDev) return (offer = null)
   const res = await fetch(updates.RELEASES, { headers: { Accept: 'application/vnd.github+json' } })
   if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
-  offer = updates.pick(await res.json(), app.getVersion(), updateChannel(), process.env.APPIMAGE ? '.AppImage' : '.deb')
+  // What this install can take: its own AppImage, else the installer for the platform.
+  const suffix = process.env.APPIMAGE ? '.AppImage' : process.platform === 'win32' ? '-Setup.exe' : '.deb'
+  offer = updates.pick(await res.json(), app.getVersion(), updateChannel(), suffix)
   return offer
 }
 

@@ -24,6 +24,7 @@ Progress: [`development/TODO.md`](development/TODO.md).
 | Server (Docker) | `aiyuayaan/domus` on Docker Hub, amd64 and arm64 |
 | Android | `Docus-<version>.apk` from the [latest release](https://github.com/aiyu-ayaan/Domus-Rust/releases) |
 | Linux desktop | the one-line installer below, or the `.deb` / `.AppImage` from the release |
+| Windows desktop | `Docus-<version>-Setup.exe` from the release |
 
 ### Server
 
@@ -61,7 +62,8 @@ curl -fsSL https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/script
 ### Android
 
 Download the APK from the release page and open it. Later updates are offered in
-Settings → Updates, on the Stable, Beta or Alpha channel.
+Settings → Updates, on the Stable, Beta or Alpha channel, and installed from there; Android asks
+once to allow Docus to install them.
 
 Releases, version numbers and the update channels: [development/docs/RELEASE.md](development/docs/RELEASE.md).
 

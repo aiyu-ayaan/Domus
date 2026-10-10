@@ -195,5 +195,6 @@
 - [x] Update channels (stable / beta / alpha): Android Settings > Updates, desktop self-update for the AppImage, Docker channel tags
 - [x] `scripts/install-linux.sh` (menu entry with the app icon, `docus` command), README download section, `development/docs/RELEASE.md`
 - [ ] Add the repository secrets and run the first `!alpha` release; the workflow itself has only been linted and simulated locally
-- [ ] Android: install the update in-app instead of through the browser download
+- [x] Android: update downloaded and installed from Settings > Updates (asks only for the install permission)
+- [x] Windows installer built by the release workflow (unverified until the first release; job is continue-on-error)
 - [ ] Desktop: arm64 Linux build
