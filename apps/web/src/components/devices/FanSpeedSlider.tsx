@@ -9,7 +9,8 @@ export function FanSpeedSlider({ device, disabled, className }: { device: Device
   const speed = device.state.fan_percent
   const [value, setValue] = useState(speed ?? 0)
   useEffect(() => setValue(speed ?? 0), [speed])
-  if (speed == null) return null
+  // The level only drives the fan in manual mode.
+  if (speed == null || device.state.mode !== 'Manual') return null
   // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
   const [low, high] = device.state.fan_cadr ?? [0, 0]
   const cadr = low + ((high - low) * value) / 100
