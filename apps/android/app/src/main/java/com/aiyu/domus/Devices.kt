@@ -316,7 +316,7 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             else s.colorTemp?.let {
                 CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
-            s.fanPercent?.let {
+            s.fanPercent?.takeIf { s.mode == "Manual" }?.let {
                 // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
                 val (low, high) = s.fanCadr?.takeIf { r -> r.size == 2 } ?: listOf(0, 0)
                 val cadr = low + (high - low) * it / 100
