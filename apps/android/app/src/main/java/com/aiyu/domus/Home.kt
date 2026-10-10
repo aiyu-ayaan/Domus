@@ -173,15 +173,12 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         if (metered && overview != null) {
             val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
             val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
-            val deviceTodayKwh = devices.filter { it.isOnline }.mapNotNull { it.state.todayKwh }.sum().toDouble()
-            val displayTodayKwh = if (deviceTodayKwh > 0.0) deviceTodayKwh else overview.todayKwh
-            val displayTodayCost = if (overview.todayKwh > 0.0 && deviceTodayKwh > 0.0) overview.todayCost * (displayTodayKwh / overview.todayKwh) else overview.todayCost
 
             // Both cards take the height of the taller one.
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard("Using now", formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Combined live power draw of all your metered devices.")
                 StatCard(
-                    "Today", formatKwh(displayTodayKwh), formatMoney(displayTodayCost, overview.settings.currency),
+                    "Today", formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
                     Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
                     info = "Energy used since midnight. The amount below it is the estimated cost at your electricity rate.",
                 )

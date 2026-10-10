@@ -188,7 +188,7 @@ data class EnergyOverview(
 )
 
 @Serializable
-data class EnergyPoint(val t: String, val kwh: Double = 0.0, val cost: Double = 0.0)
+data class EnergyPoint(val t: String, val kwh: Double = 0.0, val cost: Double = 0.0, /** Average measured power; null where nothing was measured. */ val watts: Double? = null)
 
 /** Averages of one hour / day; null where nothing was measured. */
 @Serializable
