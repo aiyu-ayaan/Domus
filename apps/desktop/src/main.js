@@ -107,9 +107,18 @@ nativeTheme.on('updated', () => win?.setTitleBarOverlay(titleBar()))
 ipcMain.on('theme:set', (event, theme) => {
   if (trusted(event) && ['system', 'light', 'dark'].includes(theme)) nativeTheme.themeSource = theme
 })
+ipcMain.on('theme:get', (event) => {
+  event.returnValue = nativeTheme.themeSource
+})
 
 function showConnect(message = '') {
-  win.loadFile(CONNECT, { query: { message, flavor: isDev ? 'dev' : 'prod' } })
+  win.loadFile(CONNECT, {
+    query: {
+      message,
+      flavor: isDev ? 'dev' : 'prod',
+      theme: nativeTheme.themeSource,
+    },
+  })
 }
 
 /** Opens the first saved address that answers: the home one on the home network, the remote one elsewhere. */

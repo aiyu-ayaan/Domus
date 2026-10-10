@@ -20,4 +20,5 @@ contextBridge.exposeInMainWorld('docus', {
   discover: () => ipcRenderer.invoke('server:discover'),
   cancel: () => ipcRenderer.send('server:cancel'),
   hasSavedServer: () => ipcRenderer.sendSync('server:hasSaved'),
+  getTheme: () => ipcRenderer.sendSync('theme:get'),
 })

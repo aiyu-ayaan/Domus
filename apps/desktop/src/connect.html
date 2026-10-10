@@ -4,79 +4,375 @@
     <meta charset="utf-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
     <title>Docus</title>
-    <!-- Tokens from design-system/docus/MASTER.md -->
+    <!-- Botanical Material 3 / Expressive tokens from design-system/docus/MASTER.md and index.css -->
     <style>
       :root {
-        color-scheme: light dark;
-        --bg: #fafafa; --panel: #fff; --raised: #f4f4f5; --border: #e4e4e7; --border-strong: #d4d4d8;
-        --fg: #09090b; --muted: #52525b; --primary: #18181b; --on-primary: #fafafa; --on: #16a34a; --danger: #dc2626;
+        color-scheme: dark;
+        --bg: #12140E;
+        --panel: #1A1C16;
+        --raised: #282B24;
+        --border: #44483D;
+        --border-strong: #8F9285;
+        --fg: #E2E3D8;
+        --muted: #C5C8BA;
+        --subtle: #8F9285;
+        --primary: #B1D18A;
+        --on-primary: #1F3701;
+        --primary-container: #354E16;
+        --on-primary-container: #CDEDA3;
+        --on: #B1D18A;
+        --warn: #F59E0B;
+        --danger: #FFB4AB;
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #09090b; --panel: #111113; --raised: #18181b; --border: #27272a; --border-strong: #3f3f46;
-          --fg: #fafafa; --muted: #a1a1aa; --primary: #fafafa; --on-primary: #09090b; --on: #22c55e; --danger: #ef4444;
+      :root[data-theme='light'] {
+        color-scheme: light;
+        --bg: #F9FAEF;
+        --panel: #FFFFFF;
+        --raised: #EEEFE3;
+        --border: #C5C8BA;
+        --border-strong: #75796C;
+        --fg: #1A1C16;
+        --muted: #44483D;
+        --subtle: #75796C;
+        --primary: #4C662B;
+        --on-primary: #FFFFFF;
+        --primary-container: #CDEDA3;
+        --on-primary-container: #354E16;
+        --on: #4C662B;
+        --warn: #B45309;
+        --danger: #BA1A1A;
+      }
+      @media (prefers-color-scheme: light) {
+        :root:not([data-theme='dark']) {
+          color-scheme: light;
+          --bg: #F9FAEF;
+          --panel: #FFFFFF;
+          --raised: #EEEFE3;
+          --border: #C5C8BA;
+          --border-strong: #75796C;
+          --fg: #1A1C16;
+          --muted: #44483D;
+          --subtle: #75796C;
+          --primary: #4C662B;
+          --on-primary: #FFFFFF;
+          --primary-container: #CDEDA3;
+          --on-primary-container: #354E16;
+          --on: #4C662B;
+          --warn: #B45309;
+          --danger: #BA1A1A;
         }
       }
-      * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+        --bg: #12140E;
+        --panel: #1A1C16;
+        --raised: #282B24;
+        --border: #44483D;
+        --border-strong: #8F9285;
+        --fg: #E2E3D8;
+        --muted: #C5C8BA;
+        --subtle: #8F9285;
+        --primary: #B1D18A;
+        --on-primary: #1F3701;
+        --primary-container: #354E16;
+        --on-primary-container: #CDEDA3;
+        --on: #B1D18A;
+        --warn: #F59E0B;
+        --danger: #FFB4AB;
+      }
+
+      * { box-sizing: border-box; }
       ::-webkit-scrollbar { width: 7px; height: 7px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 9999px; }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
       ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-      /* The window has no native title bar: this strip drags it, the window buttons sit on its right. */
-      header { position: fixed; inset: 0 0 auto 0; height: 36px; display: grid; place-items: center; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; -webkit-app-region: drag; user-select: none; }
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; }
-      main { width: 100%; max-width: 380px; }
-      svg { width: 32px; height: 32px; display: block; }
-      h1 { margin: 16px 0 4px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
-      p { margin: 0; color: var(--muted); }
-      h2 { margin: 24px 0 8px; font-size: 12px; font-weight: 500; color: var(--muted); }
-      ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); overflow: hidden; }
-      li + li { border-top: 1px solid var(--border); }
-      li button { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background 150ms; }
-      li button:hover { background: var(--raised); }
-      li small { color: var(--muted); font-size: 12px; }
-      .empty { padding: 12px; }
-      form { display: flex; gap: 8px; }
-      input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--raised); color: var(--fg); font: inherit; }
-      .go { height: 36px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font: inherit; font-weight: 500; cursor: pointer; transition: opacity 150ms; }
-      .link { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
-      button:disabled { opacity: 0.5; cursor: default; }
-      :focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
-      #error { margin-top: 12px; color: var(--danger); min-height: 21px; }
+
+      header {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        background: var(--bg);
+        -webkit-app-region: drag;
+        user-select: none;
+        z-index: 100;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 56px 20px 24px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        width: 100%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .logo {
+        width: 44px;
+        height: 44px;
+      }
+      .logo svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--fg);
+      }
+      .subtitle {
+        margin: -8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .section-title {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--raised);
+        overflow: hidden;
+      }
+      li + li {
+        border-top: 1px solid var(--border);
+      }
+      li button {
+        display: flex;
+        width: 100%;
+        min-height: 44px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 12px;
+        border: 0;
+        background: none;
+        color: var(--fg);
+        font: inherit;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        transition: background 120ms ease;
+      }
+      li button:hover {
+        background: rgba(177, 209, 138, 0.12);
+      }
+      li small {
+        color: var(--muted);
+        font-size: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .empty {
+        padding: 12px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 2px 0;
+      }
+
+      form {
+        display: flex;
+        gap: 8px;
+      }
+      input {
+        flex: 1;
+        min-width: 0;
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--raised);
+        color: var(--fg);
+        font: inherit;
+        font-size: 13px;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+      }
+      input:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(177, 209, 138, 0.25);
+      }
+      .go {
+        height: 38px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--primary);
+        color: var(--on-primary);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 120ms ease;
+        white-space: nowrap;
+      }
+      .go:hover {
+        opacity: 0.9;
+      }
+      .go:active {
+        opacity: 0.8;
+      }
+
+      .link-btn {
+        border: 0;
+        background: none;
+        color: var(--primary);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0;
+        transition: opacity 120ms ease;
+      }
+      .link-btn:hover {
+        text-decoration: underline;
+      }
+
+      .cancel-link {
+        border: 0;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        transition: color 120ms ease;
+      }
+      .cancel-link:hover {
+        color: var(--fg);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #error {
+        margin: 0;
+        color: var(--danger);
+        font-size: 12px;
+        min-height: 18px;
+      }
+      #cancel-box {
+        text-align: center;
+        padding-top: 4px;
+      }
     </style>
   </head>
   <body>
     <header>Docus</header>
     <main>
-      <svg viewBox="0 0 256 256" aria-hidden="true">
-        <path fill="currentColor" d="M36 52a12 12 0 0 1 12-12H116V120H36ZM132 40a88 88 0 0 1 0 176Z" />
-        <path fill="var(--on)" d="M36 136H116V216H48a12 12 0 0 1-12-12Z" />
-      </svg>
+      <div class="logo">
+        <svg viewBox="0 0 256 256" aria-hidden="true">
+          <rect width="256" height="256" rx="56" fill="var(--panel)" stroke="var(--border)" stroke-width="8" />
+          <g transform="translate(134 128) scale(.6) translate(-128 -128)">
+            <path fill="var(--fg)" d="M36 52a12 12 0 0 1 12-12H116V120H36ZM132 40a88 88 0 0 1 0 176Z" />
+            <path fill="var(--primary)" d="M36 136H116V216H48a12 12 0 0 1-12-12Z" />
+          </g>
+          <g id="dev-badge" style="display: none;">
+            <rect x="154" y="24" width="78" height="32" rx="8" fill="#f59e0b" />
+            <text x="193" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="800" letter-spacing="1.5" fill="#12140E" text-anchor="middle" dominant-baseline="middle">DEV</text>
+          </g>
+        </svg>
+      </div>
       <h1>Connect to your home</h1>
-      <p>Choose the Docus server this app should open.</p>
+      <p class="subtitle">Choose the Docus server this app should open.</p>
 
-      <h2 id="found-title">On this network</h2>
-      <ul id="found" aria-labelledby="found-title" aria-live="polite"><li class="empty"><p>Searching…</p></li></ul>
-      <button class="link" id="rescan" type="button">Search again</button>
+      <section class="card">
+        <div class="section-header">
+          <label class="section-title" id="found-title">On this network</label>
+          <button class="link-btn" id="rescan" type="button">Search again</button>
+        </div>
+        <ul id="found" aria-labelledby="found-title" aria-live="polite">
+          <li class="empty"><p>Searching…</p></li>
+        </ul>
 
-      <h2><label for="address">Server address</label></h2>
-      <form id="form">
-        <input id="address" placeholder="192.168.1.10:8443 or home.example.com" autocomplete="off" spellcheck="false" required />
-        <button class="go" type="submit">Connect</button>
-      </form>
-      <p id="error" role="alert"></p>
-      <div id="cancel-box" style="margin-top: 16px; display: none;">
-        <button class="link" id="cancel" type="button">Cancel and return to current server</button>
+        <div class="divider"></div>
+
+        <label class="section-title" for="address">Server address</label>
+        <form id="form">
+          <input id="address" placeholder="192.168.1.10:8443 or home.example.com" autocomplete="off" spellcheck="false" required />
+          <button class="go" type="submit">Connect</button>
+        </form>
+        <p id="error" role="alert"></p>
+      </section>
+
+      <div id="cancel-box" style="display: none;">
+        <button class="cancel-link" id="cancel" type="button">Cancel and return to current server</button>
       </div>
     </main>
     <script>
       const $ = (id) => document.getElementById(id)
       const params = new URLSearchParams(location.search)
-      if (params.get('flavor') === 'dev' || window.docus?.flavor === 'dev') {
+      const isDev = params.get('flavor') === 'dev' || window.docus?.flavor === 'dev'
+
+      if (isDev) {
         document.title = 'Docus (Dev)'
         const header = document.querySelector('header')
         if (header) header.textContent = 'Docus (Dev)'
+        const badge = $('dev-badge')
+        if (badge) badge.style.display = 'block'
       }
+
+      const activeTheme = params.get('theme') || window.docus?.getTheme?.()
+      if (activeTheme === 'light') document.documentElement.setAttribute('data-theme', 'light')
+      else if (activeTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark')
+
       $('error').textContent = params.get('message') ?? ''
 
       if (window.docus?.hasSavedServer?.()) {
