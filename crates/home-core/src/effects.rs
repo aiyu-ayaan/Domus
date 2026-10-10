@@ -49,6 +49,28 @@ pub const EFFECTS: &[Effect] = &[
     Effect { id: "party", name: "Party", colors: &[(0, 100, 100), (120, 100, 100), (240, 100, 100), (60, 100, 100), (300, 100, 100)], fade: false, step: 6 },
 ];
 
+/// More loops for lights without a slot limit (light strips). Written for Domus: names,
+/// colours and pacing are our own, not a vendor's presets.
+pub const STRIP_EFFECTS: &[Effect] = &[
+    Effect { id: "festive", name: "Festive", colors: &[(0, 100, 100), (120, 100, 70), (45, 90, 100), (120, 100, 70)], fade: true, step: 18 },
+    Effect { id: "peppermint", name: "Peppermint", colors: &[(355, 95, 100), (0, 0, 100), (355, 95, 100), (0, 0, 80)], fade: false, step: 9 },
+    Effect { id: "fireside", name: "Fireside", colors: &[(18, 100, 100), (30, 100, 70), (10, 100, 85), (36, 95, 55), (22, 100, 95)], fade: true, step: 6 },
+    Effect { id: "frost", name: "Frost", colors: &[(195, 45, 100), (210, 70, 90), (185, 25, 100), (220, 60, 75)], fade: true, step: 35 },
+    Effect { id: "storm", name: "Storm", colors: &[(235, 90, 35), (250, 80, 25), (220, 15, 100), (240, 90, 30), (265, 70, 40)], fade: false, step: 5 },
+    Effect { id: "blossom", name: "Blossom", colors: &[(325, 55, 100), (95, 60, 85), (340, 40, 100), (140, 50, 80)], fade: true, step: 42 },
+    Effect { id: "dawn", name: "Dawn", colors: &[(350, 90, 35), (12, 95, 70), (28, 85, 100), (45, 50, 100)], fade: true, step: 90 },
+    Effect { id: "dusk", name: "Dusk", colors: &[(40, 80, 100), (18, 95, 90), (320, 75, 70), (255, 80, 40)], fade: true, step: 90 },
+    Effect { id: "lagoon", name: "Lagoon", colors: &[(175, 90, 95), (190, 100, 80), (160, 80, 100), (205, 90, 70)], fade: true, step: 38 },
+    Effect { id: "spooky", name: "Spooky", colors: &[(275, 100, 60), (110, 100, 55), (25, 100, 80), (285, 90, 35)], fade: true, step: 14 },
+    Effect { id: "lullaby", name: "Lullaby", colors: &[(25, 85, 30), (345, 60, 25), (35, 75, 35)], fade: true, step: 100 },
+    Effect { id: "citrus", name: "Citrus", colors: &[(52, 100, 100), (85, 90, 100), (30, 100, 100), (65, 95, 100)], fade: true, step: 22 },
+];
+
+/// Any effect a light without a slot limit can play: the shared ones, then the strip ones.
+pub fn strip_effects() -> impl Iterator<Item = &'static Effect> {
+    EFFECTS.iter().chain(STRIP_EFFECTS)
+}
+
 pub fn mood(id: &str) -> Option<&'static Mood> {
     MOODS.iter().find(|m| m.id == id)
 }
@@ -72,7 +94,7 @@ pub fn catalog() -> Value {
         "moods": MOODS.iter().map(|m| json!({
             "id": m.id, "name": m.name, "brightness": m.brightness, "color_temp": m.color_temp, "colors": [m.preview],
         })).collect::<Vec<_>>(),
-        "effects": EFFECTS.iter().map(|e| json!({
+        "effects": strip_effects().map(|e| json!({
             "id": e.id, "name": e.name, "colors": e.colors.iter().map(hex).collect::<Vec<_>>(),
         })).collect::<Vec<_>>(),
     })
@@ -85,10 +107,12 @@ mod tests {
     #[test]
     fn effects_fit_the_eight_tuya_slots_and_ids_are_unique() {
         assert!(EFFECTS.len() <= 8);
-        let mut ids: Vec<_> = EFFECTS.iter().map(|e| e.id).chain(MOODS.iter().map(|m| m.id)).collect();
+        let mut ids: Vec<_> = strip_effects().map(|e| e.id).chain(MOODS.iter().map(|m| m.id)).collect();
         ids.sort();
         ids.dedup();
-        assert_eq!(ids.len(), EFFECTS.len() + MOODS.len());
+        assert_eq!(ids.len(), EFFECTS.len() + STRIP_EFFECTS.len() + MOODS.len());
+        // Strip effects never take a Tuya slot.
+        assert!(effect("festive").is_none());
         assert_eq!(effect("ocean").map(|(slot, _)| slot), Some(1));
         assert!(effect("good_night").is_none());
     }

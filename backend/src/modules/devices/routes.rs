@@ -40,12 +40,7 @@ async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<D
 
 /// Light moods and effects clients can offer. Which effects a light can play is in its `options.effect`.
 async fn effects(_user: AuthUser) -> Json<Value> {
-    let mut catalog = home_core::effects::catalog();
-    // Brand presets come first; a light only shows the ones it lists itself.
-    if let Some(list) = catalog["effects"].as_array_mut() {
-        list.splice(0..0, crate::integrations::tapo::preset_catalog());
-    }
-    Json(catalog)
+    Json(home_core::effects::catalog())
 }
 
 async fn get_one(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<DeviceDto>> {

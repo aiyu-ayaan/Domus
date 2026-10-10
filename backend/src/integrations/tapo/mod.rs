@@ -29,45 +29,9 @@ pub struct TapoIntegration {
     playing: std::sync::Mutex<std::collections::HashSet<String>>,
 }
 
-/// TP-Link's own predefined strip effects (Aurora, Christmas, ...), exactly as the Tapo app sends
-/// them. The values are the ones the python-kasa project documents.
-static PRESETS: std::sync::LazyLock<Vec<Value>> =
-    std::sync::LazyLock::new(|| serde_json::from_str(include_str!("effects.json")).expect("effects.json is valid"));
-
-/// `tapo_` + the preset's name in snake case, e.g. `tapo_bubbling_cauldron`.
-fn preset_id(preset: &Value) -> String {
-    let name = preset["name"].as_str().unwrap_or_default().to_lowercase();
-    let slug: String = name.chars().filter(|c| c.is_ascii_alphanumeric() || *c == ' ').collect();
-    format!("tapo_{}", slug.replace(' ', "_"))
-}
-
-fn preset(id: &str) -> Option<&'static Value> {
-    PRESETS.iter().find(|p| preset_id(p) == id)
-}
-
-/// The presets as catalog entries for clients: id, name and the colours the Tapo app shows for them.
-pub fn preset_catalog() -> Vec<Value> {
-    PRESETS
-        .iter()
-        .map(|p| {
-            let colors: Vec<String> = p["display_colors"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(|c| {
-                    let (r, g, b) = hsv_to_rgb(c.get(0)?.as_f64()?, c.get(1)?.as_f64()? / 100.0, c.get(2)?.as_f64()? / 100.0);
-                    Some(rgb_to_hex(r, g, b))
-                })
-                .collect();
-            json!({ "id": preset_id(p), "name": p["name"], "colors": colors })
-        })
-        .collect()
-}
-
-/// Effect ids a strip offers: TP-Link's presets, then ours that don't share a name with one.
+/// Effect ids a strip offers: it has no slot limit, so the shared effects and the strip ones.
 fn strip_effects() -> Vec<String> {
-    let ours = effects::EFFECTS.iter().filter(|e| !PRESETS.iter().any(|p| p["name"] == e.name)).map(|e| e.id.to_string());
-    PRESETS.iter().map(preset_id).chain(ours).collect()
+    effects::strip_effects().map(|e| e.id.to_string()).collect()
 }
 
 /// An effect in the light strips' native form (`set_lighting_effect`, type `sequence`).
@@ -253,11 +217,7 @@ fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
         s.options.insert("effect".into(), strip_effects());
         if fx.get("enable").and_then(Value::as_u64) == Some(1) {
             let name = fx.get("name").and_then(Value::as_str);
-            s.effect = PRESETS
-                .iter()
-                .find(|p| p["name"].as_str() == name)
-                .map(preset_id)
-                .or_else(|| effects::EFFECTS.iter().find(|e| Some(e.name) == name).map(|e| e.id.to_string()));
+            s.effect = effects::strip_effects().find(|e| Some(e.name) == name).map(|e| e.id.to_string());
         }
     }
     if let Some(rssi) = info.get("rssi") {
@@ -373,13 +333,9 @@ impl IntegrationPlugin for TapoIntegration {
             None => None,
             Some("") => Some(None),
             Some(id) => Some(Some(
-                preset(id)
-                    .map(|p| {
-                        let mut p = p.clone();
-                        p["enable"] = json!(1);
-                        p
-                    })
-                    .or_else(|| effects::effect(id).map(|(_, e)| lighting_effect(e, true)))
+                effects::strip_effects()
+                    .find(|e| e.id == id)
+                    .map(|e| lighting_effect(e, true))
                     .ok_or_else(|| CoreError::Unsupported("this light cannot play that effect".into()))?,
             )),
         };
@@ -444,24 +400,23 @@ mod tests {
     use super::*;
 
     #[test]
-    fn strips_offer_tp_links_presets() {
-        assert_eq!(PRESETS.len(), 17);
-        assert!(preset("tapo_grandmas_christmas_lights").is_some());
-        assert_eq!(preset("tapo_aurora").unwrap()["type"], "sequence");
-        let catalog = preset_catalog();
-        assert_eq!(catalog[0]["id"], "tapo_aurora");
-        assert_eq!(catalog[0]["colors"][0], "#00ff00");
-
-        // Presets first; ours only where TP-Link has none of that name (it has its own Aurora, not a Forest).
+    fn strips_offer_every_effect_and_report_the_one_playing() {
         let offered = strip_effects();
-        assert_eq!(offered[0], "tapo_aurora");
-        assert!(offered.contains(&"forest".to_string()) && !offered.contains(&"aurora".to_string()));
+        assert_eq!(offered.len(), effects::EFFECTS.len() + effects::STRIP_EFFECTS.len());
+        assert!(offered.contains(&"ocean".to_string()) && offered.contains(&"festive".to_string()));
 
-        let info = json!({"device_on": true, "lighting_effect": {"enable": 1, "name": "Christmas"}});
+        let festive = effects::STRIP_EFFECTS.iter().find(|e| e.id == "festive").unwrap();
+        let native = lighting_effect(festive, true);
+        assert_eq!(native["type"], "sequence");
+        assert_eq!(native["sequence"][0], json!([0, 100, 100]));
+        assert_eq!(native["id"].as_str().unwrap().len(), 32);
+
+        let info = json!({"device_on": true, "lighting_effect": {"enable": 1, "name": "Festive"}});
         let s = state_from(&info, None);
-        assert_eq!(s.effect.as_deref(), Some("tapo_christmas"));
+        assert_eq!(s.effect.as_deref(), Some("festive"));
         assert_eq!(s.options["effect"].len(), offered.len());
-        // A bulb without the field offers none.
+        // An effect set from the vendor's app is not one of ours; a bulb without the field offers none.
+        assert_eq!(state_from(&json!({"lighting_effect": {"enable": 1, "name": "Something else"}}), None).effect, None);
         assert!(!state_from(&json!({"device_on": true}), None).options.contains_key("effect"));
     }
 
