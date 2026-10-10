@@ -229,6 +229,14 @@ export interface EnergyPoint {
   cost: number
 }
 
+/** Averages of one hour / day; null where nothing was measured. */
+export interface AirPoint {
+  t: string
+  pm25: number | null
+  temperature: number | null
+  humidity: number | null
+}
+
 export interface Notification {
   id: string
   level: 'info' | 'success' | 'warning' | 'error'

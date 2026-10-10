@@ -1,11 +1,95 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
-import { useCommand, useDevices, useRooms } from '@/lib/queries'
+import { TrendChart } from '@/components/devices/TrendChart'
+import { api } from '@/lib/api'
+import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
 import { airQuality, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
+
+type Range = 'day' | 'week' | 'month'
+type Reading = 'pm25' | 'temperature' | 'humidity'
+const READINGS: Record<Reading, { label: string; unit: string; digits: number }> = {
+  pm25: { label: 'PM2.5', unit: 'µg/m³', digits: 0 },
+  temperature: { label: 'Temperature', unit: '°C', digits: 1 },
+  humidity: { label: 'Humidity', unit: '%', digits: 0 },
+}
+
+/** Recorded history: the chart, and what it says about the period. */
+function Trend() {
+  const [range, setRange] = useState<Range>('day')
+  const [reading, setReading] = useState<Reading>('pm25')
+  const { data = [], isLoading } = useQuery({ queryKey: keys.airHistory(range), queryFn: () => api.airHistory(range), refetchInterval: 60_000 })
+  // Offer only the readings the home's devices actually report.
+  const available = (Object.keys(READINGS) as Reading[]).filter((r) => r === 'pm25' || data.some((p) => p[r] != null))
+  const shown = available.includes(reading) ? reading : 'pm25'
+  const meta = READINGS[shown]
+
+  const pm = data.flatMap((p) => (p.pm25 == null ? [] : [p]))
+  const average = pm.length ? pm.reduce((s, p) => s + p.pm25!, 0) / pm.length : null
+  const peak = pm.reduce<(typeof pm)[number] | null>((best, p) => (p.pm25! > (best?.pm25 ?? -1) ? p : best), null)
+  const clean = pm.length ? (pm.filter((p) => p.pm25! <= 35).length / pm.length) * 100 : null
+  const when = (t: string) =>
+    range === 'day' ? new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : new Date(t).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+  const period = range === 'day' ? '24 h' : range === 'week' ? '7 d' : '30 d'
+
+  return (
+    <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <Card className="lg:col-span-2">
+        <CardHeader
+          title="Trend"
+          action={
+            <div className="flex flex-wrap justify-end gap-2">
+              {available.length > 1 && (
+                <Segmented size="sm" label="Reading" value={shown} onChange={setReading} options={available.map((r) => ({ value: r, label: READINGS[r].label }))} />
+              )}
+              <Segmented size="sm" label="Range" value={range} onChange={setRange} options={[{ value: 'day', label: '24 hours' }, { value: 'week', label: '7 days' }, { value: 'month', label: '30 days' }]} />
+            </div>
+          }
+        />
+        <div className="p-4">
+          {isLoading ? (
+            <Skeleton className="h-[240px]" />
+          ) : (
+            <TrendChart
+              points={data.map((p) => ({ t: p.t, value: p[shown] }))}
+              range={range}
+              unit={meta.unit}
+              digits={meta.digits}
+              marks={shown === 'pm25' ? [{ value: 15, label: 'Clean ≤ 15' }, { value: 35, label: 'Good ≤ 35' }] : []}
+              empty="No history yet. Readings are recorded every few minutes while a sensor is online."
+              height={200}
+            />
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title={`Last ${period}`} />
+        <dl className="divide-y divide-border">
+          <TrendFact label="Average PM2.5" value={average != null ? `${formatNumber(average, 0)} µg/m³` : '—'} sub={airQuality(average ?? undefined)?.label ?? 'No readings yet'} />
+          <TrendFact label="Peak" value={peak ? `${formatNumber(peak.pm25!, 0)} µg/m³` : '—'} sub={peak ? when(peak.t) : 'No readings yet'} />
+          <TrendFact label="Time with good air" value={clean != null ? `${formatNumber(clean, 0)}%` : '—'} sub="PM2.5 at or below 35 µg/m³" />
+        </dl>
+      </Card>
+    </div>
+  )
+}
+
+function TrendFact({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
+      <div className="min-w-0">
+        <dt className="text-label text-muted">{label}</dt>
+        <dd className="truncate text-caption text-subtle">{sub}</dd>
+      </div>
+      <dd className="text-title font-semibold tabular">{value}</dd>
+    </div>
+  )
+}
 
 export function AirQualityView() {
   const control = useCanControl()
@@ -104,6 +188,8 @@ export function AirQualityView() {
           sub={avgHum != null ? `${avgHum}% humidity` : 'Sensors online'}
         />
       </div>
+
+      <Trend />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Purifier controls */}

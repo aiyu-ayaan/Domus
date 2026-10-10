@@ -10,7 +10,7 @@ import { useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
 import { formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
-import type { ElectricitySettings } from '@/lib/types'
+import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
 type Range = 'day' | 'week' | 'month'
 
@@ -20,6 +20,9 @@ export function EnergyView() {
   const { data: devices } = useDevices()
   const [range, setRange] = useState<Range>('day')
   const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range), refetchInterval: 60_000 })
+  // The insights always compare against today's hours and the last 7 days, whatever range the chart shows.
+  const day = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
+  const week = useQuery({ queryKey: keys.energyHistory('week'), queryFn: () => api.energyHistory('week'), refetchInterval: 60_000 })
 
   if (isLoading || !o) return <Skeleton className="h-64" />
   const currency = o.settings.currency
@@ -55,6 +58,8 @@ export function EnergyView() {
         />
         <div className="p-4">{history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={history.data ?? []} range={range} currency={currency} height={220} />}</div>
       </Card>
+
+      <Insights o={o} day={day.data ?? []} week={week.data ?? []} />
 
       <Card className="mt-6">
         <CardHeader title="By device · this cycle" />
@@ -92,6 +97,82 @@ export function EnergyView() {
 
       {admin && <Plan initial={o.settings} />}
     </>
+  )
+}
+
+/** What the numbers mean: when power is used, how today compares, who uses it, and how the bill is tracking. */
+function Insights({ o, day, week }: { o: EnergyOverview; day: EnergyPoint[]; week: EnergyPoint[] }) {
+  const currency = o.settings.currency
+  const peak = day.reduce<EnergyPoint | null>((best, p) => (p.kwh > (best?.kwh ?? 0) ? p : best), null)
+  // Days before today that recorded anything: an empty day means "not measured yet", not "used nothing".
+  const earlier = week.slice(0, -1).filter((p) => p.kwh > 0)
+  const average = earlier.length ? earlier.reduce((s, p) => s + p.kwh, 0) / earlier.length : null
+  const change = average ? ((o.today_kwh - average) / average) * 100 : null
+  const top = o.devices.reduce<EnergyOverview['devices'][number] | null>((best, d) => (d.kwh > (best?.kwh ?? 0) ? d : best), null)
+  const elapsed = (o.cycle_day / o.cycle_days) * 100
+  const budget = o.settings.monthly_budget
+  const spent = budget ? Math.min((o.cycle_cost / budget) * 100, 100) : null
+
+  return (
+    <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <Card className="lg:col-span-2">
+        <CardHeader title="Insights" />
+        <dl className="grid grid-cols-2 divide-border max-sm:divide-y sm:grid-cols-4 sm:divide-x">
+          <Insight
+            label="Peak hour (24 h)"
+            value={peak ? new Date(peak.t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—'}
+            sub={peak ? formatKwh(peak.kwh) : 'No usage yet'}
+          />
+          <Insight label="Daily average" value={average != null ? formatKwh(average) : '—'} sub={average != null ? `Over the last ${earlier.length} ${earlier.length === 1 ? 'day' : 'days'}` : 'Needs a full day'} />
+          <Insight
+            label="Today vs average"
+            value={change != null ? `${change > 0 ? '+' : ''}${formatNumber(change, 0)}%` : '—'}
+            sub={change == null ? 'Needs a full day' : change > 10 ? 'Above your usual day' : change < -10 ? 'Below your usual day' : 'About your usual day'}
+          />
+          <Insight label="Top device" value={top ? `${formatNumber((top.kwh / Math.max(o.cycle_kwh, 0.0001)) * 100, 0)}%` : '—'} sub={top?.name ?? 'No metered device'} />
+        </dl>
+      </Card>
+
+      <Card>
+        <CardHeader title="Billing cycle" />
+        <div className="space-y-4 p-4">
+          <Progress label="Time elapsed" value={`Day ${o.cycle_day} of ${o.cycle_days}`} percent={elapsed} />
+          {spent != null ? (
+            <Progress label="Budget used" value={`${formatMoney(o.cycle_cost, currency)} of ${formatMoney(budget!, currency)}`} percent={spent} warn={spent > elapsed + 10} />
+          ) : (
+            <p className="text-label text-muted">Set a monthly budget in the plan below to track spending against it.</p>
+          )}
+          <p className="text-label text-muted tabular">
+            On track for {formatMoney(o.projected_cost, currency)} ({formatKwh(o.projected_kwh)}) by the end of the cycle.
+          </p>
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+function Insight({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="p-4">
+      <dt className="text-label text-muted">{label}</dt>
+      <dd className="mt-1 text-title font-semibold tabular">{value}</dd>
+      <dd className="mt-0.5 truncate text-label text-muted tabular">{sub}</dd>
+    </div>
+  )
+}
+
+function Progress({ label, value, percent, warn }: { label: string; value: string; percent: number; warn?: boolean }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex justify-between gap-3 text-label">
+        <span className="text-muted">{label}</span>
+        <span className="tabular">{value}</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-raised" role="progressbar" aria-label={label} aria-valuenow={Math.round(percent)} aria-valuemin={0} aria-valuemax={100}>
+        <div className={warn ? 'h-full rounded-full bg-warn' : 'h-full rounded-full bg-fg/70'} style={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }} />
+      </div>
+      {warn && <p className="mt-1 text-caption text-warn">Spending is ahead of the calendar.</p>}
+    </div>
   )
 }
 

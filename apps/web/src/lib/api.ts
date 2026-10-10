@@ -1,4 +1,5 @@
 import type {
+  AirPoint,
   Automation,
   Device,
   DeviceCommand,
@@ -166,6 +167,7 @@ export const api = {
   energyOverview: () => get<EnergyOverview>('/energy/overview'),
   energyHistory: (range: 'day' | 'week' | 'month', deviceId?: string) =>
     get<EnergyPoint[]>(`/energy/history?range=${range}${deviceId ? `&device_id=${deviceId}` : ''}`),
+  airHistory: (range: 'day' | 'week' | 'month') => get<AirPoint[]>(`/air/history?range=${range}`),
   energySettings: () => get<ElectricitySettings>('/energy/settings'),
   saveEnergySettings: (b: ElectricitySettings) => put<ElectricitySettings>('/energy/settings', b),
 
