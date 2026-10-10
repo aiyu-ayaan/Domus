@@ -1,0 +1,114 @@
+## v0.0.1-alpha.1 (2026-10-10)
+
+- !alpha : First public build
+- release(Workflow) : Install pnpm with npm in the desktop jobs
+- rename(Domus) : Rename the app from Docus to Domus everywhere
+- docs(Release) : Point the keystore secret at the shared keystore's domus alias
+- desktop(Windows) : Build a Windows installer in the release workflow
+- android(Updates) : Download and install updates in the app
+- docs(Release) : Add Linux installer, download section and release documentation
+- desktop(Updates) : Add update channel with AppImage self-update, show version and build in Settings
+- android(Updates) : Take version from the release and add the update channel
+- release(Workflow) : Add marker-driven release workflow with release PR and one version source
+- docker(Image) : Split compose into published and local, distroless runtime, stripped binary
+- docs(Performance) : Document startup performance, add android profile and release scripts
+- desktop(Performance) : Probe saved server addresses in parallel at startup
+- backend(Performance) : Compress responses and cache hashed web assets as immutable
+- web(Performance) : Load avatar artwork per style on demand, out of the entry chunk
+- android(Performance) : Add baseline and startup profile with baselineprofile generator module
+- docs(Changelog) : Track desktop connect screen theme synchronization in TODO.md
+- desktop(Theme) : Apply Docus botanical Material 3 palette and typography to connect screen
+- docs(Changelog) : Track desktop change server on login screen in TODO.md
+- web(Auth) : Add Change server action and connected host indicator on login screen
+- desktop(Connect) : Add cancel and return navigation to server connection page
+- android(UI) : Add Material 3 Expressive CollapsibleCard component and apply to Server security card
+- android(Theme) : Disable dynamic wallpaper theming by default
+- desktop(Fix) : Restore closing bracket and token:set IPC listener in main.js
+- android(LiveSync) : Dynamically compute live wattage, air quality, and periodic energy updates
+- docs(Flavors) : Document dev and prod flavor architecture, workflows, and configuration
+- web(Flavors) : Isolate local storage, document title, and visual indicators by flavor
+- desktop(Flavors) : Isolate dev and prod user data, window titles, and packaging flavors
+- android(Flavors) : Add dev and prod product flavors with isolated package and launcher branding
+- avatar(Sync) : Enable live multi-device avatar synchronization and Android full screen customization
+- avatar(DiceBear) : Add cross-platform random avatar generation and customization studio
+- docs(Navigation) : Document mobile floating pill navigation parity
+- web(Navigation) : Implement Android floating pill bottom navigation on mobile viewports
+- docs(Theme) : Document custom scrollbar implementation and capsule proportions in TODO.md
+- web(Navigation) : Fix sidebar icon capsule proportions and uniform vertical spacing
+- web(Scrollbar) : Hide native OS scrollbars and implement theme-matched sleek scrollbars
+- docs(Navigation) : Document compact vertically centered sidebar dock
+- web(Navigation) : Make floating pill sidebar compact and vertically centered
+- docs(Theme) : Update theme documentation for Android botanical scheme and pill sidebar
+- web(Navigation) : Redesign sidebar with Android floating pill shape, capsule nav items and debounced hover
+- web(Theme) : Align web and desktop theme tokens with Android Material 3 botanical palette
+- android(Theme) : Restore original Material 3 Expressive botanical palette
+- docs(TODO) : Record 3-state Auto/Light/Dark theme toggle support
+- web(Theme) : Add Auto system mode to theme toggle cycling and icon indicators
+- docs(Theme) : Document theme synchronization and auto-collapsing sidebar architecture
+- web(Navigation) : Implement auto-collapsing sidebar with hover expansion
+- web(Theme) : Add reactive theme store and global ThemeToggle control
+- android(Theme) : Align theme color presets with Docus Swiss design tokens
+- desktop(Linux) : Name the deb package docus and always enable the setuid sandbox on install
+- docs(Deployment) : Document Docker, the Cloudflare Tunnel setup, server addresses and the desktop app
+- android(Server) : Use the home address on the home network and the remote one elsewhere, synced from the server
+- desktop(App) : Add the server chooser, home/remote switching, in-page title bar and Linux packaging config
+- web(Settings) : Add server addresses, share the session with the desktop app and draw its title bar
+- backend(Server) : Add /server/links with the home and remote address and the certificate fingerprint
+- docker(Server) : Add the home server image and compose service, MQTT broker behind a profile
+- feat(Plugins): Add logo-design plugin to enabledPlugins in settings
+- docs(Brand) : Document the logo, add it to the README and note it in CLAUDE.md
+- brand(Logo) : Centre the mark optically in the app icons and the Android splash
+- android(Splash) : Animate the mark on the Android 12+ splash screen, modules drop in and one switches on
+- android(Icon) : Replace the house launcher icon with the modular D mark
+- brand(Logo) : Add the modular D mark and use it for the web favicon, PWA icons and desktop window
+- backend(Effects) : Keep the playing effect when only brightness changes
+- backend(Effects) : Replace the vendor preset table with Domus-authored strip effects
+- web(Lights) : Make Effects a third tab beside White and Color, moods under the white presets
+- android(Lights) : Make Effects a third tab beside White and Color, moods under White
+- backend(Effects) : Add TP-Link's predefined strip effects to Tapo light strips
+- android(Lights) : Add moods and effects to the light sheet; document the effect catalog
+- web(Lights) : Add moods and effects to the light controls
+- backend(Effects) : Add light moods and on-device effects for Tuya bulbs and Tapo strips with a shared catalog
+- android(Plugins) : Add material-3 plugin to enabledPlugins in settings.json
+- android(Lights) : Show White and Color controls for every light like the web app, with temperature slider and presets
+- docs(Android) : Document onboarding sync, editors, Screen Sync, alerts, analytics and the dev gateway
+- android(Analytics) : Add Analytics tab with electricity and air quality charts, onboarding intro, redesigned sign-in and richer Home
+- web(Analytics) : Add air quality trend chart and insight sections to the Energy and Air Quality pages
+- backend(Air) : Record PM2.5, temperature and humidity history and serve it at /air/history
+- android(Manage) : Add device onboarding, plugins, rooms, people, tariff, scene and automation editors, Screen Sync capture and background alerts
+- android(Core) : Add API and models for onboarding, management, editors and Screen Sync color analysis
+- scripts(Android) : Add pnpm gateway and android:dev, start the gateway with pnpm dev
+- docs(Android) : Document the Android app architecture, discovery and trust flow
+- android(App) : Add app module with connect, sign-in, home, devices, scenes, energy and settings screens
+- backend(TLS) : Log the certificate SHA-256 fingerprint at startup for app trust prompts
+- android(UI) : Add ui-shared module with Material 3 Expressive theme, floating navigation and motion components
+- android(Core) : Scaffold com.aiyu.domus project with core module for discovery, TLS trust, API and live state
+- backend(Discovery) : Add UDP beacon so apps can find the server on the LAN
+- feat(ScreenSync) : Add screen color synchronization scenes for live ambilight smart lights
+- feat(Scenes) : Add toggle switch for scenes and device groups
+- web(Navigation & Air Quality) : Add dedicated Air Quality view and dynamic navigation tabs
+- web(Overview) : Dynamic device-based dashboard with air quality and energy insight tabs
+- docs(Architecture) : document light bulb color and white temperature architecture and tracking
+- backend(Lights) : add color and color mode support across home-core, Tapo, Tuya, and Xiaomi MIoT
+- web(Lights) : add liquid-glass color and temperature controls, presets and automation support
+- backend(Polling) : poll local devices every 3s and cloud every 15s so power readings are live
+- web(Live) : compute power now from live devices and refresh energy every 15s; docs(Architecture) : document Xiaomi 2FA, slab billing and live data flow
+- add liquid-glass plugin to enabledPlugins in settings.json
+- web(Sheet) : stop inputs losing focus after each keystroke
+- web(Live) : refresh rooms, groups, energy and integrations when devices change
+- energy(Billing) : support any ISO currency and slab-based tariffs
+- integrations(Xiaomi) : add email/SMS two-step verification and persist trusted device id
+- backend(Tapo) : send title-case headers so devices stop rejecting KLAP handshake with 400
+- docs(Design) : point UI work at the design profile and drop demo devices
+- web(Redesign) : rebuild UI on a persisted Minimalism & Swiss design profile
+- backend(Integrations) : remove demo devices, fix negative-zero energy totals
+- docs(Architecture) : document integrations, discovery, security and UI architecture
+- web(Redesign) : rebuild UI with liquid glass design and live device control
+- backend(Tuya) : show readable Tuya error codes
+- backend(Integrations) : real Tuya/Tapo/Xiaomi drivers, auto-discovery and secure core
+- docs(Architecture) : add system architecture diagrams, task tracking, and README
+- ui(Web&Desktop) : add React web app with Apple Liquid Glass UI and Electron desktop shell
+- backend(Monolith) : implement Rust backend modular monolith with API, auth, energy, and integrations
+- core(Init) : initialize workspace configuration, database schema, and shared domain crate
+- initial commit
+
