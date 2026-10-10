@@ -27,6 +27,8 @@ export interface DeviceState {
   color_temp?: number
   color?: string
   color_mode?: string
+  /** Id of the light effect the device is playing, if any. */
+  effect?: string
   temperature?: number
   humidity?: number
   air_quality_pm25?: number
@@ -65,8 +67,24 @@ export type DeviceCommand = Partial<{
   color_mode: string
   fan_speed: string
   mode: string
+  /** A mood or effect id; '' stops a running effect. */
+  effect: string
   raw: unknown
 }>
+
+export interface LightPreset {
+  id: string
+  name: string
+  /** Preview colours: one for a mood, the loop for an effect. */
+  colors: string[]
+  brightness?: number
+  color_temp?: number
+}
+
+export interface EffectCatalog {
+  moods: LightPreset[]
+  effects: LightPreset[]
+}
 
 export interface Discovered {
   id: string

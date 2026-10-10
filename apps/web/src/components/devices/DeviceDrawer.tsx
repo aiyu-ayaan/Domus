@@ -8,6 +8,7 @@ import { Field, SelectField } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/Card'
 import { EnergyChart } from './EnergyChart'
 import { LightColorControls } from './LightColorControls'
+import { LightScenes } from './LightScenes'
 import { api } from '@/lib/api'
 import { keys, useCommand, useEnergy, useRooms } from '@/lib/queries'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
@@ -165,6 +166,11 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
                     send({ color_mode: m })
                   }}
                 />
+              </div>
+            )}
+            {isLight && (
+              <div className="border-b border-border py-3.5 last:border-0">
+                <LightScenes device={device} disabled={!control} onPick={(id) => send({ effect: id })} />
               </div>
             )}
             {fan && fan.length > 0 && (

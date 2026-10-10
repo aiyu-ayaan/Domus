@@ -4,6 +4,7 @@ import type {
   Device,
   DeviceCommand,
   Discovered,
+  EffectCatalog,
   DiscoveryReport,
   DiscoverySettings,
   ElectricitySettings,
@@ -123,6 +124,7 @@ export const api = {
     patch<Device>(`/devices/${id}`, b),
   removeDevice: (id: string) => del<Ok>(`/devices/${id}`),
   command: (id: string, cmd: DeviceCommand) => post<Device>(`/devices/${id}/command`, cmd),
+  effects: () => get<EffectCatalog>('/devices/effects'),
   refresh: (id: string) => post<Device>(`/devices/${id}/refresh`),
   addManual: (b: { integration_type: string; host: string; token?: string; name?: string; room_id?: string }) =>
     post<Device>('/devices/manual', b),
