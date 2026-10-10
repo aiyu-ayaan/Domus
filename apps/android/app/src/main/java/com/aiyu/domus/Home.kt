@@ -152,7 +152,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     ScreenColumn {
         ScreenHeader(
             "${greeting()}, ${user.username}",
-            if (!live && !loading) "Reconnecting…" else "${on.size} of ${devices.size} devices on",
+            if (!live && !loading) "Reconnecting…" else devices.filter { it.type != "sensor" }.let { all -> "${all.count { it.isOnline && it.state.isOn == true }} of ${all.size} devices on" },
             actions = {
                 UserAvatar(
                     avatarSpec = user.avatar,
