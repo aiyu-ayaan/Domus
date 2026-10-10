@@ -22,6 +22,14 @@ data class User(
 @Serializable
 data class AuthResponse(val token: String, val user: User)
 
+/** Where the server is reached at home and from outside; [fingerprint] is its own certificate (null with TLS off). */
+@Serializable
+data class ServerLinks(
+    @SerialName("local_url") val localUrl: String = "",
+    @SerialName("remote_url") val remoteUrl: String = "",
+    val fingerprint: String? = null,
+)
+
 @Serializable
 data class SetupStatus(@SerialName("needs_admin_setup") val needsAdminSetup: Boolean)
 

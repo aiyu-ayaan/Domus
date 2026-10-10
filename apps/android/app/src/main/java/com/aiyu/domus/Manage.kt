@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Person
@@ -322,6 +324,36 @@ fun TariffPage(onBack: () -> Unit) {
             { scope.launch { repository.change { it.saveEnergySettings(typed) }?.let { show(it); onBack() } } },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid,
         ) { Text("Save") }
+    }
+}
+
+/** Home and remote address of the server. Saved on the server, so every app and the desktop get them. */
+@Composable
+fun ServerLinksPage(admin: Boolean, onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    val links by repository.links.collectAsStateWithLifecycle()
+    var local by remember(links) { mutableStateOf(links.localUrl) }
+    var remote by remember(links) { mutableStateOf(links.remoteUrl) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    SubPage("Server addresses", onBack) {
+        Text(
+            "Domus uses the home address on your network and the remote one everywhere else. You stay signed in on both.",
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (admin) {
+            Field(local, { local = it }, "Home network", keyboard = KeyboardType.Uri, supporting = "For example https://192.168.1.10:8443")
+            Field(remote, { remote = it }, "Remote", keyboard = KeyboardType.Uri, supporting = "For example a Cloudflare Tunnel hostname")
+            error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
+            Button(
+                { scope.launch { error = repository.saveLinks(local, remote); if (error == null) onBack() } },
+                Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = local != links.localUrl || remote != links.remoteUrl,
+            ) { Text("Save") }
+        } else {
+            RowCard("Home network", links.localUrl.ifBlank { "Not set" }, Icons.Rounded.Home)
+            RowCard("Remote", links.remoteUrl.ifBlank { "Not set" }, Icons.Rounded.Public)
+        }
     }
 }
 

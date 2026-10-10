@@ -34,7 +34,7 @@ class ApiException(message: String, val status: Int) : Exception(message) {
 }
 
 /** REST + live events of one Domus server. [pin] is the approved certificate fingerprint of a self-signed server. */
-class DomusApi(val baseUrl: String, pin: String?, private val token: () -> String?) {
+class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, private val token: () -> String?) {
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false; coerceInputValues = true }
 
     private val client: OkHttpClient = run {
@@ -43,7 +43,7 @@ class DomusApi(val baseUrl: String, pin: String?, private val token: () -> Strin
         OkHttpClient.Builder()
             .sslSocketFactory(ssl.socketFactory, trust)
             .hostnameVerifier(Tls.hostnameVerifier(pin))
-            .connectTimeout(6, TimeUnit.SECONDS)
+            .connectTimeout(connectSeconds, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .pingInterval(25, TimeUnit.SECONDS) // notices a dead live connection
             .build()
@@ -86,6 +86,10 @@ class DomusApi(val baseUrl: String, pin: String?, private val token: () -> Strin
     suspend fun login(username: String, password: String) =
         call("POST", "/auth/login", AuthResponse.serializer(), fields("username" to username, "password" to password))
     suspend fun me() = call("GET", "/auth/me", User.serializer())
+
+    suspend fun serverLinks() = call("GET", "/server/links", ServerLinks.serializer())
+    suspend fun saveServerLinks(localUrl: String, remoteUrl: String) =
+        call("PUT", "/server/links", ServerLinks.serializer(), fields("local_url" to localUrl, "remote_url" to remoteUrl))
 
     suspend fun devices() = call("GET", "/devices", ListSerializer(Device.serializer()))
     suspend fun command(id: String, command: DeviceCommand) =

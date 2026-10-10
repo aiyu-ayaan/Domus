@@ -118,16 +118,62 @@ class DomusRepository(context: Context) {
     /** Fingerprint of the approved self-signed certificate, null when a public authority vouches for the server. */
     val pinnedFingerprint: String? get() = store.get(PIN)
 
+    private val _links = MutableStateFlow(ServerLinks(store.get(LOCAL).orEmpty(), store.get(REMOTE).orEmpty()))
+    /** The server's home and remote address, as last synced. */
+    val links: StateFlow<ServerLinks> = _links
+
     init {
         scope.launch { restore() }
+    }
+
+    /** Addresses of the saved server, the home one first. */
+    private fun candidates() = listOfNotNull(store.get(LOCAL), store.get(REMOTE), store.get(SERVER)).filter { it.isNotBlank() }.distinct()
+
+    /** True when [url] answers as a trusted server within two seconds. */
+    private suspend fun reachable(url: String) =
+        runCatching { DomusApi(url, store.get(PIN), connectSeconds = 2) { null }.setupStatus() }.isSuccess
+
+    /**
+     * Moves to the home or the remote address, whichever answers now. The session token is valid on both, so
+     * nobody signs in again. True when the address changed.
+     */
+    private suspend fun follow(): Boolean {
+        val current = api?.baseUrl ?: return false
+        val best = candidates().firstOrNull { reachable(it) } ?: return false
+        if (best == current) return false
+        store.put(SERVER, best)
+        open(best, store.get(PIN))
+        (_session.value as? Session.SignedIn)?.let { _session.value = it.copy(server = best) }
+        return true
+    }
+
+    /** Keeps what the server says about its addresses. Its certificate arrives over a connection already trusted. */
+    private fun remember(links: ServerLinks) {
+        store.put(LOCAL, links.localUrl.ifBlank { null })
+        store.put(REMOTE, links.remoteUrl.ifBlank { null })
+        links.fingerprint?.let { store.put(PIN, it) }
+        _links.value = links
+    }
+
+    /** Admin only. Null on success, otherwise the reason to show. Every app picks the change up from the server. */
+    suspend fun saveLinks(localUrl: String, remoteUrl: String): String? {
+        val api = api ?: return "No server"
+        return try {
+            remember(api.saveServerLinks(localUrl.trim(), remoteUrl.trim()))
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
     }
 
     private fun open(server: String, pin: String?) = DomusApi(server, pin) { store.get(TOKEN) }.also { api = it }
 
     /** Picks up where the last launch left off. Also the "Try again" action of [Session.Unreachable]. */
     suspend fun restore() {
-        val server = store.get(SERVER) ?: run { _session.value = Session.NoServer; return }
+        val saved = store.get(SERVER) ?: run { _session.value = Session.NoServer; return }
         _session.value = Session.Loading
+        val server = candidates().firstOrNull { reachable(it) } ?: saved
+        if (server != saved) store.put(SERVER, server)
         val api = open(server, store.get(PIN))
         try {
             if (store.get(TOKEN) != null) {
@@ -160,7 +206,8 @@ class DomusRepository(context: Context) {
             val needsSetup = candidate.setupStatus().needsAdminSetup
             store.put(SERVER, url)
             store.put(PIN, trustFingerprint)
-            store.put(TOKEN, null)
+            listOf(TOKEN, LOCAL, REMOTE).forEach { store.put(it, null) }
+            _links.value = ServerLinks()
             open(url, trustFingerprint)
             _session.value = Session.SignedOut(url, needsSetup)
             ConnectResult.Connected
@@ -206,7 +253,8 @@ class DomusRepository(context: Context) {
 
     /** Back to the connect screen. The saved server and its approved certificate are dropped. */
     fun forgetServer() {
-        listOf(SERVER, PIN, TOKEN).forEach { store.put(it, null) }
+        listOf(SERVER, PIN, TOKEN, LOCAL, REMOTE).forEach { store.put(it, null) }
+        _links.value = ServerLinks()
         clear()
         api = null
         _session.value = Session.NoServer
@@ -272,6 +320,8 @@ class DomusRepository(context: Context) {
                 _energy.value = energy.await()
                 // Optional too: an older server has no catalog, lights then just show no moods.
                 if (_effects.value.moods.isEmpty()) runCatching { api.effects() }.getOrNull()?.let { _effects.value = it }
+                // Optional as well; this is how an address saved on another device arrives here.
+                runCatching { api.serverLinks() }.getOrNull()?.let(::remember)
             }
         }
         _loading.value = false
@@ -325,7 +375,11 @@ class DomusRepository(context: Context) {
         foreground = true
         if (_session.value is Session.SignedIn) {
             startLive()
-            scope.launch { refresh() } // catch up on what changed while away
+            scope.launch {
+                // The phone may have left or come home while the app was away.
+                if (follow()) { stopLive(); startLive() }
+                refresh() // catch up on what changed while away
+            }
         }
     }
 
@@ -339,6 +393,7 @@ class DomusRepository(context: Context) {
         liveJob = scope.launch {
             var retry = 0
             while (true) {
+                if (retry > 0) follow() // the connection dropped: maybe the network changed
                 val api = api ?: return@launch
                 val closed = Job()
                 socket = api.live(
@@ -388,6 +443,8 @@ class DomusRepository(context: Context) {
         const val SERVER = "server"
         const val PIN = "pin"
         const val TOKEN = "token"
+        const val LOCAL = "local"
+        const val REMOTE = "remote"
         const val THEME = "theme"
         const val DYNAMIC = "dynamic"
         const val ALERTS = "alerts"

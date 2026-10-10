@@ -100,6 +100,7 @@ fun MainScreen(session: Session.SignedIn) {
                 current == "people" -> UsersPage(user, close)
                 current == "tariff" -> TariffPage(close)
                 current == "notices" -> NoticesPage(close)
+                current == "links" -> ServerLinksPage(user.isAdmin, close)
                 current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
                 current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
             }

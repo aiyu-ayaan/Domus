@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -123,6 +124,8 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 if (pin != null) Text(pin, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, color = c.onSurfaceVariant)
             }
         }
+
+        RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
 
         SectionTitle("Appearance")
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().enterStaggered(2)) {
