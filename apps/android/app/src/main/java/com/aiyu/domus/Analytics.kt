@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.Today
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -169,8 +170,8 @@ private fun ColumnScope.ElectricitySection() {
         }
     }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(1), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard("Today", formatKwh(displayTodayKwh), formatMoney(displayTodayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight())
-        StatCard("This cycle", formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight())
+        StatCard("Today", formatKwh(displayTodayKwh), formatMoney(displayTodayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Energy used since midnight. The amount below it is the estimated cost at your electricity rate.")
+        StatCard("This cycle", formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Energy used and estimated bill so far in the current billing cycle.")
     }
 
     SectionTitle("History")
@@ -182,13 +183,22 @@ private fun ColumnScope.ElectricitySection() {
         else {
             // Starts on the latest bucket; a tap or drag picks another.
             var picked by remember(range) { mutableStateOf<Int?>(null) }
+            var watts by remember { mutableStateOf(false) }
+            // Average power over a bucket is its energy divided by its length (1 h for the day view, else 24 h).
+            val perBucket = if (range == "day") 1.0 else 24.0
+            val values = points.map { if (watts) it.kwh * 1000 / perBucket else it.kwh }
+            val show = { v: Double -> if (watts) formatWatts(v) else formatKwh(v) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(!watts, { watts = false }, { Text("kWh") })
+                FilterChip(watts, { watts = true }, { Text("Watts") })
+            }
             val selected = (picked ?: points.lastIndex).coerceIn(0, points.lastIndex)
             val point = points[selected]
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(bucketLabel(point.t, range), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                RollingText("${formatKwh(point.kwh)} · ${formatMoney(point.cost, currency)}", MaterialTheme.typography.titleMedium)
+                RollingText("${show(values[selected])} · ${formatMoney(point.cost, currency)}", MaterialTheme.typography.titleMedium)
             }
-            BarChart(points.map { it.kwh }, selected, { picked = it }, "Energy used per ${if (range == "day") "hour" else "day"}, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
+            BarChart(values, selected, { picked = it }, "${if (watts) "Average power" else "Energy used"} per ${if (range == "day") "hour" else "day"}, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
             ChartAxis(bucketLabel(points.first().t, range), bucketLabel(points.last().t, range))
             Text("Total ${formatKwh(points.sumOf { it.kwh })} · ${formatMoney(points.sumOf { it.cost }, currency)}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }

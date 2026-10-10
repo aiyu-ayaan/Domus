@@ -38,6 +38,10 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
@@ -80,11 +84,18 @@ private fun greeting(): String = when (Calendar.getInstance().get(Calendar.HOUR_
 @Composable
 fun StatCard(
     label: String, value: String, detail: String?, icon: ImageVector, shape: RoundedPolygon,
-    container: Color, content: Color, modifier: Modifier = Modifier,
+    container: Color, content: Color, modifier: Modifier = Modifier, info: String? = null,
 ) {
+    var showInfo by remember { mutableStateOf(false) }
+    if (showInfo && info != null) {
+        AlertDialog(onDismissRequest = { showInfo = false }, confirmButton = { TextButton({ showInfo = false }) { Text("Got it") } }, title = { Text(label) }, text = { Text(info) })
+    }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.large, modifier = modifier.semantics(mergeDescendants = true) {}) {
         Column(Modifier.padding(16.dp)) {
-            ShapedIcon(icon, shape, content, container, size = 40.dp)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+                ShapedIcon(icon, shape, content, container, size = 40.dp)
+                if (info != null) IconButton({ showInfo = true }, Modifier.size(32.dp)) { Icon(Icons.Rounded.Info, "About $label", Modifier.size(18.dp)) }
+            }
             Spacer(Modifier.height(12.dp))
             Text(label, style = MaterialTheme.typography.labelLarge)
             RollingText(value, MaterialTheme.typography.headlineMedium)
@@ -168,10 +179,11 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
 
             // Both cards take the height of the taller one.
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard("Using now", formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight())
+                StatCard("Using now", formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Combined live power draw of all your metered devices.")
                 StatCard(
                     "Today", formatKwh(displayTodayKwh), formatMoney(displayTodayCost, overview.settings.currency),
                     Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
+                    info = "Energy used since midnight. The amount below it is the estimated cost at your electricity rate.",
                 )
             }
         }
