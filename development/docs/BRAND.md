@@ -21,7 +21,7 @@ flowchart LR
     LR[brand/logo-reversed.svg<br/>mark, dark surfaces]
     T[brand/app-icon.svg<br/>rounded dark tile] -->|copy| F[web/public/favicon.svg]
     T -->|render.sh| P[web/public/icon-192.png, icon-512.png]
-    T -->|render.sh| D[desktop/build/icon.png<br/>BrowserWindow icon]
+    T -->|render.sh| D[desktop/build/icon.png<br/>window + Linux package icon]
     S[brand/app-icon-square.svg] -->|render.sh| A[web/public/apple-touch-icon.png]
     L -.redrawn by hand.-> AL[android: ic_launcher_foreground.xml<br/>launcher + themed icon]
     L -.redrawn by hand.-> AS[android: splash_mark.xml<br/>animated splash]
@@ -40,5 +40,5 @@ last one turns from neutral to `on`. 980ms in total, under the platform's 1000ms
 
 ## Not done
 
-- `.ico` / `.icns` installer icons — add with the packaged Electron build.
+- `.ico` / `.icns` installer icons (Windows, macOS). The Linux packages take `desktop/build/icon.png`.
 - A wordmark / lockup; the mark is used alone.

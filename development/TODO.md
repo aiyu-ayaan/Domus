@@ -100,6 +100,17 @@
 - [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
 - [x] Logo: modular D mark on the favicon, PWA icons, desktop window, Android launcher and animated splash (`development/docs/BRAND.md`)
 
+## Milestone 11: Docker, remote access and the desktop app (2026-10-10)
+- [x] Server image (`Dockerfile`) and compose service on the host network; MQTT broker behind the `mqtt` profile
+- [x] `GET/PUT /server/links`: home and remote address plus the certificate fingerprint
+- [x] Web: Server addresses card in Settings
+- [x] Android: home address at home, remote elsewhere, one session; Server addresses page
+- [x] Desktop: connect page with LAN scan, home/remote switching, shared session token, certificate pinning, in-page title bar (no native bar or menu)
+- [x] Desktop on Linux: `pnpm dev:desktop` runs (`--no-sandbox`), `pnpm build:desktop` builds the `.deb` and AppImage with the icon
+- [x] Docs: `development/docs/DEPLOYMENT.md`
+- [ ] Run against a real Cloudflare Tunnel
+- [ ] Install the `.deb` and check the launcher icon; test Android switching on a phone that leaves the Wi-Fi
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications
@@ -110,5 +121,5 @@
 - [ ] Xiaomi: legacy (non-MIoT) devices
 - [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
-- [ ] Packaged Electron builds; Docker image for the home server
+- [ ] Packaged Electron builds for macOS and Windows
 

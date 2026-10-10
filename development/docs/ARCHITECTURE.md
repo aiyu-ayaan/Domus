@@ -292,6 +292,10 @@ The server answers `DOMUS_DISCOVER` on UDP 48443 (`infrastructure/beacon.rs`) wi
 certificate's SHA-256 fingerprint at startup so a client can pin a self-signed certificate after the owner
 compares the two. See `ANDROID_APP.md` for the full flow and diagram.
 
+The server also keeps a home and a remote address (`modules/server.rs`, `GET/PUT /server/links`). Apps use
+the home one on the home network and the remote one elsewhere, with one session for both. Docker, the
+Cloudflare Tunnel setup, the desktop app and the diagrams for all of it are in `DEPLOYMENT.md`.
+
 ## 8. Web UI structure
 
 ```mermaid

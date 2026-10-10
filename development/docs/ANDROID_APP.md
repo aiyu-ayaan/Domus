@@ -85,6 +85,8 @@ sequenceDiagram
   one certificate. If the certificate changes, requests fail and the app asks to connect again.
 - **At rest** — server URL, pinned fingerprint and JWT are AES-GCM encrypted with an Android Keystore key
   (`SecureStore`). `allowBackup` is off.
+- **Home and remote** — once signed in the app reads the server's home and remote address and uses whichever
+  answers, home first, without another sign-in. See `DEPLOYMENT.md` sections 4 and 6.
 
 ## 3. State and live updates
 

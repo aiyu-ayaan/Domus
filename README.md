@@ -30,7 +30,7 @@ npm run dev            # backend (https://127.0.0.1:8443) + web (http://localhos
 
 npm run dev:backend    # backend only
 npm run dev:web        # web only (proxies /api to the backend)
-npm run dev:desktop    # Electron, loads http://localhost:3000
+npm run dev:desktop    # Electron; pick the server on its connect page
 ```
 
 Open http://localhost:3000. The first visit asks you to create the
@@ -43,7 +43,17 @@ pnpm build:web                     # builds apps/web/dist, served by the backend
 APP_ENV=production cargo run --release --manifest-path backend/Cargo.toml
 ```
 
-Then open `https://<server-ip>:8443`. Desktop: `DOCUS_URL=https://<server-ip>:8443 pnpm dev:desktop`.
+Then open `https://<server-ip>:8443`.
+
+Or with Docker (host networking, data in the `docus_data` volume):
+
+```bash
+docker compose up -d --build
+```
+
+Remote access through a Cloudflare Tunnel, the home/remote address the apps switch between, and the
+desktop packages (`pnpm build:desktop`) are described in
+[development/docs/DEPLOYMENT.md](development/docs/DEPLOYMENT.md).
 
 On first start Docus creates `data/` with:
 

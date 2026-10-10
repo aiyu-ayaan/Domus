@@ -51,7 +51,7 @@ home-automation/
 │   │   │   ├── lib/
 │   │   │   └── App.tsx
 │   │   └── package.json
-│   └── desktop/                      # Optional Tauri desktop app
+│   └── desktop/                      # Electron desktop app (server chooser, Linux packages)
 │   └── android/                      # Native Android app (Kotlin + Compose): app, core, ui-shared
 │
 ├── crates/
@@ -151,6 +151,7 @@ home-automation/
 ## Work
 
 - On this need to work on the web and electron version of the application.. 
+- Docker, the Cloudflare Tunnel setup, the home/remote server addresses and the desktop app are documented in `development/docs/DEPLOYMENT.md`. Read it before changing `Dockerfile`, `docker-compose.yml`, `apps/desktop` or `modules/server.rs`. The desktop window has no native title bar or menu; keep it that way.
 - The native android app lives in `apps/android` (package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`, Material 3 Expressive). Read `development/docs/ANDROID_APP.md` before changing it. It does not follow the web design profile below.
 
 
