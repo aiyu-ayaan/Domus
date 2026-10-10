@@ -113,7 +113,7 @@
 
 ## Milestone 12: Light theme, Theme toggle, and Auto-collapsing sidebar (DONE — 2026-10-10)
 - [x] Web reactive theme store (`apps/web/src/lib/theme.ts`) with `useSyncExternalStore`, OS media query listener, and cross-tab storage sync
-- [x] Reusable `ThemeToggle` component with Sun/Moon Phosphor icons for quick one-click theme switching
+- [x] Reusable `ThemeToggle` component with Sun/Moon/CircleHalfTilt Phosphor icons cycling across Auto (system), Light, and Dark modes
 - [x] Light & dark tokens reinforced in `apps/web/src/index.css` with explicit `:root[data-theme='dark']` and smooth 150ms theme transition
 - [x] Auto-collapsing sidebar in `AppShell.tsx`: 64px compact icon rail when idle, smooth 150ms hover-to-expand to 232px with zero-reflow layout stability
 - [x] Collapsed rail indicators: centered icons, badge indicator dots for unread notifications and pending devices, and stacked footer with theme toggle
