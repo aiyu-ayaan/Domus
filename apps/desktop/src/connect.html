@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>Docus</title>
+    <!-- Tokens from design-system/docus/MASTER.md -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fafafa; --panel: #fff; --raised: #f4f4f5; --border: #e4e4e7; --border-strong: #d4d4d8;
+        --fg: #09090b; --muted: #52525b; --primary: #18181b; --on-primary: #fafafa; --on: #16a34a; --danger: #dc2626;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #09090b; --panel: #111113; --raised: #18181b; --border: #27272a; --border-strong: #3f3f46;
+          --fg: #fafafa; --muted: #a1a1aa; --primary: #fafafa; --on-primary: #09090b; --on: #22c55e; --danger: #ef4444;
+        }
+      }
+      * { box-sizing: border-box; }
+      /* The window has no native title bar: this strip drags it, the window buttons sit on its right. */
+      header { position: fixed; inset: 0 0 auto 0; height: 36px; display: grid; place-items: center; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; -webkit-app-region: drag; user-select: none; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; }
+      main { width: 100%; max-width: 380px; }
+      svg { width: 32px; height: 32px; display: block; }
+      h1 { margin: 16px 0 4px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+      p { margin: 0; color: var(--muted); }
+      h2 { margin: 24px 0 8px; font-size: 12px; font-weight: 500; color: var(--muted); }
+      ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); overflow: hidden; }
+      li + li { border-top: 1px solid var(--border); }
+      li button { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background 150ms; }
+      li button:hover { background: var(--raised); }
+      li small { color: var(--muted); font-size: 12px; }
+      .empty { padding: 12px; }
+      form { display: flex; gap: 8px; }
+      input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--raised); color: var(--fg); font: inherit; }
+      .go { height: 36px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font: inherit; font-weight: 500; cursor: pointer; transition: opacity 150ms; }
+      .link { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+      button:disabled { opacity: 0.5; cursor: default; }
+      :focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
+      #error { margin-top: 12px; color: var(--danger); min-height: 21px; }
+    </style>
+  </head>
+  <body>
+    <header>Docus</header>
+    <main>
+      <svg viewBox="0 0 256 256" aria-hidden="true">
+        <path fill="currentColor" d="M36 52a12 12 0 0 1 12-12H116V120H36ZM132 40a88 88 0 0 1 0 176Z" />
+        <path fill="var(--on)" d="M36 136H116V216H48a12 12 0 0 1-12-12Z" />
+      </svg>
+      <h1>Connect to your home</h1>
+      <p>Choose the Docus server this app should open.</p>
+
+      <h2 id="found-title">On this network</h2>
+      <ul id="found" aria-labelledby="found-title" aria-live="polite"><li class="empty"><p>Searching…</p></li></ul>
+      <button class="link" id="rescan" type="button">Search again</button>
+
+      <h2><label for="address">Server address</label></h2>
+      <form id="form">
+        <input id="address" placeholder="192.168.1.10:8443 or home.example.com" autocomplete="off" spellcheck="false" required />
+        <button class="go" type="submit">Connect</button>
+      </form>
+      <p id="error" role="alert"></p>
+    </main>
+    <script>
+      const $ = (id) => document.getElementById(id)
+      $('error').textContent = new URLSearchParams(location.search).get('message') ?? ''
+
+      async function connect(address) {
+        const buttons = document.querySelectorAll('button')
+        buttons.forEach((b) => (b.disabled = true))
+        $('error').textContent = ''
+        // On success the window navigates to the server and this page goes away.
+        $('error').textContent = await window.docus.connect(address)
+        buttons.forEach((b) => (b.disabled = false))
+      }
+
+      async function scan() {
+        $('found').innerHTML = '<li class="empty"><p>Searching…</p></li>'
+        const servers = await window.docus.discover()
+        $('found').replaceChildren(
+          ...servers.map(({ name, url }) => {
+            const item = document.createElement('li')
+            const button = document.createElement('button')
+            const host = document.createElement('small')
+            button.type = 'button'
+            button.textContent = name
+            host.textContent = new URL(url).host
+            button.append(host)
+            button.onclick = () => connect(url)
+            item.append(button)
+            return item
+          }),
+        )
+        if (servers.length === 0) $('found').innerHTML = '<li class="empty"><p>No server found. Enter its address below.</p></li>'
+      }
+
+      $('rescan').onclick = scan
+      $('form').onsubmit = (event) => {
+        event.preventDefault()
+        connect($('address').value)
+      }
+      scan()
+    </script>
+  </body>
+</html>
