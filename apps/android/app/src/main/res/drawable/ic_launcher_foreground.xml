@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A house inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#CDEDA3"
+        android:pathData="M54,32 L76,51 V72 a4,4 0 0 1 -4,4 H60 V61 H48 V76 H36 a4,4 0 0 1 -4,-4 V51 Z" />
+</vector>

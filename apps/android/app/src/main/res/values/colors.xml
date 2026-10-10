@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window background before Compose draws: the theme's surface, so launch doesn't flash. -->
+    <color name="canvas">#F9FAEF</color>
+    <color name="ic_launcher_background">#354E16</color>
+</resources>
