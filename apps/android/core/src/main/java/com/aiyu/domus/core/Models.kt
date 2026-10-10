@@ -50,6 +50,8 @@ data class DeviceState(
     val humidity: Float? = null,
     @SerialName("air_quality_pm25") val pm25: Float? = null,
     @SerialName("fan_speed") val fanSpeed: String? = null,
+    /** 0-100 %, for fans with a stepless speed. */
+    @SerialName("fan_percent") val fanPercent: Int? = null,
     val mode: String? = null,
     @SerialName("filter_life") val filterLife: Float? = null,
     @SerialName("current_power_watts") val watts: Float? = null,
@@ -69,6 +71,7 @@ data class DeviceCommand(
     val color: String? = null,
     @SerialName("color_mode") val colorMode: String? = null,
     @SerialName("fan_speed") val fanSpeed: String? = null,
+    @SerialName("fan_percent") val fanPercent: Int? = null,
     val mode: String? = null,
     /** A mood or effect id from the server's catalog; an empty string stops a running effect. */
     val effect: String? = null,
@@ -109,6 +112,7 @@ data class Device(
             color = cmd.color ?: state.color,
             colorMode = cmd.colorMode ?: state.colorMode,
             fanSpeed = cmd.fanSpeed ?: state.fanSpeed,
+            fanPercent = cmd.fanPercent ?: state.fanPercent,
             mode = cmd.mode ?: state.mode,
             // A plain color or white command ends an effect; an effect command starts ("" stops) one.
             effect = when {

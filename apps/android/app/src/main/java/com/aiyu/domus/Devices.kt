@@ -316,6 +316,7 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             else s.colorTemp?.let {
                 CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
+            s.fanPercent?.let { CommitSlider("Speed", it, 0f..100f, "$it%", enabled) { v -> send(DeviceCommand(fanPercent = v)) } }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
                 if (options.isNotEmpty()) {
