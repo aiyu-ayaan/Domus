@@ -1,0 +1,39 @@
+# Builds the image from this checkout:
+#   docker compose -f docker-compose.local.yml up -d --build
+# To run the published image instead, use docker-compose.yml.
+services:
+  docus:
+    build: .
+    image: docus:local
+    container_name: docus
+    restart: unless-stopped
+    # Host networking: device discovery (Tapo, Xiaomi) and the app beacon are LAN
+    # broadcasts, which never reach a bridged container.
+    network_mode: host
+    environment:
+      # Any config key: DOCUS__<SECTION>__<KEY> (see config/default.toml).
+      DOCUS__SERVER__PORT: ${DOCUS_PORT:-8443}
+      # Schedules and the billing cycle run in this time zone.
+      TZ: ${TZ:-UTC}
+    volumes:
+      # Database, master key, JWT secret and TLS certificate. Back this up.
+      - docus_data:/app/data
+
+  # Optional broker: docker compose -f docker-compose.local.yml --profile mqtt up -d
+  mqtt:
+    profiles: ["mqtt"]
+    image: eclipse-mosquitto:2.0
+    container_name: docus-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+volumes:
+  docus_data:
+  mosquitto_data:
+  mosquitto_log:

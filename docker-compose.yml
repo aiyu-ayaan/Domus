@@ -1,15 +1,22 @@
+# Docus home server from the published image. This file is all a host needs:
+#   wget https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/docker-compose.yml
+#   docker compose up -d
+# Update: docker compose pull && docker compose up -d
+# Building from source instead: docker-compose.local.yml.
 services:
   docus:
-    build: .
-    image: docus:latest
+    # DOCUS_VERSION: latest (stable), beta, alpha, or an exact version like 0.0.1-alpha.1.
+    image: aiyuayaan/domus:${DOCUS_VERSION:-latest}
     container_name: docus
     restart: unless-stopped
     # Host networking: device discovery (Tapo, Xiaomi) and the app beacon are LAN
     # broadcasts, which never reach a bridged container.
     network_mode: host
     environment:
-      # Any config key: DOCUS__<SECTION>__<KEY> (see config/default.toml).
+      # Any config key: DOCUS__<SECTION>__<KEY>.
       DOCUS__SERVER__PORT: ${DOCUS_PORT:-8443}
+      # Schedules and the billing cycle run in this time zone.
+      TZ: ${TZ:-UTC}
     volumes:
       # Database, master key, JWT secret and TLS certificate. Back this up.
       - docus_data:/app/data
@@ -23,10 +30,22 @@ services:
     ports:
       - "1883:1883"
       - "9001:9001"
+    configs:
+      - source: mosquitto
+        target: /mosquitto/config/mosquitto.conf
     volumes:
-      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
+
+# Inline (same as config/mosquitto.conf), so no second file has to be downloaded.
+configs:
+  mosquitto:
+    content: |
+      listener 1883
+      allow_anonymous true
+      persistence true
+      persistence_location /mosquitto/data/
+      log_dest stdout
 
 volumes:
   docus_data:

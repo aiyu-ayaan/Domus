@@ -28,19 +28,31 @@ tunnel needs a single public hostname and no path rules.
 
 ## 2. Docker
 
+Two compose files:
+
+| File | Image | For |
+|---|---|---|
+| `docker-compose.yml` | `aiyuayaan/domus:${DOCUS_VERSION:-latest}` from Docker Hub | a home server; the only file it needs (the Mosquitto config is inline) |
+| `docker-compose.local.yml` | built from this checkout (`docus:local`) | development and testing the Dockerfile |
+
 ```bash
-docker compose up -d --build      # build and start
+docker compose up -d                                        # published image
+docker compose pull && docker compose up -d                 # update it
+DOCUS_VERSION=alpha docker compose up -d                    # a channel or an exact version
+docker compose -f docker-compose.local.yml up -d --build    # build here instead
 docker compose logs -f docus      # shows the TLS certificate fingerprint on start
-DOCUS_PORT=9443 docker compose up -d   # another port
+DOCUS_PORT=9443 TZ=Asia/Kolkata docker compose up -d        # another port, local time for schedules
 docker compose --profile mqtt up -d    # also start the optional Mosquitto broker
 ```
 
 | | |
 |---|---|
-| Image | `Dockerfile`: Node stage builds `apps/web`, Rust stage builds `domus-backend`, runtime is `debian:bookworm-slim`, user `docus` (uid 1000) |
+| Image | `Dockerfile`: Node stage builds `apps/web`, Rust stage builds `domus-backend`, runtime is `gcr.io/distroless/cc-debian12` (glibc, CA certificates, tzdata, no shell), uid 1000 |
 | Network | `network_mode: host`. Tapo and Xiaomi discovery and the app beacon are LAN broadcasts; they do not reach a bridged container |
 | Data | Named volume `docus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up; losing `master.key` loses every linked account |
 | Config | `APP_ENV=production` (listens on `0.0.0.0`). Any key of `config/default.toml` as `DOCUS__<SECTION>__<KEY>` in `environment:` |
+
+The release binary is stripped and built with thin LTO (`[profile.release]` in `Cargo.toml`); `.dockerignore` is an allow-list, so the build context is only what the Dockerfile copies. The image has no shell: `docker exec` cannot open one, use `docker compose logs`. Published images and their tags are described in `RELEASE.md`.
 
 The build uses BuildKit cache mounts for the Cargo registry and `target/`. `COPY` keeps source mtimes, so the
 Dockerfile touches the workspace sources before `cargo build`; without that a cached, older binary is shipped.

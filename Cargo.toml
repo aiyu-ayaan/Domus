@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
 authors = ["Docus Team"]
 license = "MIT"
@@ -48,3 +48,8 @@ hmac = "0.12"
 rc4 = "0.1"
 base64 = "0.22"
 hex = "0.4"
+
+[profile.release]
+# Smaller server binary and image; the symbols are not used at runtime.
+strip = true
+lto = "thin"
