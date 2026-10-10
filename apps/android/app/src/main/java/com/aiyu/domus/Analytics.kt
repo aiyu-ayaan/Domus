@@ -132,6 +132,7 @@ fun AnalyticsScreen(user: User, onOpenDevice: (String) -> Unit, onEditTariff: ()
 @Composable
 private fun ColumnScope.ElectricitySection() {
     val repository = LocalRepository.current
+    val devices by repository.devices.collectAsStateWithLifecycle()
     val energy by repository.energy.collectAsStateWithLifecycle()
     val loading by repository.loading.collectAsStateWithLifecycle()
     var range by rememberSaveable { mutableStateOf("day") }
@@ -154,15 +155,21 @@ private fun ColumnScope.ElectricitySection() {
     }
     val currency = overview.settings.currency
 
+    val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+    val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
+    val deviceTodayKwh = devices.filter { it.isOnline }.mapNotNull { it.state.todayKwh }.sum().toDouble()
+    val displayTodayKwh = if (deviceTodayKwh > 0.0) deviceTodayKwh else overview.todayKwh
+    val displayTodayCost = if (overview.todayKwh > 0.0 && deviceTodayKwh > 0.0) overview.todayCost * (displayTodayKwh / overview.todayKwh) else overview.todayCost
+
     Surface(color = c.primaryContainer, contentColor = c.onPrimaryContainer, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Using now", style = MaterialTheme.typography.labelLarge)
-            RollingText(formatWatts(overview.watts), MaterialTheme.typography.displayMedium)
+            RollingText(formatWatts(wattsToDisplay), MaterialTheme.typography.displayMedium)
             Text("On track for ${formatMoney(overview.projectedCost, currency)} this billing cycle", style = MaterialTheme.typography.bodyMedium)
         }
     }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(1), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard("Today", formatKwh(overview.todayKwh), formatMoney(overview.todayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight())
+        StatCard("Today", formatKwh(displayTodayKwh), formatMoney(displayTodayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight())
         StatCard("This cycle", formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight())
     }
 

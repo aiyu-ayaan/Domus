@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
@@ -336,7 +337,16 @@ class DomusRepository(context: Context) {
         _loading.value = false
     }
 
-    private fun replace(device: Device) = _devices.update { list -> list.map { if (it.id == device.id) device else it } }
+    private fun replace(device: Device) {
+        _devices.update { list ->
+            val next = list.map { if (it.id == device.id) device else it }
+            val liveWatts = next.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+            _energy.update { current ->
+                current?.copy(watts = liveWatts)
+            }
+            next
+        }
+    }
 
     /** Shows the new state at once, then sends it. A failure puts the real state back. */
     fun command(device: Device, command: DeviceCommand) {
@@ -400,6 +410,19 @@ class DomusRepository(context: Context) {
     private fun startLive() {
         if (liveJob?.isActive == true) return
         liveJob = scope.launch {
+            // Periodic energy refresh while live in foreground (every 5 seconds, mirroring web query refetchInterval)
+            launch {
+                while (isActive) {
+                    delay(5000)
+                    if (foreground) {
+                        attempt { it.energyOverview() }?.let { overview ->
+                            val currentLiveWatts = _devices.value.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+                            val wattsToKeep = if (_devices.value.any { it.isOnline && it.state.watts != null }) currentLiveWatts else overview.watts
+                            _energy.value = overview.copy(watts = wattsToKeep)
+                        }
+                    }
+                }
+            }
             var retry = 0
             while (true) {
                 if (retry > 0) follow() // the connection dropped: maybe the network changed

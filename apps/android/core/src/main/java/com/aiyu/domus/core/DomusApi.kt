@@ -187,9 +187,11 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
      */
     fun sync(sceneId: String, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit) = socket("/scenes/$sceneId/sync", {}, onEvent, onClosed)
 
-    private fun socket(path: String, onOpen: () -> Unit, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit): WebSocket =
-        client.newWebSocket(
-            request(path).url("${baseUrl.replaceFirst("https", "wss")}/api/v1$path").build(),
+    private fun socket(path: String, onOpen: () -> Unit, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit): WebSocket {
+        val scheme = if (baseUrl.startsWith("https")) "wss" else "ws"
+        val wsUrl = "${baseUrl.replaceFirst(Regex("^https?"), scheme)}/api/v1$path"
+        return client.newWebSocket(
+            request(path).url(wsUrl).build(),
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) = onOpen()
                 override fun onMessage(webSocket: WebSocket, text: String) {
@@ -200,6 +202,7 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) = onClosed()
             },
         )
+    }
 
     internal fun decodeState(element: JsonElement) = json.decodeFromJsonElement(DeviceState.serializer(), element)
 
