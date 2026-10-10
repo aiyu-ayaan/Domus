@@ -1,5 +1,6 @@
 //! TP-Link Tapo integration — fully local. Devices are found by UDP broadcast
 //! on port 20002 and controlled over KLAP with the owner's TP-Link account.
+//! A hub (H100) also brings the sensors, switches and thermostats paired with it.
 
 pub mod klap;
 
@@ -131,6 +132,21 @@ impl TapoIntegration {
         Err(last)
     }
 
+    /// Everything paired with a hub. The hub answers ten at a time.
+    async fn children(&self, host: &str, creds: &TapoCredentials) -> Result<Vec<Value>> {
+        let mut out: Vec<Value> = Vec::new();
+        loop {
+            let page = self.klap.request(host, creds, "get_child_device_list", Some(json!({ "start_index": out.len() }))).await?;
+            let list = page.get("child_device_list").and_then(Value::as_array).cloned().unwrap_or_default();
+            let total = page.get("sum").and_then(Value::as_u64).unwrap_or(0) as usize;
+            let done = list.is_empty();
+            out.extend(list);
+            if done || out.len() >= total {
+                return Ok(out);
+            }
+        }
+    }
+
     async fn energy(&self, host: &str, creds: &TapoCredentials) -> Option<Value> {
         self.klap.request(host, creds, "get_energy_usage", None).await.ok()
     }
@@ -156,6 +172,42 @@ impl TapoIntegration {
     }
 }
 
+/// A device paired with a hub. It is reached through the hub, so it carries the hub's address.
+fn child_device(account: &AccountContext, hub_ip: &str, c: &Value) -> DiscoveredDevice {
+    let s = |k: &str| c.get(k).and_then(Value::as_str).map(str::to_string);
+    let model = s("model");
+    let polled = child_polled(c);
+    DiscoveredDevice {
+        external_id: s("device_id").unwrap_or_default(),
+        name: decode_nickname(c).unwrap_or_else(|| model.clone().unwrap_or_else(|| "Tapo sensor".into())),
+        device_type: match s("category") {
+            Some(cat) if cat.contains("trv") => DeviceType::Climate,
+            _ => device_type(&s("type").unwrap_or_default()),
+        },
+        model,
+        ip_address: Some(hub_ip.to_string()),
+        mac_address: s("mac").map(|m| m.replace('-', ":")),
+        account_id: Some(account.id.clone()),
+        online: polled.online,
+        config: json!({ "child_id": c.get("device_id"), "type": c.get("type"), "category": c.get("category") }),
+        secrets: json!({}),
+        note: None,
+        state: Some(polled.state),
+    }
+}
+
+fn child_polled(c: &Value) -> PolledState {
+    PolledState {
+        online: c.get("status").and_then(Value::as_str) != Some("offline"),
+        state: state_from(c, None),
+        ip_address: None,
+    }
+}
+
+fn child_id(device: &DeviceContext) -> Option<&str> {
+    device.config.get("child_id").and_then(Value::as_str)
+}
+
 fn creds_of(account: &AccountContext) -> Result<TapoCredentials> {
     serde_json::from_value(account.credentials.clone())
         .map_err(|e| CoreError::Internal(format!("bad Tapo credentials: {e}")))
@@ -166,6 +218,7 @@ fn device_type(t: &str) -> DeviceType {
         "SMART.TAPOPLUG" | "SMART.KASAPLUG" => DeviceType::Plug,
         "SMART.TAPOBULB" | "SMART.KASABULB" => DeviceType::Light,
         "SMART.TAPOSWITCH" | "SMART.KASASWITCH" => DeviceType::Switch,
+        "SMART.TAPOSENSOR" => DeviceType::Sensor,
         _ => DeviceType::Other,
     }
 }
@@ -224,6 +277,20 @@ fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
             }
         }
     }
+    // Hub sensors (T100, T110, T300, T31x), thermostats (KE100) and the hub's own siren.
+    let fahrenheit = info.get("temp_unit").and_then(Value::as_str) == Some("fahrenheit");
+    if let Some(t) = info.get("current_temp").and_then(Value::as_f64) {
+        s.temperature = Some(if fahrenheit { (t - 32.0) / 1.8 } else { t } as f32);
+    }
+    s.humidity = info.get("current_humidity").and_then(Value::as_f64).map(|h| h as f32);
+    for (from, to) in [("detected", "motion"), ("open", "contact"), ("at_low_battery", "battery_low"), ("in_alarm", "alarm"), ("battery_percentage", "battery"), ("target_temp", "target_temp")] {
+        if let Some(v) = info.get(from) {
+            s.extra.insert(to.into(), v.clone());
+        }
+    }
+    if let Some(leak) = info.get("water_leak_status").and_then(Value::as_str) {
+        s.extra.insert("water_leak".into(), json!(leak != "normal"));
+    }
     if let Some(rssi) = info.get("rssi") {
         s.extra.insert("rssi".into(), rssi.clone());
     }
@@ -239,7 +306,7 @@ impl IntegrationPlugin for TapoIntegration {
     async fn discover(&self, accounts: &[AccountContext]) -> Result<Vec<DiscoveredDevice>> {
         let mut out = Vec::new();
         for b in self.scan().await? {
-            if b.device_type.contains("CAMERA") || b.device_type.contains("HUB") {
+            if b.device_type.contains("CAMERA") {
                 continue;
             }
             let fallback = DiscoveredDevice {
@@ -274,6 +341,12 @@ impl IntegrationPlugin for TapoIntegration {
                     d.external_id = b.device_id.clone();
                     d.ip_address = Some(b.ip.clone());
                     out.push(d);
+                    if b.device_type.contains("HUB") {
+                        match self.children(&b.ip, &creds).await {
+                            Ok(list) => out.extend(list.iter().map(|c| child_device(&account, &b.ip, c))),
+                            Err(e) => tracing::warn!("Tapo hub {} did not list its devices: {e}", b.ip),
+                        }
+                    }
                 }
                 Err(e) => out.push(DiscoveredDevice {
                     note: Some(match e {
@@ -297,7 +370,43 @@ impl IntegrationPlugin for TapoIntegration {
         Ok(d)
     }
 
+    /// One request per hub answers for everything paired with it.
+    async fn fetch_states(&self, devices: &[DeviceContext]) -> HashMap<String, Result<PolledState>> {
+        let mut hubs: HashMap<String, std::result::Result<Vec<Value>, String>> = HashMap::new();
+        let mut out = HashMap::new();
+        for d in devices {
+            let res = match (child_id(d), d.ip_address.as_deref(), d.account.as_ref()) {
+                (Some(id), Some(host), Some(account)) => {
+                    if !hubs.contains_key(host) {
+                        let list = match creds_of(account) {
+                            Ok(creds) => self.children(host, &creds).await,
+                            Err(e) => Err(e),
+                        };
+                        hubs.insert(host.to_string(), list.map_err(|e| e.to_string()));
+                    }
+                    match &hubs[host] {
+                        Ok(list) => list
+                            .iter()
+                            .find(|c| c.get("device_id").and_then(Value::as_str) == Some(id))
+                            .map(child_polled)
+                            .ok_or_else(|| integration_err("no longer paired with the Tapo hub")),
+                        Err(e) => Err(integration_err(e)),
+                    }
+                }
+                _ => self.fetch_state(d).await,
+            };
+            out.insert(d.device_id.clone(), res);
+        }
+        out
+    }
+
     async fn fetch_state(&self, device: &DeviceContext) -> Result<PolledState> {
+        // The refresh after a command: ask the hub as a poll would. Without an address or
+        // account it falls through to the errors below.
+        if child_id(device).is_some() && device.ip_address.is_some() && device.account.is_some() {
+            let mut polled = self.fetch_states(std::slice::from_ref(device)).await;
+            return polled.remove(&device.device_id).unwrap_or_else(|| Err(integration_err("no poll result")));
+        }
         let host = device
             .ip_address
             .as_deref()
@@ -392,10 +501,24 @@ impl IntegrationPlugin for TapoIntegration {
         if params.is_empty() {
             return Err(CoreError::Unsupported("this device does not support that command".into()));
         }
-        self.klap
-            .request(host, &creds, "set_device_info", Some(Value::Object(params)))
+        let Some(child) = child_id(device) else {
+            self.klap
+                .request(host, &creds, "set_device_info", Some(Value::Object(params)))
+                .await?;
+            return Ok(());
+        };
+        // A hub passes requests on to its devices, wrapped as a batch of one.
+        let reply = self
+            .klap
+            .request(host, &creds, "control_child", Some(json!({
+                "device_id": child,
+                "requestData": { "method": "multipleRequest", "params": { "requests": [{ "method": "set_device_info", "params": params }] } },
+            })))
             .await?;
-        Ok(())
+        match reply.pointer("/responseData/result/responses/0/error_code").and_then(Value::as_i64).unwrap_or(0) {
+            0 => Ok(()),
+            code => Err(klap::TapoError(code).into()),
+        }
     }
 }
 
@@ -424,6 +547,25 @@ mod tests {
         // An effect set from the vendor's app is not one of ours; a bulb without the field offers none.
         assert_eq!(state_from(&json!({"lighting_effect": {"enable": 1, "name": "Something else"}}), None).effect, None);
         assert!(!state_from(&json!({"device_on": true}), None).options.contains_key("effect"));
+    }
+
+    #[test]
+    fn hub_children_become_sensors_and_thermostats() {
+        let account = AccountContext { id: "acc".into(), credentials: json!({}) };
+        let motion = json!({"device_id": "c1", "nickname": "SGFsbA==", "model": "T100", "type": "SMART.TAPOSENSOR", "category": "subg.trigger.motion-sensor", "status": "online", "detected": true, "at_low_battery": false});
+        let d = child_device(&account, "10.0.0.5", &motion);
+        assert_eq!((d.name.as_str(), d.device_type, d.ip_address.as_deref()), ("Hall", DeviceType::Sensor, Some("10.0.0.5")));
+        assert_eq!(d.config["child_id"], "c1");
+        assert_eq!(d.state.unwrap().extra["motion"], json!(true));
+
+        let trv = json!({"device_id": "c2", "model": "KE100", "type": "SMART.KASAENERGY", "category": "subg.trv", "status": "offline", "current_temp": 68.0, "temp_unit": "fahrenheit", "target_temp": 21});
+        let d = child_device(&account, "10.0.0.5", &trv);
+        assert_eq!((d.device_type, d.online), (DeviceType::Climate, false));
+        let s = d.state.unwrap();
+        assert_eq!((s.temperature, &s.extra["target_temp"]), (Some(20.0), &json!(21)));
+
+        let leak = state_from(&json!({"water_leak_status": "water_leak", "current_humidity": 55}), None);
+        assert_eq!((leak.humidity, &leak.extra["water_leak"]), (Some(55.0), &json!(true)));
     }
 
     #[test]

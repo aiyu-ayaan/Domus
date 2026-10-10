@@ -71,7 +71,7 @@ const HUE_FIELDS: &[FormField] = &[
 
 const CATALOG: &[(IntegrationType, &str, &str, &str, bool, &[FormField])] = &[
     (IntegrationType::Tuya, "Tuya / Smart Life", "Plugs, switches, lights and purifiers from the Smart Life and Tuya Smart apps. Linked by scanning a QR code — no developer account needed.", "qr", false, &[]),
-    (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs and switches, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true, &[]),
+    (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs, switches and the H100 hub with its sensors, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true, &[]),
     (IntegrationType::Xiaomi, "Xiaomi Mi Home", "Mi Home / MIoT devices such as air purifiers, lamps and plugs. Tokens come from your Xiaomi account; control is local.", "credentials", true, &[]),
     (IntegrationType::Mqtt, "MQTT", "Any device that announces itself on your MQTT broker through Home Assistant discovery: Zigbee2MQTT, ESPHome and many more brands. Lights, switches, plugs, fans and sensors.", "form", true, MQTT_FIELDS),
     (IntegrationType::Hue, "Philips Hue", "Lights and smart plugs paired with a Hue bridge, controlled locally over your network. Linked by pressing the button on the bridge.", "form", true, HUE_FIELDS),
