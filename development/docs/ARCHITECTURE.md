@@ -240,6 +240,14 @@ midnight (set the same time zone on the plug).
 across devices, `null` where nothing was measured. The clients draw it as a line chart next to
 the kWh bars (`EnergyChart` + `TrendChart` on the web, `LineChart` on Android).
 
+### Notifications
+
+One shared inbox. `DELETE /notifications/{id}`, `DELETE /notifications` (all), and the read calls publish a
+`notifications_changed` event on the WebSocket; the web invalidates its inbox query and Android bumps its
+`revision`, so a delete, swipe or "Delete all" in any client empties the same row everywhere within a second.
+Android: swipe a row either way (Home "Recent activity" and the Notifications page); web: trash icon per row and a
+two-step "Delete all" in the sheet.
+
 ### Tariffs and currency
 
 `electricity_settings` holds any 3-letter ISO currency (the UI lists every
