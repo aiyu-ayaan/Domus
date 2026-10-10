@@ -121,15 +121,19 @@ function showConnect(message = '') {
   })
 }
 
-/** Opens the first saved address that answers: the home one on the home network, the remote one elsewhere. */
+/** Opens the saved address that answers first: the home one on the home network, the remote one elsewhere. */
 async function start() {
-  for (const url of override ? [override] : config.servers) {
-    const p = await probe(url)
-    if (override ? p.ok : accepts(url, p)) {
-      return win.loadURL(url).catch(() => showConnect(`Can't load ${url}.`))
-    }
-  }
-  const tried = (override ? [override] : config.servers).map((u) => new URL(u).host).join(' or ')
+  const urls = override ? [override] : config.servers
+  // All at once, so an address that is out of reach doesn't hold the window for its timeout.
+  const url = await Promise.any(
+    urls.map(async (u) => {
+      const p = await probe(u)
+      if (!(override ? p.ok : accepts(u, p))) throw new Error(u)
+      return u
+    }),
+  ).catch(() => null)
+  if (url) return win.loadURL(url).catch(() => showConnect(`Can't load ${url}.`))
+  const tried = urls.map((u) => new URL(u).host).join(' or ')
   showConnect(tried ? `Can't reach ${tried}.` : '')
 }
 
