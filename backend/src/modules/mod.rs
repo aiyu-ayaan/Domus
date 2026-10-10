@@ -8,4 +8,5 @@ pub mod integrations;
 pub mod notifications;
 pub mod rooms;
 pub mod scenes;
+pub mod server;
 pub mod users;

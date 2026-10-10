@@ -6,17 +6,19 @@ use crate::infrastructure::crypto::write_private;
 use axum_server::tls_rustls::RustlsConfig;
 use std::path::PathBuf;
 
-pub async fn load_rustls(tls: &TlsConfig, server: &ServerConfig) -> anyhow::Result<RustlsConfig> {
+/// The TLS setup and the SHA-256 fingerprint of its certificate.
+pub async fn load_rustls(tls: &TlsConfig, server: &ServerConfig) -> anyhow::Result<(RustlsConfig, Option<String>)> {
     let (cert, key) = match (&tls.cert_path, &tls.key_path) {
         (Some(c), Some(k)) => (c.clone(), k.clone()),
         _ => ensure_self_signed(server)?,
     };
     tracing::info!("TLS certificate: {}", cert.display());
     // Apps show this when they first meet a self-signed server; the owner compares the two.
-    if let Some(fp) = std::fs::read_to_string(&cert).ok().and_then(|pem| fingerprint(&pem)) {
+    let fp = std::fs::read_to_string(&cert).ok().and_then(|pem| fingerprint(&pem));
+    if let Some(fp) = &fp {
         tracing::info!("TLS certificate SHA-256 fingerprint: {fp}");
     }
-    Ok(RustlsConfig::from_pem_file(cert, key).await?)
+    Ok((RustlsConfig::from_pem_file(cert, key).await?, fp))
 }
 
 /// SHA-256 of the first certificate in `pem`, as `AA:BB:..`.

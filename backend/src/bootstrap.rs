@@ -96,6 +96,17 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     tokio::spawn(DiscoveryWorker::new(manager.clone()).run());
     tokio::spawn(SchedulerWorker::new(automations.clone(), pool.clone(), config.workers.energy_retention_days).run());
 
+    let rustls = if config.tls.enabled { Some(tls::load_rustls(&config.tls, &config.server).await?) } else { None };
+    let server = crate::modules::server::ServerInfo {
+        default_local_url: format!(
+            "{}://{}:{}",
+            if config.tls.enabled { "https" } else { "http" },
+            tls::local_ip().unwrap_or_else(|| "localhost".into()),
+            config.server.port
+        ),
+        fingerprint: rustls.as_ref().and_then(|(_, fp)| fp.clone()),
+    };
+
     let state = AppState {
         pool,
         jwt,
@@ -106,14 +117,14 @@ pub async fn bootstrap() -> anyhow::Result<()> {
         tuya,
         tuya_logins: Default::default(),
         xiaomi_logins: Default::default(),
+        server: Arc::new(server),
     };
     let app = create_router(state, &config.server.web_dir, config.tls.enabled);
 
     tokio::spawn(crate::infrastructure::beacon::run(config.server.port, config.tls.enabled));
 
     let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
-    if config.tls.enabled {
-        let rustls = tls::load_rustls(&config.tls, &config.server).await?;
+    if let Some((rustls, _)) = rustls {
         info!("Listening on https://{addr}");
         axum_server::bind_rustls(addr, rustls)
             .serve(app.into_make_service())

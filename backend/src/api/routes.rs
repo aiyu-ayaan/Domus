@@ -8,7 +8,9 @@ use crate::modules::{
     air::air_routes, auth, automations::automation_routes, devices, energy::energy_routes, groups::group_routes,
     integrations::{integration_routes, TuyaLogins, XiaomiLogins},
     notifications::{notification_routes, Notifier},
-    rooms::room_routes, scenes::scene_routes, users::user_routes,
+    rooms::room_routes, scenes::scene_routes,
+    server::{server_routes, ServerInfo},
+    users::user_routes,
 };
 use axum::{
     http::{header, HeaderValue, Method},
@@ -38,6 +40,7 @@ pub struct AppState {
     pub tuya: Option<Arc<TuyaIntegration>>,
     pub tuya_logins: TuyaLogins,
     pub xiaomi_logins: XiaomiLogins,
+    pub server: Arc<ServerInfo>,
 }
 
 pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
@@ -58,6 +61,7 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
         .nest("/notifications", notification_routes())
         .nest("/users", user_routes())
         .nest("/integrations", integration_routes())
+        .nest("/server", server_routes())
         .route("/ws", get(ws_handler))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth_middleware));
 
