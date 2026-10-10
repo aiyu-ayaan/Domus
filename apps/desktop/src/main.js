@@ -186,6 +186,10 @@ ipcMain.handle('server:connect', async (event, address) => {
 })
 
 ipcMain.on('server:choose', (event) => trusted(event) && showConnect())
+ipcMain.on('server:cancel', (event) => trusted(event) && start())
+ipcMain.on('server:hasSaved', (event) => {
+  event.returnValue = trusted(event) && (config.servers.length > 0 || !!override)
+})
 
 // The signed-in server's addresses (GET /api/v1/server/links). Its certificate
 // fingerprint arrives over a connection that is already trusted.

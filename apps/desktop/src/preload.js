@@ -18,4 +18,6 @@ contextBridge.exposeInMainWorld('docus', {
   // Connect page only.
   connect: (address) => ipcRenderer.invoke('server:connect', address),
   discover: () => ipcRenderer.invoke('server:discover'),
+  cancel: () => ipcRenderer.send('server:cancel'),
+  hasSavedServer: () => ipcRenderer.sendSync('server:hasSaved'),
 })

@@ -65,6 +65,9 @@
         <button class="go" type="submit">Connect</button>
       </form>
       <p id="error" role="alert"></p>
+      <div id="cancel-box" style="margin-top: 16px; display: none;">
+        <button class="link" id="cancel" type="button">Cancel and return to current server</button>
+      </div>
     </main>
     <script>
       const $ = (id) => document.getElementById(id)
@@ -75,6 +78,13 @@
         if (header) header.textContent = 'Docus (Dev)'
       }
       $('error').textContent = params.get('message') ?? ''
+
+      if (window.docus?.hasSavedServer?.()) {
+        const cancelBox = $('cancel-box')
+        if (cancelBox) cancelBox.style.display = 'block'
+        const cancelBtn = $('cancel')
+        if (cancelBtn) cancelBtn.onclick = () => window.docus.cancel()
+      }
 
       async function connect(address) {
         const buttons = document.querySelectorAll('button')
