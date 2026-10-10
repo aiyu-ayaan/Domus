@@ -223,27 +223,73 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
   const location = useLocation()
   const primary = items.slice(0, 4)
   const moreActive = items.slice(4).some((m) => location.pathname.startsWith(m.to))
-  const cls = (active: boolean) => cn('relative flex flex-1 flex-col items-center justify-center gap-0.5 text-caption', active ? 'text-fg' : 'text-subtle')
+
   return (
-    <nav aria-label="Main" className="chrome fixed inset-x-0 bottom-0 z-nav flex h-14 border-t border-border pb-[env(safe-area-inset-bottom)] lg:hidden" style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }}>
-      {primary.map((item) => (
-        <NavLink key={item.to} to={item.to} end={item.to === '/'} className={({ isActive }) => cls(isActive)}>
-          {({ isActive }) => (
-            <>
-              <span className="relative">
-                <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
-                {item.to === '/devices' && pending > 0 && <span className="absolute -right-1 -top-0.5 h-1.5 w-1.5 rounded-full bg-on" aria-label={`${pending} new devices`} />}
-              </span>
-              {item.label}
-            </>
+    <div className="fixed inset-x-0 bottom-3.5 z-nav flex justify-center pointer-events-none lg:hidden px-3 pb-[env(safe-area-inset-bottom)]">
+      <nav
+        aria-label="Main"
+        className={cn(
+          'pointer-events-auto flex items-center gap-1 p-1.5',
+          'rounded-full border border-border/80 bg-panel/95 backdrop-blur-xl shadow-xl select-none',
+        )}
+      >
+        {primary.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            className={({ isActive }) =>
+              cn(
+                'relative flex h-11 items-center rounded-full transition-all duration-200 ease-std text-body',
+                isActive
+                  ? 'bg-primary-container text-on-primary-container font-semibold px-4 shadow-sm'
+                  : 'w-11 justify-center text-muted hover:text-fg hover:bg-raised/70',
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                  <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                  {item.to === '/devices' && pending > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-on ring-2 ring-panel"
+                      aria-label={`${pending} new devices`}
+                    />
+                  )}
+                </span>
+                {isActive && (
+                  <span className="ml-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
+                    {item.label}
+                  </span>
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
+
+        <button
+          onClick={onMore}
+          aria-haspopup="dialog"
+          aria-label="More options"
+          className={cn(
+            'relative flex h-11 items-center rounded-full transition-all duration-200 ease-std cursor-pointer text-body',
+            moreActive
+              ? 'bg-primary-container text-on-primary-container font-semibold px-4 shadow-sm'
+              : 'w-11 justify-center text-muted hover:text-fg hover:bg-raised/70',
           )}
-        </NavLink>
-      ))}
-      <button onClick={onMore} className={cn(cls(moreActive), 'cursor-pointer')} aria-haspopup="dialog">
-        <DotsThree size={20} weight="bold" aria-hidden />
-        More
-      </button>
-    </nav>
+        >
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <DotsThree size={20} weight="bold" aria-hidden />
+          </span>
+          {moreActive && (
+            <span className="ml-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
+              More
+            </span>
+          )}
+        </button>
+      </nav>
+    </div>
   )
 }
 
