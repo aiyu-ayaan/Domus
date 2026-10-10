@@ -5,7 +5,7 @@ import { Field } from '@/components/ui/Field'
 import { ErrorText } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { rollRandomAvatar } from '@/lib/avatar'
-import { api } from '@/lib/api'
+import { api, desktop } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { errorMessage } from '@/lib/toast'
 
@@ -85,10 +85,32 @@ export function AuthScreen() {
           <Button type="submit" variant="primary" loading={loading} className="mt-1 w-full">
             {setup ? 'Create account' : 'Sign in'}
           </Button>
+          {desktop && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => desktop?.chooseServer()}
+              className="w-full"
+            >
+              Change server
+            </Button>
+          )}
         </form>
-        <p className="mt-4 flex items-center gap-1.5 text-caption text-subtle">
-          <LockSimple size={12} aria-hidden /> Encrypted connection. Data stays on your server.
-        </p>
+        <div className="mt-4 flex items-center justify-between text-caption text-subtle">
+          <p className="flex items-center gap-1.5">
+            <LockSimple size={12} aria-hidden />
+            <span>Encrypted connection.{desktop ? ` Connected to ${window.location.host}` : ' Data stays on your server.'}</span>
+          </p>
+          {desktop && (
+            <button
+              type="button"
+              onClick={() => desktop?.chooseServer()}
+              className="text-muted hover:text-fg underline transition-colors cursor-pointer"
+            >
+              Change
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
