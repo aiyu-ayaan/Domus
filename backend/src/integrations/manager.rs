@@ -346,8 +346,14 @@ impl DeviceManager {
         if cmd.is_empty() {
             return Err(ApiError::BadRequest("empty command".into()));
         }
-        let cmd = &cmd.resolved();
         let rec = self.get(device_id).await?;
+        let mut cmd = cmd.resolved();
+        // Brightness on its own while an effect plays means "this effect, brighter or dimmer".
+        // Sent bare, a bulb drops the effect and falls back to white light.
+        if cmd.brightness.is_some() && cmd.effect.is_none() && cmd.color.is_none() && cmd.color_temp.is_none() && cmd.color_mode.is_none() && cmd.is_on != Some(false) {
+            cmd.effect = rec.state().effect;
+        }
+        let cmd = &cmd;
         let plugin = self.plugin(&rec.integration_type)?;
         let accounts = self.account_map(&rec.integration_type).await;
         plugin.send_command(&self.context(&rec, &accounts), cmd).await?;

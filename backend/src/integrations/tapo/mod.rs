@@ -36,12 +36,12 @@ fn strip_effects() -> Vec<String> {
 
 /// An effect in the light strips' native form (`set_lighting_effect`, type `sequence`).
 /// The strip stores and loops it by itself.
-fn lighting_effect(e: &effects::Effect, enable: bool) -> Value {
+fn lighting_effect(e: &effects::Effect, enable: bool, brightness: u8) -> Value {
     json!({
         "custom": 1,
         "id": format!("DomusEffect{:0>21}", e.id),
         "name": e.name,
-        "brightness": 100,
+        "brightness": brightness.clamp(1, 100),
         "segments": [0],
         "expansion_strategy": 1,
         "enable": enable as u8,
@@ -218,6 +218,10 @@ fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
         if fx.get("enable").and_then(Value::as_u64) == Some(1) {
             let name = fx.get("name").and_then(Value::as_str);
             s.effect = effects::strip_effects().find(|e| Some(e.name) == name).map(|e| e.id.to_string());
+            // While an effect plays, its own brightness is the light's brightness.
+            if let Some(b) = fx.get("brightness").and_then(Value::as_u64) {
+                s.brightness = Some(b.min(100) as u8);
+            }
         }
     }
     if let Some(rssi) = info.get("rssi") {
@@ -335,7 +339,7 @@ impl IntegrationPlugin for TapoIntegration {
             Some(id) => Some(Some(
                 effects::strip_effects()
                     .find(|e| e.id == id)
-                    .map(|e| lighting_effect(e, true))
+                    .map(|e| lighting_effect(e, true, command.brightness.unwrap_or(100)))
                     .ok_or_else(|| CoreError::Unsupported("this light cannot play that effect".into()))?,
             )),
         };
@@ -343,7 +347,7 @@ impl IntegrationPlugin for TapoIntegration {
         let was_playing = self.playing.lock().unwrap().contains(host);
         // Stop the running effect when asked to, or when a plain colour is about to replace it.
         if matches!(chosen, Some(None)) || (chosen.is_none() && recolour && was_playing) {
-            self.klap.request(host, &creds, "set_lighting_effect", Some(lighting_effect(&effects::EFFECTS[0], false))).await?;
+            self.klap.request(host, &creds, "set_lighting_effect", Some(lighting_effect(&effects::EFFECTS[0], false, 100))).await?;
             self.playing.lock().unwrap().remove(host);
             if matches!(chosen, Some(None)) && command.is_on.is_none() && command.brightness.is_none() && !recolour {
                 return Ok(());
@@ -406,14 +410,16 @@ mod tests {
         assert!(offered.contains(&"ocean".to_string()) && offered.contains(&"festive".to_string()));
 
         let festive = effects::STRIP_EFFECTS.iter().find(|e| e.id == "festive").unwrap();
-        let native = lighting_effect(festive, true);
+        let native = lighting_effect(festive, true, 40);
+        assert_eq!(native["brightness"], 40);
         assert_eq!(native["type"], "sequence");
         assert_eq!(native["sequence"][0], json!([0, 100, 100]));
         assert_eq!(native["id"].as_str().unwrap().len(), 32);
 
-        let info = json!({"device_on": true, "lighting_effect": {"enable": 1, "name": "Festive"}});
+        let info = json!({"device_on": true, "brightness": 100, "lighting_effect": {"enable": 1, "name": "Festive", "brightness": 40}});
         let s = state_from(&info, None);
         assert_eq!(s.effect.as_deref(), Some("festive"));
+        assert_eq!(s.brightness, Some(40));
         assert_eq!(s.options["effect"].len(), offered.len());
         // An effect set from the vendor's app is not one of ours; a bulb without the field offers none.
         assert_eq!(state_from(&json!({"lighting_effect": {"enable": 1, "name": "Something else"}}), None).effect, None);

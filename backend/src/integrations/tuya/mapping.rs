@@ -183,7 +183,10 @@ pub fn state_from_status(config: &Value, status: &Map<String, Value>) -> DeviceS
     if supports_effects(config) {
         s.options.insert("effect".into(), effects::effect_ids());
         if status.get("work_mode").and_then(Value::as_str) == Some("scene") {
-            s.effect = status.get(SCENE_CODE).and_then(playing_effect);
+            if let Some((id, brightness)) = status.get(SCENE_CODE).and_then(playing_effect) {
+                s.effect = Some(id);
+                s.brightness = Some(brightness);
+            }
         }
     }
     if let Some((_, v)) = first(status, COLOR_CODES) {
@@ -264,7 +267,8 @@ fn supports_effects(config: &Value) -> bool {
 }
 
 /// An effect as Tuya scene data: one unit per colour, in the effect's slot.
-fn scene_data(slot: usize, e: &effects::Effect) -> Value {
+/// `brightness` (1-100) dims every colour of the loop; a scene has no brightness of its own.
+fn scene_data(slot: usize, e: &effects::Effect, brightness: u8) -> Value {
     // Durations are 0-100; the effect's tenths of a second are used as they are.
     let pace = e.step.clamp(1, 100);
     let units: Vec<Value> = e
@@ -275,7 +279,7 @@ fn scene_data(slot: usize, e: &effects::Effect) -> Value {
                 "unit_change_mode": if e.fade { "gradient" } else { "jump" },
                 "unit_switch_duration": pace,
                 "unit_gradient_duration": pace,
-                "h": h, "s": s as u32 * 10, "v": v as u32 * 10,
+                "h": h, "s": s as u32 * 10, "v": (v as u32 * brightness.clamp(1, 100) as u32 / 10).max(10),
                 "bright": 0, "temperature": 0,
             })
         })
@@ -285,7 +289,8 @@ fn scene_data(slot: usize, e: &effects::Effect) -> Value {
 
 /// Which of our effects a bulb's scene data is: its slot, checked against the first colour
 /// so a scene set from the Tuya app in the same slot is not mistaken for ours.
-fn playing_effect(v: &Value) -> Option<String> {
+/// Returns the effect id and the brightness it is playing at.
+fn playing_effect(v: &Value) -> Option<(String, u8)> {
     let parsed;
     let data = match v {
         Value::String(text) => {
@@ -296,7 +301,12 @@ fn playing_effect(v: &Value) -> Option<String> {
     };
     let e = effects::EFFECTS.get(data.get("scene_num")?.as_u64()?.checked_sub(1)? as usize)?;
     let first = data.get("scene_units")?.get(0)?;
-    (first.get("h")?.as_u64()? == e.colors[0].0 as u64).then(|| e.id.to_string())
+    if first.get("h")?.as_u64()? != e.colors[0].0 as u64 {
+        return None;
+    }
+    // The first colour's value against the catalog's tells how far the loop is dimmed.
+    let brightness = (first.get("v")?.as_u64()? * 10 / e.colors[0].2.max(1) as u64).clamp(1, 100) as u8;
+    Some((e.id.to_string(), brightness))
 }
 
 pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
@@ -315,7 +325,7 @@ pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
                     }
                 }
                 out.push(json!({ "code": "work_mode", "value": "scene" }));
-                out.push(json!({ "code": SCENE_CODE, "value": scene_data(slot, e) }));
+                out.push(json!({ "code": SCENE_CODE, "value": scene_data(slot, e, cmd.brightness.unwrap_or(100)) }));
             }
             // Stop: back to plain white light. An effect this bulb can't play (another brand's) is ignored.
             None if id.is_empty() => out.push(json!({ "code": "work_mode", "value": "white" })),
@@ -350,7 +360,8 @@ pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
         }
     }
     if let Some(pct) = cmd.brightness {
-        if cmd.color.is_none() {
+        // With an effect the brightness is already in the scene data.
+        if cmd.color.is_none() && cmd.effect.as_deref().is_none_or(str::is_empty) {
             if let Some(code) = writable(config, BRIGHT_CODES) {
                 let (min, max) = range(config, code, (10.0, 1000.0));
                 let v = (min + (max - min) * pct.min(100) as f64 / 100.0).round() as i64;
@@ -484,6 +495,14 @@ mod tests {
         assert!(s.options["effect"].contains(&"party".to_string()));
         status.insert("scene_data_v2".into(), json!(r#"{"scene_num":1,"scene_units":[{"bright":200,"h":0,"s":0,"temperature":0,"v":0}]}"#));
         assert_eq!(state_from_status(&config, &status).effect, None);
+
+        // Brightness with an effect dims the loop instead of leaving it (no white-light brightness is sent).
+        let dim = commands_for(&config, &DeviceCommand { effect: Some("ocean".into()), brightness: Some(40), ..Default::default() });
+        assert_eq!(dim.len(), 3);
+        assert_eq!(dim[2]["value"]["scene_units"][0]["v"], 400);
+        status.insert("scene_data_v2".into(), json!(dim[2]["value"].to_string()));
+        let dimmed = state_from_status(&config, &status);
+        assert_eq!((dimmed.effect.as_deref(), dimmed.brightness), (Some("ocean"), Some(40)));
 
         // Stopping goes back to white; a bulb without scene data ignores effects.
         let stop = commands_for(&config, &DeviceCommand { effect: Some(String::new()), ..Default::default() });
