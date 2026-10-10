@@ -280,6 +280,12 @@ flowchart TB
   create users. Roles and room access are re-read on every request, so changes
   apply immediately. Device and WebSocket data are filtered by room access.
 
+### Clients finding the server
+
+The server answers `DOMUS_DISCOVER` on UDP 48443 (`infrastructure/beacon.rs`) with its API port, and logs its
+certificate's SHA-256 fingerprint at startup so a client can pin a self-signed certificate after the owner
+compares the two. See `ANDROID_APP.md` for the full flow and diagram.
+
 ## 8. Web UI structure
 
 ```mermaid

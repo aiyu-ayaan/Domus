@@ -52,6 +52,7 @@ home-automation/
 │   │   │   └── App.tsx
 │   │   └── package.json
 │   └── desktop/                      # Optional Tauri desktop app
+│   └── android/                      # Native Android app (Kotlin + Compose): app, core, ui-shared
 │
 ├── crates/
 │   └── home-core/                   # Shared Rust domain logic
@@ -150,7 +151,7 @@ home-automation/
 ## Work
 
 - On this need to work on the web and electron version of the application.. 
-- On future will work on the native android app. Currently out of scope 
+- The native android app lives in `apps/android` (package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`, Material 3 Expressive). Read `development/docs/ANDROID_APP.md` before changing it. It does not follow the web design profile below.
 
 
 ## UI

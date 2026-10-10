@@ -75,7 +75,20 @@
 - [x] Overview Quick Controls integration (`OverviewView.tsx`): Screen Sync scene badges, target light count resolution, live pulsing status, one-touch Sync/Stop, and remote session deactivation
 - [x] Architecture documentation: comprehensive specification and sequence/state diagrams in `development/docs/SCREEN_SYNC.md`
 
+## Milestone 9: Native Android app (DONE — 2026-10-10)
+- [x] Gradle project `apps/android`, package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`
+- [x] Server discovery: backend UDP beacon (`infrastructure/beacon.rs`, port 48443) + `ServerDiscovery` broadcast scan
+- [x] Custom server URL (hosted servers), https only; trust-on-first-use pinning for the self-signed certificate; fingerprint logged by the server
+- [x] Session, pin and token encrypted with an Android Keystore key
+- [x] Material 3 Expressive theme and motion; Rewire floating pill navigation (rail on wide windows)
+- [x] Screens: connect, admin setup / sign in, Home dashboard, Devices by room with control sheet, Scenes & automations, Energy with history, Settings
+- [x] Live updates over the WebSocket, optimistic commands with rollback
+- [x] Verified on an emulator (debug and minified release) against a local server
+- [x] Docs: `development/docs/ANDROID_APP.md`
+
 ## Next
+- [ ] Android: verify LAN discovery and controls on a real phone with real devices
+- [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback
 - [ ] Tuya realtime MQTT push instead of polling
@@ -84,5 +97,4 @@
 - [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
 - [ ] Packaged Electron builds; Docker image for the home server
-- [ ] Native Android app (out of scope for now)
 
