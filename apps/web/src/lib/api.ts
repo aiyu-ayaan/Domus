@@ -21,10 +21,15 @@ import type {
   User,
 } from './types'
 
-const TOKEN_KEY = 'docus.token'
+import { getStorageKey, type AppFlavor } from './flavor'
+
+const TOKEN_KEY = getStorageKey('docus.token')
 
 /** What the desktop app's preload exposes (apps/desktop/src/preload.js). */
 interface DesktopBridge {
+  platform?: string
+  isDesktop?: boolean
+  flavor?: AppFlavor
   apiBase?: string
   /** One token for the local and the remote address, which are different origins. */
   token: { get(): string | null; set(token: string | null): void }

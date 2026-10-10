@@ -25,6 +25,7 @@ import { Sheet } from './ui/Sheet'
 import { Button } from './ui/Button'
 import { ThemeToggle } from './ui/ThemeToggle'
 import { Avatar } from './ui/Avatar'
+import { isDevFlavor, appName } from '@/lib/flavor'
 
 interface NavItem {
   to: string
@@ -37,14 +38,19 @@ interface NavItem {
 function Mark({ collapsed }: { collapsed?: boolean }) {
   return (
     <span className="flex items-center gap-2.5 overflow-hidden">
-      <img src="/favicon.svg" alt="Docus" className="h-6 w-6 shrink-0" />
+      <img src={isDevFlavor ? '/favicon-dev.svg' : '/favicon.svg'} alt={appName} className="h-6 w-6 shrink-0" />
       <span
         className={cn(
-          'text-title font-semibold tracking-[-0.01em] transition-all duration-base whitespace-nowrap',
+          'flex items-center gap-1.5 text-title font-semibold tracking-[-0.01em] transition-all duration-base whitespace-nowrap',
           collapsed ? 'opacity-0 w-0' : 'opacity-100',
         )}
       >
-        Docus
+        <span>Docus</span>
+        {isDevFlavor && (
+          <span className="rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none">
+            DEV
+          </span>
+        )}
       </span>
     </span>
   )

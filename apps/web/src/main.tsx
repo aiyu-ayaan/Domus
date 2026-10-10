@@ -6,11 +6,13 @@ import { AuthProvider } from '@/lib/auth'
 import { ToastProvider } from '@/lib/toast'
 import { Toaster } from '@/components/ui/Toaster'
 import { applyStoredTheme } from '@/lib/theme'
+import { applyFlavorHead } from '@/lib/flavor'
 import { desktop } from '@/lib/api'
 import { ScreenSyncProvider } from '@/features/screensync/ScreenSync'
 import './index.css'
 
 applyStoredTheme()
+applyFlavorHead()
 if (desktop) document.documentElement.classList.add('desktop')
 
 // Live changes arrive over the WebSocket, so queries do not poll.

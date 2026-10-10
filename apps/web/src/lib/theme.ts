@@ -1,8 +1,9 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { desktop } from './api'
+import { getStorageKey } from './flavor'
 
 export type Theme = 'system' | 'dark' | 'light'
-const THEME_KEY = 'docus.theme'
+const THEME_KEY = getStorageKey('docus.theme')
 
 let currentTheme: Theme = (() => {
   try {
