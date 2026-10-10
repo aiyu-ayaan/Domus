@@ -91,3 +91,26 @@ To avoid flickering when moving between elements:
 1. `onMouseEnter` cancels any pending collapse timer and expands immediately (`200ms cubic-bezier(0.2, 0, 0, 1)`).
 2. `onMouseLeave` uses a 150ms grace timeout before collapsing, preventing accidental snap-close if the cursor briefly crosses an edge.
 3. The main content gutter reserves `lg:pl-[96px]` (72px rail + 12px margin + 12px gap) so the page layout never shifts during hover expansion.
+
+---
+
+## 3. Mobile Floating Pill Bottom Navigation (Android Parity)
+
+On viewports below `1024px` (`lg:hidden`), the web UI mirrors Android's `FloatingNavBar`:
+
+```mermaid
+flowchart LR
+    subgraph FloatingNavBar["Floating Island (`rounded-full`, centered, bottom-3.5)"]
+        ActiveTab["Active Tab: `bg-primary-container` (Icon + Label)"]
+        Inactive1["Tab: Icon only (`w-11 h-11`)"]
+        Inactive2["Tab: Icon only (`w-11 h-11`)"]
+        MoreBtn["More: DotsThree (expands if sub-route active)"]
+    end
+```
+
+- **Floating Island**: Centered capsule (`fixed bottom-3.5 left-1/2 -translate-x-1/2`, `rounded-full border border-border/80 bg-panel/95 backdrop-blur-xl shadow-xl p-1.5`).
+- **Dynamic Content-Size Capsule**:
+  - Inactive tabs display only the icon in a circular `w-11 h-11 rounded-full` touch target.
+  - Active tab expands horizontally (`px-4 h-11 rounded-full bg-primary-container text-on-primary-container font-semibold`) displaying both the icon and the text label with a smooth fade-in animation.
+- **Badge Indicators**: Pending devices badge dot sits on the icon corner (`-top-1 -right-1`).
+- **More Sheet**: Secondary tabs (Air quality, Energy, Integrations, Settings) accessible via 'More', with 'More' button turning active/expanded when browsing those routes.
