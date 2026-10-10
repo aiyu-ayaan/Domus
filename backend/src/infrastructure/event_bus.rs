@@ -50,6 +50,8 @@ pub enum SystemEvent {
         title: String,
         message: String,
     },
+    /// A notification was read or deleted: clients reload their inbox.
+    NotificationsChanged,
     AutomationTriggered {
         automation_id: String,
         name: String,

@@ -79,28 +79,25 @@ async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Valu
 }
 
 async fn mark_read(State(s): State<AppState>, _user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
-    sqlx::query("UPDATE notifications SET is_read = 1 WHERE id = ?")
-        .bind(id)
-        .execute(&s.pool)
-        .await?;
-    Ok(Json(json!({ "success": true })))
+    changed(&s, sqlx::query("UPDATE notifications SET is_read = 1 WHERE id = ?").bind(id)).await
 }
 
 async fn read_all(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Value>> {
-    sqlx::query("UPDATE notifications SET is_read = 1").execute(&s.pool).await?;
-    Ok(Json(json!({ "success": true })))
+    changed(&s, sqlx::query("UPDATE notifications SET is_read = 1")).await
 }
 
 async fn remove(State(s): State<AppState>, _user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
-    sqlx::query("DELETE FROM notifications WHERE id = ?")
-        .bind(id)
-        .execute(&s.pool)
-        .await?;
-    Ok(Json(json!({ "success": true })))
+    changed(&s, sqlx::query("DELETE FROM notifications WHERE id = ?").bind(id)).await
 }
 
-async fn clear(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Value>> {
-    user.require_admin()?;
-    sqlx::query("DELETE FROM notifications").execute(&s.pool).await?;
+/// The inbox is shared by everyone who can sign in, like read and delete one.
+async fn clear(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Value>> {
+    changed(&s, sqlx::query("DELETE FROM notifications")).await
+}
+
+/// Runs a write on the inbox and tells every connected client to reload it.
+async fn changed<'q>(s: &AppState, q: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>) -> ApiResult<Json<Value>> {
+    q.execute(&s.pool).await?;
+    s.bus.publish(SystemEvent::NotificationsChanged);
     Ok(Json(json!({ "success": true })))
 }
