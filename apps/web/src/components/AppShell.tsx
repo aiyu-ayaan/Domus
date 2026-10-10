@@ -98,17 +98,17 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'fixed left-3 top-[calc(var(--titlebar)+12px)] bottom-3 z-nav hidden flex-col lg:flex',
-        'rounded-3xl border border-border/70 bg-panel shadow-lg select-none',
-        'transition-[width,box-shadow] duration-200 ease-std overflow-hidden',
+        'fixed left-3.5 top-1/2 -translate-y-1/2 z-nav hidden flex-col lg:flex',
+        'h-auto max-h-[calc(100dvh-32px)] rounded-[32px] border border-border/80 bg-panel shadow-xl select-none',
+        'transition-[width,box-shadow] duration-200 ease-std overflow-hidden p-2.5',
         hovered ? 'w-[240px] shadow-2xl' : 'w-[72px]',
       )}
     >
-      <div className={cn('app-drag flex h-14 shrink-0 items-center overflow-hidden', hovered ? 'px-4' : 'justify-center px-0')}>
+      <div className={cn('app-drag flex h-10 shrink-0 items-center overflow-hidden mb-1', hovered ? 'px-2' : 'justify-center px-0')}>
         <Mark collapsed={!hovered} />
       </div>
 
-      <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-2.5 py-2 overflow-y-auto scrollbar-none">
+      <nav aria-label="Main" className="flex flex-col gap-1 w-full overflow-y-auto scrollbar-none py-1">
         {items.map((item) => (
           <div key={item.to} className="w-full flex justify-center">
             {hovered ? (
@@ -117,7 +117,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                 end={item.to === '/'}
                 className={({ isActive }) =>
                   cn(
-                    'flex h-11 w-full items-center rounded-full px-3.5 my-0.5 transition-all duration-base text-body',
+                    'flex h-10 w-full items-center rounded-full px-3 my-0.5 transition-all duration-base text-body',
                     isActive
                       ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
                       : 'text-muted hover:text-fg hover:bg-raised/70 font-medium',
@@ -126,8 +126,8 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
               >
                 {({ isActive }) => (
                   <>
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                      <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                      <item.icon size={19} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                     </span>
                     <span className="ml-3 truncate whitespace-nowrap">{item.label}</span>
                     {item.to === '/devices' && <Count n={pending} label="new devices found" active={isActive} />}
@@ -141,7 +141,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                 title={item.label}
                 className={({ isActive }) =>
                   cn(
-                    'relative my-0.5 flex h-9 w-14 items-center justify-center rounded-full transition-all duration-base',
+                    'relative my-0.5 flex h-9 w-13 items-center justify-center rounded-full transition-all duration-base',
                     isActive
                       ? 'bg-primary-container text-on-primary-container shadow-sm'
                       : 'text-muted hover:text-fg hover:bg-raised/70',
@@ -150,7 +150,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
               >
                 {({ isActive }) => (
                   <>
-                    <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                    <item.icon size={19} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                     {item.to === '/devices' && pending > 0 && (
                       <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={`${pending} new devices`} />
                     )}
@@ -161,14 +161,14 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
           </div>
         ))}
 
-        <div className="w-full flex justify-center mt-2 pt-2 border-t border-border/40">
+        <div className="w-full flex justify-center mt-1 pt-1 border-t border-border/40">
           {hovered ? (
             <button
               onClick={onNotifications}
-              className="flex h-11 w-full items-center rounded-full px-3.5 my-0.5 transition-all duration-base text-body text-muted hover:text-fg hover:bg-raised/70 font-medium cursor-pointer"
+              className="flex h-10 w-full items-center rounded-full px-3 my-0.5 transition-all duration-base text-body text-muted hover:text-fg hover:bg-raised/70 font-medium cursor-pointer"
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                <Bell size={20} aria-hidden />
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                <Bell size={19} aria-hidden />
               </span>
               <span className="ml-3 truncate whitespace-nowrap">Notifications</span>
               <Count n={unread} label="unread" tone="danger" />
@@ -177,9 +177,9 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
             <button
               onClick={onNotifications}
               title={unread ? `Notifications (${unread} unread)` : 'Notifications'}
-              className="relative my-0.5 flex h-9 w-14 items-center justify-center rounded-full text-muted hover:text-fg hover:bg-raised/70 cursor-pointer transition-all duration-base"
+              className="relative my-0.5 flex h-9 w-13 items-center justify-center rounded-full text-muted hover:text-fg hover:bg-raised/70 cursor-pointer transition-all duration-base"
             >
-              <Bell size={20} aria-hidden />
+              <Bell size={19} aria-hidden />
               {unread > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={`${unread} unread notifications`} />
               )}
@@ -189,9 +189,9 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-border/60 p-2.5 shrink-0">
+      <div className="border-t border-border/60 pt-2 mt-1 shrink-0 w-full">
         {hovered ? (
-          <div className="flex items-center gap-2 rounded-full bg-raised/50 p-1.5 border border-border/50 anim-fade">
+          <div className="flex items-center gap-2 rounded-full bg-raised/50 p-1 border border-border/50 anim-fade">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm">
               {user?.username.slice(0, 1)}
             </span>
@@ -203,8 +203,8 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
             <Button variant="ghost" size="sm" aria-label="Sign out" title="Sign out" className="rounded-full h-8 w-8" icon={<SignOut size={16} />} onClick={signOut} />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2.5 py-1">
-            <ThemeToggle size="sm" className="rounded-full h-10 w-10 bg-raised/40 hover:bg-raised" />
+          <div className="flex flex-col items-center gap-2">
+            <ThemeToggle size="sm" className="rounded-full h-9 w-9 bg-raised/40 hover:bg-raised" />
             <span
               title={`${user?.username} (${user?.role})`}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm cursor-default"
