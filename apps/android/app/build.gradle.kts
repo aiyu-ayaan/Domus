@@ -22,6 +22,20 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "Docus Dev"
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appName"] = "Docus"
+        }
+    }
+
     signingConfigs {
         keystoreProps.getProperty("storeFile")?.let { path ->
             create("release") {
@@ -41,7 +55,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
         debug {
-            applicationIdSuffix = ".debug"
+            // Dev flavor isolates applicationId with .dev suffix
         }
     }
 

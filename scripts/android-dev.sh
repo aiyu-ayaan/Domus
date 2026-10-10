@@ -15,7 +15,7 @@ if ! "$ADB" devices | awk 'NR>1 && $2=="device"' | grep -q .; then
   until [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do sleep 2; done
 fi
 
-(cd apps/android && ./gradlew :app:installDebug)
+(cd apps/android && ./gradlew :app:installDevDebug)
 "$ADB" reverse tcp:8443 tcp:8443 >/dev/null 2>&1 || true
-"$ADB" shell am start -n com.aiyu.domus.debug/com.aiyu.domus.MainActivity >/dev/null
-echo "Domus is open. Dev server: tap the discovered server, or enter localhost:8443."
+"$ADB" shell am start -n com.aiyu.domus.dev/com.aiyu.domus.MainActivity >/dev/null
+echo "Domus Dev is open. Dev server: tap the discovered server, or enter localhost:8443."

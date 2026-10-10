@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark slate launcher background for Dev variant so it stands apart from Prod on the launcher grid -->
+    <color name="ic_launcher_background">#18181B</color>
+</resources>
