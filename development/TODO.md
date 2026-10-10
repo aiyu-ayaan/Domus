@@ -111,6 +111,16 @@
 - [ ] Run against a real Cloudflare Tunnel
 - [ ] Install the `.deb` and check the launcher icon; test Android switching on a phone that leaves the Wi-Fi
 
+## Milestone 12: Light theme, Theme toggle, and Auto-collapsing sidebar (DONE — 2026-10-10)
+- [x] Web reactive theme store (`apps/web/src/lib/theme.ts`) with `useSyncExternalStore`, OS media query listener, and cross-tab storage sync
+- [x] Reusable `ThemeToggle` component with Sun/Moon Phosphor icons for quick one-click theme switching
+- [x] Light & dark tokens reinforced in `apps/web/src/index.css` with explicit `:root[data-theme='dark']` and smooth 150ms theme transition
+- [x] Auto-collapsing sidebar in `AppShell.tsx`: 64px compact icon rail when idle, smooth 150ms hover-to-expand to 232px with zero-reflow layout stability
+- [x] Collapsed rail indicators: centered icons, badge indicator dots for unread notifications and pending devices, and stacked footer with theme toggle
+- [x] Mobile navigation parity: theme toggle in sticky header and in the 'More' sheet
+- [x] Android theme presets aligned with Docus Swiss design tokens in `apps/android/ui-shared/src/main/java/com/aiyu/domus/ui/theme/Color.kt` (neutral Zinc with on-green accents)
+- [x] Architecture documentation with Mermaid diagrams in `development/docs/THEME_AND_NAVIGATION.md`
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications
@@ -122,4 +132,5 @@
 - [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
 - [ ] Packaged Electron builds for macOS and Windows
+
 
