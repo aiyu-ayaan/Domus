@@ -52,6 +52,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +90,8 @@ fun FloatingNavScaffold(tabs: List<NavTab>, selected: Int, onSelect: (Int) -> Un
     val effects = motion.defaultEffectsSpec<Float>()
     val fastEffects = motion.fastEffectsSpec<Float>()
     val spatial = motion.defaultSpatialSpec<Float>()
+    // A tab keeps its scroll while another one is shown.
+    val saved = rememberSaveableStateHolder()
     val page: @Composable () -> Unit = {
         AnimatedContent(
             targetState = selected,
@@ -96,7 +99,7 @@ fun FloatingNavScaffold(tabs: List<NavTab>, selected: Int, onSelect: (Int) -> Un
             // M3 "fade through": outgoing fades fast, incoming fades + scales up slightly.
             transitionSpec = { (fadeIn(effects) + scaleIn(spatial, initialScale = 0.94f)).togetherWith(fadeOut(fastEffects)) },
             label = "tab",
-        ) { current -> Surface(Modifier.fillMaxSize()) { content(current) } }
+        ) { current -> saved.SaveableStateProvider(current) { Surface(Modifier.fillMaxSize()) { content(current) } } }
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
