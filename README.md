@@ -5,7 +5,9 @@
 A local-first smart-home hub for your home server. Rust backend, SQLite,
 React web UI (with an Electron desktop shell), and pluggable integrations for
 **Tuya / Smart Life** (QR-code login, no developer account), **TP-Link Tapo**
-(local) and **Xiaomi Mi Home** (local, tokens from your Mi account).
+(local), **Xiaomi Mi Home** (local, tokens from your Mi account), **Philips Hue**
+(local bridge) and **MQTT** (Zigbee2MQTT, ESPHome and anything else that speaks
+Home Assistant discovery).
 
 - Automatic discovery of new devices, with an inbox or auto-add
 - Live dashboard: power draw, bill so far and projected bill, air quality
@@ -159,8 +161,13 @@ Settings live in `config/default.toml`; any key can be overridden with
 | Brand | How |
 |---|---|
 | Tuya / Smart Life | Integrations → *Link with QR code*. Enter the **User Code** from Smart Life (Me → Settings → Account and Security → User Code), then scan the QR in the app. |
-| Tapo | Integrations → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. |
+| Tapo | Integrations → *Link account* with your TP-Link ID. Devices on the LAN are found automatically and controlled locally. An H100 hub brings its sensors, switches and thermostats with it. Cameras are listed but not supported yet. |
 | Xiaomi | Integrations → *Link account* with your Mi account and server region. If Xiaomi asks for two-step verification, enter the code it emails or texts you in the same panel. The account can be an email, a phone number with country code (`+91…`) or a Xiaomi ID. Tokens are fetched once; control is local. Devices can also be added with a token. |
+| Philips Hue | Press the round button on the bridge, then Integrations → Philips Hue → *Link* within 30 seconds. Leave the address empty to find the bridge automatically. Lights and Hue smart plugs are controlled locally. |
+| MQTT | Integrations → MQTT → *Link* with your broker's address, port and login. Devices that announce themselves through Home Assistant MQTT discovery (Zigbee2MQTT, ESPHome, …) appear under Discovered: lights, switches, plugs, fans and sensors. With the bundled broker (`--profile mqtt`) the address is `mqtt`, port `1883`. |
+
+Hue, MQTT and the Tapo hub have not been run against real hardware yet; see
+`development/docs/INTEGRATIONS.md` for what each integration covers.
 
 ## Electricity billing
 

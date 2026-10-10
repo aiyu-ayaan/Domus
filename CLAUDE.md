@@ -6,7 +6,7 @@ many more..
 It will include all the feature like automaction,ground devices like add them to bedroom, same like [Home Assistant](https://www.home-assistant.io/). 
 
 ## MVP
-For MVP integration will include the devices from Tuya, Xiomi and Tapo. 
+For MVP integration will include the devices from Tuya, Xiomi and Tapo. Philips Hue (local bridge) and MQTT (Home Assistant discovery) are also built in.
 
 - For Tuya devices use the Scan QR functionality present on the Home Assistant https://www.home-assistant.io/integrations/tuya/#scanning-the-qr-code.. No admin pannel requirents..
 
@@ -102,11 +102,12 @@ home-automation/
 │       │   ├── notifications/
 │       │   └── users/
 │       │
-│       ├── integrations/
+│       ├── integrations/           # one folder per plugin, see development/docs/INTEGRATIONS.md
+│       │   ├── tuya/
+│       │   ├── tapo/
+│       │   ├── xiaomi/
 │       │   ├── mqtt/
-│       │   ├── matter/
-│       │   ├── zigbee/
-│       │   └── esp32/
+│       │   └── hue/
 │       │
 │       ├── automation_engine/
 │       │   ├── mod.rs
@@ -117,7 +118,6 @@ home-automation/
 │       │
 │       ├── infrastructure/
 │       │   ├── database.rs
-│       │   ├── mqtt_client.rs
 │       │   ├── event_bus.rs
 │       │   └── logging.rs
 │       │
@@ -159,6 +159,7 @@ home-automation/
 
 - On this need to work on the web and electron version of the application.. 
 - Docker, the Cloudflare Tunnel setup, the home/remote server addresses and the desktop app are documented in `development/docs/DEPLOYMENT.md`. Read it before changing `Dockerfile`, `docker-compose.yml`, `apps/desktop` or `modules/server.rs`. The desktop window has no native title bar or menu; keep it that way.
+- Integrations (Tuya, Tapo with hubs, Xiaomi, MQTT, Philips Hue), how form-based linking works and what has been checked on real hardware are documented in `development/docs/INTEGRATIONS.md`. Read it before adding or changing a plugin under `backend/src/integrations` or the catalog in `modules/integrations/mod.rs`. New plugins describe their link form in the catalog, so no client change is needed. Tapo cameras are not supported (they need OpenSSL instead of rustls).
 - Startup performance (Android baseline profile, web entry chunk, backend compression and asset caching, desktop server probing) is documented in `development/docs/PERFORMANCE.md`. Read it before touching `apps/android/baselineprofile`, the static file serving in `api/routes.rs` or anything imported by the web entry. Re-record the Android profile with `pnpm android:profile` after larger UI changes.
 - Releases are marker commits on `master` (`!alpha`, `!beta`, `!stable`, `!fix`, `!feat`, `!major`, `!patch`) that open a release PR; merging it builds and publishes. Versions, the build number, update channels and the required secrets are in `development/docs/RELEASE.md`. Read it before changing `.github/workflows/release.yml`, `scripts/release-version.mjs`, `scripts/set-version.mjs`, `scripts/install-linux.sh` or any version field. Never edit a version by hand; `docker-compose.yml` runs the published image, `docker-compose.local.yml` builds from source.
 - The native android app lives in `apps/android` (package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`, Material 3 Expressive). Read `development/docs/ANDROID_APP.md` before changing it. It does not follow the web design profile below. Clicks give haptic feedback through the theme's `LocalIndication` (`ui-shared/.../theme/Haptics.kt`); use `HapticSwitch` rather than `Switch` for toggles with a callback.

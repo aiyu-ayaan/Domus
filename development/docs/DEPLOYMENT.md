@@ -42,7 +42,7 @@ DOMUS_VERSION=alpha docker compose up -d                    # a channel or an ex
 docker compose -f docker-compose.local.yml up -d --build    # build here instead
 docker compose logs -f domus      # shows the TLS certificate fingerprint on start
 DOMUS_PORT=9443 TZ=Asia/Kolkata docker compose up -d        # another port, local time for schedules
-docker compose --profile mqtt up -d    # also start the optional Mosquitto broker
+docker compose --profile mqtt up -d    # also start the optional Mosquitto broker (link it under Integrations as host mqtt, port 1883)
 ```
 
 | | |

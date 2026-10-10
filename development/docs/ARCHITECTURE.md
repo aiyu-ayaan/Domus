@@ -23,7 +23,7 @@ flowchart LR
             M2["devices · discovery · groups"]
             M3["rooms · scenes · automations"]
             M4["energy · notifications"]
-            M5["integrations (accounts, Tuya QR)"]
+            M5["integrations (accounts, Tuya QR, link forms)"]
         end
         WS["/ws live events"]
         Mgr["DeviceManager<br/>poll · discover · adopt · command"]
@@ -37,6 +37,8 @@ flowchart LR
         Tuya["Tuya / Smart Life<br/>cloud, QR login"]
         Tapo["Tapo<br/>local KLAP + UDP 20002"]
         Xiaomi["Xiaomi<br/>Mi cloud tokens + local miIO"]
+        Mqtt["MQTT<br/>broker + Home Assistant discovery"]
+        Hue["Philips Hue<br/>local bridge API"]
     end
 
     DB[("SQLite (WAL)<br/>data/domus.db")]
@@ -81,6 +83,8 @@ classDiagram
     IntegrationPlugin <|.. TuyaIntegration
     IntegrationPlugin <|.. TapoIntegration
     IntegrationPlugin <|.. XiaomiIntegration
+    IntegrationPlugin <|.. MqttIntegration
+    IntegrationPlugin <|.. HueIntegration
     TuyaIntegration --> CredentialStore : persists refreshed tokens
     XiaomiIntegration --> CredentialStore : persists re-login
     DeviceManager --> IntegrationPlugin : only caller
@@ -88,7 +92,10 @@ classDiagram
 
 Plugins never touch the database. The `DeviceManager` decrypts credentials and
 device secrets, builds a `DeviceContext`, and stores whatever comes back.
-`fetch_states` is batched so cloud plugins (Tuya) answer a whole home in one call.
+`fetch_states` is batched so cloud plugins (Tuya) answer a whole home in one call;
+Hue and Tapo hubs use it for one request per bridge or hub. The `DeviceContext`
+also carries the last stored state, which MQTT lays its cached messages over.
+What each plugin covers and how it is linked is in `INTEGRATIONS.md`.
 
 ## 3. Discovery and adoption
 
@@ -199,6 +206,8 @@ the Mi Home app or a browser and retry.
 |---|---|---|---|
 | Tapo | UDP broadcast to :20002 | KLAP v2/v1 over HTTP: handshake proves both sides know the account hash, then AES-128-CBC with per-request sequence IV and SHA-256 signature. Device firmware ("SHIP 2.0") answers `400` to lowercase header names, so the client sends title-case headers | TP-Link email/password (sealed) |
 | Xiaomi | Mi cloud device list (token + LAN IP) and miIO hello broadcast on :54321 | miIO UDP, AES-128-CBC keyed by MD5(token); MIoT `get/set_properties` mapped from miot-spec.org | Account password + device tokens (sealed) |
+| MQTT | Home Assistant discovery configs retained under `homeassistant/` | Publish to the entity's command topics; state comes from a cache of subscribed topics | Broker address and login (sealed) |
+| Hue | Lights listed by the bridge | Bridge API v1 over HTTPS on the LAN | Bridge address and app key (sealed) |
 | Tuya | Smart Life homes → devices → DP specifications | Cloud commands on DP codes, scaled using the DP spec | OAuth tokens + local keys (sealed) |
 
 ## 6. State, events and energy

@@ -180,9 +180,9 @@
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7
 - [ ] Tuya local control (protocol 3.3/3.4/3.5) using stored local keys, cloud as fallback
 - [ ] Tuya realtime MQTT push instead of polling
-- [ ] Tapo: hub child devices
+- [x] Tapo: hub child devices (H100)
 - [ ] Xiaomi: legacy (non-MIoT) devices
-- [ ] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
+- [x] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
 - [ ] Per-device energy tariffs / time-of-use rates
 - [ ] Packaged Electron builds for macOS and Windows
 
@@ -203,3 +203,15 @@
 - [x] Web + desktop: separate `/about` page (version, build, environment, privacy, source, developer) and `/about/acknowledgements`, linked from Settings > About; credits in `apps/web/src/lib/credits.ts`
 - [x] Android: `About.kt` pages `about` and `acknowledgements` opened from Settings; same shared-axis enter and predictive-back shrink as every page, Acknowledgements backs out to About and slides by depth
 - [ ] Check the predictive back gesture on a real Android 14+ device
+
+## Milestone 18: MQTT, Philips Hue and Tapo hubs (2026-10-11)
+- [x] Form-based linking: catalog entries list their inputs, web and Android render them (`POST /integrations/{id}/accounts`)
+- [x] MQTT plugin: brokers linked as accounts, Home Assistant discovery (lights, switches, plugs, fans, sensors), run end to end against Mosquitto
+- [x] Philips Hue plugin: button pairing, lights and plugs through the local bridge API, run against a stand-in bridge
+- [x] Tapo H100 hub: child sensors, switches and KE100 thermostats through `control_child`
+- [x] Tapo cameras appear under Discovered with a "not supported yet" note; `development/docs/INTEGRATIONS.md`
+- [ ] Verify on hardware: a real Zigbee2MQTT device, a real Hue bridge, a Tapo H100 with a sensor
+- [ ] Tapo cameras: need TLS with RSA key exchange (OpenSSL, not rustls) and a camera to test on
+- [ ] MQTT: covers and climate, devices without Home Assistant discovery (manual topics), state pushed as it arrives instead of on the poll
+- [ ] Hue: motion sensors and scenes; follow the bridge when its IP changes
+- [ ] Show sensor readings (`motion`, `contact`, `battery`) on the device page, not only in the tile summary
