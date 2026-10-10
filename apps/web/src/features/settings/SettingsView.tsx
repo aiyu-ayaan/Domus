@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
+import { CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
 import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
@@ -211,6 +212,10 @@ function AboutCard() {
     <Card>
       <CardHeader title="About" />
       <div className="divide-y divide-border">
+        <Link to="/about" className="flex min-h-12 items-center justify-between px-4 transition-colors duration-fast hover:bg-raised">
+          <span>About Domus</span>
+          <CaretRight size={16} className="text-subtle" aria-hidden />
+        </Link>
         <div className="flex min-h-12 items-center justify-between px-4">
           <span className="text-muted">Version</span>
           <span>

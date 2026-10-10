@@ -13,6 +13,8 @@ const AutomationsView = lazy(() => import('@/features/automations/AutomationsVie
 const EnergyView = lazy(() => import('@/features/energy/EnergyView').then((m) => ({ default: m.EnergyView })))
 const AirQualityView = lazy(() => import('@/features/airquality/AirQualityView').then((m) => ({ default: m.AirQualityView })))
 const IntegrationsView = lazy(() => import('@/features/integrations/IntegrationsView').then((m) => ({ default: m.IntegrationsView })))
+const AboutView = lazy(() => import('@/features/settings/AboutView').then((m) => ({ default: m.AboutView })))
+const AcknowledgementsView = lazy(() => import('@/features/settings/AboutView').then((m) => ({ default: m.AcknowledgementsView })))
 const SettingsView = lazy(() => import('@/features/settings/SettingsView').then((m) => ({ default: m.SettingsView })))
 
 function AdminOnly({ children }: { children: JSX.Element }) {
@@ -37,6 +39,8 @@ export default function App() {
           <Route path="air-quality" element={<Lazy><AirQualityView /></Lazy>} />
           <Route path="plugins" element={<AdminOnly><Lazy><IntegrationsView /></Lazy></AdminOnly>} />
           <Route path="settings" element={<Lazy><SettingsView /></Lazy>} />
+          <Route path="about" element={<Lazy><AboutView /></Lazy>} />
+          <Route path="about/acknowledgements" element={<Lazy><AcknowledgementsView /></Lazy>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

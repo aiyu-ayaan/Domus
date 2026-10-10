@@ -48,6 +48,9 @@ private val Tabs = listOf(
     "settings" to NavTab("Settings", Icons.Outlined.Settings, Icons.Rounded.Settings),
 )
 
+/** How deep a page sits: tabs 0, pages 1, About's Acknowledgements 2. Decides which way a change slides. */
+private fun pageDepth(page: String?) = when (page) { null -> 0; "acknowledgements" -> 2; else -> 1 }
+
 @Composable
 fun MainScreen(session: Session.SignedIn) {
     val repository = LocalRepository.current
@@ -63,7 +66,8 @@ fun MainScreen(session: Session.SignedIn) {
     // Each screen keeps its scroll while another one covers it. Opening a page drops what it kept, so it starts at the top.
     val saved = rememberSaveableStateHolder()
     val open = { key: String -> saved.removeState(key); page = key }
-    val close = { page = null }
+    // Acknowledgements sits one level under About; every other page returns to the tabs.
+    val close = { page = if (page == "acknowledgements") "about" else null }
     // Back from a tab or a page previews as the screen shrinking, then returns to Home or the tabs.
     val pageBack = rememberPredictiveBack(page != null, close)
     val tabBack = rememberPredictiveBack(page == null && tab != "home") { tab = "home" }
@@ -76,7 +80,7 @@ fun MainScreen(session: Session.SignedIn) {
             targetState = page,
             // Shared axis X: a page slides in from the end, the tabs come back from the start.
             // Shared axis X: a page slides in from the end, the tabs come back from the start.
-            transitionSpec = { sharedAxisX(targetState != null, motion) },
+            transitionSpec = { sharedAxisX(pageDepth(targetState) > pageDepth(initialState), motion) },
             label = "page",
         ) { current -> saved.SaveableStateProvider(current ?: "tabs") {
             when {
@@ -101,6 +105,8 @@ fun MainScreen(session: Session.SignedIn) {
                 current == "tariff" -> TariffPage(close)
                 current == "notices" -> NoticesPage(close)
                 current == "links" -> ServerLinksPage(user.isAdmin, close)
+                current == "about" -> AboutPage(close, onOpenAcknowledgements = { open("acknowledgements") })
+                current == "acknowledgements" -> AcknowledgementsPage(close)
                 current == "avatar" -> AvatarCustomizationPage(user, close)
                 current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
                 current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)

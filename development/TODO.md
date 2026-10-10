@@ -198,3 +198,8 @@
 - [x] Android: update downloaded and installed from Settings > Updates (asks only for the install permission)
 - [x] Windows installer built by the release workflow (unverified until the first release; job is continue-on-error)
 - [ ] Desktop: arm64 Linux build
+
+## Milestone 17: About Domus page (2026-10-10)
+- [x] Web + desktop: separate `/about` page (version, build, environment, privacy, source, developer) and `/about/acknowledgements`, linked from Settings > About; credits in `apps/web/src/lib/credits.ts`
+- [x] Android: `About.kt` pages `about` and `acknowledgements` opened from Settings; same shared-axis enter and predictive-back shrink as every page, Acknowledgements backs out to About and slides by depth
+- [ ] Check the predictive back gesture on a real Android 14+ device

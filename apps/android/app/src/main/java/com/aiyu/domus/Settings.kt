@@ -23,6 +23,7 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Payments
@@ -232,6 +233,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         }
 
         RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
+        RowCard("About Domus", "Version ${version ?: ""}, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
 
         SectionTitle("Appearance")
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().enterStaggered(2)) {
