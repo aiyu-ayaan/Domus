@@ -246,6 +246,8 @@ export interface EnergyPoint {
   t: string
   kwh: number
   cost: number
+  /** Average measured power; null where nothing was measured. */
+  watts: number | null
 }
 
 /** Averages of one hour / day; null where nothing was measured. */
