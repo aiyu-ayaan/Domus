@@ -1,8 +1,9 @@
 # Android app (`apps/android`)
 
 Native client for the Domus server. Package `com.aiyu.domus`, Jetpack Compose, Material 3 Expressive.
-It is a remote for the home: it shows and controls what the server manages. Linking integrations and
-building scenes or automations stays in the web app.
+It does what the web app does: control, onboarding (plugins, discovery, adoption), rooms, people, tariff,
+scenes and automations, analytics, and Screen Sync from the phone's own screen. Both clients talk to the same
+server, so a device added in one appears in the other through the event stream.
 
 ## 1. Modules
 
@@ -10,14 +11,16 @@ building scenes or automations stays in the web app.
 flowchart TD
     subgraph app[":app — com.aiyu.domus"]
         MA[MainActivity / DomusRoot]
-        CS[ConnectScreen · AuthScreen · UnreachableScreen]
-        MS[MainScreen: Home · Devices · Scenes · Energy · Settings]
+        CS[OnboardingScreen · ConnectScreen · AuthScreen · UnreachableScreen]
+        MS[MainScreen tabs: Home · Devices · Scenes · Analytics · Settings]
+        PG[Pages: Add devices · Plugins · Rooms · People · Tariff · Notifications · Scene / Automation editor]
         DS[DeviceSheet]
+        SV[ScreenSyncService · AlertsService · BootReceiver]
     end
     subgraph ui[":ui-shared — com.aiyu.domus.ui"]
         TH[DomusTheme: MaterialExpressiveTheme + MotionScheme.expressive]
         NAV[FloatingNavScaffold: pill bar / rail]
-        CMP[MorphingShape · ScreenHeader · ShapedIcon · RollingText · pressScale · enterStaggered]
+        CMP[MorphingShape · ScreenHeader · ShapedIcon · RollingText · ColorWheel · BarChart · LineChart]
     end
     subgraph core[":core — com.aiyu.domus.core"]
         REPO[DomusRepository: StateFlows]
@@ -25,9 +28,12 @@ flowchart TD
         TLS[Tls: pinned trust manager]
         DISC[ServerDiscovery: UDP broadcast]
         STORE[SecureStore: Keystore AES-GCM]
+        COL[screenColor: frame -> light color]
     end
     MA --> CS & MS
-    MS --> DS
+    MS --> DS & PG
+    SV --> REPO
+    SV --> COL
     app --> ui
     app --> core
     REPO --> API --> TLS
@@ -90,6 +96,47 @@ structural events refetch, `notification` becomes a snackbar. Reconnects back of
 Commands are optimistic: the tile shows the new state at once, the server's answer replaces it, and a failure
 restores the old state and shows the server's message.
 
+### Staying in sync with the web app
+
+`DomusRepository.revision` counts server-side changes the repository does not hold itself (`device_discovered`,
+`discovery_finished`, `integrations_changed`, `notification`, device add/remove). Pages that list such things
+(Add devices, Plugins, Notifications, Home's activity) reload when it moves. Adopting a device on the web makes
+it leave the phone's "found" list and appear under Devices, and the other way round.
+
+### Editors
+
+Triggers, conditions and actions are kept as the JSON objects the server stores (`Scene.actions`,
+`Automation.triggers` …). The app builds the common kinds and passes every other object through untouched, so
+a rule written on the web (group commands, color actions) survives being saved from the phone.
+
+### Screen Sync on the phone
+
+```mermaid
+sequenceDiagram
+    participant UI as Scenes tab
+    participant Sys as Android consent dialog
+    participant Svc as ScreenSyncService (mediaProjection)
+    participant Srv as Server /scenes/:id/sync
+    UI->>Sys: createScreenCaptureIntent()
+    Sys-->>UI: grant
+    UI->>Svc: start(sceneId, grant)
+    Svc->>Svc: VirtualDisplay 96x54 -> ImageReader
+    Svc->>Srv: WSS open
+    Srv-->>Svc: ready
+    loop fps from the scene config
+        Svc->>Svc: screenColor() + smoothing
+        Svc->>Srv: {"c":"#rrggbb","b":1-100}
+    end
+    Srv-->>Svc: stopped (scene switched off anywhere)
+    Svc->>Srv: close -> lights restored
+```
+
+### Alerts while closed
+
+A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Settings, foreground service of type
+`specialUse`) sets `DomusRepository.keepLive`, which keeps the event stream open off screen, and turns
+`notification` events into system notifications. `BootReceiver` restarts it after a reboot or update.
+
 ## 4. UI
 
 - **Navigation** — `FloatingNavScaffold` is the Rewire bar: a floating pill on phones whose selected tab grows
@@ -99,6 +146,15 @@ restores the old state and shows the server's message.
   increased corner scale, emphasized type, `MaterialShapes` badges, the morphing brand mark,
   `LoadingIndicator`, `LinearWavyProgressIndicator`, shape-morphing `ToggleButton`, tiles that change color
   and corner radius when a device turns on, staggered entrances, rolling numbers.
+- **Before sign-in** — a three-page introduction on first run (`HorizontalPager`, shapes that turn away as a
+  page leaves), then connect and sign-in on a raised panel over drifting tonal shapes.
+- **Home** — live stat cards (only for what the home measures), scene cards, what is on, rooms, recent activity.
+- **Analytics** — the tab exists only when a device measures power or air, and shows Electricity, Air quality,
+  or a switch between the two. Electricity: live use, today / cycle, history bars, insights (peak hour, daily
+  average, today vs average, top device), billing-cycle progress, per-device share. Air quality: PM2.5 with a
+  WHO scale, purifier / filter / climate facts, a trend line (PM2.5, temperature, humidity) from
+  `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
+  value as text.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
   and swatches carry descriptions; content is capped at 840dp on wide windows.
@@ -112,10 +168,22 @@ cd apps/android
 ./gradlew :app:assembleRelease        # minified; signed when keystore.properties exists
 ```
 
-Emulator: the host's server is `10.0.2.2:8443` (broadcast discovery does not cross the emulator's NAT).
+From the repository root:
+
+```bash
+pnpm dev          # backend + web + gateway
+pnpm gateway      # the gateway alone
+pnpm android:dev  # build, install on the connected phone / emulator (starts one if needed), open the app
+```
+
+The dev server listens on `127.0.0.1` only. `scripts/gateway.mjs` forwards each LAN address (same port, raw TCP
+so TLS stays end to end) to it and keeps `adb reverse tcp:8443` set. A phone on Wi-Fi then finds the server by
+broadcast; an emulator or USB phone, where broadcasts don't arrive, finds it at `localhost:8443` (discovery
+probes that and `10.0.2.2` when the broadcast finds nothing).
 
 ## 6. Not in the app yet
 
-Linking integrations (Tuya QR, Tapo, Xiaomi), adopting discovered devices, creating or editing rooms, groups,
-scenes and automations, user management, electricity tariff settings, starting Screen Sync (needs a screen to
-capture), a free color wheel, push notifications while the app is closed.
+Device groups (create / command), discovery settings (interval, auto-adopt), changing your own password,
+editing a trigger / condition / action in place (remove it and add it again), color and group actions in the
+editors (kept if they exist, not creatable), Screen Sync smoothing / fps / brightness-range settings (stored
+values are kept), ignored-device restore.

@@ -86,6 +86,17 @@
 - [x] Verified on an emulator (debug and minified release) against a local server
 - [x] Docs: `development/docs/ANDROID_APP.md`
 
+## Milestone 10: Android parity, analytics and dev tooling (2026-10-10)
+- [x] Android onboarding: Plugins (Tuya QR, Tapo, Xiaomi + verification code), Add devices (scan, adopt, ignore, add by address), synced with the web through the event stream
+- [x] Android management: rooms, people (roles, room access), electricity tariff with slabs, notification inbox, device rename / move / remove
+- [x] Android scene and automation editors (JSON-preserving), Screen Sync from the phone screen (MediaProjection), free color wheel
+- [x] Android alerts while closed (opt-in foreground service) with boot restart
+- [x] Android first-run introduction, redesigned connect / sign-in, Home with scene cards, rooms and recent activity
+- [x] Analytics tab on Android (Electricity + Air quality, dynamic), charts with selectable buckets
+- [x] Backend: `air_metrics` history + `GET /air/history`; web: air quality trend chart, insights on Energy and Air Quality
+- [x] `pnpm gateway` (LAN + adb forwarding for the dev server, started by `pnpm dev`) and `pnpm android:dev`
+- [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications

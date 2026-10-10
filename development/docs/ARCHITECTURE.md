@@ -280,6 +280,12 @@ flowchart TB
   create users. Roles and room access are re-read on every request, so changes
   apply immediately. Device and WebSocket data are filtered by room access.
 
+### Air quality history
+
+Devices that report PM2.5 are sampled every five energy intervals into `air_metrics` (with temperature and
+humidity when present). `GET /air/history?range=day|week|month` returns per-bucket averages, `null` where
+nothing was measured; retention follows `energy_retention_days`.
+
 ### Clients finding the server
 
 The server answers `DOMUS_DISCOVER` on UDP 48443 (`infrastructure/beacon.rs`) with its API port, and logs its

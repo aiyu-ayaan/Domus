@@ -15,7 +15,7 @@ Rust + MQTT + React
 
 For Backend use the rust and for frontend use the react and react navigate for desktop build..
 
-pnpm can be use to ran project. with `npm run dev` to ran both backend and frontend and also have `dev:web` and `dev:backend` to ran in individually.. 
+pnpm can be use to ran project. with `npm run dev` to ran both backend and frontend and also have `dev:web` and `dev:backend` to ran in individually.. `pnpm dev` also starts the Android dev gateway (`pnpm gateway`, see `scripts/gateway.mjs`); `pnpm android:dev` builds, installs and opens the Android app.
 
 For Now database will be sqlite. and make sure all requirest are encrypted.. 
 
