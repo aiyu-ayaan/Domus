@@ -86,6 +86,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun login(username: String, password: String) =
         call("POST", "/auth/login", AuthResponse.serializer(), fields("username" to username, "password" to password))
     suspend fun me() = call("GET", "/auth/me", User.serializer())
+    suspend fun updateAvatar(avatar: String) =
+        call("PUT", "/auth/me/avatar", User.serializer(), fields("avatar" to avatar))
 
     suspend fun serverLinks() = call("GET", "/server/links", ServerLinks.serializer())
     suspend fun saveServerLinks(localUrl: String, remoteUrl: String) =
@@ -141,11 +143,12 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
 
     suspend fun users() = call("GET", "/users", ListSerializer(User.serializer()))
     /** [id] null creates (then [username] and [password] are required); a null [password] keeps the current one. */
-    suspend fun saveUser(id: String?, username: String, email: String, password: String?, role: String, allRooms: Boolean, roomIds: List<String>) =
+    suspend fun saveUser(id: String?, username: String, email: String, password: String?, role: String, allRooms: Boolean, roomIds: List<String>, avatar: String? = null) =
         write(if (id == null) "POST" else "PUT", "/users${id?.let { "/$it" }.orEmpty()}", buildJsonObject {
             if (id == null) put("username", username)
             put("email", email); put("role", role); put("all_rooms", allRooms)
             password?.let { put("password", it) }
+            avatar?.let { put("avatar", it) }
             put("room_ids", JsonArray(roomIds.map(::JsonPrimitive)))
         })
     suspend fun removeUser(id: String) = write("DELETE", "/users/$id")

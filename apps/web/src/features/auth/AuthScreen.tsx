@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { LockSimple } from '@phosphor-icons/react'
+import { DiceFive, LockSimple } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { ErrorText } from '@/components/ui/Card'
+import { Avatar } from '@/components/ui/Avatar'
+import { rollRandomAvatar } from '@/lib/avatar'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { errorMessage } from '@/lib/toast'
@@ -14,6 +16,7 @@ export function AuthScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [avatar, setAvatar] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const mismatch = setup && confirm.length > 0 && confirm !== password
@@ -24,7 +27,9 @@ export function AuthScreen() {
     setError(null)
     setLoading(true)
     try {
-      const res = setup ? await api.setup({ username, email, password }) : await api.login({ username, password })
+      const res = setup
+        ? await api.setup({ username, email, password, avatar: avatar || undefined })
+        : await api.login({ username, password })
       signIn(res.token, res.user)
     } catch (err) {
       setError(errorMessage(err))
@@ -42,6 +47,25 @@ export function AuthScreen() {
           {setup ? 'Create the administrator account for this home. You can add other people later.' : 'Use your Docus account.'}
         </p>
         <form onSubmit={submit} className="mt-6 flex flex-col gap-4 rounded-lg border border-border bg-panel p-5">
+          {setup && (
+            <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-raised/40 p-3">
+              <Avatar avatar={avatar || `dicebear:bottts:${username || 'admin'}`} username={username || 'Admin'} size="md" />
+              <div className="min-w-0 flex-1">
+                <p className="text-label font-medium text-fg">Profile avatar</p>
+                <p className="text-caption text-muted truncate">DiceBear random avatar</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                icon={<DiceFive size={16} />}
+                onClick={() => setAvatar(rollRandomAvatar().spec)}
+                title="Roll random avatar"
+              >
+                Roll
+              </Button>
+            </div>
+          )}
           <Field label="Username" autoComplete="username" required minLength={3} value={username} onChange={(e) => setUsername(e.target.value)} />
           {setup && <Field label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}
           <Field

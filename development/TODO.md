@@ -122,6 +122,29 @@
 - [x] Android theme preserved as original Material 3 Expressive botanical palette in `apps/android/ui-shared/src/main/java/com/aiyu/domus/ui/theme/Color.kt`
 - [x] Architecture documentation with Mermaid diagrams in `development/docs/THEME_AND_NAVIGATION.md`
 
+## Milestone 13: DiceBear Random Avatar & Universal Customization (DONE — 2026-10-10)
+- [x] Backend database migration `0006_user_avatar.sql`: adds `avatar TEXT` column to `users` table
+- [x] Backend models: `UserRecord` and `UserDto` include `avatar` with automatic fallback to deterministic `dicebear:bottts:{username}`
+- [x] Backend API endpoint: `PUT /api/v1/auth/me/avatar` allowing any authenticated user to update their avatar; `CreateUserRequest` and `UpdateUserRequest` support `avatar`
+- [x] Web & Desktop: integration of `@dicebear/core` and `@dicebear/collection` with 15 styles (Robots, Lorelei, Avataaars, Adventurer, Micah, Notionists, Pixel Art, Fun Emoji, Thumbs, Shapes, Rings, Identicon, Personas, Open Peeps, Big Smile)
+- [x] Web & Desktop Avatar library (`apps/web/src/lib/avatar.ts`): offline inlined SVG data URI generator, spec parser (`dicebear:{style}:{seed}`), HTTP API fallback, seed randomizer
+- [x] Web & Desktop UI components:
+  - `Avatar.tsx`: responsive liquid glass styled avatar with sizes (`xs` to `2xl`), specular glow ring, error recovery and initials fallback
+  - `AvatarPickerModal.tsx`: Apple liquid glass Avatar Studio dialog with real-time preview, 🎲 full avatar randomize, 🎲 seed roll, 15 visual collection selector cards, custom seed input, and quick suggestion presets
+- [x] Web & Desktop Screen integration:
+  - Settings screen: Account card profile banner with avatar, 1-click Quick Roll button, and full studio modal
+  - Navigation sidebar: floating pill dock displays user avatar in both collapsed capsule and expanded pill modes
+  - Mobile header and slide-out menu: displays user avatar and direct link to avatar customization
+  - Household People list & UserSheet: each person displays their avatar, and admins can roll or pick avatars when creating/editing members
+  - Overview dashboard: header displays user avatar with direct account link
+  - First-run setup (`AuthScreen.tsx`): initial admin avatar preview with 1-click randomize
+- [x] Native Android app (`apps/android`):
+  - Model & API updates: `User.avatar`, `DomusApi.updateAvatar`, `DomusRepository.updateAvatar`
+  - `UserAvatar` Compose component with OkHttp / URL PNG stream loading, in-memory `LruCache`, and Material 3 initials fallback
+  - `AvatarPickerDialog` Compose dialog with real-time preview, Randomize button, style selection chips, and custom seed field
+  - Screen integration: Settings profile hero card, Home dashboard greeting header, and Manage People user list and edit dialog
+- [x] Architecture documentation with Mermaid diagram in `development/docs/AVATAR_SYSTEM.md`
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications

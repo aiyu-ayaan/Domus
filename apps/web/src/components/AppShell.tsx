@@ -24,6 +24,7 @@ import { timeAgo } from '@/lib/format'
 import { Sheet } from './ui/Sheet'
 import { Button } from './ui/Button'
 import { ThemeToggle } from './ui/ThemeToggle'
+import { Avatar } from './ui/Avatar'
 
 interface NavItem {
   to: string
@@ -193,9 +194,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
       <div className={cn('pt-1.5 mt-0.5 shrink-0 w-full flex flex-col items-center border-t border-border/50')}>
         {hovered ? (
           <div className="flex items-center gap-2 rounded-full bg-raised/50 p-1 border border-border/50 anim-fade w-full">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm">
-              {user?.username.slice(0, 1)}
-            </span>
+            <Avatar avatar={user?.avatar} username={user?.username} size="sm" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-label font-medium leading-tight">{user?.username}</p>
               <p className="truncate text-caption capitalize text-subtle leading-tight">{user?.role}</p>
@@ -206,12 +205,12 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
         ) : (
           <div className="flex flex-col items-center gap-1.5">
             <ThemeToggle size="sm" className="rounded-full h-8 w-14 bg-raised/40 hover:bg-raised flex items-center justify-center p-0" />
-            <span
-              title={`${user?.username} (${user?.role})`}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm cursor-default"
-            >
-              {user?.username.slice(0, 1)}
-            </span>
+            <Avatar
+              avatar={user?.avatar}
+              username={user?.username}
+              size="sm"
+              alt={`${user?.username} (${user?.role})`}
+            />
           </div>
         )}
       </div>
@@ -382,11 +381,19 @@ export function AppShell() {
 
       <header className="chrome app-drag sticky top-[var(--titlebar)] z-nav flex h-14 items-center justify-between border-b border-border px-4 pt-[env(safe-area-inset-top)] lg:hidden">
         <Mark />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <ThemeToggle size="sm" />
           <Button variant="ghost" size="sm" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
             {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
           </Button>
+          <Avatar
+            avatar={user?.avatar}
+            username={user?.username}
+            size="sm"
+            interactive
+            onClick={() => setMoreOpen(true)}
+            className="ring-1 ring-border"
+          />
         </div>
       </header>
 
@@ -398,8 +405,24 @@ export function AppShell() {
 
       <TabBar items={items} onMore={() => setMoreOpen(true)} pending={pending.length} />
       <Notifications open={notifOpen} onClose={() => setNotifOpen(false)} />
-      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
+      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="Menu">
         <div className="-mx-2 flex flex-col gap-1">
+          {/* User profile banner in More sheet */}
+          <div className="mb-2 flex items-center gap-3 rounded-xl border border-border/70 bg-raised/40 p-3">
+            <Avatar avatar={user?.avatar} username={user?.username} size="md" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-fg text-body">{user?.username}</p>
+              <p className="truncate text-caption capitalize text-subtle">{user?.role}</p>
+            </div>
+            <NavLink
+              to="/settings"
+              onClick={() => setMoreOpen(false)}
+              className="rounded-lg bg-panel px-2.5 py-1 text-caption font-medium border border-border hover:bg-raised transition-colors"
+            >
+              Avatar
+            </NavLink>
+          </div>
+
           {items.slice(4).map((item) => (
             <NavLink
               key={item.to}

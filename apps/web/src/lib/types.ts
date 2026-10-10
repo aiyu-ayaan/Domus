@@ -5,6 +5,7 @@ export interface User {
   username: string
   email: string
   role: Role
+  avatar?: string
   all_rooms: boolean
   room_ids: string[]
   created_at: string

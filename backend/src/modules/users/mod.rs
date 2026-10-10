@@ -21,6 +21,7 @@ pub struct CreateUserRequest {
     pub email: String,
     pub password: String,
     pub role: String,
+    pub avatar: Option<String>,
     #[serde(default = "yes")]
     pub all_rooms: bool,
     #[serde(default)]
@@ -36,6 +37,7 @@ pub struct UpdateUserRequest {
     pub email: Option<String>,
     pub role: Option<String>,
     pub password: Option<String>,
+    pub avatar: Option<String>,
     pub all_rooms: Option<bool>,
     pub room_ids: Option<Vec<String>>,
 }
@@ -91,6 +93,12 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
     validate_credentials(&req.username, &req.password)?;
     let role = parse_role(&req.role)?;
     let now = Utc::now();
+    let avatar = req
+        .avatar
+        .as_deref()
+        .filter(|a| !a.trim().is_empty())
+        .map(|a| a.trim().to_string())
+        .unwrap_or_else(|| format!("dicebear:bottts:{}", req.username.trim()));
     let rec = UserRecord {
         id: Uuid::new_v4().to_string(),
         username: req.username.trim().into(),
@@ -98,6 +106,7 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
         password_hash: hash_password(&req.password)?,
         role: role.as_str().into(),
         all_rooms: req.all_rooms,
+        avatar: Some(avatar),
         created_at: now,
         updated_at: now,
     };
@@ -129,6 +138,9 @@ async fn update(
     if let Some(email) = req.email {
         rec.email = email.trim().into();
     }
+    if let Some(avatar) = req.avatar {
+        rec.avatar = Some(avatar.trim().into());
+    }
     if let Some(all) = req.all_rooms {
         rec.all_rooms = all;
     }
@@ -136,11 +148,12 @@ async fn update(
         validate_credentials(&rec.username, pw)?;
         rec.password_hash = hash_password(pw)?;
     }
-    sqlx::query("UPDATE users SET email = ?, role = ?, all_rooms = ?, password_hash = ?, updated_at = ? WHERE id = ?")
+    sqlx::query("UPDATE users SET email = ?, role = ?, all_rooms = ?, password_hash = ?, avatar = ?, updated_at = ? WHERE id = ?")
         .bind(&rec.email)
         .bind(&rec.role)
         .bind(rec.all_rooms)
         .bind(&rec.password_hash)
+        .bind(&rec.avatar)
         .bind(Utc::now())
         .bind(&id)
         .execute(&s.pool)

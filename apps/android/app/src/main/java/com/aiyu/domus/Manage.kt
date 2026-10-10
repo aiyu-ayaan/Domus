@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Public
@@ -74,11 +75,23 @@ fun Field(
 
 /** List row on a tonal card; clickable when [onClick] is given. */
 @Composable
-fun RowCard(title: String, subtitle: String?, icon: ImageVector, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, trailing: @Composable RowScope.() -> Unit = {}) {
+fun RowCard(
+    title: String,
+    subtitle: String?,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    trailing: @Composable RowScope.() -> Unit = {}
+) {
     val c = MaterialTheme.colorScheme
     val body: @Composable () -> Unit = {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            ShapedIcon(icon, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
+            if (leading != null) {
+                leading()
+            } else {
+                ShapedIcon(icon, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
+            }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -210,7 +223,13 @@ fun UsersPage(me: User, onBack: () -> Unit) {
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         list?.forEach { user ->
             val access = if (user.isAdmin || user.allRooms) "all rooms" else "${user.roomIds.size} rooms"
-            RowCard(user.username, "${user.role.replaceFirstChar(Char::uppercase)} · $access", Icons.Rounded.Person, onClick = { editing = user; open = true })
+            RowCard(
+                title = user.username,
+                subtitle = "${user.role.replaceFirstChar(Char::uppercase)} · $access",
+                icon = Icons.Rounded.Person,
+                leading = { UserAvatar(avatarSpec = user.avatar, username = user.username, size = 44.dp) },
+                onClick = { editing = user; open = true },
+            )
         }
     }
     if (open) {
@@ -219,6 +238,7 @@ fun UsersPage(me: User, onBack: () -> Unit) {
         var email by remember { mutableStateOf(user?.email.orEmpty()) }
         var password by remember { mutableStateOf("") }
         var role by remember { mutableStateOf(user?.role ?: "member") }
+        var avatar by remember { mutableStateOf(user?.avatar ?: "dicebear:bottts:${user?.username ?: "member"}") }
         var allRooms by remember { mutableStateOf(user?.allRooms ?: true) }
         var roomIds by remember { mutableStateOf(user?.roomIds.orEmpty().toSet()) }
         FormDialog(
@@ -227,7 +247,7 @@ fun UsersPage(me: User, onBack: () -> Unit) {
             onSave = {
                 open = false
                 scope.launch {
-                    repository.request { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, roomIds.toList()) }
+                    repository.request { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, roomIds.toList(), avatar = avatar) }
                     reload++
                 }
             },
@@ -235,6 +255,24 @@ fun UsersPage(me: User, onBack: () -> Unit) {
             // You can't delete the account you are signed in with.
             onDelete = user?.takeIf { it.id != me.id }?.let { { open = false; scope.launch { repository.request { api -> api.removeUser(it.id) }; reload++ } } },
         ) {
+            // Avatar picker preview row
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                UserAvatar(avatarSpec = avatar, username = username.ifEmpty { "User" }, size = 48.dp)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Avatar", style = MaterialTheme.typography.titleSmall)
+                    Text(parseDiceBearSpec(avatar).first, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                androidx.compose.material3.FilledTonalButton(onClick = { avatar = randomDiceBearSpec() }) {
+                    Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Roll")
+                }
+            }
+
             if (user == null) Field(username, { username = it }, "Username", supporting = "At least 3 characters")
             Field(email, { email = it }, "Email", keyboard = KeyboardType.Email)
             Field(password, { password = it }, if (user == null) "Password" else "New password", secret = true, supporting = if (user == null) "At least 8 characters" else "Leave empty to keep the current one")

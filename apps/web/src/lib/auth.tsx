@@ -10,6 +10,7 @@ interface AuthState {
   loading: boolean
   signIn: (token: string, user: User) => void
   signOut: () => void
+  updateUser: (user: User) => void
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u)
       },
       signOut,
+      updateUser: (u: User) => setUser(u),
     }),
     [user, needsSetup, loading, signOut],
   )

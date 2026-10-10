@@ -2,7 +2,7 @@ use super::{hash_password, verify_password, UserDto, UserRecord};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
-use axum::{extract::State, routing::{get, post}, Json, Router};
+use axum::{extract::State, routing::{get, post, put}, Json, Router};
 use chrono::Utc;
 use home_core::Role;
 use serde::Deserialize;
@@ -14,6 +14,12 @@ pub struct SetupRequest {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub avatar: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateAvatarRequest {
+    pub avatar: String,
 }
 
 #[derive(Deserialize)]
@@ -38,6 +44,7 @@ pub fn public_routes() -> Router<AppState> {
 pub fn protected_routes() -> Router<AppState> {
     Router::new()
         .route("/me", get(me))
+        .route("/me/avatar", put(update_avatar))
         .route("/password", post(change_password))
 }
 
@@ -67,6 +74,12 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
         return Err(ApiError::Forbidden("Setup has already been completed".into()));
     }
     let now = Utc::now();
+    let avatar = req
+        .avatar
+        .as_deref()
+        .filter(|a| !a.trim().is_empty())
+        .map(|a| a.trim().to_string())
+        .unwrap_or_else(|| format!("dicebear:bottts:{}", req.username.trim()));
     let user = UserRecord {
         id: Uuid::new_v4().to_string(),
         username: req.username.trim().to_string(),
@@ -74,6 +87,7 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
         password_hash: hash_password(&req.password)?,
         role: Role::Admin.as_str().into(),
         all_rooms: true,
+        avatar: Some(avatar),
         created_at: now,
         updated_at: now,
     };
@@ -130,4 +144,27 @@ async fn change_password(
         .execute(&s.pool)
         .await?;
     Ok(Json(json!({ "success": true })))
+}
+
+async fn update_avatar(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Json(req): Json<UpdateAvatarRequest>,
+) -> ApiResult<Json<UserDto>> {
+    let avatar = req.avatar.trim();
+    if avatar.len() > 1024 {
+        return Err(ApiError::BadRequest("Avatar string too long".into()));
+    }
+    sqlx::query("UPDATE users SET avatar = ?, updated_at = ? WHERE id = ?")
+        .bind(avatar)
+        .bind(Utc::now())
+        .bind(&user.id)
+        .execute(&s.pool)
+        .await?;
+    let rec: UserRecord = sqlx::query_as("SELECT * FROM users WHERE id = ?")
+        .bind(&user.id)
+        .fetch_one(&s.pool)
+        .await?;
+    let rooms = super::room_ids(&s.pool, &user.id).await?;
+    Ok(Json(UserDto::from_record(&rec, rooms)))
 }

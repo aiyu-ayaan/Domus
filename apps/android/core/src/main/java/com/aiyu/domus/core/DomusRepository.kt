@@ -244,6 +244,15 @@ class DomusRepository(context: Context) {
         if (foreground || keepLive) startLive()
     }
 
+    suspend fun updateAvatar(avatar: String): Boolean {
+        val updated = request { it.updateAvatar(avatar) } ?: return false
+        val current = _session.value
+        if (current is Session.SignedIn) {
+            _session.value = current.copy(user = updated)
+        }
+        return true
+    }
+
     fun logout() {
         val server = api?.baseUrl ?: return
         store.put(TOKEN, null)

@@ -5,12 +5,13 @@ import { Monitor, PlugsConnected, StopCircle } from '@phosphor-icons/react'
 import { Badge, Card, CardHeader, EmptyState, Metric, Notice, PageHeader, Skeleton } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Switch, Segmented } from '@/components/ui/Controls'
+import { Avatar } from '@/components/ui/Avatar'
 import { DeviceRow } from '@/components/devices/DeviceRow'
 import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
 import { OverviewInsights } from './OverviewInsights'
 import { useScreenSync } from '@/features/screensync/ScreenSync'
 import { api } from '@/lib/api'
-import { useCanControl, useIsAdmin } from '@/lib/auth'
+import { useAuth, useCanControl, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useDiscovered, useEnergy, useGroups, useRooms, useScenes } from '@/lib/queries'
 import { airQuality, formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
@@ -20,6 +21,7 @@ import type { Device, Group, Scene } from '@/lib/types'
 type CategoryFilter = 'all' | 'power' | 'lights' | 'air' | 'climate'
 
 export function OverviewView() {
+  const { user } = useAuth()
   const admin = useIsAdmin()
   const control = useCanControl()
   const navigate = useNavigate()
@@ -260,7 +262,20 @@ export function OverviewView() {
 
   return (
     <>
-      <PageHeader title="Overview" description={date} />
+      <PageHeader
+        title="Overview"
+        description={date}
+        actions={
+          <Link
+            to="/settings"
+            title="Account & Avatar Settings"
+            className="flex items-center gap-2.5 rounded-full border border-border/80 bg-raised/40 px-3 py-1 hover:bg-raised/80 hover:border-primary/40 transition-all select-none group"
+          >
+            <Avatar avatar={user?.avatar} username={user?.username} size="sm" className="group-hover:scale-105 transition-transform" />
+            <span className="text-caption font-semibold text-fg truncate max-w-[120px]">{user?.username}</span>
+          </Link>
+        }
+      />
 
       {admin && pending.length > 0 && (
         <div className="mb-6">

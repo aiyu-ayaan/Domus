@@ -142,6 +142,14 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         ScreenHeader(
             "${greeting()}, ${user.username}",
             if (!live && !loading) "Reconnecting…" else "${on.size} of ${devices.size} devices on",
+            actions = {
+                UserAvatar(
+                    avatarSpec = user.avatar,
+                    username = user.username,
+                    size = 44.dp,
+                    onClick = { open("settings") },
+                )
+            },
         )
         if (loading && devices.isEmpty()) {
             LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))

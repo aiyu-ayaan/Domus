@@ -35,7 +35,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -60,19 +64,42 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
     val c = MaterialTheme.colorScheme
     val context = LocalContext.current
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var avatarDialogOpen by remember { mutableStateOf(false) }
 
     ScreenColumn {
         ScreenHeader("Settings", "Domus ${version.orEmpty()}")
 
         Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                ShapedIcon(Icons.Rounded.Person, MaterialShapes.Cookie9Sided, c.primary, c.onPrimary, size = 56.dp)
+                UserAvatar(
+                    avatarSpec = session.user.avatar,
+                    username = session.user.username,
+                    size = 56.dp,
+                    onClick = { avatarDialogOpen = true },
+                )
                 Spacer(Modifier.width(16.dp))
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text(session.user.username, style = MaterialTheme.typography.titleLarge)
                     Text(session.user.role.replaceFirstChar(Char::uppercase), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
+                FilledTonalButton(onClick = { avatarDialogOpen = true }) {
+                    Text("Avatar")
+                }
             }
+        }
+
+        if (avatarDialogOpen) {
+            AvatarPickerDialog(
+                currentSpec = session.user.avatar,
+                username = session.user.username,
+                onSave = { newSpec ->
+                    scope.launch {
+                        repository.updateAvatar(newSpec)
+                    }
+                },
+                onDismiss = { avatarDialogOpen = false },
+            )
         }
 
         SectionTitle("Home")

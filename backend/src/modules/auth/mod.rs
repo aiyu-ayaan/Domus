@@ -18,6 +18,7 @@ pub struct UserRecord {
     pub password_hash: String,
     pub role: String,
     pub all_rooms: bool,
+    pub avatar: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -25,8 +26,8 @@ pub struct UserRecord {
 impl UserRecord {
     pub async fn insert(&self, pool: &SqlitePool) -> Result<(), ApiError> {
         sqlx::query(
-            "INSERT INTO users (id, username, email, password_hash, role, all_rooms, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO users (id, username, email, password_hash, role, all_rooms, avatar, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(&self.id)
         .bind(&self.username)
@@ -34,6 +35,7 @@ impl UserRecord {
         .bind(&self.password_hash)
         .bind(&self.role)
         .bind(self.all_rooms)
+        .bind(&self.avatar)
         .bind(self.created_at)
         .bind(self.updated_at)
         .execute(pool)
@@ -48,6 +50,7 @@ pub struct UserDto {
     pub username: String,
     pub email: String,
     pub role: String,
+    pub avatar: String,
     pub all_rooms: bool,
     pub room_ids: Vec<String>,
     pub created_at: DateTime<Utc>,
@@ -55,11 +58,18 @@ pub struct UserDto {
 
 impl UserDto {
     pub fn from_record(u: &UserRecord, room_ids: Vec<String>) -> Self {
+        let avatar = u
+            .avatar
+            .as_deref()
+            .filter(|a| !a.trim().is_empty())
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| format!("dicebear:bottts:{}", u.username.trim()));
         Self {
             id: u.id.clone(),
             username: u.username.clone(),
             email: u.email.clone(),
             role: u.role.clone(),
+            avatar,
             all_rooms: u.all_rooms,
             room_ids,
             created_at: u.created_at,

@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PencilSimple, Plus, Trash } from '@phosphor-icons/react'
+import { DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
 import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { Checkbox, Field, SelectField } from '@/components/ui/Field'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
+import { Avatar } from '@/components/ui/Avatar'
+import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal'
+import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
 import { api, desktop } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useRooms, useServerLinks } from '@/lib/queries'
@@ -20,15 +23,93 @@ const roleHelp: Record<Role, string> = {
 }
 
 export function SettingsView() {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const admin = useIsAdmin()
   const [theme, setTheme] = useTheme()
+  const toast = useToast()
+  const qc = useQueryClient()
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false)
+  const [rolling, setRolling] = useState(false)
+
+  const parsedAvatar = parseAvatarSpec(user?.avatar, user?.username || 'user')
+
+  const changeAvatarMutation = useMutation({
+    mutationFn: (newAvatar: string) => api.updateAvatar(newAvatar),
+    onSuccess: (updated) => {
+      updateUser(updated)
+      qc.invalidateQueries({ queryKey: keys.users })
+      toast.push({ tone: 'success', title: 'Avatar updated' })
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not update avatar', message: errorMessage(e) }),
+  })
+
+  const handleQuickRoll = async () => {
+    setRolling(true)
+    const rolled = rollRandomAvatar(parsedAvatar.style)
+    try {
+      await changeAvatarMutation.mutateAsync(rolled.spec)
+    } finally {
+      setTimeout(() => setRolling(false), 200)
+    }
+  }
+
   return (
     <>
       <PageHeader title="Settings" />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader title="Account" />
+          {/* Avatar Profile Section */}
+          <div className="flex items-center gap-4 px-4 py-3.5 bg-raised/30 border-b border-border">
+            <div className="relative group">
+              <Avatar
+                avatar={user?.avatar}
+                username={user?.username}
+                size="lg"
+                interactive
+                onClick={() => setAvatarModalOpen(true)}
+                className="ring-2 ring-primary/40 group-hover:ring-primary group-hover:scale-105 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setAvatarModalOpen(true)}
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Change avatar"
+              >
+                <PencilSimple size={18} />
+              </button>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-fg text-body truncate">{user?.username}</span>
+                <Badge tone="neutral">{user?.role}</Badge>
+              </div>
+              <p className="text-caption text-muted truncate mt-0.5">
+                DiceBear {parsedAvatar.style} · seed: {parsedAvatar.seed}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<DiceFive size={16} className={rolling ? 'animate-spin' : ''} />}
+                onClick={handleQuickRoll}
+                title="Roll a random avatar"
+                disabled={changeAvatarMutation.isPending}
+              >
+                Roll
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Sparkle size={14} />}
+                onClick={() => setAvatarModalOpen(true)}
+              >
+                Customize
+              </Button>
+            </div>
+          </div>
+
           <div className="divide-y divide-border">
             <div className="flex min-h-12 items-center justify-between px-4">
               <span className="text-muted">Username</span>
@@ -44,6 +125,15 @@ export function SettingsView() {
             </div>
           </div>
         </Card>
+        <AvatarPickerModal
+          open={avatarModalOpen}
+          onClose={() => setAvatarModalOpen(false)}
+          currentAvatar={user?.avatar}
+          username={user?.username}
+          onSave={async (newAvatar) => {
+            await changeAvatarMutation.mutateAsync(newAvatar)
+          }}
+        />
         <Card>
           <CardHeader title="Appearance" />
           <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
@@ -156,7 +246,7 @@ function People() {
       <ul className="divide-y divide-border">
         {users.map((u) => (
           <li key={u.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase">{u.username.slice(0, 1)}</span>
+            <Avatar avatar={u.avatar} username={u.username} size="sm" />
             <div className="min-w-0 flex-1">
               <p className="text-body font-medium">
                 {u.username}
@@ -183,19 +273,43 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
   const toast = useToast()
   const { data: rooms = [] } = useRooms()
   const existing = user && user !== 'new' ? user : null
-  const [form, setForm] = useState({ username: '', email: '', password: '', role: 'member' as Role, all_rooms: true, room_ids: [] as string[] })
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    role: 'member' as Role,
+    avatar: '',
+    all_rooms: true,
+    room_ids: [] as string[],
+  })
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [key, setKey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const current = existing?.id ?? (user === 'new' ? 'new' : null)
   if (current !== key) {
     setKey(current)
     setError(null)
-    setForm({ username: existing?.username ?? '', email: existing?.email ?? '', password: '', role: existing?.role ?? 'member', all_rooms: existing?.all_rooms ?? true, room_ids: existing?.room_ids ?? [] })
+    setForm({
+      username: existing?.username ?? '',
+      email: existing?.email ?? '',
+      password: '',
+      role: existing?.role ?? 'member',
+      avatar: existing?.avatar ?? `dicebear:bottts:${existing?.username || 'member'}`,
+      all_rooms: existing?.all_rooms ?? true,
+      room_ids: existing?.room_ids ?? [],
+    })
   }
   const save = useMutation({
     mutationFn: async () => {
       if (existing) {
-        await api.updateUser(existing.id, { email: form.email, role: form.role, all_rooms: form.all_rooms, room_ids: form.room_ids, ...(form.password ? { password: form.password } : {}) })
+        await api.updateUser(existing.id, {
+          email: form.email,
+          role: form.role,
+          avatar: form.avatar,
+          all_rooms: form.all_rooms,
+          room_ids: form.room_ids,
+          ...(form.password ? { password: form.password } : {}),
+        })
       } else {
         await api.createUser(form)
       }
@@ -208,55 +322,87 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     onError: (e) => setError(errorMessage(e)),
   })
   const toggleRoom = (id: string) => setForm((f) => ({ ...f, room_ids: f.room_ids.includes(id) ? f.room_ids.filter((x) => x !== id) : [...f.room_ids, id] }))
+
+  const handleRollAvatar = () => {
+    const rolled = rollRandomAvatar()
+    setForm((f) => ({ ...f, avatar: rolled.spec }))
+  }
+
   return (
-    <Sheet
-      open={!!user}
-      onClose={onClose}
-      title={existing ? `Edit ${existing.username}` : 'Add person'}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" loading={save.isPending} disabled={!existing && (!form.username || form.password.length < 8)} onClick={() => save.mutate()}>
-            Save
-          </Button>
-        </>
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {!existing && <Field label="Username" required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
-        <Field label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <Field label={existing ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing} hint={existing ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
-          <option value="admin">Admin</option>
-          <option value="member">Member</option>
-          <option value="guest">Guest</option>
-        </SelectField>
-        {form.role !== 'admin' && (
-          <div className="rounded-lg border border-border">
-            <div className="flex min-h-12 items-center justify-between gap-3 px-3">
-              <div>
-                <p>All rooms</p>
-                <p className="text-label text-muted">Turn off to choose specific rooms.</p>
-              </div>
-              <Switch checked={form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: v })} label="Access to all rooms" />
+    <>
+      <Sheet
+        open={!!user}
+        onClose={onClose}
+        title={existing ? `Edit ${existing.username}` : 'Add person'}
+        footer={
+          <>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" loading={save.isPending} disabled={!existing && (!form.username || form.password.length < 8)} onClick={() => save.mutate()}>
+              Save
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {/* Avatar row */}
+          <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-raised/30 p-3">
+            <Avatar avatar={form.avatar} username={form.username || 'User'} size="md" />
+            <div className="min-w-0 flex-1">
+              <p className="text-label font-medium text-fg">Avatar</p>
+              <p className="truncate text-caption text-muted">DiceBear profile avatar</p>
             </div>
-            {!form.all_rooms && (
-              <fieldset className="border-t border-border p-1">
-                <legend className="sr-only">Rooms</legend>
-                {rooms.length === 0 && <p className="p-2 text-label text-muted">Create rooms first.</p>}
-                {rooms.map((r) => (
-                  <Checkbox key={r.id} checked={form.room_ids.includes(r.id)} onChange={() => toggleRoom(r.id)}>
-                    {r.name}
-                  </Checkbox>
-                ))}
-              </fieldset>
-            )}
+            <div className="flex items-center gap-1.5">
+              <Button type="button" variant="ghost" size="sm" icon={<DiceFive size={16} />} onClick={handleRollAvatar}>
+                Roll
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setAvatarModalOpen(true)}>
+                Pick
+              </Button>
+            </div>
           </div>
-        )}
-        <ErrorText>{error}</ErrorText>
-      </div>
-    </Sheet>
+
+          {!existing && <Field label="Username" required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
+          <Field label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <Field label={existing ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing} hint={existing ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+            <option value="guest">Guest</option>
+          </SelectField>
+          {form.role !== 'admin' && (
+            <div className="rounded-lg border border-border">
+              <div className="flex min-h-12 items-center justify-between gap-3 px-3">
+                <div>
+                  <p>All rooms</p>
+                  <p className="text-label text-muted">Turn off to choose specific rooms.</p>
+                </div>
+                <Switch checked={form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: v })} label="Access to all rooms" />
+              </div>
+              {!form.all_rooms && (
+                <fieldset className="border-t border-border p-1">
+                  <legend className="sr-only">Rooms</legend>
+                  {rooms.length === 0 && <p className="p-2 text-label text-muted">Create rooms first.</p>}
+                  {rooms.map((r) => (
+                    <Checkbox key={r.id} checked={form.room_ids.includes(r.id)} onChange={() => toggleRoom(r.id)}>
+                      {r.name}
+                    </Checkbox>
+                  ))}
+                </fieldset>
+              )}
+            </div>
+          )}
+          <ErrorText>{error}</ErrorText>
+        </div>
+      </Sheet>
+      <AvatarPickerModal
+        open={avatarModalOpen}
+        onClose={() => setAvatarModalOpen(false)}
+        currentAvatar={form.avatar}
+        username={form.username || 'user'}
+        onSave={(newAvatar) => setForm((f) => ({ ...f, avatar: newAvatar }))}
+      />
+    </>
   )
 }

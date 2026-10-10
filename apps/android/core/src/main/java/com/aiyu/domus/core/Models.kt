@@ -12,6 +12,7 @@ data class User(
     val username: String,
     val email: String = "",
     val role: String = "guest",
+    val avatar: String? = null,
     @SerialName("all_rooms") val allRooms: Boolean = true,
     @SerialName("room_ids") val roomIds: List<String> = emptyList(),
 ) {

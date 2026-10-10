@@ -127,9 +127,10 @@ export const sceneSyncUrl = (sceneId: string) => {
 
 export const api = {
   setupStatus: () => get<{ needs_admin_setup: boolean }>('/auth/setup-status'),
-  setup: (b: { username: string; email: string; password: string }) => post<AuthResponse>('/auth/setup', b),
+  setup: (b: { username: string; email: string; password: string; avatar?: string }) => post<AuthResponse>('/auth/setup', b),
   login: (b: { username: string; password: string }) => post<AuthResponse>('/auth/login', b),
   me: () => get<User>('/auth/me'),
+  updateAvatar: (avatar: string) => put<User>('/auth/me/avatar', { avatar }),
 
   /** The desktop app keeps the answer, so it can find the server from home and from outside. */
   serverLinks: () =>
@@ -204,9 +205,9 @@ export const api = {
   readAll: () => post<Ok>('/notifications/read-all'),
 
   users: () => get<User[]>('/users'),
-  createUser: (b: { username: string; email: string; password: string; role: string; all_rooms: boolean; room_ids: string[] }) =>
+  createUser: (b: { username: string; email: string; password: string; role: string; avatar?: string; all_rooms: boolean; room_ids: string[] }) =>
     post<User>('/users', b),
-  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; all_rooms: boolean; room_ids: string[] }>) =>
+  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; avatar: string; all_rooms: boolean; room_ids: string[] }>) =>
     put<User>(`/users/${id}`, b),
   removeUser: (id: string) => del<Ok>(`/users/${id}`),
 
