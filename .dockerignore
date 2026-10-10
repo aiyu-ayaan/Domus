@@ -1,0 +1,14 @@
+.git
+**/node_modules
+target
+data
+*.db*
+apps/android
+apps/web/dist
+apps/desktop/*
+!apps/desktop/package.json
+design-system
+development
+.claude
+.agents
+.codegraph
