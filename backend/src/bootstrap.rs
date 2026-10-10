@@ -109,6 +109,8 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     };
     let app = create_router(state, &config.server.web_dir, config.tls.enabled);
 
+    tokio::spawn(crate::infrastructure::beacon::run(config.server.port, config.tls.enabled));
+
     let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
     if config.tls.enabled {
         let rustls = tls::load_rustls(&config.tls, &config.server).await?;
