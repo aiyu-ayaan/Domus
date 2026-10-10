@@ -217,6 +217,8 @@ export const api = {
   notifications: () => get<{ items: Notification[]; unread: number }>('/notifications'),
   readNotification: (id: string) => post<Ok>(`/notifications/${id}/read`),
   readAll: () => post<Ok>('/notifications/read-all'),
+  removeNotification: (id: string) => del<Ok>(`/notifications/${id}`),
+  clearNotifications: () => del<Ok>('/notifications'),
 
   users: () => get<User[]>('/users'),
   createUser: (b: { username: string; email: string; password: string; role: string; avatar?: string; all_rooms: boolean; room_ids: string[] }) =>

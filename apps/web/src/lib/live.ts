@@ -80,6 +80,9 @@ export function useLiveEvents(enabled: boolean) {
             qc.invalidateQueries({ queryKey: keys.notifications })
             push({ tone: ev.level, title: ev.title, message: ev.message })
             break
+          case 'notifications_changed':
+            qc.invalidateQueries({ queryKey: keys.notifications })
+            break
           case 'integrations_changed':
             qc.invalidateQueries({ queryKey: keys.integrations })
             break

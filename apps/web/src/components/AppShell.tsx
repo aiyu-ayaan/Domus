@@ -12,6 +12,7 @@ import {
   PlugsConnected,
   SignOut,
   SquaresFour,
+  Trash,
   Wind,
   type Icon,
 } from '@phosphor-icons/react'
@@ -303,20 +304,33 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
   const qc = useQueryClient()
   const navigate = useNavigate()
   const readAll = useMutation({ mutationFn: api.readAll, onSuccess: () => qc.invalidateQueries({ queryKey: keys.notifications }) })
+  const remove = useMutation({ mutationFn: api.removeNotification, onSuccess: () => qc.invalidateQueries({ queryKey: keys.notifications }) })
+  const clear = useMutation({ mutationFn: api.clearNotifications, onSuccess: () => qc.invalidateQueries({ queryKey: keys.notifications }) })
+  const [confirmClear, setConfirmClear] = useState(false)
+  useEffect(() => setConfirmClear(false), [open, data?.items.length])
   const tone = { info: 'bg-info', success: 'bg-on', warning: 'bg-warn', error: 'bg-danger' }
   return (
     <Sheet
       open={open}
       onClose={onClose}
       title="Notifications"
-      footer={data?.unread ? <Button variant="ghost" size="sm" onClick={() => readAll.mutate()}>Mark all as read</Button> : undefined}
+      footer={
+        data?.items.length ? (
+          <>
+            {data.unread > 0 && <Button variant="ghost" size="sm" onClick={() => readAll.mutate()}>Mark all as read</Button>}
+            <Button variant="ghost" size="sm" onClick={() => (confirmClear ? clear.mutate() : setConfirmClear(true))}>
+              {confirmClear ? 'Confirm: delete all' : 'Delete all'}
+            </Button>
+          </>
+        ) : undefined
+      }
     >
       {!data?.items.length ? (
         <p className="py-10 text-center text-muted">No notifications.</p>
       ) : (
         <ul className="-mx-5 divide-y divide-border">
           {data.items.map((n) => (
-            <li key={n.id}>
+            <li key={n.id} className="group flex items-start hover:bg-raised/60">
               <button
                 onClick={() => {
                   if (!n.is_read) api.readNotification(n.id).then(() => qc.invalidateQueries({ queryKey: keys.notifications }))
@@ -325,7 +339,7 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
                     onClose()
                   }
                 }}
-                className="flex w-full cursor-pointer gap-3 px-5 py-3 text-left hover:bg-raised/60"
+                className="flex min-w-0 flex-1 cursor-pointer gap-3 py-3 pl-5 text-left"
               >
                 <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', n.is_read ? 'bg-transparent' : tone[n.level])} aria-hidden />
                 <span className="min-w-0 flex-1">
@@ -334,6 +348,7 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
                   <span className="mt-0.5 block text-caption text-subtle">{timeAgo(n.created_at)}</span>
                 </span>
               </button>
+              <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={`Delete ${n.title}`} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
             </li>
           ))}
         </ul>
