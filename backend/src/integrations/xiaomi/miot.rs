@@ -142,6 +142,7 @@ pub fn map_spec(spec: &Value) -> MiotMap {
                 "color" => "color",
                 "fan-level" if is_primary => "fan_level",
                 "mode" if is_primary => "mode",
+                "favorite-level" | "favorite-fan-level" => "fan_percent",
                 "pm2.5-density" => "pm25",
                 "temperature" => "temperature",
                 "relative-humidity" => "humidity",
@@ -154,6 +155,12 @@ pub fn map_spec(spec: &Value) -> MiotMap {
                     map.props.insert(key.to_string(), r);
                 }
             }
+        }
+    }
+    // Mi Home shows the purifier's "Favorite" mode as "Manual".
+    if let Some(mode) = map.props.get_mut("mode") {
+        for (_, d) in mode.values.iter_mut().filter(|(_, d)| d == "Favorite") {
+            *d = "Manual".into();
         }
     }
     map
@@ -234,6 +241,7 @@ pub fn state_from(map: &MiotMap, result: &Value) -> DeviceState {
             }
             "fan_level" => s.fan_speed = label(p, v),
             "mode" => s.mode = label(p, v),
+            "fan_percent" => s.fan_percent = v.as_f64().map(|x| pct(p, x)),
             "pm25" => s.air_quality_pm25 = f,
             "temperature" => s.temperature = f,
             "humidity" => s.humidity = f,
@@ -303,6 +311,14 @@ pub fn set_params(did: &str, map: &MiotMap, cmd: &DeviceCommand) -> Vec<Value> {
             push("mode", enum_value(&p, mode));
         }
     }
+    if let (Some(speed), Some(p)) = (cmd.fan_percent, map.props.get("fan_percent")) {
+        // The level only drives the fan in manual mode, so switch to it as Mi Home's slider does.
+        let manual = map.props.get("mode").and_then(|m| m.values.iter().find(|(_, d)| d == "Manual"));
+        if let (None, Some((v, _))) = (&cmd.mode, manual) {
+            push("mode", json!(v));
+        }
+        push("fan_percent", scale(Some(p), speed));
+    }
     out
 }
 
@@ -318,7 +334,10 @@ mod tests {
                 { "iid": 4, "type": "urn:miot-spec-v2:property:fan-level:00000016:zhimi-ma4:1",
                   "value-list": [{"value": 1, "description": "Level1"}, {"value": 2, "description": "Level2"}] },
                 { "iid": 5, "type": "urn:miot-spec-v2:property:mode:00000008:zhimi-ma4:1",
-                  "value-list": [{"value": 0, "description": "Auto"}, {"value": 1, "description": "Sleep"}] }
+                  "value-list": [{"value": 0, "description": "Auto"}, {"value": 1, "description": "Sleep"}, {"value": 2, "description": "Favorite"}] }
+            ]},
+            { "iid": 9, "type": "urn:miot-spec-v2:service:custom-service:00007801:zhimi-ma4:1", "properties": [
+                { "iid": 11, "type": "urn:miot-spec-v2:property:favorite-level:00000001:zhimi-ma4:1", "value-range": [0, 14, 1] }
             ]},
             { "iid": 3, "type": "urn:miot-spec-v2:service:environment:0000780A:zhimi-ma4:1", "properties": [
                 { "iid": 6, "type": "urn:miot-spec-v2:property:pm2.5-density:00000034:zhimi-ma4:1" }
@@ -357,6 +376,15 @@ mod tests {
 
         let cmd = DeviceCommand { mode: Some("auto".into()), ..Default::default() };
         assert_eq!(set_params("x", &m, &cmd)[0]["value"], 0);
+
+        // "Favorite" is offered as "Manual"; its speed slider switches to that mode.
+        assert_eq!(s.options["mode"], ["Auto", "Sleep", "Manual"]);
+        let level = json!([{"did": "x|fan_percent", "siid": 9, "piid": 11, "code": 0, "value": 7}]);
+        assert_eq!(state_from(&m, &level).fan_percent, Some(50));
+        let cmd = DeviceCommand { fan_percent: Some(100), ..Default::default() };
+        let params = set_params("x", &m, &cmd);
+        assert_eq!((&params[0]["piid"], &params[0]["value"]), (&json!(5), &json!(2)));
+        assert_eq!((&params[1]["piid"], &params[1]["value"]), (&json!(11), &json!(14)));
         assert_eq!(device_type(&m.service, "zhimi.airpurifier.ma4"), DeviceType::AirPurifier);
     }
 

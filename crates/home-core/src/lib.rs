@@ -163,6 +163,9 @@ pub struct DeviceState {
     pub air_quality_pm25: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fan_speed: Option<String>,
+    /// 0-100 %, for fans with a stepless speed instead of named levels.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fan_percent: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mode: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -205,6 +208,8 @@ pub struct DeviceCommand {
     pub color_mode: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fan_speed: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fan_percent: Option<u8>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mode: Option<String>,
     /// A mood or effect id from `effects`; an empty string stops a running effect.
@@ -265,6 +270,9 @@ impl DeviceCommand {
         }
         if let Some(v) = &self.fan_speed {
             state.fan_speed = Some(v.clone());
+        }
+        if let Some(v) = self.fan_percent {
+            state.fan_percent = Some(v.min(100));
         }
         if let Some(v) = &self.mode {
             state.mode = Some(v.clone());
