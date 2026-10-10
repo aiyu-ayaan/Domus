@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,9 @@ fun MainScreen(session: Session.SignedIn) {
 
     // A page opened over the tabs: "rooms", "scene:<id>", ... Null shows the tabs.
     var page by rememberSaveable { mutableStateOf<String?>(null) }
-    val open = { key: String -> page = key }
+    // Each screen keeps its scroll while another one covers it. Opening a page drops what it kept, so it starts at the top.
+    val saved = rememberSaveableStateHolder()
+    val open = { key: String -> saved.removeState(key); page = key }
     val close = { page = null }
     // Back from a tab or a page previews as the screen shrinking, then returns to Home or the tabs.
     val pageBack = rememberPredictiveBack(page != null, close)
@@ -75,7 +78,7 @@ fun MainScreen(session: Session.SignedIn) {
             // Shared axis X: a page slides in from the end, the tabs come back from the start.
             transitionSpec = { sharedAxisX(targetState != null, motion) },
             label = "page",
-        ) { current ->
+        ) { current -> saved.SaveableStateProvider(current ?: "tabs") {
             when {
                 current == null -> {
                     // Analytics exists only when the home measures power or air.
@@ -102,7 +105,7 @@ fun MainScreen(session: Session.SignedIn) {
                 current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
                 current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
             }
-        }
+        } }
         // Above the floating pill.
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 80.dp))
     }
