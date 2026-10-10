@@ -203,7 +203,7 @@ impl IntegrationPlugin for XiaomiIntegration {
                 let (_, params) = miot::get_params(&device.external_id, &map);
                 let result = miio::call(host, &token, "get_properties", params).await?;
                 let mut state = miot::state_from(&map, &result);
-                if let (Some(_), Some(cadr)) = (state.fan_percent, device.model.as_deref().and_then(miot::max_cadr)) {
+                if let (Some(_), Some(cadr)) = (state.fan_percent, device.model.as_deref().and_then(miot::cadr_range)) {
                     state.extra.insert("fan_cadr".into(), json!(cadr));
                 }
                 state

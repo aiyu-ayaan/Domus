@@ -182,11 +182,12 @@ pub fn device_type(service: &str, model: &str) -> DeviceType {
     }
 }
 
-/// Clean air delivery rate at full speed, in m³/h; the clients turn it into a room size.
-// shortcut: only models whose rated CADR we know, add a row per purifier as they turn up
-pub fn max_cadr(model: &str) -> Option<u32> {
+/// Clean air delivery rate at the lowest and full speed, in m³/h; the clients turn it into a room size.
+// shortcut: only models whose CADR we know, add a row per purifier as they turn up
+pub fn cadr_range(model: &str) -> Option<[u32; 2]> {
     match model {
-        "xiaomi.airp.cpa4m" => Some(230),
+        // Low end fitted to the 2~3 m² Mi Home shows at the lowest level.
+        "xiaomi.airp.cpa4m" => Some([30, 230]),
         _ => None,
     }
 }
