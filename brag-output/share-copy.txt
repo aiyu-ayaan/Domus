@@ -1,1 +1,0 @@
-Domus is live in alpha: one self-hosted app for every Tuya, Tapo and Xiaomi device in your home. Android, desktop and web, encrypted end to end, running on your own server.
