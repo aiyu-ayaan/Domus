@@ -2,7 +2,11 @@ package com.aiyu.domus
 
 import android.app.Application
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.View
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -37,12 +41,30 @@ class DomusApp : Application() {
 
 val LocalRepository = staticCompositionLocalOf<DomusRepository> { error("No repository") }
 
+/** `drawable/splash_mark` runs 980ms from process start; onCreate is ~200ms in, so the first frame waits the rest. */
+private const val SPLASH_MS = 780L
+
 class MainActivity : ComponentActivity() {
     private val repository get() = (application as DomusApp).repository
+
+    /** Android 12+ drops the system splash at the first drawn frame, so hold that frame on a cold start. */
+    private fun holdSplash(coldStart: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !coldStart) return
+        val until = SystemClock.uptimeMillis() + SPLASH_MS
+        val content = findViewById<View>(android.R.id.content)
+        content.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                if (SystemClock.uptimeMillis() < until) return false
+                content.viewTreeObserver.removeOnPreDrawListener(this)
+                return true
+            }
+        })
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        holdSplash(savedInstanceState == null)
         setContent {
             val appearance by repository.appearance.collectAsStateWithLifecycle()
             val dark = when (appearance.theme) {

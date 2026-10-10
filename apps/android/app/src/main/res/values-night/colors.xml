@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="canvas">#12140E</color>
+    <color name="splash_mark">#FAFAFA</color>
+    <color name="splash_on">#22C55E</color>
 </resources>

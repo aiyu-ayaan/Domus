@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash animation: the three modules of the mark drop in, then the last one switches on.
+     Runs 980ms (the first 200ms wait out the launch transition); keep windowSplashScreenAnimationDuration
+     and SPLASH_MS in MainActivity in step. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="108dp"
+            android:height="108dp"
+            android:viewportWidth="108"
+            android:viewportHeight="108">
+            <group
+                android:translateX="54"
+                android:translateY="54"
+                android:scaleX="0.25"
+                android:scaleY="0.25">
+                <group
+                    android:name="top"
+                    android:pivotX="-52"
+                    android:pivotY="-48"
+                    android:scaleX="0.7"
+                    android:scaleY="0.7">
+                    <path
+                        android:name="top_fill"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/splash_mark"
+                        android:pathData="M-92,-76a12,12 0 0 1 12,-12H-12V-8H-92Z" />
+                </group>
+                <group
+                    android:name="bowl"
+                    android:pivotX="4"
+                    android:pivotY="0"
+                    android:scaleX="0.7"
+                    android:scaleY="0.7">
+                    <path
+                        android:name="bowl_fill"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/splash_mark"
+                        android:pathData="M4,-88a88,88 0 0 1 0,176Z" />
+                </group>
+                <group
+                    android:name="on"
+                    android:pivotX="-52"
+                    android:pivotY="48"
+                    android:scaleX="0.7"
+                    android:scaleY="0.7">
+                    <path
+                        android:name="on_fill"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/splash_mark"
+                        android:pathData="M-92,8H-12V88H-80a12,12 0 0 1 -12,-12Z" />
+                </group>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="top">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleX"
+                    android:startOffset="200"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleY"
+                    android:startOffset="200"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="top_fill">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="fillAlpha"
+                    android:startOffset="200"
+                    android:valueFrom="0"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bowl">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleX"
+                    android:startOffset="290"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleY"
+                    android:startOffset="290"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="bowl_fill">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="fillAlpha"
+                    android:startOffset="290"
+                    android:valueFrom="0"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="on">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleX"
+                    android:startOffset="380"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="scaleY"
+                    android:startOffset="380"
+                    android:valueFrom="0.7"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="on_fill">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="fillAlpha"
+                    android:startOffset="380"
+                    android:valueFrom="0"
+                    android:valueTo="1" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="fillColor"
+                    android:startOffset="680"
+                    android:valueFrom="@color/splash_mark"
+                    android:valueTo="@color/splash_on"
+                    android:valueType="colorType" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>
