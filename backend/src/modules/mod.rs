@@ -1,3 +1,4 @@
+pub mod air;
 pub mod auth;
 pub mod automations;
 pub mod devices;

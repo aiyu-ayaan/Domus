@@ -233,6 +233,9 @@ impl DeviceManager {
                     if let Some(w) = p.state.current_power_watts {
                         self.sample_energy(&rec.id, w as f64).await;
                     }
+                    if let Some(pm) = p.state.air_quality_pm25 {
+                        self.sample_air(&rec.id, pm, p.state.temperature, p.state.humidity).await;
+                    }
                 }
             }
             Err(e) => {
@@ -259,6 +262,29 @@ impl DeviceManager {
                     tracing::debug!("poll of '{}' failed ({count}): {e}", rec.name);
                 }
             }
+        }
+    }
+
+    /// Store an air reading for this device, at most every five energy intervals (air changes slowly).
+    async fn sample_air(&self, device_id: &str, pm25: f32, temperature: Option<f32>, humidity: Option<f32>) {
+        {
+            let key = format!("air:{device_id}");
+            let mut last = self.last_sample.lock().await;
+            if last.get(&key).is_some_and(|t| t.elapsed() < self.energy_sample * 5) {
+                return;
+            }
+            last.insert(key, Instant::now());
+        }
+        let res = sqlx::query("INSERT INTO air_metrics (device_id, pm25, temperature, humidity, recorded_at) VALUES (?, ?, ?, ?, ?)")
+            .bind(device_id)
+            .bind(pm25)
+            .bind(temperature)
+            .bind(humidity)
+            .bind(Utc::now())
+            .execute(&self.pool)
+            .await;
+        if let Err(e) = res {
+            tracing::warn!("air sample failed: {e}");
         }
     }
 

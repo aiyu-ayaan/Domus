@@ -37,6 +37,10 @@ impl SchedulerWorker {
                     .bind(cutoff)
                     .execute(&self.pool)
                     .await;
+                let _ = sqlx::query("DELETE FROM air_metrics WHERE recorded_at < ?")
+                    .bind(cutoff)
+                    .execute(&self.pool)
+                    .await;
                 let _ = sqlx::query("DELETE FROM notifications WHERE created_at < ?")
                     .bind(Utc::now() - chrono::Duration::days(30))
                     .execute(&self.pool)

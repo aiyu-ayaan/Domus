@@ -5,7 +5,7 @@ use crate::infrastructure::event_bus::EventBus;
 use crate::integrations::tuya::TuyaIntegration;
 use crate::integrations::DeviceManager;
 use crate::modules::{
-    auth, automations::automation_routes, devices, energy::energy_routes, groups::group_routes,
+    air::air_routes, auth, automations::automation_routes, devices, energy::energy_routes, groups::group_routes,
     integrations::{integration_routes, TuyaLogins, XiaomiLogins},
     notifications::{notification_routes, Notifier},
     rooms::room_routes, scenes::scene_routes, users::user_routes,
@@ -54,6 +54,7 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
         .nest("/automations", automation_routes())
         .nest("/scenes", scene_routes())
         .nest("/energy", energy_routes())
+        .nest("/air", air_routes())
         .nest("/notifications", notification_routes())
         .nest("/users", user_routes())
         .nest("/integrations", integration_routes())
