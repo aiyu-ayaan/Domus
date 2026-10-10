@@ -1,6 +1,5 @@
 package com.aiyu.domus
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -57,26 +56,24 @@ fun MainScreen(session: Session.SignedIn) {
     val devices by repository.devices.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(repository) { repository.messages.collect { snackbar.showSnackbar(it) } }
-    BackHandler(tab != "home") { tab = "home" }
 
     // A page opened over the tabs: "rooms", "scene:<id>", ... Null shows the tabs.
     var page by rememberSaveable { mutableStateOf<String?>(null) }
     val open = { key: String -> page = key }
     val close = { page = null }
-    BackHandler(page != null, close)
+    // Back from a tab or a page previews as the screen shrinking, then returns to Home or the tabs.
+    val pageBack = rememberPredictiveBack(page != null, close)
+    val tabBack = rememberPredictiveBack(page == null && tab != "home") { tab = "home" }
 
     val user = session.user
     val canControl = user.canControl
     val motion = MaterialTheme.motionScheme
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().predictiveBackEffect { maxOf(pageBack.value, tabBack.value) }) {
         AnimatedContent(
             targetState = page,
             // Shared axis X: a page slides in from the end, the tabs come back from the start.
-            transitionSpec = {
-                val forward = targetState != null
-                (slideInHorizontally(motion.defaultSpatialSpec()) { if (forward) it / 4 else -it / 4 } + fadeIn(motion.defaultEffectsSpec()))
-                    .togetherWith(slideOutHorizontally(motion.fastSpatialSpec()) { if (forward) -it / 4 else it / 4 } + fadeOut(motion.fastEffectsSpec()))
-            },
+            // Shared axis X: a page slides in from the end, the tabs come back from the start.
+            transitionSpec = { sharedAxisX(targetState != null, motion) },
             label = "page",
         ) { current ->
             when {

@@ -158,7 +158,9 @@ fun OnboardingScreen() {
     val pager = rememberPagerState { Intros.size }
     val c = MaterialTheme.colorScheme
     val last = pager.currentPage == Intros.lastIndex
-    Box(Modifier.fillMaxSize()) {
+    // Back steps to the previous intro page; on the first page it leaves the app as usual.
+    val back = rememberPredictiveBack(pager.currentPage > 0) { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }
+    Box(Modifier.fillMaxSize().predictiveBackEffect { back.value }) {
         Backdrop()
         Column(Modifier.fillMaxSize().systemBarsPadding().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             TextButton(repository::finishOnboarding, Modifier.align(Alignment.End)) { Text("Skip") }
