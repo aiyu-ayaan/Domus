@@ -50,8 +50,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -122,16 +124,17 @@ fun FloatingNavScaffold(tabs: List<NavTab>, selected: Int, onSelect: (Int) -> Un
                 }
             }
             val density = LocalDensity.current
-            var pill by remember { mutableStateOf(0.dp) }
+            // Saved in pixels: a screen restored at its very end would otherwise be measured without the inset and pushed up.
+            var pill by rememberSaveable { mutableIntStateOf(0) }
             Box(Modifier.fillMaxSize().nestedScroll(hideOnScroll)) {
-                CompositionLocalProvider(LocalBottomBarInset provides pill) { page() }
+                CompositionLocalProvider(LocalBottomBarInset provides with(density) { pill.toDp() }) { page() }
                 AnimatedVisibility(
                     !scrolledAway,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     enter = slideInVertically(motion.defaultSpatialSpec<IntOffset>()) { it } + fadeIn(effects),
                     exit = slideOutVertically(motion.defaultSpatialSpec<IntOffset>()) { it } + fadeOut(fastEffects),
                 ) {
-                    FloatingNavBar(tabs, selected, onSelect, Modifier.onSizeChanged { pill = with(density) { it.height.toDp() } })
+                    FloatingNavBar(tabs, selected, onSelect, Modifier.onSizeChanged { pill = it.height })
                 }
             }
         }
