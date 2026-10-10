@@ -490,7 +490,7 @@ class DomusRepository(context: Context) {
                     }
                 }
             }
-            "device_discovered", "discovery_finished", "integrations_changed" -> _revision.update { it + 1 }
+            "device_discovered", "discovery_finished", "integrations_changed", "notifications_changed" -> _revision.update { it + 1 }
             "notification" -> {
                 _revision.update { it + 1 }
                 _messages.tryEmit(listOfNotNull(text("title"), text("message")).joinToString(": "))

@@ -12,6 +12,9 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.key
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -147,6 +150,9 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     val rooms by repository.rooms.collectAsStateWithLifecycle()
     val revision by repository.revision.collectAsStateWithLifecycle()
     var notices by remember { mutableStateOf(emptyList<Notice>()) }
+    var clearNotices by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    if (clearNotices) Confirm("Delete all notifications?", "They are removed on every device.", "Delete all", { clearNotices = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearNotices = false })
     LaunchedEffect(revision) { repository.request { it.notices() }?.let { notices = it.items.take(3) } }
 
     ScreenColumn {
@@ -232,10 +238,14 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         if (notices.isNotEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SectionTitle("Recent activity", Modifier.weight(1f))
+                TextButton({ clearNotices = true }) { Text("Delete all") }
                 TextButton({ open("notices") }) { Text("See all") }
             }
             notices.forEachIndexed { i, notice ->
-                RowCard(notice.title, listOfNotNull(notice.message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString(" · "), Icons.Rounded.Notifications, Modifier.enterStaggered(6 + i), onClick = { open("notices") })
+                key(notice.id) {
+                    // Swipe a row away to delete it; the server then tells every other client.
+                    SwipeNotice(notice, { notices = notices.filter { it.id != notice.id }; scope.launch { repository.request { it.removeNotice(notice.id) } } }, Modifier.enterStaggered(6 + i), onClick = { open("notices") })
+                }
             }
         }
     }

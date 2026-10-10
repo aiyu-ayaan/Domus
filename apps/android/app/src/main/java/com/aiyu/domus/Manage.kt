@@ -14,6 +14,10 @@ import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -395,6 +399,25 @@ fun ServerLinksPage(admin: Boolean, onBack: () -> Unit) {
     }
 }
 
+/** A notice that is deleted by swiping it away in either direction. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeNotice(notice: Notice, onDelete: () -> Unit, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, trailing: @Composable RowScope.() -> Unit = {}) {
+    val state = rememberSwipeToDismissBoxState(positionalThreshold = { it * 0.4f })
+    LaunchedEffect(state.currentValue) { if (state.currentValue != SwipeToDismissBoxValue.Settled) onDelete() }
+    SwipeToDismissBox(
+        state = state,
+        modifier = modifier,
+        backgroundContent = {
+            Box(Modifier.fillMaxSize().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 24.dp), contentAlignment = if (state.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd) {
+                Icon(Icons.Rounded.Delete, "Delete", tint = MaterialTheme.colorScheme.onErrorContainer)
+            }
+        },
+    ) {
+        RowCard(notice.title, listOfNotNull(notice.message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString("\n"), Icons.Rounded.Notifications, onClick = onClick, trailing = trailing)
+    }
+}
+
 /** The server's notification inbox. */
 @Composable
 fun NoticesPage(onBack: () -> Unit) {
@@ -402,17 +425,21 @@ fun NoticesPage(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val revision by repository.revision.collectAsStateWithLifecycle()
     var notices by remember { mutableStateOf<List<Notice>?>(null) }
+    var clearing by remember { mutableStateOf(false) }
+    // The server tells every client when the inbox changes, so this reloads after a delete anywhere.
     LaunchedEffect(revision) { notices = repository.request { it.notices() }?.items ?: notices ?: emptyList() }
+    if (clearing) Confirm("Delete all notifications?", "They are removed on every device.", "Delete all", { clearing = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearing = false })
 
     SubPage("Notifications", onBack, actions = {
         TextButton({ scope.launch { repository.request { it.readAllNotices() }; notices = notices?.map { it.copy(isRead = true) } } }, enabled = notices?.any { !it.isRead } == true) { Text("Mark all read") }
+        IconButton({ clearing = true }, enabled = notices?.isNotEmpty() == true) { Icon(Icons.Rounded.DeleteSweep, "Delete all") }
     }) {
         val list = notices
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         if (list?.isEmpty() == true) EmptyState("Nothing yet", "Alerts from automations, new devices and offline devices appear here.")
         list?.forEach { notice ->
-            RowCard(notice.title, listOfNotNull(notice.message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString("\n"), Icons.Rounded.Notifications) {
-                if (!notice.isRead) Badge()
+            key(notice.id) {
+                SwipeNotice(notice, { notices = notices?.filter { it.id != notice.id }; scope.launch { repository.request { it.removeNotice(notice.id) } } }) { if (!notice.isRead) Badge() }
             }
         }
     }

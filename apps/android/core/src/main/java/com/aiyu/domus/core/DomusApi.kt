@@ -166,6 +166,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
 
     suspend fun notices() = call("GET", "/notifications", NoticeList.serializer())
     suspend fun readAllNotices() = write("POST", "/notifications/read-all")
+    suspend fun removeNotice(id: String) = write("DELETE", "/notifications/$id")
+    suspend fun clearNotices() = write("DELETE", "/notifications")
 
     suspend fun scenes() = call("GET", "/scenes", ListSerializer(Scene.serializer()))
     suspend fun toggleScene(id: String, on: Boolean) =
