@@ -114,11 +114,11 @@
 ## Milestone 12: Light theme, Theme toggle, and Auto-collapsing sidebar (DONE — 2026-10-10)
 - [x] Web reactive theme store (`apps/web/src/lib/theme.ts`) with `useSyncExternalStore`, OS media query listener, and cross-tab storage sync
 - [x] Reusable `ThemeToggle` component with Sun/Moon/CircleHalfTilt Phosphor icons cycling across Auto (system), Light, and Dark modes
-- [x] Light & dark tokens reinforced in `apps/web/src/index.css` with explicit `:root[data-theme='dark']` and smooth 150ms theme transition
-- [x] Auto-collapsing sidebar in `AppShell.tsx`: 64px compact icon rail when idle, smooth 150ms hover-to-expand to 232px with zero-reflow layout stability
-- [x] Collapsed rail indicators: centered icons, badge indicator dots for unread notifications and pending devices, and stacked footer with theme toggle
+- [x] Light & dark tokens in `apps/web/src/index.css` aligned to Android Material 3 botanical scheme (`#12140E` dark, `#F9FAEF` light, with `#354E16`/`#CDEDA3` active container pills)
+- [x] Compact vertically centered floating pill dock in `AppShell.tsx`: `rounded-[32px]`, `top-1/2 -translate-y-1/2`, `h-auto` compact height, 72px pill rail when idle, smooth 200ms debounced hover-to-expand to 240px with zero-reflow layout stability
+- [x] Collapsed rail indicators: Android Material 3 pill capsules (`w-13 h-9 rounded-full`), badge indicator dots for unread notifications and pending devices, and stacked footer with theme toggle
 - [x] Mobile navigation parity: theme toggle in sticky header and in the 'More' sheet
-- [x] Android theme presets aligned with Docus Swiss design tokens in `apps/android/ui-shared/src/main/java/com/aiyu/domus/ui/theme/Color.kt` (neutral Zinc with on-green accents)
+- [x] Android theme preserved as original Material 3 Expressive botanical palette in `apps/android/ui-shared/src/main/java/com/aiyu/domus/ui/theme/Color.kt`
 - [x] Architecture documentation with Mermaid diagrams in `development/docs/THEME_AND_NAVIGATION.md`
 
 ## Next

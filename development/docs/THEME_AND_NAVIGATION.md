@@ -59,26 +59,26 @@ flowchart TD
 
 ## 2. Android-Style Floating Pill Sidebar Architecture
 
-The desktop navigation mirrors Android's `FloatingNavRail` with a floating pill container (`rounded-3xl`) and capsule navigation indicators:
+The desktop navigation mirrors Android's `FloatingNavRail` with a compact, vertically centered floating pill dock (`rounded-[32px]`, `top-1/2 -translate-y-1/2 h-auto`) and capsule navigation indicators:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Collapsed: Default (Idle)
     
     state Collapsed {
-        Rail: Floating 72px pill island (rounded-3xl, 12px margins)
-        Pills: Material 3 pill indicators (56x36px rounded-full)
+        Dock: Compact floating pill island (w-72px, h-auto, vertically centered)
+        Pills: Material 3 pill indicators (w-13 h-9 rounded-full)
         ActiveItem: bg-primary-container with on-primary-container icon
         Badges: Top-right indicator dots (6px)
-        Footer: 40px rounded-full ThemeToggle + Avatar initial
+        Footer: Rounded-full ThemeToggle (h-9 w-9) + Avatar initial (h-8 w-8)
     }
     
     state Expanded {
         Panel: Width 240px with 24px shadow overlay
-        Capsules: Full-width rounded-full pill rows (h-11)
+        Capsules: Full-width rounded-full pill rows (h-10 px-3)
         Labels: Nav labels visible (fade in)
         CountPills: Numeric tabular badges
-        Footer: Rounded-full capsule profile card
+        Footer: Rounded-full capsule profile card with sign-out
     }
     
     Collapsed --> Expanded: onMouseEnter (immediate)
