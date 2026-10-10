@@ -37,6 +37,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -120,7 +123,12 @@ fun ScreenHeader(title: String, subtitle: String, modifier: Modifier = Modifier,
         MorphingShape(Modifier.size(44.dp))
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
+            // One line that shrinks to fit (large font scale, long name) instead of wrapping; ellipsis below 20 sp.
+            Text(
+                title, style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = MaterialTheme.typography.headlineLarge.fontSize),
+                modifier = Modifier.semantics { heading() },
+            )
             RollingText(subtitle, MaterialTheme.typography.bodyMedium, MaterialTheme.colorScheme.onSurfaceVariant)
         }
         actions()
