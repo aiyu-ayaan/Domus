@@ -26,12 +26,17 @@ export function PageHeader({ title, description, actions }: { title: string; des
   )
 }
 
-export function Metric({ label, value, sub, live }: { label: string; value: ReactNode; sub?: ReactNode; live?: boolean }) {
+export function Metric({ label, value, sub, live, info }: { label: string; value: ReactNode; sub?: ReactNode; live?: boolean; info?: string }) {
   return (
     <Card className="p-4 md:p-5">
       <p className="flex items-center gap-2 text-label text-muted">
         {label}
         {live && <StatusDot on label="Live" />}
+        {info && (
+          <span tabIndex={0} role="img" aria-label={info} title={info} className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-border text-[10px] leading-none text-subtle">
+            i
+          </span>
+        )}
       </p>
       <p className="mt-2 text-metric font-semibold tracking-[-0.01em] tabular">{value}</p>
       {sub && <p className="mt-1 truncate text-label text-muted tabular">{sub}</p>}

@@ -183,6 +183,7 @@ export function OverviewView() {
         key="power"
         label="Power now"
         live
+        info="Combined live power draw of all your metered devices."
         value={formatWatts(watts)}
         sub={`${onCount} of ${controllable.length} devices on`}
       />,
@@ -191,6 +192,7 @@ export function OverviewView() {
       <Metric
         key="today"
         label="Today"
+        info="Energy used since midnight. The amount below is its estimated cost at your electricity rate."
         value={formatKwh(energy?.today_kwh ?? 0)}
         sub={formatMoney(energy?.today_cost ?? 0, currency)}
       />,
@@ -199,6 +201,7 @@ export function OverviewView() {
       <Metric
         key="bill"
         label="Bill this cycle"
+        info="Estimated bill so far in this billing cycle, plus the projection for the full cycle."
         value={formatMoney(energy?.cycle_cost ?? 0, currency)}
         sub={`Projected ${formatMoney(energy?.projected_cost ?? 0, currency)}`}
       />,
