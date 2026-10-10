@@ -47,6 +47,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -191,8 +193,10 @@ private val Categories = listOf(
     "Climate" to setOf("climate", "sensor"),
 )
 
+private const val NO_ROOM = "\u0000none"
+
 @Composable
-fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit) {
+fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit, onManageRooms: () -> Unit) {
     val canControl = user.canControl
     val repository = LocalRepository.current
     val devices by repository.devices.collectAsStateWithLifecycle()
@@ -202,7 +206,10 @@ fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit)
     // Only categories that have a device, like the web app.
     val categories = Categories.filter { (_, types) -> devices.any { it.type in types } }
     val types = categories.firstOrNull { it.first == category }?.second
-    val shown = if (types == null) devices else devices.filter { it.type in types }
+    // null = every room; NO_ROOM = devices that are in none.
+    var roomFilter by rememberSaveable { mutableStateOf<String?>(null) }
+    val inRoom = { d: Device -> roomFilter == null || (if (roomFilter == NO_ROOM) rooms.none { it.id == d.roomId } else d.roomId == roomFilter) }
+    val shown = devices.filter { (types == null || it.type in types) && inRoom(it) }
 
     ScreenColumn {
         ScreenHeader("Devices", "${devices.count { it.isOnline }} of ${devices.size} online") {
@@ -214,8 +221,19 @@ fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit)
                 categories.forEach { (name, _) -> FilterChip(category == name, { category = name }, { Text(name) }) }
             }
         }
+        if (rooms.isNotEmpty() || user.isAdmin) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (rooms.isNotEmpty()) {
+                    FilterChip(roomFilter == null, { roomFilter = null }, { Text("All rooms") })
+                    rooms.sortedBy { it.floor }.forEach { room -> FilterChip(roomFilter == room.id, { roomFilter = room.id }, { Text(room.name) }) }
+                    if (devices.any { d -> rooms.none { it.id == d.roomId } }) FilterChip(roomFilter == NO_ROOM, { roomFilter = NO_ROOM }, { Text("No room") })
+                }
+                if (user.isAdmin) AssistChip(onManageRooms, { Text("Manage rooms") }, leadingIcon = { Icon(Icons.Rounded.MeetingRoom, null, Modifier.size(18.dp)) })
+            }
+        }
         when {
             loading && devices.isEmpty() -> LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
+            shown.isEmpty() && devices.isNotEmpty() -> EmptyState("Nothing here", "No device matches this room and category.")
             devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Tap + to link Tuya, Tapo or Xiaomi and add what they find." else "Ask an admin to add devices or give you access to a room.")
             else -> {
                 // Rooms in floor order, then devices without a room.

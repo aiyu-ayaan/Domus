@@ -87,7 +87,7 @@ fun MainScreen(session: Session.SignedIn) {
                     FloatingNavScaffold(tabs.map { it.second }, index, { tab = tabs[it].first }) { selected ->
                         when (tabs[selected].first) {
                             "home" -> HomeScreen(user, onOpenDevice = { openDevice = it }, onShowDevices = { tab = "devices" }, open = open)
-                            "devices" -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") })
+                            "devices" -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") }, onManageRooms = { open("rooms") })
                             "scenes" -> ScenesScreen(user, open)
                             "analytics" -> AnalyticsScreen(user, onOpenDevice = { openDevice = it }, onEditTariff = { open("tariff") })
                             else -> SettingsScreen(session, open)
