@@ -13,7 +13,7 @@ use crate::modules::{
     users::user_routes,
 };
 use axum::{
-    http::{header, HeaderValue, Method},
+    http::{header, HeaderValue, Method, Response},
     middleware,
     routing::get,
     Json, Router,
@@ -22,7 +22,9 @@ use serde_json::{json, Value};
 use sqlx::SqlitePool;
 use std::path::Path;
 use std::sync::Arc;
+use tower::ServiceBuilder;
 use tower_http::{
+    compression::CompressionLayer,
     cors::CorsLayer,
     services::{ServeDir, ServeFile},
     set_header::SetResponseHeaderLayer,
@@ -99,10 +101,19 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
 
     if web_dir.join("index.html").exists() {
         tracing::info!("Serving web UI from {}", web_dir.display());
+        // Vite names everything in assets/ by content hash, so a browser never has to ask for it twice.
+        // The rest (index.html, icons) is revalidated, or a new build would be reached through an old page.
+        let forever = SetResponseHeaderLayer::overriding(header::CACHE_CONTROL, |res: &Response<_>| {
+            res.status().is_success().then(|| HeaderValue::from_static("public, max-age=31536000, immutable"))
+        });
+        let revalidate = SetResponseHeaderLayer::overriding(header::CACHE_CONTROL, HeaderValue::from_static("no-cache"));
         let spa = ServeDir::new(web_dir).fallback(ServeFile::new(web_dir.join("index.html")));
-        app = app.fallback_service(spa);
+        app = app
+            .nest_service("/assets", ServiceBuilder::new().layer(forever).service(ServeDir::new(web_dir.join("assets"))))
+            .fallback_service(ServiceBuilder::new().layer(revalidate).service(spa));
     }
-    app
+    // gzip / brotli for JSON and the web UI; event streams and images are left alone by default.
+    app.layer(CompressionLayer::new())
 }
 
 async fn health_check() -> Json<Value> {
