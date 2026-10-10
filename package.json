@@ -4,9 +4,11 @@
   "private": true,
   "description": "Docus - Modern smart home assistant platform",
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"backend,web\" -c \"cyan,magenta\" \"pnpm run dev:backend\" \"pnpm run dev:web\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"backend,web,gateway\" -c \"cyan,magenta,green\" \"pnpm run dev:backend\" \"pnpm run dev:web\" \"pnpm run gateway\"",
     "dev:backend": "cargo run --manifest-path backend/Cargo.toml",
     "dev:web": "pnpm --filter @docus/web dev",
+    "gateway": "node scripts/gateway.mjs",
+    "android:dev": "bash scripts/android-dev.sh",
     "dev:desktop": "pnpm --filter @docus/desktop dev",
     "build": "pnpm --filter @docus/web build && cargo build --release --manifest-path backend/Cargo.toml",
     "build:web": "pnpm --filter @docus/web build",
