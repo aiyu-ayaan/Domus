@@ -53,7 +53,7 @@ fun DomusTheme(dark: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = fa
         motionScheme = MotionScheme.expressive(),
         shapes = DomusShapes,
         typography = DomusTypography,
-        content = content,
+        content = { WithClickHaptics(content) },
     )
 }
 

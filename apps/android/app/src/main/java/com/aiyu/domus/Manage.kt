@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.HapticSwitch
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -288,7 +289,7 @@ fun UsersPage(me: User, onBack: () -> Unit) {
             if (role != "admin") {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("All rooms", Modifier.weight(1f))
-                    Switch(allRooms, { allRooms = it })
+                    HapticSwitch(allRooms, { allRooms = it })
                 }
                 if (!allRooms) FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     rooms.forEach { room ->

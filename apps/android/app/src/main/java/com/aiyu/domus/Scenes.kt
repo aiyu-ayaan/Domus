@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.HapticSwitch
 import android.app.Activity
 import android.media.projection.MediaProjectionManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -84,7 +85,7 @@ private fun SwitchRow(
             }
             action()
             Spacer(Modifier.width(8.dp))
-            Switch(checked, onCheckedChange, enabled = enabled, modifier = Modifier.semantics { contentDescription = title })
+            HapticSwitch(checked, onCheckedChange, enabled = enabled, modifier = Modifier.semantics { contentDescription = title })
         }
     }
 }

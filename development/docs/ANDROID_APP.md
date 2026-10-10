@@ -157,6 +157,7 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   WHO scale, purifier / filter / climate facts, a trend line (PM2.5, temperature, humidity) from
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text.
+- **Haptics** — `Haptics.kt` (ui-shared): `DomusTheme` provides `LocalIndication` as the M3 ripple plus a `VirtualKey` tick on press release, so every button, chip, `clickable` and list row ticks with no per-call code (a cancelled press stays silent). `Switch` draws no indication, so use `HapticSwitch` (on/off ticks) instead of `Switch` when it has its own `onCheckedChange`; a `Switch` with `onCheckedChange = null` inside a clickable row already ticks via the row. Don't pass `indication = null` on a clickable you want to tick.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
   and swatches carry descriptions; content is capped at 840dp on wide windows.

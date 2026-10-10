@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.HapticSwitch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
@@ -165,7 +166,7 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
                 Icon(deviceIcon(device.type), contentDescription = null, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.weight(1f))
                 device.state.isOn?.let { isOn ->
-                    Switch(
+                    HapticSwitch(
                         checked = isOn,
                         onCheckedChange = { repository.command(device, DeviceCommand(isOn = it)) },
                         enabled = canControl && device.isOnline,
