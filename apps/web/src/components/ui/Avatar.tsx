@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getAvatarUri, parseAvatarSpec } from '@/lib/avatar'
+import { getAvatarUri, parseAvatarSpec, useAvatarArt } from '@/lib/avatar'
 import { cn } from '@/lib/cn'
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
@@ -38,13 +38,9 @@ export function Avatar({
   const [lastSrc, setLastSrc] = useState<string | null>(null)
   const initial = (username?.trim()?.[0] || 'U').toUpperCase()
 
-  const src = useMemo(() => {
-    try {
-      return getAvatarUri(avatar || '', username || 'user')
-    } catch {
-      return null
-    }
-  }, [avatar, username])
+  const arrived = useAvatarArt()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `arrived` changes when artwork lands
+  const src = useMemo(() => getAvatarUri(avatar || '', username || 'user'), [avatar, username, arrived])
 
   if (src !== lastSrc) {
     setLastSrc(src)

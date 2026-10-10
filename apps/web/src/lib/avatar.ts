@@ -1,4 +1,5 @@
-import { createAvatar } from '@dicebear/core'
+import { useSyncExternalStore } from 'react'
+import { createAvatar, type Style } from '@dicebear/core'
 import {
   bottts,
   lorelei,
@@ -15,33 +16,60 @@ import {
   personas,
   openPeeps,
   bigSmile,
-} from '@dicebear/collection'
+} from '@dicebear/collection/async'
+
+// Each style's artwork is 50-200KB of SVG parts, so it is its own chunk, fetched when first drawn.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const loaders: Record<string, () => Promise<Style<any>>> = {
+  bottts, lorelei, avataaars, adventurer, micah, notionists, pixelArt, funEmoji,
+  thumbs, shapes, rings, identicon, personas, openPeeps, bigSmile,
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const art = new Map<string, Style<any> | null>() // null: on its way
+const waiting = new Set<() => void>()
+let arrived = 0
+
+function load(id: string) {
+  art.set(id, null)
+  loaders[id]().then(
+    (style) => {
+      art.set(id, style)
+      arrived++
+      waiting.forEach((notify) => notify())
+    },
+    () => art.delete(id), // offline: the next render asks again
+  )
+}
+const subscribe = (notify: () => void) => {
+  waiting.add(notify)
+  return () => waiting.delete(notify)
+}
+/** Re-renders the caller when artwork arrives; call it wherever `getAvatarUri` is used. */
+export const useAvatarArt = () => useSyncExternalStore(subscribe, () => arrived)
 
 export interface AvatarStyleDef {
   id: string
   name: string
   emoji: string
   description: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: any
 }
 
 export const AVATAR_STYLES: AvatarStyleDef[] = [
-  { id: 'bottts', name: 'Robots', emoji: '🤖', description: 'Smart & mechanical bots', schema: bottts },
-  { id: 'lorelei', name: 'Lorelei', emoji: '🎨', description: 'Modern clean illustration', schema: lorelei },
-  { id: 'avataaars', name: 'Avataaars', emoji: '🧑', description: 'Classic cartoon humans', schema: avataaars },
-  { id: 'adventurer', name: 'Adventurer', emoji: '🗡️', description: 'Fantasy RPG adventurers', schema: adventurer },
-  { id: 'micah', name: 'Micah', emoji: '✨', description: 'Contemporary portraits', schema: micah },
-  { id: 'notionists', name: 'Notionists', emoji: '📝', description: 'Hand-drawn minimalist sketches', schema: notionists },
-  { id: 'pixelArt', name: 'Pixel Art', emoji: '👾', description: 'Retro 8-bit characters', schema: pixelArt },
-  { id: 'funEmoji', name: 'Fun Emoji', emoji: '😎', description: 'Playful emoji faces', schema: funEmoji },
-  { id: 'thumbs', name: 'Thumbs', emoji: '👍', description: 'Cute thumb characters', schema: thumbs },
-  { id: 'shapes', name: 'Shapes', emoji: '🔷', description: 'Abstract geometric art', schema: shapes },
-  { id: 'rings', name: 'Rings', emoji: '🪐', description: 'Cybernetic planetary rings', schema: rings },
-  { id: 'identicon', name: 'Identicon', emoji: '🔐', description: 'Cryptographic block shapes', schema: identicon },
-  { id: 'personas', name: 'Personas', emoji: '🕶️', description: 'Distinct stylized personas', schema: personas },
-  { id: 'openPeeps', name: 'Open Peeps', emoji: '🚶', description: 'Casual hand-drawn people', schema: openPeeps },
-  { id: 'bigSmile', name: 'Big Smile', emoji: '😄', description: 'Bright cheerful faces', schema: bigSmile },
+  { id: 'bottts', name: 'Robots', emoji: '🤖', description: 'Smart & mechanical bots' },
+  { id: 'lorelei', name: 'Lorelei', emoji: '🎨', description: 'Modern clean illustration' },
+  { id: 'avataaars', name: 'Avataaars', emoji: '🧑', description: 'Classic cartoon humans' },
+  { id: 'adventurer', name: 'Adventurer', emoji: '🗡️', description: 'Fantasy RPG adventurers' },
+  { id: 'micah', name: 'Micah', emoji: '✨', description: 'Contemporary portraits' },
+  { id: 'notionists', name: 'Notionists', emoji: '📝', description: 'Hand-drawn minimalist sketches' },
+  { id: 'pixelArt', name: 'Pixel Art', emoji: '👾', description: 'Retro 8-bit characters' },
+  { id: 'funEmoji', name: 'Fun Emoji', emoji: '😎', description: 'Playful emoji faces' },
+  { id: 'thumbs', name: 'Thumbs', emoji: '👍', description: 'Cute thumb characters' },
+  { id: 'shapes', name: 'Shapes', emoji: '🔷', description: 'Abstract geometric art' },
+  { id: 'rings', name: 'Rings', emoji: '🪐', description: 'Cybernetic planetary rings' },
+  { id: 'identicon', name: 'Identicon', emoji: '🔐', description: 'Cryptographic block shapes' },
+  { id: 'personas', name: 'Personas', emoji: '🕶️', description: 'Distinct stylized personas' },
+  { id: 'openPeeps', name: 'Open Peeps', emoji: '🚶', description: 'Casual hand-drawn people' },
+  { id: 'bigSmile', name: 'Big Smile', emoji: '😄', description: 'Bright cheerful faces' },
 ]
 
 export const STYLE_MAP = new Map<string, AvatarStyleDef>(
@@ -114,9 +142,9 @@ function normalizeStyleId(style: string): string {
 }
 
 /**
- * Generates an SVG Data URI inlined directly in memory for instant, offline rendering.
+ * Generates an SVG Data URI in memory (offline). Null until the artwork is loaded, see `useAvatarArt`.
  */
-export function getAvatarUri(avatarSpecOrStyle?: string | null, fallbackSeedOrStyle?: string): string {
+export function getAvatarUri(avatarSpecOrStyle?: string | null, fallbackSeedOrStyle?: string): string | null {
   let style = 'bottts'
   let seed = (fallbackSeedOrStyle || 'user').trim()
 
@@ -134,16 +162,14 @@ export function getAvatarUri(avatarSpecOrStyle?: string | null, fallbackSeedOrSt
     seed = input
   }
 
-  const def = STYLE_MAP.get(style.toLowerCase()) ?? AVATAR_STYLES[0]
-
+  const id = normalizeStyleId(style)
+  const loaded = art.get(id)
+  if (loaded === undefined) load(id)
+  if (!loaded) return null
   try {
-    const avatar = createAvatar(def.schema, {
-      seed,
-    })
-    return avatar.toDataUri()
-  } catch (err) {
-    console.warn('Failed to create offline avatar, falling back to HTTP URL:', err)
-    return getDiceBearHttpUrl(style, seed, 'svg')
+    return createAvatar(loaded, { seed }).toDataUri()
+  } catch {
+    return null // the caller shows the initial instead
   }
 }
 

@@ -12,6 +12,7 @@ import {
   generateRandomSeed,
   rollRandomAvatar,
   getAvatarUri,
+  useAvatarArt,
 } from '@/lib/avatar'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
@@ -40,6 +41,7 @@ export function AvatarPickerModal({
     [currentAvatar, username],
   )
 
+  useAvatarArt() // re-renders the previews when the artwork arrives
   const [selectedStyle, setSelectedStyle] = useState<string>(initial.style)
   const [seed, setSeed] = useState<string>(initial.seed)
   const [saving, setSaving] = useState(false)
@@ -197,7 +199,7 @@ export function AvatarPickerModal({
                   )}
                 >
                   <div className="relative mb-1.5 h-10 w-10 overflow-hidden rounded-full ring-1 ring-border/50 group-hover:scale-105 transition-transform">
-                    <img src={previewUri} alt={style.name} className="h-full w-full object-cover" />
+                    <img src={previewUri ?? undefined} alt={style.name} className="h-full w-full object-cover" />
                   </div>
                   <span className="truncate text-caption font-medium">{style.name}</span>
                 </button>
