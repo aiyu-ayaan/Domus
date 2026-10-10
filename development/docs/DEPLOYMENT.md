@@ -139,8 +139,10 @@ only; the window loads nothing but the Docus server.
 `pnpm build:desktop` (electron-builder) writes `apps/desktop/dist/`:
 
 - `docus_<version>_amd64.deb`: installs to `/opt/Docus`, with a desktop entry and the icon under
-  `/usr/share/icons/hicolor`. Its post-install script configures the sandbox, so the installed app runs
-  sandboxed. This is the recommended package.
+  `/usr/share/icons/hicolor`. Its post-install script (`build/after-install.sh`) makes `chrome-sandbox`
+  setuid, so the installed app runs sandboxed. electron-builder's default script skips that when user
+  namespaces work for root, which is the case on Ubuntu 24.04+ even though they are blocked for users.
+  This is the recommended package: `sudo apt install ./docus_<version>_amd64.deb`.
 - `Docus-<version>.AppImage`: portable; on Ubuntu 24.04+ it needs `--no-sandbox` for the reason above.
 
 The launcher icon comes from the desktop entry. It matches the running window because `productName`
