@@ -1,12 +1,12 @@
 # Theme & Navigation Architecture
 
-This document covers the unified theme management (Web, Electron desktop, and Android) and the auto-collapsing sidebar navigation system.
+This document covers the unified theme management (Web, Electron desktop, and Android) and the Android-style floating pill sidebar navigation system.
 
-## 1. Unified Theme Architecture
+## 1. Unified Material 3 Botanical Theme Architecture
 
-Docus follows the **Minimalism & Swiss Style** design profile defined in `design-system/docus/MASTER.md`. Both Web and Android clients share this token system:
-- **Dark Mode**: Neutral Zinc `#09090B` (page), `#111113` (panels), `#18181B` (raised containers), `#FAFAFA` (foreground text), and `#22C55E` (Domus live/on green).
-- **Light Mode**: Clean Zinc `#FAFAFA` (page), `#FFFFFF` (panels), `#F4F4F5` (raised containers), `#09090B` (foreground text), and `#16A34A` (Domus live/on green).
+Both Web/Desktop and Android clients share Android's Material 3 botanical color scheme:
+- **Dark Mode**: Background `#12140E`, surface `#1A1C16`, container `#282B24`, borders `#44483D` / `#8F9285`, text `#E2E3D8`, muted `#C5C8BA`, active pill container `#354E16` with text `#CDEDA3`, and on/live green `#B1D18A`.
+- **Light Mode**: Background `#F9FAEF`, clean cards `#FFFFFF`, container `#EEEFE3`, borders `#C5C8BA` / `#75796C`, text `#1A1C16`, muted `#44483D`, active pill container `#CDEDA3` with text `#354E16`, and on/live green `#4C662B`.
 
 ### Theme Propagation Flow
 
@@ -30,7 +30,7 @@ flowchart TD
         AND[Android DomusTheme / MaterialExpressiveTheme]
     end
 
-    SB -->|toggleTheme| WebCore
+    SB -->|cycleTheme: Auto / Light / Dark| WebCore
     ST -->|setTheme| WebCore
     SYS -.->|media change| US
     WebCore -->|sync| STK
@@ -43,49 +43,51 @@ flowchart TD
 
 | Token | Web (Dark) | Web (Light) | Android Compose (Dark) | Android Compose (Light) | Role |
 |---|---|---|---|---|---|
-| `bg` | `#09090B` | `#FAFAFA` | `background = 0xFF09090B` | `background = 0xFFFAFAFA` | Page background |
-| `panel` | `#111113` | `#FFFFFF` | `surface = 0xFF111113` | `surface = 0xFFFFFFFF` | Cards, sidebar, sheets |
-| `raised` | `#18181B` | `#F4F4F5` | `surfaceContainer = 0xFF18181B` | `surfaceContainer = 0xFFF4F4F5` | Inputs, active rows |
-| `border` | `#27272A` | `#E4E4E7` | `outlineVariant = 0xFF27272A` | `outlineVariant = 0xFFE4E4E7` | Hairline dividers |
-| `border-strong` | `#3F3F46` | `#D4D4D8` | `outline = 0xFF3F3F46` | `outline = 0xFFD4D4D8` | Active/focus outlines |
-| `fg` | `#FAFAFA` | `#09090B` | `onSurface = 0xFFFAFAFA` | `onSurface = 0xFF09090B` | Primary text |
-| `muted` | `#A1A1AA` | `#52525B` | `onSurfaceVariant = 0xFFA1A1AA` | `onSurfaceVariant = 0xFF52525B` | Secondary text |
-| `on` | `#22C55E` | `#16A34A` | `tertiary = 0xFF22C55E` | `tertiary = 0xFF16A34A` | Live / healthy / turned on |
-| `danger` | `#EF4444` | `#DC2626` | `error = 0xFFEF4444` | `error = 0xFFDC2626` | Errors / destructive |
+| `bg` | `#12140E` | `#F9FAEF` | `background = 0xFF12140E` | `background = 0xFFF9FAEF` | Page background |
+| `panel` | `#1A1C16` | `#FFFFFF` | `surface = 0xFF12140E` | `surface = 0xFFF9FAEF` | Cards, sidebar, sheets |
+| `raised` | `#282B24` | `#EEEFE3` | `surfaceContainer = 0xFF1E201A` | `surfaceContainer = 0xFFEEEFE3` | Inputs, active rows |
+| `primary-container` | `#354E16` | `#CDEDA3` | `primaryContainer = 0xFF354E16` | `primaryContainer = 0xFFCDEDA3` | Active navigation pill background |
+| `on-primary-container` | `#CDEDA3` | `#354E16` | `onPrimaryContainer = 0xFFCDEDA3` | `onPrimaryContainer = 0xFF354E16` | Active navigation pill text/icon |
+| `border` | `#44483D` | `#C5C8BA` | `outlineVariant = 0xFF44483D` | `outlineVariant = 0xFFC5C8BA` | Hairline dividers |
+| `border-strong` | `#8F9285` | `#75796C` | `outline = 0xFF8F9285` | `outline = 0xFF75796C` | Active/focus outlines |
+| `fg` | `#E2E3D8` | `#1A1C16` | `onSurface = 0xFFE2E3D8` | `onSurface = 0xFF1A1C16` | Primary text |
+| `muted` | `#C5C8BA` | `#44483D` | `onSurfaceVariant = 0xFFC5C8BA` | `onSurfaceVariant = 0xFF44483D` | Secondary text |
+| `on` | `#B1D18A` | `#4C662B` | `primary = 0xFFB1D18A` | `primary = 0xFF4C662B` | Live / healthy / turned on |
+| `danger` | `#FFB4AB` | `#BA1A1A` | `error = 0xFFFFB4AB` | `error = 0xFFBA1A1A` | Errors / destructive |
 
 ---
 
-## 2. Auto-Collapsing Sidebar Architecture
+## 2. Android-Style Floating Pill Sidebar Architecture
 
-The desktop navigation operates in two synchronized states: a compact 64px icon rail when idle, and a full 232px sidebar when hovered.
+The desktop navigation mirrors Android's `FloatingNavRail` with a floating pill container (`rounded-3xl`) and capsule navigation indicators:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Collapsed: Default (Idle)
     
     state Collapsed {
-        Rail: Width 64px
-        Icons: Centered 18px icons
-        MarkIcon: 24px D mark only
+        Rail: Floating 72px pill island (rounded-3xl, 12px margins)
+        Pills: Material 3 pill indicators (56x36px rounded-full)
+        ActiveItem: bg-primary-container with on-primary-container icon
         Badges: Top-right indicator dots (6px)
-        FooterIcon: ThemeToggle + Avatar initial stacked
+        Footer: 40px rounded-full ThemeToggle + Avatar initial
     }
     
     state Expanded {
-        Panel: Width 232px with 24px shadow overlay
+        Panel: Width 240px with 24px shadow overlay
+        Capsules: Full-width rounded-full pill rows (h-11)
         Labels: Nav labels visible (fade in)
-        MarkFull: D mark + 'Docus' title
         CountPills: Numeric tabular badges
-        FooterFull: Avatar + User info + ThemeToggle + SignOut
+        Footer: Rounded-full capsule profile card
     }
     
-    Collapsed --> Expanded: onMouseEnter (150ms cubic-bezier)
-    Expanded --> Collapsed: onMouseLeave (150ms cubic-bezier)
+    Collapsed --> Expanded: onMouseEnter (immediate)
+    Expanded --> Collapsed: onMouseLeave (debounced 150ms)
 ```
 
-### Layout Stability (Zero-Reflow)
+### Jitter-Free Debounced Hover
 
-To eliminate layout thrashing:
-1. The main content container reserves a fixed `lg:pl-[64px]` gutter.
-2. The sidebar element uses `z-nav` and an overlay shadow (`shadow-2xl`) when expanding to 232px on hover.
-3. Content cards, responsive grids, and SVG charts remain strictly stable and never reflow during sidebar hover interactions.
+To avoid flickering when moving between elements:
+1. `onMouseEnter` cancels any pending collapse timer and expands immediately (`200ms cubic-bezier(0.2, 0, 0, 1)`).
+2. `onMouseLeave` uses a 150ms grace timeout before collapsing, preventing accidental snap-close if the cursor briefly crosses an edge.
+3. The main content gutter reserves `lg:pl-[96px]` (72px rail + 12px margin + 12px gap) so the page layout never shifts during hover expansion.
