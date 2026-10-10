@@ -210,7 +210,10 @@ flowchart LR
     Diff -- yes --> Save["UPDATE devices"] --> Ev["DeviceStateChanged<br/>(with previous state)"]
     Diff -- 5 failures --> Off["mark offline"] --> Ev
     FS --> Meter{"power reported?"}
-    Meter -- "≥ 60 s since last sample" --> EM["INSERT energy_metrics<br/>kWh = W × Δt"]
+    Meter -- "≥ 60 s since last sample" --> EM["INSERT energy_metrics<br/>W, kWh = W × Δt"]
+    Meter -- "device meter today<br/>> recorded today + 10 Wh" --> Fill["INSERT fill-* rows<br/>gap spread over unsampled hours"]
+    EM --> Hist["GET /energy/history<br/>kWh, cost, avg W per bucket"]
+    Fill --> Hist
     Ev --> AE["AutomationEngine<br/>edge-triggered rules"]
     Ev --> WSS["WebSocket → UI cache"]
     Cmd["POST /devices/{id}/command"] --> Send["plugin.send_command"] --> Opt["optimistic state"] --> Ev
@@ -221,6 +224,21 @@ Energy samples store *incremental* kWh, so usage is a plain sum: today, the
 current billing cycle (custom start day), a projection to cycle end, budget
 usage, and per-device breakdown. History is bucketed in 15-minute UTC slots so
 half-hour time zones (e.g. IST) aggregate correctly into local hours.
+
+**One source for "today".** Samples only exist while the server polls, so a restart or an outage
+used to leave the server's total below the plug's own. A device that reports its own daily meter
+(`today_energy_kwh`, Tapo) is now reconciled on every sample: when the meter is more than 10 Wh
+ahead of today's recorded sum, `catch_up_rows` (`modules/energy`) stores the difference as rows
+with id `fill-…`, spread over today's hours that have no row (or at "now" when every hour has
+one). Nothing is added in the 15 minutes after midnight, while the meter may still hold
+yesterday. Web and Android both show `today_kwh` / `today_cost` from `GET /energy/overview` and
+never recompute it from device state. The meter is assumed to reset at the server's local
+midnight (set the same time zone on the plug).
+
+**Power history.** Every sample stores the measured `power_watts`. `GET /energy/history` returns
+`watts` per bucket: each device's average over its real samples (fill rows are excluded), summed
+across devices, `null` where nothing was measured. The clients draw it as a line chart next to
+the kWh bars (`EnergyChart` + `TrendChart` on the web, `LineChart` on Android).
 
 ### Tariffs and currency
 
