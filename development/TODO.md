@@ -100,6 +100,7 @@
 - [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
 - [x] Logo: modular D mark on the favicon, PWA icons, desktop window, Android launcher and animated splash (`development/docs/BRAND.md`)
 - [x] Dynamic theming (wallpaper colors on Android 12+) disabled by default; cleanly toggleable in Settings Appearance
+- [x] Material 3 Expressive Collapsible Card (`CollapsibleCard`) in `ui-shared/Common.kt`; implemented on Android Settings Server security & certificate fingerprint with one-touch copy
 
 ## Milestone 11: Docker, remote access and the desktop app (2026-10-10)
 - [x] Server image (`Dockerfile`) and compose service on the host network; MQTT broker behind the `mqtt` profile

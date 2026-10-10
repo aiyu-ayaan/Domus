@@ -9,19 +9,25 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -29,9 +35,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toPath
 import androidx.compose.material3.toShape
@@ -40,9 +50,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -201,3 +215,106 @@ fun ColorWheel(onPick: (String) -> Unit, modifier: Modifier = Modifier, enabled:
         }
     }
 }
+
+/**
+ * Material 3 Expressive Collapsible Card.
+ *
+ * Provides a tonal card surface with an accessible interactive header,
+ * spring-based motion on expand/collapse, rotating chevron indicator,
+ * and expandable content area separated by a subtle divider.
+ *
+ * Supports both internal state (`initiallyExpanded`) and hoisted state (`expanded` + `onExpandedChange`).
+ */
+@Composable
+fun CollapsibleCard(
+    title: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    leading: (@Composable () -> Unit)? = null,
+    trailingBadge: (@Composable () -> Unit)? = null,
+    initiallyExpanded: Boolean = false,
+    expanded: Boolean? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    var internalExpanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
+    val isExpanded = expanded ?: internalExpanded
+    val toggle = {
+        val next = !isExpanded
+        if (onExpandedChange != null) {
+            onExpandedChange(next)
+        } else {
+            internalExpanded = next
+        }
+    }
+
+    val c = MaterialTheme.colorScheme
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = spatialSpec,
+        label = "chevronRotation",
+    )
+
+    Surface(
+        color = containerColor,
+        shape = shape,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        role = Role.Button,
+                        onClick = toggle,
+                    )
+                    .semantics {
+                        stateDescription = if (isExpanded) "Expanded" else "Collapsed"
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (leading != null) {
+                    leading()
+                    Spacer(Modifier.width(16.dp))
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    if (!subtitle.isNullOrBlank()) {
+                        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    }
+                }
+                if (trailingBadge != null) {
+                    trailingBadge()
+                    Spacer(Modifier.width(8.dp))
+                }
+                Icon(
+                    imageVector = Icons.Rounded.ExpandMore,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = c.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .graphicsLayer { rotationZ = chevronRotation },
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) + expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()),
+                exit = fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()) + shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    content = content,
+                )
+            }
+        }
+    }
+}
+

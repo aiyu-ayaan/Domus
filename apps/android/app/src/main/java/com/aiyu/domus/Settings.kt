@@ -13,8 +13,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddHome
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Group
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -34,12 +40,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,11 +58,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Session
+import com.aiyu.domus.ui.components.CollapsibleCard
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
 import com.aiyu.domus.ui.components.enterStaggered
+import kotlinx.coroutines.delay
 
 private val Themes = listOf("system" to "System", "light" to "Light", "dark" to "Dark")
 
@@ -118,22 +130,97 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         }
 
         SectionTitle("Server")
-        Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(1)) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ShapedIcon(Icons.Rounded.Dns, MaterialShapes.Clover4Leaf, if (live) c.primary else c.surfaceContainerHighest, if (live) c.onPrimary else c.onSurfaceVariant)
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text(session.server.removePrefix("https://"), style = MaterialTheme.typography.titleMedium)
-                        Text(if (live) "Live" else "Reconnecting…", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+        val pin = repository.pinnedFingerprint
+        CollapsibleCard(
+            title = session.server.removePrefix("https://"),
+            subtitle = if (live) (if (pin != null) "Live · Pinned certificate" else "Live · Public certificate") else "Reconnecting…",
+            leading = {
+                ShapedIcon(Icons.Rounded.Dns, MaterialShapes.Clover4Leaf, if (live) c.primary else c.surfaceContainerHighest, if (live) c.onPrimary else c.onSurfaceVariant)
+            },
+            trailingBadge = {
+                if (live) {
+                    Surface(
+                        color = c.primaryContainer.copy(alpha = 0.7f),
+                        shape = MaterialTheme.shapes.extraSmall,
+                    ) {
+                        Text(
+                            "LIVE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = c.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
                     }
                 }
-                val pin = repository.pinnedFingerprint
-                Text(
-                    if (pin == null) "Encrypted · certificate verified by a public authority" else "Encrypted · you approved this server's own certificate:",
-                    style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant,
-                )
-                if (pin != null) Text(pin, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, color = c.onSurfaceVariant)
+            },
+            modifier = Modifier.fillMaxWidth().enterStaggered(1),
+        ) {
+            Text(
+                if (pin == null) "Encrypted · certificate verified by a public authority" else "Encrypted · you approved this server's own certificate on first use:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = c.onSurfaceVariant,
+            )
+            if (pin != null) {
+                var copied by remember { mutableStateOf(false) }
+                val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager }
+                Surface(
+                    color = c.surfaceContainerHighest,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                "SHA-256 Fingerprint",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = c.onSurfaceVariant,
+                            )
+                            FilledTonalButton(
+                                onClick = {
+                                    clipboard?.setPrimaryClip(ClipData.newPlainText("Fingerprint", pin))
+                                    copied = true
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                modifier = Modifier.heightIn(min = 32.dp),
+                            ) {
+                                AnimatedContent(
+                                    targetState = copied,
+                                    label = "copyAnimation",
+                                ) { isCopied ->
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isCopied) Icons.Rounded.Check else Icons.Rounded.ContentCopy,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Text(
+                                            if (isCopied) "Copied" else "Copy",
+                                            style = MaterialTheme.typography.labelMedium,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        LaunchedEffect(copied) {
+                            if (copied) {
+                                delay(2000L)
+                                copied = false
+                            }
+                        }
+                        Text(
+                            pin,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = c.onSurface,
+                        )
+                    }
+                }
             }
         }
 
