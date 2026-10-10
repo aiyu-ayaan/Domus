@@ -57,6 +57,21 @@ The release binary is stripped and built with thin LTO (`[profile.release]` in `
 The build uses BuildKit cache mounts for the Cargo registry and `target/`. `COPY` keeps source mtimes, so the
 Dockerfile touches the workspace sources before `cargo build`; without that a cached, older binary is shipped.
 
+### Forgot the password
+
+`domus-backend reset-password <username> [new-password]` sets a new password straight in the database. Without a password it generates one and prints it. It works while the server runs and needs no shell in the image, because `exec` starts the binary itself:
+
+```bash
+docker compose exec domus domus-backend reset-password aiyu            # random password, printed
+docker compose exec domus domus-backend reset-password aiyu 'new-pass' # your own (8+ characters)
+docker compose -f docker-compose.local.yml exec domus domus-backend reset-password aiyu
+domus-backend reset-password aiyu                                      # outside Docker, from the repo root (uses ./data)
+```
+
+Existing sessions stay valid until their token expires; the new password applies to the next sign-in. Source: `backend/src/cli.rs`.
+
+A `Request failed (500)` on sign-in is a server error, not a wrong password (that is a 401): check `docker compose logs domus`.
+
 ## 3. Cloudflare Tunnel
 
 `cloudflared` runs outside this compose file (on the host or in its own container with host networking).

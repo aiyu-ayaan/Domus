@@ -1,6 +1,7 @@
 pub mod api;
 pub mod automation_engine;
 pub mod bootstrap;
+pub mod cli;
 pub mod config;
 pub mod infrastructure;
 pub mod integrations;
