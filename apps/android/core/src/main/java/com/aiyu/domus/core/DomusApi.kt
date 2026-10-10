@@ -90,6 +90,7 @@ class DomusApi(val baseUrl: String, pin: String?, private val token: () -> Strin
     suspend fun devices() = call("GET", "/devices", ListSerializer(Device.serializer()))
     suspend fun command(id: String, command: DeviceCommand) =
         call("POST", "/devices/$id/command", Device.serializer(), encode(DeviceCommand.serializer(), command))
+    suspend fun effects() = call("GET", "/devices/effects", EffectCatalog.serializer())
     suspend fun refresh(id: String) = call("POST", "/devices/$id/refresh", Device.serializer())
 
     /** A write whose answer is not needed (or is read loosely). */

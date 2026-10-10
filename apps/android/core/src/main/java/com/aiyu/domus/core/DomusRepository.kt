@@ -65,6 +65,9 @@ class DomusRepository(context: Context) {
     val automations: StateFlow<List<Automation>> = _automations
     private val _energy = MutableStateFlow<EnergyOverview?>(null)
     val energy: StateFlow<EnergyOverview?> = _energy
+    private val _effects = MutableStateFlow(EffectCatalog())
+    /** Light moods and effects the server offers. Loaded once per sign-in. */
+    val effects: StateFlow<EffectCatalog> = _effects
     /** True until the first load after sign-in finishes. */
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
@@ -267,6 +270,8 @@ class DomusRepository(context: Context) {
                 _scenes.value = scenes.await()
                 _automations.value = automations.await()
                 _energy.value = energy.await()
+                // Optional too: an older server has no catalog, lights then just show no moods.
+                if (_effects.value.moods.isEmpty()) runCatching { api.effects() }.getOrNull()?.let { _effects.value = it }
             }
         }
         _loading.value = false

@@ -95,6 +95,8 @@
 - [x] Analytics tab on Android (Electricity + Air quality, dynamic), charts with selectable buckets
 - [x] Backend: `air_metrics` history + `GET /air/history`; web: air quality trend chart, insights on Energy and Air Quality
 - [x] `pnpm gateway` (LAN + adb forwarding for the dev server, started by `pnpm dev`) and `pnpm android:dev`
+- [x] Light moods and on-device effects (catalog in `home-core`, Tuya scene mode, Tapo strip lighting effects), web + Android; one effect verified on a Tuya bulb and the Tapo L900
+- [ ] Light effects: tune Tuya step timing by eye, Xiaomi support, brightness while an effect plays on a Tapo strip
 - [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
 
 ## Next

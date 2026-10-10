@@ -76,9 +76,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.DeviceCommand
+import com.aiyu.domus.core.LightPreset
 import com.aiyu.domus.core.Room
 import com.aiyu.domus.core.User
 import com.aiyu.domus.core.airLevel
@@ -400,9 +403,9 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
             Box(Modifier.size(48.dp).clip(MaterialShapes.Sunny.toShape()).background(shown).border(1.dp, c.outlineVariant, MaterialShapes.Sunny.toShape()))
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(if (!on) "Light off" else if (mode == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
+                Text(if (!on) "Light off" else if (s.effect != null) "Effect" else if (mode == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
                 RollingText(
-                    if (mode == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
+                    s.effect?.let { "Playing ${it.replaceFirstChar(Char::uppercase)}" } ?: if (mode == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
                     MaterialTheme.typography.bodyMedium, c.onSurfaceVariant,
                 )
             }
@@ -469,6 +472,62 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
         }
         // Any color: drag on the wheel, it is sent when the finger lifts.
         ColorWheel({ send(DeviceCommand(color = it, colorMode = "color")) }, Modifier.align(Alignment.CenterHorizontally).size(220.dp), enabled)
+    }
+
+    val catalog by LocalRepository.current.effects.collectAsStateWithLifecycle()
+    if (catalog.moods.isNotEmpty()) {
+        Text("Moods", style = MaterialTheme.typography.titleSmall)
+        PresetGrid(catalog.moods, enabled, { send(DeviceCommand(effect = it.id)) }) { mood ->
+            // A mood is "on" when the light shows exactly its setting and no effect runs.
+            s.effect == null && s.isOn == true && s.colorMode == "white" && s.brightness == mood.brightness && s.colorTemp == mood.colorTemp
+        }
+    }
+    // Only the effects this light says it can play by itself.
+    val playable = catalog.effects.filter { it.id in s.options["effect"].orEmpty() }
+    if (playable.isNotEmpty()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Effects", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            if (s.effect != null) TextButton({ send(DeviceCommand(effect = "")) }, enabled = enabled) { Text("Stop effect") }
+        }
+        PresetGrid(playable, enabled, { send(DeviceCommand(effect = it.id)) }) { it.id == s.effect }
+    }
+}
+
+/** Two tiles per row: an orb showing the preset's light, and its name. The active one is filled and rounder. */
+@Composable
+private fun PresetGrid(presets: List<LightPreset>, enabled: Boolean, onPick: (LightPreset) -> Unit, active: (LightPreset) -> Boolean) {
+    val c = MaterialTheme.colorScheme
+    val motion = MaterialTheme.motionScheme
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        presets.chunked(2).forEach { pair ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                pair.forEach { preset ->
+                    val on = active(preset)
+                    val container by animateColorAsState(if (on) c.secondaryContainer else c.surfaceContainerHigh, motion.defaultEffectsSpec(), label = "preset")
+                    val corner by animateDpAsState(if (on) 28.dp else 16.dp, motion.defaultSpatialSpec(), label = "presetCorner")
+                    val colors = preset.colors.mapNotNull(::parseColor).ifEmpty { listOf(c.outline) }
+                    Surface(
+                        onClick = { onPick(preset) },
+                        enabled = enabled,
+                        color = container,
+                        shape = RoundedCornerShape(corner.coerceAtLeast(0.dp)),
+                        modifier = Modifier.weight(1f).semantics { role = Role.RadioButton; stateDescription = if (on) "On" else "Off" },
+                    ) {
+                        Row(Modifier.heightIn(min = 56.dp).padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // The light itself: device data, not theme color. A loop is drawn as a sweep through its colors.
+                            Box(
+                                Modifier.size(32.dp).clip(CircleShape)
+                                    .background(if (colors.size > 1) Brush.sweepGradient(colors + colors.first()) else SolidColor(colors.first()))
+                                    .border(1.dp, c.outlineVariant, CircleShape),
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(preset.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
+                if (pair.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
     }
 }
 

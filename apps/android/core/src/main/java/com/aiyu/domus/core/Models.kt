@@ -35,6 +35,8 @@ data class DeviceState(
     /** #RRGGBB */
     val color: String? = null,
     @SerialName("color_mode") val colorMode: String? = null,
+    /** Id of the light effect the device is playing, if any. */
+    val effect: String? = null,
     val temperature: Float? = null,
     val humidity: Float? = null,
     @SerialName("air_quality_pm25") val pm25: Float? = null,
@@ -59,7 +61,24 @@ data class DeviceCommand(
     @SerialName("color_mode") val colorMode: String? = null,
     @SerialName("fan_speed") val fanSpeed: String? = null,
     val mode: String? = null,
+    /** A mood or effect id from the server's catalog; an empty string stops a running effect. */
+    val effect: String? = null,
 )
+
+/** A mood (still white preset) or an effect (color loop the bulb plays by itself). */
+@Serializable
+data class LightPreset(
+    val id: String,
+    val name: String,
+    /** Preview colors as #rrggbb: one for a mood, the loop for an effect. */
+    val colors: List<String> = emptyList(),
+    val brightness: Int? = null,
+    @SerialName("color_temp") val colorTemp: Int? = null,
+)
+
+/** Moods suit every light; a light can play the effects listed in its `options["effect"]`. */
+@Serializable
+data class EffectCatalog(val moods: List<LightPreset> = emptyList(), val effects: List<LightPreset> = emptyList())
 
 @Serializable
 data class Device(
@@ -82,6 +101,12 @@ data class Device(
             colorMode = cmd.colorMode ?: state.colorMode,
             fanSpeed = cmd.fanSpeed ?: state.fanSpeed,
             mode = cmd.mode ?: state.mode,
+            // A plain color or white command ends an effect; an effect command starts ("" stops) one.
+            effect = when {
+                cmd.effect != null -> cmd.effect.ifEmpty { null }
+                cmd.color != null || cmd.colorTemp != null || cmd.colorMode != null -> null
+                else -> state.effect
+            },
         ),
     )
 }

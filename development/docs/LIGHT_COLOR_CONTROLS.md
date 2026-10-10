@@ -111,3 +111,35 @@ The shared domain contracts in `crates/home-core/src/lib.rs` normalize disparate
    - Custom native color wheel picker and interactive hue slider with editable Hex badge.
 5. **Automations Integration**:
    - `RuleEditor` supports selecting and configuring color or temperature actions for individual lights and groups.
+
+## Moods and effects
+
+Presets a light can be set to in one tap, on web (`LightScenes.tsx`) and Android (`PresetGrid` in the device sheet).
+The catalog lives in `crates/home-core/src/effects.rs` and is served at `GET /devices/effects`.
+
+- **Mood** — a still white setting (brightness + warmth). `DeviceCommand::resolved()` turns it into a plain
+  white command before it reaches a plugin, so every light supports it.
+- **Effect** — a loop of colours the bulb plays by itself. Nothing is streamed while it runs. A light lists the
+  effects it can play in `state.options.effect`; `state.effect` is the one playing, read back from the device.
+
+```mermaid
+flowchart LR
+    UI[Web / Android tile] -- "POST /devices/:id/command {effect: id}" --> M[DeviceManager.command]
+    M -- "mood id" --> R[resolved: is_on + brightness + color_temp]
+    R --> P[any plugin: normal white command]
+    M -- "effect id" --> T{integration}
+    T -- Tuya --> TS["work_mode = scene<br/>scene_data_v2 {scene_num = slot, scene_units per colour}"]
+    T -- "Tapo strip" --> TP["set_lighting_effect {type: sequence, sequence: [[h,s,v]…]}"]
+    T -- other --> N[ignored: not listed in options.effect]
+    M -- "effect: ''" --> S["stop: Tuya work_mode = white · Tapo effect enable = 0"]
+```
+
+| Integration | Offered when | Running effect read from |
+|---|---|---|
+| Tuya | the bulb has `scene_data_v2` and `work_mode` includes `scene` | `work_mode == scene`, slot number and first colour match the catalog |
+| Tapo | `get_device_info` contains `lighting_effect` (light strips) | `lighting_effect.enable == 1` and its name |
+| Xiaomi | not yet | — |
+
+A Tuya bulb addresses scenes by slot 1-8, so the catalog holds at most eight effects and an effect's position is
+its slot. A Tapo strip ignores colour changes while an effect runs; the plugin remembers which hosts are playing
+and switches the effect off before a plain colour command.
