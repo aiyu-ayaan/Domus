@@ -99,6 +99,7 @@
 - [ ] Light effects: tune Tuya step timing by eye, Xiaomi support, brightness while an effect plays on a Tapo strip
 - [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
 - [x] Logo: modular D mark on the favicon, PWA icons, desktop window, Android launcher and animated splash (`development/docs/BRAND.md`)
+- [x] Dynamic theming (wallpaper colors on Android 12+) disabled by default; cleanly toggleable in Settings Appearance
 
 ## Milestone 11: Docker, remote access and the desktop app (2026-10-10)
 - [x] Server image (`Dockerfile`) and compose service on the host network; MQTT broker behind the `mqtt` profile

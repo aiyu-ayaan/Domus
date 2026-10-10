@@ -43,7 +43,7 @@ private val DomusTypography = base.copy(
 
 /** Material 3 Expressive: spring motion scheme, increased corners, emphasized type. Wallpaper colors on Android 12+. */
 @Composable
-fun DomusTheme(dark: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = true, content: @Composable () -> Unit) {
+fun DomusTheme(dark: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = false, content: @Composable () -> Unit) {
     val colors = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val context = LocalContext.current
         if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)

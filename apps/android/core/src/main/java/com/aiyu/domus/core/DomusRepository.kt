@@ -44,7 +44,7 @@ sealed interface ConnectResult {
     data class Failed(val message: String) : ConnectResult
 }
 
-data class Appearance(val theme: String = "system", val dynamicColor: Boolean = true)
+data class Appearance(val theme: String = "system", val dynamicColor: Boolean = false)
 
 /** Everything the screens show, kept current by the server's event stream. One instance per process. */
 class DomusRepository(context: Context) {
@@ -78,7 +78,7 @@ class DomusRepository(context: Context) {
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
     /** Short notices for a snackbar: failed commands, server notifications. */
     val messages: SharedFlow<String> = _messages
-    private val _appearance = MutableStateFlow(Appearance(store.get(THEME) ?: "system", store.get(DYNAMIC) != "false"))
+    private val _appearance = MutableStateFlow(Appearance(store.get(THEME) ?: "system", store.get(DYNAMIC) == "true"))
     val appearance: StateFlow<Appearance> = _appearance
 
     /**
