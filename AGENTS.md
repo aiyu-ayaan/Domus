@@ -128,7 +128,8 @@ home-automation/
 │   ├── integration/
 │   └── fixtures/
 ├── scripts/
-├── docker-compose.yml
+├── docker-compose.yml               # published image (aiyuayaan/domus)
+├── docker-compose.local.yml         # builds from source
 ├── pnpm-workspace.yaml
 ├── package.json
 ├── Cargo.toml                        # Rust workspace root

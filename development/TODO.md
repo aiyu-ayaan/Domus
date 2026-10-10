@@ -187,3 +187,13 @@
 - [ ] Packaged Electron builds for macOS and Windows
 
 
+
+## Milestone 16: Releases, update channels and the published image (2026-10-10)
+- [x] Docker: `docker-compose.yml` runs `aiyuayaan/domus` (one-file setup, inline Mosquitto config), `docker-compose.local.yml` builds from source; distroless runtime, stripped thin-LTO binary, allow-list `.dockerignore` (image 146 MB -> 67 MB); `Cargo.lock` committed
+- [x] Release workflow: marker commits (`!alpha` ... `!patch`) open a release PR, merging builds the image (amd64 + arm64), AppImage + deb and the signed APK, then tags and publishes; first release is `0.0.1-alpha.1`
+- [x] One version and build number (root `package.json`) for server, web, desktop and Android (`scripts/set-version.mjs`)
+- [x] Update channels (stable / beta / alpha): Android Settings > Updates, desktop self-update for the AppImage, Docker channel tags
+- [x] `scripts/install-linux.sh` (menu entry with the app icon, `docus` command), README download section, `development/docs/RELEASE.md`
+- [ ] Add the repository secrets and run the first `!alpha` release; the workflow itself has only been linted and simulated locally
+- [ ] Android: install the update in-app instead of through the browser download
+- [ ] Desktop: arm64 Linux build

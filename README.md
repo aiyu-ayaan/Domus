@@ -17,6 +17,54 @@ Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs
 UI design profile: [`design-system/docus/MASTER.md`](design-system/docus/MASTER.md).
 Progress: [`development/TODO.md`](development/TODO.md).
 
+## Download
+
+| | |
+|---|---|
+| Server (Docker) | `aiyuayaan/domus` on Docker Hub, amd64 and arm64 |
+| Android | `Docus-<version>.apk` from the [latest release](https://github.com/aiyu-ayaan/Domus-Rust/releases) |
+| Linux desktop | the one-line installer below, or the `.deb` / `.AppImage` from the release |
+
+### Server
+
+One file is all the host needs:
+
+```bash
+mkdir docus && cd docus
+wget https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/docker-compose.yml
+docker compose up -d
+```
+
+Open `https://<server-ip>:8443` and create the administrator account. `docker compose logs docus`
+shows the certificate fingerprint the apps ask you to confirm.
+
+```bash
+docker compose pull && docker compose up -d      # update
+DOCUS_VERSION=beta docker compose up -d          # follow a channel: latest (default), beta, alpha, or 0.0.1
+TZ=Asia/Kolkata DOCUS_PORT=9443 docker compose up -d
+docker compose --profile mqtt up -d              # also start the optional Mosquitto broker
+```
+
+Put `DOCUS_VERSION`, `TZ` and `DOCUS_PORT` in a `.env` file next to the compose file to keep them.
+
+### Linux desktop app
+
+Installs the newest release for the current user (x86_64, no root): the AppImage, a menu entry with
+the Docus icon and a `docus` command. The app then keeps itself up to date.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/scripts/install-linux.sh | sh
+# ... | sh -s -- --channel beta     beta builds too (or alpha)
+# ... | sh -s -- --uninstall        remove it; settings are kept
+```
+
+### Android
+
+Download the APK from the release page and open it. Later updates are offered in
+Settings → Updates, on the Stable, Beta or Alpha channel.
+
+Releases, version numbers and the update channels: [development/docs/RELEASE.md](development/docs/RELEASE.md).
+
 ## Requirements
 
 - Rust 1.80+ (`cargo`)
@@ -45,10 +93,10 @@ APP_ENV=production cargo run --release --manifest-path backend/Cargo.toml
 
 Then open `https://<server-ip>:8443`.
 
-Or with Docker (host networking, data in the `docus_data` volume):
+Or build the Docker image from this checkout (host networking, data in the `docus_data` volume):
 
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.local.yml up -d --build
 ```
 
 Remote access through a Cloudflare Tunnel, the home/remote address the apps switch between, and the
