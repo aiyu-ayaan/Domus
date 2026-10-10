@@ -5,7 +5,7 @@ pub mod klap;
 
 use base64::{engine::general_purpose::STANDARD as B64, Engine};
 use home_core::{
-    hex_to_rgb, hsv_to_rgb, integration_err, rgb_to_hex, rgb_to_hsv, AccountContext, CoreError,
+    effects, hex_to_rgb, hsv_to_rgb, integration_err, rgb_to_hex, rgb_to_hsv, AccountContext, CoreError,
     DeviceCommand, DeviceContext, DeviceState, DeviceType, DiscoveredDevice, IntegrationPlugin,
     IntegrationType, PolledState, Result,
 };
@@ -24,6 +24,30 @@ const DISCOVERY_QUERY: [u8; 16] = [
 pub struct TapoIntegration {
     klap: KlapClient,
     broadcast: Vec<String>,
+    /// Hosts known to be playing a lighting effect. A strip ignores colour changes while one
+    /// runs, so it is switched off first; remembering spares that extra request otherwise.
+    playing: std::sync::Mutex<std::collections::HashSet<String>>,
+}
+
+/// An effect in the light strips' native form (`set_lighting_effect`, type `sequence`).
+/// The strip stores and loops it by itself.
+fn lighting_effect(e: &effects::Effect, enable: bool) -> Value {
+    json!({
+        "custom": 1,
+        "id": format!("DomusEffect{:0>21}", e.id),
+        "name": e.name,
+        "brightness": 100,
+        "segments": [0],
+        "expansion_strategy": 1,
+        "enable": enable as u8,
+        "type": "sequence",
+        "duration": 0,
+        "transition": e.step as u32 * 100,
+        "direction": 4,
+        "spread": 7,
+        "repeat_times": 0,
+        "sequence": e.colors.iter().map(|&(h, s, v)| json!([h, s, v])).collect::<Vec<_>>(),
+    })
 }
 
 #[derive(Debug, Clone)]
@@ -41,6 +65,7 @@ impl TapoIntegration {
         Self {
             klap: KlapClient::new(),
             broadcast,
+            playing: Default::default(),
         }
     }
 
@@ -182,6 +207,14 @@ fn state_from(info: &Value, energy: Option<&Value>) -> DeviceState {
         s.current_power_watts = e.get("current_power").and_then(Value::as_f64).map(|mw| (mw / 1000.0) as f32);
         s.today_energy_kwh = e.get("today_energy").and_then(Value::as_f64).map(|wh| (wh / 1000.0) as f32);
     }
+    // Only light strips report a lighting effect; they are the ones that can play ours.
+    if let Some(fx) = info.get("lighting_effect") {
+        s.options.insert("effect".into(), effects::effect_ids());
+        if fx.get("enable").and_then(Value::as_u64) == Some(1) {
+            let name = fx.get("name").and_then(Value::as_str);
+            s.effect = effects::EFFECTS.iter().find(|e| Some(e.name) == name).map(|e| e.id.to_string());
+        }
+    }
     if let Some(rssi) = info.get("rssi") {
         s.extra.insert("rssi".into(), rssi.clone());
     }
@@ -266,6 +299,11 @@ impl IntegrationPlugin for TapoIntegration {
             .ok_or_else(|| CoreError::AuthError("TP-Link account was removed".into()))?;
         let creds = creds_of(account)?;
         let info = self.device_info(host, &creds).await?;
+        {
+            let on = info.pointer("/lighting_effect/enable").and_then(Value::as_u64) == Some(1);
+            let mut playing = self.playing.lock().unwrap();
+            if on { playing.insert(host.to_string()); } else { playing.remove(host); }
+        }
         let has_energy = device.config.get("has_energy").and_then(Value::as_bool).unwrap_or(false);
         let energy = if has_energy { self.energy(host, &creds).await } else { None };
         Ok(PolledState {
@@ -284,6 +322,26 @@ impl IntegrationPlugin for TapoIntegration {
             .account
             .as_ref()
             .ok_or_else(|| CoreError::AuthError("TP-Link account was removed".into()))?;
+        let creds = creds_of(account)?;
+        let chosen = command.effect.as_deref().map(effects::effect);
+        let recolour = command.color.is_some() || command.color_temp.is_some() || command.color_mode.is_some();
+        let was_playing = self.playing.lock().unwrap().contains(host);
+        // Stop the running effect when asked to, or when a plain colour is about to replace it.
+        if matches!(chosen, Some(None)) || (chosen.is_none() && recolour && was_playing) {
+            self.klap.request(host, &creds, "set_lighting_effect", Some(lighting_effect(&effects::EFFECTS[0], false))).await?;
+            self.playing.lock().unwrap().remove(host);
+            if matches!(chosen, Some(None)) && command.is_on.is_none() && command.brightness.is_none() && !recolour {
+                return Ok(());
+            }
+        }
+        if let Some(Some((_, e))) = chosen {
+            if command.is_on != Some(false) {
+                self.klap.request(host, &creds, "set_device_info", Some(json!({ "device_on": true }))).await?;
+            }
+            self.klap.request(host, &creds, "set_lighting_effect", Some(lighting_effect(e, true))).await?;
+            self.playing.lock().unwrap().insert(host.to_string());
+            return Ok(());
+        }
         let mut params = serde_json::Map::new();
         if let Some(on) = command.is_on {
             params.insert("device_on".into(), json!(on));
@@ -316,7 +374,7 @@ impl IntegrationPlugin for TapoIntegration {
             return Err(CoreError::Unsupported("this device does not support that command".into()));
         }
         self.klap
-            .request(host, &creds_of(account)?, "set_device_info", Some(Value::Object(params)))
+            .request(host, &creds, "set_device_info", Some(Value::Object(params)))
             .await?;
         Ok(())
     }

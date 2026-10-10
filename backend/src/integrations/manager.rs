@@ -346,6 +346,7 @@ impl DeviceManager {
         if cmd.is_empty() {
             return Err(ApiError::BadRequest("empty command".into()));
         }
+        let cmd = &cmd.resolved();
         let rec = self.get(device_id).await?;
         let plugin = self.plugin(&rec.integration_type)?;
         let accounts = self.account_map(&rec.integration_type).await;

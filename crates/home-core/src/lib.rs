@@ -1,6 +1,8 @@
 //! Shared domain model for Docus: device state, commands, automation rules and
 //! the contract every integration plugin implements.
 
+pub mod effects;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -150,6 +152,9 @@ pub struct DeviceState {
     /// Color mode ("color" or "white")
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_mode: Option<String>,
+    /// Id of the light effect the device is playing (see `effects`), if any.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effect: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub temperature: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -202,6 +207,9 @@ pub struct DeviceCommand {
     pub fan_speed: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mode: Option<String>,
+    /// A mood or effect id from `effects`; an empty string stops a running effect.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effect: Option<String>,
     /// Integration-native payload (e.g. Tuya DP codes), passed through as is.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub raw: Option<Value>,
@@ -212,8 +220,34 @@ impl DeviceCommand {
         *self == Self::default()
     }
 
+    /// A mood is only a preset: turn it into the plain white command it stands for,
+    /// so every integration can show it. Effects and other commands pass through.
+    pub fn resolved(&self) -> DeviceCommand {
+        match self.effect.as_deref().and_then(effects::mood) {
+            Some(m) => DeviceCommand {
+                is_on: Some(true),
+                brightness: Some(m.brightness),
+                color_temp: Some(m.color_temp),
+                color_mode: Some("white".into()),
+                effect: None,
+                ..self.clone()
+            },
+            None => self.clone(),
+        }
+    }
+
     /// Optimistically apply this command to a cached state.
     pub fn apply_to(&self, state: &mut DeviceState) {
+        // A plain colour or white command ends a running effect.
+        if self.color.is_some() || self.color_temp.is_some() || self.color_mode.is_some() {
+            state.effect = None;
+        }
+        if let Some(id) = &self.effect {
+            state.effect = (!id.is_empty()).then(|| id.clone());
+            if !id.is_empty() {
+                state.is_on = Some(true);
+            }
+        }
         if let Some(v) = self.is_on {
             state.is_on = Some(v);
         }

@@ -1,7 +1,7 @@
 //! Translate between Tuya data points (DP codes) and the normalised model.
 
 use home_core::{
-    hex_to_rgb, hsv_to_rgb, rgb_to_hex, rgb_to_hsv, DeviceCommand, DeviceState, DeviceType,
+    effects, hex_to_rgb, hsv_to_rgb, rgb_to_hex, rgb_to_hsv, DeviceCommand, DeviceState, DeviceType,
 };
 use serde_json::{json, Map, Value};
 
@@ -11,6 +11,7 @@ const TEMP_CODES: &[&str] = &["temp_value_v2", "temp_value"];
 const FAN_CODES: &[&str] = &["fan_speed_enum", "speed", "fan_speed", "fan_speed_percent"];
 const COLOR_CODES: &[&str] = &["colour_data_v2", "colour_data_hsv", "colour_data"];
 const WORK_MODE_CODES: &[&str] = &["work_mode"];
+const SCENE_CODE: &str = "scene_data_v2";
 
 pub fn device_type(category: &str) -> DeviceType {
     match category {
@@ -179,6 +180,12 @@ pub fn state_from_status(config: &Value, status: &Map<String, Value>) -> DeviceS
             }
         }
     }
+    if supports_effects(config) {
+        s.options.insert("effect".into(), effects::effect_ids());
+        if status.get("work_mode").and_then(Value::as_str) == Some("scene") {
+            s.effect = status.get(SCENE_CODE).and_then(playing_effect);
+        }
+    }
     if let Some((_, v)) = first(status, COLOR_CODES) {
         if let Some(hex) = parse_tuya_color(v) {
             s.color = Some(hex);
@@ -250,11 +257,68 @@ fn writable<'a>(config: &'a Value, candidates: &[&'a str]) -> Option<&'a str> {
         .copied()
 }
 
+/// Bulbs that play scenes themselves: `work_mode` has a `scene` value and they take v2 scene data.
+fn supports_effects(config: &Value) -> bool {
+    dp(config, SCENE_CODE).is_some()
+        && enum_options(config, "work_mode").is_some_and(|modes| modes.iter().any(|m| m == "scene"))
+}
+
+/// An effect as Tuya scene data: one unit per colour, in the effect's slot.
+fn scene_data(slot: usize, e: &effects::Effect) -> Value {
+    // Durations are 0-100; the effect's tenths of a second are used as they are.
+    let pace = e.step.clamp(1, 100);
+    let units: Vec<Value> = e
+        .colors
+        .iter()
+        .map(|&(h, s, v)| {
+            json!({
+                "unit_change_mode": if e.fade { "gradient" } else { "jump" },
+                "unit_switch_duration": pace,
+                "unit_gradient_duration": pace,
+                "h": h, "s": s as u32 * 10, "v": v as u32 * 10,
+                "bright": 0, "temperature": 0,
+            })
+        })
+        .collect();
+    json!({ "scene_num": slot, "scene_units": units })
+}
+
+/// Which of our effects a bulb's scene data is: its slot, checked against the first colour
+/// so a scene set from the Tuya app in the same slot is not mistaken for ours.
+fn playing_effect(v: &Value) -> Option<String> {
+    let parsed;
+    let data = match v {
+        Value::String(text) => {
+            parsed = serde_json::from_str::<Value>(text).ok()?;
+            &parsed
+        }
+        other => other,
+    };
+    let e = effects::EFFECTS.get(data.get("scene_num")?.as_u64()?.checked_sub(1)? as usize)?;
+    let first = data.get("scene_units")?.get(0)?;
+    (first.get("h")?.as_u64()? == e.colors[0].0 as u64).then(|| e.id.to_string())
+}
+
 pub fn commands_for(config: &Value, cmd: &DeviceCommand) -> Vec<Value> {
     let mut out = Vec::new();
     if let Some(on) = cmd.is_on {
         if let Some(code) = writable(config, ON_CODES) {
             out.push(json!({ "code": code, "value": on }));
+        }
+    }
+    if let (Some(id), true) = (&cmd.effect, supports_effects(config)) {
+        match effects::effect(id) {
+            Some((slot, e)) => {
+                if cmd.is_on.is_none() {
+                    if let Some(code) = writable(config, ON_CODES) {
+                        out.push(json!({ "code": code, "value": true }));
+                    }
+                }
+                out.push(json!({ "code": "work_mode", "value": "scene" }));
+                out.push(json!({ "code": SCENE_CODE, "value": scene_data(slot, e) }));
+            }
+            // Stop: back to plain white light.
+            None => out.push(json!({ "code": "work_mode", "value": "white" })),
         }
     }
     if let Some(hex) = &cmd.color {
@@ -394,6 +458,36 @@ mod tests {
         assert_eq!(s.voltage, Some(230.1));
         assert_eq!(s.current_amps, Some(0.54));
         assert_eq!(device_type("cz"), DeviceType::Plug);
+    }
+
+    #[test]
+    fn effects_use_the_bulbs_scene_mode() {
+        let config = json!({ "functions": ["switch_led", "work_mode", "scene_data_v2"], "dps": {
+            "switch_led": {"type": "Boolean"},
+            "work_mode": {"type": "Enum", "values": {"range": ["white", "colour", "scene", "music"]}},
+            "scene_data_v2": {"type": "Json", "values": {}},
+        }});
+        let cmds = commands_for(&config, &DeviceCommand { effect: Some("ocean".into()), ..Default::default() });
+        assert_eq!(cmds[0], json!({"code": "switch_led", "value": true}));
+        assert_eq!(cmds[1], json!({"code": "work_mode", "value": "scene"}));
+        assert_eq!(cmds[2]["value"]["scene_num"], 1);
+        assert_eq!(cmds[2]["value"]["scene_units"][0]["unit_change_mode"], "gradient");
+        assert_eq!(cmds[2]["value"]["scene_units"][0]["s"], 1000);
+
+        // The bulb reports scene data as a JSON string; ours is recognised, the Tuya app's own scene 1 is not.
+        let mut status = Map::new();
+        status.insert("work_mode".into(), json!("scene"));
+        status.insert("scene_data_v2".into(), json!(cmds[2]["value"].to_string()));
+        let s = state_from_status(&config, &status);
+        assert_eq!(s.effect.as_deref(), Some("ocean"));
+        assert!(s.options["effect"].contains(&"party".to_string()));
+        status.insert("scene_data_v2".into(), json!(r#"{"scene_num":1,"scene_units":[{"bright":200,"h":0,"s":0,"temperature":0,"v":0}]}"#));
+        assert_eq!(state_from_status(&config, &status).effect, None);
+
+        // Stopping goes back to white; a bulb without scene data ignores effects.
+        let stop = commands_for(&config, &DeviceCommand { effect: Some(String::new()), ..Default::default() });
+        assert_eq!(stop, vec![json!({"code": "work_mode", "value": "white"})]);
+        assert!(commands_for(&json!({"dps": {}}), &DeviceCommand { effect: Some("ocean".into()), ..Default::default() }).is_empty());
     }
 
     #[test]

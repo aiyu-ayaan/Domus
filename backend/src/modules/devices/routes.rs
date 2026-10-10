@@ -18,6 +18,7 @@ pub fn device_routes() -> Router<AppState> {
     Router::new()
         .route("/", get(list))
         .route("/manual", post(add_manual))
+        .route("/effects", get(effects))
         .route("/:id", get(get_one).patch(update).delete(remove))
         .route("/:id/command", post(command))
         .route("/:id/refresh", post(refresh))
@@ -35,6 +36,11 @@ pub fn discovery_routes() -> Router<AppState> {
 
 async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<DeviceDto>>> {
     Ok(Json(visible_devices(&s, &user).await?.iter().map(|d| d.to_dto()).collect()))
+}
+
+/// Light moods and effects clients can offer. Which effects a light can play is in its `options.effect`.
+async fn effects(_user: AuthUser) -> Json<Value> {
+    Json(home_core::effects::catalog())
 }
 
 async fn get_one(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<DeviceDto>> {
