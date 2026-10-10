@@ -85,8 +85,8 @@ function verifyCertificate({ hostname, certificate, verificationResult }, callba
 // that drags the window, and the window buttons are overlaid on its right end.
 const titleBar = () =>
   nativeTheme.shouldUseDarkColors
-    ? { color: '#09090B', symbolColor: '#FAFAFA', height: 35 }
-    : { color: '#FAFAFA', symbolColor: '#09090B', height: 35 }
+    ? { color: '#12140E', symbolColor: '#E2E3D8', height: 35 }
+    : { color: '#F9FAEF', symbolColor: '#1A1C16', height: 35 }
 nativeTheme.on('updated', () => win?.setTitleBarOverlay(titleBar()))
 // The theme chosen in Settings; 'system' follows the desktop.
 ipcMain.on('theme:set', (event, theme) => {

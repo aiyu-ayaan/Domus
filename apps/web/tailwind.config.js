@@ -17,6 +17,8 @@ export default {
         subtle: token('subtle'),
         primary: token('primary'),
         'on-primary': token('on-primary'),
+        'primary-container': token('primary-container'),
+        'on-primary-container': token('on-primary-container'),
         on: token('on'),
         warn: token('warn'),
         danger: token('danger'),
