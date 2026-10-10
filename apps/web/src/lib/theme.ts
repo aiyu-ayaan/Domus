@@ -60,15 +60,21 @@ export function setTheme(theme: Theme) {
   notify()
 }
 
-export function toggleTheme(): 'dark' | 'light' {
-  const next = getResolvedTheme() === 'dark' ? 'light' : 'dark'
+export function cycleTheme(): Theme {
+  const next: Theme = currentTheme === 'system' ? 'light' : currentTheme === 'light' ? 'dark' : 'system'
   setTheme(next)
   return next
 }
 
+export function toggleTheme(): Theme {
+  return cycleTheme()
+}
+
 export interface ThemeControls {
+  theme: Theme
   resolved: 'dark' | 'light'
-  toggle: () => 'dark' | 'light'
+  toggle: () => Theme
+  cycle: () => Theme
 }
 
 export function useTheme(): [Theme, (t: Theme) => void, ThemeControls] {
@@ -107,6 +113,6 @@ export function useTheme(): [Theme, (t: Theme) => void, ThemeControls] {
     syncDocument(theme)
   }, [theme])
 
-  return [theme, setTheme, { resolved, toggle: toggleTheme }]
+  return [theme, setTheme, { theme, resolved, toggle: cycleTheme, cycle: cycleTheme }]
 }
 

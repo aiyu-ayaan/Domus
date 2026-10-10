@@ -1,4 +1,4 @@
-import { Sun, Moon } from '@phosphor-icons/react'
+import { Sun, Moon, CircleHalfTilt } from '@phosphor-icons/react'
 import { useTheme } from '@/lib/theme'
 import { Button } from './Button'
 import { cn } from '@/lib/cn'
@@ -12,21 +12,39 @@ export function ThemeToggle({
   size?: 'sm' | 'md'
   showLabel?: boolean
 }) {
-  const [, , { resolved, toggle }] = useTheme()
-  const isDark = resolved === 'dark'
-  const title = isDark ? 'Switch to light theme' : 'Switch to dark theme'
+  const [theme, , { resolved, toggle }] = useTheme()
+  const iconSize = size === 'sm' ? 16 : 18
+
+  const config =
+    theme === 'system'
+      ? {
+          label: 'Auto',
+          title: `Theme: Auto (${resolved}) · Click for Light`,
+          icon: <CircleHalfTilt size={iconSize} aria-hidden />,
+        }
+      : theme === 'light'
+        ? {
+            label: 'Light',
+            title: 'Theme: Light · Click for Dark',
+            icon: <Sun size={iconSize} aria-hidden />,
+          }
+        : {
+            label: 'Dark',
+            title: 'Theme: Dark · Click for Auto',
+            icon: <Moon size={iconSize} aria-hidden />,
+          }
 
   return (
     <Button
       variant="ghost"
       size={size}
-      aria-label={title}
-      title={title}
+      aria-label={config.title}
+      title={config.title}
       onClick={toggle}
       className={cn('transition-colors', className)}
-      icon={isDark ? <Sun size={size === 'sm' ? 16 : 18} aria-hidden /> : <Moon size={size === 'sm' ? 16 : 18} aria-hidden />}
+      icon={config.icon}
     >
-      {showLabel ? (isDark ? 'Light mode' : 'Dark mode') : undefined}
+      {showLabel ? config.label : undefined}
     </Button>
   )
 }
