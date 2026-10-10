@@ -166,5 +166,13 @@ async fn update_avatar(
         .fetch_one(&s.pool)
         .await?;
     let rooms = super::room_ids(&s.pool, &user.id).await?;
-    Ok(Json(UserDto::from_record(&rec, rooms)))
+    let dto = UserDto::from_record(&rec, rooms);
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UserUpdated {
+        user_id: rec.id.clone(),
+        username: rec.username.clone(),
+        role: rec.role.clone(),
+        avatar: rec.avatar.clone(),
+    });
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
+    Ok(Json(dto))
 }

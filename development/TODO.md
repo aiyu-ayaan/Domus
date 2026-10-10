@@ -140,9 +140,13 @@
   - First-run setup (`AuthScreen.tsx`): initial admin avatar preview with 1-click randomize
 - [x] Native Android app (`apps/android`):
   - Model & API updates: `User.avatar`, `DomusApi.updateAvatar`, `DomusRepository.updateAvatar`
-  - `UserAvatar` Compose component with OkHttp / URL PNG stream loading, in-memory `LruCache`, and Material 3 initials fallback
-  - `AvatarPickerDialog` Compose dialog with real-time preview, Randomize button, style selection chips, and custom seed field
-  - Screen integration: Settings profile hero card, Home dashboard greeting header, and Manage People user list and edit dialog
+  - `UserAvatar` Compose component: removed intrusive grey circular border and background; clean, centered display with `ContentScale.Fit`
+  - `AvatarCustomizationPage`: dedicated full-screen avatar studio (`SubPage`) with hero showcase, instant Randomize & Roll buttons, style chips, seed editor, and Apply action
+  - Screen integration: Settings profile hero card and Home greeting header open full-screen studio
+- [x] Real-time Multi-Device Synchronization:
+  - Backend `EventBus`: added `SystemEvent::UserUpdated` and `SystemEvent::UsersChanged` broadcasts on avatar/user updates
+  - Web & Desktop: `useLiveEvents` updates `AuthContext` state immediately on `user_updated` and invalidates query caches
+  - Android: `DomusRepository.handle()` updates `_session.value` and `_revision` immediately on `user_updated` and `users_changed`
 - [x] Architecture documentation with Mermaid diagram in `development/docs/AVATAR_SYSTEM.md`
 
 ## Next

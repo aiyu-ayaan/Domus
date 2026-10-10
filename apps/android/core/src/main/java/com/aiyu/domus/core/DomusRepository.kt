@@ -439,6 +439,25 @@ class DomusRepository(context: Context) {
                 _revision.update { it + 1 }
                 refresh()
             }
+            "user_updated" -> {
+                val userId = text("user_id")
+                val avatar = text("avatar")
+                val current = _session.value
+                if (current is Session.SignedIn && current.user.id == userId) {
+                    val updatedUser = if (avatar != null) current.user.copy(avatar = avatar) else attempt { it.me() } ?: current.user
+                    _session.value = current.copy(user = updatedUser)
+                }
+                _revision.update { it + 1 }
+            }
+            "users_changed" -> {
+                _revision.update { it + 1 }
+                val current = _session.value
+                if (current is Session.SignedIn) {
+                    attempt { it.me() }?.let { me ->
+                        _session.value = current.copy(user = me)
+                    }
+                }
+            }
             "device_discovered", "discovery_finished", "integrations_changed" -> _revision.update { it + 1 }
             "notification" -> {
                 _revision.update { it + 1 }

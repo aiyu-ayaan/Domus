@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { wsUrl } from './api'
+import { useAuth } from './auth'
 import { keys } from './queries'
 import { useToast } from './toast'
 import type { Device, LiveEvent } from './types'
@@ -9,6 +10,11 @@ import type { Device, LiveEvent } from './types'
 export function useLiveEvents(enabled: boolean) {
   const qc = useQueryClient()
   const { push } = useToast()
+  const { user, updateUser } = useAuth()
+  const userRef = useRef(user)
+  userRef.current = user
+  const updateUserRef = useRef(updateUser)
+  updateUserRef.current = updateUser
 
   useEffect(() => {
     if (!enabled) return
@@ -31,6 +37,22 @@ export function useLiveEvents(enabled: boolean) {
           return
         }
         switch (ev.type) {
+          case 'user_updated': {
+            const currentMe = userRef.current
+            if (currentMe && ev.user_id === currentMe.id) {
+              updateUserRef.current({
+                ...currentMe,
+                username: ev.username || currentMe.username,
+                role: (ev.role as any) || currentMe.role,
+                avatar: ev.avatar ?? currentMe.avatar,
+              })
+            }
+            qc.invalidateQueries({ queryKey: keys.users })
+            break
+          }
+          case 'users_changed':
+            qc.invalidateQueries({ queryKey: keys.users })
+            break
           case 'device_state_changed': {
             const list = qc.getQueryData<Device[]>(keys.devices)
             if (list && !list.some((d) => d.id === ev.device_id)) qc.invalidateQueries({ queryKey: keys.devices })

@@ -269,6 +269,7 @@ function People() {
 }
 
 function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () => void }) {
+  const { user: me, updateUser } = useAuth()
   const qc = useQueryClient()
   const toast = useToast()
   const { data: rooms = [] } = useRooms()
@@ -302,7 +303,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
   const save = useMutation({
     mutationFn: async () => {
       if (existing) {
-        await api.updateUser(existing.id, {
+        const updated = await api.updateUser(existing.id, {
           email: form.email,
           role: form.role,
           avatar: form.avatar,
@@ -310,6 +311,9 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
           room_ids: form.room_ids,
           ...(form.password ? { password: form.password } : {}),
         })
+        if (existing.id === me?.id) {
+          updateUser(updated)
+        }
       } else {
         await api.createUser(form)
       }

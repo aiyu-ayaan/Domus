@@ -37,6 +37,13 @@ pub enum SystemEvent {
     },
     IntegrationsChanged,
     RoomsChanged,
+    UserUpdated {
+        user_id: String,
+        username: String,
+        role: String,
+        avatar: Option<String>,
+    },
+    UsersChanged,
     Notification {
         id: String,
         level: String,

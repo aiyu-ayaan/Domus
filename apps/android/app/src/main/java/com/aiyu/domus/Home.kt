@@ -147,7 +147,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
                     avatarSpec = user.avatar,
                     username = user.username,
                     size = 44.dp,
-                    onClick = { open("settings") },
+                    onClick = { open("avatar") },
                 )
             },
         )

@@ -65,8 +65,6 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
     val context = LocalContext.current
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var avatarDialogOpen by remember { mutableStateOf(false) }
-
     ScreenColumn {
         ScreenHeader("Settings", "Domus ${version.orEmpty()}")
 
@@ -76,30 +74,17 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                     avatarSpec = session.user.avatar,
                     username = session.user.username,
                     size = 56.dp,
-                    onClick = { avatarDialogOpen = true },
+                    onClick = { open("avatar") },
                 )
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     Text(session.user.username, style = MaterialTheme.typography.titleLarge)
                     Text(session.user.role.replaceFirstChar(Char::uppercase), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
-                FilledTonalButton(onClick = { avatarDialogOpen = true }) {
+                FilledTonalButton(onClick = { open("avatar") }) {
                     Text("Avatar")
                 }
             }
-        }
-
-        if (avatarDialogOpen) {
-            AvatarPickerDialog(
-                currentSpec = session.user.avatar,
-                username = session.user.username,
-                onSave = { newSpec ->
-                    scope.launch {
-                        repository.updateAvatar(newSpec)
-                    }
-                },
-                onDismiss = { avatarDialogOpen = false },
-            )
         }
 
         SectionTitle("Home")

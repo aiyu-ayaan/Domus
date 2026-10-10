@@ -267,7 +267,8 @@ export interface Notification {
 }
 
 export type LiveEvent =
-  | { type: 'connected' | 'resync' | 'integrations_changed' | 'rooms_changed' }
+  | { type: 'connected' | 'resync' | 'integrations_changed' | 'rooms_changed' | 'users_changed' }
+  | { type: 'user_updated'; user_id: string; username: string; role: string; avatar?: string }
   | { type: 'device_state_changed'; device_id: string; state: DeviceState; is_online: boolean }
   | { type: 'device_added' | 'device_updated' | 'device_removed'; device_id: string }
   | { type: 'device_discovered'; discovery_id: string; name: string; integration: string }

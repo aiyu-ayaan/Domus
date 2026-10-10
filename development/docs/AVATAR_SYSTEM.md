@@ -89,14 +89,33 @@ The studio supports 15 DiceBear collections:
 ### 2. Android (`apps/android`)
 - Converts spec to DiceBear PNG stream: `https://api.dicebear.com/9.x/{style}/png?seed={seed}&size={size}`.
 - High-performance `UserAvatar` Compose component with in-memory `LruCache` and graceful initials fallback.
-- `AvatarPickerDialog` supporting real-time preview, style switching, seed rolling, and custom seed entry.
+- **Centered, Clean Rendering:** Removed intrusive grey circular borders and background clipping from `UserAvatar`, rendering the avatar artwork cleanly centered via `ContentScale.Fit` with transparent backdrop.
+- **Full-Screen Avatar Studio (`AvatarCustomizationPage`):**
+  - Replaces dialog with a dedicated full-screen `SubPage("Customize Avatar")` transition.
+  - Large 140dp hero avatar showcase.
+  - Quick action buttons: "Randomize" (full style & seed roll) and "Roll Seed".
+  - Horizontal chip row of all supported DiceBear collections.
+  - Interactive seed phrase editor with one-tap seed refresh.
+  - Prominent "Save" and "Apply Avatar" buttons.
 - Integrated into:
-  - Settings screen profile hero card
-  - Home dashboard greeting header
+  - Settings screen profile hero card (one tap opens full-screen studio)
+  - Home dashboard greeting header (one tap opens full-screen studio)
   - Manage People user list and edit dialog
 
-### 3. Backend (`backend`)
+### 3. Real-Time Multi-Device Live Synchronization
+- **Backend EventBus (`SystemEvent::UserUpdated`, `SystemEvent::UsersChanged`):**
+  - Whenever an avatar is changed (`PUT /api/v1/auth/me/avatar` or `PUT /api/v1/users/:id`), the backend broadcasts `UserUpdated` with `{ user_id, username, role, avatar }` and `UsersChanged` over the WebSocket stream (`backend/src/api/ws.rs`).
+- **Web & Desktop Client (`useLiveEvents`):**
+  - Listens for `user_updated`. If the updated user is the active session user, immediately updates `AuthContext` state (`updateUser`) and invalidates React Query `keys.users`.
+  - Stale closures are prevented via `userRef` and `updateUserRef`.
+  - Immediate local sync: updating an avatar or saving in `UserSheet` updates local `AuthContext` state without delay.
+- **Android Client (`DomusRepository`):**
+  - Listens for `user_updated` over the OkHttp WebSocket connection.
+  - If the event matches `current.user.id`, immediately mutates `_session.value` with the new avatar and bumps `_revision`, updating all UI screens in real time.
+
+### 4. Backend (`backend`)
 - SQLite migration `0006_user_avatar.sql`: adds `avatar TEXT` to `users` table.
 - Model updates: `UserRecord` and `UserDto` include `avatar`.
 - Dedicated endpoint `PUT /api/v1/auth/me/avatar` allowing any authenticated member/admin to update their own avatar.
 - User management `POST /users` and `PUT /users/:id` allow admins to manage avatars for all household members.
+- Broadcasts real-time events over the central `EventBus`.

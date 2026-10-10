@@ -112,6 +112,7 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
     };
     rec.insert(&s.pool).await?;
     set_rooms(&s, &rec.id, &req.room_ids).await?;
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
     Ok(Json(UserDto::from_record(&rec, req.room_ids)))
 }
 
@@ -161,6 +162,13 @@ async fn update(
     if let Some(rooms) = &req.room_ids {
         set_rooms(&s, &id, rooms).await?;
     }
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UserUpdated {
+        user_id: rec.id.clone(),
+        username: rec.username.clone(),
+        role: rec.role.clone(),
+        avatar: rec.avatar.clone(),
+    });
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
     Ok(Json(UserDto::from_record(&rec, room_ids(&s.pool, &id).await?)))
 }
 
@@ -170,5 +178,6 @@ async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
         return Err(ApiError::BadRequest("You cannot delete your own account".into()));
     }
     sqlx::query("DELETE FROM users WHERE id = ?").bind(&id).execute(&s.pool).await?;
+    s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
     Ok(Json(json!({ "success": true })))
 }

@@ -6,7 +6,6 @@ import android.util.LruCache
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,9 +29,11 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -41,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +54,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.aiyu.domus.core.User
 import java.net.URL
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 val DICEBEAR_STYLES = listOf(
@@ -128,7 +134,7 @@ fun rememberDiceBearBitmap(url: String): Bitmap? {
 
 /**
  * Universal DiceBear Avatar component for Android.
- * Renders high-quality PNGs with smooth caching and fallback initials.
+ * Renders high-quality PNGs, cleanly centered without intrusive circular container borders.
  */
 @Composable
 fun UserAvatar(
@@ -148,9 +154,6 @@ fun UserAvatar(
     Box(
         modifier = modifier
             .size(size)
-            .clip(CircleShape)
-            .border(1.dp, c.outlineVariant.copy(alpha = 0.5f), CircleShape)
-            .background(c.surfaceContainerHigh)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -159,13 +162,15 @@ fun UserAvatar(
                 Image(
                     bitmap = bmp.asImageBitmap(),
                     contentDescription = username,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(size),
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize(),
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .size(size)
+                        .clip(CircleShape)
                         .background(c.primaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -182,7 +187,179 @@ fun UserAvatar(
 }
 
 /**
- * Android Avatar Picker dialog allowing user to randomize or customize their DiceBear avatar.
+ * Dedicated Full Screen Avatar Customization Studio.
+ */
+@Composable
+fun AvatarCustomizationPage(
+    user: User,
+    onBack: () -> Unit,
+) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    val initial = remember(user.avatar, user.username) { parseDiceBearSpec(user.avatar, user.username) }
+    var selectedStyle by remember { mutableStateOf(initial.first) }
+    var seed by remember { mutableStateOf(initial.second) }
+    var saving by remember { mutableStateOf(false) }
+    val spec = remember(selectedStyle, seed) { "dicebear:$selectedStyle:$seed" }
+    val c = MaterialTheme.colorScheme
+
+    SubPage(
+        title = "Customize Avatar",
+        onBack = onBack,
+        actions = {
+            Button(
+                onClick = {
+                    scope.launch {
+                        saving = true
+                        repository.updateAvatar(spec)
+                        saving = false
+                        onBack()
+                    }
+                },
+                enabled = !saving,
+            ) {
+                if (saving) {
+                    LoadingIndicator(Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                } else {
+                    Icon(Icons.Rounded.Check, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                }
+                Text("Save")
+            }
+        }
+    ) {
+        // High-resolution Hero Preview
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = c.surfaceContainerHigh,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                UserAvatar(
+                    avatarSpec = spec,
+                    username = user.username,
+                    size = 140.dp,
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = DICEBEAR_STYLES.firstOrNull { it.first == selectedStyle }?.second ?: selectedStyle,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "Seed: $seed",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = c.onSurfaceVariant,
+                )
+            }
+        }
+
+        // Randomize and Roll Seed buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            FilledTonalButton(
+                onClick = {
+                    val rolled = randomDiceBearSpec()
+                    val p = parseDiceBearSpec(rolled, user.username)
+                    selectedStyle = p.first
+                    seed = p.second
+                },
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+            ) {
+                Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Randomize")
+            }
+            FilledTonalButton(
+                onClick = {
+                    seed = "${SEED_WORDS.random()}${(100..999).random()}"
+                },
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+            ) {
+                Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Roll Seed")
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Avatar Style collection selector
+        Text(
+            text = "Avatar Style",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            DICEBEAR_STYLES.forEach { (id, label) ->
+                FilterChip(
+                    selected = id == selectedStyle,
+                    onClick = { selectedStyle = id },
+                    label = { Text(label) },
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Custom seed input
+        Text(
+            text = "Seed Phrase",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            text = "Enter any keyword, name, or character string to morph this avatar style.",
+            style = MaterialTheme.typography.bodySmall,
+            color = c.onSurfaceVariant,
+        )
+        OutlinedTextField(
+            value = seed,
+            onValueChange = { seed = it },
+            label = { Text("Seed") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = { seed = "${SEED_WORDS.random()}${(100..999).random()}" }) {
+                    Icon(Icons.Rounded.Refresh, "Roll seed")
+                }
+            }
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                scope.launch {
+                    saving = true
+                    repository.updateAvatar(spec)
+                    saving = false
+                    onBack()
+                }
+            },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            enabled = !saving,
+        ) {
+            Icon(Icons.Rounded.Check, null, Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Apply Avatar")
+        }
+    }
+}
+
+/**
+ * Kept for dialog use cases (e.g. user creation sheet).
  */
 @Composable
 fun AvatarPickerDialog(
@@ -206,7 +383,6 @@ fun AvatarPickerDialog(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // High-resolution preview
                 Surface(
                     shape = MaterialTheme.shapes.extraLarge,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -237,7 +413,6 @@ fun AvatarPickerDialog(
 
                 Spacer(Modifier.height(12.dp))
 
-                // Randomize buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -269,7 +444,6 @@ fun AvatarPickerDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Style selection chips
                 Text(
                     text = "Avatar Style",
                     style = MaterialTheme.typography.titleSmall,
@@ -293,7 +467,6 @@ fun AvatarPickerDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Custom seed input
                 OutlinedTextField(
                     value = seed,
                     onValueChange = { seed = it },
