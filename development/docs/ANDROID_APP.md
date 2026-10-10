@@ -166,6 +166,7 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
 
 - Every page opened over the tabs (`MainScreen.page`) and the plugin link flow (`Onboard.kt`: list → link page → steps such as the Xiaomi code) change with the same shared-axis X transition, `sharedAxisX` in `PredictiveBack.kt`. New screens should use it rather than swapping content without motion.
 - **Predictive back** (`android:enableOnBackInvokedCallback="true"`): `rememberPredictiveBack(enabled, onBack)` drives the live preview, and `Modifier.predictiveBackEffect` shrinks the screen to 90 % with rounded corners while the gesture is held. It is used for pages, the tab → Home step, the plugin link page and the intro pager. Dialogs and `ModalBottomSheet` handle the gesture themselves. Do not add plain `BackHandler`s.
+- **Scroll survives back**: `AnimatedContent` drops the `rememberSaveable` state of the screen it removes, so both hosts wrap each screen in a `SaveableStateHolder` — `MainScreen` per page (key `tabs` for the tab host) and `FloatingNavScaffold` per tab. Going back restores the screen underneath where it was scrolled; `open(key)` clears that page's kept state first, so a page opened again starts at the top. A new `AnimatedContent` host with scrolling screens needs the same wrap.
 
 ## 5. Build and run
 
