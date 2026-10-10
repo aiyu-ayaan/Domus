@@ -12,7 +12,26 @@ pub async fn load_rustls(tls: &TlsConfig, server: &ServerConfig) -> anyhow::Resu
         _ => ensure_self_signed(server)?,
     };
     tracing::info!("TLS certificate: {}", cert.display());
+    // Apps show this when they first meet a self-signed server; the owner compares the two.
+    if let Some(fp) = std::fs::read_to_string(&cert).ok().and_then(|pem| fingerprint(&pem)) {
+        tracing::info!("TLS certificate SHA-256 fingerprint: {fp}");
+    }
     Ok(RustlsConfig::from_pem_file(cert, key).await?)
+}
+
+/// SHA-256 of the first certificate in `pem`, as `AA:BB:..`.
+fn fingerprint(pem: &str) -> Option<String> {
+    use base64::Engine;
+    use sha2::Digest;
+    let body: String = pem
+        .lines()
+        .skip_while(|l| !l.starts_with("-----BEGIN CERTIFICATE"))
+        .skip(1)
+        .take_while(|l| !l.starts_with("-----END"))
+        .collect();
+    let der = base64::engine::general_purpose::STANDARD.decode(body.trim()).ok().filter(|d| !d.is_empty())?;
+    let hex: Vec<String> = sha2::Sha256::digest(der).iter().map(|b| format!("{b:02X}")).collect();
+    Some(hex.join(":"))
 }
 
 fn ensure_self_signed(server: &ServerConfig) -> anyhow::Result<(PathBuf, PathBuf)> {
@@ -48,4 +67,17 @@ pub fn local_ip() -> Option<String> {
     let sock = std::net::UdpSocket::bind("0.0.0.0:0").ok()?;
     sock.connect("8.8.8.8:80").ok()?;
     Some(sock.local_addr().ok()?.ip().to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn fingerprint_is_sha256_of_the_der_bytes() {
+        // "hello" in base64; sha256("hello") starts 2C:F2:4D.
+        let pem = "-----BEGIN CERTIFICATE-----\naGVsbG8=\n-----END CERTIFICATE-----\n";
+        let fp = super::fingerprint(pem).unwrap();
+        assert!(fp.starts_with("2C:F2:4D:BA"));
+        assert_eq!(fp.len(), 32 * 3 - 1);
+        assert!(super::fingerprint("not a certificate").is_none());
+    }
 }
