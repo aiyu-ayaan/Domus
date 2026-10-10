@@ -17,6 +17,43 @@ Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs
 UI design profile: [`design-system/domus/MASTER.md`](design-system/domus/MASTER.md).
 Progress: [`development/TODO.md`](development/TODO.md).
 
+## Screenshots
+
+<p align="center"><img src="res/domus.gif" alt="Domus walkthrough" width="270" /></p>
+
+**Desktop** (Electron and web)
+
+<p>
+  <img src="res/screenshots/desktop-dark-overview.png" width="49%" />
+  <img src="res/screenshots/desktop-light-overview.png" width="49%" />
+  <img src="res/screenshots/desktop-dark-energy.png" width="49%" />
+  <img src="res/screenshots/desktop-dark-air-quality.png" width="49%" />
+  <img src="res/screenshots/desktop-dark-devices.png" width="49%" />
+  <img src="res/screenshots/desktop-dark-automations.png" width="49%" />
+</p>
+
+**Android**
+
+<p>
+  <img src="res/screenshots/android-home.png" width="19%" />
+  <img src="res/screenshots/android-devices.png" width="19%" />
+  <img src="res/screenshots/android-energy.png" width="19%" />
+  <img src="res/screenshots/android-scenes.png" width="19%" />
+  <img src="res/screenshots/android-settings.png" width="19%" />
+</p>
+
+**Mobile web**
+
+<p>
+  <img src="res/screenshots/mobile-dark-overview.png" width="19%" />
+  <img src="res/screenshots/mobile-dark-devices.png" width="19%" />
+  <img src="res/screenshots/mobile-dark-energy.png" width="19%" />
+  <img src="res/screenshots/mobile-light-overview.png" width="19%" />
+  <img src="res/screenshots/mobile-dark-rooms.png" width="19%" />
+</p>
+
+All captures are in [`res/screenshots`](res/screenshots); the full-quality walkthrough is [`res/domus.mp4`](res/domus.mp4).
+
 ## Download
 
 | | |

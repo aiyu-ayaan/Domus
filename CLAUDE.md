@@ -133,6 +133,7 @@ home-automation/
 ├── tests/
 │   ├── integration/
 │   └── fixtures/
+├── res/                              # README media: screenshots/, domus.gif, domus.mp4, cover.jpg
 ├── scripts/
 ├── docker-compose.yml               # published image (aiyuayaan/domus)
 ├── docker-compose.local.yml         # builds from source
