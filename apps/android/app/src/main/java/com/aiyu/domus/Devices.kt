@@ -316,7 +316,12 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             else s.colorTemp?.let {
                 CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
-            s.fanPercent?.let { CommitSlider("Speed", it, 0f..100f, "$it%", enabled) { v -> send(DeviceCommand(fanPercent = v)) } }
+            s.fanPercent?.let {
+                // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as proportional to speed.
+                val cadr = (s.fanCadr ?: 0) * it / 100
+                val label = if (cadr > 0) "Speed · Coverage ${cadr * 7 / 100}–${cadr * 12 / 100} m²" else "Speed"
+                CommitSlider(label, it, 0f..100f, "$it%", enabled) { v -> send(DeviceCommand(fanPercent = v)) }
+            }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
                 if (options.isNotEmpty()) {
