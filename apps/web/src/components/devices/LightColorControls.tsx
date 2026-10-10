@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, PaintBrush, Sun } from '@phosphor-icons/react'
+import { Check, PaintBrush, Sparkle, Sun } from '@phosphor-icons/react'
 import { cn } from '@/lib/cn'
 
 export interface LightColorControlsProps {
@@ -14,6 +14,12 @@ export interface LightColorControlsProps {
   onChangeColorTemp?: (temp: number) => void
   onCommitColorTemp?: (temp: number) => void
   onChangeColorMode?: (mode: 'white' | 'color') => void
+  /** Rendered under the white presets (moods are white settings). */
+  moods?: React.ReactNode
+  /** Content of the Effects tab; the tab exists only when this is given. */
+  effects?: React.ReactNode
+  /** Name of the effect the light is playing: opens the Effects tab and labels the preview. */
+  playing?: string
 }
 
 export const WHITE_PRESETS = [
@@ -153,6 +159,9 @@ export function LightColorControls({
   onChangeColorTemp,
   onCommitColorTemp,
   onChangeColorMode,
+  moods,
+  effects,
+  playing,
 }: LightColorControlsProps) {
   // Determine active mode: default based on explicit colorMode or presence of color/colorTemp
   const resolvedMode: 'white' | 'color' =
@@ -162,12 +171,12 @@ export function LightColorControls({
       ? 'color'
       : 'white'
 
-  const [mode, setMode] = useState<'white' | 'color'>(resolvedMode)
+  // 'effect' is only a view: opening it sends nothing until an effect is picked.
+  const [mode, setMode] = useState<'white' | 'color' | 'effect'>(playing ? 'effect' : resolvedMode)
   useEffect(() => {
-    if (colorMode === 'white' || colorMode === 'color') {
-      setMode(colorMode)
-    }
-  }, [colorMode])
+    if (playing) setMode('effect')
+    else if (colorMode === 'white' || colorMode === 'color') setMode(colorMode)
+  }, [colorMode, playing])
 
   // Internal color state
   const currentColor = color || '#F59E0B'
@@ -200,7 +209,7 @@ export function LightColorControls({
   const currentWhiteHex = useMemo(() => kelvinToHex(currentKelvin), [currentKelvin])
 
   // Live color radiating from the glow indicator
-  const activeRadiantHex = mode === 'white' ? currentWhiteHex : internalColor
+  const activeRadiantHex = (mode === 'effect' ? resolvedMode : mode) === 'white' ? currentWhiteHex : internalColor
 
   const handleModeChange = (newMode: 'white' | 'color') => {
     setMode(newMode)
@@ -360,11 +369,11 @@ export function LightColorControls({
                   style={{ backgroundColor: isOn ? activeRadiantHex : 'rgb(113, 113, 122)' }}
                 />
                 <span className="text-label font-semibold text-fg">
-                  {isOn ? (mode === 'white' ? 'White Light' : 'Color Light') : 'Light Off'}
+                  {isOn ? (playing ? 'Effect' : mode === 'white' ? 'White Light' : mode === 'color' ? 'Color Light' : resolvedMode === 'white' ? 'White Light' : 'Color Light') : 'Light Off'}
                 </span>
               </div>
               <p className="truncate text-caption text-muted">
-                {isOn ? (mode === 'white' ? tempLabel : activeColorName) : 'Bulb is turned off'}
+                {isOn ? (playing ? `Playing ${playing}` : (mode === 'effect' ? resolvedMode : mode) === 'white' ? tempLabel : activeColorName) : 'Bulb is turned off'}
               </p>
             </div>
           </div>
@@ -373,7 +382,7 @@ export function LightColorControls({
           <div className="flex flex-col items-end text-caption text-subtle">
             <span className="font-medium text-fg tabular">{isOn ? `${brightness}%` : '0%'}</span>
             <span className="uppercase tracking-wider text-[11px] text-muted">
-              {mode === 'white' ? `${currentKelvin}K` : activeRadiantHex}
+              {playing ? '' : (mode === 'effect' ? resolvedMode : mode) === 'white' ? `${currentKelvin}K` : activeRadiantHex}
             </span>
           </div>
         </div>
@@ -415,11 +424,28 @@ export function LightColorControls({
             <PaintBrush size={15} />
             <span>Color</span>
           </button>
+          {effects && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'effect'}
+              onClick={() => setMode('effect')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-[5px] px-3 py-1 text-label font-medium transition-colors duration-base ease-std',
+                mode === 'effect' ? 'bg-panel text-fg shadow-[0_0_0_1px_rgb(var(--border-strong))]' : 'text-muted hover:text-fg',
+              )}
+            >
+              <Sparkle size={15} />
+              <span>Effects</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* 3. Mode Content */}
-      {mode === 'white' ? (
+      {mode === 'effect' ? (
+        effects
+      ) : mode === 'white' ? (
         /* White Mode Controls */
         <div className="flex flex-col gap-3.5">
           {/* Temperature Slider with visual gradient track */}
@@ -502,6 +528,7 @@ export function LightColorControls({
               })}
             </div>
           </div>
+          {moods}
         </div>
       ) : (
         /* Color Mode Controls */

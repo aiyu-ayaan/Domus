@@ -8,7 +8,7 @@ import { Field, SelectField } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/Card'
 import { EnergyChart } from './EnergyChart'
 import { LightColorControls } from './LightColorControls'
-import { LightScenes } from './LightScenes'
+import { LightEffects, LightMoods, useEffectCatalog } from './LightScenes'
 import { api } from '@/lib/api'
 import { keys, useCommand, useEnergy, useRooms } from '@/lib/queries'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
@@ -52,6 +52,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const qc = useQueryClient()
   const toast = useToast()
   const s = device.state
+  const { data: catalog } = useEffectCatalog()
 
   const [brightness, setBrightness] = useState(s.brightness ?? 0)
   const [colorTemp, setColorTemp] = useState(s.color_temp ?? 50)
@@ -165,12 +166,10 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
                     setColorMode(m)
                     send({ color_mode: m })
                   }}
+                  moods={<LightMoods device={device} disabled={!control} onPick={(id) => send({ effect: id })} />}
+                  effects={s.options?.effect?.length ? <LightEffects device={device} disabled={!control} onPick={(id) => send({ effect: id })} /> : undefined}
+                  playing={s.effect ? (catalog?.effects.find((e) => e.id === s.effect)?.name ?? s.effect) : undefined}
                 />
-              </div>
-            )}
-            {isLight && (
-              <div className="border-b border-border py-3.5 last:border-0">
-                <LightScenes device={device} disabled={!control} onPick={(id) => send({ effect: id })} />
               </div>
             )}
             {fan && fan.length > 0 && (
