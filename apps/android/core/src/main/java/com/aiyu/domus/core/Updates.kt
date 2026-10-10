@@ -61,4 +61,16 @@ object Updates {
             pick(response.body!!.string(), installed, channel)
         }
     }
+
+    /** Downloads [update]'s APK into [directory], replacing any earlier download. Throws when it fails. */
+    suspend fun download(update: AppUpdate, directory: java.io.File): java.io.File = withContext(Dispatchers.IO) {
+        directory.deleteRecursively()
+        directory.mkdirs()
+        val file = java.io.File(directory, "Docus-${update.version}.apk")
+        OkHttpClient().newCall(Request.Builder().url(update.url).build()).execute().use { response ->
+            if (!response.isSuccessful) throw java.io.IOException("The download answered ${response.code}")
+            file.outputStream().use { response.body!!.byteStream().copyTo(it) }
+        }
+        file
+    }
 }

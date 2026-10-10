@@ -52,7 +52,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -274,17 +275,38 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 }
             }
             val found = update?.getOrNull()
+            // null: idle. true: downloading. false: the download failed.
+            var downloading by remember { mutableStateOf<Boolean?>(null) }
             RowCard(
                 when {
+                    downloading == true -> "Downloading Docus ${found?.version.orEmpty()}…"
                     found != null -> "Docus ${found.version} is available"
                     update == null -> "Checking for updates…"
                     update?.isFailure == true -> "Couldn't check for updates"
                     else -> "Docus is up to date"
                 },
-                // shortcut: the browser downloads the APK and Android installs it from there; add an in-app installer if that is too many taps.
-                if (found != null) "Tap to download, then open the file to install" else "Version $installed",
+                when {
+                    downloading == false -> "The download failed. Tap to try again"
+                    found != null && downloading == null -> "Tap to download and install"
+                    else -> "Version $installed"
+                },
                 Icons.Rounded.SystemUpdate,
-                onClick = found?.let { { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url))) } },
+                onClick = found?.takeIf { downloading != true }?.let {
+                    {
+                        scope.launch {
+                            downloading = true
+                            downloading = runCatching {
+                                val apk = Updates.download(it, File(context.cacheDir, "updates"))
+                                // Android's own installer; it asks to allow installs from Docus the first time.
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW)
+                                        .setDataAndType(FileProvider.getUriForFile(context, "${context.packageName}.updates", apk), "application/vnd.android.package-archive")
+                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                            }.fold({ null }, { false })
+                        }
+                    }
+                },
             )
         }
 
