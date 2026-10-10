@@ -109,6 +109,7 @@
 - [x] Android: home address at home, remote elsewhere, one session; Server addresses page
 - [x] Desktop: connect page with LAN scan, home/remote switching, shared session token, certificate pinning, in-page title bar (no native bar or menu)
 - [x] Desktop login screen: "Change server" action and connected host indicator on AuthScreen, with return navigation on connect page
+- [x] Desktop theme synchronization: `connect.html` updated with botanical Material 3 tokens (`#12140E` / `#B1D18A`), dynamic theme detection, and official D mark
 - [x] Desktop on Linux: `pnpm dev:desktop` runs (`--no-sandbox`), `pnpm build:desktop` builds the `.deb` and AppImage with the icon
 - [x] Docs: `development/docs/DEPLOYMENT.md`
 - [ ] Run against a real Cloudflare Tunnel
