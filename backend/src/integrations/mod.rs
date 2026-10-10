@@ -2,6 +2,7 @@
 //! `DeviceManager` is the only caller.
 
 pub mod accounts;
+pub mod hue;
 pub mod manager;
 pub mod mqtt;
 pub mod tapo;

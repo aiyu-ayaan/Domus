@@ -39,6 +39,9 @@ enabled = true
 [integrations.mqtt]
 enabled = true
 
+[integrations.hue]
+enabled = true
+
 [workers]
 poll_interval_secs = 3
 cloud_poll_interval_secs = 15

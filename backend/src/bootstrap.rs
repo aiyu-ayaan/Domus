@@ -10,8 +10,8 @@ use crate::infrastructure::{
     tls,
 };
 use crate::integrations::{
-    accounts::AccountStore, broadcast_addresses, mqtt::MqttIntegration, tapo::TapoIntegration,
-    tuya::TuyaIntegration, xiaomi::XiaomiIntegration, DeviceManager,
+    accounts::AccountStore, broadcast_addresses, hue::HueIntegration, mqtt::MqttIntegration,
+    tapo::TapoIntegration, tuya::TuyaIntegration, xiaomi::XiaomiIntegration, DeviceManager,
 };
 use crate::modules::notifications::Notifier;
 use crate::workers::{DeviceWorker, DiscoveryWorker, SchedulerWorker};
@@ -62,6 +62,9 @@ pub async fn bootstrap() -> anyhow::Result<()> {
     }
     if config.integrations.mqtt.enabled {
         plugins.push(Arc::new(MqttIntegration::new()));
+    }
+    if config.integrations.hue.enabled {
+        plugins.push(Arc::new(HueIntegration::new()));
     }
     info!(
         "Integrations: {}",

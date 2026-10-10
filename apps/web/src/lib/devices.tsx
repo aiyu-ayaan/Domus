@@ -52,6 +52,7 @@ export const integrationLabel: Record<string, string> = {
   tapo: 'Tapo',
   xiaomi: 'Mi Home',
   mqtt: 'MQTT',
+  hue: 'Hue',
 }
 
 export const canToggle = (d: Device) => d.state.is_on !== undefined && d.device_type !== 'sensor'

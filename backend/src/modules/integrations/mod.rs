@@ -1,10 +1,11 @@
-//! Plugin catalog and account linking (Tuya QR login, Tapo and Xiaomi sign-in, MQTT broker form).
+//! Plugin catalog and account linking (Tuya QR login, Tapo and Xiaomi sign-in, MQTT broker and Hue bridge forms).
 
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::infrastructure::event_bus::SystemEvent;
 use crate::integrations::accounts::AccountRecord;
+use crate::integrations::hue::HueIntegration;
 use crate::integrations::mqtt;
 use crate::integrations::tapo::klap::TapoCredentials;
 use crate::integrations::tuya::api as tuya;
@@ -64,11 +65,16 @@ const MQTT_FIELDS: &[FormField] = &[
     field("password", "Password", "password", false, "", ""),
 ];
 
+const HUE_FIELDS: &[FormField] = &[
+    field("host", "Bridge IP address", "text", false, "Press the round button on the bridge first, then link within 30 seconds. Leave empty to find the bridge automatically.", ""),
+];
+
 const CATALOG: &[(IntegrationType, &str, &str, &str, bool, &[FormField])] = &[
     (IntegrationType::Tuya, "Tuya / Smart Life", "Plugs, switches, lights and purifiers from the Smart Life and Tuya Smart apps. Linked by scanning a QR code — no developer account needed.", "qr", false, &[]),
     (IntegrationType::Tapo, "TP-Link Tapo", "Tapo plugs, bulbs and switches, controlled locally over your network. Energy monitoring on P110/P115.", "credentials", true, &[]),
     (IntegrationType::Xiaomi, "Xiaomi Mi Home", "Mi Home / MIoT devices such as air purifiers, lamps and plugs. Tokens come from your Xiaomi account; control is local.", "credentials", true, &[]),
     (IntegrationType::Mqtt, "MQTT", "Any device that announces itself on your MQTT broker through Home Assistant discovery: Zigbee2MQTT, ESPHome and many more brands. Lights, switches, plugs, fans and sensors.", "form", true, MQTT_FIELDS),
+    (IntegrationType::Hue, "Philips Hue", "Lights and smart plugs paired with a Hue bridge, controlled locally over your network. Linked by pressing the button on the bridge.", "form", true, HUE_FIELDS),
 ];
 
 pub fn integration_routes() -> Router<AppState> {
@@ -79,6 +85,7 @@ pub fn integration_routes() -> Router<AppState> {
         .route("/tuya/qr/:token", get(tuya_qr_poll))
         .route("/tapo/accounts", post(tapo_link))
         .route("/mqtt/accounts", post(mqtt_link))
+        .route("/hue/accounts", post(hue_link))
         .route("/xiaomi/accounts", post(xiaomi_link))
         .route("/xiaomi/verify", post(xiaomi_verify))
 }
@@ -308,4 +315,13 @@ async fn mqtt_link(State(s): State<AppState>, user: AuthUser, Json(form): Json<F
     }
     mqtt::check(&broker).await?;
     save_account(&s, "mqtt", &format!("{}:{}", broker.host, broker.port), &broker).await
+}
+
+async fn hue_link(State(s): State<AppState>, user: AuthUser, Json(form): Json<Form>) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    if !s.manager.enabled_integrations().contains(&IntegrationType::Hue) {
+        return Err(ApiError::BadRequest("Philips Hue integration is disabled".into()));
+    }
+    let (bridge, name) = HueIntegration::new().pair(form.get("host").map_or("", |h| h.trim())).await?;
+    save_account(&s, "hue", &name, &bridge).await
 }

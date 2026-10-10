@@ -67,6 +67,7 @@ pub enum IntegrationType {
     Tapo,
     Xiaomi,
     Mqtt,
+    Hue,
 }
 
 impl IntegrationType {
@@ -76,6 +77,7 @@ impl IntegrationType {
             Self::Tapo => "tapo",
             Self::Xiaomi => "xiaomi",
             Self::Mqtt => "mqtt",
+            Self::Hue => "hue",
         }
     }
 
@@ -85,6 +87,7 @@ impl IntegrationType {
             "tapo" => Some(Self::Tapo),
             "xiaomi" => Some(Self::Xiaomi),
             "mqtt" => Some(Self::Mqtt),
+            "hue" => Some(Self::Hue),
             _ => None,
         }
     }

@@ -45,6 +45,7 @@ pub struct IntegrationsConfig {
     pub tapo: IntegrationConfig,
     pub xiaomi: IntegrationConfig,
     pub mqtt: IntegrationConfig,
+    pub hue: IntegrationConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -87,6 +88,7 @@ impl AppConfig {
             .set_default("integrations.tapo.enabled", true)?
             .set_default("integrations.xiaomi.enabled", true)?
             .set_default("integrations.mqtt.enabled", true)?
+            .set_default("integrations.hue.enabled", true)?
             .set_default("workers.poll_interval_secs", 3)?
             .set_default("workers.cloud_poll_interval_secs", 15)?
             .set_default("workers.energy_sample_secs", 60)?
