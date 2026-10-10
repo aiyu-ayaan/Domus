@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -50,6 +51,8 @@ import kotlinx.coroutines.launch
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -57,7 +60,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aiyu.domus.core.AppUpdate
 import com.aiyu.domus.core.Session
+import com.aiyu.domus.core.UpdateChannel
+import com.aiyu.domus.core.Updates
 import com.aiyu.domus.ui.components.CollapsibleCard
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
@@ -248,6 +254,38 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                     Switch(appearance.dynamicColor, onCheckedChange = null)
                 }
             }
+        }
+
+        // A dev build is its own app; a release APK would install beside it, not over it.
+        val installed = version.orEmpty()
+        if (Updates.versionKey(installed) != null) {
+            SectionTitle("Updates")
+            val chosen by repository.updateChannel.collectAsStateWithLifecycle()
+            val channel = chosen ?: Updates.channelOf(installed)
+            // null: still asking, or GitHub can't be reached.
+            var update by remember { mutableStateOf<Result<AppUpdate?>?>(null) }
+            LaunchedEffect(channel) {
+                update = null
+                update = runCatching { Updates.check(installed, channel) }
+            }
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                UpdateChannel.entries.forEachIndexed { index, item ->
+                    SegmentedButton(channel == item, { repository.setUpdateChannel(item) }, SegmentedButtonDefaults.itemShape(index, UpdateChannel.entries.size)) { Text(item.label) }
+                }
+            }
+            val found = update?.getOrNull()
+            RowCard(
+                when {
+                    found != null -> "Docus ${found.version} is available"
+                    update == null -> "Checking for updates…"
+                    update?.isFailure == true -> "Couldn't check for updates"
+                    else -> "Docus is up to date"
+                },
+                // shortcut: the browser downloads the APK and Android installs it from there; add an in-app installer if that is too many taps.
+                if (found != null) "Tap to download, then open the file to install" else "Version $installed",
+                Icons.Rounded.SystemUpdate,
+                onClick = found?.let { { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url))) } },
+            )
         }
 
         SectionTitle("Account")

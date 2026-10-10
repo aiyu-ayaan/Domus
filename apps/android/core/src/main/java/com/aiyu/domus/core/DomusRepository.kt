@@ -107,6 +107,15 @@ class DomusRepository(context: Context) {
         _backgroundAlerts.value = on
     }
 
+    private val _updateChannel = MutableStateFlow(UpdateChannel.entries.firstOrNull { it.name == store.get(CHANNEL) })
+    /** The release stream the user chose; null until they do, which means the installed build's own. */
+    val updateChannel: StateFlow<UpdateChannel?> = _updateChannel
+
+    fun setUpdateChannel(channel: UpdateChannel) {
+        store.put(CHANNEL, channel.name)
+        _updateChannel.value = channel
+    }
+
     private val _onboarded = MutableStateFlow(store.get(ONBOARDED) == "true")
     /** False until the first-run introduction has been seen. */
     val onboarded: StateFlow<Boolean> = _onboarded
@@ -500,5 +509,6 @@ class DomusRepository(context: Context) {
         const val DYNAMIC = "dynamic"
         const val ALERTS = "alerts"
         const val ONBOARDED = "onboarded"
+        const val CHANNEL = "update_channel"
     }
 }

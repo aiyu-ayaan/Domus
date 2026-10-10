@@ -11,6 +11,10 @@ val keystoreProps = Properties().apply {
     rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
 }
 
+// The release's name and number: `version` and `build` of the root package.json, bumped by the release PR
+// (scripts/set-version.mjs), so the app always matches the release it ships in.
+val rootManifest = groovy.json.JsonSlurper().parse(rootProject.file("../../package.json")) as Map<*, *>
+
 android {
     namespace = "com.aiyu.domus"
     compileSdk = 37
@@ -19,8 +23,8 @@ android {
         applicationId = "com.aiyu.domus"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = rootManifest["build"] as Int
+        versionName = rootManifest["version"] as String
     }
 
     flavorDimensions += "environment"

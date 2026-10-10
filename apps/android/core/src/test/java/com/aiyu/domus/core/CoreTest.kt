@@ -6,6 +6,20 @@ import org.junit.Test
 
 class CoreTest {
     @Test
+    fun updateIsTheNewestReleaseOnTheChannelWithAnApk() {
+        fun release(tag: String, apk: Boolean = true) =
+            """{"tag_name":"v$tag","assets":[${if (apk) """{"browser_download_url":"https://x/Docus-$tag.apk"}""" else ""}]}"""
+        val releases = "[" + listOf(release("0.0.2-alpha.1"), release("0.0.1"), release("0.0.1-beta.2"), release("0.0.3", apk = false)).joinToString(",") + "]"
+        assertEquals("0.0.2-alpha.1", Updates.pick(releases, "0.0.1-alpha.1", UpdateChannel.ALPHA)?.version)
+        // Beta takes the stable release too; the alpha is not for it, and 0.0.3 has no APK.
+        assertEquals(AppUpdate("0.0.1", "https://x/Docus-0.0.1.apk"), Updates.pick(releases, "0.0.1-beta.2", UpdateChannel.BETA))
+        assertNull(Updates.pick(releases, "0.0.1", UpdateChannel.STABLE))
+        assertNull(Updates.pick(releases, "0.0.0-dev", UpdateChannel.ALPHA))
+        assertEquals(UpdateChannel.ALPHA, Updates.channelOf("0.0.1-alpha.1"))
+        assertEquals(UpdateChannel.STABLE, Updates.channelOf("1.2.3"))
+    }
+
+    @Test
     fun serverUrlIsAlwaysHttps() {
         assertEquals("https://192.168.1.10:8443", normalizeServerUrl(" 192.168.1.10 "))
         assertEquals("https://192.168.1.10:9000", normalizeServerUrl("192.168.1.10:9000/"))
