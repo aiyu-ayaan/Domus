@@ -2,11 +2,19 @@ package com.aiyu.domus.core
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 // Mirrors the server DTOs (apps/web/src/lib/types.ts). Unknown fields are ignored, so the server can grow.
 
 @Serializable
-data class User(val id: String, val username: String, val email: String = "", val role: String = "guest") {
+data class User(
+    val id: String,
+    val username: String,
+    val email: String = "",
+    val role: String = "guest",
+    @SerialName("all_rooms") val allRooms: Boolean = true,
+    @SerialName("room_ids") val roomIds: List<String> = emptyList(),
+) {
     val isAdmin get() = role == "admin"
     val canControl get() = role != "guest"
 }
@@ -86,8 +94,12 @@ data class Scene(
     val id: String,
     val name: String,
     @SerialName("is_active") val isActive: Boolean = false,
-    /** `standard` or `screen_sync` (needs a desktop to capture the screen). */
+    /** `standard` or `screen_sync` (mirrors a shared screen's color onto lights). */
     val kind: String = "standard",
+    /** Raw action objects (see `Action` in the web types); kept as JSON so kinds this app can't edit survive a save. */
+    val actions: List<JsonObject> = emptyList(),
+    /** Screen Sync settings, `{}` otherwise. */
+    val config: JsonObject = JsonObject(emptyMap()),
 )
 
 @Serializable
@@ -97,10 +109,25 @@ data class Automation(
     val description: String? = null,
     @SerialName("is_enabled") val isEnabled: Boolean = true,
     @SerialName("last_triggered_at") val lastTriggeredAt: String? = null,
+    val triggers: List<JsonObject> = emptyList(),
+    val conditions: List<JsonObject> = emptyList(),
+    val actions: List<JsonObject> = emptyList(),
 )
 
+/** A usage slab of the billing cycle; [upToKwh] null = everything above. */
 @Serializable
-data class EnergySettings(val currency: String = "USD", @SerialName("monthly_budget") val monthlyBudget: Double? = null)
+data class Slab(@SerialName("up_to_kwh") val upToKwh: Double? = null, val rate: Double = 0.0)
+
+@Serializable
+data class EnergySettings(
+    @SerialName("rate_per_kwh") val ratePerKwh: Double = 0.15,
+    val currency: String = "USD",
+    @SerialName("monthly_budget") val monthlyBudget: Double? = null,
+    @SerialName("billing_cycle_day") val billingCycleDay: Int = 1,
+    @SerialName("fixed_monthly_charge") val fixedMonthlyCharge: Double = 0.0,
+    /** Empty = flat [ratePerKwh]. */
+    val slabs: List<Slab> = emptyList(),
+)
 
 @Serializable
 data class DeviceEnergy(
@@ -131,3 +158,58 @@ data class EnergyPoint(val t: String, val kwh: Double = 0.0, val cost: Double = 
 
 @Serializable
 data class ActionResult(val success: Boolean = true, val errors: List<String> = emptyList())
+
+/** A device an integration found that is not added to the home yet. */
+@Serializable
+data class Discovered(
+    val id: String,
+    val name: String,
+    @SerialName("integration_type") val integration: String = "",
+    @SerialName("device_type") val type: String = "other",
+    val model: String? = null,
+    @SerialName("ip_address") val ip: String? = null,
+    val note: String? = null,
+)
+
+@Serializable
+data class DiscoveryReport(val found: Int = 0, val new: Int = 0, val adopted: Int = 0)
+
+@Serializable
+data class Account(val id: String, val name: String = "", val status: String = "ok", @SerialName("last_error") val lastError: String? = null)
+
+@Serializable
+data class Integration(
+    val id: String,
+    val name: String,
+    val description: String = "",
+    /** How an account is linked: `qr`, `credentials` or `none`. */
+    val link: String = "none",
+    val local: Boolean = false,
+    val enabled: Boolean = true,
+    val accounts: List<Account> = emptyList(),
+    @SerialName("device_count") val deviceCount: Int = 0,
+)
+
+@Serializable
+data class TuyaQr(@SerialName("qr_token") val token: String, @SerialName("qr_content") val content: String)
+
+/** [status] is `waiting`, `linked` or `expired`. */
+@Serializable
+data class TuyaQrStatus(val status: String = "waiting", val name: String? = null)
+
+/** Xiaomi either links at once ([accountId]) or asks for a code sent by [via] (`email` / `phone`). */
+@Serializable
+data class XiaomiLink(@SerialName("account_id") val accountId: String? = null, @SerialName("verify_id") val verifyId: String? = null, val via: String? = null)
+
+@Serializable
+data class Notice(
+    val id: String,
+    val level: String = "info",
+    val title: String = "",
+    val message: String = "",
+    @SerialName("is_read") val isRead: Boolean = false,
+    @SerialName("created_at") val createdAt: String? = null,
+)
+
+@Serializable
+data class NoticeList(val items: List<Notice> = emptyList(), val unread: Int = 0)

@@ -42,4 +42,26 @@ class CoreTest {
         assertEquals("250 Wh", formatKwh(0.25))
         assertEquals(AirLevel.MODERATE, airLevel(40f))
     }
+
+    @Test
+    fun screenColorFollowsTheStyle() {
+        val grey = 0xFF808080.toInt()
+        val red = 0xFFFF0000.toInt()
+        // 3x1 frame: two grey pixels, one red.
+        val frame = intArrayOf(grey, grey, red)
+        assertEquals("#ff0000", screenColor(frame, 3, 1, "vivid", false).hex)
+        assertEquals("#808080", screenColor(frame, 3, 1, "dominant", false).hex)
+        assertEquals("#aa5555", screenColor(frame, 3, 1, "average", false).hex)
+        assertEquals(10, syncBrightness(0f, 10, 100))
+        assertEquals(100, syncBrightness(1f, 10, 100))
+    }
+
+    @Test
+    fun edgesIgnoreTheMiddleOfTheScreen() {
+        val blue = 0xFF0000FF.toInt()
+        val white = 0xFFFFFFFF.toInt()
+        // 5x5: blue border, white center.
+        val frame = IntArray(25) { i -> if (i % 5 in 1..3 && i / 5 in 1..3) white else blue }
+        assertEquals("#0000ff", screenColor(frame, 5, 5, "average", true).hex)
+    }
 }

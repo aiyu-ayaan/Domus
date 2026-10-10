@@ -46,7 +46,6 @@ class DomusRepository(context: Context) {
     private var api: DomusApi? = null
     private var socket: WebSocket? = null
     private var liveJob: Job? = null
-    private var foreground = false
 
     private val _session = MutableStateFlow<Session>(Session.Loading)
     val session: StateFlow<Session> = _session
@@ -71,6 +70,32 @@ class DomusRepository(context: Context) {
     val messages: SharedFlow<String> = _messages
     private val _appearance = MutableStateFlow(Appearance(store.get(THEME) ?: "system", store.get(DYNAMIC) != "false"))
     val appearance: StateFlow<Appearance> = _appearance
+
+    /**
+     * Counts server-side changes that are not held here (discovered devices, linked accounts, notices).
+     * Screens that list those reload when it moves, so a device onboarded anywhere shows up everywhere.
+     */
+    private val _revision = MutableStateFlow(0)
+    val revision: StateFlow<Int> = _revision
+    private val _alerts = MutableSharedFlow<Pair<String, String>>(extraBufferCapacity = 8)
+    /** Server notifications as (title, message), for system notifications while the app is not on screen. */
+    val alerts: SharedFlow<Pair<String, String>> = _alerts
+    private val _backgroundAlerts = MutableStateFlow(store.get(ALERTS) == "true")
+    /** The user's choice to be notified while the app is closed. */
+    val backgroundAlerts: StateFlow<Boolean> = _backgroundAlerts
+    /** Set by the alerts service: keep the event stream open off screen. */
+    var keepLive = false
+        set(value) {
+            field = value
+            if (value && _session.value is Session.SignedIn) startLive() else if (!value && !foreground) stopLive()
+        }
+    var foreground = false
+        private set
+
+    fun setBackgroundAlerts(on: Boolean) {
+        store.put(ALERTS, on.toString())
+        _backgroundAlerts.value = on
+    }
 
     /** Fingerprint of the approved self-signed certificate, null when a public authority vouches for the server. */
     val pinnedFingerprint: String? get() = store.get(PIN)
@@ -151,7 +176,7 @@ class DomusRepository(context: Context) {
         _session.value = Session.SignedIn(server, user)
         _loading.value = true
         scope.launch { refresh() }
-        if (foreground) startLive()
+        if (foreground || keepLive) startLive()
     }
 
     fun logout() {
@@ -184,7 +209,18 @@ class DomusRepository(context: Context) {
         _appearance.value = value
     }
 
-    /** Runs [block]; a failure becomes a snackbar message and an expired session signs the user out. */
+    /**
+     * Runs [block] against the server; null when it failed. A failure becomes a snackbar message and an expired
+     * session signs the user out. Screens use it for one-off reads and writes, then [refresh] or wait for the event.
+     */
+    suspend fun <T> request(block: suspend (DomusApi) -> T): T? = attempt(block)
+
+    /** Like [request], and reloads the shared lists when it worked. */
+    suspend fun <T> change(block: suspend (DomusApi) -> T): T? = attempt(block)?.also { _revision.update { it + 1 }; refresh() }
+
+    /** Opens a Screen Sync color stream, or null when signed out. */
+    fun sync(sceneId: String, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit): WebSocket? = api?.sync(sceneId, onEvent, onClosed)
+
     private suspend fun <T> attempt(block: suspend (DomusApi) -> T): T? {
         val api = api ?: return null
         return try {
@@ -269,7 +305,7 @@ class DomusRepository(context: Context) {
 
     fun onBackground() {
         foreground = false
-        stopLive()
+        if (!keepLive) stopLive()
     }
 
     private fun startLive() {
@@ -309,8 +345,16 @@ class DomusRepository(context: Context) {
                 val state = runCatching { api?.decodeState(event.getValue("state")) }.getOrNull() ?: return
                 replace(known.copy(state = state, isOnline = event["is_online"]?.jsonPrimitive?.booleanOrNull ?: known.isOnline))
             }
-            "device_added", "device_updated", "device_removed", "rooms_changed", "automation_triggered", "resync" -> refresh()
-            "notification" -> _messages.tryEmit(listOfNotNull(text("title"), text("message")).joinToString(": "))
+            "device_added", "device_updated", "device_removed", "rooms_changed", "automation_triggered", "resync" -> {
+                _revision.update { it + 1 }
+                refresh()
+            }
+            "device_discovered", "discovery_finished", "integrations_changed" -> _revision.update { it + 1 }
+            "notification" -> {
+                _revision.update { it + 1 }
+                _messages.tryEmit(listOfNotNull(text("title"), text("message")).joinToString(": "))
+                _alerts.tryEmit(text("title").orEmpty() to text("message").orEmpty())
+            }
         }
     }
 
@@ -320,5 +364,6 @@ class DomusRepository(context: Context) {
         const val TOKEN = "token"
         const val THEME = "theme"
         const val DYNAMIC = "dynamic"
+        const val ALERTS = "alerts"
     }
 }
