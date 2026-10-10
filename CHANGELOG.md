@@ -1,3 +1,55 @@
+## v0.0.1-alpha.2 (2026-10-10)
+
+- !alpha : Add Philips Hue, MQTT and Tapo hub support, and the new feature film
+- docs(Media) : Replace the walkthrough video and gif with the new feature film
+- docs(Integrations) : Document MQTT, Hue and Tapo hubs with an architecture diagram
+- chore(UI) : Name Hue and MQTT wherever the apps list the supported brands
+- feat(Tapo) : List cameras in discovery with a note instead of hiding them
+- feat(Tapo) : Support the H100 hub and the devices paired with it
+- feat(Hue) : Add Philips Hue integration through the local bridge
+- feat(MQTT) : Add MQTT integration with Home Assistant discovery and form-based linking
+- feat(About) : Add About page with developer credits on web and Android
+- fix(Android) : Keep a tab scrolled to its end in place by saving the nav pill inset
+- docs(Android) : Note how screens keep their scroll across back navigation
+- fix(Android) : Restore the scroll of the screen underneath when going back from a page
+- fix(Android) : Keep each tab's scroll position when switching tabs or going back to Home
+- chore(Repo) : Remove brag-output now that its media lives in res
+- docs(README) : Add screenshots and a walkthrough GIF from brag-output into res
+- feat(Android) : Tick on every button, chip and row press, and on switch toggles
+- feat(Android) : Unfold the purifier speed under the mode chips and show its coverage live
+- feat(Web) : Unfold the purifier speed under the mode picker with a 150ms transition
+- fix(Android) : Show the purifier speed only in manual mode
+- fix(Web) : Show the purifier speed only in manual mode
+- fix(Android) : Match the purifier coverage at low speed and drop the speed percentage
+- fix(Web) : Match the purifier coverage at low speed and drop the speed percentage
+- fix(Xiaomi) : Report the purifier's airflow at its lowest speed too
+- feat(Android) : Show the room coverage beside the purifier speed
+- feat(Web) : Show the room coverage beside the purifier speed
+- feat(Xiaomi) : Report the purifier's rated airflow so clients can show its coverage
+- feat(Android) : Add a speed slider for purifiers with a manual fan level
+- feat(Web) : Add a speed slider for purifiers with a manual fan level
+- feat(Xiaomi) : Read and set the purifier's manual speed, and call its Favorite mode Manual
+- fix(Android) : Accept a phone number in the Xiaomi sign-in and clean it up before sending
+- feat(Android) : Predictive back on pages, tabs and the intro, with one shared page transition
+- feat(Android) : Link accounts on their own page with step transitions instead of a dialog
+- feat(Android) : Filter devices by room and open room management from the Devices screen
+- fix(Android) : Shrink the screen title to fit on one line instead of wrapping
+- docs(Notifications) : Describe delete and cross-client sync
+- feat(Android) : Swipe to delete notifications, delete all, and reload when another client deletes
+- feat(Web) : Delete one or all notifications from the inbox sheet
+- feat(Notifications) : Let anyone delete all notifications and sync read and delete to every client
+- docs(Energy) : Describe the meter reconciliation and the power history
+- fix(Android) : Count devices on like the web, without sensors
+- fix(Android) : Use the server's today figures and show measured watts as a line chart
+- feat(Energy) : Show measured watts as a line chart in the web energy chart
+- fix(Energy) : Reconcile recorded energy with each plug's own daily meter and return measured watts in the history
+- feat(Auth) : Add a reset-password command that also runs inside Docker
+- fix(ScreenSync) : Keep the notification non-dismissible and refresh the switch when sync starts and stops
+- feat(Android) : Add info hints to stat cards and a watts view to the energy chart
+- feat(Overview) : Add info hints to the power, today and bill cards
+- feat(Energy) : Add a watts view to the energy chart
+- brag(Launch) : Add vertical launch video, screenshots of every screen and the Hyperframes source
+
 ## v0.0.1-alpha.1 (2026-10-10)
 
 - !alpha : First public build
