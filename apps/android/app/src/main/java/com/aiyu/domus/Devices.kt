@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Blinds
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DevicesOther
@@ -388,14 +389,20 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
     val c = MaterialTheme.colorScheme
     val s = device.state
     // The device's own mode when it reports one; otherwise color only for a light with a color and no white setting.
-    val reported = s.colorMode?.takeIf { it == "white" || it == "color" } ?: if (s.color != null && s.colorTemp == null) "color" else "white"
+    val lit = s.colorMode?.takeIf { it == "white" || it == "color" } ?: if (s.color != null && s.colorTemp == null) "color" else "white"
+    // Which tab is open: the one for what the light is doing. "effect" is only a view; it sends nothing by itself.
+    val reported = if (s.effect != null) "effect" else lit
     var mode by remember(reported) { mutableStateOf(reported) }
+    val catalog by LocalRepository.current.effects.collectAsStateWithLifecycle()
+    // Only the effects this light says it can play by itself.
+    val playable = catalog.effects.filter { it.id in s.options["effect"].orEmpty() }
     val temp = s.colorTemp ?: 50
     var dragTemp by remember { mutableStateOf<Float?>(null) }
     val shownTemp = dragTemp?.roundToInt() ?: temp
     val color = s.color ?: "#F59E0B"
     val on = device.isOnline && s.isOn != false
-    val glow = if (mode == "white") Color(0xFF000000 or kelvinRgb(whiteKelvin(shownTemp)).toLong()) else parseColor(color) ?: c.primary
+    val playing = playable.firstOrNull { it.id == s.effect }
+    val glow = playing?.colors?.firstOrNull()?.let(::parseColor) ?: if (lit == "white") Color(0xFF000000 or kelvinRgb(whiteKelvin(shownTemp)).toLong()) else parseColor(color) ?: c.primary
     val shown by animateColorAsState(if (on) glow else c.surfaceContainerHighest, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "glow")
 
     Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
@@ -403,9 +410,9 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
             Box(Modifier.size(48.dp).clip(MaterialShapes.Sunny.toShape()).background(shown).border(1.dp, c.outlineVariant, MaterialShapes.Sunny.toShape()))
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(if (!on) "Light off" else if (s.effect != null) "Effect" else if (mode == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
+                Text(if (!on) "Light off" else if (s.effect != null) "Effect" else if (lit == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
                 RollingText(
-                    s.effect?.let { "Playing ${it.replaceFirstChar(Char::uppercase)}" } ?: if (mode == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
+                    s.effect?.let { "Playing ${playing?.name ?: it}" } ?: if (lit == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
                     MaterialTheme.typography.bodyMedium, c.onSurfaceVariant,
                 )
             }
@@ -415,8 +422,11 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
 
     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
         // Switching mode re-sends that mode's current setting, so the bulb changes at once.
-        SegmentedButton(mode == "white", { mode = "white"; send(DeviceCommand(colorTemp = temp, colorMode = "white")) }, SegmentedButtonDefaults.itemShape(0, 2), enabled = enabled, icon = { Icon(Icons.Rounded.LightMode, null, Modifier.size(18.dp)) }) { Text("White") }
-        SegmentedButton(mode == "color", { mode = "color"; send(DeviceCommand(color = color, colorMode = "color")) }, SegmentedButtonDefaults.itemShape(1, 2), enabled = enabled, icon = { Icon(Icons.Rounded.Palette, null, Modifier.size(18.dp)) }) { Text("Color") }
+        val tabs = if (playable.isEmpty()) 2 else 3
+        SegmentedButton(mode == "white", { mode = "white"; send(DeviceCommand(colorTemp = temp, colorMode = "white")) }, SegmentedButtonDefaults.itemShape(0, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.LightMode, null, Modifier.size(18.dp)) }) { Text("White") }
+        SegmentedButton(mode == "color", { mode = "color"; send(DeviceCommand(color = color, colorMode = "color")) }, SegmentedButtonDefaults.itemShape(1, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.Palette, null, Modifier.size(18.dp)) }) { Text("Color") }
+        // Opening Effects changes nothing on the light until one is picked.
+        if (tabs == 3) SegmentedButton(mode == "effect", { mode = "effect" }, SegmentedButtonDefaults.itemShape(2, 3), icon = { Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp)) }) { Text("Effects") }
     }
 
     if (mode == "white") {
@@ -451,6 +461,17 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
                 )
             }
         }
+        // Moods are white presets with a brightness, so they live with the other white settings.
+        if (catalog.moods.isNotEmpty()) {
+            Text("Moods", style = MaterialTheme.typography.titleSmall)
+            PresetGrid(catalog.moods, enabled, { send(DeviceCommand(effect = it.id)) }) { mood ->
+                // A mood is "on" when the light shows exactly its setting and no effect runs.
+                s.effect == null && s.isOn == true && s.colorMode == "white" && s.brightness == mood.brightness && s.colorTemp == mood.colorTemp
+            }
+        }
+    } else if (mode == "effect") {
+        if (s.effect != null) OutlinedButton({ send(DeviceCommand(effect = "")) }, enabled = enabled) { Text("Stop effect") }
+        PresetGrid(playable, enabled, { send(DeviceCommand(effect = it.id)) }) { it.id == s.effect }
     } else {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LightColors.forEach { hex ->
@@ -472,24 +493,6 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
         }
         // Any color: drag on the wheel, it is sent when the finger lifts.
         ColorWheel({ send(DeviceCommand(color = it, colorMode = "color")) }, Modifier.align(Alignment.CenterHorizontally).size(220.dp), enabled)
-    }
-
-    val catalog by LocalRepository.current.effects.collectAsStateWithLifecycle()
-    if (catalog.moods.isNotEmpty()) {
-        Text("Moods", style = MaterialTheme.typography.titleSmall)
-        PresetGrid(catalog.moods, enabled, { send(DeviceCommand(effect = it.id)) }) { mood ->
-            // A mood is "on" when the light shows exactly its setting and no effect runs.
-            s.effect == null && s.isOn == true && s.colorMode == "white" && s.brightness == mood.brightness && s.colorTemp == mood.colorTemp
-        }
-    }
-    // Only the effects this light says it can play by itself.
-    val playable = catalog.effects.filter { it.id in s.options["effect"].orEmpty() }
-    if (playable.isNotEmpty()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Effects", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            if (s.effect != null) TextButton({ send(DeviceCommand(effect = "")) }, enabled = enabled) { Text("Stop effect") }
-        }
-        PresetGrid(playable, enabled, { send(DeviceCommand(effect = it.id)) }) { it.id == s.effect }
     }
 }
 
