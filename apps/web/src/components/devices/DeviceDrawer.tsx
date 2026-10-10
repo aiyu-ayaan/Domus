@@ -7,6 +7,7 @@ import { Segmented, Slider, Switch } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/Card'
 import { EnergyChart } from './EnergyChart'
+import { FanSpeedSlider } from './FanSpeedSlider'
 import { LightColorControls } from './LightColorControls'
 import { LightEffects, LightMoods, useEffectCatalog } from './LightScenes'
 import { api } from '@/lib/api'
@@ -122,7 +123,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
         <Button variant="ghost" size="sm" aria-label="Refresh state" icon={<ArrowsClockwise size={16} />} loading={refresh.isPending} onClick={() => refresh.mutate()} />
       </div>
 
-      {(canToggle(device) || isLight || fan?.length || modes?.length) && (
+      {(canToggle(device) || isLight || fan?.length || modes?.length || s.fan_percent != null) && (
         <Section title="Controls">
           <div className="rounded-lg border border-border px-4">
             {canToggle(device) && (
@@ -184,6 +185,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
                 <Segmented size="sm" label="Mode" value={s.mode} options={modes.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ mode: v })} />
               </div>
             )}
+            <FanSpeedSlider device={device} disabled={!control} className="border-b border-border py-3 last:border-0" />
           </div>
         </Section>
       )}

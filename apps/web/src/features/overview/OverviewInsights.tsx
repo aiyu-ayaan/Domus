@@ -3,6 +3,7 @@ import { Wind, Lightning, Thermometer, DropHalf } from '@phosphor-icons/react'
 import { Card, CardHeader, Badge } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { EnergyChart } from '@/components/devices/EnergyChart'
+import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { airQuality, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { useCanControl } from '@/lib/auth'
 import { useCommand } from '@/lib/queries'
@@ -184,6 +185,8 @@ export function OverviewInsights({
                         />
                       </div>
                     )}
+
+                    <FanSpeedSlider device={d} disabled={!control || !d.is_online} />
 
                     {fan && fan.length > 0 && (
                       <div className="space-y-1">

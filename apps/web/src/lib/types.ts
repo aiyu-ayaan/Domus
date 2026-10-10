@@ -34,6 +34,8 @@ export interface DeviceState {
   humidity?: number
   air_quality_pm25?: number
   fan_speed?: string
+  /** 0-100 %, for fans with a stepless speed. */
+  fan_percent?: number
   mode?: string
   filter_life?: number
   current_power_watts?: number
@@ -67,6 +69,7 @@ export type DeviceCommand = Partial<{
   color: string
   color_mode: string
   fan_speed: string
+  fan_percent: number
   mode: string
   /** A mood or effect id; '' stops a running effect. */
   effect: string

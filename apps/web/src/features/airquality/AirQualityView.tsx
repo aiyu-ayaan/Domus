@@ -5,6 +5,7 @@ import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } fro
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
 import { TrendChart } from '@/components/devices/TrendChart'
+import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
 import { airQuality, formatNumber } from '@/lib/format'
@@ -289,6 +290,8 @@ export function AirQualityView() {
                         />
                       </div>
                     )}
+
+                    <FanSpeedSlider device={d} disabled={!control || !d.is_online} className="border-t border-border pt-3" />
 
                     {/* Fan speed selector */}
                     {fan && fan.length > 0 && (
