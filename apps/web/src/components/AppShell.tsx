@@ -17,7 +17,7 @@ import {
 } from '@phosphor-icons/react'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { useLiveEvents } from '@/lib/live'
-import { keys, useDevices, useDiscovered, useEnergy, useNotifications } from '@/lib/queries'
+import { keys, useDevices, useDiscovered, useEnergy, useNotifications, useServerLinks } from '@/lib/queries'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { timeAgo } from '@/lib/format'
@@ -58,7 +58,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
       active ? 'bg-raised font-medium text-fg' : 'text-muted hover:bg-raised/60 hover:text-fg',
     )
   return (
-    <aside className="fixed inset-y-0 left-0 z-nav hidden w-[232px] flex-col border-r border-border bg-panel lg:flex">
+    <aside className="fixed bottom-0 left-0 top-[var(--titlebar)] z-nav hidden w-[232px] flex-col border-r border-border bg-panel lg:flex">
       <div className="app-drag flex h-14 items-center px-4">
         <Mark />
       </div>
@@ -175,6 +175,7 @@ export function AppShell() {
   const { data: pending = [] } = useDiscovered('pending')
   const { data: devices = [] } = useDevices()
   const { data: energy } = useEnergy()
+  useServerLinks() // fetched on every launch so the desktop app follows address changes made elsewhere
 
   const hasEnergy =
     devices.some((d) => d.state.current_power_watts != null || d.state.today_energy_kwh != null) ||
@@ -206,7 +207,7 @@ export function AppShell() {
       </a>
       <Sidebar items={items} pending={pending.length} unread={unread} onNotifications={() => setNotifOpen(true)} />
 
-      <header className="chrome app-drag sticky top-0 z-nav flex h-14 items-center justify-between border-b border-border px-4 pt-[env(safe-area-inset-top)] lg:hidden">
+      <header className="chrome app-drag sticky top-[var(--titlebar)] z-nav flex h-14 items-center justify-between border-b border-border px-4 pt-[env(safe-area-inset-top)] lg:hidden">
         <Mark />
         <Button variant="ghost" size="sm" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
           {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}

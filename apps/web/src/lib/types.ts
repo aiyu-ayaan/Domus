@@ -273,3 +273,11 @@ export type LiveEvent =
   | { type: 'discovery_finished'; found: number; new: number }
   | { type: 'notification'; id: string; level: Notification['level']; title: string; message: string }
   | { type: 'automation_triggered'; automation_id: string; name: string }
+
+/** Where clients reach the server: at home and from outside. */
+export interface ServerLinks {
+  local_url: string
+  remote_url: string
+  /** SHA-256 of the server's own certificate; null when TLS is off. */
+  fingerprint: string | null
+}

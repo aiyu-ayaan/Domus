@@ -160,6 +160,27 @@ input[type='range'].range::-moz-range-thumb {
 }
 input[type='range'].range:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Electron: the top bar drags the window. */
+/* Electron: the window has no native title bar. A 36px bar on top drags it and
+   holds the window buttons (drawn by Electron at its right end); everything
+   pinned to the top starts below it via --titlebar. */
+:root { --titlebar: 0px; }
+html.desktop { --titlebar: 36px; }
+html.desktop body { padding-top: var(--titlebar); }
+html.desktop body::before {
+  content: 'Docus';
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 1000;
+  height: var(--titlebar);
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid rgb(var(--border));
+  background: rgb(var(--bg));
+  color: rgb(var(--muted));
+  font-size: 12px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+html.desktop .min-h-dvh { min-height: calc(100dvh - var(--titlebar)); }
 .app-drag { -webkit-app-region: drag; }
 .app-drag button, .app-drag a, .app-drag input { -webkit-app-region: no-drag; }

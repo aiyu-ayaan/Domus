@@ -17,28 +17,42 @@ import type {
   Scene,
   SceneKind,
   ScreenSyncConfig,
+  ServerLinks,
   User,
 } from './types'
 
 const TOKEN_KEY = 'docus.token'
 
+/** What the desktop app's preload exposes (apps/desktop/src/preload.js). */
+interface DesktopBridge {
+  apiBase?: string
+  /** One token for the local and the remote address, which are different origins. */
+  token: { get(): string | null; set(token: string | null): void }
+  saveLinks(links: ServerLinks): void
+  chooseServer(): void
+  /** 'system' | 'light' | 'dark': the window buttons follow the app theme. */
+  setTheme(theme: string): void
+}
+export const desktop = (window as unknown as { docus?: DesktopBridge }).docus
+
 /**
  * API origin. Same-origin in the browser (the backend or Vite proxy serves
  * /api); Electron's preload can point it at the home server.
  */
-const BASE = (window as unknown as { docus?: { apiBase?: string } }).docus?.apiBase ?? ''
+const BASE = desktop?.apiBase ?? ''
 
 export const session = {
   get token() {
     try {
-      return localStorage.getItem(TOKEN_KEY)
+      return desktop ? desktop.token.get() : localStorage.getItem(TOKEN_KEY)
     } catch {
       return null
     }
   },
   set(token: string | null) {
     try {
-      if (token) localStorage.setItem(TOKEN_KEY, token)
+      if (desktop) desktop.token.set(token)
+      else if (token) localStorage.setItem(TOKEN_KEY, token)
       else localStorage.removeItem(TOKEN_KEY)
     } catch {
       /* storage unavailable: session lasts for this tab only */
@@ -116,6 +130,18 @@ export const api = {
   setup: (b: { username: string; email: string; password: string }) => post<AuthResponse>('/auth/setup', b),
   login: (b: { username: string; password: string }) => post<AuthResponse>('/auth/login', b),
   me: () => get<User>('/auth/me'),
+
+  /** The desktop app keeps the answer, so it can find the server from home and from outside. */
+  serverLinks: () =>
+    get<ServerLinks>('/server/links').then((links) => {
+      desktop?.saveLinks(links)
+      return links
+    }),
+  saveServerLinks: (b: { local_url: string; remote_url: string }) =>
+    put<ServerLinks>('/server/links', b).then((links) => {
+      desktop?.saveLinks(links)
+      return links
+    }),
   changePassword: (b: { current_password: string; new_password: string }) => post<Ok>('/auth/password', b),
 
   devices: () => get<Device[]>('/devices'),

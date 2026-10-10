@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { Checkbox, Field, SelectField } from '@/components/ui/Field'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
-import { api } from '@/lib/api'
+import { api, desktop } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
-import { keys, useRooms } from '@/lib/queries'
+import { keys, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { useTheme } from '@/lib/theme'
 import type { Role, User } from '@/lib/types'
@@ -55,6 +55,7 @@ export function SettingsView() {
           </div>
         </Card>
         <PasswordCard />
+        <ServerCard />
       </div>
       {admin && <People />}
     </>
@@ -89,6 +90,45 @@ function PasswordCard() {
         <Button type="submit" loading={change.isPending} disabled={!current || next.length < 8} className="self-start">
           Update password
         </Button>
+      </form>
+    </Card>
+  )
+}
+
+function ServerCard() {
+  const admin = useIsAdmin()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { data } = useServerLinks()
+  const [form, setForm] = useState<{ local_url: string; remote_url: string } | null>(null)
+  const value = form ?? { local_url: data?.local_url ?? '', remote_url: data?.remote_url ?? '' }
+  const save = useMutation({
+    mutationFn: () => api.saveServerLinks(value),
+    onSuccess: (links) => {
+      qc.setQueryData(keys.serverLinks, links)
+      setForm(null)
+      toast.push({ tone: 'success', title: 'Server addresses saved', message: 'The apps pick them up the next time they open.' })
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+  })
+  return (
+    <Card>
+      <CardHeader title="Server addresses" action={desktop && <Button size="sm" onClick={() => desktop?.chooseServer()}>Change server</Button>} />
+      <form
+        className="flex flex-col gap-4 p-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          save.mutate()
+        }}
+      >
+        <p className="text-label text-muted">The apps use the home address on your network and the remote one everywhere else, without signing in again.</p>
+        <Field label="Home network" placeholder="https://192.168.1.10:8443" disabled={!admin} value={value.local_url} onChange={(e) => setForm({ ...value, local_url: e.target.value })} />
+        <Field label="Remote" placeholder="https://home.example.com" hint="For example a Cloudflare Tunnel hostname." disabled={!admin} value={value.remote_url} onChange={(e) => setForm({ ...value, remote_url: e.target.value })} />
+        {admin && (
+          <Button type="submit" loading={save.isPending} disabled={!form} className="self-start">
+            Save addresses
+          </Button>
+        )}
       </form>
     </Card>
   )

@@ -6,10 +6,12 @@ import { AuthProvider } from '@/lib/auth'
 import { ToastProvider } from '@/lib/toast'
 import { Toaster } from '@/components/ui/Toaster'
 import { applyStoredTheme } from '@/lib/theme'
+import { desktop } from '@/lib/api'
 import { ScreenSyncProvider } from '@/features/screensync/ScreenSync'
 import './index.css'
 
 applyStoredTheme()
+if (desktop) document.documentElement.classList.add('desktop')
 
 // Live changes arrive over the WebSocket, so queries do not poll.
 const queryClient = new QueryClient({

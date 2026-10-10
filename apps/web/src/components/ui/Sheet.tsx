@@ -63,7 +63,7 @@ export function Sheet({
 
   if (!open) return null
   return createPortal(
-    <div className="fixed inset-0 z-sheet">
+    <div className="fixed inset-0 top-[var(--titlebar)] z-sheet">
       <div className="anim-fade absolute inset-0 bg-black/50" onClick={onClose} aria-hidden />
       <div
         ref={panel}
@@ -121,7 +121,7 @@ export function Confirm({
   }, [open])
   if (!open) return null
   return createPortal(
-    <div className="fixed inset-0 z-sheet flex items-center justify-center p-4">
+    <div className="fixed inset-0 top-[var(--titlebar)] z-sheet flex items-center justify-center p-4">
       <div className="anim-fade absolute inset-0 bg-black/50" onClick={onClose} aria-hidden />
       <div role="alertdialog" aria-modal="true" aria-label={title} className="anim-enter relative w-full max-w-sm rounded-lg border border-border bg-panel p-5" style={{ boxShadow: 'var(--overlay-shadow)' }}>
         <h2 className="text-title font-semibold">{title}</h2>
