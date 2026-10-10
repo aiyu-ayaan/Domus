@@ -182,6 +182,15 @@ pub fn device_type(service: &str, model: &str) -> DeviceType {
     }
 }
 
+/// Clean air delivery rate at full speed, in m³/h; the clients turn it into a room size.
+// shortcut: only models whose rated CADR we know, add a row per purifier as they turn up
+pub fn max_cadr(model: &str) -> Option<u32> {
+    match model {
+        "xiaomi.airp.cpa4m" => Some(230),
+        _ => None,
+    }
+}
+
 pub fn get_params(did: &str, map: &MiotMap) -> (Vec<String>, Value) {
     let keys: Vec<String> = map.props.keys().cloned().collect();
     let params = keys
