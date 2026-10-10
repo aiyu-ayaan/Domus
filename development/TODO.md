@@ -98,6 +98,7 @@
 - [x] Light moods and on-device effects (catalog in `home-core`, Tuya scene mode, Tapo strip lighting effects), web + Android; one effect verified on a Tuya bulb and the Tapo L900
 - [ ] Light effects: tune Tuya step timing by eye, Xiaomi support, brightness while an effect plays on a Tapo strip
 - [ ] Verify on hardware: Screen Sync capture, alerts service, Tuya QR link from the phone, real-phone LAN discovery
+- [x] Logo: modular D mark on the favicon, PWA icons, desktop window, Android launcher and animated splash (`development/docs/BRAND.md`)
 
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices

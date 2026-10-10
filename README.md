@@ -1,3 +1,5 @@
+<img src="design-system/docus/brand/app-icon.svg" alt="Docus logo" width="72" />
+
 # Docus
 
 A local-first smart-home hub for your home server. Rust backend, SQLite,

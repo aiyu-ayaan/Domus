@@ -158,4 +158,6 @@ home-automation/
 
 UI follows the design profile in `design-system/docus/MASTER.md` (Minimalism & Swiss, generated with `/ui-ux-pro-max`). Read it before any UI change; page overrides go in `design-system/docus/pages/`. The earlier cartoonish liquid-glass look was rejected — keep it precise: neutral palette, green only for on/live state, hairline borders, small radii, subtle 150ms motion, no coloured icon tiles or gradients. 
 
+## Brand
 
+The logo is a D built from three modules, one of them `on` green. Masters and the PNG render script are in `design-system/docus/brand/`; read `development/docs/BRAND.md` before touching any icon, favicon or the Android splash. Use `/logo-design:logo-design` for logo work. The earlier house icon was rejected — don't bring a house back.
