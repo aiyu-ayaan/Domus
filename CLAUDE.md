@@ -15,7 +15,12 @@ Rust + MQTT + React
 
 For Backend use the rust and for frontend use the react and react navigate for desktop build..
 
-pnpm can be use to ran project. with `npm run dev` to ran both backend and frontend and also have `dev:web` and `dev:backend` to ran in individually.. `pnpm dev` also starts the Android dev gateway (`pnpm gateway`, see `scripts/gateway.mjs`); `pnpm android:dev` builds, installs and opens the Android app.
+pnpm can be use to ran project. with `npm run dev` to ran both backend and frontend and also have `dev:web` and `dev:backend` to ran in individually.. `pnpm dev` also starts the Android dev gateway (`pnpm gateway`, see `scripts/gateway.mjs`); `pnpm android:dev` builds, installs and opens the Android app (`dev` flavor).
+
+The project features physical App Flavors (`dev` and `prod`) across Android, Desktop, and Web so dev and prod instances do not interrupt each other (see `development/docs/APP_FLAVORS.md`):
+- **Android**: `dev` (`com.aiyu.domus.dev`, "Docus Dev", amber DEV badge) vs `prod` (`com.aiyu.domus`, "Docus"). Both install side-by-side. Commands: `pnpm android:dev` and `pnpm android:prod`.
+- **Desktop**: dev uses `~/.config/DocusDev` (`docus-dev.json`, window title `Docus (Dev)`, icon `icon-dev.png`), prod uses `~/.config/Docus`. Commands: `pnpm dev:desktop`, `pnpm dev:desktop:prod`, `pnpm build:desktop:dev`, `pnpm build:desktop:prod`.
+- **Web**: dev isolates LocalStorage keys (`docus.dev.token`, `docus.dev.theme`), updates title/favicon (`/favicon-dev.svg`), and displays a sleek `DEV` pill in navigation. Commands: `pnpm dev:web`, `pnpm build:web:dev`, `pnpm build:web:prod`.
 
 For Now database will be sqlite. and make sure all requirest are encrypted.. 
 

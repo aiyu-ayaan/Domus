@@ -149,6 +149,18 @@
   - Android: `DomusRepository.handle()` updates `_session.value` and `_revision` immediately on `user_updated` and `users_changed`
 - [x] Architecture documentation with Mermaid diagram in `development/docs/AVATAR_SYSTEM.md`
 
+## Milestone 14: App Flavors Architecture & Multi-Platform Isolation (DONE — 2026-10-10)
+- [x] Android flavors (`apps/android`): `flavorDimensions += "environment"` with `dev` (`com.aiyu.domus.dev`, "Docus Dev", `-dev` suffix, amber DEV badge launcher icon) and `prod` (`com.aiyu.domus`, "Docus")
+- [x] Android side-by-side install support: verified separate application IDs, sandboxed Linux UIDs, isolated Keystores, SharedPreferences, and databases
+- [x] Android dev/prod scripts: `scripts/android-dev.sh` (installs `devDebug`, launches `com.aiyu.domus.dev`) and `scripts/android-prod.sh` (installs `prodDebug`/`prodRelease`)
+- [x] Desktop flavors (`apps/desktop`): `DOCUS_FLAVOR` runtime environment variable isolating `userData` to `~/.config/DocusDev` (dev) vs `~/.config/Docus` (prod), and configuration files (`docus-dev.json` vs `docus.json`)
+- [x] Desktop window and packaging isolation: window title "Docus (Dev)" vs "Docus", `build/icon-dev.png` with DEV badge, dedicated builder configs (`electron-builder.dev.json` producing `docus-dev` deb/AppImage vs `electron-builder.prod.json` producing `docus`)
+- [x] Desktop after-install script: `build/after-install.sh` dynamically supports both `/opt/Docus Dev` and `/opt/Docus`
+- [x] Web flavors (`apps/web`): `flavor.ts` module with flavor detection, isolated LocalStorage keys (`docus.dev.token` vs `docus.token`, `docus.dev.theme` vs `docus.theme`), dynamic `<title>` and `<link rel="icon">` switching (`/favicon-dev.svg`, `/manifest.dev.webmanifest`)
+- [x] Web in-app indicator: non-intrusive amber DEV hairline pill in floating navigation dock and mobile header
+- [x] Root & workspace scripts: added `android:dev`, `android:prod`, `android:build:dev`, `android:build:prod`, `dev:desktop`, `dev:desktop:prod`, `build:desktop:dev`, `build:desktop:prod`, `build:web:dev`, `build:web:prod`
+- [x] Documentation & architecture: `development/docs/APP_FLAVORS.md` with Mermaid isolation diagrams, comparison matrix, and workflows
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications
