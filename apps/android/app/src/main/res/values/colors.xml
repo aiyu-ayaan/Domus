@@ -2,5 +2,5 @@
 <resources>
     <!-- Window background before Compose draws: the theme's surface, so launch doesn't flash. -->
     <color name="canvas">#F9FAEF</color>
-    <color name="ic_launcher_background">#354E16</color>
+    <color name="ic_launcher_background">#09090B</color>
 </resources>
