@@ -119,8 +119,10 @@ class ScreenSyncService : Service() {
         val stop = PendingIntent.getService(this, 1, Intent(this, ScreenSyncService::class.java).setAction(STOP), PendingIntent.FLAG_IMMUTABLE)
         val status = notification(STATUS, "Screen Sync is on", "Your lights follow this screen")
             .setOngoing(true)
+            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
             .addAction(Notification.Action.Builder(null, "Stop", stop).build())
             .build()
+            .also { it.flags = it.flags or Notification.FLAG_NO_CLEAR } // not swipe-able on any Android version
         // Must be in the foreground, as mediaProjection, before the projection is taken.
         if (Build.VERSION.SDK_INT >= 29) startForeground(2, status, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION) else startForeground(2, status)
 
@@ -152,6 +154,8 @@ class ScreenSyncService : Service() {
             onEvent = { event ->
                 val type = (event["type"] as? JsonPrimitive)?.contentOrNull
                 if (type == "stopped" || type == "error") stopSelf()
+                // The server marks the scene active before `ready`: pull it so the switch follows.
+                if (type == "ready") CoroutineScope(Dispatchers.Main).launch { repository.refresh() }
             },
             onClosed = { stopSelf() },
         ) ?: return START_NOT_STICKY.also { stopSelf() }
@@ -192,7 +196,8 @@ class ScreenSyncService : Service() {
         reader?.close()
         projection?.stop()
         val repository = repository
-        CoroutineScope(Dispatchers.Main).launch { delay(800); repository.refresh() }
+        // The server restores the lights before it clears the flag, so check twice.
+        CoroutineScope(Dispatchers.Main).launch { delay(800); repository.refresh(); delay(2500); repository.refresh() }
         super.onDestroy()
     }
 
