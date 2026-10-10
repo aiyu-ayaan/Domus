@@ -1,6 +1,13 @@
 package com.aiyu.domus
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -53,15 +60,44 @@ fun MainScreen(session: Session.SignedIn) {
     LaunchedEffect(repository) { repository.messages.collect { snackbar.showSnackbar(it) } }
     BackHandler(tab != 0) { tab = 0 }
 
-    val canControl = session.user.canControl
+    // A page opened over the tabs: "rooms", "scene:<id>", ... Null shows the tabs.
+    var page by rememberSaveable { mutableStateOf<String?>(null) }
+    val open = { key: String -> page = key }
+    val close = { page = null }
+    BackHandler(page != null, close)
+
+    val user = session.user
+    val canControl = user.canControl
+    val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize()) {
-        FloatingNavScaffold(Tabs, tab, { tab = it }) { current ->
-            when (current) {
-                0 -> HomeScreen(session.user, onOpenDevice = { openDevice = it }, onShowDevices = { tab = 1 })
-                1 -> DevicesScreen(canControl, onOpenDevice = { openDevice = it })
-                2 -> ScenesScreen(canControl)
-                3 -> EnergyScreen()
-                else -> SettingsScreen(session)
+        AnimatedContent(
+            targetState = page,
+            // Shared axis X: a page slides in from the end, the tabs come back from the start.
+            transitionSpec = {
+                val forward = targetState != null
+                (slideInHorizontally(motion.defaultSpatialSpec()) { if (forward) it / 4 else -it / 4 } + fadeIn(motion.defaultEffectsSpec()))
+                    .togetherWith(slideOutHorizontally(motion.fastSpatialSpec()) { if (forward) -it / 4 else it / 4 } + fadeOut(motion.fastEffectsSpec()))
+            },
+            label = "page",
+        ) { current ->
+            when {
+                current == null -> FloatingNavScaffold(Tabs, tab, { tab = it }) { selected ->
+                    when (selected) {
+                        0 -> HomeScreen(user, onOpenDevice = { openDevice = it }, onShowDevices = { tab = 1 })
+                        1 -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") })
+                        2 -> ScenesScreen(user, open)
+                        3 -> EnergyScreen(onEditTariff = if (user.isAdmin) ({ open("tariff") }) else null)
+                        else -> SettingsScreen(session, open)
+                    }
+                }
+                current == "discover" -> DiscoverPage(close, onOpenPlugins = { open("plugins") })
+                current == "plugins" -> IntegrationsPage(close, onFindDevices = { open("discover") })
+                current == "rooms" -> RoomsPage(close)
+                current == "people" -> UsersPage(user, close)
+                current == "tariff" -> TariffPage(close)
+                current == "notices" -> NoticesPage(close)
+                current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
+                current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
             }
         }
         // Above the floating pill.
@@ -69,6 +105,6 @@ fun MainScreen(session: Session.SignedIn) {
     }
 
     devices.firstOrNull { it.id == openDevice }?.let { device ->
-        DeviceSheet(device, canControl, onDismiss = { openDevice = null })
+        DeviceSheet(device, user, onDismiss = { openDevice = null })
     }
 }

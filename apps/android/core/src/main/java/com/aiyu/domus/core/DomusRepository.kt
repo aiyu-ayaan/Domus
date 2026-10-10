@@ -21,6 +21,12 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.WebSocket
 
+/** An open Screen Sync color stream. Closing it makes the server restore the lights. */
+interface SyncStream {
+    fun send(frame: String)
+    fun close()
+}
+
 sealed interface Session {
     data object Loading : Session
     /** First run, or the user chose another server. */
@@ -219,7 +225,13 @@ class DomusRepository(context: Context) {
     suspend fun <T> change(block: suspend (DomusApi) -> T): T? = attempt(block)?.also { _revision.update { it + 1 }; refresh() }
 
     /** Opens a Screen Sync color stream, or null when signed out. */
-    fun sync(sceneId: String, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit): WebSocket? = api?.sync(sceneId, onEvent, onClosed)
+    fun sync(sceneId: String, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit): SyncStream? =
+        api?.sync(sceneId, onEvent, onClosed)?.let { socket ->
+            object : SyncStream {
+                override fun send(frame: String) { socket.send(frame) }
+                override fun close() { socket.close(1000, null) }
+            }
+        }
 
     private suspend fun <T> attempt(block: suspend (DomusApi) -> T): T? {
         val api = api ?: return null

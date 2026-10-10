@@ -1,6 +1,9 @@
 package com.aiyu.domus
 
+import android.Manifest
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AddHome
 import androidx.compose.material.icons.rounded.Dns
+import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.MeetingRoom
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialShapes
@@ -43,7 +52,7 @@ import com.aiyu.domus.ui.components.enterStaggered
 private val Themes = listOf("system" to "System", "light" to "Light", "dark" to "Dark")
 
 @Composable
-fun SettingsScreen(session: Session.SignedIn) {
+fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
     val repository = LocalRepository.current
     val appearance by repository.appearance.collectAsStateWithLifecycle()
     val live by repository.live.collectAsStateWithLifecycle()
@@ -62,6 +71,36 @@ fun SettingsScreen(session: Session.SignedIn) {
                     Text(session.user.username, style = MaterialTheme.typography.titleLarge)
                     Text(session.user.role.replaceFirstChar(Char::uppercase), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
+            }
+        }
+
+        SectionTitle("Home")
+        if (session.user.isAdmin) {
+            RowCard("Add devices", "Find and add what your accounts and network offer", Icons.Rounded.AddHome, onClick = { open("discover") })
+            RowCard("Plugins", "Tuya, Tapo and Xiaomi accounts", Icons.Rounded.Extension, onClick = { open("plugins") })
+            RowCard("Rooms", null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
+            RowCard("People", "Accounts, roles and room access", Icons.Rounded.Group, onClick = { open("people") })
+            RowCard("Electricity tariff", "Rate, billing cycle and budget", Icons.Rounded.Payments, onClick = { open("tariff") })
+        }
+        RowCard("Notifications", "What your home reported", Icons.Rounded.Notifications, onClick = { open("notices") })
+        // Opt-in: without a cloud push service, alerts need a connection that stays open.
+        val alerts by repository.backgroundAlerts.collectAsStateWithLifecycle()
+        val setAlerts = { on: Boolean -> repository.setBackgroundAlerts(on); AlertsService.apply(context) }
+        val askToNotify = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> setAlerts(granted) }
+        Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+            Row(
+                Modifier
+                    .toggleable(alerts, role = Role.Switch) { on ->
+                        if (on && Build.VERSION.SDK_INT >= 33) askToNotify.launch(Manifest.permission.POST_NOTIFICATIONS) else setAlerts(on)
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Alerts while the app is closed", style = MaterialTheme.typography.titleMedium)
+                    Text("Keeps a connection to your server open. Uses a little battery.", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                }
+                Switch(alerts, onCheckedChange = null)
             }
         }
 

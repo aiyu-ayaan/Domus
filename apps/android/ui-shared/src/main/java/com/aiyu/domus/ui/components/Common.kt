@@ -16,6 +16,8 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -36,7 +38,9 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +52,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -154,5 +160,44 @@ fun Modifier.enterStaggered(index: Int): Modifier {
     return graphicsLayer {
         alpha = progress.value.coerceIn(0f, 1f)
         translationY = (1f - progress.value) * 24.dp.toPx()
+    }
+}
+
+/**
+ * Hue around the ring, saturation from the center out, at full brightness (a lamp's own brightness is separate).
+ * [onPick] gets `#RRGGBB` once, when the finger lifts.
+ */
+@Composable
+fun ColorWheel(onPick: (String) -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    var picked by remember { mutableStateOf<Offset?>(null) }
+    val ring = MaterialTheme.colorScheme.outline
+    fun hexAt(p: Offset, size: androidx.compose.ui.unit.IntSize): String {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val d = p - center
+        val hue = (Math.toDegrees(kotlin.math.atan2(d.y, d.x).toDouble()).toFloat() + 360f) % 360f
+        val saturation = (d.getDistance() / (minOf(size.width, size.height) / 2f)).coerceIn(0f, 1f)
+        return "#%06X".format(0xFFFFFF and android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, 1f)))
+    }
+    Canvas(
+        modifier
+            .semantics { contentDescription = "Color wheel" }
+            .then(
+                if (!enabled) Modifier else Modifier
+                    .pointerInput(Unit) { detectTapGestures { picked = it; onPick(hexAt(it, size)) } }
+                    .pointerInput(Unit) {
+                        detectDragGestures(onDragEnd = { picked?.let { onPick(hexAt(it, size)) } }) { change, _ -> picked = change.position }
+                    },
+            ),
+    ) {
+        val radius = size.minDimension / 2
+        // Sweep starts at 3 o'clock like atan2, so the color under the finger is the color sent.
+        drawCircle(Brush.sweepGradient(listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)), radius)
+        drawCircle(Brush.radialGradient(listOf(Color.White, Color.Transparent), radius = radius), radius)
+        picked?.let {
+            val d = it - center
+            val at = if (d.getDistance() > radius) center + d * (radius / d.getDistance()) else it
+            drawCircle(Color.White, 12.dp.toPx(), at)
+            drawCircle(ring, 12.dp.toPx(), at, style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+        }
     }
 }

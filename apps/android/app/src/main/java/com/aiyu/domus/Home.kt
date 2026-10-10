@@ -132,7 +132,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
             TextButton(onShowDevices) { Text("All devices") }
         }
         when {
-            devices.isEmpty() -> EmptyState("No devices yet", "Link Tuya, Tapo or Xiaomi under Plugins in the Domus web app. Devices you add there show up here.")
+            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Open Devices and tap + to link Tuya, Tapo or Xiaomi." else "Ask an admin to add devices or give you access to a room.")
             on.isEmpty() -> EmptyState("Everything is off", "Devices you switch on appear here.")
             else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
         }

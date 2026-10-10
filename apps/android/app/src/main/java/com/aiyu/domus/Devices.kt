@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.Blinds
 import androidx.compose.material.icons.rounded.Check
@@ -38,8 +39,10 @@ import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.Thermostat
 import androidx.compose.material.icons.rounded.ToggleOn
 import androidx.compose.material.icons.rounded.Toys
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +50,8 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -56,6 +61,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,9 +79,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.DeviceCommand
 import com.aiyu.domus.core.Room
+import com.aiyu.domus.core.User
 import com.aiyu.domus.core.airLevel
 import com.aiyu.domus.core.formatKwh
 import com.aiyu.domus.core.formatWatts
+import com.aiyu.domus.ui.components.ColorWheel
 import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
@@ -84,6 +92,7 @@ import com.aiyu.domus.ui.components.ShapedIcon
 import com.aiyu.domus.ui.components.enterStaggered
 import com.aiyu.domus.ui.components.pressScale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 fun deviceIcon(type: String): ImageVector = when (type) {
     "light" -> Icons.Rounded.Lightbulb
@@ -169,7 +178,8 @@ private val Categories = listOf(
 )
 
 @Composable
-fun DevicesScreen(canControl: Boolean, onOpenDevice: (String) -> Unit) {
+fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit) {
+    val canControl = user.canControl
     val repository = LocalRepository.current
     val devices by repository.devices.collectAsStateWithLifecycle()
     val rooms by repository.rooms.collectAsStateWithLifecycle()
@@ -181,7 +191,9 @@ fun DevicesScreen(canControl: Boolean, onOpenDevice: (String) -> Unit) {
     val shown = if (types == null) devices else devices.filter { it.type in types }
 
     ScreenColumn {
-        ScreenHeader("Devices", "${devices.count { it.isOnline }} of ${devices.size} online")
+        ScreenHeader("Devices", "${devices.count { it.isOnline }} of ${devices.size} online") {
+            if (user.isAdmin) FilledTonalIconButton(onAdd) { Icon(Icons.Rounded.Add, "Add devices") }
+        }
         if (categories.size > 1) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(types == null, { category = null }, { Text("All") })
@@ -190,7 +202,7 @@ fun DevicesScreen(canControl: Boolean, onOpenDevice: (String) -> Unit) {
         }
         when {
             loading && devices.isEmpty() -> LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
-            devices.isEmpty() -> EmptyState("No devices yet", "Link Tuya, Tapo or Xiaomi under Plugins in the Domus web app. Devices you add there show up here.")
+            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Tap + to link Tuya, Tapo or Xiaomi and add what they find." else "Ask an admin to add devices or give you access to a room.")
             else -> {
                 // Rooms in floor order, then devices without a room.
                 val groups: List<Pair<Room?, List<Device>>> =
@@ -225,7 +237,11 @@ private fun parseColor(hex: String): Color? = runCatching { Color(android.graphi
 /** Everything one device can do, in a bottom sheet. Only the controls its state reports are shown. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun DeviceSheet(device: Device, canControl: Boolean, onDismiss: () -> Unit) {
+fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
+    val canControl = user.canControl
+    val scope = rememberCoroutineScope()
+    var editing by remember { mutableStateOf(false) }
+    var removing by remember { mutableStateOf(false) }
     val repository = LocalRepository.current
     val rooms by repository.rooms.collectAsStateWithLifecycle()
     val c = MaterialTheme.colorScheme
@@ -289,6 +305,8 @@ fun DeviceSheet(device: Device, canControl: Boolean, onDismiss: () -> Unit) {
                             }
                         }
                     }
+                    // Any color: drag on the wheel, it is sent when the finger lifts.
+                    ColorWheel({ send(DeviceCommand(color = it, colorMode = "color")) }, Modifier.align(Alignment.CenterHorizontally).size(220.dp), enabled)
                 }
             }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
@@ -333,7 +351,30 @@ fun DeviceSheet(device: Device, canControl: Boolean, onDismiss: () -> Unit) {
                 }
             }
             Text(listOfNotNull(device.model, device.integration.replaceFirstChar(Char::uppercase)).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+            if (user.isAdmin) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton({ editing = true }) { Text("Rename or move") }
+                    TextButton({ removing = true }, colors = ButtonDefaults.textButtonColors(contentColor = c.error)) { Text("Remove") }
+                }
+            }
         }
+    }
+    if (editing) {
+        var name by remember { mutableStateOf(device.name) }
+        var room by remember { mutableStateOf(device.roomId) }
+        FormDialog("Edit device", canSave = name.isNotBlank(), onDismiss = { editing = false }, onSave = {
+            editing = false
+            scope.launch { repository.change { it.updateDevice(device.id, name.trim(), room) } }
+        }) {
+            Field(name, { name = it }, "Name")
+            Picker("Room", listOf<Pair<String?, String>>(null to "No room") + rooms.map { it.id to it.name }, room, { room = it })
+        }
+    }
+    if (removing) {
+        Confirm("Remove ${device.name}?", "It leaves your home and its scenes. You can add it again from Add devices.", "Remove", {
+            onDismiss()
+            scope.launch { repository.change { it.removeDevice(device.id) } }
+        }, { removing = false })
     }
 }
 

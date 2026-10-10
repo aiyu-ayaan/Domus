@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Today
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
@@ -78,7 +81,7 @@ private fun EnergyBars(points: List<EnergyPoint>, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun EnergyScreen() {
+fun EnergyScreen(onEditTariff: (() -> Unit)?) {
     val repository = LocalRepository.current
     val energy by repository.energy.collectAsStateWithLifecycle()
     val loading by repository.loading.collectAsStateWithLifecycle()
@@ -90,10 +93,12 @@ fun EnergyScreen() {
 
     ScreenColumn {
         val overview = energy
-        ScreenHeader("Energy", overview?.let { "Day ${it.cycleDay} of ${it.cycleDays} in this billing cycle" } ?: "Power use and cost")
+        ScreenHeader("Energy", overview?.let { "Day ${it.cycleDay} of ${it.cycleDays} in this billing cycle" } ?: "Power use and cost") {
+            if (onEditTariff != null) FilledTonalIconButton(onEditTariff) { Icon(Icons.Rounded.Payments, "Electricity tariff") }
+        }
         if (overview == null) {
             if (loading) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
-            else EmptyState("No energy data yet", "Add a plug or switch that measures power, and set your electricity rate in the web app.")
+            else EmptyState("No energy data yet", "Add a plug or switch that measures power. Costs use the electricity tariff.")
             return@ScreenColumn
         }
         val currency = overview.settings.currency

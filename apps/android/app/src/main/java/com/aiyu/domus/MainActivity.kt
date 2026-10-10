@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         repository.onForeground()
+        AlertsService.apply(this) // the app is in front: the one moment a foreground service may always start
     }
 
     override fun onStop() {
