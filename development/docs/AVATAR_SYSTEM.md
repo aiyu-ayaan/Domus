@@ -13,7 +13,7 @@ graph TD
     end
 
     subgraph Avatar Engines
-        Core["@dicebear/core + @dicebear/collection<br/>(Client-side Synchronous Offline SVG)"]
+        Core["@dicebear/core + @dicebear/collection<br/>(Client-side Offline SVG, one lazy chunk per style)"]
         ApiFallback["DiceBear HTTP API<br/>https://api.dicebear.com/9.x/:style/:format"]
     end
 

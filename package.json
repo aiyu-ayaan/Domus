@@ -10,6 +10,8 @@
     "gateway": "node scripts/gateway.mjs",
     "android:dev": "bash scripts/android-dev.sh",
     "android:prod": "bash scripts/android-prod.sh",
+    "android:release": "(cd apps/android && ./gradlew :app:installProdRelease)",
+    "android:profile": "(cd apps/android && ./gradlew :app:generateBaselineProfile -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true)",
     "android:build:dev": "(cd apps/android && ./gradlew :app:assembleDevDebug)",
     "android:build:prod": "(cd apps/android && ./gradlew :app:assembleProdRelease)",
     "dev:desktop": "pnpm --filter @docus/desktop dev",

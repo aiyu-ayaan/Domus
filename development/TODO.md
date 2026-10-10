@@ -165,6 +165,15 @@
 - [x] Root & workspace scripts: added `android:dev`, `android:prod`, `android:build:dev`, `android:build:prod`, `dev:desktop`, `dev:desktop:prod`, `build:desktop:dev`, `build:desktop:prod`, `build:web:dev`, `build:web:prod`
 - [x] Documentation & architecture: `development/docs/APP_FLAVORS.md` with Mermaid isolation diagrams, comparison matrix, and workflows
 
+## Milestone 15: Startup Performance — Android baseline profile, web, backend, desktop (2026-10-10)
+- [x] Android: `:baselineprofile` module (`BaselineProfileGenerator`: cold launch + tab walk), `androidx.baselineprofile` + `profileinstaller` in `:app`, profile merged into `src/main/generated/baselineProfiles` for both flavors, `pnpm android:profile`
+- [ ] Android: re-record the profile with the dev app signed in (`pnpm android:profile`); the committed one covers launch + connect screens only
+- [x] Web: avatar artwork out of the entry chunk, one lazy chunk per DiceBear style (entry JS 1.79 MB -> 0.33 MB)
+- [x] Backend: brotli/gzip compression, immutable caching for `/assets/*`, `no-cache` for `index.html`
+- [x] Desktop: saved server addresses probed in parallel at startup
+- [x] Docs: `development/docs/PERFORMANCE.md` with diagram
+- [ ] Web: self-host the Inter font (the Google Fonts stylesheet still blocks first paint and needs internet)
+
 ## Next
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications

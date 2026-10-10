@@ -176,7 +176,11 @@ From the repository root:
 pnpm dev          # backend + web + gateway
 pnpm gateway      # the gateway alone
 pnpm android:dev  # build, install on the connected phone / emulator (starts one if needed), open the app
+pnpm android:profile  # re-record the baseline profile (sign in on the device first)
 ```
+
+Release builds ship a baseline + startup profile recorded by the `:baselineprofile` module, so launch and the
+main tabs are compiled at install. How it works and when to re-record it: `PERFORMANCE.md`.
 
 The dev server listens on `127.0.0.1` only. `scripts/gateway.mjs` forwards each LAN address (same port, raw TCP
 so TLS stays end to end) to it and keeps `adb reverse tcp:8443` set. A phone on Wi-Fi then finds the server by

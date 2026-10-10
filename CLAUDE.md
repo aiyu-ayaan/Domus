@@ -157,6 +157,7 @@ home-automation/
 
 - On this need to work on the web and electron version of the application.. 
 - Docker, the Cloudflare Tunnel setup, the home/remote server addresses and the desktop app are documented in `development/docs/DEPLOYMENT.md`. Read it before changing `Dockerfile`, `docker-compose.yml`, `apps/desktop` or `modules/server.rs`. The desktop window has no native title bar or menu; keep it that way.
+- Startup performance (Android baseline profile, web entry chunk, backend compression and asset caching, desktop server probing) is documented in `development/docs/PERFORMANCE.md`. Read it before touching `apps/android/baselineprofile`, the static file serving in `api/routes.rs` or anything imported by the web entry. Re-record the Android profile with `pnpm android:profile` after larger UI changes.
 - The native android app lives in `apps/android` (package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`, Material 3 Expressive). Read `development/docs/ANDROID_APP.md` before changing it. It does not follow the web design profile below.
 
 
