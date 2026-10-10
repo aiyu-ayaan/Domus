@@ -1,8 +1,31 @@
 package com.aiyu.domus
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.MeetingRoom
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextOverflow
+import com.aiyu.domus.core.Notice
+import com.aiyu.domus.core.Scene
+import com.aiyu.domus.ui.components.pressScale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,9 +93,38 @@ fun StatCard(
     }
 }
 
-/** The dashboard: what the home is doing right now, scenes one tap away, and everything that is on. */
+/** A scene as a card: lights up while active, one tap switches it. */
 @Composable
-fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> Unit) {
+private fun SceneCard(scene: Scene, enabled: Boolean, onToggle: () -> Unit) {
+    val c = MaterialTheme.colorScheme
+    val motion = MaterialTheme.motionScheme
+    val container by animateColorAsState(if (scene.isActive) c.primaryContainer else c.surfaceContainerHigh, motion.defaultEffectsSpec(), label = "scene")
+    val content by animateColorAsState(if (scene.isActive) c.onPrimaryContainer else c.onSurface, motion.defaultEffectsSpec(), label = "sceneContent")
+    val corner by animateDpAsState(if (scene.isActive) 36.dp else 20.dp, motion.defaultSpatialSpec(), label = "sceneCorner")
+    val source = remember { MutableInteractionSource() }
+    Card(
+        onClick = onToggle,
+        enabled = enabled,
+        shape = RoundedCornerShape(corner.coerceAtLeast(0.dp)),
+        colors = CardDefaults.cardColors(containerColor = container, contentColor = content),
+        interactionSource = source,
+        modifier = Modifier.width(156.dp).pressScale(source).semantics { role = Role.Switch; stateDescription = if (scene.isActive) "On" else "Off" },
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            ShapedIcon(Icons.Rounded.AutoAwesome, MaterialShapes.Clover4Leaf, if (scene.isActive) c.primary else c.surfaceContainerHighest, if (scene.isActive) c.onPrimary else c.onSurfaceVariant)
+            Spacer(Modifier.height(16.dp))
+            Text(scene.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(if (scene.isActive) "On · tap to turn off" else "Tap to run", style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+/**
+ * The dashboard: what the home is doing right now, scenes one tap away, what is on, each room at a glance and
+ * what happened lately. [open] opens a page over the tabs.
+ */
+@Composable
+fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> Unit, open: (String) -> Unit) {
     val repository = LocalRepository.current
     val devices by repository.devices.collectAsStateWithLifecycle()
     val scenes by repository.scenes.collectAsStateWithLifecycle()
@@ -81,6 +133,10 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     val live by repository.live.collectAsStateWithLifecycle()
     val c = MaterialTheme.colorScheme
     val on = devices.filter { it.isOnline && it.state.isOn == true }
+    val rooms by repository.rooms.collectAsStateWithLifecycle()
+    val revision by repository.revision.collectAsStateWithLifecycle()
+    var notices by remember { mutableStateOf(emptyList<Notice>()) }
+    LaunchedEffect(revision) { repository.request { it.notices() }?.let { notices = it.items.take(3) } }
 
     ScreenColumn {
         ScreenHeader(
@@ -96,11 +152,12 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         val metered = devices.any { it.state.watts != null }
         val overview = energy
         if (metered && overview != null) {
-            Row(Modifier.fillMaxWidth().enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard("Using now", formatWatts(overview.watts), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f))
+            // Both cards take the height of the taller one.
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatCard("Using now", formatWatts(overview.watts), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight())
                 StatCard(
                     "Today", formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
-                    Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f),
+                    Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
                 )
             }
         }
@@ -114,16 +171,8 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         val quick = scenes.filter { it.kind == "standard" }
         if (quick.isNotEmpty()) {
             SectionTitle("Scenes")
-            Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(2), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                quick.forEach { scene ->
-                    FilterChip(
-                        selected = scene.isActive,
-                        onClick = { repository.toggleScene(scene, !scene.isActive) },
-                        label = { Text(scene.name) },
-                        leadingIcon = if (scene.isActive) ({ Icon(Icons.Rounded.Check, contentDescription = null) }) else null,
-                        enabled = user.canControl,
-                    )
-                }
+            Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(2), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                quick.forEach { scene -> SceneCard(scene, user.canControl) { repository.toggleScene(scene, !scene.isActive) } }
             }
         }
 
@@ -133,8 +182,38 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
         }
         when {
             devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Open Devices and tap + to link Tuya, Tapo or Xiaomi." else "Ask an admin to add devices or give you access to a room.")
-            on.isEmpty() -> EmptyState("Everything is off", "Devices you switch on appear here.")
+            on.isEmpty() -> Text("Everything is off.", color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
             else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
+        }
+
+        val lived = rooms.sortedBy { it.floor }.map { room -> room to devices.filter { it.roomId == room.id } }.filter { it.second.isNotEmpty() }
+        if (lived.isNotEmpty()) {
+            SectionTitle("Rooms")
+            Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(5), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                lived.forEach { (room, inRoom) ->
+                    val active = inRoom.count { it.isOnline && it.state.isOn == true }
+                    Surface(onShowDevices, Modifier.width(156.dp), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large) {
+                        Column(Modifier.padding(16.dp)) {
+                            ShapedIcon(Icons.Rounded.MeetingRoom, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
+                            Spacer(Modifier.height(16.dp))
+                            Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("${inRoom.size} ${if (inRoom.size == 1) "device" else "devices"} · ${if (active == 0) "all off" else "$active on"}", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+                            // The room's temperature, when something in it measures one.
+                            inRoom.firstNotNullOfOrNull { it.state.temperature }?.let { Text("${it.roundToInt()}°", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant) }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (notices.isNotEmpty()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SectionTitle("Recent activity", Modifier.weight(1f))
+                TextButton({ open("notices") }) { Text("See all") }
+            }
+            notices.forEachIndexed { i, notice ->
+                RowCard(notice.title, listOfNotNull(notice.message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString(" · "), Icons.Rounded.Notifications, Modifier.enterStaggered(6 + i), onClick = { open("notices") })
+            }
         }
     }
 }

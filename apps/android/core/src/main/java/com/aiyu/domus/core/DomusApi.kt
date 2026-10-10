@@ -127,6 +127,9 @@ class DomusApi(val baseUrl: String, pin: String?, private val token: () -> Strin
     suspend fun saveAutomation(id: String?, body: JsonObject) = write(if (id == null) "POST" else "PUT", "/automations${id?.let { "/$it" }.orEmpty()}", body)
     suspend fun removeAutomation(id: String) = write("DELETE", "/automations/$id")
 
+    /** [range] is `day`, `week` or `month`. */
+    suspend fun airHistory(range: String) = call("GET", "/air/history?range=$range", ListSerializer(AirPoint.serializer()))
+
     suspend fun energySettings() = call("GET", "/energy/settings", EnergySettings.serializer())
     suspend fun saveEnergySettings(settings: EnergySettings) =
         call("PUT", "/energy/settings", EnergySettings.serializer(), encode(EnergySettings.serializer(), settings))

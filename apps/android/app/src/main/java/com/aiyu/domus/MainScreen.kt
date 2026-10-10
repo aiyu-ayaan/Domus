@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Devices
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
@@ -28,7 +28,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,23 +41,23 @@ import com.aiyu.domus.ui.components.FloatingNavScaffold
 import com.aiyu.domus.ui.components.NavTab
 
 private val Tabs = listOf(
-    NavTab("Home", Icons.Outlined.Home, Icons.Rounded.Home),
-    NavTab("Devices", Icons.Outlined.Devices, Icons.Rounded.Devices),
-    NavTab("Scenes", Icons.Outlined.AutoAwesome, Icons.Rounded.AutoAwesome),
-    NavTab("Energy", Icons.Outlined.Bolt, Icons.Rounded.Bolt),
-    NavTab("Settings", Icons.Outlined.Settings, Icons.Rounded.Settings),
+    "home" to NavTab("Home", Icons.Outlined.Home, Icons.Rounded.Home),
+    "devices" to NavTab("Devices", Icons.Outlined.Devices, Icons.Rounded.Devices),
+    "scenes" to NavTab("Scenes", Icons.Outlined.AutoAwesome, Icons.Rounded.AutoAwesome),
+    "analytics" to NavTab("Analytics", Icons.Outlined.Insights, Icons.Rounded.Insights),
+    "settings" to NavTab("Settings", Icons.Outlined.Settings, Icons.Rounded.Settings),
 )
 
 @Composable
 fun MainScreen(session: Session.SignedIn) {
     val repository = LocalRepository.current
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    var tab by rememberSaveable { mutableStateOf("home") }
     // The open device sheet. Kept as an id so the sheet follows live state changes.
     var openDevice by rememberSaveable { mutableStateOf<String?>(null) }
     val devices by repository.devices.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(repository) { repository.messages.collect { snackbar.showSnackbar(it) } }
-    BackHandler(tab != 0) { tab = 0 }
+    BackHandler(tab != "home") { tab = "home" }
 
     // A page opened over the tabs: "rooms", "scene:<id>", ... Null shows the tabs.
     var page by rememberSaveable { mutableStateOf<String?>(null) }
@@ -81,13 +80,18 @@ fun MainScreen(session: Session.SignedIn) {
             label = "page",
         ) { current ->
             when {
-                current == null -> FloatingNavScaffold(Tabs, tab, { tab = it }) { selected ->
-                    when (selected) {
-                        0 -> HomeScreen(user, onOpenDevice = { openDevice = it }, onShowDevices = { tab = 1 })
-                        1 -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") })
-                        2 -> ScenesScreen(user, open)
-                        3 -> EnergyScreen(onEditTariff = if (user.isAdmin) ({ open("tariff") }) else null)
-                        else -> SettingsScreen(session, open)
+                current == null -> {
+                    // Analytics exists only when the home measures power or air.
+                    val tabs = Tabs.filter { it.first != "analytics" || devices.measuresPower() || devices.measuresAir() }
+                    val index = tabs.indexOfFirst { it.first == tab }.coerceAtLeast(0)
+                    FloatingNavScaffold(tabs.map { it.second }, index, { tab = tabs[it].first }) { selected ->
+                        when (tabs[selected].first) {
+                            "home" -> HomeScreen(user, onOpenDevice = { openDevice = it }, onShowDevices = { tab = "devices" }, open = open)
+                            "devices" -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") })
+                            "scenes" -> ScenesScreen(user, open)
+                            "analytics" -> AnalyticsScreen(user, onOpenDevice = { openDevice = it }, onEditTariff = { open("tariff") })
+                            else -> SettingsScreen(session, open)
+                        }
                     }
                 }
                 current == "discover" -> DiscoverPage(close, onOpenPlugins = { open("plugins") })

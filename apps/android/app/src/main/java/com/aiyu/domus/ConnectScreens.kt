@@ -1,6 +1,34 @@
 package com.aiyu.domus
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Mail
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material3.Surface
+import androidx.compose.material3.toShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.graphics.shapes.RoundedPolygon
+import com.aiyu.domus.ui.theme.rememberReducedMotion
+import kotlin.math.absoluteValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,20 +98,103 @@ import com.aiyu.domus.ui.components.ShapedIcon
 import com.aiyu.domus.ui.components.enterStaggered
 import kotlinx.coroutines.launch
 
-/** Centered, scrollable column for the screens before sign-in. */
+/** Two large tonal shapes drifting behind the screens before sign-in. Decoration only; still with animations off. */
 @Composable
-private fun EntryColumn(title: String, subtitle: String, content: @Composable ColumnScope.() -> Unit) {
-    Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
-        Column(
-            Modifier.widthIn(max = 520.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Spacer(Modifier.height(24.dp))
-            MorphingShape(Modifier.size(120.dp))
-            Text(title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
-            Text(subtitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            content()
+private fun Backdrop() {
+    val c = MaterialTheme.colorScheme
+    val turn = if (rememberReducedMotion()) 0f else rememberInfiniteTransition(label = "backdrop")
+        .animateFloat(0f, 360f, infiniteRepeatable(tween(60_000, easing = LinearEasing)), label = "turn").value
+    Box(Modifier.fillMaxSize().clipToBounds()) {
+        Box(Modifier.align(Alignment.TopStart).offset((-110).dp, (-90).dp).size(320.dp).graphicsLayer { rotationZ = turn }.clip(MaterialShapes.Flower.toShape()).background(c.primaryContainer.copy(alpha = 0.55f)))
+        Box(Modifier.align(Alignment.BottomEnd).offset(120.dp, 100.dp).size(340.dp).graphicsLayer { rotationZ = -turn }.clip(MaterialShapes.Cookie12Sided.toShape()).background(c.tertiaryContainer.copy(alpha = 0.55f)))
+    }
+}
+
+/**
+ * Frame of the screens before sign-in: the morphing mark carrying [icon], a headline, and the form on a raised
+ * panel. Each part rises in after the one above it.
+ */
+@Composable
+private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, content: @Composable ColumnScope.() -> Unit) {
+    val c = MaterialTheme.colorScheme
+    Box(Modifier.fillMaxSize()) {
+        Backdrop()
+        Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
+            Column(
+                Modifier.widthIn(max = 520.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Spacer(Modifier.height(32.dp))
+                Box(Modifier.enterStaggered(0), contentAlignment = Alignment.Center) {
+                    MorphingShape(Modifier.size(136.dp))
+                    Icon(icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(56.dp))
+                }
+                Spacer(Modifier.height(24.dp))
+                Text(title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.enterStaggered(1).semantics { heading() })
+                Spacer(Modifier.height(8.dp))
+                Text(subtitle, style = MaterialTheme.typography.bodyLarge, color = c.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.enterStaggered(2))
+                Spacer(Modifier.height(28.dp))
+                Surface(color = c.surfaceContainerLow, shape = MaterialTheme.shapes.extraLarge, shadowElevation = 2.dp, modifier = Modifier.fillMaxWidth().enterStaggered(3)) {
+                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp), content = content)
+                }
+            }
+        }
+    }
+}
+
+private class Intro(val icon: ImageVector, val shape: RoundedPolygon, val title: String, val body: String)
+
+private val Intros = listOf(
+    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, "Your whole home, one app", "Lights, plugs, purifiers and sensors from Tuya, Tapo and Xiaomi, side by side."),
+    Intro(Icons.Rounded.Lock, MaterialShapes.Clover4Leaf, "Private by design", "Domus talks only to the server in your home, over an encrypted connection. No cloud account."),
+    Intro(Icons.Rounded.Router, MaterialShapes.Sunny, "It finds your server", "On your Wi‑Fi the app finds the server by itself. Away from home, enter its address."),
+)
+
+/** First-run introduction: three pages to swipe or step through, then the connect screen. */
+@Composable
+fun OnboardingScreen() {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    val pager = rememberPagerState { Intros.size }
+    val c = MaterialTheme.colorScheme
+    val last = pager.currentPage == Intros.lastIndex
+    Box(Modifier.fillMaxSize()) {
+        Backdrop()
+        Column(Modifier.fillMaxSize().systemBarsPadding().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            TextButton(repository::finishOnboarding, Modifier.align(Alignment.End)) { Text("Skip") }
+            HorizontalPager(pager, Modifier.weight(1f)) { page ->
+                val intro = Intros[page]
+                Column(Modifier.fillMaxSize().padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Box(
+                        Modifier
+                            .size(220.dp)
+                            // The shape shrinks and turns away as its page leaves.
+                            .graphicsLayer {
+                                val away = ((pager.currentPage - page) + pager.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
+                                scaleX = 1f - away * 0.3f
+                                scaleY = 1f - away * 0.3f
+                                rotationZ = away * 45f
+                            }
+                            .clip(intro.shape.toShape())
+                            .background(c.primary),
+                        contentAlignment = Alignment.Center,
+                    ) { Icon(intro.icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(96.dp)) }
+                    Spacer(Modifier.height(40.dp))
+                    Text(intro.title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+                    Spacer(Modifier.height(12.dp))
+                    Text(intro.body, style = MaterialTheme.typography.bodyLarge, color = c.onSurfaceVariant, textAlign = TextAlign.Center)
+                }
+            }
+            Row(Modifier.padding(vertical = 24.dp).semantics { contentDescription = "Page ${pager.currentPage + 1} of ${Intros.size}" }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                repeat(Intros.size) { i ->
+                    val width by animateDpAsState(if (i == pager.currentPage) 28.dp else 8.dp, MaterialTheme.motionScheme.fastSpatialSpec(), label = "dot")
+                    Box(Modifier.height(8.dp).width(width.coerceAtLeast(8.dp)).clip(CircleShape).background(if (i == pager.currentPage) c.primary else c.outlineVariant))
+                }
+            }
+            Button(
+                { if (last) repository.finishOnboarding() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
+                Modifier.widthIn(max = 520.dp).fillMaxWidth().heightIn(min = 56.dp),
+            ) { Text(if (last) "Get started" else "Next") }
         }
     }
 }
@@ -99,7 +210,11 @@ private fun ErrorText(message: String?) {
 @Composable
 private fun SubmitButton(text: String, busy: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
     Button(onClick, enabled = enabled && !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-        if (busy) LoadingIndicator(Modifier.size(28.dp)) else Text(text)
+        if (busy) LoadingIndicator(Modifier.size(28.dp)) else {
+            Text(text)
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
+        }
     }
 }
 
@@ -135,7 +250,7 @@ fun ConnectScreen() {
         }
     }
 
-    EntryColumn("Welcome to Domus", "Connect to the server that runs your home.") {
+    EntryColumn(Icons.Rounded.Home, "Welcome to Domus", "Connect to the server that runs your home.") {
         Text("On this network", style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().semantics { heading() })
         found.forEachIndexed { index, server ->
             Card(
@@ -229,12 +344,22 @@ fun AuthScreen(session: Session.SignedOut) {
     }
 
     EntryColumn(
+        if (session.needsSetup) Icons.Rounded.AdminPanelSettings else Icons.Rounded.Home,
         if (session.needsSetup) "Create the admin account" else "Welcome back",
-        if (session.needsSetup) "This server is new. The first account manages everything." else session.server.removePrefix("https://"),
+        if (session.needsSetup) "This server is new. The first account manages everything." else "Sign in to your home.",
     ) {
+        // Which server, and that the connection to it is encrypted.
+        Surface(color = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.Lock, contentDescription = "Encrypted connection to", modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(session.server.removePrefix("https://"), style = MaterialTheme.typography.labelLarge)
+            }
+        }
         OutlinedTextField(
             username, { username = it; error = null },
             label = { Text("Username") },
+            leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
@@ -243,6 +368,7 @@ fun AuthScreen(session: Session.SignedOut) {
             OutlinedTextField(
                 email, { email = it; error = null },
                 label = { Text("Email") },
+                leadingIcon = { Icon(Icons.Rounded.Mail, contentDescription = null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
@@ -251,6 +377,7 @@ fun AuthScreen(session: Session.SignedOut) {
         OutlinedTextField(
             password, { password = it; error = null },
             label = { Text("Password") },
+            leadingIcon = { Icon(Icons.Rounded.Key, contentDescription = null) },
             supportingText = if (session.needsSetup) ({ Text("At least 8 characters") }) else null,
             singleLine = true,
             isError = error != null,
@@ -274,8 +401,7 @@ fun AuthScreen(session: Session.SignedOut) {
 fun UnreachableScreen(session: Session.Unreachable) {
     val repository = LocalRepository.current
     val scope = rememberCoroutineScope()
-    EntryColumn("Can't reach your home", session.server.removePrefix("https://")) {
-        ShapedIcon(Icons.Rounded.CloudOff, MaterialShapes.Pill, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
+    EntryColumn(Icons.Rounded.CloudOff, "Can't reach your home", session.server.removePrefix("https://")) {
         Text(session.message, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Button({ scope.launch { repository.restore() } }, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Try again") }
         TextButton(repository::forgetServer) { Text("Use another server") }

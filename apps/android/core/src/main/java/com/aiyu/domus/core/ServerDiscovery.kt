@@ -3,7 +3,9 @@ package com.aiyu.domus.core
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.NetworkInterface
+import java.net.Socket
 import java.net.SocketTimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -44,6 +46,14 @@ object ServerDiscovery {
                     parseReply(String(packet.data, 0, packet.length), host)?.let { found[it.url] = it }
                 }
             }
+        }
+        // Broadcasts don't cross an emulator's NAT or a USB cable. A server reachable through `adb reverse`
+        // (the dev gateway sets it) or on the emulator's host address is offered too; on a normal phone
+        // nothing listens there and this adds nothing.
+        if (found.isEmpty()) {
+            listOf("localhost", "10.0.2.2").firstOrNull { host ->
+                runCatching { Socket().use { it.connect(InetSocketAddress(host, 8443), 400) } }.isSuccess
+            }?.let { found["dev"] = FoundServer("This computer", "https://$it:8443") }
         }
         found.values.toList()
     }

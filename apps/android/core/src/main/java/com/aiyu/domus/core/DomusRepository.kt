@@ -103,6 +103,15 @@ class DomusRepository(context: Context) {
         _backgroundAlerts.value = on
     }
 
+    private val _onboarded = MutableStateFlow(store.get(ONBOARDED) == "true")
+    /** False until the first-run introduction has been seen. */
+    val onboarded: StateFlow<Boolean> = _onboarded
+
+    fun finishOnboarding() {
+        store.put(ONBOARDED, "true")
+        _onboarded.value = true
+    }
+
     /** Fingerprint of the approved self-signed certificate, null when a public authority vouches for the server. */
     val pinnedFingerprint: String? get() = store.get(PIN)
 
@@ -377,5 +386,6 @@ class DomusRepository(context: Context) {
         const val THEME = "theme"
         const val DYNAMIC = "dynamic"
         const val ALERTS = "alerts"
+        const val ONBOARDED = "onboarded"
     }
 }

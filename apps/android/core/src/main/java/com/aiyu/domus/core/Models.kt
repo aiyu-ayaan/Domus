@@ -156,6 +156,10 @@ data class EnergyOverview(
 @Serializable
 data class EnergyPoint(val t: String, val kwh: Double = 0.0, val cost: Double = 0.0)
 
+/** Averages of one hour / day; null where nothing was measured. */
+@Serializable
+data class AirPoint(val t: String, val pm25: Double? = null, val temperature: Double? = null, val humidity: Double? = null)
+
 @Serializable
 data class ActionResult(val success: Boolean = true, val errors: List<String> = emptyList())
 

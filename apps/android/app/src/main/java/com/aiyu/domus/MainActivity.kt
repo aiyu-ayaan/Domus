@@ -8,6 +8,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -95,7 +96,10 @@ private fun DomusRoot() {
     ) { s ->
         when (s) {
             Session.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
-            Session.NoServer -> ConnectScreen()
+            Session.NoServer -> {
+                val onboarded by LocalRepository.current.onboarded.collectAsStateWithLifecycle()
+                Crossfade(onboarded, label = "intro") { if (it) ConnectScreen() else OnboardingScreen() }
+            }
             is Session.Unreachable -> UnreachableScreen(s)
             is Session.SignedOut -> AuthScreen(s)
             is Session.SignedIn -> MainScreen(s)
