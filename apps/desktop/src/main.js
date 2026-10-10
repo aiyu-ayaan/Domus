@@ -210,6 +210,8 @@ ipcMain.on('token:get', (event) => {
   }
   event.returnValue = token ?? null
 })
+ipcMain.on('token:set', (event, token) => {
+  if (!trusted(event)) return
   config.token = typeof token !== 'string' ? null : (safeStorage.isEncryptionAvailable() ? { sealed: safeStorage.encryptString(token).toString('base64') } : { plain: token })
   save()
 })
