@@ -281,13 +281,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 12
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+      # Not pnpm/action-setup: its bundled pnpm cannot read this repository's .npmrc and fails
+      # with "onlyBuiltDependencies?.sort is not a function". The Dockerfile installs it this way too.
+      - run: npm install -g pnpm@12
       - run: pnpm install --frozen-lockfile --filter @domus/desktop
       - run: pnpm build:desktop:prod
       - uses: actions/upload-artifact@v4
@@ -309,13 +308,12 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 12
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+      # Not pnpm/action-setup: its bundled pnpm cannot read this repository's .npmrc and fails
+      # with "onlyBuiltDependencies?.sort is not a function". The Dockerfile installs it this way too.
+      - run: npm install -g pnpm@12
       - run: pnpm install --frozen-lockfile --filter @domus/desktop
       - run: pnpm --filter @domus/desktop build:win
       - uses: actions/upload-artifact@v4
