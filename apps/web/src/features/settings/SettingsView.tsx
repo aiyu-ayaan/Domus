@@ -231,7 +231,7 @@ function AboutCard() {
               <Segmented size="sm" label="Update channel" value={info.channel} onChange={setChannel} options={channels} />
             </div>
             <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
-              <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : check.data ? `Docus ${check.data.version} is available` : 'Up to date'}</p>
+              <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : check.data ? `Domus ${check.data.version} is available` : 'Up to date'}</p>
               {check.data ? (
                 <Button size="sm" loading={install.isPending} onClick={() => install.mutate()}>
                   {info.selfInstall ? 'Update and restart' : 'Download'}

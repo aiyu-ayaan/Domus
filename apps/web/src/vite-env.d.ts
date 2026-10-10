@@ -6,7 +6,7 @@ declare const __APP_BUILD__: number
 
 interface ImportMetaEnv {
   readonly VITE_APP_FLAVOR?: 'dev' | 'prod'
-  readonly DOCUS_BACKEND?: string
+  readonly DOMUS_BACKEND?: string
 }
 
 interface ImportMeta {

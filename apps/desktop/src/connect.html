@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
-    <title>Docus</title>
-    <!-- Botanical Material 3 / Expressive tokens from design-system/docus/MASTER.md and index.css -->
+    <title>Domus</title>
+    <!-- Botanical Material 3 / Expressive tokens from design-system/domus/MASTER.md and index.css -->
     <style>
       :root {
         color-scheme: dark;
@@ -315,7 +315,7 @@
     </style>
   </head>
   <body>
-    <header>Docus</header>
+    <header>Domus</header>
     <main>
       <div class="logo">
         <svg viewBox="0 0 256 256" aria-hidden="true">
@@ -331,7 +331,7 @@
         </svg>
       </div>
       <h1>Connect to your home</h1>
-      <p class="subtitle">Choose the Docus server this app should open.</p>
+      <p class="subtitle">Choose the Domus server this app should open.</p>
 
       <section class="card">
         <div class="section-header">
@@ -359,27 +359,27 @@
     <script>
       const $ = (id) => document.getElementById(id)
       const params = new URLSearchParams(location.search)
-      const isDev = params.get('flavor') === 'dev' || window.docus?.flavor === 'dev'
+      const isDev = params.get('flavor') === 'dev' || window.domus?.flavor === 'dev'
 
       if (isDev) {
-        document.title = 'Docus (Dev)'
+        document.title = 'Domus (Dev)'
         const header = document.querySelector('header')
-        if (header) header.textContent = 'Docus (Dev)'
+        if (header) header.textContent = 'Domus (Dev)'
         const badge = $('dev-badge')
         if (badge) badge.style.display = 'block'
       }
 
-      const activeTheme = params.get('theme') || window.docus?.getTheme?.()
+      const activeTheme = params.get('theme') || window.domus?.getTheme?.()
       if (activeTheme === 'light') document.documentElement.setAttribute('data-theme', 'light')
       else if (activeTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark')
 
       $('error').textContent = params.get('message') ?? ''
 
-      if (window.docus?.hasSavedServer?.()) {
+      if (window.domus?.hasSavedServer?.()) {
         const cancelBox = $('cancel-box')
         if (cancelBox) cancelBox.style.display = 'block'
         const cancelBtn = $('cancel')
-        if (cancelBtn) cancelBtn.onclick = () => window.docus.cancel()
+        if (cancelBtn) cancelBtn.onclick = () => window.domus.cancel()
       }
 
       async function connect(address) {
@@ -387,13 +387,13 @@
         buttons.forEach((b) => (b.disabled = true))
         $('error').textContent = ''
         // On success the window navigates to the server and this page goes away.
-        $('error').textContent = await window.docus.connect(address)
+        $('error').textContent = await window.domus.connect(address)
         buttons.forEach((b) => (b.disabled = false))
       }
 
       async function scan() {
         $('found').innerHTML = '<li class="empty"><p>Searching…</p></li>'
-        const servers = await window.docus.discover()
+        const servers = await window.domus.discover()
         $('found').replaceChildren(
           ...servers.map(({ name, url }) => {
             const item = document.createElement('li')

@@ -1,6 +1,6 @@
-# Docus 
+# Domus 
 
-Docus is the home assisant app that will be deploy to the homeserver to controll all smart devices... It will have the plugging like enviroment to plug any integration like tuya,tapo and
+Domus is the home assisant app that will be deploy to the homeserver to controll all smart devices... It will have the plugging like enviroment to plug any integration like tuya,tapo and
 many more.. 
 
 It will include all the feature like automaction,ground devices like add them to bedroom, same like [Home Assistant](https://www.home-assistant.io/). 

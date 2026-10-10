@@ -34,7 +34,7 @@ R8 uses to put startup classes together at the front of the dex file.
 - Only release builds use it. Debug builds are unaffected and stay slower; judge speed on `assembleProdRelease`.
 
 To see it, install the signed release build: `pnpm android:release` (`:app:installProdRelease`). It is signed
-with `apps/android/docus-release.jks` through `keystore.properties`; both are gitignored and exist only on the
+with `apps/android/domus-release.jks` through `keystore.properties`; both are gitignored and exist only on the
 machine that made them, so back them up: an app signed with another key cannot update this one.
 
 The launch time itself does not move with the profile: `MainActivity.holdSplash` keeps the first frame back

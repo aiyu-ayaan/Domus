@@ -1,5 +1,5 @@
-# Docus server configuration. Every key can be overridden with an environment
-# variable: DOCUS__<SECTION>__<KEY>, e.g. DOCUS__SERVER__PORT=9443.
+# Domus server configuration. Every key can be overridden with an environment
+# variable: DOMUS__<SECTION>__<KEY>, e.g. DOMUS__SERVER__PORT=9443.
 
 [server]
 host = "0.0.0.0"
@@ -13,11 +13,11 @@ web_dir = "apps/web/dist"
 # HTTPS for all API traffic. Without cert_path/key_path a self-signed
 # certificate is generated in <data_dir>/tls.
 enabled = true
-# cert_path = "/etc/docus/cert.pem"
-# key_path = "/etc/docus/key.pem"
+# cert_path = "/etc/domus/cert.pem"
+# key_path = "/etc/domus/key.pem"
 
 [database]
-# Empty = sqlite://<data_dir>/docus.db
+# Empty = sqlite://<data_dir>/domus.db
 url = ""
 max_connections = 8
 
@@ -30,7 +30,7 @@ token_expiry_hours = 168
 enabled = false
 host = "127.0.0.1"
 port = 1883
-client_id = "docus_backend"
+client_id = "domus_backend"
 keep_alive_secs = 60
 
 [integrations.tuya]

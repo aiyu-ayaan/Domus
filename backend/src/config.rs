@@ -22,7 +22,7 @@ pub struct TlsConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DatabaseConfig {
-    /// Empty = `sqlite://<data_dir>/docus.db`.
+    /// Empty = `sqlite://<data_dir>/domus.db`.
     pub url: String,
     pub max_connections: u32,
 }
@@ -95,7 +95,7 @@ impl AppConfig {
             .set_default("mqtt.enabled", false)?
             .set_default("mqtt.host", "127.0.0.1")?
             .set_default("mqtt.port", 1883)?
-            .set_default("mqtt.client_id", "docus_backend")?
+            .set_default("mqtt.client_id", "domus_backend")?
             .set_default("mqtt.keep_alive_secs", 60)?
             .set_default("integrations.tuya.enabled", true)?
             .set_default("integrations.tapo.enabled", true)?
@@ -106,13 +106,13 @@ impl AppConfig {
             .set_default("workers.energy_retention_days", 400)?
             .add_source(config::File::with_name("config/default").required(false))
             .add_source(config::File::with_name(&format!("config/{}", env)).required(false))
-            .add_source(config::Environment::with_prefix("DOCUS").separator("__"));
+            .add_source(config::Environment::with_prefix("DOMUS").separator("__"));
 
         let mut config = builder.build()?.try_deserialize::<AppConfig>()?;
         if config.database.url.is_empty() {
             config.database.url = format!(
                 "sqlite://{}?mode=rwc",
-                config.server.data_dir.join("docus.db").display()
+                config.server.data_dir.join("domus.db").display()
             );
         }
         Ok(config)

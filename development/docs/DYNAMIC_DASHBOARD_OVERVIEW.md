@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Docus Overview dashboard provides real-time monitoring and control of smart home devices. Rather than rendering hardcoded metrics and widgets that assume every home has electricity meters or specific sensors, the dashboard dynamically adapts to the devices actually registered in the system:
+The Domus Overview dashboard provides real-time monitoring and control of smart home devices. Rather than rendering hardcoded metrics and widgets that assume every home has electricity meters or specific sensors, the dashboard dynamically adapts to the devices actually registered in the system:
 1. **Device-Based Hero Metrics**: Power, Energy, Bill, Air Quality, and Climate cards render if and only if devices reporting those metrics are present.
 2. **Dynamic Insights Tabs**: The secondary analytics section provides tabbed monitoring (`Energy`, `Air quality`, `Climate`) that only includes tabs for device types actually installed. If no analytical devices are installed, the section automatically hides so the layout remains clean.
 3. **Device Category Filters**: The Devices card provides dynamic filtering chips (`All`, `Power`, `Lights`, `Air quality`, `Climate`) that automatically detect device capabilities and hide categories with zero devices.
@@ -107,7 +107,7 @@ flowchart TD
 
 ## Design System Compliance (`ui-ux-pro-max`)
 
-Following the design profile in [MASTER.md](file:///media/aiyu/550E85595197DBEC/development/domus/design-system/docus/MASTER.md):
+Following the design profile in [MASTER.md](file:///media/aiyu/550E85595197DBEC/development/domus/design-system/domus/MASTER.md):
 - **Minimalism & Swiss Style**: Hairline borders (`border-border`), tabular numbers (`tabular`), no cartoonish gradients or oversized badges.
 - **State Semantics**: Green (`on`) indicates healthy air or live status; Amber (`warn`) indicates moderate air quality or filter warning; Red (`danger`) indicates poor air or offline devices.
 - **Accessibility**: Screen reader labels on switches and segmented controls; contrast ratio ≥ 4.5:1.

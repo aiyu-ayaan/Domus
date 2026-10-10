@@ -1,6 +1,6 @@
-# Docus 
+# Domus 
 
-Docus is the home assisant app that will be deploy to the homeserver to controll all smart devices... It will have the plugging like enviroment to plug any integration like tuya,tapo and
+Domus is the home assisant app that will be deploy to the homeserver to controll all smart devices... It will have the plugging like enviroment to plug any integration like tuya,tapo and
 many more.. 
 
 It will include all the feature like automaction,ground devices like add them to bedroom, same like [Home Assistant](https://www.home-assistant.io/). 
@@ -18,9 +18,9 @@ For Backend use the rust and for frontend use the react and react navigate for d
 pnpm can be use to ran project. with `npm run dev` to ran both backend and frontend and also have `dev:web` and `dev:backend` to ran in individually.. `pnpm dev` also starts the Android dev gateway (`pnpm gateway`, see `scripts/gateway.mjs`); `pnpm android:dev` builds, installs and opens the Android app (`dev` flavor).
 
 The project features physical App Flavors (`dev` and `prod`) across Android, Desktop, and Web so dev and prod instances do not interrupt each other (see `development/docs/APP_FLAVORS.md`):
-- **Android**: `dev` (`com.aiyu.domus.dev`, "Docus Dev", amber DEV badge) vs `prod` (`com.aiyu.domus`, "Docus"). Both install side-by-side. Commands: `pnpm android:dev` and `pnpm android:prod`.
-- **Desktop**: dev uses `~/.config/DocusDev` (`docus-dev.json`, window title `Docus (Dev)`, icon `icon-dev.png`), prod uses `~/.config/Docus`. Commands: `pnpm dev:desktop`, `pnpm dev:desktop:prod`, `pnpm build:desktop:dev`, `pnpm build:desktop:prod`.
-- **Web**: dev isolates LocalStorage keys (`docus.dev.token`, `docus.dev.theme`), updates title/favicon (`/favicon-dev.svg`), and displays a sleek `DEV` pill in navigation. Commands: `pnpm dev:web`, `pnpm build:web:dev`, `pnpm build:web:prod`.
+- **Android**: `dev` (`com.aiyu.domus.dev`, "Domus Dev", amber DEV badge) vs `prod` (`com.aiyu.domus`, "Domus"). Both install side-by-side. Commands: `pnpm android:dev` and `pnpm android:prod`.
+- **Desktop**: dev uses `~/.config/DomusDev` (`domus-dev.json`, window title `Domus (Dev)`, icon `icon-dev.png`), prod uses `~/.config/Domus`. Commands: `pnpm dev:desktop`, `pnpm dev:desktop:prod`, `pnpm build:desktop:dev`, `pnpm build:desktop:prod`.
+- **Web**: dev isolates LocalStorage keys (`domus.dev.token`, `domus.dev.theme`), updates title/favicon (`/favicon-dev.svg`), and displays a sleek `DEV` pill in navigation. Commands: `pnpm dev:web`, `pnpm build:web:dev`, `pnpm build:web:prod`.
 
 For Now database will be sqlite. and make sure all requirest are encrypted.. 
 
@@ -165,8 +165,8 @@ home-automation/
 
 ## UI
 
-UI follows the design profile in `design-system/docus/MASTER.md` (Minimalism & Swiss, generated with `/ui-ux-pro-max`). Read it before any UI change; page overrides go in `design-system/docus/pages/`. The earlier cartoonish liquid-glass look was rejected — keep it precise: neutral palette, green only for on/live state, hairline borders, small radii, subtle 150ms motion, no coloured icon tiles or gradients. 
+UI follows the design profile in `design-system/domus/MASTER.md` (Minimalism & Swiss, generated with `/ui-ux-pro-max`). Read it before any UI change; page overrides go in `design-system/domus/pages/`. The earlier cartoonish liquid-glass look was rejected — keep it precise: neutral palette, green only for on/live state, hairline borders, small radii, subtle 150ms motion, no coloured icon tiles or gradients. 
 
 ## Brand
 
-The logo is a D built from three modules, one of them `on` green. Masters and the PNG render script are in `design-system/docus/brand/`; read `development/docs/BRAND.md` before touching any icon, favicon or the Android splash. Use `/logo-design:logo-design` for logo work. The earlier house icon was rejected — don't bring a house back.
+The logo is a D built from three modules, one of them `on` green. Masters and the PNG render script are in `design-system/domus/brand/`; read `development/docs/BRAND.md` before touching any icon, favicon or the Android splash. Use `/logo-design:logo-design` for logo work. The earlier house icon was rejected — don't bring a house back.

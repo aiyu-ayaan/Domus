@@ -1,4 +1,4 @@
-# Docus Project Tracking & Task Plan
+# Domus Project Tracking & Task Plan
 
 ## Milestone 1: Workspace & Core Scaffolding (DONE)
 - [x] Rust workspace (`crates/home-core`, `backend`), pnpm workspace (`apps/web`, `apps/desktop`)
@@ -28,7 +28,7 @@
 
 ## Milestone 4: UI (DONE — 2026-10-09)
 - [x] First pass (liquid glass) rejected as too cartoonish
-- [x] Persisted design profile `design-system/docus/MASTER.md` (Minimalism & Swiss via ui-ux-pro-max)
+- [x] Persisted design profile `design-system/domus/MASTER.md` (Minimalism & Swiss via ui-ux-pro-max)
 - [x] Rebuilt every screen on the profile: Overview, Devices/Discovered/Groups, Rooms, Automations & Scenes, Energy, Integrations, Settings
 - [x] Demo/virtual devices removed
 - [ ] Check phone layout on a real device (375px)
@@ -154,13 +154,13 @@
 - [x] Architecture documentation with Mermaid diagram in `development/docs/AVATAR_SYSTEM.md`
 
 ## Milestone 14: App Flavors Architecture & Multi-Platform Isolation (DONE — 2026-10-10)
-- [x] Android flavors (`apps/android`): `flavorDimensions += "environment"` with `dev` (`com.aiyu.domus.dev`, "Docus Dev", `-dev` suffix, amber DEV badge launcher icon) and `prod` (`com.aiyu.domus`, "Docus")
+- [x] Android flavors (`apps/android`): `flavorDimensions += "environment"` with `dev` (`com.aiyu.domus.dev`, "Domus Dev", `-dev` suffix, amber DEV badge launcher icon) and `prod` (`com.aiyu.domus`, "Domus")
 - [x] Android side-by-side install support: verified separate application IDs, sandboxed Linux UIDs, isolated Keystores, SharedPreferences, and databases
 - [x] Android dev/prod scripts: `scripts/android-dev.sh` (installs `devDebug`, launches `com.aiyu.domus.dev`) and `scripts/android-prod.sh` (installs `prodDebug`/`prodRelease`)
-- [x] Desktop flavors (`apps/desktop`): `DOCUS_FLAVOR` runtime environment variable isolating `userData` to `~/.config/DocusDev` (dev) vs `~/.config/Docus` (prod), and configuration files (`docus-dev.json` vs `docus.json`)
-- [x] Desktop window and packaging isolation: window title "Docus (Dev)" vs "Docus", `build/icon-dev.png` with DEV badge, dedicated builder configs (`electron-builder.dev.json` producing `docus-dev` deb/AppImage vs `electron-builder.prod.json` producing `docus`)
-- [x] Desktop after-install script: `build/after-install.sh` dynamically supports both `/opt/Docus Dev` and `/opt/Docus`
-- [x] Web flavors (`apps/web`): `flavor.ts` module with flavor detection, isolated LocalStorage keys (`docus.dev.token` vs `docus.token`, `docus.dev.theme` vs `docus.theme`), dynamic `<title>` and `<link rel="icon">` switching (`/favicon-dev.svg`, `/manifest.dev.webmanifest`)
+- [x] Desktop flavors (`apps/desktop`): `DOMUS_FLAVOR` runtime environment variable isolating `userData` to `~/.config/DomusDev` (dev) vs `~/.config/Domus` (prod), and configuration files (`domus-dev.json` vs `domus.json`)
+- [x] Desktop window and packaging isolation: window title "Domus (Dev)" vs "Domus", `build/icon-dev.png` with DEV badge, dedicated builder configs (`electron-builder.dev.json` producing `domus-dev` deb/AppImage vs `electron-builder.prod.json` producing `domus`)
+- [x] Desktop after-install script: `build/after-install.sh` dynamically supports both `/opt/Domus Dev` and `/opt/Domus`
+- [x] Web flavors (`apps/web`): `flavor.ts` module with flavor detection, isolated LocalStorage keys (`domus.dev.token` vs `domus.token`, `domus.dev.theme` vs `domus.theme`), dynamic `<title>` and `<link rel="icon">` switching (`/favicon-dev.svg`, `/manifest.dev.webmanifest`)
 - [x] Web in-app indicator: non-intrusive amber DEV hairline pill in floating navigation dock and mobile header
 - [x] Root & workspace scripts: added `android:dev`, `android:prod`, `android:build:dev`, `android:build:prod`, `dev:desktop`, `dev:desktop:prod`, `build:desktop:dev`, `build:desktop:prod`, `build:web:dev`, `build:web:prod`
 - [x] Documentation & architecture: `development/docs/APP_FLAVORS.md` with Mermaid isolation diagrams, comparison matrix, and workflows
@@ -193,7 +193,7 @@
 - [x] Release workflow: marker commits (`!alpha` ... `!patch`) open a release PR, merging builds the image (amd64 + arm64), AppImage + deb and the signed APK, then tags and publishes; first release is `0.0.1-alpha.1`
 - [x] One version and build number (root `package.json`) for server, web, desktop and Android (`scripts/set-version.mjs`)
 - [x] Update channels (stable / beta / alpha): Android Settings > Updates, desktop self-update for the AppImage, Docker channel tags
-- [x] `scripts/install-linux.sh` (menu entry with the app icon, `docus` command), README download section, `development/docs/RELEASE.md`
+- [x] `scripts/install-linux.sh` (menu entry with the app icon, `domus` command), README download section, `development/docs/RELEASE.md`
 - [ ] Add the repository secrets and run the first `!alpha` release; the workflow itself has only been linted and simulated locally
 - [x] Android: update downloaded and installed from Settings > Updates (asks only for the install permission)
 - [x] Windows installer built by the release workflow (unverified until the first release; job is continue-on-error)

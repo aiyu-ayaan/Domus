@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=== Initializing Docus Development Environment ==="
+echo "=== Initializing Domus Development Environment ==="
 
 # Check Node and pnpm
 if ! command -v pnpm &> /dev/null; then
@@ -21,5 +21,5 @@ pnpm install
 echo "2. Building Rust backend and crates..."
 cargo check
 
-echo "=== Docus environment ready! ==="
+echo "=== Domus environment ready! ==="
 echo "Run 'npm run dev' to launch both backend and web frontend."

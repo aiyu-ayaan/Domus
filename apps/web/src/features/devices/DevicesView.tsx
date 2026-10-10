@@ -61,7 +61,7 @@ function AllDevices() {
 
   if (isLoading) return <Skeleton className="h-64" />
   if (!devices?.length) {
-    return <EmptyState icon={<SquaresFour size={28} />} title="No devices" message="Link an integration or check Discovered — Docus scans your network automatically." />
+    return <EmptyState icon={<SquaresFour size={28} />} title="No devices" message="Link an integration or check Discovered — Domus scans your network automatically." />
   }
   return (
     <>

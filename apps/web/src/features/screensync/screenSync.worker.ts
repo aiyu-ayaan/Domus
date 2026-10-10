@@ -3,7 +3,7 @@
  *
  * Two frame sources:
  * - `stream`: a ReadableStream<VideoFrame> from MediaStreamTrackProcessor (Chromium,
- *   Electron). Keeps running at full rate even when the Docus tab is in the background.
+ *   Electron). Keeps running at full rate even when the Domus tab is in the background.
  * - `pixels`: small RGBA buffers pushed by the main thread (Firefox / Safari fallback).
  *
  * Emits `{ type: 'color', hex, brightness }` only when the result changes visibly,

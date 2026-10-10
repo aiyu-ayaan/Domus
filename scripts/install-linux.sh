@@ -1,26 +1,26 @@
 #!/bin/sh
-# Install, update or remove the Docus desktop app on Linux (x86_64), for this user, no root.
+# Install, update or remove the Domus desktop app on Linux (x86_64), for this user, no root.
 #
 #   curl -fsSL https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/scripts/install-linux.sh | sh
 #   ... | sh -s -- --channel beta     beta builds (and stable ones)
 #   ... | sh -s -- --version 0.0.1    a specific release
-#   ... | sh -s -- --uninstall        remove it (settings stay in ~/.config/Docus)
+#   ... | sh -s -- --uninstall        remove it (settings stay in ~/.config/Domus)
 #
-# The AppImage goes to ~/.local/share/docus, a place this user owns, because the app updates
+# The AppImage goes to ~/.local/share/domus, a place this user owns, because the app updates
 # itself by replacing that file (apps/desktop/src/main.js). It also gets a menu entry with the
-# app's own icon and a `docus` command. Re-running it updates.
+# app's own icon and a `domus` command. Re-running it updates.
 #
 # POSIX sh: it is piped into whatever `sh` is, which on Debian and Ubuntu is dash.
 set -eu
 
-API="${DOCUS_RELEASES_URL:-https://api.github.com/repos/aiyu-ayaan/Domus-Rust/releases?per_page=100}"
+API="${DOMUS_RELEASES_URL:-https://api.github.com/repos/aiyu-ayaan/Domus-Rust/releases?per_page=100}"
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-APP="$DATA_HOME/docus/Docus.AppImage"
-BIN="$HOME/.local/bin/docus"
+APP="$DATA_HOME/domus/Domus.AppImage"
+BIN="$HOME/.local/bin/domus"
 # Named like the entry inside the AppImage; StartupWMClass below is what ties the window to it.
-DESKTOP_FILE="$DATA_HOME/applications/docus.desktop"
-ICON_PATH="usr/share/icons/hicolor/512x512/apps/docus.png"
-ICON_FILE="$DATA_HOME/icons/hicolor/512x512/apps/docus.png"
+DESKTOP_FILE="$DATA_HOME/applications/domus.desktop"
+ICON_PATH="usr/share/icons/hicolor/512x512/apps/domus.png"
+ICON_FILE="$DATA_HOME/icons/hicolor/512x512/apps/domus.png"
 
 CHANNEL=stable
 VERSION=""
@@ -40,7 +40,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 case "$CHANNEL" in stable | beta | alpha) ;; *) die "--channel must be stable, beta or alpha" ;; esac
-[ "$(id -u)" -ne 0 ] || die "run this as the user who will use Docus, not as root."
+[ "$(id -u)" -ne 0 ] || die "run this as the user who will use Domus, not as root."
 
 refresh_menus() {
   command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database -q "$DATA_HOME/applications" 2>/dev/null || true
@@ -51,15 +51,15 @@ if [ "$UNINSTALL" -eq 1 ]; then
   rm -f "$APP" "$APP.part" "$DESKTOP_FILE" "$ICON_FILE"
   # Only our own link.
   if [ -L "$BIN" ] && [ "$(readlink "$BIN")" = "$APP" ]; then rm -f "$BIN"; fi
-  rmdir "$DATA_HOME/docus" 2>/dev/null || true
+  rmdir "$DATA_HOME/domus" 2>/dev/null || true
   refresh_menus
-  echo "Docus is removed. Its settings are kept in ${XDG_CONFIG_HOME:-$HOME/.config}/Docus."
+  echo "Domus is removed. Its settings are kept in ${XDG_CONFIG_HOME:-$HOME/.config}/Domus."
   exit 0
 fi
 
-case "$(uname -m)" in x86_64 | amd64) ;; *) die "Docus for Linux is built for x86_64 only; this machine is $(uname -m)." ;; esac
+case "$(uname -m)" in x86_64 | amd64) ;; *) die "Domus for Linux is built for x86_64 only; this machine is $(uname -m)." ;; esac
 
-mkdir -p "$DATA_HOME/docus"
+mkdir -p "$DATA_HOME/domus"
 trap 'rm -f "$APP.part"' EXIT INT TERM
 
 if [ -n "$FROM_FILE" ]; then
@@ -73,17 +73,17 @@ else
     fetch() { wget -qO- "$1"; }
     fetch_to() { wget -q --show-progress -O "$2" "$1"; }
   else
-    die "curl or wget is needed to download Docus."
+    die "curl or wget is needed to download Domus."
   fi
 
-  echo "Looking up Docus releases..."
+  echo "Looking up Domus releases..."
   releases="$(fetch "$API")" || die "could not reach GitHub. Try again in a while."
   # Every AppImage URL as "<sort key> <version> <url>"; the newest is last after a sort. The key
   # orders by number, then alpha < beta < stable, then the pre-release number (plain `sort -V`
   # puts 0.0.1 before 0.0.1-alpha.1). A channel takes its own builds and every steadier one.
-  newest="$(printf '%s\n' "$releases" | grep -oE 'https://[^"]*/Docus-[0-9][^"/]*\.AppImage' | sort -u |
+  newest="$(printf '%s\n' "$releases" | grep -oE 'https://[^"]*/Domus-[0-9][^"/]*\.AppImage' | sort -u |
     awk -v channel="$CHANNEL" -v want="$VERSION" '{
-      v = $0; sub(/.*\/Docus-/, "", v); sub(/\.AppImage$/, "", v)
+      v = $0; sub(/.*\/Domus-/, "", v); sub(/\.AppImage$/, "", v)
       if (v !~ /^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)\.[0-9]+)?$/) next
       split(v, p, /[.-]/)
       stage = 2; n = 99999
@@ -93,7 +93,7 @@ else
     }' | sort | tail -n 1)"
   [ -n "$newest" ] || die "no Linux build found for ${VERSION:-the $CHANNEL channel}. Try --channel alpha, or see the releases page."
   label="$(printf '%s' "$newest" | cut -d' ' -f2)"
-  echo "Downloading Docus $label..."
+  echo "Downloading Domus $label..."
   fetch_to "$(printf '%s' "$newest" | cut -d' ' -f3)" "$APP.part" || die "the download failed. Nothing was changed."
 fi
 
@@ -120,21 +120,21 @@ mkdir -p "$(dirname "$DESKTOP_FILE")"
 cat >"$DESKTOP_FILE" <<ENTRY
 [Desktop Entry]
 Type=Application
-Name=Docus
+Name=Domus
 Comment=Smart home control
 Exec="$APP" --no-sandbox %U
 TryExec=$APP
 Icon=$ICON_FILE
 Terminal=false
 Categories=Utility;
-StartupWMClass=Docus
+StartupWMClass=Domus
 ENTRY
 refresh_menus
 
 mkdir -p "$(dirname "$BIN")"
 if [ ! -e "$BIN" ] || [ -L "$BIN" ]; then ln -sf "$APP" "$BIN"; fi
 
-echo "Docus $label is installed: find it in your applications menu, or run 'docus'."
+echo "Domus $label is installed: find it in your applications menu, or run 'domus'."
 if [ ! -e /dev/fuse ]; then
-  echo "warning: FUSE is not available, so Docus unpacks itself on every start (slower). Install fuse3 with your package manager." >&2
+  echo "warning: FUSE is not available, so Domus unpacks itself on every start (slower). Install fuse3 with your package manager." >&2
 fi

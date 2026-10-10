@@ -1,8 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
-// The UI is loaded from the Docus server itself, so API calls stay same-origin.
+// The UI is loaded from the Domus server itself, so API calls stay same-origin.
 // Typed on the web side as `DesktopBridge` (apps/web/src/lib/api.ts).
-contextBridge.exposeInMainWorld('docus', {
+contextBridge.exposeInMainWorld('domus', {
   platform: process.platform,
   isDesktop: true,
   flavor: ipcRenderer.sendSync('flavor:get'),

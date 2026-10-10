@@ -9,7 +9,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { execFile } from 'node:child_process'
 
-const PORT = Number(process.env.DOCUS__SERVER__PORT ?? 8443)
+const PORT = Number(process.env.DOMUS__SERVER__PORT ?? 8443)
 const sdk = process.env.ANDROID_HOME ?? path.join(os.homedir(), 'Android', 'Sdk')
 const adb = path.join(sdk, 'platform-tools', 'adb')
 

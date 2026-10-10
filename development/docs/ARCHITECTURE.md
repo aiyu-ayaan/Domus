@@ -1,6 +1,6 @@
-# Docus System Architecture
+# Domus System Architecture
 
-Docus is a local-first smart-home hub: a Rust modular monolith with SQLite,
+Domus is a local-first smart-home hub: a Rust modular monolith with SQLite,
 a React web UI (also wrapped by Electron), and pluggable device integrations.
 Everything runs on the home server; cloud APIs are used only where a vendor
 offers no local alternative (Tuya) or to fetch device keys (Xiaomi).
@@ -39,7 +39,7 @@ flowchart LR
         Xiaomi["Xiaomi<br/>Mi cloud tokens + local miIO"]
     end
 
-    DB[("SQLite (WAL)<br/>data/docus.db")]
+    DB[("SQLite (WAL)<br/>data/domus.db")]
     Key[["data/master.key<br/>data/jwt.secret<br/>data/tls/"]]
 
     Web & Desk -->|HTTPS + WSS| TLS --> Auth --> Modules
@@ -159,7 +159,7 @@ Tokens refresh automatically and are written back through `CredentialStore`.
 ## 4b. Xiaomi sign-in and two-step verification
 
 Mi cloud is only used once to fetch device tokens and LAN IPs; control is
-local. Xiaomi asks for a code whenever it sees an unknown device id, so Docus
+local. Xiaomi asks for a code whenever it sees an unknown device id, so Domus
 generates one device id per account, stores it with the credentials, and asks
 Xiaomi to trust it. Later automatic re-logins then skip the code.
 
@@ -272,10 +272,10 @@ flowchart TB
 
 - **Transport:** HTTPS/WSS by default; a self-signed certificate covering
   localhost, the hostname and LAN IP is generated on first start. Electron
-  trusts that certificate for the Docus origin only.
+  trusts that certificate for the Domus origin only.
 - **At rest:** integration credentials and device secrets (Tuya local keys,
   miIO tokens) are sealed with AES-256-GCM. The master key is kept outside the
-  database (`DOCUS_MASTER_KEY` or `data/master.key`, mode 0600). Passwords use Argon2.
+  database (`DOMUS_MASTER_KEY` or `data/master.key`, mode 0600). Passwords use Argon2.
 - **Accounts:** first-run setup creates the admin and then locks; only admins
   create users. Roles and room access are re-read on every request, so changes
   apply immediately. Device and WebSocket data are filtered by room access.
@@ -314,7 +314,7 @@ flowchart TB
 ```
 
 Visual design follows the persisted profile in
-[`design-system/docus/MASTER.md`](../../design-system/docus/MASTER.md)
+[`design-system/domus/MASTER.md`](../../design-system/domus/MASTER.md)
 (Minimalism & Swiss, generated with `ui-ux-pro-max`): neutral zinc palette,
 green only for "on/live", Inter, 6/10px radii, hairline borders, 150ms fades.
 Side panels (`Sheet`) keep their close handler in a ref so inline handlers

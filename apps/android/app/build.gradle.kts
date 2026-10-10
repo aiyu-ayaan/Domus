@@ -33,11 +33,11 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            manifestPlaceholders["appName"] = "Docus Dev"
+            manifestPlaceholders["appName"] = "Domus Dev"
         }
         create("prod") {
             dimension = "environment"
-            manifestPlaceholders["appName"] = "Docus"
+            manifestPlaceholders["appName"] = "Domus"
         }
     }
 

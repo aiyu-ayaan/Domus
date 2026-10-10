@@ -279,11 +279,11 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             var downloading by remember { mutableStateOf<Boolean?>(null) }
             RowCard(
                 when {
-                    downloading == true -> "Downloading Docus ${found?.version.orEmpty()}…"
-                    found != null -> "Docus ${found.version} is available"
+                    downloading == true -> "Downloading Domus ${found?.version.orEmpty()}…"
+                    found != null -> "Domus ${found.version} is available"
                     update == null -> "Checking for updates…"
                     update?.isFailure == true -> "Couldn't check for updates"
-                    else -> "Docus is up to date"
+                    else -> "Domus is up to date"
                 },
                 when {
                     downloading == false -> "The download failed. Tap to try again"
@@ -297,7 +297,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                             downloading = true
                             downloading = runCatching {
                                 val apk = Updates.download(it, File(context.cacheDir, "updates"))
-                                // Android's own installer; it asks to allow installs from Docus the first time.
+                                // Android's own installer; it asks to allow installs from Domus the first time.
                                 context.startActivity(
                                     Intent(Intent.ACTION_VIEW)
                                         .setDataAndType(FileProvider.getUriForFile(context, "${context.packageName}.updates", apk), "application/vnd.android.package-archive")

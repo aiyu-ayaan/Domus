@@ -8,28 +8,28 @@ const path = require('path')
 const { pathToFileURL } = require('url')
 const updates = require('./updates')
 
-// The window shows the web UI served by the Docus server itself. Which server
+// The window shows the web UI served by the Domus server itself. Which server
 // is chosen on the connect page (connect.html) and remembered; once signed in,
 // the server tells the app its home and remote addresses and the app uses
 // whichever answers, home first. See development/docs/DEPLOYMENT.md.
 
 // Development: load this address and skip the connect page, e.g.
-//   DOCUS_URL=http://localhost:3000 pnpm dev:desktop
-const override = process.env.DOCUS_URL
+//   DOMUS_URL=http://localhost:3000 pnpm dev:desktop
+const override = process.env.DOMUS_URL
 const CONNECT = path.join(__dirname, 'connect.html')
 const BEACON_PORT = 48443 // backend/src/infrastructure/beacon.rs
 
 // App Flavors: 'dev' or 'prod'.
 // In development or when explicitly requested, flavor is 'dev'.
-// When packaged or when DOCUS_FLAVOR=prod, flavor is 'prod'.
-const flavor = process.env.DOCUS_FLAVOR || (!app.isPackaged ? 'dev' : 'prod')
+// When packaged or when DOMUS_FLAVOR=prod, flavor is 'prod'.
+const flavor = process.env.DOMUS_FLAVOR || (!app.isPackaged ? 'dev' : 'prod')
 const isDev = flavor === 'dev'
 
 // Set distinct app name and isolate userData per flavor so dev does not overwrite prod
 const appData = app.getPath('appData')
-const userDataName = isDev ? 'DocusDev' : 'Docus'
+const userDataName = isDev ? 'DomusDev' : 'Domus'
 app.setPath('userData', path.join(appData, userDataName))
-app.setName(isDev ? 'Docus Dev' : 'Docus')
+app.setName(isDev ? 'Domus Dev' : 'Domus')
 if (app.setAppUserModelId) {
   app.setAppUserModelId(isDev ? 'com.aiyu.domus.dev' : 'com.aiyu.domus')
 }
@@ -38,7 +38,7 @@ if (app.setAppUserModelId) {
 let config = { servers: [], pins: {}, token: null }
 let win = null
 
-const configFile = () => path.join(app.getPath('userData'), isDev ? 'docus-dev.json' : 'docus.json')
+const configFile = () => path.join(app.getPath('userData'), isDev ? 'domus-dev.json' : 'domus.json')
 const save = () => fs.writeFileSync(configFile(), JSON.stringify(config), { mode: 0o600 })
 
 const origin = (url) => {
@@ -138,7 +138,7 @@ async function start() {
   showConnect(tried ? `Can't reach ${tried}.` : '')
 }
 
-/** Docus servers on this network: each answers the broadcast probe with its port. */
+/** Domus servers on this network: each answers the broadcast probe with its port. */
 function discover(wait = 1200) {
   return new Promise((resolve) => {
     const found = new Map()
@@ -147,7 +147,7 @@ function discover(wait = 1200) {
     socket.on('message', (message, from) => {
       try {
         const reply = JSON.parse(message)
-        if (reply.service === 'domus' && reply.tls === true) found.set(`https://${from.address}:${reply.port}`, String(reply.name || 'Docus'))
+        if (reply.service === 'domus' && reply.tls === true) found.set(`https://${from.address}:${reply.port}`, String(reply.name || 'Domus'))
       } catch {
         /* not ours */
       }
@@ -179,7 +179,7 @@ ipcMain.handle('server:connect', async (event, address) => {
   const url = normalize(address)
   if (!url) return 'Enter an address like 192.168.1.10:8443 or home.example.com. Only https is supported.'
   const p = await probe(url, 6000)
-  if (!p.ok) return `No Docus server answers at ${new URL(url).host}.`
+  if (!p.ok) return `No Domus server answers at ${new URL(url).host}.`
   if (!accepts(url, p)) {
     const { response } = await dialog.showMessageBox(win, {
       type: 'question',
@@ -289,12 +289,12 @@ async function offerUpdate() {
     buttons: ['Later', process.env.APPIMAGE ? 'Update and restart' : 'Download'],
     defaultId: 1,
     cancelId: 0,
-    message: `Docus ${found.version} is available`,
+    message: `Domus ${found.version} is available`,
     detail: `You have ${app.getVersion()}. The update channel is in Settings.`,
   })
   if (response === 1) {
     const failed = await installUpdate()
-    if (failed) dialog.showErrorBox('Docus update', failed)
+    if (failed) dialog.showErrorBox('Domus update', failed)
   } else {
     config.skipped = found.version
     save()
@@ -318,7 +318,7 @@ function createWindow() {
   const iconToUse = fs.existsSync(iconPath) ? iconPath : defaultIcon
 
   win = new BrowserWindow({
-    title: isDev ? 'Docus (Dev)' : 'Docus',
+    title: isDev ? 'Domus (Dev)' : 'Domus',
     width: 1320,
     height: 860,
     minWidth: 380,
@@ -340,14 +340,14 @@ function createWindow() {
   if (isDev) {
     win.on('page-title-updated', (event, title) => {
       event.preventDefault()
-      win.setTitle(title ? `${title} (Dev)` : 'Docus (Dev)')
+      win.setTitle(title ? `${title} (Dev)` : 'Domus (Dev)')
     })
   }
 
   win.once('ready-to-show', () => win.show())
   win.on('closed', () => (win = null))
 
-  // Keep the app on the Docus server; open anything else in the browser.
+  // Keep the app on the Domus server; open anything else in the browser.
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: 'deny' }

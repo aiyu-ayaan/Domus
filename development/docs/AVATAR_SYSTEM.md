@@ -1,6 +1,6 @@
 # DiceBear Avatar Architecture & Cross-Device System
 
-Docus provides customizable avatars powered by [DiceBear](https://github.com/dicebear/dicebear), allowing any user to generate random avatars, select diverse avatar collections, customize seeds, and have changes instantly synced and rendered across all devices (Web, Desktop Electron, and Android).
+Domus provides customizable avatars powered by [DiceBear](https://github.com/dicebear/dicebear), allowing any user to generate random avatars, select diverse avatar collections, customize seeds, and have changes instantly synced and rendered across all devices (Web, Desktop Electron, and Android).
 
 ## Architecture Diagram
 

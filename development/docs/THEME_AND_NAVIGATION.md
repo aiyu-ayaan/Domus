@@ -20,7 +20,7 @@ flowchart TD
 
     subgraph WebCore["Web Theme Store (`apps/web/src/lib/theme.ts`)"]
         US[useSyncExternalStore]
-        STK[(localStorage: docus.theme)]
+        STK[(localStorage: domus.theme)]
         SYS[window.matchMedia prefers-color-scheme]
     end
 

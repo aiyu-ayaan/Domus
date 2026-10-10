@@ -25,7 +25,7 @@ use tracing::info;
 pub async fn bootstrap() -> anyhow::Result<()> {
     init_logging();
     let _ = rustls::crypto::ring::default_provider().install_default();
-    info!("Starting Docus Smart Home Core Server...");
+    info!("Starting Domus Smart Home Core Server...");
 
     let config = AppConfig::load()?;
     std::fs::create_dir_all(&config.server.data_dir)?;

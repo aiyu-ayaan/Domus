@@ -1,4 +1,4 @@
-# Docus home server: the Rust backend serving the built web UI over HTTPS.
+# Domus home server: the Rust backend serving the built web UI over HTTPS.
 #   docker compose -f docker-compose.local.yml up -d --build
 
 # The web build is the same for every architecture, so it runs on the build machine's own.
@@ -9,9 +9,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY apps/web/package.json apps/web/
 COPY apps/desktop/package.json apps/desktop/
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --filter @docus/web
+    pnpm install --frozen-lockfile --filter @domus/web
 COPY apps/web apps/web
-RUN pnpm --filter @docus/web build
+RUN pnpm --filter @domus/web build
 
 FROM rust:1-bookworm AS backend
 WORKDIR /src
@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/src/target \
     # COPY keeps source mtimes, which can be older than the cached build; touch so cargo rebuilds our crates.
     find crates backend migrations -type f -exec touch {} + && \
-    cargo build --release -p docus-backend && cp target/release/domus-backend /domus-backend && \
+    cargo build --release -p domus-backend && cp target/release/domus-backend /domus-backend && \
     mkdir /data
 
 # glibc, libgcc, CA certificates and tzdata, no shell or package manager.

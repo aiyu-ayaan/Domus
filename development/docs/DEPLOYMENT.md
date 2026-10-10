@@ -9,8 +9,8 @@ between the home and the remote address.
 flowchart LR
     subgraph Home network
         subgraph Host["Home server (Docker, host network)"]
-            D["docus container<br/>domus-backend :8443 HTTPS<br/>web UI + /api/v1 + WSS<br/>beacon UDP :48443"]
-            V[("volume docus_data<br/>db, master.key, jwt.secret, tls/")]
+            D["domus container<br/>domus-backend :8443 HTTPS<br/>web UI + /api/v1 + WSS<br/>beacon UDP :48443"]
+            V[("volume domus_data<br/>db, master.key, jwt.secret, tls/")]
             CF["cloudflared<br/>(not in this compose)"]
             D --- V
             CF -- "https://localhost:8443<br/>No TLS Verify" --> D
@@ -32,16 +32,16 @@ Two compose files:
 
 | File | Image | For |
 |---|---|---|
-| `docker-compose.yml` | `aiyuayaan/domus:${DOCUS_VERSION:-latest}` from Docker Hub | a home server; the only file it needs (the Mosquitto config is inline) |
-| `docker-compose.local.yml` | built from this checkout (`docus:local`) | development and testing the Dockerfile |
+| `docker-compose.yml` | `aiyuayaan/domus:${DOMUS_VERSION:-latest}` from Docker Hub | a home server; the only file it needs (the Mosquitto config is inline) |
+| `docker-compose.local.yml` | built from this checkout (`domus:local`) | development and testing the Dockerfile |
 
 ```bash
 docker compose up -d                                        # published image
 docker compose pull && docker compose up -d                 # update it
-DOCUS_VERSION=alpha docker compose up -d                    # a channel or an exact version
+DOMUS_VERSION=alpha docker compose up -d                    # a channel or an exact version
 docker compose -f docker-compose.local.yml up -d --build    # build here instead
-docker compose logs -f docus      # shows the TLS certificate fingerprint on start
-DOCUS_PORT=9443 TZ=Asia/Kolkata docker compose up -d        # another port, local time for schedules
+docker compose logs -f domus      # shows the TLS certificate fingerprint on start
+DOMUS_PORT=9443 TZ=Asia/Kolkata docker compose up -d        # another port, local time for schedules
 docker compose --profile mqtt up -d    # also start the optional Mosquitto broker
 ```
 
@@ -49,8 +49,8 @@ docker compose --profile mqtt up -d    # also start the optional Mosquitto broke
 |---|---|
 | Image | `Dockerfile`: Node stage builds `apps/web`, Rust stage builds `domus-backend`, runtime is `gcr.io/distroless/cc-debian12` (glibc, CA certificates, tzdata, no shell), uid 1000 |
 | Network | `network_mode: host`. Tapo and Xiaomi discovery and the app beacon are LAN broadcasts; they do not reach a bridged container |
-| Data | Named volume `docus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up; losing `master.key` loses every linked account |
-| Config | `APP_ENV=production` (listens on `0.0.0.0`). Any key of `config/default.toml` as `DOCUS__<SECTION>__<KEY>` in `environment:` |
+| Data | Named volume `domus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up; losing `master.key` loses every linked account |
+| Config | `APP_ENV=production` (listens on `0.0.0.0`). Any key of `config/default.toml` as `DOMUS__<SECTION>__<KEY>` in `environment:` |
 
 The release binary is stripped and built with thin LTO (`[profile.release]` in `Cargo.toml`); `.dockerignore` is an allow-list, so the build context is only what the Dockerfile copies. The image has no shell: `docker exec` cannot open one, use `docker compose logs`. Published images and their tags are described in `RELEASE.md`.
 
@@ -124,13 +124,13 @@ flowchart TD
     C -- yes --> PR["probe each, home first<br/>(/api/v1/health)"]
     PR -- one answers --> W[load the server's web UI]
     PR -- none --> P
-    W -- "GET /server/links (web UI)" --> SV["links:save → docus.json<br/>servers + pin"]
+    W -- "GET /server/links (web UI)" --> SV["links:save → domus.json<br/>servers + pin"]
     W -- "window focus" --> PR
 ```
 
-- **State**: `docus.json` in the app's user-data directory (`~/.config/Docus`): server list, certificate pins,
+- **State**: `domus.json` in the app's user-data directory (`~/.config/Domus`): server list, certificate pins,
   session token (encrypted with the OS keyring through `safeStorage` when one is available, mode `0600`).
-- **Token**: web storage is per origin, so the page asks the app for the token (`window.docus.token`,
+- **Token**: web storage is per origin, so the page asks the app for the token (`window.domus.token`,
   `preload.js`). Home and remote address then share one sign-in.
 - **Certificates**: `session.setCertificateVerifyProc` accepts a failing certificate only when its
   fingerprint is pinned. A verify proc rather than `certificate-error`, because the latter does not cover
@@ -139,26 +139,26 @@ flowchart TD
   (`html.desktop` in `apps/web/src/index.css`, `--titlebar` offsets everything pinned to the top) and
   Electron overlays the window buttons on its right end, coloured from the theme chosen in Settings.
 - **Change server**: Settings → Server addresses → Change server.
-- **Development**: `DOCUS_URL=http://localhost:3000 pnpm dev:desktop` skips the connect page.
+- **Development**: `DOMUS_URL=http://localhost:3000 pnpm dev:desktop` skips the connect page.
 
 ### Linux
 
 `pnpm dev:desktop` runs Electron with `--no-sandbox`. Chromium's sandbox needs either unprivileged user
 namespaces (blocked by AppArmor on Ubuntu 24.04+) or a setuid-root `chrome-sandbox`, and a setuid bit
 cannot exist inside `node_modules` on a `nosuid` mount such as this NTFS drive. The flag is for development
-only; the window loads nothing but the Docus server.
+only; the window loads nothing but the Domus server.
 
 `pnpm build:desktop` (electron-builder) writes `apps/desktop/dist/`:
 
-- `docus_<version>_amd64.deb`: installs to `/opt/Docus`, with a desktop entry and the icon under
+- `domus_<version>_amd64.deb`: installs to `/opt/Domus`, with a desktop entry and the icon under
   `/usr/share/icons/hicolor`. Its post-install script (`build/after-install.sh`) makes `chrome-sandbox`
   setuid, so the installed app runs sandboxed. electron-builder's default script skips that when user
   namespaces work for root, which is the case on Ubuntu 24.04+ even though they are blocked for users.
-  This is the recommended package: `sudo apt install ./docus_<version>_amd64.deb`.
-- `Docus-<version>.AppImage`: portable; on Ubuntu 24.04+ it needs `--no-sandbox` for the reason above.
+  This is the recommended package: `sudo apt install ./domus_<version>_amd64.deb`.
+- `Domus-<version>.AppImage`: portable; on Ubuntu 24.04+ it needs `--no-sandbox` for the reason above.
 
 The launcher icon comes from the desktop entry. It matches the running window because `productName`
-(`Docus`) gives the window class `Docus` and the entry declares `StartupWMClass=Docus`. The icon source is
+(`Domus`) gives the window class `Domus` and the entry declares `StartupWMClass=Domus`. The icon source is
 `apps/desktop/build/icon.png` (see `BRAND.md`).
 
 ## 6. Android

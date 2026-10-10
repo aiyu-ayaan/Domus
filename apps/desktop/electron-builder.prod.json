@@ -1,7 +1,7 @@
 {
   "appId": "com.aiyu.domus",
-  "productName": "Docus",
-  "executableName": "docus",
+  "productName": "Domus",
+  "executableName": "domus",
   "files": [
     "src/**"
   ],
@@ -21,9 +21,9 @@
     "synopsis": "Smart home control"
   },
   "deb": {
-    "packageName": "docus",
+    "packageName": "domus",
     "afterInstall": "build/after-install.sh",
-    "artifactName": "docus_${version}_${arch}.${ext}"
+    "artifactName": "domus_${version}_${arch}.${ext}"
   },
   "win": {
     "target": [
@@ -32,6 +32,6 @@
     "icon": "build/icon.png"
   },
   "nsis": {
-    "artifactName": "Docus-${version}-Setup.${ext}"
+    "artifactName": "Domus-${version}-Setup.${ext}"
   }
 }

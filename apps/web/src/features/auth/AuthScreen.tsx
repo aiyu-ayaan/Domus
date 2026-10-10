@@ -42,9 +42,9 @@ export function AuthScreen() {
     <div className="flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="anim-enter w-full max-w-[380px]">
         <img src="/favicon.svg" alt="" className="h-8 w-8" />
-        <h1 className="mt-6 text-page font-semibold tracking-[-0.01em]">{setup ? 'Set up Docus' : 'Sign in to Docus'}</h1>
+        <h1 className="mt-6 text-page font-semibold tracking-[-0.01em]">{setup ? 'Set up Domus' : 'Sign in to Domus'}</h1>
         <p className="mt-1 text-body text-muted">
-          {setup ? 'Create the administrator account for this home. You can add other people later.' : 'Use your Docus account.'}
+          {setup ? 'Create the administrator account for this home. You can add other people later.' : 'Use your Domus account.'}
         </p>
         <form onSubmit={submit} className="mt-6 flex flex-col gap-4 rounded-lg border border-border bg-panel p-5">
           {setup && (

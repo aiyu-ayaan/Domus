@@ -14,7 +14,7 @@ enum class UpdateChannel(val label: String, val stage: Int) { STABLE("Stable", 2
 
 data class AppUpdate(val version: String, val url: String)
 
-/** Finds a newer APK among the GitHub releases (.github/workflows/release.yml names them `Docus-<version>.apk`). */
+/** Finds a newer APK among the GitHub releases (.github/workflows/release.yml names them `Domus-<version>.apk`). */
 object Updates {
     private const val RELEASES = "https://api.github.com/repos/aiyu-ayaan/Domus-Rust/releases?per_page=30"
     private val VERSION = Regex("""^v?(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta)\.(\d+))?$""")
@@ -66,7 +66,7 @@ object Updates {
     suspend fun download(update: AppUpdate, directory: java.io.File): java.io.File = withContext(Dispatchers.IO) {
         directory.deleteRecursively()
         directory.mkdirs()
-        val file = java.io.File(directory, "Docus-${update.version}.apk")
+        val file = java.io.File(directory, "Domus-${update.version}.apk")
         OkHttpClient().newCall(Request.Builder().url(update.url).build()).execute().use { response ->
             if (!response.isSuccessful) throw java.io.IOException("The download answered ${response.code}")
             file.outputStream().use { response.body!!.byteStream().copyTo(it) }

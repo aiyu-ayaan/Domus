@@ -1,13 +1,13 @@
 #!/bin/bash
-# deb post-install for Docus / Docus Dev.
+# deb post-install for Domus / Domus Dev.
 APP_DIR=""
 BIN_NAME=""
-if [ -d "/opt/Docus Dev" ]; then
-    APP_DIR="/opt/Docus Dev"
-    BIN_NAME="docus-dev"
-elif [ -d "/opt/Docus" ]; then
-    APP_DIR="/opt/Docus"
-    BIN_NAME="docus"
+if [ -d "/opt/Domus Dev" ]; then
+    APP_DIR="/opt/Domus Dev"
+    BIN_NAME="domus-dev"
+elif [ -d "/opt/Domus" ]; then
+    APP_DIR="/opt/Domus"
+    BIN_NAME="domus"
 fi
 
 if [ -n "$APP_DIR" ]; then

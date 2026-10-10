@@ -119,7 +119,7 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
 async fn health_check() -> Json<Value> {
     Json(json!({
         "status": "healthy",
-        "service": "docus-backend",
+        "service": "domus-backend",
         "version": env!("CARGO_PKG_VERSION"),
         "timestamp": chrono::Utc::now()
     }))

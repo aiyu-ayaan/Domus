@@ -27,7 +27,7 @@ flowchart LR
     L -.redrawn by hand.-> AS[android: splash_mark.xml<br/>animated splash]
 ```
 
-Masters live in `design-system/docus/brand/`. `render.sh` (needs Chrome) rewrites the PNGs. The two
+Masters live in `design-system/domus/brand/`. `render.sh` (needs Chrome) rewrites the PNGs. The two
 Android drawables are vector copies of the same path data, scaled 0.25 into the 108dp canvas — edit
 them by hand if the mark changes.
 

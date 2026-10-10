@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tokens: design-system/docus/MASTER.md */
+/* Tokens: design-system/domus/MASTER.md */
 :root {
   --bg: 18 20 14;              /* Android dark background #12140E */
   --panel: 26 28 22;           /* Android dark surfaceContainerLow #1A1C16 */
@@ -232,7 +232,7 @@ input[type='range'].range:disabled { opacity: 0.4; cursor: not-allowed; }
 html.desktop { --titlebar: 36px; }
 html.desktop body { padding-top: var(--titlebar); }
 html.desktop body::before {
-  content: 'Docus';
+  content: 'Domus';
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 1000;

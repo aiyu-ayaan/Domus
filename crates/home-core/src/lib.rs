@@ -1,4 +1,4 @@
-//! Shared domain model for Docus: device state, commands, automation rules and
+//! Shared domain model for Domus: device state, commands, automation rules and
 //! the contract every integration plugin implements.
 
 pub mod effects;

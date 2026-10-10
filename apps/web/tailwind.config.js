@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-// Tokens mirror design-system/docus/MASTER.md.
+// Tokens mirror design-system/domus/MASTER.md.
 const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
 
 export default {

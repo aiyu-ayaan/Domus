@@ -256,7 +256,7 @@ async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<Stri
     user.require_control()?;
     if screen_sync_config(&s, &id).await.is_some() {
         return Err(ApiError::BadRequest(
-            "Screen Sync needs a screen to share. Start it from the Docus app on the device showing the content.".into(),
+            "Screen Sync needs a screen to share. Start it from the Domus app on the device showing the content.".into(),
         ));
     }
     let actions = s

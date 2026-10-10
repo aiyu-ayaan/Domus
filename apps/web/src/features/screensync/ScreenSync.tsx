@@ -160,7 +160,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
       socket.onclose = () => {
         if (!active.current || fatal || ws.current !== socket) return
         if (attempts.current >= MAX_RECONNECTS) {
-          toast.push({ tone: 'error', title: 'Lost connection to Docus', message: 'Screen Sync stopped.' })
+          toast.push({ tone: 'error', title: 'Lost connection to Domus', message: 'Screen Sync stopped.' })
           stop()
           return
         }
@@ -175,7 +175,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
   const start = useCallback(
     async (scene: Scene) => {
       if (!isScreenSyncSupported()) {
-        toast.push({ tone: 'error', title: 'Screen sharing is not available', message: 'Use Docus in Chrome, Edge, Firefox, Safari or the desktop app over HTTPS.' })
+        toast.push({ tone: 'error', title: 'Screen sharing is not available', message: 'Use Domus in Chrome, Edge, Firefox, Safari or the desktop app over HTTPS.' })
         return
       }
       if (active.current || stream.current) stop()
@@ -188,7 +188,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
         media = await navigator.mediaDevices.getDisplayMedia({
           video: { frameRate: { ideal: cfg.fps, max: Math.max(cfg.fps, 15) }, width: { max: 1280 }, height: { max: 720 } },
           audio: false,
-          // Chromium hints: offer whole screens first and never the Docus tab itself.
+          // Chromium hints: offer whole screens first and never the Domus tab itself.
           ...({ selfBrowserSurface: 'exclude', surfaceSwitching: 'include', monitorTypeSurfaces: 'include' } as object),
         })
       } catch (e) {

@@ -23,7 +23,7 @@ import type {
 
 import { getStorageKey, type AppFlavor } from './flavor'
 
-const TOKEN_KEY = getStorageKey('docus.token')
+const TOKEN_KEY = getStorageKey('domus.token')
 
 /** What the desktop app's preload exposes (apps/desktop/src/preload.js). */
 interface DesktopBridge {
@@ -47,7 +47,7 @@ interface DesktopBridge {
   }
 }
 export type UpdateChannel = 'stable' | 'beta' | 'alpha'
-export const desktop = (window as unknown as { docus?: DesktopBridge }).docus
+export const desktop = (window as unknown as { domus?: DesktopBridge }).domus
 
 /**
  * API origin. Same-origin in the browser (the backend or Vite proxy serves
@@ -102,7 +102,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
-    throw new ApiError('Cannot reach the Docus server. Check that it is running.', 0)
+    throw new ApiError('Cannot reach the Domus server. Check that it is running.', 0)
   }
   const data = res.status === 204 ? null : await res.json().catch(() => null)
   if (!res.ok) {

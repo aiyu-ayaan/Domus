@@ -8,9 +8,9 @@ members = [
 [workspace.package]
 version = "0.0.0"
 edition = "2021"
-authors = ["Docus Team"]
+authors = ["Domus Team"]
 license = "MIT"
-repository = "https://github.com/docus/docus"
+repository = "https://github.com/aiyu-ayaan/Domus-Rust"
 
 [workspace.dependencies]
 home-core = { path = "crates/home-core" }

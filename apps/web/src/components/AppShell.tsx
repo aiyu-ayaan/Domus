@@ -45,7 +45,7 @@ function Mark({ collapsed }: { collapsed?: boolean }) {
           collapsed ? 'opacity-0 w-0' : 'opacity-100',
         )}
       >
-        <span>Docus</span>
+        <span>Domus</span>
         {isDevFlavor && (
           <span className="rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none">
             DEV

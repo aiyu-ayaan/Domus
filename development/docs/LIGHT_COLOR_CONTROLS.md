@@ -1,6 +1,6 @@
 # Light Bulb Color & Temperature Architecture
 
-This document describes the end-to-end architecture for smart light bulb color and white temperature controls in Docus across the web frontend, core domain model, and vendor integrations (Tapo, Tuya / Smart Life, Xiaomi MIoT).
+This document describes the end-to-end architecture for smart light bulb color and white temperature controls in Domus across the web frontend, core domain model, and vendor integrations (Tapo, Tuya / Smart Life, Xiaomi MIoT).
 
 ## 1. System Architecture Diagram
 

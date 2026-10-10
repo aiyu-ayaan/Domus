@@ -1,31 +1,31 @@
-# Docus home server from the published image. This file is all a host needs:
+# Domus home server from the published image. This file is all a host needs:
 #   wget https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/docker-compose.yml
 #   docker compose up -d
 # Update: docker compose pull && docker compose up -d
 # Building from source instead: docker-compose.local.yml.
 services:
-  docus:
-    # DOCUS_VERSION: latest (stable), beta, alpha, or an exact version like 0.0.1-alpha.1.
-    image: aiyuayaan/domus:${DOCUS_VERSION:-latest}
-    container_name: docus
+  domus:
+    # DOMUS_VERSION: latest (stable), beta, alpha, or an exact version like 0.0.1-alpha.1.
+    image: aiyuayaan/domus:${DOMUS_VERSION:-latest}
+    container_name: domus
     restart: unless-stopped
     # Host networking: device discovery (Tapo, Xiaomi) and the app beacon are LAN
     # broadcasts, which never reach a bridged container.
     network_mode: host
     environment:
-      # Any config key: DOCUS__<SECTION>__<KEY>.
-      DOCUS__SERVER__PORT: ${DOCUS_PORT:-8443}
+      # Any config key: DOMUS__<SECTION>__<KEY>.
+      DOMUS__SERVER__PORT: ${DOMUS_PORT:-8443}
       # Schedules and the billing cycle run in this time zone.
       TZ: ${TZ:-UTC}
     volumes:
       # Database, master key, JWT secret and TLS certificate. Back this up.
-      - docus_data:/app/data
+      - domus_data:/app/data
 
   # Optional broker: docker compose --profile mqtt up -d
   mqtt:
     profiles: ["mqtt"]
     image: eclipse-mosquitto:2.0
-    container_name: docus-mqtt
+    container_name: domus-mqtt
     restart: unless-stopped
     ports:
       - "1883:1883"
@@ -48,6 +48,6 @@ configs:
       log_dest stdout
 
 volumes:
-  docus_data:
+  domus_data:
   mosquitto_data:
   mosquitto_log:

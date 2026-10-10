@@ -1,4 +1,4 @@
-# Docus Design System — MASTER
+# Domus Design System — MASTER
 
 Single source of truth for the web/desktop UI. Page files in `pages/` may
 override specific rules; otherwise everything here applies. Derived from the

@@ -77,15 +77,15 @@ stable releases, Stable gets stable releases. The default is the channel of the 
 
 | Client | Where | How it updates |
 |---|---|---|
-| Android | Settings → Updates (`core/Updates.kt`) | Downloads the APK and hands it to Android's installer, which asks to allow installs from Docus the first time (`REQUEST_INSTALL_PACKAGES`, FileProvider `<applicationId>.updates`) |
+| Android | Settings → Updates (`core/Updates.kt`) | Downloads the APK and hands it to Android's installer, which asks to allow installs from Domus the first time (`REQUEST_INSTALL_PACKAGES`, FileProvider `<applicationId>.updates`) |
 | Desktop AppImage | Offer at start, Settings → About (`apps/desktop/src/updates.js`, `main.js`) | Downloads the AppImage over its own file and restarts |
-| Desktop deb / Windows | same | Opens the `.deb` / `Docus-<version>-Setup.exe` download |
-| Server | `DOCUS_VERSION` in `docker-compose.yml` | Docker tags `latest`, `beta`, `alpha` or an exact version; `docker compose pull && docker compose up -d` |
+| Desktop deb / Windows | same | Opens the `.deb` / `Domus-<version>-Setup.exe` download |
+| Server | `DOMUS_VERSION` in `docker-compose.yml` | Docker tags `latest`, `beta`, `alpha` or an exact version; `docker compose pull && docker compose up -d` |
 | `scripts/install-linux.sh` | `--channel`, `--version` | Re-run to update |
 
 Dev flavors never update this way; they are rebuilt.
 
-The Windows installer (NSIS, unsigned, so SmartScreen warns on first run) is built on `windows-latest` with `pnpm --filter @docus/desktop build:win`. Its job is `continue-on-error` until a release has shipped a working one: a failure there is a warning and the release goes out without it.
+The Windows installer (NSIS, unsigned, so SmartScreen warns on first run) is built on `windows-latest` with `pnpm --filter @domus/desktop build:win`. Its job is `continue-on-error` until a release has shipped a working one: a failure there is a warning and the release goes out without it.
 
 ## 5. Repository setup
 

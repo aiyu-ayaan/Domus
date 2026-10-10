@@ -1,7 +1,7 @@
 //! At-rest encryption for integration credentials and device secrets.
 //!
 //! Values are sealed with AES-256-GCM under a master key that lives outside
-//! the database (`DOCUS_MASTER_KEY` env var, or `<data_dir>/master.key`).
+//! the database (`DOMUS_MASTER_KEY` env var, or `<data_dir>/master.key`).
 
 use aes_gcm::aead::{Aead, AeadCore, KeyInit, OsRng};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
@@ -22,14 +22,14 @@ impl Vault {
         }
     }
 
-    /// Load the master key from `DOCUS_MASTER_KEY` (base64) or `data_dir/master.key`,
+    /// Load the master key from `DOMUS_MASTER_KEY` (base64) or `data_dir/master.key`,
     /// creating the file on first start.
     pub fn load_or_create(data_dir: &Path) -> anyhow::Result<Self> {
-        if let Ok(b64) = std::env::var("DOCUS_MASTER_KEY") {
+        if let Ok(b64) = std::env::var("DOMUS_MASTER_KEY") {
             let bytes = B64.decode(b64.trim())?;
             let key: [u8; 32] = bytes
                 .try_into()
-                .map_err(|_| anyhow::anyhow!("DOCUS_MASTER_KEY must be 32 bytes (base64)"))?;
+                .map_err(|_| anyhow::anyhow!("DOMUS_MASTER_KEY must be 32 bytes (base64)"))?;
             return Ok(Self::new(key));
         }
         let bytes = read_or_create_secret(&data_dir.join("master.key"), 32)?;

@@ -1,5 +1,5 @@
 [package]
-name = "docus-backend"
+name = "domus-backend"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -1,6 +1,6 @@
 # Screen Sync Architecture & Design Specification
 
-This document details the end-to-end architecture, color extraction pipeline, streaming protocol, and device pacing mechanisms for **Screen Sync** (Dynamic Ambilight) in Docus. Screen Sync enables real-time synchronization between displays (monitors, televisions, video streams) and smart RGB/tunable lighting fixtures across diverse hardware vendors (Tapo KLAP, Tuya / Smart Life, Xiaomi MIoT).
+This document details the end-to-end architecture, color extraction pipeline, streaming protocol, and device pacing mechanisms for **Screen Sync** (Dynamic Ambilight) in Domus. Screen Sync enables real-time synchronization between displays (monitors, televisions, video streams) and smart RGB/tunable lighting fixtures across diverse hardware vendors (Tapo KLAP, Tuya / Smart Life, Xiaomi MIoT).
 
 ---
 
@@ -23,7 +23,7 @@ sequenceDiagram
     actor User as User / Browser
     participant UI as OverviewView / ScreenSyncProvider
     participant Worker as screenSync.worker.ts (Web Worker)
-    participant Backend as Docus Backend (/scenes/:id/sync WS)
+    participant Backend as Domus Backend (/scenes/:id/sync WS)
     participant Workers as Per-Device Watch Workers
     participant Lights as Smart Lights (Tapo / Tuya / Xiaomi)
 
@@ -135,7 +135,7 @@ The server implementation resides in [`backend/src/modules/scenes/screen_sync.rs
 ### 4.2 Watch Channels & Latest-Frame-Wins
 Traditional messaging queues (`mpsc`) suffer from backpressure lag: if a light takes 250ms to acknowledge a Wi-Fi packet, a queue of 10 FPS builds up an ever-growing backlog, causing lighting changes to lag several seconds behind the screen.
 
-Docus solves this using Tokio `watch` channels:
+Domus solves this using Tokio `watch` channels:
 ```rust
 let (frame_tx, frame_rx) = watch::channel::<Option<Frame>>(None);
 ```

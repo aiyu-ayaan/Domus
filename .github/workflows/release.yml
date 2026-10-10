@@ -51,7 +51,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE: ${{ vars.DOCUS_IMAGE || 'aiyuayaan/domus' }}
+  IMAGE: ${{ vars.DOMUS_IMAGE || 'aiyuayaan/domus' }}
 
 jobs:
   plan:
@@ -261,8 +261,8 @@ jobs:
           context: .
           platforms: linux/${{ matrix.arch }}
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=docus-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=docus-${{ matrix.arch }}
+          cache-from: type=gha,scope=domus-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=domus-${{ matrix.arch }}
       - name: Record the digest
         run: |
           mkdir digests
@@ -288,7 +288,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter @docus/desktop
+      - run: pnpm install --frozen-lockfile --filter @domus/desktop
       - run: pnpm build:desktop:prod
       - uses: actions/upload-artifact@v4
         with:
@@ -316,8 +316,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter @docus/desktop
-      - run: pnpm --filter @docus/desktop build:win
+      - run: pnpm install --frozen-lockfile --filter @domus/desktop
+      - run: pnpm --filter @domus/desktop build:win
       - uses: actions/upload-artifact@v4
         with:
           name: windows
@@ -359,7 +359,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/android"
           cp app/build/outputs/apk/prod/release/app-prod-release.apk \
-            "$RUNNER_TEMP/android/Docus-${{ needs.plan.outputs.version }}.apk"
+            "$RUNNER_TEMP/android/Domus-${{ needs.plan.outputs.version }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: android
@@ -398,7 +398,7 @@ jobs:
             awk -v h="## v$VERSION " 'index($0, h) == 1 { on = 1; next } /^## v/ { on = 0 } on' CHANGELOG.md > notes.md
             {
               echo
-              echo "Docker: \`DOCUS_VERSION=$VERSION docker compose up -d\` ([docker-compose.yml](https://github.com/$GITHUB_REPOSITORY/blob/v$VERSION/docker-compose.yml))"
+              echo "Docker: \`DOMUS_VERSION=$VERSION docker compose up -d\` ([docker-compose.yml](https://github.com/$GITHUB_REPOSITORY/blob/v$VERSION/docker-compose.yml))"
               echo "Built for this release: \`${{ needs.plan.outputs.targets }}\`"
             } >> notes.md
             gh release create "v$VERSION" $files --target "$GITHUB_SHA" --title "v$VERSION" --notes-file notes.md \

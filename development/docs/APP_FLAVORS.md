@@ -1,6 +1,6 @@
 # App Flavors Architecture (Web, Desktop, Android)
 
-This document specifies the multi-platform flavor architecture designed to allow development (`dev`) and production (`prod`) versions of Docus to run, build, and coexist simultaneously on the same machine or device without data collision, configuration clobbering, or session interruption.
+This document specifies the multi-platform flavor architecture designed to allow development (`dev`) and production (`prod`) versions of Domus to run, build, and coexist simultaneously on the same machine or device without data collision, configuration clobbering, or session interruption.
 
 ---
 
@@ -8,20 +8,20 @@ This document specifies the multi-platform flavor architecture designed to allow
 
 ```mermaid
 flowchart TD
-    subgraph Platforms["Docus Multi-Platform Clients"]
+    subgraph Platforms["Domus Multi-Platform Clients"]
         subgraph Android["Android (apps/android)"]
-            A_DEV["Dev Flavor<br/>ID: com.aiyu.domus.dev<br/>App: Docus Dev<br/>Icon: D Mark + Amber DEV Badge<br/>Store: Private Keystore & DB"]
-            A_PROD["Prod Flavor<br/>ID: com.aiyu.domus<br/>App: Docus<br/>Icon: Canonical Brand Mark<br/>Store: Private Keystore & DB"]
+            A_DEV["Dev Flavor<br/>ID: com.aiyu.domus.dev<br/>App: Domus Dev<br/>Icon: D Mark + Amber DEV Badge<br/>Store: Private Keystore & DB"]
+            A_PROD["Prod Flavor<br/>ID: com.aiyu.domus<br/>App: Domus<br/>Icon: Canonical Brand Mark<br/>Store: Private Keystore & DB"]
         end
 
         subgraph Desktop["Desktop Electron (apps/desktop)"]
-            D_DEV["Dev Flavor<br/>ID: com.aiyu.domus.dev<br/>Title: Docus (Dev)<br/>UserData: ~/.config/DocusDev<br/>Config: docus-dev.json<br/>Bin: docus-dev"]
-            D_PROD["Prod Flavor<br/>ID: com.aiyu.domus<br/>Title: Docus<br/>UserData: ~/.config/Docus<br/>Config: docus.json<br/>Bin: docus"]
+            D_DEV["Dev Flavor<br/>ID: com.aiyu.domus.dev<br/>Title: Domus (Dev)<br/>UserData: ~/.config/DomusDev<br/>Config: domus-dev.json<br/>Bin: domus-dev"]
+            D_PROD["Prod Flavor<br/>ID: com.aiyu.domus<br/>Title: Domus<br/>UserData: ~/.config/Domus<br/>Config: domus.json<br/>Bin: domus"]
         end
 
         subgraph Web["Web SPA (apps/web)"]
-            W_DEV["Dev Flavor<br/>Title: Docus (Dev)<br/>Badge: Amber DEV Pill<br/>Token: docus.dev.token<br/>Theme: docus.dev.theme<br/>Icon: /favicon-dev.svg"]
-            W_PROD["Prod Flavor<br/>Title: Docus<br/>Badge: None<br/>Token: docus.token<br/>Theme: docus.theme<br/>Icon: /favicon.svg"]
+            W_DEV["Dev Flavor<br/>Title: Domus (Dev)<br/>Badge: Amber DEV Pill<br/>Token: domus.dev.token<br/>Theme: domus.dev.theme<br/>Icon: /favicon-dev.svg"]
+            W_PROD["Prod Flavor<br/>Title: Domus<br/>Badge: None<br/>Token: domus.token<br/>Theme: domus.theme<br/>Icon: /favicon.svg"]
         end
     end
 
@@ -43,26 +43,26 @@ flowchart TD
 | Platform | Dimension | Development (`dev`) | Production (`prod`) |
 |---|---|---|---|
 | **Android** | Package / Application ID | `com.aiyu.domus.dev` | `com.aiyu.domus` |
-| | App Label / Title | `Docus Dev` | `Docus` |
+| | App Label / Title | `Domus Dev` | `Domus` |
 | | Version Suffix | `-dev` | *(none)* |
 | | Launcher Icon | Adaptive D mark with amber `DEV` pill badge | Canonical D mark |
 | | Keystore / Storage | Sandboxed to `com.aiyu.domus.dev` | Sandboxed to `com.aiyu.domus` |
 | | Side-by-side Install | **Yes** (different package ID) | **Yes** (different package ID) |
 | **Desktop** | App ID (`appId`) | `com.aiyu.domus.dev` | `com.aiyu.domus` |
-| | Product Name | `Docus Dev` | `Docus` |
-| | Executable Name | `docus-dev` | `docus` |
-| | Linux Package (`.deb`) | `docus-dev_${version}_${arch}.deb` (`/opt/Docus Dev`) | `docus_${version}_${arch}.deb` (`/opt/Docus`) |
-| | User Data Path | `~/.config/DocusDev` (`app.setPath('userData', ...)`) | `~/.config/Docus` |
-| | Config File | `docus-dev.json` | `docus.json` |
-| | Window Title | `Docus (Dev)` | `Docus` |
-| | WMClass / Launcher | `Docus Dev` (`icon-dev.png`) | `Docus` (`icon.png`) |
+| | Product Name | `Domus Dev` | `Domus` |
+| | Executable Name | `domus-dev` | `domus` |
+| | Linux Package (`.deb`) | `domus-dev_${version}_${arch}.deb` (`/opt/Domus Dev`) | `domus_${version}_${arch}.deb` (`/opt/Domus`) |
+| | User Data Path | `~/.config/DomusDev` (`app.setPath('userData', ...)`) | `~/.config/Domus` |
+| | Config File | `domus-dev.json` | `domus.json` |
+| | Window Title | `Domus (Dev)` | `Domus` |
+| | WMClass / Launcher | `Domus Dev` (`icon-dev.png`) | `Domus` (`icon.png`) |
 | | Side-by-side Install | **Yes** (separate `/opt/` and binaries) | **Yes** (separate `/opt/` and binaries) |
-| **Web** | Application Name | `Docus (Dev)` | `Docus` |
-| | Document Title | `Docus (Dev)` | `Docus` |
+| **Web** | Application Name | `Domus (Dev)` | `Domus` |
+| | Document Title | `Domus (Dev)` | `Domus` |
 | | Favicon / PWA Icon | `/favicon-dev.svg` / `/icon-dev-*.png` | `/favicon.svg` / `/icon-*.png` |
 | | Web Manifest | `/manifest.dev.webmanifest` | `/manifest.webmanifest` |
-| | Auth Token Key | `docus.dev.token` | `docus.token` |
-| | Theme Storage Key | `docus.dev.theme` | `docus.theme` |
+| | Auth Token Key | `domus.dev.token` | `domus.token` |
+| | Theme Storage Key | `domus.dev.theme` | `domus.theme` |
 | | Visual In-App Badge | Amber `DEV` hairline chip in header & rail | None (clean minimal brand) |
 
 ---
@@ -75,35 +75,35 @@ Flavors are configured using Gradle `flavorDimensions += "environment"`:
 - `dev`:
   - `applicationIdSuffix = ".dev"`
   - `versionNameSuffix = "-dev"`
-  - String resource `@string/app_name` = `"Docus Dev"` (in `src/dev/res/values/strings.xml`)
+  - String resource `@string/app_name` = `"Domus Dev"` (in `src/dev/res/values/strings.xml`)
   - Icon overlay `ic_launcher_foreground.xml` (in `src/dev/res/drawable/`) with the brand mark and a sharp amber `DEV` pill badge.
 - `prod`:
   - Canonical package `com.aiyu.domus`
-  - String resource `@string/app_name` = `"Docus"` (in `src/prod/res/values/strings.xml`)
+  - String resource `@string/app_name` = `"Domus"` (in `src/prod/res/values/strings.xml`)
   - Canonical brand launcher icon.
 
 Because Android isolates apps by application ID, `com.aiyu.domus.dev` and `com.aiyu.domus` run as completely separate Linux user IDs with separate Keystores, SharedPreferences, SQLite files, and notification channels.
 
 ### 3.2 Desktop (`apps/desktop`)
 
-Electron isolates runtime state based on `process.env.DOCUS_FLAVOR`:
-1. When running unpackaged (`pnpm dev:desktop`) or with `DOCUS_FLAVOR=dev`:
-   - `app.setPath('userData', path.join(appData, 'DocusDev'))`
-   - Config file is saved to `docus-dev.json`.
-   - Window title is locked to `Docus (Dev)`.
+Electron isolates runtime state based on `process.env.DOMUS_FLAVOR`:
+1. When running unpackaged (`pnpm dev:desktop`) or with `DOMUS_FLAVOR=dev`:
+   - `app.setPath('userData', path.join(appData, 'DomusDev'))`
+   - Config file is saved to `domus-dev.json`.
+   - Window title is locked to `Domus (Dev)`.
    - Desktop icon loaded is `build/icon-dev.png`.
 2. Packaging:
-   - `pnpm build:desktop:dev`: Uses `electron-builder.dev.json` to produce `docus-dev` deb and AppImage.
-   - `pnpm build:desktop:prod`: Uses `electron-builder.prod.json` to produce `docus` deb and AppImage.
-   - The post-install script `build/after-install.sh` detects both `/opt/Docus Dev` and `/opt/Docus`, setting up appropriate symlinks (`/usr/bin/docus-dev` and `/usr/bin/docus`) without overwriting one another.
+   - `pnpm build:desktop:dev`: Uses `electron-builder.dev.json` to produce `domus-dev` deb and AppImage.
+   - `pnpm build:desktop:prod`: Uses `electron-builder.prod.json` to produce `domus` deb and AppImage.
+   - The post-install script `build/after-install.sh` detects both `/opt/Domus Dev` and `/opt/Domus`, setting up appropriate symlinks (`/usr/bin/domus-dev` and `/usr/bin/domus`) without overwriting one another.
 
 ### 3.3 Web (`apps/web`)
 
 Web uses `apps/web/src/lib/flavor.ts`:
-- Checks `import.meta.env.VITE_APP_FLAVOR`, the desktop bridge (`window.docus?.flavor`), or Vite dev mode (`import.meta.env.DEV`).
+- Checks `import.meta.env.VITE_APP_FLAVOR`, the desktop bridge (`window.domus?.flavor`), or Vite dev mode (`import.meta.env.DEV`).
 - Storage key isolation:
-  - Auth token: `docus.dev.token` vs `docus.token`.
-  - Theme preference: `docus.dev.theme` vs `docus.theme`.
+  - Auth token: `domus.dev.token` vs `domus.token`.
+  - Theme preference: `domus.dev.theme` vs `domus.theme`.
 - DOM Head updates:
   - Updates `<title>` and `<link rel="icon">` dynamically to point to `/favicon-dev.svg` and `/manifest.dev.webmanifest`.
 - In-App UI Badge:
@@ -123,10 +123,10 @@ pnpm android:build:prod # Assembles prodRelease APK
 
 ### Desktop
 ```bash
-pnpm dev:desktop          # Runs Electron in dev flavor (~/.config/DocusDev)
-pnpm dev:desktop:prod     # Runs Electron in prod flavor (~/.config/Docus)
-pnpm build:desktop:dev    # Builds docus-dev (.deb & AppImage)
-pnpm build:desktop:prod   # Builds docus (.deb & AppImage)
+pnpm dev:desktop          # Runs Electron in dev flavor (~/.config/DomusDev)
+pnpm dev:desktop:prod     # Runs Electron in prod flavor (~/.config/Domus)
+pnpm build:desktop:dev    # Builds domus-dev (.deb & AppImage)
+pnpm build:desktop:prod   # Builds domus (.deb & AppImage)
 ```
 
 ### Web

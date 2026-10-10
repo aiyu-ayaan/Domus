@@ -20,7 +20,7 @@ const replace = (text, pattern, value, path) => {
 json('package.json', (p) => ({ ...p, version, build: p.build + (flag === '--bump-build' ? 1 : 0) }))
 for (const path of ['apps/web/package.json', 'apps/desktop/package.json']) json(path, (p) => ({ ...p, version }))
 edit('Cargo.toml', (t) => replace(t, /(\[workspace\.package\]\nversion = ")[^"]*/, `$1${version}`, 'Cargo.toml'))
-for (const crate of ['docus-backend', 'home-core']) {
+for (const crate of ['domus-backend', 'home-core']) {
   edit('Cargo.lock', (t) => replace(t, new RegExp(`(name = "${crate}"\\nversion = ")[^"]*`), `$1${version}`, 'Cargo.lock'))
 }
 console.log(`version ${version}, build ${JSON.parse(readFileSync('package.json', 'utf8')).build}`)

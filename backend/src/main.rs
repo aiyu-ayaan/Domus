@@ -1,4 +1,4 @@
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    docus_backend::bootstrap::bootstrap().await
+    domus_backend::bootstrap::bootstrap().await
 }

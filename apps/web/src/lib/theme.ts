@@ -3,7 +3,7 @@ import { desktop } from './api'
 import { getStorageKey } from './flavor'
 
 export type Theme = 'system' | 'dark' | 'light'
-const THEME_KEY = getStorageKey('docus.theme')
+const THEME_KEY = getStorageKey('domus.theme')
 
 let currentTheme: Theme = (() => {
   try {

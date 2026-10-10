@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Domus mark: a D of three modules, one switched on. Inside the 66dp adaptive-icon safe zone,
      nudged 2.5dp right: the bowl is lighter than the squares, so the box centre looks off.
-     Source: design-system/docus/brand/logo.svg -->
+     Source: design-system/domus/brand/logo.svg -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
