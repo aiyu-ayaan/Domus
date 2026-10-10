@@ -95,7 +95,7 @@ Secrets (Settings → Secrets and variables → Actions):
 |---|---|
 | `DOCKERHUB_USERNAME` | `aiyuayaan` |
 | `DOCKERHUB_TOKEN` | Docker Hub access token with Read & Write (Account settings → Personal access tokens) |
-| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 apps/android/docus-release.jks` |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 ~/Keys/aiyu-soft-android-keys.jsk` (alias `domus`) |
 | `ANDROID_KEYSTORE_PASSWORD` | `storePassword` of `apps/android/keystore.properties` |
 | `ANDROID_KEY_ALIAS` | `keyAlias` |
 | `ANDROID_KEY_PASSWORD` | `keyPassword` |
