@@ -277,21 +277,22 @@ export function AirQualityView() {
 
                     {/* Mode selector */}
                     {modes && modes.length > 0 && (
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                        <span className="text-body text-muted">Operating Mode</span>
-                        <Segmented
-                          size="sm"
-                          label={`${d.name} mode`}
-                          value={s.mode}
-                          options={modes.map((m) => ({ value: m, label: m }))}
-                          onChange={(v) =>
-                            control && command.mutate({ id: d.id, cmd: { mode: v } })
-                          }
-                        />
+                      <div className="border-t border-border pt-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <span className="text-body text-muted">Operating Mode</span>
+                          <Segmented
+                            size="sm"
+                            label={`${d.name} mode`}
+                            value={s.mode}
+                            options={modes.map((m) => ({ value: m, label: m }))}
+                            onChange={(v) =>
+                              control && command.mutate({ id: d.id, cmd: { mode: v } })
+                            }
+                          />
+                        </div>
+                        <FanSpeedSlider device={d} disabled={!control || !d.is_online} className="pt-3" />
                       </div>
                     )}
-
-                    <FanSpeedSlider device={d} disabled={!control || !d.is_online} className="border-t border-border pt-3" />
 
                     {/* Fan speed selector */}
                     {fan && fan.length > 0 && (

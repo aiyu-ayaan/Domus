@@ -123,7 +123,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
         <Button variant="ghost" size="sm" aria-label="Refresh state" icon={<ArrowsClockwise size={16} />} loading={refresh.isPending} onClick={() => refresh.mutate()} />
       </div>
 
-      {(canToggle(device) || isLight || fan?.length || modes?.length || s.fan_percent != null) && (
+      {(canToggle(device) || isLight || fan?.length || modes?.length) && (
         <Section title="Controls">
           <div className="rounded-lg border border-border px-4">
             {canToggle(device) && (
@@ -180,12 +180,14 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
               </div>
             )}
             {modes && modes.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-0">
-                <span className="text-body">Mode</span>
-                <Segmented size="sm" label="Mode" value={s.mode} options={modes.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ mode: v })} />
+              <div className="border-b border-border last:border-0">
+                <div className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <span className="text-body">Mode</span>
+                  <Segmented size="sm" label="Mode" value={s.mode} options={modes.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ mode: v })} />
+                </div>
+                <FanSpeedSlider device={device} disabled={!control} className="pb-3" />
               </div>
             )}
-            <FanSpeedSlider device={device} disabled={!control} className="border-b border-border py-3 last:border-0" />
           </div>
         </Section>
       )}
