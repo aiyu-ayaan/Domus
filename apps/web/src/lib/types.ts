@@ -36,8 +36,8 @@ export interface DeviceState {
   fan_speed?: string
   /** 0-100 %, for fans with a stepless speed. */
   fan_percent?: number
-  /** Clean air delivery rate at full speed, m³/h. */
-  fan_cadr?: number
+  /** Clean air delivery rate at the lowest and full speed, m³/h. */
+  fan_cadr?: [number, number]
   mode?: string
   filter_life?: number
   current_power_watts?: number

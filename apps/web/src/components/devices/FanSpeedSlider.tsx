@@ -10,16 +10,14 @@ export function FanSpeedSlider({ device, disabled, className }: { device: Device
   const [value, setValue] = useState(speed ?? 0)
   useEffect(() => setValue(speed ?? 0), [speed])
   if (speed == null) return null
-  // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as proportional to speed.
-  const cadr = ((device.state.fan_cadr ?? 0) * value) / 100
+  // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
+  const [low, high] = device.state.fan_cadr ?? [0, 0]
+  const cadr = low + ((high - low) * value) / 100
   return (
     <div className={className}>
       <div className="flex justify-between text-body">
-        <span>
-          Speed
-          {cadr > 0 && <span className="text-muted"> · Coverage {Math.floor(cadr * 0.07)}–{Math.floor(cadr * 0.12)} m²</span>}
-        </span>
-        <span className="text-muted tabular">{value}%</span>
+        <span>Speed</span>
+        {cadr > 0 && <span className="text-muted tabular">Coverage {Math.floor(cadr * 0.07)}–{Math.floor(cadr * 0.12)} m²</span>}
       </div>
       <Slider
         label={`${device.name} speed`}
