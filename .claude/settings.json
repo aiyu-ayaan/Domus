@@ -19,6 +19,7 @@
   "enabledPlugins": {
     "ponytail@ponytail": true,
     "liquid-glass@liquid-glass-skills": true,
-    "material-3@material-3-skill": true
+    "material-3@material-3-skill": true,
+    "logo-design@logo-design-skill": true
   }
 }
