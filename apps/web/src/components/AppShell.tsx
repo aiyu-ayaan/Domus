@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -49,10 +49,20 @@ function Mark({ collapsed }: { collapsed?: boolean }) {
   )
 }
 
-function Count({ n, label }: { n: number; label: string }) {
+function Count({ n, label, active, tone = 'default' }: { n: number; label: string; active?: boolean; tone?: 'default' | 'danger' }) {
   if (!n) return null
   return (
-    <span className="ml-auto rounded bg-raised px-1.5 text-caption font-medium text-fg tabular" aria-label={`${n} ${label}`}>
+    <span
+      className={cn(
+        'ml-auto rounded-full px-2 py-0.5 text-caption font-semibold tabular',
+        tone === 'danger'
+          ? 'bg-danger/20 text-danger'
+          : active
+            ? 'bg-on-primary-container/20 text-on-primary-container'
+            : 'bg-raised text-fg',
+      )}
+      aria-label={`${n} ${label}`}
+    >
       {n > 99 ? '99+' : n}
     </span>
   )
@@ -61,103 +71,143 @@ function Count({ n, label }: { n: number; label: string }) {
 function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]; pending: number; unread: number; onNotifications: () => void }) {
   const { user, signOut } = useAuth()
   const [hovered, setHovered] = useState(false)
-  const isExpanded = hovered
+  const leaveTimer = useRef<number | null>(null)
 
-  const linkCls = (active: boolean) =>
-    cn(
-      'group/item relative flex h-9 items-center rounded-md text-body transition-colors duration-fast',
-      active ? 'bg-raised font-medium text-fg' : 'text-muted hover:bg-raised/60 hover:text-fg',
-      isExpanded ? 'px-2.5' : 'justify-center px-0',
-    )
+  const handleMouseEnter = () => {
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current)
+      leaveTimer.current = null
+    }
+    setHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    leaveTimer.current = window.setTimeout(() => {
+      setHovered(false)
+    }, 150)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+    }
+  }, [])
 
   return (
     <aside
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={cn(
-        'fixed bottom-0 left-0 top-[var(--titlebar)] z-nav hidden flex-col border-r border-border bg-panel lg:flex',
-        'transition-[width,box-shadow] duration-base ease-std',
-        isExpanded ? 'w-[232px] shadow-2xl' : 'w-[64px]',
+        'fixed left-3 top-[calc(var(--titlebar)+12px)] bottom-3 z-nav hidden flex-col lg:flex',
+        'rounded-3xl border border-border/70 bg-panel shadow-lg select-none',
+        'transition-[width,box-shadow] duration-200 ease-std overflow-hidden',
+        hovered ? 'w-[240px] shadow-2xl' : 'w-[72px]',
       )}
     >
-      <div className={cn('app-drag flex h-14 items-center overflow-hidden', isExpanded ? 'px-4' : 'justify-center px-0')}>
-        <Mark collapsed={!isExpanded} />
+      <div className={cn('app-drag flex h-14 shrink-0 items-center overflow-hidden', hovered ? 'px-4' : 'justify-center px-0')}>
+        <Mark collapsed={!hovered} />
       </div>
 
-      <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-2.5 py-2 overflow-x-hidden">
+      <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-2.5 py-2 overflow-y-auto scrollbar-none">
         {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            title={!isExpanded ? item.label : undefined}
-            className={({ isActive }) => linkCls(isActive)}
-          >
-            {({ isActive }) => (
-              <>
-                <span className="relative flex h-6 w-6 shrink-0 items-center justify-center">
-                  <item.icon size={18} weight={isActive ? 'fill' : 'regular'} aria-hidden />
-                  {item.to === '/devices' && pending > 0 && !isExpanded && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={`${pending} new devices`} />
-                  )}
-                </span>
-                <span
-                  className={cn(
-                    'min-w-0 flex-1 truncate transition-opacity duration-fast ml-2.5 whitespace-nowrap',
-                    !isExpanded && 'sr-only',
-                  )}
-                >
-                  {item.label}
-                </span>
-                {item.to === '/devices' && isExpanded && <Count n={pending} label="new devices found" />}
-              </>
+          <div key={item.to} className="w-full flex justify-center">
+            {hovered ? (
+              <NavLink
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  cn(
+                    'flex h-11 w-full items-center rounded-full px-3.5 my-0.5 transition-all duration-base text-body',
+                    isActive
+                      ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
+                      : 'text-muted hover:text-fg hover:bg-raised/70 font-medium',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+                      <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                    </span>
+                    <span className="ml-3 truncate whitespace-nowrap">{item.label}</span>
+                    {item.to === '/devices' && <Count n={pending} label="new devices found" active={isActive} />}
+                  </>
+                )}
+              </NavLink>
+            ) : (
+              <NavLink
+                to={item.to}
+                end={item.to === '/'}
+                title={item.label}
+                className={({ isActive }) =>
+                  cn(
+                    'relative my-0.5 flex h-9 w-14 items-center justify-center rounded-full transition-all duration-base',
+                    isActive
+                      ? 'bg-primary-container text-on-primary-container shadow-sm'
+                      : 'text-muted hover:text-fg hover:bg-raised/70',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+                    {item.to === '/devices' && pending > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={`${pending} new devices`} />
+                    )}
+                  </>
+                )}
+              </NavLink>
             )}
-          </NavLink>
+          </div>
         ))}
 
-        <button
-          onClick={onNotifications}
-          title={!isExpanded ? (unread ? `Notifications (${unread} unread)` : 'Notifications') : undefined}
-          className={cn(linkCls(false), 'mt-2 cursor-pointer')}
-        >
-          <span className="relative flex h-6 w-6 shrink-0 items-center justify-center">
-            <Bell size={18} aria-hidden />
-            {unread > 0 && !isExpanded && (
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={`${unread} unread notifications`} />
-            )}
-          </span>
-          <span
-            className={cn(
-              'min-w-0 flex-1 truncate text-left transition-opacity duration-fast ml-2.5 whitespace-nowrap',
-              !isExpanded && 'sr-only',
-            )}
-          >
-            Notifications
-          </span>
-          {isExpanded && <Count n={unread} label="unread" />}
-        </button>
+        <div className="w-full flex justify-center mt-2 pt-2 border-t border-border/40">
+          {hovered ? (
+            <button
+              onClick={onNotifications}
+              className="flex h-11 w-full items-center rounded-full px-3.5 my-0.5 transition-all duration-base text-body text-muted hover:text-fg hover:bg-raised/70 font-medium cursor-pointer"
+            >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+                <Bell size={20} aria-hidden />
+              </span>
+              <span className="ml-3 truncate whitespace-nowrap">Notifications</span>
+              <Count n={unread} label="unread" tone="danger" />
+            </button>
+          ) : (
+            <button
+              onClick={onNotifications}
+              title={unread ? `Notifications (${unread} unread)` : 'Notifications'}
+              className="relative my-0.5 flex h-9 w-14 items-center justify-center rounded-full text-muted hover:text-fg hover:bg-raised/70 cursor-pointer transition-all duration-base"
+            >
+              <Bell size={20} aria-hidden />
+              {unread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={`${unread} unread notifications`} />
+              )}
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-border p-2">
-        {isExpanded ? (
-          <div className="flex items-center gap-2 p-1 anim-fade">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase">
+      <div className="border-t border-border/60 p-2.5 shrink-0">
+        {hovered ? (
+          <div className="flex items-center gap-2 rounded-full bg-raised/50 p-1.5 border border-border/50 anim-fade">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm">
               {user?.username.slice(0, 1)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-label font-medium">{user?.username}</p>
-              <p className="text-caption capitalize text-subtle">{user?.role}</p>
+              <p className="truncate text-label font-medium leading-tight">{user?.username}</p>
+              <p className="truncate text-caption capitalize text-subtle leading-tight">{user?.role}</p>
             </div>
-            <ThemeToggle size="sm" />
-            <Button variant="ghost" size="sm" aria-label="Sign out" title="Sign out" icon={<SignOut size={16} />} onClick={signOut} />
+            <ThemeToggle size="sm" className="rounded-full h-8 w-8" />
+            <Button variant="ghost" size="sm" aria-label="Sign out" title="Sign out" className="rounded-full h-8 w-8" icon={<SignOut size={16} />} onClick={signOut} />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 py-1">
-            <ThemeToggle size="sm" />
+          <div className="flex flex-col items-center gap-2.5 py-1">
+            <ThemeToggle size="sm" className="rounded-full h-10 w-10 bg-raised/40 hover:bg-raised" />
             <span
               title={`${user?.username} (${user?.role})`}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-raised text-caption font-semibold uppercase cursor-default"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-caption font-bold text-on-primary-container uppercase shadow-sm cursor-default"
             >
               {user?.username.slice(0, 1)}
             </span>
@@ -293,7 +343,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:pl-[64px]">
+      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:pl-[96px]">
         <div key={location.pathname.split('/')[1]} className="anim-enter mx-auto max-w-[1360px] px-4 py-6 md:px-8 md:py-8">
           <Outlet />
         </div>
