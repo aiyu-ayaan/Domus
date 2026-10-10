@@ -1,6 +1,11 @@
 package com.aiyu.domus
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -310,22 +315,15 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                     Text(if (isOn) "On" else "Off", style = MaterialTheme.typography.titleMedium)
                 }
             }
-            s.brightness?.let { CommitSlider("Brightness", it, 1f..100f, "$it%", enabled) { v -> send(DeviceCommand(brightness = v)) } }
+            s.brightness?.let { CommitSlider("Brightness", it, 1f..100f, { v -> "$v%" }, enabled) { v -> send(DeviceCommand(brightness = v)) } }
             // Every light gets the White / Color controls, whatever it reports right now (same rule as the web app).
             if (device.type == "light") LightControls(device, enabled, send)
             else s.colorTemp?.let {
-                CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
-            }
-            s.fanPercent?.takeIf { s.mode == "Manual" }?.let {
-                // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
-                val (low, high) = s.fanCadr?.takeIf { r -> r.size == 2 } ?: listOf(0, 0)
-                val cadr = low + (high - low) * it / 100
-                val label = if (cadr > 0) "Speed · Coverage ${cadr * 7 / 100}–${cadr * 12 / 100} m²" else "Speed"
-                CommitSlider(label, it, 0f..100f, "", enabled) { v -> send(DeviceCommand(fanPercent = v)) }
+                CommitSlider("White", it, 0f..100f, { v -> if (v < 34) "Warm" else if (v < 67) "Neutral" else "Cool" }, enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
-                if (options.isNotEmpty()) {
+                if (options.isNotEmpty()) Column {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(label, style = MaterialTheme.typography.titleSmall)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -336,6 +334,23 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                                     label = { Text(option.replace('_', ' ').replaceFirstChar(Char::uppercase)) },
                                     enabled = enabled,
                                 )
+                            }
+                        }
+                    }
+                    // The manual level only drives the fan in manual mode, so it unfolds under the mode chips.
+                    val speed = s.fanPercent
+                    if (key == "mode" && speed != null) {
+                        val motion = MaterialTheme.motionScheme
+                        AnimatedVisibility(
+                            visible = current == "Manual",
+                            enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+                            exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+                        ) {
+                            // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
+                            val (low, high) = s.fanCadr?.takeIf { it.size == 2 } ?: listOf(0, 0)
+                            val coverage = { v: Int -> (low + (high - low) * v / 100).let { if (it > 0) "Coverage ${it * 7 / 100}–${it * 12 / 100} m²" else "" } }
+                            Box(Modifier.padding(top = 20.dp)) {
+                                CommitSlider("Speed", speed, 0f..100f, coverage, enabled) { v -> send(DeviceCommand(fanPercent = v)) }
                             }
                         }
                     }
@@ -561,13 +576,13 @@ private fun PresetGrid(presets: List<LightPreset>, enabled: Boolean, onPick: (Li
 
 /** Slider that follows the finger locally and sends one command when released. */
 @Composable
-private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRange<Float>, valueText: String, enabled: Boolean, onCommit: (Int) -> Unit) {
+private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRange<Float>, valueText: (Int) -> String, enabled: Boolean, onCommit: (Int) -> Unit) {
     // Null when not dragging: the slider then follows the device (which already shows the sent value).
     var drag by remember { mutableStateOf<Float?>(null) }
     Column {
         Row {
             Text(label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            if (valueText.isNotEmpty()) Text(drag?.let { "${it.roundToInt()}" } ?: valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(valueText(drag?.roundToInt() ?: value), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Slider(
             value = drag ?: value.toFloat().coerceIn(range),
