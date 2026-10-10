@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,9 @@ import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.Blinds
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DevicesOther
+import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Refresh
@@ -50,6 +53,10 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Slider
@@ -67,6 +74,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -83,6 +91,8 @@ import com.aiyu.domus.core.User
 import com.aiyu.domus.core.airLevel
 import com.aiyu.domus.core.formatKwh
 import com.aiyu.domus.core.formatWatts
+import com.aiyu.domus.core.kelvinRgb
+import com.aiyu.domus.core.whiteKelvin
 import com.aiyu.domus.ui.components.ColorWheel
 import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
@@ -230,7 +240,7 @@ fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
 }
 
 // Light colors a bulb can be set to: device data, not theme colors (same presets as the web app).
-private val LightColors = listOf("#F59E0B", "#F97316", "#EF4444", "#EC4899", "#A855F7", "#0EA5E9", "#06B6D4", "#10B981", "#84CC16", "#FFFFFF")
+private val LightColors = listOf("#F59E0B", "#EAB308", "#F97316", "#EF4444", "#EC4899", "#A855F7", "#0EA5E9", "#06B6D4", "#10B981", "#84CC16")
 
 private fun parseColor(hex: String): Color? = runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull()
 
@@ -279,35 +289,10 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 }
             }
             s.brightness?.let { CommitSlider("Brightness", it, 1f..100f, "$it%", enabled) { v -> send(DeviceCommand(brightness = v)) } }
-            s.colorTemp?.let {
-                CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v ->
-                    send(DeviceCommand(colorTemp = v, colorMode = "white"))
-                }
-            }
-            if (s.color != null) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Color", style = MaterialTheme.typography.titleSmall)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LightColors.forEach { hex ->
-                            val selected = s.colorMode != "white" && s.color.equals(hex, ignoreCase = true)
-                            Box(
-                                Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(parseColor(hex) ?: c.surfaceVariant)
-                                    .border(1.dp, c.outlineVariant, CircleShape)
-                                    .clickable(enabled, role = Role.RadioButton) { send(DeviceCommand(color = hex, colorMode = "color")) }
-                                    .semantics { contentDescription = "Color $hex"; stateDescription = if (selected) "Selected" else "Not selected" },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                // Dark tick: every preset is a light, saturated color.
-                                if (selected) Icon(Icons.Rounded.Check, contentDescription = null, tint = Color.Black)
-                            }
-                        }
-                    }
-                    // Any color: drag on the wheel, it is sent when the finger lifts.
-                    ColorWheel({ send(DeviceCommand(color = it, colorMode = "color")) }, Modifier.align(Alignment.CenterHorizontally).size(220.dp), enabled)
-                }
+            // Every light gets the White / Color controls, whatever it reports right now (same rule as the web app).
+            if (device.type == "light") LightControls(device, enabled, send)
+            else s.colorTemp?.let {
+                CommitSlider("White", it, 0f..100f, if (it < 34) "Warm" else if (it < 67) "Neutral" else "Cool", enabled) { v -> send(DeviceCommand(colorTemp = v)) }
             }
             listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
@@ -375,6 +360,115 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             onDismiss()
             scope.launch { repository.change { it.removeDevice(device.id) } }
         }, { removing = false })
+    }
+}
+
+// Colors of light itself (white temperatures, bulb colors): device data, not theme colors. Same values as the web app.
+private val WhiteTrack = listOf(0xFFFF890E, 0xFFFFA757, 0xFFFFE4CE, 0xFFD6E6FF, 0xFFB2D4FF).map(::Color)
+private val WhitePresets = listOf("Candle" to 0, "Soft White" to 16, "Daylight" to 67, "Cool White" to 100)
+
+private fun whiteName(percent: Int) = when {
+    percent < 10 -> "Candle"
+    percent < 30 -> "Soft White"
+    percent < 60 -> "Neutral White"
+    percent < 85 -> "Daylight"
+    else -> "Cool White"
+}
+
+/**
+ * White / Color controls of a light, like the web app's: a preview of the light it gives, the mode switch,
+ * then a temperature slider with presets (White) or swatches and the wheel (Color).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (DeviceCommand) -> Unit) {
+    val c = MaterialTheme.colorScheme
+    val s = device.state
+    // The device's own mode when it reports one; otherwise color only for a light with a color and no white setting.
+    val reported = s.colorMode?.takeIf { it == "white" || it == "color" } ?: if (s.color != null && s.colorTemp == null) "color" else "white"
+    var mode by remember(reported) { mutableStateOf(reported) }
+    val temp = s.colorTemp ?: 50
+    var dragTemp by remember { mutableStateOf<Float?>(null) }
+    val shownTemp = dragTemp?.roundToInt() ?: temp
+    val color = s.color ?: "#F59E0B"
+    val on = device.isOnline && s.isOn != false
+    val glow = if (mode == "white") Color(0xFF000000 or kelvinRgb(whiteKelvin(shownTemp)).toLong()) else parseColor(color) ?: c.primary
+    val shown by animateColorAsState(if (on) glow else c.surfaceContainerHighest, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "glow")
+
+    Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(48.dp).clip(MaterialShapes.Sunny.toShape()).background(shown).border(1.dp, c.outlineVariant, MaterialShapes.Sunny.toShape()))
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(if (!on) "Light off" else if (mode == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
+                RollingText(
+                    if (mode == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
+                    MaterialTheme.typography.bodyMedium, c.onSurfaceVariant,
+                )
+            }
+            Text(if (on) "${s.brightness ?: 100}%" else "0%", style = MaterialTheme.typography.titleMedium)
+        }
+    }
+
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        // Switching mode re-sends that mode's current setting, so the bulb changes at once.
+        SegmentedButton(mode == "white", { mode = "white"; send(DeviceCommand(colorTemp = temp, colorMode = "white")) }, SegmentedButtonDefaults.itemShape(0, 2), enabled = enabled, icon = { Icon(Icons.Rounded.LightMode, null, Modifier.size(18.dp)) }) { Text("White") }
+        SegmentedButton(mode == "color", { mode = "color"; send(DeviceCommand(color = color, colorMode = "color")) }, SegmentedButtonDefaults.itemShape(1, 2), enabled = enabled, icon = { Icon(Icons.Rounded.Palette, null, Modifier.size(18.dp)) }) { Text("Color") }
+    }
+
+    if (mode == "white") {
+        Column {
+            Row {
+                Text("Color temperature", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                Text("${whiteKelvin(shownTemp)}K · ${if (shownTemp < 35) "Warm" else if (shownTemp > 65) "Cool" else "Neutral"}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            }
+            Slider(
+                value = dragTemp ?: temp.toFloat(),
+                onValueChange = { dragTemp = it },
+                onValueChangeFinished = { dragTemp?.let { send(DeviceCommand(colorTemp = it.roundToInt(), colorMode = "white")) }; dragTemp = null },
+                valueRange = 0f..100f,
+                enabled = enabled,
+                // The track shows the light each position gives.
+                track = { Box(Modifier.fillMaxWidth().height(16.dp).clip(CircleShape).background(Brush.horizontalGradient(WhiteTrack)).border(1.dp, c.outlineVariant, CircleShape)) },
+                modifier = Modifier.semantics { contentDescription = "Color temperature" },
+            )
+            Row {
+                Text("2000K warm", style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                Text("6500K cool", style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant)
+            }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            WhitePresets.forEach { (name, percent) ->
+                FilterChip(
+                    selected = kotlin.math.abs(temp - percent) <= 7,
+                    onClick = { send(DeviceCommand(colorTemp = percent, colorMode = "white")) },
+                    label = { Text("$name · ${whiteKelvin(percent)}K") },
+                    leadingIcon = { Box(Modifier.size(16.dp).clip(CircleShape).background(Color(0xFF000000 or kelvinRgb(whiteKelvin(percent)).toLong())).border(1.dp, c.outlineVariant, CircleShape)) },
+                    enabled = enabled,
+                )
+            }
+        }
+    } else {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LightColors.forEach { hex ->
+                val selected = color.equals(hex, ignoreCase = true)
+                Box(
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(parseColor(hex) ?: c.surfaceVariant)
+                        .border(1.dp, c.outlineVariant, CircleShape)
+                        .clickable(enabled, role = Role.RadioButton) { send(DeviceCommand(color = hex, colorMode = "color")) }
+                        .semantics { contentDescription = "Color $hex"; stateDescription = if (selected) "Selected" else "Not selected" },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // Dark tick: every preset is a light, saturated color.
+                    if (selected) Icon(Icons.Rounded.Check, contentDescription = null, tint = Color.Black)
+                }
+            }
+        }
+        // Any color: drag on the wheel, it is sent when the finger lifts.
+        ColorWheel({ send(DeviceCommand(color = it, colorMode = "color")) }, Modifier.align(Alignment.CenterHorizontally).size(220.dp), enabled)
     }
 }
 

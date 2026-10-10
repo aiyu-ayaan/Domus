@@ -52,3 +52,16 @@ fun normalizeServerUrl(input: String): String? {
     val port = if (uri.port != -1) uri.port else if (isIp) 8443 else 443
     return if (port == 443) "https://$host" else "https://$host:$port"
 }
+
+/** A light's 0-100 % white setting as color temperature: 2000 K (warm) to 6500 K (cool), like the web app. */
+fun whiteKelvin(percent: Int): Int = 2000 + percent.coerceIn(0, 100) * 4500 / 100
+
+/** The color of light at [kelvin] as 0xRRGGBB (Tanner Helland's approximation), for previews. */
+fun kelvinRgb(kelvin: Int): Int {
+    val t = kelvin.coerceIn(1000, 40000) / 100.0
+    val r = if (t <= 66) 255.0 else 329.698727446 * Math.pow(t - 60, -0.1332047592)
+    val g = if (t <= 66) 99.4708025861 * Math.log(t) - 161.1195681661 else 288.1221695283 * Math.pow(t - 60, -0.0755148492)
+    val b = if (t > 66) 255.0 else if (t <= 19) 0.0 else 138.5177312231 * Math.log(t - 10) - 305.0447927307
+    fun channel(v: Double) = v.coerceIn(0.0, 255.0).toInt()
+    return (channel(r) shl 16) or (channel(g) shl 8) or channel(b)
+}

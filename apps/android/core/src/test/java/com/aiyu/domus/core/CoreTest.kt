@@ -64,4 +64,14 @@ class CoreTest {
         val frame = IntArray(25) { i -> if (i % 5 in 1..3 && i / 5 in 1..3) white else blue }
         assertEquals("#0000ff", screenColor(frame, 5, 5, "average", true).hex)
     }
+
+    @Test
+    fun whiteSettingMapsToWarmAndCoolLight() {
+        assertEquals(2000, whiteKelvin(0))
+        assertEquals(6500, whiteKelvin(100))
+        // Warm light has no blue to speak of; cool light is nearly white (the web app's #FFF9FA at 6500 K).
+        assertEquals(0xFF, kelvinRgb(2000) shr 16)
+        assertEquals(true, (kelvinRgb(2000) and 0xFF) < 40)
+        assertEquals(true, (kelvinRgb(6500) and 0xFF) >= 250)
+    }
 }
