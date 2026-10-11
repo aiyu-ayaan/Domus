@@ -45,10 +45,13 @@ private val libraries = listOf(
     Library("Material 3 for Compose", "https://developer.android.com/jetpack/androidx/releases/compose-material3", "Apache-2.0"),
     Library("AndroidX Activity, Lifecycle, Core", "https://developer.android.com/jetpack/androidx", "Apache-2.0"),
     Library("AndroidX ProfileInstaller", "https://developer.android.com/jetpack/androidx/releases/profileinstaller", "Apache-2.0"),
+    Library("OkHttp", "https://github.com/square/okhttp", "Apache-2.0"),
+    Library("AndroidX Graphics Shapes", "https://developer.android.com/jetpack/androidx/releases/graphics", "Apache-2.0"),
     Library("ZXing", "https://github.com/zxing/zxing", "Apache-2.0"),
     Library("Markdown Renderer", "https://github.com/mikepenz/multiplatform-markdown-renderer", "Apache-2.0"),
     Library("Coil", "https://github.com/coil-kt/coil", "Apache-2.0"),
     Library("DiceBear (avatar artwork)", "https://github.com/dicebear/dicebear", "MIT"),
+    Library("Open-Meteo (place search, asked by your server)", "https://open-meteo.com", "CC BY 4.0"),
     Library("Home Assistant (Tuya QR flow)", "https://www.home-assistant.io", "Inspiration"),
 )
 
