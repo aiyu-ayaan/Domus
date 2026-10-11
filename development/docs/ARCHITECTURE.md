@@ -12,6 +12,7 @@ flowchart LR
     subgraph Clients
         Web["React web UI"]
         Desk["Electron shell"]
+        And["Android app"]
     end
 
     subgraph Server["backend/ — Rust (Axum, Tokio)"]
@@ -44,7 +45,7 @@ flowchart LR
     DB[("SQLite (WAL)<br/>data/domus.db")]
     Key[["data/master.key<br/>data/jwt.secret<br/>data/tls/"]]
 
-    Web & Desk -->|HTTPS + WSS| TLS --> Auth --> Modules
+    Web & Desk & And -->|HTTPS + WSS| TLS --> Auth --> Modules
     Auth --> WS
     Modules --> Mgr
     Modules --> DB
@@ -532,17 +533,19 @@ erDiagram
     devices ||--o{ device_group_members : ""
     device_groups ||--o{ device_group_members : ""
     devices ||--o{ energy_metrics : samples
-    users { text id PK; text role; bool all_rooms }
+    devices ||--o{ air_metrics : samples
+    users { text id PK; text role; bool all_rooms; bool kid; bool must_change_password; text reset_code_hash }
     user_room_access { text user_id; text room_id; bool can_control; bool can_edit }
     user_device_access { text user_id; text device_id; bool can_control; bool can_edit }
-    devices { text id PK; text integration_type; text external_id; text state_json; text secrets_enc; bool is_online }
+    devices { text id PK; text integration_type; text external_id; text state_json; text secrets_enc; bool is_online; bool confirm_changes }
     discovered_devices { text id PK; text status; text note; text secrets_enc }
     integration_accounts { text id PK; text credentials_enc; text status }
     energy_metrics { text device_id; real power_watts; real energy_kwh; datetime recorded_at }
     automations { text triggers_json; text conditions_json; text actions_json; bool is_enabled }
     scenes { text actions_json }
-    electricity_settings { real rate_per_kwh; text currency; real monthly_budget; int billing_cycle_day; real fixed_monthly_charge; text slabs }
-    notifications { text level; text title; bool is_read }
+    electricity_settings { real rate_per_kwh; text currency; real monthly_budget; int billing_cycle_day; real fixed_monthly_charge; text slabs; text time_of_use }
+    air_metrics { text device_id; real pm25; datetime recorded_at }
+    notifications { text level; text title; bool is_read; bool admin_only }
     app_settings { text key PK; text value_json }
 ```
 

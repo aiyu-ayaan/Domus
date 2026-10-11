@@ -10,14 +10,99 @@ React web UI (with an Electron desktop shell), and pluggable integrations for
 Home Assistant discovery).
 
 - Automatic discovery of new devices, with an inbox or auto-add
-- Live dashboard: power draw, bill so far and projected bill, air quality
-- Rooms, device groups, scenes and automations
+- Live dashboard: power draw, bill so far and projected bill, air quality, motion / door / leak / battery readings
+- Rooms, device groups, scenes and automations; triggers at a time, at **sunrise or sunset** (with an offset), on a device change, power level or going offline
+- **Ask before switching**: mark a main switch and every app, group, scene and manual automation run warns before it is turned on or off
+- Electricity billing with flat, slab and **time-of-day** tariffs in any currency
 - Multiple users with admin / member / guest roles and access per room or per device, each see-only, control or edit
-- HTTPS by default; credentials and device keys encrypted at rest
+- Web, Electron desktop (Linux, Windows) and a native Android app, kept in sync live
+- An Updates page with the release notes (Markdown, tables and images) in every app
+- HTTPS by default; credentials and device keys encrypted at rest; one-file backup and restore
 
-Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs/ARCHITECTURE.md).
+Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs/ARCHITECTURE.md), summarised [below](#how-it-fits-together).
 UI design profile: [`design-system/domus/MASTER.md`](design-system/domus/MASTER.md).
 Progress: [`development/TODO.md`](development/TODO.md).
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    subgraph Clients
+        Web["React web UI"]
+        Desk["Electron desktop"]
+        And["Android app<br/>(Kotlin, Compose)"]
+    end
+
+    subgraph Server["Domus server: Rust (Axum, Tokio), one binary or Docker image"]
+        direction TB
+        TLS["HTTPS (rustls)"] --> Auth["JWT auth<br/>role and access read from the database"]
+        Auth --> Modules["modules<br/>users · devices · rooms · scenes · automations<br/>energy · notifications · integrations"]
+        Auth --> WS["live events (WebSocket)"]
+        Modules --> Mgr["DeviceManager<br/>poll · discover · command"]
+        Mgr --> Bus(("EventBus"))
+        Bus --> Engine["AutomationEngine<br/>time · sun · state triggers"]
+        Engine --> Mgr
+        Bus --> WS
+        Workers["workers<br/>poller · discovery · scheduler"] --> Mgr
+        Workers --> Engine
+        Mgr --> Vault["Vault<br/>AES-256-GCM"]
+    end
+
+    subgraph Plugins["integrations"]
+        Tuya["Tuya / Smart Life<br/>cloud, QR login"]
+        Tapo["Tapo<br/>local"]
+        Xiaomi["Xiaomi<br/>local miIO"]
+        Hue["Philips Hue<br/>local bridge"]
+        Mqtt["MQTT<br/>Home Assistant discovery"]
+    end
+
+    DB[("SQLite<br/>data/domus.db")]
+    Keys[["data/master.key · jwt.secret · tls/"]]
+    Web & Desk & And -->|"HTTPS + WSS"| TLS
+    Mgr --> Plugins
+    Modules --> DB
+    Vault -.-> Keys
+    Modules -. "place search (name only)" .-> Geo(("Open-Meteo<br/>geocoding"))
+```
+
+Clients talk only to the server; the server talks to your devices (locally where the vendor allows it)
+and keeps everything in one SQLite file. The cloud is used only where a vendor offers no local control
+(Tuya) or to fetch device keys (Xiaomi), plus two optional lookups: place search for the home location and
+GitHub for update checks.
+
+### Data model
+
+```mermaid
+erDiagram
+    users ||--o{ user_room_access : "rooms"
+    rooms ||--o{ user_room_access : ""
+    users ||--o{ user_device_access : "devices"
+    devices ||--o{ user_device_access : ""
+    rooms ||--o{ devices : contains
+    integration_accounts ||--o{ devices : "linked via"
+    integration_accounts ||--o{ discovered_devices : "found via"
+    devices ||--o{ device_group_members : ""
+    device_groups ||--o{ device_group_members : ""
+    devices ||--o{ energy_metrics : samples
+    devices ||--o{ air_metrics : samples
+    users { text id PK; text role; bool all_rooms; bool kid; bool must_change_password; text reset_code_hash }
+    user_room_access { text user_id; text room_id; bool can_control; bool can_edit }
+    user_device_access { text user_id; text device_id; bool can_control; bool can_edit }
+    devices { text id PK; text integration_type; text state_json; text secrets_enc; bool is_online; bool confirm_changes }
+    discovered_devices { text id PK; text status; text secrets_enc }
+    integration_accounts { text id PK; text credentials_enc; text status }
+    energy_metrics { text device_id; real power_watts; real energy_kwh; datetime recorded_at }
+    air_metrics { text device_id; real pm25; datetime recorded_at }
+    automations { text triggers_json; text conditions_json; text actions_json; bool is_enabled }
+    scenes { text actions_json; text kind }
+    electricity_settings { real rate_per_kwh; text currency; text slabs; text time_of_use }
+    notifications { text level; text title; bool is_read; bool admin_only }
+    app_settings { text key PK; text value_json }
+```
+
+Credentials and device keys are stored sealed (`*_enc`) under `data/master.key`, which is not in the
+database. The full set of diagrams, one per feature, is in
+[`development/docs`](development/docs).
 
 ## Screenshots
 
@@ -104,6 +189,9 @@ Download the APK from the release page and open it. Later updates are offered wh
 Settings → Updates, on the Stable, Beta or Alpha channel, and installed from there; Android asks
 once to allow Domus to install them.
 
+The **Updates** page (Settings → Updates on Android, Settings → About → Updates on web and desktop) shows
+what you run, the newest release on your channel and its release notes, which are written in Markdown.
+
 Releases, version numbers and the update channels: [development/docs/RELEASE.md](development/docs/RELEASE.md).
 
 ## Requirements
@@ -156,6 +244,54 @@ On first start Domus creates `data/` with:
 Settings live in `config/default.toml`; any key can be overridden with
 `DOMUS__SECTION__KEY` environment variables (see `.env.example`).
 
+## Backup and restore
+
+Everything lives in `data/`. Back up the whole folder, or take the one-file backup:
+
+**Back up.** Sign in as an administrator → Settings → **Backup** → *Download backup*. The file is a copy of the
+database with the master key stored inside, so the linked accounts in it can still be opened after a restore.
+It is made while the server runs. Keep it private: whoever holds it can open those accounts. The JWT secret
+and the TLS certificate are not in it.
+
+**Restore.** Stop the server, then:
+
+```bash
+# Docker
+docker compose cp domus-backup-2026-10-11.db domus:/app/data/restore.db
+docker compose stop domus
+docker compose run --rm domus domus-backend restore data/restore.db
+docker compose start domus
+
+# Without Docker, from the repo root (uses ./data)
+domus-backend restore ~/Downloads/domus-backup-2026-10-11.db
+```
+
+What was there is kept next to it as `*.before-restore`. After a restore on a new machine people sign in
+again and the apps ask to trust the new certificate. If you set the key with `DOMUS_MASTER_KEY`, the backup
+holds no key and the restored server needs the same variable. More in
+[development/docs/DEPLOYMENT.md](development/docs/DEPLOYMENT.md#backup-and-restore).
+
+## Forgot the administrator password
+
+Domus has no mail server, so nothing is sent by email. In order of effort:
+
+1. **Another administrator** opens Settings → People, turns on *Reset code* for you and tells you the 8-digit
+   code (good for 30 minutes and 5 wrong tries). On the sign-in screen choose *Forgot password?*, enter your
+   username and then the code.
+2. **From the server**, which works while Domus runs or is stopped and needs no sign-in:
+
+   ```bash
+   docker compose exec domus domus-backend reset-password <username>              # prints a new random password
+   docker compose exec domus domus-backend reset-password <username> 'new-pass'   # or choose one (8+ characters)
+   domus-backend reset-password <username>                                        # without Docker, from the repo root
+   ```
+
+   Sign in with it and change it in Settings → Password.
+
+Five wrong passwords for a username lock that name for 15 minutes in production (the lock is lifted by
+restarting the server, and is off in development). Details and the rules for generated passwords and kid's
+accounts: [development/docs/ACCOUNTS.md](development/docs/ACCOUNTS.md).
+
 ## Connecting devices
 
 | Brand | How |
@@ -175,8 +311,34 @@ kWh or **slabs** for unit-based tariffs (e.g. Pune/MSEDCL: 0–100 units at one
 rate, 101–300 at the next, and so on). The bill is calculated per billing
 cycle, plus the fixed monthly charge.
 
+Tariffs can also carry **time-of-day** windows: hours (on the home's clock, past midnight allowed) whose
+units cost a set amount more or less, for example a night rebate or a peak surcharge, on top of the flat or
+slab price.
+
 New devices appear under **Devices → Discovered**. Turn on *Add new devices
 automatically* there to skip the inbox.
+
+## Sunrise and sunset
+
+Set where the home is in Settings → **Home location**: use this phone's or browser's location, search for
+the town (the server asks the free Open-Meteo geocoder; only the name you type leaves the home), or type the
+latitude and longitude. The coordinates are rounded to about a kilometre and stay on your server. An
+automation can then run at sunrise or sunset, minutes before or after. Without a location, a sun trigger
+never fires.
+
+## Ask before switching
+
+A main switch that cuts power to everything plugged into it is easy to turn off by mistake. Open the device
+and turn on **Ask before switching**: every app then asks before turning it on or off, and so do room
+*All on / All off*, device groups, scenes (including scenes inside scenes) and a manual *Run* of an
+automation that would switch it. The setting is kept on the server, so it is the same on web, desktop and
+Android. Automations that fire on their own cannot ask and run as written, and nothing outside Domus (a
+vendor app, a wall switch) is covered.
+
+## License
+
+Domus is released under the [MIT License](LICENSE). Third-party libraries keep their own licenses; they are
+listed under About → Acknowledgements in every app.
 
 ## Tests
 

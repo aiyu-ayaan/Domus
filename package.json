@@ -1,5 +1,6 @@
 {
   "name": "domus-root",
+  "license": "MIT",
   "version": "0.0.1-alpha.3",
   "build": 4,
   "private": true,
