@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { desktop } from '@/lib/api'
 import { useToast } from '@/lib/toast'
 import { ReleaseNotes, useReleaseNotes } from '@/lib/releases'
+import { t } from '@/lib/i18n'
 import { Button } from './ui/Button'
 
 /** The desktop app's own update: what it found, the install and the download's progress (0..1, null when idle). */
@@ -17,7 +18,7 @@ export function useDesktopUpdate() {
   useEffect(() => updates?.onProgress?.(setProgress), [updates])
   const install = useMutation({
     mutationFn: () => updates!.install(),
-    onSuccess: (failed) => failed && toast.push({ tone: 'error', title: 'Update failed', message: failed }),
+    onSuccess: (failed) => failed && toast.push({ tone: 'error', title: t('update.failed'), message: failed }),
   })
   return { updates, info, check, install, progress, busy: install.isPending || progress !== null }
 }
@@ -26,7 +27,7 @@ export function UpdateProgress({ value }: { value: number }) {
   const percent = Math.round(value * 100)
   return (
     <div className="flex items-center gap-3">
-      <div className="h-1.5 flex-1 rounded-full bg-raised" role="progressbar" aria-label="Downloading update" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+      <div className="h-1.5 flex-1 rounded-full bg-raised" role="progressbar" aria-label={t('update.downloading')} aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div className="h-full rounded-full bg-fg/70 transition-[width] duration-fast" style={{ width: `${percent}%` }} />
       </div>
       <span className="w-9 text-right text-label tabular text-muted">{percent}%</span>
@@ -48,14 +49,14 @@ export function UpdatePrompt() {
     return () => document.removeEventListener('keydown', onKey)
   }, [open, busy])
   if (!open) return null
-  const title = `Domus ${found.version} is available`
+  const title = t('update.available', { version: found.version })
   return createPortal(
     <div className="fixed inset-0 top-[var(--titlebar)] z-sheet flex items-center justify-center p-4">
       <div className="anim-fade absolute inset-0 bg-black/50" aria-hidden />
       <div role="alertdialog" aria-modal="true" aria-label={title} className="anim-enter relative w-full max-w-md rounded-lg border border-border bg-panel p-5" style={{ boxShadow: 'var(--overlay-shadow)' }}>
         <h2 className="text-title font-semibold">{title}</h2>
         <p className="mt-2 text-body text-muted">
-          You have {info.version}. {info.selfInstall ? 'Domus restarts when the download is done.' : 'The installer opens when the download is done.'}
+          {t('update.youHave', { version: info.version })} {info.selfInstall ? t('update.restartsWhenDone') : t('update.installerOpens')}
         </p>
         {/* Long notes scroll inside the dialog so its buttons stay in reach. */}
         {notes.data && (
@@ -77,10 +78,10 @@ export function UpdatePrompt() {
               setClosed(true)
             }}
           >
-            Later
+            {t('update.later')}
           </Button>
           <Button variant="primary" autoFocus loading={busy} onClick={() => install.mutate(undefined, { onSettled: () => setClosed(true) })}>
-            {info.selfInstall ? 'Update and restart' : 'Download'}
+            {info.selfInstall ? t('update.restart') : t('update.download')}
           </Button>
         </div>
       </div>

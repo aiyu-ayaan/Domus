@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import {
   Armchair,
   Bathtub,
@@ -36,15 +37,15 @@ export const deviceIcons: Record<DeviceType, Icon> = {
 }
 
 export const deviceTypeLabel: Record<DeviceType, string> = {
-  switch: 'Switch',
-  plug: 'Smart plug',
-  light: 'Light',
-  air_purifier: 'Air purifier',
-  fan: 'Fan',
-  sensor: 'Sensor',
-  climate: 'Climate',
-  cover: 'Cover',
-  other: 'Device',
+  switch: t('device.type.switch'),
+  plug: t('device.type.plug'),
+  light: t('device.type.light'),
+  air_purifier: t('device.type.air_purifier'),
+  fan: t('device.type.fan'),
+  sensor: t('device.type.sensor'),
+  climate: t('device.type.climate'),
+  cover: t('device.type.cover'),
+  other: t('device.type.other'),
 }
 
 export const integrationLabel: Record<string, string> = {
@@ -59,10 +60,10 @@ export const canToggle = (d: Device) => d.state.is_on !== undefined && d.device_
 
 /** Short one-line status shown on tiles. */
 export function deviceSummary(d: Device): string {
-  if (!d.is_online) return 'Offline'
+  if (!d.is_online) return t('device.offline')
   const s = d.state
   const parts: string[] = []
-  if (s.is_on !== undefined && d.device_type !== 'sensor') parts.push(s.is_on ? 'On' : 'Off')
+  if (s.is_on !== undefined && d.device_type !== 'sensor') parts.push(t(s.is_on ? 'device.on' : 'device.off'))
   if (d.device_type === 'light' && s.is_on && s.brightness != null) parts.push(`${s.brightness}%`)
   if (d.device_type === 'air_purifier' && s.air_quality_pm25 != null) {
     parts.push(`PM2.5 ${formatNumber(s.air_quality_pm25, 0)} · ${airQuality(s.air_quality_pm25)?.label}`)
@@ -71,13 +72,13 @@ export function deviceSummary(d: Device): string {
     if (s.humidity != null) parts.push(`${formatNumber(s.humidity, 0)}%`)
   }
   // Sensors without a reading of their own say what they last saw.
-  if (typeof s.motion === 'boolean') parts.push(s.motion ? 'Motion' : 'Clear')
-  if (typeof s.contact === 'boolean') parts.push(s.contact ? 'Open' : 'Closed')
-  if (s.water_leak === true) parts.push('Leak')
+  if (typeof s.motion === 'boolean') parts.push(t(s.motion ? 'device.motion' : 'device.clear'))
+  if (typeof s.contact === 'boolean') parts.push(t(s.contact ? 'device.open' : 'device.closed'))
+  if (s.water_leak === true) parts.push(t('device.leak'))
   if (s.current_power_watts != null && s.is_on !== false && d.device_type !== 'air_purifier') {
     parts.push(formatWatts(s.current_power_watts))
   }
-  return parts.join(' · ') || 'Online'
+  return parts.join(' · ') || t('device.online')
 }
 
 const roomIconMap: [RegExp, Icon][] = [
@@ -94,16 +95,16 @@ const roomIconMap: [RegExp, Icon][] = [
 ]
 
 export const roomIconChoices: { id: string; icon: Icon; label: string }[] = [
-  { id: 'house', icon: House, label: 'Home' },
-  { id: 'bed', icon: Bed, label: 'Bedroom' },
-  { id: 'living', icon: Armchair, label: 'Living' },
-  { id: 'kitchen', icon: CookingPot, label: 'Kitchen' },
-  { id: 'office', icon: Desk, label: 'Office' },
-  { id: 'bath', icon: Bathtub, label: 'Bathroom' },
-  { id: 'garage', icon: Garage, label: 'Garage' },
-  { id: 'garden', icon: Plant, label: 'Garden' },
-  { id: 'kids', icon: Baby, label: 'Kids' },
-  { id: 'media', icon: Television, label: 'Media' },
+  { id: 'house', icon: House, label: t('room.icon.house') },
+  { id: 'bed', icon: Bed, label: t('room.icon.bed') },
+  { id: 'living', icon: Armchair, label: t('room.icon.living') },
+  { id: 'kitchen', icon: CookingPot, label: t('room.icon.kitchen') },
+  { id: 'office', icon: Desk, label: t('room.icon.office') },
+  { id: 'bath', icon: Bathtub, label: t('room.icon.bath') },
+  { id: 'garage', icon: Garage, label: t('room.icon.garage') },
+  { id: 'garden', icon: Plant, label: t('room.icon.garden') },
+  { id: 'kids', icon: Baby, label: t('room.icon.kids') },
+  { id: 'media', icon: Television, label: t('room.icon.media') },
 ]
 
 export function roomIcon(name: string, icon?: string | null): Icon {

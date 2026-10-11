@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
@@ -84,7 +85,7 @@ export function Sheet({
             <h2 className="text-title font-semibold">{title}</h2>
             {description && <p className="mt-0.5 text-label text-muted">{description}</p>}
           </div>
-          <Button variant="ghost" size="sm" aria-label="Close" icon={<X size={16} />} onClick={onClose} className="-mr-1.5" />
+          <Button variant="ghost" size="sm" aria-label={t('common.close')} icon={<X size={16} />} onClick={onClose} className="-mr-1.5" />
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
         {footer && <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</footer>}
@@ -100,7 +101,7 @@ export function Confirm({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Delete',
+  confirmLabel = t('common.delete'),
   tone = 'danger',
   loading,
 }: {
@@ -131,7 +132,7 @@ export function Confirm({
         <p className="mt-2 text-body text-muted">{message}</p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose} autoFocus>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" className={tone === 'danger' ? 'bg-danger text-white hover:bg-danger/90' : undefined} onClick={onConfirm} loading={loading}>
             {confirmLabel}

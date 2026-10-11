@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Confirm } from '@/components/ui/Sheet'
 import { setConfirmHandler } from '@/lib/api'
@@ -26,9 +27,9 @@ export function useConfirmSwitch(): { ask: (devices: Device[], on: boolean, run:
           pending?.run()
           close()
         }}
-        title={pending ? `Turn ${pending.names.length === 1 ? pending.names[0] : `${pending.names.length} devices`} ${pending.on ? 'on' : 'off'}?` : ''}
-        message={pending && (pending.names.length === 1 ? 'You asked to be warned before this device is switched.' : `You asked to be warned before switching ${pending.names.join(', ')}.`)}
-        confirmLabel={pending?.on ? 'Turn on' : 'Turn off'}
+        title={pending ? t('confirmSwitch.turnTitle', { count: pending.names.length, name: pending.names[0], state: t(pending.on ? 'confirmSwitch.state.on' : 'confirmSwitch.state.off') }) : ''}
+        message={pending && (pending.names.length === 1 ? t('confirmSwitch.warnedOne') : t('confirmSwitch.warnedMany', { names: pending.names.join(', ') }))}
+        confirmLabel={t(pending?.on ? 'confirmSwitch.turnOn' : 'confirmSwitch.turnOff')}
         tone="neutral"
       />
     ),
@@ -55,9 +56,9 @@ export function ConfirmHost() {
       open={!!asking}
       onClose={() => close(false)}
       onConfirm={() => close(true)}
-      title={names.length === 1 ? `Switch ${names[0]}?` : `Switch ${names.length} devices?`}
-      message={`This includes ${names.join(', ')}, which ${names.length === 1 ? 'asks' : 'ask'} before switching. Switching ${names.length === 1 ? 'it' : 'them'} can cut power to whatever is connected.`}
-      confirmLabel="Switch"
+      title={t('confirmSwitch.switchTitle', { count: names.length, name: names[0] })}
+      message={t('confirmSwitch.includes', { count: names.length, names: names.join(', ') })}
+      confirmLabel={t('confirmSwitch.switch')}
       tone="neutral"
     />
   )

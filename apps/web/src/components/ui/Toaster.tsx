@@ -1,5 +1,6 @@
 import { CheckCircle, Info, Warning, XCircle, X } from '@phosphor-icons/react'
 import { useToast, type ToastTone } from '@/lib/toast'
+import { t as tr } from '@/lib/i18n'
 
 const icons: Record<ToastTone, JSX.Element> = {
   info: <Info size={16} className="text-info" />,
@@ -24,7 +25,7 @@ export function Toaster() {
             <p className="text-body font-medium">{t.title}</p>
             {t.message && <p className="mt-0.5 text-label text-muted [overflow-wrap:anywhere]">{t.message}</p>}
           </div>
-          <button onClick={() => dismiss(t.id)} aria-label="Dismiss" className="-m-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded text-subtle hover:text-fg">
+          <button onClick={() => dismiss(t.id)} aria-label={tr('common.dismiss')} className="-m-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded text-subtle hover:text-fg">
             <X size={14} />
           </button>
         </div>

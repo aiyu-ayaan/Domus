@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import { errorMessage, useToast } from './toast'
@@ -55,7 +56,7 @@ export function useCommand() {
     },
     onError: (e, _v, ctx) => {
       if (ctx?.prev) qc.setQueryData(keys.devices, ctx.prev)
-      toast.push({ tone: 'error', title: 'Command failed', message: errorMessage(e) })
+      toast.push({ tone: 'error', title: t('device.commandFailed'), message: errorMessage(e) })
     },
   })
 }

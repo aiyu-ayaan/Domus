@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { getAvatarUri, parseAvatarSpec, useAvatarArt } from '@/lib/avatar'
 import { cn } from '@/lib/cn'
@@ -69,12 +70,12 @@ export function Avatar({
           'cursor-pointer hover:scale-105 active:scale-95 hover:ring-primary/60 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         className,
       )}
-      title={alt || username || `Avatar (${parsed.style})`}
+      title={alt || username || t('avatar.title', { style: parsed.style })}
     >
       {src && !loadError ? (
         <img
           src={src}
-          alt={alt || username || 'User avatar'}
+          alt={alt || username || t('avatar.alt')}
           onError={() => setLoadError(true)}
           className="h-full w-full object-cover transition-opacity duration-200"
           loading="lazy"

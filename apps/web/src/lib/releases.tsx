@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { Suspense, lazy } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
@@ -6,7 +7,7 @@ const Notes = lazy(() => import('@/components/ReleaseNotes'))
 /** A release's notes rendered from Markdown. */
 export function ReleaseNotes({ markdown }: { markdown: string }) {
   return (
-    <Suspense fallback={<p className="text-label text-muted">Loading the release notes…</p>}>
+    <Suspense fallback={<p className="text-label text-muted">{t('releases.loading')}</p>}>
       <Notes markdown={markdown} />
     </Suspense>
   )
@@ -25,7 +26,7 @@ export const useReleaseNotes = (version: string | null | undefined) =>
     queryFn: async (): Promise<string | null> => {
       const res = await fetch(`https://api.github.com/repos/aiyu-ayaan/Domus-Rust/releases/tags/v${encodeURIComponent(version!)}`, { headers: { Accept: 'application/vnd.github+json' } })
       if (res.status === 404) return null
-      if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
+      if (!res.ok) throw new Error(t('releases.githubAnswered', { status: res.status }))
       return ((await res.json()).body as string | null)?.trim() || null
     },
   })

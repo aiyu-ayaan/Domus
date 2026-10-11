@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { CaretDown, Eye, EyeSlash } from '@phosphor-icons/react'
 import { cn } from '@/lib/cn'
@@ -35,7 +36,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({ l
           <button
             type="button"
             onClick={() => setReveal((r) => !r)}
-            aria-label={reveal ? 'Hide password' : 'Show password'}
+            aria-label={t(reveal ? 'field.hidePassword' : 'field.showPassword')}
             className="absolute inset-y-0 right-0 flex w-9 cursor-pointer items-center justify-center text-subtle hover:text-fg"
           >
             {reveal ? <EyeSlash size={16} /> : <Eye size={16} />}

@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { Sun, Moon, CircleHalfTilt } from '@phosphor-icons/react'
 import { useTheme } from '@/lib/theme'
 import { Button } from './Button'
@@ -18,19 +19,19 @@ export function ThemeToggle({
   const config =
     theme === 'system'
       ? {
-          label: 'Auto',
-          title: `Theme: Auto (${resolved}) · Click for Light`,
+          label: t('theme.auto'),
+          title: t('theme.titleAuto', { resolved }),
           icon: <CircleHalfTilt size={iconSize} aria-hidden />,
         }
       : theme === 'light'
         ? {
-            label: 'Light',
-            title: 'Theme: Light · Click for Dark',
+            label: t('theme.light'),
+            title: t('theme.titleLight'),
             icon: <Sun size={iconSize} aria-hidden />,
           }
         : {
-            label: 'Dark',
-            title: 'Theme: Dark · Click for Auto',
+            label: t('theme.dark'),
+            title: t('theme.titleDark'),
             icon: <Moon size={iconSize} aria-hidden />,
           }
 
