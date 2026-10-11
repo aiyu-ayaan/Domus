@@ -1,16 +1,21 @@
 package com.aiyu.domus
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.FilterChip
@@ -23,7 +28,11 @@ import android.text.format.DateFormat
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,7 +63,15 @@ import kotlin.math.roundToInt
 fun List<Device>.measuresPower() = any { it.state.watts != null || it.state.todayKwh != null }
 fun List<Device>.measuresAir() = any { it.type == "air_purifier" || it.state.pm25 != null }
 
-private val Ranges = listOf("day" to "Day", "week" to "Week", "month" to "Month")
+// "hour" is the last 60 minutes, one bucket a minute. Air is sampled too coarsely for it.
+private val Ranges = listOf(
+    Triple("hour", "Hour", Icons.Rounded.Schedule),
+    Triple("day", "Day", Icons.Rounded.Today),
+    Triple("week", "Week", Icons.Rounded.DateRange),
+    Triple("month", "Month", Icons.Rounded.CalendarMonth),
+)
+/** What one bucket of [range] covers. */
+private fun bucketOf(range: String) = when (range) { "hour" -> "minute"; "day" -> "hour"; else -> "day" }
 
 /** Tracks the device's 12/24-hour clock setting, refreshing when the app resumes from system settings. */
 @Composable
@@ -72,11 +89,28 @@ fun rememberIs24HourFormat(): Boolean {
     return is24Hour
 }
 
+/**
+ * Connected toggle buttons, the expressive successor of the segmented button. Every range shows its icon;
+ * the chosen one widens and spells its name, like a navigation bar item.
+ */
 @Composable
-private fun RangePicker(range: String, onChange: (String) -> Unit) {
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        Ranges.forEachIndexed { index, (key, label) ->
-            SegmentedButton(range == key, { onChange(key) }, SegmentedButtonDefaults.itemShape(index, Ranges.size)) { Text(label) }
+private fun RangePicker(range: String, ranges: List<Triple<String, String, ImageVector>>, onChange: (String) -> Unit) {
+    Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        ranges.forEachIndexed { index, (key, label, icon) ->
+            val selected = range == key
+            val weight by animateFloatAsState(if (selected) 2f else 1f, MaterialTheme.motionScheme.fastEffectsSpec(), label = "weight")
+            ToggleButton(
+                selected, { onChange(key) },
+                Modifier.weight(weight).semantics { role = Role.RadioButton; contentDescription = label },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    ranges.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+            ) {
+                Icon(icon, null, Modifier.size(ToggleButtonDefaults.IconSize))
+                AnimatedVisibility(selected) { Text(label, Modifier.padding(start = ToggleButtonDefaults.IconSpacing), maxLines = 1) }
+            }
         }
     }
 }
@@ -157,11 +191,15 @@ private fun ColumnScope.ElectricitySection() {
     var day by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     var week by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     var month by remember { mutableStateOf<List<EnergyPoint>?>(null) }
+    var hour by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     LaunchedEffect(energy?.todayKwh) {
         day = repository.energyHistory("day")
         week = repository.energyHistory("week")
     }
-    LaunchedEffect(range, energy?.todayKwh) { if (range == "month") month = repository.energyHistory("month") }
+    LaunchedEffect(range, energy?.todayKwh) {
+        if (range == "month") month = repository.energyHistory("month")
+        if (range == "hour") hour = repository.energyHistory("hour")
+    }
     val c = MaterialTheme.colorScheme
 
     val overview = energy
@@ -188,9 +226,9 @@ private fun ColumnScope.ElectricitySection() {
     }
 
     SectionTitle("History")
-    RangePicker(range) { range = it }
+    RangePicker(range, Ranges) { range = it }
     ChartCard {
-        val points = when (range) { "day" -> day; "week" -> week; else -> month }
+        val points = when (range) { "hour" -> hour; "day" -> day; "week" -> week; else -> month }
         if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         else if (points.sumOf { it.kwh } <= 0) Text("Nothing recorded in this period yet.", color = c.onSurfaceVariant)
         else {
@@ -208,7 +246,7 @@ private fun ColumnScope.ElectricitySection() {
                 Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
                 RollingText(if (watts) point.watts?.let(::formatWatts) ?: "No reading" else "${formatKwh(point.kwh)} · ${formatMoney(point.cost, currency)}", MaterialTheme.typography.titleMedium)
             }
-            val per = if (range == "day") "hour" else "day"
+            val per = bucketOf(range)
             if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, "Average power per $per", Modifier.fillMaxWidth().height(160.dp))
             else BarChart(points.map { it.kwh }, selected, { picked = it }, "Energy used per $per, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
@@ -224,7 +262,7 @@ private fun ColumnScope.ElectricitySection() {
     val change = average?.let { (overview.todayKwh - it) / it * 100 }
     val top = overview.devices.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
     FactRow(
-        Triple("Peak hour", peak?.let { formatBucket(it.t, "day", is24Hour) } ?: "—", peak?.let { "${formatKwh(it.kwh)} in the last 24 h" } ?: "No usage yet"),
+        Triple("Peak hour", peak?.let { formatBucket(it.t, "hour", is24Hour) } ?: "—", peak?.let { "${formatKwh(it.kwh)} in the last 24 h" } ?: "No usage yet"),
         Triple("Daily average", average?.let(::formatKwh) ?: "—", if (average == null) "Needs a full day" else "Over the last ${earlier.size} ${if (earlier.size == 1) "day" else "days"}"),
         index = 2,
     )
@@ -358,7 +396,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) }
 
     SectionTitle("Trend")
-    RangePicker(range) { range = it }
+    RangePicker(range, Ranges.drop(1)) { range = it }
     val points = history
     // Offer only the readings the home's devices report.
     val available = Readings.filter { (key, _) -> key == "pm25" || points.orEmpty().any { it.reading(key) != null } }
@@ -377,7 +415,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
             val measured = points.mapNotNull { it.reading(shown) }
             LineChart(
                 points.map { it.reading(shown) }, selected, { picked = it },
-                "${Readings.first { it.first == shown }.second} per ${if (range == "day") "hour" else "day"}, average ${readingText(shown, measured.average())}",
+                "${Readings.first { it.first == shown }.second} per ${bucketOf(range)}, average ${readingText(shown, measured.average())}",
                 Modifier.fillMaxWidth().height(160.dp),
                 marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
             )

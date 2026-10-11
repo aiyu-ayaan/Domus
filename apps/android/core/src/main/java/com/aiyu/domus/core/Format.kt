@@ -3,6 +3,8 @@ package com.aiyu.domus.core
 import java.text.NumberFormat
 import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Currency
 
@@ -31,17 +33,21 @@ fun formatMoney(value: Double, currency: String): String {
 }
 
 /**
- * Formats an ISO-8601 history bucket timestamp.
- * Hourly ("day") buckets follow the device's 12/24-hour clock setting ("2:00 PM" vs "14:00");
- * "week" buckets use weekday + day ("Mon 6"); "month" buckets use month + day ("Oct 6").
+ * Formats an ISO-8601 history bucket timestamp on the device's clock, whatever zone the server sent it in.
+ * "hour" buckets are a minute ("2:05 PM" vs "14:05"), following the 12/24-hour setting; "day" buckets are
+ * an hour, written as its span ("12 AM – 1 AM" vs "00:00 – 01:00"); "week" buckets use weekday + day
+ * ("Mon 6"); "month" buckets use month + day ("Oct 6").
  */
-fun formatBucket(iso: String, range: String, is24Hour: Boolean): String = runCatching {
-    val pattern = when (range) {
-        "day" -> if (is24Hour) "HH:mm" else "h:mm a"
-        "week" -> "EEE d"
-        else -> "MMM d"
+fun formatBucket(iso: String, range: String, is24Hour: Boolean, zone: ZoneId = ZoneId.systemDefault()): String = runCatching {
+    val start = OffsetDateTime.parse(iso).atZoneSameInstant(zone)
+    fun text(pattern: String, at: ZonedDateTime = start) = at.format(DateTimeFormatter.ofPattern(pattern))
+    when (range) {
+        "hour" -> text(if (is24Hour) "HH:mm" else "h:mm a")
+        // An older server buckets on its own clock, which can start an hour at :30 here.
+        "day" -> (if (is24Hour) "HH:mm" else if (start.minute == 0) "h a" else "h:mm a").let { "${text(it)} – ${text(it, start.plusHours(1))}" }
+        "week" -> text("EEE d")
+        else -> text("MMM d")
     }
-    OffsetDateTime.parse(iso).format(DateTimeFormatter.ofPattern(pattern))
 }.getOrDefault("")
 
 /**

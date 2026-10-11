@@ -142,7 +142,7 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun removeAutomation(id: String) = write("DELETE", "/automations/$id")
 
     /** [range] is `day`, `week` or `month`. */
-    suspend fun airHistory(range: String) = call("GET", "/air/history?range=$range", ListSerializer(AirPoint.serializer()))
+    suspend fun airHistory(range: String) = call("GET", "/air/history?range=$range&tz=${zone()}", ListSerializer(AirPoint.serializer()))
 
     suspend fun energySettings() = call("GET", "/energy/settings", EnergySettings.serializer())
     suspend fun saveEnergySettings(settings: EnergySettings) =
@@ -175,6 +175,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun suggestEmail(username: String, userId: String?) =
         call("GET", "/users/email/suggest?username=${encoded(username)}${userId?.let { "&user_id=$it" }.orEmpty()}", EmailSuggestion.serializer())
     private fun encoded(text: String) = java.net.URLEncoder.encode(text, "UTF-8")
+    /** The phone's time zone: history buckets are hours and days on its clock, not the server's. */
+    private fun zone() = encoded(java.time.ZoneId.systemDefault().id)
 
     suspend fun integrations() = call("GET", "/integrations", ListSerializer(Integration.serializer()))
     suspend fun removeAccount(id: String) = write("DELETE", "/integrations/accounts/$id")
@@ -203,8 +205,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun runAutomation(id: String) = call("POST", "/automations/$id/run", ActionResult.serializer())
 
     suspend fun energyOverview() = call("GET", "/energy/overview", EnergyOverview.serializer())
-    /** [range] is `day`, `week` or `month`. */
-    suspend fun energyHistory(range: String) = call("GET", "/energy/history?range=$range", ListSerializer(EnergyPoint.serializer()))
+    /** [range] is `hour` (per minute), `day`, `week` or `month`. */
+    suspend fun energyHistory(range: String) = call("GET", "/energy/history?range=$range&tz=${zone()}", ListSerializer(EnergyPoint.serializer()))
 
     /** Server event stream. [onEvent] gets each event object; [onClosed] fires once when the connection ends for any reason. */
     fun live(onOpen: () -> Unit, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit) = socket("/ws", onOpen, onEvent, onClosed)
