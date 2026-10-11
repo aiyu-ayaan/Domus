@@ -411,7 +411,8 @@ export function OverviewView() {
                       to={quickTab === 'scenes' ? '/automations' : '/devices'}
                       className="text-label text-muted hover:text-fg"
                     >
-                      {t('overview.manage')}\n                    </Link>
+                      {t('overview.manage')}
+                    </Link>
                   </div>
                 }
               />
@@ -419,7 +420,8 @@ export function OverviewView() {
               {quickTab === 'scenes' ? (
                 scenes.length === 0 ? (
                   <p className="px-4 py-6 text-label text-muted">
-                    {t('overview.noScenes')}\n                  </p>
+                    {t('overview.noScenes')}
+                  </p>
                 ) : (
                   <ul className="divide-y divide-border">
                     {scenes.map((s) => {
@@ -456,7 +458,8 @@ export function OverviewView() {
                                     icon={<StopCircle size={14} weight="fill" />}
                                     onClick={stopScreenSync}
                                   >
-                                    {t('overview.stop')}\n                                  </Button>
+                                    {t('overview.stop')}
+                                  </Button>
                                 </>
                               ) : (
                                 <>
@@ -468,7 +471,8 @@ export function OverviewView() {
                                       loading={toggleScene.isPending && toggleScene.variables?.id === s.id}
                                       onClick={() => toggleScene.mutate({ id: s.id, on: false })}
                                     >
-                                      {t('overview.turnOff')}\n                                    </Button>
+                                      {t('overview.turnOff')}
+                                    </Button>
                                   )}
                                   <Button
                                     size="sm"
@@ -476,7 +480,8 @@ export function OverviewView() {
                                     icon={<Monitor size={14} />}
                                     onClick={() => startScreenSync(s)}
                                   >
-                                    {t('overview.sync')}\n                                  </Button>
+                                    {t('overview.sync')}
+                                  </Button>
                                 </>
                               )}
                             </div>
@@ -505,7 +510,8 @@ export function OverviewView() {
                 )
               ) : groups.length === 0 ? (
                 <p className="px-4 py-6 text-label text-muted">
-                  {t('overview.noGroups')}\n                </p>
+                  {t('overview.noGroups')}
+                </p>
               ) : (
                 <ul className="divide-y divide-border">
                   {groups.map((g) => {

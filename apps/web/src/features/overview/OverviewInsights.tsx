@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { Link } from 'react-router-dom'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Wind, Lightning, Thermometer, DropHalf } from '@phosphor-icons/react'
@@ -75,18 +76,18 @@ export function OverviewInsights({
             title={
               <span className="flex items-center gap-1.5">
                 <Wind size={16} className="text-muted" />
-                Air quality
+                {t('insights.airQuality')}
               </span>
             }
             action={
               <div className="flex items-center gap-2">
                 {climate.pm25 != null && aq && (
                   <Badge tone={aq.tone === 'text-danger' ? 'danger' : aq.tone === 'text-warn' ? 'warn' : 'on'}>
-                    PM2.5 {aq.label}
+                    {t('insights.pm25Badge', { label: aq.label })}
                   </Badge>
                 )}
                 <Link to="/air-quality" className="text-label text-muted hover:text-fg">
-                  Details
+                  {t('insights.details')}
                 </Link>
               </div>
             }
@@ -113,10 +114,10 @@ export function OverviewInsights({
                 {/* 4-segment WHO scale bar */}
                 <div className="mt-3">
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-raised flex">
-                    <div className="h-full w-1/4 bg-on/40" title="0-12 Excellent" />
-                    <div className="h-full w-1/4 bg-on" title="13-35 Good" />
-                    <div className="h-full w-1/4 bg-warn" title="36-55 Moderate" />
-                    <div className="h-full w-1/4 bg-danger" title="55+ Poor" />
+                    <div className="h-full w-1/4 bg-on/40" title={t('insights.band.excellent')} />
+                    <div className="h-full w-1/4 bg-on" title={t('insights.band.good')} />
+                    <div className="h-full w-1/4 bg-warn" title={t('insights.band.moderate')} />
+                    <div className="h-full w-1/4 bg-danger" title={t('insights.band.poor')} />
                   </div>
                   <div className="relative mt-1 h-3">
                     <div
@@ -161,13 +162,13 @@ export function OverviewInsights({
                         </p>
                         <p className="text-caption text-muted">
                           {room ? `${room.name} · ` : ''}
-                          {d.is_online ? (s.is_on ? 'Active' : 'Standby') : 'Offline'}
+                          {d.is_online ? t(s.is_on ? 'device.active' : 'device.standby') : t('device.offline')}
                         </p>
                       </div>
                       <Switch
                         checked={Boolean(s.is_on && d.is_online)}
                         disabled={!control || !d.can_control || !d.is_online}
-                        label={`${d.name} power`}
+                        label={t('insights.power', { name: d.name })}
                         onChange={(v) => confirm.ask([d], v, () => command.mutate({ id: d.id, cmd: { is_on: v } }))}
                       />
                     </div>
@@ -175,10 +176,10 @@ export function OverviewInsights({
                     {modes && modes.length > 0 && (
                       <div>
                         <div className="space-y-1">
-                          <span className="text-caption text-muted">Mode</span>
+                          <span className="text-caption text-muted">{t('insights.mode')}</span>
                           <Segmented
                             size="sm"
-                            label={`${d.name} mode`}
+                            label={t('insights.modeOf', { name: d.name })}
                             value={s.mode}
                             options={modes.map((m) => ({ value: m, label: m }))}
                             onChange={(v) =>
@@ -192,10 +193,10 @@ export function OverviewInsights({
 
                     {fan && fan.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-caption text-muted">Fan speed</span>
+                        <span className="text-caption text-muted">{t('insights.fanSpeed')}</span>
                         <Segmented
                           size="sm"
-                          label={`${d.name} fan speed`}
+                          label={t('insights.fanSpeedOf', { name: d.name })}
                           value={s.fan_speed}
                           options={fan.map((f) => ({ value: f, label: f }))}
                           onChange={(v) =>
@@ -208,7 +209,7 @@ export function OverviewInsights({
                     {filterLife != null && (
                       <div className="border-t border-border pt-2 text-label">
                         <div className="flex justify-between text-caption mb-1">
-                          <span className="text-muted">HEPA filter</span>
+                          <span className="text-muted">{t('insights.hepa')}</span>
                           <span className="tabular font-medium">
                             {formatNumber(filterLife, 0)}%
                           </span>
@@ -242,12 +243,12 @@ export function OverviewInsights({
             title={
               <span className="flex items-center gap-1.5">
                 <Lightning size={16} className="text-muted" />
-                Energy · 24 hours
+                {t('insights.energy24')}
               </span>
             }
             action={
               <Link to="/energy" className="text-label text-muted hover:text-fg">
-                Details
+                {t('insights.details')}
               </Link>
             }
           />
@@ -258,7 +259,7 @@ export function OverviewInsights({
             {energy?.settings.monthly_budget ? (
               <div className="border-t border-border pt-4">
                 <div className="mb-1.5 flex justify-between text-label">
-                  <span className="text-muted">Monthly budget</span>
+                  <span className="text-muted">{t('insights.budget')}</span>
                   <span className="tabular">
                     {formatMoney(energy.cycle_cost, currency)} /{' '}
                     {formatMoney(energy.settings.monthly_budget, currency)}
@@ -267,7 +268,7 @@ export function OverviewInsights({
                 <div
                   className="h-1.5 overflow-hidden rounded-full bg-raised"
                   role="progressbar"
-                  aria-label="Budget used"
+                  aria-label={t('insights.budgetUsed')}
                   aria-valuenow={Math.round(energy.budget_used_percent ?? 0)}
                   aria-valuemin={0}
                   aria-valuemax={100}
@@ -286,7 +287,7 @@ export function OverviewInsights({
             {devices.some((d) => (d.state.current_power_watts ?? 0) > 0) && (
               <div className="border-t border-border pt-3">
                 <p className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
-                  Drawing power now
+                  {t('insights.drawing')}
                 </p>
                 <div className="space-y-1.5">
                   {devices
@@ -325,7 +326,7 @@ export function OverviewInsights({
             title={
               <span className="flex items-center gap-1.5">
                 <Thermometer size={16} className="text-muted" />
-                Climate
+                {t('insights.climate')}
               </span>
             }
           />
@@ -333,7 +334,7 @@ export function OverviewInsights({
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-border bg-raised/40 p-3">
                 <span className="flex items-center gap-1 text-caption text-muted">
-                  <Thermometer size={14} /> Temperature
+                  <Thermometer size={14} /> {t('insights.temperature')}
                 </span>
                 <p className="mt-1 text-title font-semibold tabular">
                   {climate.temp != null ? `${formatNumber(climate.temp)} °C` : '—'}
@@ -341,7 +342,7 @@ export function OverviewInsights({
               </div>
               <div className="rounded-lg border border-border bg-raised/40 p-3">
                 <span className="flex items-center gap-1 text-caption text-muted">
-                  <DropHalf size={14} /> Humidity
+                  <DropHalf size={14} /> {t('insights.humidity')}
                 </span>
                 <p className="mt-1 text-title font-semibold tabular">
                   {climate.humidity != null ? `${formatNumber(climate.humidity, 0)} %` : '—'}
