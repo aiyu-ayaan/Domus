@@ -64,6 +64,7 @@ import com.aiyu.domus.core.Notice
 import com.aiyu.domus.core.Room
 import com.aiyu.domus.core.Session
 import com.aiyu.domus.core.Slab
+import com.aiyu.domus.core.TimeOfUse
 import com.aiyu.domus.core.User
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
@@ -566,11 +567,14 @@ fun TariffPage(onBack: () -> Unit) {
     var fixed by remember { mutableStateOf("") }
     // (up to kWh, rate) as typed; an empty "up to" is the open-ended last slab.
     val slabs = remember { mutableStateListOf<Pair<String, String>>() }
+    // (start, end, difference per kWh) as typed.
+    val windows = remember { mutableStateListOf<Triple<String, String, String>>() }
     fun show(s: EnergySettings) {
         fun text(v: Double) = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString()
         rate = text(s.ratePerKwh); currency = s.currency; budget = s.monthlyBudget?.let(::text).orEmpty()
         day = s.billingCycleDay.toString(); fixed = text(s.fixedMonthlyCharge)
         slabs.clear(); slabs.addAll(s.slabs.map { (it.upToKwh?.let(::text).orEmpty()) to text(it.rate) })
+        windows.clear(); windows.addAll(s.timeOfUse.map { Triple(it.start, it.end, text(it.adjust)) })
         loaded = true
     }
     LaunchedEffect(Unit) { repository.request { it.energySettings() }?.let(::show) }
@@ -582,9 +586,12 @@ fun TariffPage(onBack: () -> Unit) {
         billingCycleDay = day.toIntOrNull() ?: 0,
         fixedMonthlyCharge = fixed.toDoubleOrNull() ?: -1.0,
         slabs = slabs.map { Slab(it.first.toDoubleOrNull(), it.second.toDoubleOrNull() ?: -1.0) },
+        timeOfUse = windows.map { TimeOfUse(it.first.trim(), it.second.trim(), it.third.toDoubleOrNull() ?: 0.0) },
     )
+    val clock = Regex("""([01]\d|2[0-3]):[0-5]\d""")
     val valid = typed.ratePerKwh >= 0 && typed.fixedMonthlyCharge >= 0 && typed.currency.length == 3 && typed.billingCycleDay in 1..28 &&
-        (budget.isBlank() || typed.monthlyBudget != null) && typed.slabs.all { it.rate >= 0 }
+        (budget.isBlank() || typed.monthlyBudget != null) && typed.slabs.all { it.rate >= 0 } &&
+        windows.all { clock.matches(it.first.trim()) && clock.matches(it.second.trim()) && it.third.toDoubleOrNull() != null }
 
     SubPage("Electricity tariff", onBack) {
         if (!loaded) {
@@ -614,6 +621,21 @@ fun TariffPage(onBack: () -> Unit) {
             }
         }
         OutlinedButton({ slabs.add("" to "") }) { Text("Add slab") }
+
+        SectionTitle("Time of day")
+        Text(
+            "Hours when a unit costs more or less than the rate above, on the home's clock. Enter the difference per kWh: 1.1 for a peak surcharge, -1.5 for a night rebate.",
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        windows.forEachIndexed { index, (from, until, adjust) ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Field(from, { windows[index] = Triple(it, until, adjust) }, "From", Modifier.weight(1f), supporting = "22:00")
+                Field(until, { windows[index] = Triple(from, it, adjust) }, "Until", Modifier.weight(1f), supporting = "06:00")
+                Field(adjust, { windows[index] = Triple(from, until, it) }, "Per kWh", Modifier.weight(1f))
+                IconButton({ windows.removeAt(index) }) { Icon(Icons.Rounded.Close, "Remove time window ${index + 1}") }
+            }
+        }
+        OutlinedButton({ windows.add(Triple("", "", "")) }) { Text("Add time window") }
 
         Button(
             { scope.launch { repository.change { it.saveEnergySettings(typed) }?.let { show(it); onBack() } } },

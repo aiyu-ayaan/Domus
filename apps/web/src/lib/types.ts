@@ -258,6 +258,8 @@ export interface ElectricitySettings {
   fixed_monthly_charge: number
   /** Usage slabs per billing cycle; empty = flat rate_per_kwh. */
   slabs: { up_to_kwh: number | null; rate: number }[]
+  /** Windows of the day ("HH:MM" on the home's clock) whose units cost `adjust` more, or less when negative. */
+  time_of_use: { start: string; end: string; adjust: number }[]
 }
 
 export interface EnergyOverview {

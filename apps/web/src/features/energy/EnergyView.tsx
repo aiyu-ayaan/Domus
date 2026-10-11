@@ -221,6 +221,8 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
           { up_to_kwh: '', rate: '' },
         ],
   )
+  const [windows, setWindows] = useState(initial.time_of_use.map((w) => ({ ...w, adjust: String(w.adjust) })))
+  const setWindow = (i: number, k: 'start' | 'end' | 'adjust', v: string) => setWindows(windows.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const currencies = useCurrencies(s.currency)
   const setSlab = (i: number, k: keyof SlabRow, v: string) => setSlabs(slabs.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const save = useMutation({
@@ -234,6 +236,7 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
         slabs: slabbed
           ? slabs.map((x, i) => ({ up_to_kwh: x.up_to_kwh === '' || i === slabs.length - 1 ? null : Number(x.up_to_kwh), rate: Number(x.rate) }))
           : [],
+        time_of_use: windows.map((w) => ({ ...w, adjust: Number(w.adjust) })),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['energy'] })
@@ -294,6 +297,27 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
         ) : (
           <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
         )}
+        <fieldset className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
+          <legend className="mb-1 text-label font-medium text-fg">Time of day</legend>
+          <p className="text-label text-muted">
+            Hours when a unit costs more or less than the price above, on the home's clock. Enter the difference per unit: 1.10 for a peak surcharge, -1.50 for a night rebate.
+          </p>
+          {windows.map((w, i) => (
+            <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-3">
+              <Field label="From" type="time" required value={w.start} onChange={(e) => setWindow(i, 'start', e.target.value)} />
+              <Field label="Until" type="time" required value={w.end} onChange={(e) => setWindow(i, 'end', e.target.value)} />
+              <Field label="Per unit" type="number" step="0.0001" required value={w.adjust} onChange={(e) => setWindow(i, 'adjust', e.target.value)} />
+              <Button variant="ghost" size="sm" aria-label="Remove time window" onClick={() => setWindows(windows.filter((_, j) => j !== i))}>
+                Remove
+              </Button>
+            </div>
+          ))}
+          <div>
+            <Button size="sm" onClick={() => setWindows([...windows, { start: '22:00', end: '06:00', adjust: '' }])}>
+              Add time window
+            </Button>
+          </div>
+        </fieldset>
         <SelectField label="Currency" required value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value })}>
           {currencies.map((c) => (
             <option key={c.code} value={c.code}>

@@ -30,6 +30,26 @@ pub struct ElectricitySettings {
     #[sqlx(json)]
     #[serde(default)]
     pub slabs: Vec<Slab>,
+    /// Windows of the day whose units cost more or less than the rate above. They must not overlap.
+    #[sqlx(json)]
+    #[serde(default)]
+    pub time_of_use: Vec<TimeOfUse>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TimeOfUse {
+    /// "HH:MM" on the home's clock. A window that ends before it starts runs past midnight.
+    pub start: String,
+    pub end: String,
+    /// Added to the price of each kWh used in the window; negative for a cheaper one.
+    pub adjust: f64,
+}
+
+impl TimeOfUse {
+    fn contains(&self, minute: u32) -> bool {
+        let (Some(start), Some(end)) = (home_core::parse_hhmm(&self.start), home_core::parse_hhmm(&self.end)) else { return false };
+        if start < end { (start..end).contains(&minute) } else { minute >= start || minute < end }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -57,6 +77,40 @@ impl ElectricitySettings {
         // Past the last bounded slab: bill the rest at its rate.
         cost + (kwh - floor) * self.slabs.last().map_or(0.0, |s| s.rate)
     }
+
+    /// What a kWh used at `t` costs on top of [energy_cost], from the time-of-use windows.
+    pub fn time_adjust(&self, t: DateTime<Local>) -> f64 {
+        let minute = t.hour() * 60 + t.minute();
+        self.time_of_use.iter().find(|w| w.contains(minute)).map_or(0.0, |w| w.adjust)
+    }
+
+    /// The time-of-use charge (it can be negative) of each `(device, quarter hour)` since `from`.
+    /// Empty without windows, so a plain tariff costs no query.
+    async fn time_charges(&self, pool: &SqlitePool, from: DateTime<Utc>) -> ApiResult<Vec<(String, DateTime<Utc>, f64)>> {
+        if self.time_of_use.is_empty() {
+            return Ok(vec![]);
+        }
+        let rows: Vec<(String, String, i64, f64)> = sqlx::query_as(
+            "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / 15 AS q, SUM(energy_kwh)
+             FROM energy_metrics WHERE recorded_at >= ? GROUP BY device_id, h, q",
+        )
+        .bind(from)
+        .fetch_all(pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .filter_map(|(device, hour, part, kwh)| {
+                let t = utc_group(&hour, part * 15)?;
+                Some((device, t, kwh * self.time_adjust(t.with_timezone(&Local))))
+            })
+            .collect())
+    }
+}
+
+/// When a SQL group `(hour "YYYY-MM-DDTHH", minutes into it)` began.
+fn utc_group(hour: &str, minutes: i64) -> Option<DateTime<Utc>> {
+    let naive = NaiveDateTime::parse_from_str(&format!("{}:00:00", hour.replace(' ', "T")), "%Y-%m-%dT%H:%M:%S").ok()?;
+    Some(Utc.from_utc_datetime(&naive) + Duration::minutes(minutes))
 }
 
 impl Default for ElectricitySettings {
@@ -68,6 +122,7 @@ impl Default for ElectricitySettings {
             billing_cycle_day: 1,
             fixed_monthly_charge: 0.0,
             slabs: vec![],
+            time_of_use: vec![],
         }
     }
 }
@@ -81,7 +136,7 @@ pub fn energy_routes() -> Router<AppState> {
 
 pub async fn load_settings(pool: &SqlitePool) -> ElectricitySettings {
     sqlx::query_as(
-        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs FROM electricity_settings LIMIT 1",
+        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use FROM electricity_settings LIMIT 1",
     )
     .fetch_optional(pool)
     .await
@@ -125,11 +180,25 @@ async fn put_settings(
             None => {}
         }
     }
+    let mut taken = [false; 24 * 60];
+    for window in &req.time_of_use {
+        let (Some(start), Some(end)) = (home_core::parse_hhmm(&window.start), home_core::parse_hhmm(&window.end)) else {
+            return Err(ApiError::BadRequest("Time-of-use windows need a start and an end as HH:MM".into()));
+        };
+        if start == end {
+            return Err(ApiError::BadRequest("A time-of-use window cannot start and end at the same time".into()));
+        }
+        for minute in (0..24 * 60).filter(|m| window.contains(*m)) {
+            if std::mem::replace(&mut taken[minute as usize], true) {
+                return Err(ApiError::BadRequest("Time-of-use windows cannot overlap".into()));
+            }
+        }
+    }
     let mut tx = s.pool.begin().await?;
     sqlx::query("DELETE FROM electricity_settings").execute(&mut *tx).await?;
     sqlx::query(
-        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, updated_at)
-         VALUES ('default', ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use, updated_at)
+         VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(req.rate_per_kwh)
     .bind(req.currency.trim().to_uppercase())
@@ -137,6 +206,7 @@ async fn put_settings(
     .bind(req.billing_cycle_day)
     .bind(req.fixed_monthly_charge)
     .bind(sqlx::types::Json(&req.slabs))
+    .bind(sqlx::types::Json(&req.time_of_use))
     .bind(Utc::now())
     .execute(&mut *tx)
     .await?;
@@ -203,8 +273,7 @@ impl Buckets {
 
     /// When a SQL group `(hour "YYYY-MM-DDTHH", part)` began.
     pub fn group_time(&self, hour: &str, part: i64) -> Option<DateTime<Utc>> {
-        let naive = NaiveDateTime::parse_from_str(&format!("{}:00:00", hour.replace(' ', "T")), "%Y-%m-%dT%H:%M:%S").ok()?;
-        Some(Utc.from_utc_datetime(&naive) + Duration::minutes(part * self.sql_minutes()))
+        utc_group(hour, part * self.sql_minutes())
     }
 
     pub fn time(&self, i: usize) -> DateTime<FixedOffset> {
@@ -296,6 +365,17 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
 
     let cycle = kwh_by_device(&s.pool, local_midnight(cycle_start).with_timezone(&Utc)).await?;
     let today_map = kwh_by_device(&s.pool, local_midnight(today).with_timezone(&Utc)).await?;
+    // Time-of-use charges of the cycle, of today, and per device.
+    let (mut cycle_timed, mut today_timed, mut timed) = (0.0, 0.0, HashMap::<String, f64>::new());
+    for (device, t, charge) in settings.time_charges(&s.pool, local_midnight(cycle_start).with_timezone(&Utc)).await? {
+        if devices.iter().any(|d| d.id == device) {
+            cycle_timed += charge;
+            if t >= local_midnight(today) {
+                today_timed += charge;
+            }
+            *timed.entry(device).or_default() += charge;
+        }
+    }
 
     let mut usage: Vec<DeviceUsage> = devices
         .iter()
@@ -324,14 +404,16 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     let elapsed = (now - local_midnight(cycle_start)).num_minutes() as f64 / 1440.0;
     let projected_kwh = if elapsed > 0.25 { cycle_kwh / elapsed * cycle_days as f64 } else { cycle_kwh };
     let energy_cost = settings.energy_cost(cycle_kwh);
-    let cycle_cost = energy_cost + settings.fixed_monthly_charge;
-    let projected_cost = settings.energy_cost(projected_kwh) + settings.fixed_monthly_charge;
+    let cycle_cost = energy_cost + cycle_timed + settings.fixed_monthly_charge;
+    // The rest of the cycle is assumed to be used at the same times of day as so far.
+    let projected_timed = if cycle_kwh > 0.0 { cycle_timed * projected_kwh / cycle_kwh } else { 0.0 };
+    let projected_cost = settings.energy_cost(projected_kwh) + projected_timed + settings.fixed_monthly_charge;
     // Today's units are the latest in the cycle, so they sit in the highest slabs reached.
-    let today_cost = energy_cost - settings.energy_cost((cycle_kwh - today_kwh).max(0.0));
+    let today_cost = energy_cost - settings.energy_cost((cycle_kwh - today_kwh).max(0.0)) + today_timed;
     // Devices share the cycle's energy charge at the average rate.
     let avg_rate = if cycle_kwh > 0.0 { energy_cost / cycle_kwh } else { settings.energy_cost(1.0) };
     for u in &mut usage {
-        u.cost = u.kwh * avg_rate;
+        u.cost = u.kwh * avg_rate + timed.get(&u.device_id).copied().unwrap_or(0.0);
     }
 
     Ok(Json(Overview {
@@ -405,8 +487,10 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
         if q.device_id.as_ref().map_or(!visible.contains(&device_id), |d| *d != device_id) {
             continue;
         }
-        let Some(i) = buckets.group_time(&hour, part).and_then(|t| buckets.index(t)) else { continue };
+        let Some((t, i)) = buckets.group_time(&hour, part).and_then(|t| Some((t, buckets.index(t)?))) else { continue };
         points[i].kwh += kwh;
+        // Held in `cost` until the base rate is known below.
+        points[i].cost += kwh * settings.time_adjust(t.with_timezone(&Local));
         if samples > 0 {
             let e = power.entry((i, device_id)).or_default();
             e.0 += watts;
@@ -421,7 +505,7 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
     let total: f64 = points.iter().map(|p| p.kwh).sum();
     let rate = if total > 0.0 { settings.energy_cost(total) / total } else { settings.energy_cost(1.0) };
     for p in &mut points {
-        p.cost = p.kwh * rate;
+        p.cost += p.kwh * rate;
     }
     Ok(Json(points))
 }
@@ -487,6 +571,19 @@ mod tests {
         assert!(catch_up_rows(0.005, &[], at(9, 0), midnight).is_empty());
         assert!(catch_up_rows(-1.0, &[], at(9, 0), midnight).is_empty());
         assert!(catch_up_rows(5.0, &[], at(0, 10), midnight).is_empty());
+    }
+
+    #[test]
+    fn time_of_use_windows_adjust_the_price_of_their_hours() {
+        let window = |start: &str, end: &str, adjust| TimeOfUse { start: start.into(), end: end.into(), adjust };
+        let s = ElectricitySettings { time_of_use: vec![window("22:00", "06:00", -1.5), window("18:00", "22:00", 1.1)], ..Default::default() };
+        let at = |h, m| Local.with_ymd_and_hms(2026, 10, 11, h, m, 0).unwrap();
+        assert_eq!(s.time_adjust(at(23, 30)), -1.5);
+        assert_eq!(s.time_adjust(at(5, 59)), -1.5); // past midnight
+        assert_eq!(s.time_adjust(at(6, 0)), 0.0); // the end is not part of the window
+        assert_eq!(s.time_adjust(at(18, 0)), 1.1);
+        assert_eq!(s.time_adjust(at(12, 0)), 0.0);
+        assert_eq!(with(&[]).time_adjust(at(23, 30)), 0.0);
     }
 
     #[test]

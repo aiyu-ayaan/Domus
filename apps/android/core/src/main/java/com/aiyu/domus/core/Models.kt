@@ -255,7 +255,13 @@ data class EnergySettings(
     @SerialName("fixed_monthly_charge") val fixedMonthlyCharge: Double = 0.0,
     /** Empty = flat [ratePerKwh]. */
     val slabs: List<Slab> = emptyList(),
+    /** Windows of the day whose units cost more or less than the rate above. */
+    @SerialName("time_of_use") val timeOfUse: List<TimeOfUse> = emptyList(),
 )
+
+/** [start] and [end] are "HH:mm" on the home's clock; [adjust] is added to each kWh's price (negative = cheaper). */
+@Serializable
+data class TimeOfUse(val start: String = "", val end: String = "", val adjust: Double = 0.0)
 
 @Serializable
 data class DeviceEnergy(

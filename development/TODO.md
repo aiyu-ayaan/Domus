@@ -41,7 +41,7 @@
 - [x] Sheet inputs no longer lose focus on every keystroke
 - [x] Local devices polled every 3 s (cloud every 15 s) so power readings feel live
 - [ ] Verify Xiaomi 2FA end to end with a real account (SMS path unconfirmed)
-- [ ] Time-of-use tariffs (per-hour rates) on top of slabs
+- [x] Time-of-use tariffs: windows of the day with an amount per unit on top of the flat or slab rate (`0011_time_of_use.sql`), web and Android editors
 
 ## Milestone 6: Lighting & Bulb Color Control (DONE — 2026-10-10)
 - [x] Shared domain model: `color` (hex #RRGGBB) and `color_mode` ("white" / "color") in `DeviceState` and `DeviceCommand`
@@ -186,7 +186,7 @@
 - [x] Tapo: hub child devices (H100)
 - [ ] Xiaomi: legacy (non-MIoT) devices
 - [x] MQTT integration (Home Assistant MQTT discovery, Zigbee2MQTT)
-- [ ] Per-device energy tariffs / time-of-use rates
+- [ ] Per-device energy tariffs
 - [ ] Packaged Electron builds for macOS and Windows
 
 

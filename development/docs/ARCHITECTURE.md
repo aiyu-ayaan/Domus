@@ -289,6 +289,23 @@ units before today (so it lands in the highest slab reached). Per-device cost
 and the history chart use the average rate (an approximation for history ranges
 shorter than a cycle).
 
+**Time of use** (`time_of_use`, `0011_time_of_use.sql`) sits on top of either: windows of the day on the
+home's clock, each with an amount added to every unit used inside it (`+1.10` peak, `-1.50` night; a window
+may run past midnight, windows may not overlap). This is how MSEDCL's ToD charges work, and a plain
+peak / off-peak plan is the flat rate plus one window. The units are not re-metered: the samples already in
+`energy_metrics` are summed per device and quarter hour, and each quarter is priced by the window it starts in.
+
+```mermaid
+flowchart LR
+    M[("energy_metrics<br/>per device, per sample")] --> K["kWh of the cycle"] --> SL["energy_cost()<br/>flat or slabs"]
+    M --> Q["kWh per device and quarter hour"] --> TA["time_adjust(local time)<br/>window's amount per kWh"]
+    SL --> B["cycle bill = base + time of use + fixed charge"]
+    TA --> B
+    TA --> D["today, per device and each history point<br/>carry their own time-of-use charge"]
+```
+
+The projection assumes the rest of the cycle is used at the same times of day as the part so far.
+
 ### How the UI stays live
 
 ```mermaid
