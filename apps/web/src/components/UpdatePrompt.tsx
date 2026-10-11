@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { desktop } from '@/lib/api'
 import { useToast } from '@/lib/toast'
+import { ReleaseNotes, useReleaseNotes } from '@/lib/releases'
 import { Button } from './ui/Button'
 
 /** The desktop app's own update: what it found, the install and the download's progress (0..1, null when idle). */
@@ -38,6 +39,7 @@ export function UpdatePrompt() {
   const { updates, info, check, install, progress, busy } = useDesktopUpdate()
   const [closed, setClosed] = useState(false)
   const found = check.data
+  const notes = useReleaseNotes(found?.version)
   const open = !!found && !!info && !closed && found.version !== info.skipped
   useEffect(() => {
     if (!open || busy) return
@@ -50,11 +52,17 @@ export function UpdatePrompt() {
   return createPortal(
     <div className="fixed inset-0 top-[var(--titlebar)] z-sheet flex items-center justify-center p-4">
       <div className="anim-fade absolute inset-0 bg-black/50" aria-hidden />
-      <div role="alertdialog" aria-modal="true" aria-label={title} className="anim-enter relative w-full max-w-sm rounded-lg border border-border bg-panel p-5" style={{ boxShadow: 'var(--overlay-shadow)' }}>
+      <div role="alertdialog" aria-modal="true" aria-label={title} className="anim-enter relative w-full max-w-md rounded-lg border border-border bg-panel p-5" style={{ boxShadow: 'var(--overlay-shadow)' }}>
         <h2 className="text-title font-semibold">{title}</h2>
         <p className="mt-2 text-body text-muted">
           You have {info.version}. {info.selfInstall ? 'Domus restarts when the download is done.' : 'The installer opens when the download is done.'}
         </p>
+        {/* Long notes scroll inside the dialog so its buttons stay in reach. */}
+        {notes.data && (
+          <div className="mt-4 max-h-64 overflow-y-auto rounded-md border border-border p-3">
+            <ReleaseNotes markdown={notes.data} />
+          </div>
+        )}
         {busy && (
           <div className="mt-4">
             <UpdateProgress value={progress ?? 0} />

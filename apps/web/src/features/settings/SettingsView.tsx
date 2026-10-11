@@ -9,9 +9,9 @@ import { Field, SelectField } from '@/components/ui/Field'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Avatar } from '@/components/ui/Avatar'
 import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal'
-import { UpdateProgress, useDesktopUpdate } from '@/components/UpdatePrompt'
+import { useDesktopUpdate } from '@/components/UpdatePrompt'
 import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
-import { api, desktop, type UpdateChannel } from '@/lib/api'
+import { api, desktop } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useHomeLocation, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
@@ -192,20 +192,9 @@ function PasswordCard() {
   )
 }
 
-const channels: { value: UpdateChannel; label: string }[] = [
-  { value: 'stable', label: 'Stable' },
-  { value: 'beta', label: 'Beta' },
-  { value: 'alpha', label: 'Alpha' },
-]
-
-/** The web UI's version, and in the desktop app its own release channel and updates. */
+/** The web UI's version and the way to the Updates page, which holds the channel, the update and the release notes. */
 function AboutCard() {
-  const qc = useQueryClient()
-  const { updates, info, check, install, progress, busy } = useDesktopUpdate()
-  const setChannel = async (channel: UpdateChannel) => {
-    await updates!.setChannel(channel)
-    qc.invalidateQueries({ queryKey: ['desktop-update-info'] })
-  }
+  const { info, check } = useDesktopUpdate()
   return (
     <Card>
       <CardHeader title="About" />
@@ -214,6 +203,13 @@ function AboutCard() {
           <span>About Domus</span>
           <CaretRight size={16} className="text-subtle" aria-hidden />
         </Link>
+        <Link to="/updates" className="flex min-h-12 items-center justify-between gap-3 px-4 transition-colors duration-fast hover:bg-raised">
+          <span>Updates</span>
+          <span className="flex items-center gap-2 text-muted">
+            {check.data ? `Domus ${check.data.version} is available` : 'Release notes'}
+            <CaretRight size={16} className="text-subtle" aria-hidden />
+          </span>
+        </Link>
         <div className="flex min-h-12 items-center justify-between px-4">
           <span className="text-muted">Version</span>
           <span>
@@ -221,36 +217,10 @@ function AboutCard() {
           </span>
         </div>
         {info && (
-          <>
-            <div className="flex min-h-12 items-center justify-between px-4">
-              <span className="text-muted">Desktop app</span>
-              <span>{info.version}</span>
-            </div>
-            <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
-              <div>
-                <p>Update channel</p>
-                <p className="text-label text-muted">Beta and Alpha get new builds earlier, and every stable one.</p>
-              </div>
-              <Segmented size="sm" label="Update channel" value={info.channel} onChange={setChannel} options={channels} />
-            </div>
-            <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
-              <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : check.data ? `Domus ${check.data.version} is available` : 'Up to date'}</p>
-              {check.data ? (
-                <Button size="sm" loading={busy} onClick={() => install.mutate()}>
-                  {info.selfInstall ? 'Update and restart' : 'Download'}
-                </Button>
-              ) : (
-                <Button size="sm" variant="ghost" disabled={check.isFetching} onClick={() => check.refetch()}>
-                  Check now
-                </Button>
-              )}
-              {progress !== null && (
-                <div className="w-full">
-                  <UpdateProgress value={progress} />
-                </div>
-              )}
-            </div>
-          </>
+          <div className="flex min-h-12 items-center justify-between px-4">
+            <span className="text-muted">Desktop app</span>
+            <span>{info.version}</span>
+          </div>
         )}
       </div>
     </Card>

@@ -19,6 +19,7 @@ export const credits: { group: string; items: Credit[] }[] = [
       { name: 'Phosphor Icons', url: 'https://github.com/phosphor-icons/react', license: 'MIT' },
       { name: 'DiceBear', url: 'https://github.com/dicebear/dicebear', license: 'MIT (artwork: per style)' },
       { name: 'Inter', url: 'https://github.com/rsms/inter', license: 'OFL-1.1' },
+      { name: 'react-markdown', url: 'https://github.com/remarkjs/react-markdown', license: 'MIT' },
       { name: 'react-qr-code', url: 'https://github.com/rosskhanas/react-qr-code', license: 'MIT' },
       { name: 'Vite', url: 'https://github.com/vitejs/vite', license: 'MIT' },
       { name: 'Electron', url: 'https://github.com/electron/electron', license: 'MIT' },
