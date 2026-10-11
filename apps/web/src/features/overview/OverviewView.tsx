@@ -499,7 +499,7 @@ export function OverviewView() {
                                 loading={runScene.isPending && runScene.variables === s.id}
                                 onClick={() => runScene.mutate(s.id)}
                               >
-                                Run
+                                {t('overview.run')}
                               </Button>
                             </div>
                           )}

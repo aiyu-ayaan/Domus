@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -21,9 +22,9 @@ import { cn } from '@/lib/cn'
 import type { Device, Role, Room, User } from '@/lib/types'
 
 const roleHelp: Record<Role, string> = {
-  admin: 'Full access, including devices, integrations, people and settings.',
-  member: 'Can see what they are given. Control, or edit to also rename a device, is set per room and device.',
-  guest: 'Can view the rooms and devices they are given, but not control them.',
+  admin: t('settings.role.admin.help'),
+  member: t('settings.role.member.help'),
+  guest: t('settings.role.guest.help'),
 }
 
 export function SettingsView() {
@@ -42,9 +43,9 @@ export function SettingsView() {
     onSuccess: (updated) => {
       updateUser(updated)
       qc.invalidateQueries({ queryKey: keys.users })
-      toast.push({ tone: 'success', title: 'Avatar updated' })
+      toast.push({ tone: 'success', title: t('settings.avatarUpdated') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not update avatar', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('settings.avatarFailed'), message: errorMessage(e) }),
   })
 
   const handleQuickRoll = async () => {
@@ -59,10 +60,10 @@ export function SettingsView() {
 
   return (
     <>
-      <PageHeader title="Settings" />
+      <PageHeader title={t('settings.title')} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Account" />
+          <CardHeader title={t('settings.account')} />
           {/* Avatar Profile Section */}
           <div className="flex items-center gap-4 px-4 py-3.5 bg-raised/30 border-b border-border">
             <div className="relative group">
@@ -78,7 +79,7 @@ export function SettingsView() {
                 type="button"
                 onClick={() => setAvatarModalOpen(true)}
                 className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Change avatar"
+                title={t('settings.changeAvatar')}
               >
                 <PencilSimple size={18} />
               </button>
@@ -89,7 +90,7 @@ export function SettingsView() {
                 <Badge tone="neutral">{user?.role}</Badge>
               </div>
               <p className="text-caption text-muted truncate mt-0.5">
-                DiceBear {parsedAvatar.style} · seed: {parsedAvatar.seed}
+                {t('settings.avatarStyle', { style: parsedAvatar.style, seed: parsedAvatar.seed })}
               </p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -98,10 +99,10 @@ export function SettingsView() {
                 size="sm"
                 icon={<DiceFive size={16} className={rolling ? 'animate-spin' : ''} />}
                 onClick={handleQuickRoll}
-                title="Roll a random avatar"
+                title={t('settings.rollAvatar')}
                 disabled={changeAvatarMutation.isPending}
               >
-                Roll
+                {t('settings.roll')}
               </Button>
               <Button
                 size="sm"
@@ -109,22 +110,22 @@ export function SettingsView() {
                 icon={<Sparkle size={14} />}
                 onClick={() => setAvatarModalOpen(true)}
               >
-                Customize
+                {t('settings.customize')}
               </Button>
             </div>
           </div>
 
           <div className="divide-y divide-border">
             <div className="flex min-h-12 items-center justify-between px-4">
-              <span className="text-muted">Username</span>
+              <span className="text-muted">{t('settings.username')}</span>
               <span>{user?.username}</span>
             </div>
             <div className="flex min-h-12 items-center justify-between px-4">
-              <span className="text-muted">Email</span>
+              <span className="text-muted">{t('settings.email')}</span>
               <span className="truncate">{user?.email || '—'}</span>
             </div>
             <div className="flex min-h-12 items-center justify-between px-4">
-              <span className="text-muted">Role</span>
+              <span className="text-muted">{t('settings.roleLabel')}</span>
               <Badge>{user?.role}</Badge>
             </div>
           </div>
@@ -139,13 +140,13 @@ export function SettingsView() {
           }}
         />
         <Card>
-          <CardHeader title="Appearance" />
+          <CardHeader title={t('settings.appearance')} />
           <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
             <div>
-              <p>Theme</p>
-              <p className="text-label text-muted">System follows your device setting.</p>
+              <p>{t('settings.theme')}</p>
+              <p className="text-label text-muted">{t('settings.theme.help')}</p>
             </div>
-            <Segmented size="sm" label="Theme" value={theme} onChange={setTheme} options={[{ value: 'system', label: 'System' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+            <Segmented size="sm" label={t('settings.theme')} value={theme} onChange={setTheme} options={[{ value: 'system', label: t('settings.theme.system') }, { value: 'light', label: t('settings.theme.light') }, { value: 'dark', label: t('settings.theme.dark') }]} />
           </div>
         </Card>
         <PasswordCard />
@@ -168,13 +169,13 @@ function PasswordCard() {
     onSuccess: () => {
       setCurrent('')
       setNext('')
-      toast.push({ tone: 'success', title: 'Password changed' })
+      toast.push({ tone: 'success', title: t('settings.password.changed') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not change password', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('settings.password.failed'), message: errorMessage(e) }),
   })
   return (
     <Card>
-      <CardHeader title="Password" />
+      <CardHeader title={t('settings.password.title')} />
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -182,10 +183,10 @@ function PasswordCard() {
           change.mutate()
         }}
       >
-        <Field label="Current password" type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} />
-        <Field label="New password" type="password" autoComplete="new-password" required minLength={8} hint="At least 8 characters." value={next} onChange={(e) => setNext(e.target.value)} />
+        <Field label={t('settings.password.current')} type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} />
+        <Field label={t('settings.password.new')} type="password" autoComplete="new-password" required minLength={8} hint={t('auth.atLeast8')} value={next} onChange={(e) => setNext(e.target.value)} />
         <Button type="submit" loading={change.isPending} disabled={!current || next.length < 8} className="self-start">
-          Update password
+          {t('settings.password.update')}
         </Button>
       </form>
     </Card>
@@ -197,28 +198,28 @@ function AboutCard() {
   const { info, check } = useDesktopUpdate()
   return (
     <Card>
-      <CardHeader title="About" />
+      <CardHeader title={t('settings.about')} />
       <div className="divide-y divide-border">
         <Link to="/about" className="flex min-h-12 items-center justify-between px-4 transition-colors duration-fast hover:bg-raised">
-          <span>About Domus</span>
+          <span>{t('settings.aboutDomus')}</span>
           <CaretRight size={16} className="text-subtle" aria-hidden />
         </Link>
         <Link to="/updates" className="flex min-h-12 items-center justify-between gap-3 px-4 transition-colors duration-fast hover:bg-raised">
-          <span>Updates</span>
+          <span>{t('settings.updates')}</span>
           <span className="flex items-center gap-2 text-muted">
-            {check.data ? `Domus ${check.data.version} is available` : 'Release notes'}
+            {check.data ? t('update.available', { version: check.data.version }) : t('settings.releaseNotes')}
             <CaretRight size={16} className="text-subtle" aria-hidden />
           </span>
         </Link>
         <div className="flex min-h-12 items-center justify-between px-4">
-          <span className="text-muted">Version</span>
+          <span className="text-muted">{t('settings.version')}</span>
           <span>
-            {__APP_VERSION__} <span className="text-subtle">(build {__APP_BUILD__})</span>
+            {__APP_VERSION__} <span className="text-subtle">{t('settings.build', { build: __APP_BUILD__ })}</span>
           </span>
         </div>
         {info && (
           <div className="flex min-h-12 items-center justify-between px-4">
-            <span className="text-muted">Desktop app</span>
+            <span className="text-muted">{t('settings.desktopApp')}</span>
             <span>{info.version}</span>
           </div>
         )}
@@ -239,13 +240,13 @@ function ServerCard() {
     onSuccess: (links) => {
       qc.setQueryData(keys.serverLinks, links)
       setForm(null)
-      toast.push({ tone: 'success', title: 'Server addresses saved', message: 'The apps pick them up the next time they open.' })
+      toast.push({ tone: 'success', title: t('settings.server.saved'), message: t('settings.server.savedHint') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('discovery.saveFailed'), message: errorMessage(e) }),
   })
   return (
     <Card>
-      <CardHeader title="Server addresses" action={desktop && <Button size="sm" onClick={() => desktop?.chooseServer()}>Change server</Button>} />
+      <CardHeader title={t('settings.server.title')} action={desktop && <Button size="sm" onClick={() => desktop?.chooseServer()}>{t('auth.changeServer')}</Button>} />
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -253,12 +254,12 @@ function ServerCard() {
           save.mutate()
         }}
       >
-        <p className="text-label text-muted">The apps use the home address on your network and the remote one everywhere else, without signing in again.</p>
-        <Field label="Home network" placeholder="https://192.168.1.10:8443" disabled={!admin} value={value.local_url} onChange={(e) => setForm({ ...value, local_url: e.target.value })} />
-        <Field label="Remote" placeholder="https://home.example.com" hint="For example a Cloudflare Tunnel hostname." disabled={!admin} value={value.remote_url} onChange={(e) => setForm({ ...value, remote_url: e.target.value })} />
+        <p className="text-label text-muted">{t('settings.server.explain')}</p>
+        <Field label={t('settings.server.home')} placeholder="https://192.168.1.10:8443" disabled={!admin} value={value.local_url} onChange={(e) => setForm({ ...value, local_url: e.target.value })} />
+        <Field label={t('settings.server.remote')} placeholder="https://home.example.com" hint={t('settings.server.remoteHint')} disabled={!admin} value={value.remote_url} onChange={(e) => setForm({ ...value, remote_url: e.target.value })} />
         {admin && (
           <Button type="submit" loading={save.isPending} disabled={!form} className="self-start">
-            Save addresses
+            {t('settings.server.save')}
           </Button>
         )}
       </form>
@@ -279,24 +280,24 @@ function LocationCard() {
       qc.setQueryData(keys.homeLocation, place)
       setForm(null)
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('discovery.saveFailed'), message: errorMessage(e) }),
   })
   const [query, setQuery] = useState('')
   const search = useMutation({
     mutationFn: () => api.searchPlaces(query),
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not search', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('settings.location.searchFailed'), message: errorMessage(e) }),
   })
   const locate = () =>
     navigator.geolocation.getCurrentPosition(
       // Two decimals is about a kilometre: enough for the sun, and not the address.
       (p) => setForm({ latitude: p.coords.latitude.toFixed(2), longitude: p.coords.longitude.toFixed(2) }),
-      () => toast.push({ tone: 'error', title: 'Could not read the location', message: 'Type the latitude and longitude instead.' }),
+      () => toast.push({ tone: 'error', title: t('settings.location.readFailed'), message: t('settings.location.readFailedHint') }),
     )
   const filled = value.latitude.trim() !== '' && value.longitude.trim() !== '' && !Number.isNaN(Number(value.latitude)) && !Number.isNaN(Number(value.longitude))
   return (
     <Card>
       {/* Electron has no location service of its own, so the desktop app offers the search only. */}
-      <CardHeader title="Home location" action={admin && !desktop && <Button size="sm" onClick={locate}>Use this device</Button>} />
+      <CardHeader title={t('settings.location.title')} action={admin && !desktop && <Button size="sm" onClick={locate}>{t('settings.location.useDevice')}</Button>} />
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -306,15 +307,15 @@ function LocationCard() {
       >
         <p className="text-label text-muted">
           {data?.sunrise && data.sunset
-            ? `Automations can run at sunrise and sunset. Today the sun rises at ${formatTime(data.sunrise)} and sets at ${formatTime(data.sunset)}.`
-            : 'Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.'}
+            ? t('settings.location.sun', { rise: formatTime(data.sunrise), set: formatTime(data.sunset) })
+            : t('settings.location.sunUnknown')}
         </p>
         {admin && (
           <div className="flex flex-col gap-2">
             <div className="flex items-end gap-3">
               <Field
-                label="Find a place"
-                placeholder="Town or city"
+                label={t('settings.location.find')}
+                placeholder={t('settings.location.place')}
                 className="flex-1"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -325,7 +326,7 @@ function LocationCard() {
                 }}
               />
               <Button loading={search.isPending} disabled={query.trim().length < 2} onClick={() => search.mutate()}>
-                Search
+                {t('settings.location.search')}
               </Button>
             </div>
             {search.data &&
@@ -350,17 +351,17 @@ function LocationCard() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-label text-muted">No place by that name. Try the nearest town.</p>
+                <p className="text-label text-muted">{t('settings.location.none')}</p>
               ))}
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Latitude" inputMode="decimal" placeholder="18.52" disabled={!admin} value={value.latitude} onChange={(e) => setForm({ ...value, latitude: e.target.value })} />
-          <Field label="Longitude" inputMode="decimal" placeholder="73.86" disabled={!admin} value={value.longitude} onChange={(e) => setForm({ ...value, longitude: e.target.value })} />
+          <Field label={t('settings.location.lat')} inputMode="decimal" placeholder="18.52" disabled={!admin} value={value.latitude} onChange={(e) => setForm({ ...value, latitude: e.target.value })} />
+          <Field label={t('settings.location.lon')} inputMode="decimal" placeholder="73.86" disabled={!admin} value={value.longitude} onChange={(e) => setForm({ ...value, longitude: e.target.value })} />
         </div>
         {admin && (
           <Button type="submit" loading={save.isPending} disabled={!form || !filled} className="self-start">
-            Save location
+            {t('settings.location.save')}
           </Button>
         )}
       </form>
@@ -373,19 +374,18 @@ function BackupCard() {
   const toast = useToast()
   const backup = useMutation({
     mutationFn: api.downloadBackup,
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not make the backup', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('settings.backup.failed'), message: errorMessage(e) }),
   })
   if (!admin) return null
   return (
     <Card>
-      <CardHeader title="Backup" />
+      <CardHeader title={t('settings.backup.title')} />
       <div className="flex flex-col gap-4 p-4">
         <p className="text-label text-muted">
-          One file with every device, room, automation, account and reading, and the key that opens your linked integrations. Keep it private: whoever has it can sign in to
-          those. Restore it on the server with <code className="text-fg">domus-backend restore</code>.
+          {t('settings.backup.explain')}{' '}<code className="text-fg">domus-backend restore</code>.
         </p>
         <Button loading={backup.isPending} onClick={() => backup.mutate()} className="self-start">
-          Download backup
+          {t('settings.backup.download')}
         </Button>
       </div>
     </Card>
@@ -406,11 +406,11 @@ function People() {
       qc.invalidateQueries({ queryKey: keys.users })
       setDeleting(null)
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not remove', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('settings.people.removeFailed'), message: errorMessage(e) }),
   })
   return (
     <Card className="mt-6">
-      <CardHeader title={`People and access · ${users.length}`} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>Add person</Button>} />
+      <CardHeader title={t('settings.people.title', { count: users.length })} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>{t('settings.people.add')}</Button>} />
       <ul className="divide-y divide-border">
         {users.map((u) => (
           <li key={u.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
@@ -418,44 +418,44 @@ function People() {
             <div className="min-w-0 flex-1">
               <p className="text-body font-medium">
                 {u.username}
-                {u.id === me?.id && <span className="font-normal text-subtle"> (you)</span>}
+                {u.id === me?.id && <span className="font-normal text-subtle"> {t('settings.people.you')}</span>}
               </p>
               <p className="truncate text-label text-muted">
                 {accessSummary(u, rooms)}
               </p>
             </div>
-            {u.reset_requested && <Badge tone="warn">Reset requested</Badge>}
-            {u.kid && <Badge>Kid</Badge>}
+            {u.reset_requested && <Badge tone="warn">{t('settings.people.resetRequested')}</Badge>}
+            {u.kid && <Badge>{t('settings.people.kid')}</Badge>}
             <Badge tone={u.role === 'admin' ? 'info' : 'neutral'}>{u.role}</Badge>
-            <Button variant="ghost" size="sm" aria-label={`Edit ${u.username}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(u)} />
-            {u.id !== me?.id && <Button variant="ghost" size="sm" aria-label={`Remove ${u.username}`} icon={<Trash size={16} />} onClick={() => setDeleting(u)} />}
+            <Button variant="ghost" size="sm" aria-label={t('settings.people.edit', { name: u.username })} icon={<PencilSimple size={16} />} onClick={() => setEditing(u)} />
+            {u.id !== me?.id && <Button variant="ghost" size="sm" aria-label={t('settings.people.remove', { name: u.username })} icon={<Trash size={16} />} onClick={() => setDeleting(u)} />}
           </li>
         ))}
       </ul>
       <UserSheet user={editing} onClose={() => setEditing(null)} />
-      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => deleting && remove.mutate(deleting.id)} loading={remove.isPending} title={`Remove ${deleting?.username}?`} message="They lose access immediately." confirmLabel="Remove" />
+      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => deleting && remove.mutate(deleting.id)} loading={remove.isPending} title={t('settings.people.removeTitle', { name: deleting?.username ?? '' })} message={t('settings.people.removeMessage')} confirmLabel={t('drawer.removeConfirm')} />
     </Card>
   )
 }
 
 function accessSummary(u: User, rooms: Room[]) {
-  if (u.role === 'admin' || u.all_rooms) return 'Whole home'
+  if (u.role === 'admin' || u.all_rooms) return t('access.wholeHome')
   const parts = u.room_ids.flatMap((id) => {
     const name = rooms.find((r) => r.id === id)?.name
-    return name ? [u.view_only_room_ids.includes(id) ? `${name} (see only)` : name] : []
+    return name ? [u.view_only_room_ids.includes(id) ? t('access.seeOnlySuffix', { name }) : name] : []
   })
-  if (u.device_ids.length) parts.push(`${u.device_ids.length} ${u.device_ids.length === 1 ? 'device' : 'devices'}`)
-  return parts.join(', ') || 'No access'
+  if (u.device_ids.length) parts.push(t('common.deviceCount', { count: u.device_ids.length }))
+  return parts.join(', ') || t('access.noAccess')
 }
 
 type Level = 'none' | 'view' | 'control' | 'edit'
 /** Granted ids and their level; an id that is missing has no access. */
 type Levels = Record<string, Exclude<Level, 'none'>>
 const levelOptions: { value: Level; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'view', label: 'See only' },
-  { value: 'control', label: 'Control' },
-  { value: 'edit', label: 'Edit' },
+  { value: 'none', label: t('access.none') },
+  { value: 'view', label: t('access.view') },
+  { value: 'control', label: t('access.control') },
+  { value: 'edit', label: t('access.edit') },
 ]
 const toLevels = (ids: string[], viewOnly: string[], edit: string[]): Levels =>
   Object.fromEntries(ids.map((id) => [id, viewOnly.includes(id) ? 'view' : edit.includes(id) ? 'edit' : 'control']))
@@ -472,7 +472,7 @@ function AccessRow({ label, hint, value, onChange }: { label: string; hint?: str
       </div>
       <div className="relative shrink-0">
         <select
-          aria-label={`Access to ${label}`}
+          aria-label={t('access.to', { label })}
           value={value}
           onChange={(e) => onChange(e.target.value as Level)}
           className={cn(
@@ -495,7 +495,7 @@ function AccessRow({ label, hint, value, onChange }: { label: string; hint?: str
 /** One room in the access editor: grant it whole, or set single devices (which also override the room). */
 function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: string; devices: Device[]; room?: Level; levelOf: (d: Device) => Level; onRoom?: (v: Level) => void; onDevice: (id: string, v: Level) => void }) {
   const count = devices.filter((d) => levelOf(d) !== 'none').length
-  const status = room && room !== 'none' ? `Whole room · ${levelOptions.find((o) => o.value === room)?.label.toLowerCase()}` : count ? `${count} of ${devices.length} devices` : 'No access'
+  const status = room && room !== 'none' ? t('access.wholeRoomLevel', { level: levelOptions.find((o) => o.value === room)?.label.toLowerCase() ?? '' }) : count ? t('access.devicesOf', { count, total: devices.length }) : t('access.noAccess')
   return (
     <details className="group rounded-lg border border-border">
       <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 hover:bg-raised [&::-webkit-details-marker]:hidden">
@@ -504,11 +504,11 @@ function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: 
         <span className={cn('shrink-0 text-label', count || (room && room !== 'none') ? 'text-fg' : 'text-muted')}>{status}</span>
       </summary>
       <div className="divide-y divide-border border-t border-border">
-        {onRoom && <AccessRow label="Whole room" hint="Also covers devices added later" value={room ?? 'none'} onChange={onRoom} />}
+        {onRoom && <AccessRow label={t('access.wholeRoom')} hint={t('access.coversLater')} value={room ?? 'none'} onChange={onRoom} />}
         {devices.map((d) => (
           <AccessRow key={d.id} label={d.name} value={levelOf(d)} onChange={(v) => onDevice(d.id, v)} />
         ))}
-        {devices.length === 0 && <p className="py-3 pl-9 pr-3 text-label text-muted">No devices in this room yet.</p>}
+        {devices.length === 0 && <p className="py-3 pl-9 pr-3 text-label text-muted">{t('access.noDevicesInRoom')}</p>}
       </div>
     </details>
   )
@@ -540,10 +540,10 @@ function useEmailStatus(email: string, userId?: string, own?: string): EmailStat
 function handoverText(u: User) {
   if (u.reset_code) {
     const code = u.reset_code.replace(/(\d{4})(\d{4})/, '$1 $2')
-    const until = u.reset_allowed_until ? `, until ${formatTime(u.reset_allowed_until)}` : ''
-    return `Domus password reset for ${u.username}\nCode: ${code}\n\nOn the sign-in screen choose "Forgot password?", enter your username and then this code. It works once${until}.`
+    const until = u.reset_allowed_until ? t('handover.until', { time: formatTime(u.reset_allowed_until) }) : ''
+    return t('handover.reset', { username: u.username, code, until })
   }
-  return `Domus sign-in\nAddress: ${window.location.origin}\nUsername: ${u.username}\nPassword: ${u.generated_password}\n\n${u.kid ? '' : 'You will be asked to choose your own password the first time you sign in.'}`.trim()
+  return t('handover.signIn', { address: window.location.origin, username: u.username, password: u.generated_password ?? '', note: u.kid ? '' : t('handover.chooseOwn') }).trim()
 }
 
 /** Shows the secret once, to copy or share. It is not stored readable anywhere, so closing this loses it. */
@@ -559,11 +559,11 @@ function Handover({ user, onClose }: { user: User | null; onClose: () => void })
     <Sheet
       open={!!user}
       onClose={close}
-      title={user?.reset_code ? `Reset code for ${user.username}` : `Sign-in details for ${user?.username}`}
-      description="Shown only once. Send it to them now; Domus keeps no readable copy."
+      title={user?.reset_code ? t('handover.resetTitle', { name: user.username }) : t('handover.signInTitle', { name: user?.username ?? '' })}
+      description={t('handover.once')}
       footer={
         <Button variant="primary" onClick={close}>
-          Done
+          {t('common.done')}
         </Button>
       }
     >
@@ -575,11 +575,11 @@ function Handover({ user, onClose }: { user: User | null; onClose: () => void })
             icon={copied ? <Check size={16} /> : <Copy size={16} />}
             onClick={() => navigator.clipboard.writeText(text).then(() => setCopied(true))}
           >
-            {copied ? 'Copied' : 'Copy'}
+            {t(copied ? 'handover.copied' : 'handover.copy')}
           </Button>
           {canShare && (
             <Button icon={<ShareNetwork size={16} />} onClick={() => navigator.share({ text }).catch(() => {})}>
-              Share
+              {t('handover.share')}
             </Button>
           )}
         </div>
@@ -657,7 +657,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.users })
-      toast.push({ tone: 'success', title: existing ? 'Access updated' : `${form.username} added` })
+      toast.push({ tone: 'success', title: existing ? t('user.accessUpdated') : t('user.added', { name: form.username }) })
       onClose()
     },
     onError: (e) => setError(errorMessage(e)),
@@ -668,7 +668,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     onSuccess: (u) => {
       qc.invalidateQueries({ queryKey: keys.users })
       if (u.generated_password || u.reset_code) setHandover(u)
-      else toast.push({ tone: 'success', title: 'Reset code withdrawn' })
+      else toast.push({ tone: 'success', title: t('user.resetWithdrawn') })
       onClose()
     },
     onError: (e) => setError(errorMessage(e)),
@@ -707,14 +707,14 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       <Sheet
         open={!!user}
         onClose={onClose}
-        title={existing ? `Edit ${existing.username}` : 'Add person'}
+        title={existing ? t('user.editTitle', { name: existing.username }) : t('settings.people.add')}
         footer={
           <>
             <Button variant="ghost" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="primary" loading={save.isPending} disabled={emailStatus === 'taken' || (!existing && !form.username) || passwordMissing} onClick={() => save.mutate()}>
-              Save
+              {t('common.save')}
             </Button>
           </>
         }
@@ -722,94 +722,94 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
         <div className="flex flex-col gap-4">
           {/* Avatar row */}
           <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-raised/30 p-3">
-            <Avatar avatar={form.avatar} username={form.username || 'User'} size="md" />
+            <Avatar avatar={form.avatar} username={form.username || t('user.fallbackName')} size="md" />
             <div className="min-w-0 flex-1">
-              <p className="text-label font-medium text-fg">Avatar</p>
-              <p className="truncate text-caption text-muted">DiceBear profile avatar</p>
+              <p className="text-label font-medium text-fg">{t('user.avatar')}</p>
+              <p className="truncate text-caption text-muted">{t('user.avatarSub')}</p>
             </div>
             <div className="flex items-center gap-1.5">
               <Button type="button" variant="ghost" size="sm" icon={<DiceFive size={16} />} onClick={handleRollAvatar}>
-                Roll
+                {t('settings.roll')}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAvatarModalOpen(true)}>
-                Pick
+                {t('user.pick')}
               </Button>
             </div>
           </div>
 
-          {!existing && <Field label="Username" required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
+          {!existing && <Field label={t('settings.username')} required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
           <div className="flex items-start gap-2">
             <Field
-              label="Email"
+              label={t('settings.email')}
               type="email"
               className="min-w-0 flex-1"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              error={emailStatus === 'taken' ? 'Already used by another account' : undefined}
-              hint={emailStatus === 'free' ? 'Available' : emailStatus === 'checking' ? 'Checking...' : 'Type one, or generate it from the username.'}
+              error={emailStatus === 'taken' ? t('settings.email.taken') : undefined}
+              hint={emailStatus === 'free' ? t('settings.email.free') : emailStatus === 'checking' ? t('settings.email.checking') : t('settings.email.hint')}
             />
             <Button type="button" className="mt-[26px]" loading={generate.isPending} disabled={name.length < 3} onClick={() => generate.mutate()}>
-              Generate
+              {t('user.generate')}
             </Button>
           </div>
           {!self && (
-            <section className="flex flex-col gap-2" aria-label="Password">
-              <p className="text-label font-medium text-fg">Password</p>
+            <section className="flex flex-col gap-2" aria-label={t('settings.password.title')}>
+              <p className="text-label font-medium text-fg">{t('settings.password.title')}</p>
               <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium">Kid's account</p>
-                  <p className="mt-0.5 text-label text-muted">{form.kid ? 'You set the password and it stays as it is.' : 'Off: Domus makes a password, and they choose their own at first sign-in.'}</p>
+                  <p className="font-medium">{t('settings.password.kidAccount')}</p>
+                  <p className="mt-0.5 text-label text-muted">{t(form.kid ? 'user.kidOn' : 'user.kidOff')}</p>
                 </div>
-                <Switch checked={form.kid} onChange={(v) => setForm({ ...form, kid: v })} label="Kid's account" />
+                <Switch checked={form.kid} onChange={(v) => setForm({ ...form, kid: v })} label={t('settings.password.kidAccount')} />
               </div>
               {form.kid ? (
-                <Field label={existing?.kid ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing?.kid} hint={existing?.kid ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                <Field label={t(existing?.kid ? 'settings.password.new' : 'settings.password.title')} type="password" autoComplete="new-password" required={!existing?.kid} hint={existing?.kid ? t('user.keepPassword') : t('auth.atLeast8')} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
               ) : existing ? (
                 <>
-                  {existing.reset_requested && <Notice tone="warn">{existing.username} forgot their password and asked for a reset.</Notice>}
+                  {existing.reset_requested && <Notice tone="warn">{t('user.forgotAsked', { name: existing.username })}</Notice>}
                   <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
                     <div className="min-w-0">
-                      <p className="font-medium">Reset code</p>
+                      <p className="font-medium">{t('user.resetCode')}</p>
                       <p className="mt-0.5 text-label text-muted">
                         {existing.reset_allowed && existing.reset_allowed_until
-                          ? `A code is active until ${formatTime(existing.reset_allowed_until)}. Turn off to withdraw it.`
-                          : 'A one-time code they enter under "Forgot password?" to choose a new password. Good for 30 minutes.'}
+                          ? t('user.codeActive', { time: formatTime(existing.reset_allowed_until) })
+                          : t('user.codeHelp')}
                       </p>
                     </div>
-                    <Switch checked={existing.reset_allowed} disabled={issue.isPending} onChange={(v) => issue.mutate({ reset_allowed: v })} label="Reset code" />
+                    <Switch checked={existing.reset_allowed} disabled={issue.isPending} onChange={(v) => issue.mutate({ reset_allowed: v })} label={t('user.resetCode')} />
                   </div>
                   <Button type="button" className="self-start" loading={issue.isPending} onClick={() => issue.mutate({ reset_password: true })}>
-                    Generate a new password
+                    {t('user.generatePassword')}
                   </Button>
                 </>
               ) : (
-                <p className="text-caption text-subtle">You get the password to copy or share after saving.</p>
+                <p className="text-caption text-subtle">{t('user.passwordAfterSave')}</p>
               )}
             </section>
           )}
-          <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
-            <option value="admin">Admin</option>
-            <option value="member">Member</option>
-            <option value="guest">Guest</option>
+          <SelectField label={t('settings.roleLabel')} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
+            <option value="admin">{t('role.admin')}</option>
+            <option value="member">{t('role.member')}</option>
+            <option value="guest">{t('role.guest')}</option>
           </SelectField>
           {form.role !== 'admin' && (
-            <section className="flex flex-col gap-2" aria-label="Access">
-              <p className="text-label font-medium text-fg">Access</p>
+            <section className="flex flex-col gap-2" aria-label={t('user.access')}>
+              <p className="text-label font-medium text-fg">{t('user.access')}</p>
               <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium">Custom access</p>
-                  <p className="mt-0.5 text-label text-muted">{form.all_rooms ? 'Off: they reach the whole home.' : 'Set a level for each room, or for single devices in it.'}</p>
+                  <p className="font-medium">{t('user.customAccess')}</p>
+                  <p className="mt-0.5 text-label text-muted">{t(form.all_rooms ? 'user.customOff' : 'user.customOn')}</p>
                 </div>
-                <Switch checked={!form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: !v })} label="Custom access" />
+                <Switch checked={!form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: !v })} label={t('user.customAccess')} />
               </div>
               {!form.all_rooms && (
                 <fieldset className="flex flex-col gap-2">
-                  <legend className="sr-only">Rooms and devices</legend>
-                  {rooms.length === 0 && devices.length === 0 && <p className="rounded-lg border border-border p-3 text-label text-muted">Create rooms first.</p>}
+                  <legend className="sr-only">{t('user.roomsAndDevices')}</legend>
+                  {rooms.length === 0 && devices.length === 0 && <p className="rounded-lg border border-border p-3 text-label text-muted">{t('user.createRoomsFirst')}</p>}
                   {rooms.map((r) => (
                     <RoomAccess key={r.id} name={r.name} devices={inRoom(r.id)} room={form.rooms[r.id]} levelOf={levelOf} onRoom={(v) => setRoom(r.id, v)} onDevice={(id, v) => setDevice(r.id, id, v)} />
                   ))}
-                  {inRoom(null).length > 0 && <RoomAccess name="No room" devices={inRoom(null)} levelOf={levelOf} onDevice={(id, v) => setDevice(null, id, v)} />}
+                  {inRoom(null).length > 0 && <RoomAccess name={t('devices.noRoom')} devices={inRoom(null)} levelOf={levelOf} onDevice={(id, v) => setDevice(null, id, v)} />}
                 </fieldset>
               )}
             </section>
@@ -821,7 +821,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
         open={avatarModalOpen}
         onClose={() => setAvatarModalOpen(false)}
         currentAvatar={form.avatar}
-        username={form.username || 'user'}
+        username={form.username || t('user.fallbackUsername')}
         onSave={(newAvatar) => setForm((f) => ({ ...f, avatar: newAvatar }))}
       />
       <Handover user={handover} onClose={() => setHandover(null)} />

@@ -292,7 +292,7 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
           </span>
           {moreActive && (
             <span className="ml-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
-              More
+              {t('nav.moreLabel')}
             </span>
           )}
         </button>
@@ -398,7 +398,7 @@ export function AppShell() {
   return (
     <div className="min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-toast focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary">
-        Skip to content
+        {t('nav.skip')}
       </a>
       <Sidebar items={items} pending={pending.length} unread={unread} onNotifications={() => setNotifOpen(true)} />
 
