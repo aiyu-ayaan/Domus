@@ -19,6 +19,7 @@ import type {
   SceneKind,
   ScreenSyncConfig,
   ServerLinks,
+  HomeLocation,
   User,
 } from './types'
 
@@ -171,6 +172,8 @@ export const api = {
       desktop?.saveLinks(links)
       return links
     }),
+  homeLocation: () => get<HomeLocation>('/server/location'),
+  saveHomeLocation: (b: { latitude: number; longitude: number }) => put<HomeLocation>('/server/location', b),
   /** Saves the database, with the key that opens its stored accounts, as one file. */
   downloadBackup: async () => {
     const res = await fetch(`${BASE}/api/v1/server/backup`, { headers: { Authorization: `Bearer ${session.token}` } }).catch(() => null)

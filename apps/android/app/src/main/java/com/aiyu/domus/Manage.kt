@@ -41,6 +41,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import java.time.ZoneId
+import java.time.OffsetDateTime
+import com.aiyu.domus.core.formatClockTime
+import com.aiyu.domus.core.HomeLocation
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -645,6 +649,36 @@ fun ServerLinksPage(admin: Boolean, onBack: () -> Unit) {
             RowCard("Home network", links.localUrl.ifBlank { "Not set" }, Icons.Rounded.Home)
             RowCard("Remote", links.remoteUrl.ifBlank { "Not set" }, Icons.Rounded.Public)
         }
+    }
+}
+
+/** Where the home is, for automations that run at sunrise and sunset. */
+@Composable
+fun LocationPage(onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    var place by remember { mutableStateOf<HomeLocation?>(null) }
+    var latitude by rememberSaveable { mutableStateOf("") }
+    var longitude by rememberSaveable { mutableStateOf("") }
+    val is24Hour = rememberIs24HourFormat()
+    fun show(loaded: HomeLocation) { place = loaded; latitude = loaded.latitude?.toString().orEmpty(); longitude = loaded.longitude?.toString().orEmpty() }
+    LaunchedEffect(Unit) { repository.request { it.homeLocation() }?.let(::show) }
+    fun clock(instant: String?) = instant?.let { runCatching { OffsetDateTime.parse(it).atZoneSameInstant(ZoneId.systemDefault()).toLocalTime().toString().take(5) }.getOrNull() }?.let { formatClockTime(it, is24Hour) }
+    val lat = latitude.toDoubleOrNull()?.takeIf { it in -90.0..90.0 }
+    val lon = longitude.toDoubleOrNull()?.takeIf { it in -180.0..180.0 }
+
+    SubPage("Home location", onBack) {
+        Text(
+            clock(place?.sunrise)?.let { rise -> "Today the sun rises at $rise and sets at ${clock(place?.sunset)}." }
+                ?: "Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.",
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Field(latitude, { latitude = it }, "Latitude", keyboard = KeyboardType.Text, supporting = "For example 18.52", error = latitude.isNotBlank() && lat == null)
+        Field(longitude, { longitude = it }, "Longitude", keyboard = KeyboardType.Text, supporting = "For example 73.86", error = longitude.isNotBlank() && lon == null)
+        Button(
+            { scope.launch { repository.request { it.saveHomeLocation(lat!!, lon!!) }?.let(::show) } },
+            Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = lat != null && lon != null && (lat != place?.latitude || lon != place?.longitude),
+        ) { Text("Save") }
     }
 }
 

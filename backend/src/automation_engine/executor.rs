@@ -114,12 +114,13 @@ impl AutomationEngine {
 
     /// Called once per minute by the scheduler.
     pub async fn tick(self: &Arc<Self>, now: DateTime<Local>) {
+        let location = crate::modules::server::location(&self.pool).await;
         let matched: Vec<Rule> = self
             .rules
             .read()
             .await
             .iter()
-            .filter(|r| r.triggers.iter().any(|t| triggers::matches_time(t, &now)))
+            .filter(|r| r.triggers.iter().any(|t| triggers::matches_time(t, &now, location)))
             .cloned()
             .collect();
         for rule in matched {

@@ -193,6 +193,7 @@ export interface Comparison {
 export type Trigger =
   | ({ type: 'device_state'; device_id: string; property: string } & Comparison)
   | { type: 'time'; at: string; days: number[] }
+  | { type: 'sun'; event: 'sunrise' | 'sunset'; offset_minutes: number; days: number[] }
   | { type: 'power_above'; device_id: string; watts: number }
   | { type: 'device_discovered' }
   | { type: 'device_offline'; device_id: string }
@@ -310,6 +311,14 @@ export type LiveEvent =
   | { type: 'discovery_finished'; found: number; new: number }
   | { type: 'notification'; id: string; level: Notification['level']; title: string; message: string }
   | { type: 'automation_triggered'; automation_id: string; name: string }
+
+/** Where the home is, with today's sunrise and sunset there. All null until an administrator sets it. */
+export interface HomeLocation {
+  latitude: number | null
+  longitude: number | null
+  sunrise: string | null
+  sunset: string | null
+}
 
 /** Where clients reach the server: at home and from outside. */
 export interface ServerLinks {

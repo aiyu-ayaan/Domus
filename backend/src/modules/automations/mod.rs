@@ -94,6 +94,9 @@ impl AutomationRequest {
                     return Err(ApiError::BadRequest(format!("Invalid time '{at}', use HH:MM")));
                 }
             }
+            if matches!(t, Trigger::Sun { offset_minutes, .. } if offset_minutes.abs() > 360) {
+                return Err(ApiError::BadRequest("Sunrise and sunset can be shifted by at most 6 hours".into()));
+            }
         }
         Ok(())
     }
@@ -133,7 +136,7 @@ async fn sees_rule(s: &AppState, visible: &Option<HashSet<String>>, row: &Automa
             Trigger::DeviceState { device_id, .. } | Trigger::PowerAbove { device_id, .. } | Trigger::DeviceOffline { device_id } => {
                 ids.push(device_id)
             }
-            Trigger::Time { .. } | Trigger::DeviceDiscovered => {}
+            Trigger::Time { .. } | Trigger::Sun { .. } | Trigger::DeviceDiscovered => {}
         }
     }
     for c in conditions {

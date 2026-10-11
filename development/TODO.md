@@ -175,6 +175,7 @@
 - [x] Web: Inter bundled with the app (`@fontsource-variable/inter`), no request to Google Fonts
 
 ## Next
+- [x] Sunrise / sunset automation triggers with an offset (`Trigger::Sun`, `home_core::sun_times`), home location in Settings on web and Android
 - [x] Backup and restore: Settings > Backup downloads the database with the master key inside, `domus-backend restore <file>` puts it back
 - [ ] Backup: download from Android, restore from the UI, scheduled backups
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices

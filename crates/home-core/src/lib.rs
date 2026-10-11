@@ -434,6 +434,14 @@ pub enum Trigger {
         #[serde(default)]
         days: Vec<u8>,
     },
+    /// Fires at sunrise or sunset at the home's location, `offset_minutes` later (negative = earlier).
+    Sun {
+        event: SunEvent,
+        #[serde(default)]
+        offset_minutes: i32,
+        #[serde(default)]
+        days: Vec<u8>,
+    },
     /// Fires when a device's power draw rises above `watts`.
     PowerAbove { device_id: String, watts: f64 },
     /// Fires when a new device is discovered.
@@ -476,6 +484,37 @@ pub enum Action {
     Delay {
         seconds: u64,
     },
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum SunEvent {
+    Sunrise,
+    Sunset,
+}
+
+/// Sunrise and sunset (UTC) on the day whose local noon is nearest `date` at the given place, east
+/// longitude positive. None where the sun does not rise or set that day (polar day and night).
+/// The "sunrise equation": good to about a minute, which is the scheduler's resolution.
+pub fn sun_times(date: chrono::NaiveDate, latitude: f64, longitude: f64) -> Option<(chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)> {
+    use chrono::{Duration, NaiveDate, TimeZone, Utc};
+    let epoch = NaiveDate::from_ymd_opt(2000, 1, 1)?;
+    // Days since 2000-01-01 12:00 UTC of the mean solar noon here.
+    let noon = (date - epoch).num_days() as f64 - longitude / 360.0;
+    let anomaly = (357.5291 + 0.98560028 * noon).rem_euclid(360.0).to_radians();
+    let center = 1.9148 * anomaly.sin() + 0.02 * (2.0 * anomaly).sin() + 0.0003 * (3.0 * anomaly).sin();
+    let ecliptic = (anomaly.to_degrees() + center + 180.0 + 102.9372).rem_euclid(360.0).to_radians();
+    let transit = noon + 0.0053 * anomaly.sin() - 0.0069 * (2.0 * ecliptic).sin();
+    let declination = (ecliptic.sin() * 23.4397_f64.to_radians().sin()).asin();
+    // -0.833 degrees: the sun's upper edge on the horizon, with refraction.
+    let cos_hour = ((-0.833_f64).to_radians().sin() - latitude.to_radians().sin() * declination.sin())
+        / (latitude.to_radians().cos() * declination.cos());
+    if !(-1.0..=1.0).contains(&cos_hour) {
+        return None;
+    }
+    let half_day = cos_hour.acos().to_degrees() / 360.0;
+    let at = |days: f64| Utc.with_ymd_and_hms(2000, 1, 1, 12, 0, 0).unwrap() + Duration::seconds((days * 86_400.0).round() as i64);
+    Some((at(transit - half_day), at(transit + half_day)))
 }
 
 /// Parse "HH:MM" into minutes since midnight.
@@ -593,6 +632,35 @@ pub fn hex_to_rgb_int(hex: &str) -> Option<u32> {
 pub fn rgb_int_to_hex(n: u32) -> String {
     let (r, g, b) = int_to_rgb(n);
     rgb_to_hex(r, g, b)
+}
+
+#[cfg(test)]
+mod sun_tests {
+    use super::sun_times;
+    use chrono::{NaiveDate, Timelike};
+
+    #[test]
+    fn the_equator_has_a_twelve_hour_day_at_the_equinox() {
+        let (rise, set) = sun_times(NaiveDate::from_ymd_opt(2026, 3, 20).unwrap(), 0.0, 0.0).unwrap();
+        let minutes = |t: chrono::DateTime<chrono::Utc>| (t.hour() * 60 + t.minute()) as i32;
+        // Solar noon is about 12:07 UTC that day; refraction adds a few minutes at each end.
+        assert!((minutes(rise) - (6 * 60 + 4)).abs() <= 3, "sunrise {rise}");
+        assert!((minutes(set) - (18 * 60 + 11)).abs() <= 3, "sunset {set}");
+    }
+
+    #[test]
+    fn pune_in_october() {
+        // Around 06:27 and 18:11 IST (UTC+5:30) on 2026-10-11.
+        let (rise, set) = sun_times(NaiveDate::from_ymd_opt(2026, 10, 11).unwrap(), 18.52, 73.86).unwrap();
+        let ist = |t: chrono::DateTime<chrono::Utc>| ((t.hour() * 60 + t.minute()) as i32 + 330) % 1440;
+        assert!((ist(rise) - (6 * 60 + 27)).abs() <= 4, "sunrise {rise}");
+        assert!((ist(set) - (18 * 60 + 11)).abs() <= 4, "sunset {set}");
+    }
+
+    #[test]
+    fn the_midnight_sun_never_sets() {
+        assert!(sun_times(NaiveDate::from_ymd_opt(2026, 6, 21).unwrap(), 80.0, 20.0).is_none());
+    }
 }
 
 #[cfg(test)]

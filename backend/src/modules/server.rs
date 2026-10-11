@@ -41,8 +41,46 @@ pub struct ServerLinks {
     pub remote_url: String,
 }
 
+const LOCATION_KEY: &str = "location";
+
+/// Where the home is, for sunrise and sunset. Unset until an administrator saves it.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct HomeLocation {
+    pub latitude: f64,
+    pub longitude: f64,
+}
+
+/// The saved (latitude, longitude).
+pub async fn location(pool: &sqlx::SqlitePool) -> Option<(f64, f64)> {
+    get_setting::<HomeLocation>(pool, LOCATION_KEY).await.map(|l| (l.latitude, l.longitude))
+}
+
 pub fn server_routes() -> Router<AppState> {
-    Router::new().route("/links", get(get_links).put(put_links)).route("/backup", get(backup))
+    Router::new()
+        .route("/links", get(get_links).put(put_links))
+        .route("/location", get(get_location).put(put_location))
+        .route("/backup", get(backup))
+}
+
+/// The location with today's sunrise and sunset, so the editors can show what a sun trigger means.
+async fn get_location(State(s): State<AppState>, _user: AuthUser) -> Json<Value> {
+    let place = location(&s.pool).await;
+    let sun = place.and_then(|(lat, lon)| home_core::sun_times(chrono::Local::now().date_naive(), lat, lon));
+    Json(json!({
+        "latitude": place.map(|p| p.0),
+        "longitude": place.map(|p| p.1),
+        "sunrise": sun.map(|s| s.0),
+        "sunset": sun.map(|s| s.1),
+    }))
+}
+
+async fn put_location(State(s): State<AppState>, user: AuthUser, Json(req): Json<HomeLocation>) -> ApiResult<Json<Value>> {
+    user.require_admin()?;
+    if !(-90.0..=90.0).contains(&req.latitude) || !(-180.0..=180.0).contains(&req.longitude) {
+        return Err(ApiError::BadRequest("Latitude is between -90 and 90, longitude between -180 and 180".into()));
+    }
+    set_setting(&s.pool, LOCATION_KEY, &req).await?;
+    Ok(get_location(State(s), user).await)
 }
 
 /// The whole home as one SQLite file to download: the database with the master key inside.

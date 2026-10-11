@@ -1,6 +1,6 @@
 use crate::infrastructure::event_bus::SystemEvent;
 use chrono::{DateTime, Datelike, Local, Timelike};
-use home_core::{parse_hhmm, DeviceState, Trigger};
+use home_core::{parse_hhmm, sun_times, DeviceState, SunEvent, Trigger};
 use serde_json::Value;
 
 fn property(state: Option<&DeviceState>, online: bool, name: &str) -> Option<Value> {
@@ -38,11 +38,23 @@ pub fn matches_event(trigger: &Trigger, event: &SystemEvent) -> bool {
     }
 }
 
-pub fn matches_time(trigger: &Trigger, now: &DateTime<Local>) -> bool {
-    let Trigger::Time { at, days } = trigger else { return false };
-    let Some(minutes) = parse_hhmm(at) else { return false };
+/// `location` is the home's (latitude, longitude); sun triggers never fire without it.
+pub fn matches_time(trigger: &Trigger, now: &DateTime<Local>, location: Option<(f64, f64)>) -> bool {
+    let (minutes, days) = match trigger {
+        Trigger::Time { at, days } => (parse_hhmm(at), days),
+        Trigger::Sun { event, offset_minutes, days } => (sun_minutes(*event, *offset_minutes, now, location), days),
+        _ => return false,
+    };
     let today = now.weekday().num_days_from_monday() as u8;
-    minutes == now.hour() * 60 + now.minute() && (days.is_empty() || days.contains(&today))
+    minutes == Some(now.hour() * 60 + now.minute()) && (days.is_empty() || days.contains(&today))
+}
+
+/// Minutes since local midnight of today's sunrise or sunset plus the offset, when it still falls on today.
+fn sun_minutes(event: SunEvent, offset_minutes: i32, now: &DateTime<Local>, location: Option<(f64, f64)>) -> Option<u32> {
+    let (latitude, longitude) = location?;
+    let (rise, set) = sun_times(now.date_naive(), latitude, longitude)?;
+    let at = if event == SunEvent::Sunrise { rise } else { set }.with_timezone(&now.timezone()) + chrono::Duration::minutes(offset_minutes as i64);
+    (at.date_naive() == now.date_naive()).then(|| at.hour() * 60 + at.minute())
 }
 
 #[cfg(test)]
@@ -76,8 +88,23 @@ mod tests {
     fn time_trigger_respects_days() {
         // 2026-10-05 is a Monday.
         let t = Local.with_ymd_and_hms(2026, 10, 5, 7, 30, 0).unwrap();
-        assert!(matches_time(&Trigger::Time { at: "07:30".into(), days: vec![0] }, &t));
-        assert!(!matches_time(&Trigger::Time { at: "07:30".into(), days: vec![1] }, &t));
-        assert!(!matches_time(&Trigger::Time { at: "07:31".into(), days: vec![] }, &t));
+        assert!(matches_time(&Trigger::Time { at: "07:30".into(), days: vec![0] }, &t, None));
+        assert!(!matches_time(&Trigger::Time { at: "07:30".into(), days: vec![1] }, &t, None));
+        assert!(!matches_time(&Trigger::Time { at: "07:31".into(), days: vec![] }, &t, None));
+    }
+
+    #[test]
+    fn sun_trigger_fires_in_one_minute_of_the_day_and_needs_a_location() {
+        let pune = Some((18.52, 73.86));
+        let sunset = |offset_minutes| Trigger::Sun { event: SunEvent::Sunset, offset_minutes, days: vec![] };
+        let minutes_matching = |t: &Trigger, location| {
+            (0..24 * 60)
+                .filter(|m| matches_time(t, &Local.with_ymd_and_hms(2026, 10, 5, m / 60, m % 60, 0).unwrap(), location))
+                .collect::<Vec<u32>>()
+        };
+        let at_sunset = minutes_matching(&sunset(0), pune);
+        assert_eq!(at_sunset.len(), 1);
+        assert_eq!(minutes_matching(&sunset(-30), pune), vec![at_sunset[0] - 30]);
+        assert!(minutes_matching(&sunset(0), None).is_empty());
     }
 }

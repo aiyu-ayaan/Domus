@@ -98,6 +98,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun updateAvatar(avatar: String) =
         call("PUT", "/auth/me/avatar", User.serializer(), fields("avatar" to avatar))
 
+    suspend fun homeLocation() = call("GET", "/server/location", HomeLocation.serializer())
+    suspend fun saveHomeLocation(latitude: Double, longitude: Double) =
+        call("PUT", "/server/location", HomeLocation.serializer(), buildJsonObject { put("latitude", latitude); put("longitude", longitude) }.toString())
     suspend fun serverLinks() = call("GET", "/server/links", ServerLinks.serializer())
     suspend fun saveServerLinks(localUrl: String, remoteUrl: String) =
         call("PUT", "/server/links", ServerLinks.serializer(), fields("local_url" to localUrl, "remote_url" to remoteUrl))

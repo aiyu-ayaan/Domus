@@ -19,6 +19,7 @@ export const keys = {
   notifications: ['notifications'] as const,
   users: ['users'] as const,
   serverLinks: ['server-links'] as const,
+  homeLocation: ['home-location'] as const,
 }
 
 export const useDevices = () => useQuery({ queryKey: keys.devices, queryFn: api.devices })
@@ -28,6 +29,7 @@ export const useScenes = () => useQuery({ queryKey: keys.scenes, queryFn: api.sc
 export const useAutomations = () => useQuery({ queryKey: keys.automations, queryFn: api.automations })
 export const useIntegrations = () => useQuery({ queryKey: keys.integrations, queryFn: api.integrations })
 export const useNotifications = () => useQuery({ queryKey: keys.notifications, queryFn: api.notifications })
+export const useHomeLocation = () => useQuery({ queryKey: keys.homeLocation, queryFn: api.homeLocation })
 export const useServerLinks = () => useQuery({ queryKey: keys.serverLinks, queryFn: api.serverLinks })
 export const useEnergy = () =>
   useQuery({ queryKey: keys.energy, queryFn: api.energyOverview, refetchInterval: 5_000 })

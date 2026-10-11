@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { Plus, Trash } from '@phosphor-icons/react'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
-import { useDevices, useGroups, useScenes } from '@/lib/queries'
-import { formatClockTime } from '@/lib/format'
+import { useDevices, useGroups, useHomeLocation, useScenes } from '@/lib/queries'
+import { formatClockTime, formatTime } from '@/lib/format'
 import { cn } from '@/lib/cn'
 import { COLOR_PRESETS, WHITE_PRESETS } from '@/components/devices/LightColorControls'
 import type { Action, Condition, Device, DeviceCommand, Trigger } from '@/lib/types'
@@ -34,10 +34,16 @@ function compareText(c: { equals?: unknown; above?: number; below?: number }, pr
   return `${p?.label ?? prop} changes`
 }
 
+const daysText = (days: number[]) => (days.length && days.length < 7 ? ` on ${days.map((d) => DAYS[d]).join(', ')}` : ' every day')
+
 export function describeTrigger(t: Trigger, devices: Device[]): string {
   switch (t.type) {
     case 'time':
-      return `At ${formatClockTime(t.at)}${t.days.length && t.days.length < 7 ? ` on ${t.days.map((d) => DAYS[d]).join(', ')}` : ' every day'}`
+      return `At ${formatClockTime(t.at)}${daysText(t.days)}`
+    case 'sun': {
+      const shift = t.offset_minutes ? `${Math.abs(t.offset_minutes)} min ${t.offset_minutes < 0 ? 'before' : 'after'} ` : 'At '
+      return `${shift}${t.event}${daysText(t.days)}`
+    }
     case 'device_state':
       return `When ${deviceName(devices, t.device_id)} ${compareText(t, t.property)}`
     case 'power_above':
@@ -158,10 +164,42 @@ function StateCompare<T extends { property: string; equals?: unknown; above?: nu
   )
 }
 
+type SunTrigger = Extract<Trigger, { type: 'sun' }>
+
+function SunFields({ value, onChange }: { value: SunTrigger; onChange: (v: SunTrigger) => void }) {
+  const { data: place } = useHomeLocation()
+  const today = value.event === 'sunrise' ? place?.sunrise : place?.sunset
+  const before = value.offset_minutes < 0
+  return (
+    <>
+      <SelectField label="Event" value={value.event} onChange={(e) => onChange({ ...value, event: e.target.value as SunTrigger['event'] })}>
+        <option value="sunrise">Sunrise</option>
+        <option value="sunset">Sunset</option>
+      </SelectField>
+      <SelectField label="Shift" value={before ? 'before' : 'after'} onChange={(e) => onChange({ ...value, offset_minutes: Math.abs(value.offset_minutes) * (e.target.value === 'before' ? -1 : 1) })}>
+        <option value="after">After</option>
+        <option value="before">Before</option>
+      </SelectField>
+      <Field
+        label="Minutes"
+        type="number"
+        min={0}
+        max={360}
+        value={String(Math.abs(value.offset_minutes))}
+        onChange={(e) => onChange({ ...value, offset_minutes: Math.min(360, Math.abs(Math.round(Number(e.target.value)) || 0)) * (before ? -1 : 1) })}
+      />
+      <p className={cn('text-label sm:col-span-2', place && !today ? 'text-warn' : 'text-muted')}>
+        {today ? `Today's ${value.event} at your home is at ${formatTime(today)}.` : place?.latitude == null ? 'Set the home location in Settings first; until then this never fires.' : `There is no ${value.event} at your home today.`}
+      </p>
+    </>
+  )
+}
+
 export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange: (v: Trigger[]) => void }) {
   const set = (i: number, t: Trigger) => onChange(value.map((x, j) => (j === i ? t : x)))
   const defaults: Record<Trigger['type'], Trigger> = {
     time: { type: 'time', at: '07:00', days: [] },
+    sun: { type: 'sun', event: 'sunset', offset_minutes: 0, days: [] },
     device_state: { type: 'device_state', device_id: '', property: 'is_on', equals: true },
     power_above: { type: 'power_above', device_id: '', watts: 1000 },
     device_offline: { type: 'device_offline', device_id: '' },
@@ -173,34 +211,34 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
         <Row key={i} onRemove={() => onChange(value.filter((_, j) => j !== i))}>
           <SelectField label="When" value={t.type} onChange={(e) => set(i, defaults[e.target.value as Trigger['type']])}>
             <option value="time">At a time</option>
+            <option value="sun">At sunrise or sunset</option>
             <option value="device_state">A device changes</option>
             <option value="power_above">Power goes above</option>
             <option value="device_offline">A device goes offline</option>
             <option value="device_discovered">A new device is found</option>
           </SelectField>
-          {t.type === 'time' && (
-            <>
-              <Field label="Time" type="time" value={t.at} onChange={(e) => set(i, { ...t, at: e.target.value })} />
-              <fieldset className="sm:col-span-2">
-                <legend className="mb-2 text-label font-medium">Days <span className="font-normal text-subtle">(none selected = every day)</span></legend>
-                <div className="flex flex-wrap gap-2">
-                  {DAYS.map((d, n) => {
-                    const on = t.days.includes(n)
-                    return (
-                      <button
-                        type="button"
-                        key={d}
-                        aria-pressed={on}
-                        onClick={() => set(i, { ...t, days: on ? t.days.filter((x) => x !== n) : [...t.days, n].sort() })}
-                        className={cn('h-8 w-11 cursor-pointer rounded-md border text-label font-medium transition-colors', on ? 'border-fg bg-fg text-bg' : 'border-border text-muted hover:text-fg')}
-                      >
-                        {d}
-                      </button>
-                    )
-                  })}
-                </div>
-              </fieldset>
-            </>
+          {t.type === 'time' && <Field label="Time" type="time" value={t.at} onChange={(e) => set(i, { ...t, at: e.target.value })} />}
+          {t.type === 'sun' && <SunFields value={t} onChange={(v) => set(i, v)} />}
+          {(t.type === 'time' || t.type === 'sun') && (
+            <fieldset className="sm:col-span-2">
+              <legend className="mb-2 text-label font-medium">Days <span className="font-normal text-subtle">(none selected = every day)</span></legend>
+              <div className="flex flex-wrap gap-2">
+                {DAYS.map((d, n) => {
+                  const on = t.days.includes(n)
+                  return (
+                    <button
+                      type="button"
+                      key={d}
+                      aria-pressed={on}
+                      onClick={() => set(i, { ...t, days: on ? t.days.filter((x) => x !== n) : [...t.days, n].sort() })}
+                      className={cn('h-8 w-11 cursor-pointer rounded-md border text-label font-medium transition-colors', on ? 'border-fg bg-fg text-bg' : 'border-border text-muted hover:text-fg')}
+                    >
+                      {d}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
           )}
           {t.type === 'device_state' && (
             <>

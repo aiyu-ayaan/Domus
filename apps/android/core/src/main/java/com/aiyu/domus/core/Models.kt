@@ -106,6 +106,10 @@ data class ServerLinks(
     val fingerprint: String? = null,
 )
 
+/** Where the home is, with today's sunrise and sunset there (ISO instants). All null until an administrator sets it. */
+@Serializable
+data class HomeLocation(val latitude: Double? = null, val longitude: Double? = null, val sunrise: String? = null, val sunset: String? = null)
+
 @Serializable
 data class SetupStatus(@SerialName("needs_admin_setup") val needsAdminSetup: Boolean)
 

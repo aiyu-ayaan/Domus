@@ -257,6 +257,25 @@ One shared inbox. `DELETE /notifications/{id}`, `DELETE /notifications` (all), a
 Android: swipe a row either way (Home "Recent activity" and the Notifications page); web: trash icon per row and a
 two-step "Delete all" in the sheet.
 
+### Time and sun triggers
+
+`SchedulerWorker` calls `AutomationEngine::tick` once a minute. A `time` trigger compares the minute with its
+`at`; a `sun` trigger (`event`: `sunrise` / `sunset`, `offset_minutes` up to six hours either way, optional
+`days`) compares it with today's sunrise or sunset at the home's location. The times come from
+`home_core::sun_times` (the sunrise equation, about a minute off at most), so nothing is asked of the
+internet. The location is the `location` setting (`GET/PUT /server/location`, set in Settings > Home location
+on web and Android); the answer carries today's sunrise and sunset so the editors can show them. Without a
+location, or on a day the sun does not rise or set there, a sun trigger does not fire.
+
+```mermaid
+flowchart LR
+    S["SchedulerWorker<br/>every minute"] --> T["AutomationEngine::tick(now)"]
+    L[("app_settings.location<br/>latitude, longitude")] --> T
+    T --> M{"matches_time"}
+    M -- "time: at == now" --> F["fire rule"]
+    M -- "sun: sun_times(today, lat, lon)<br/>+ offset == now" --> F
+```
+
 ### Tariffs and currency
 
 `electricity_settings` holds any 3-letter ISO currency (the UI lists every

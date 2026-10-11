@@ -16,6 +16,7 @@ import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.Scene
 import com.aiyu.domus.core.formatClockTime
 import com.aiyu.domus.ui.components.SectionTitle
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
@@ -52,6 +53,12 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24H
             val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }
             "At $at" + if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
         }
+        "sun" -> {
+            val offset = rule.text("offset_minutes")?.toIntOrNull() ?: 0
+            val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }
+            (if (offset == 0) "At " else "${abs(offset)} min ${if (offset < 0) "before" else "after"} ") + rule.text("event") +
+                if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
+        }
         "power_above" -> "$device uses more than ${rule.text("watts")} W"
         "device_offline" -> "$device goes offline"
         "device_discovered" -> "A new device is found"
@@ -78,7 +85,7 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24H
     }
 }
 
-private val TriggerKinds = listOf("time" to "Time", "device_state" to "Device state", "power_above" to "Power", "device_offline" to "Goes offline", "device_discovered" to "New device")
+private val TriggerKinds = listOf("time" to "Time", "sun" to "Sunrise / sunset", "device_state" to "Device state", "power_above" to "Power", "device_offline" to "Goes offline", "device_discovered" to "New device")
 private val ConditionKinds = listOf("device_state" to "Device state", "time_between" to "Time window")
 private val ActionKinds = listOf("device_command" to "Device", "scene" to "Scene", "notify" to "Notify", "delay" to "Wait")
 
@@ -100,6 +107,9 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
     var heading by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var days by remember { mutableStateOf(emptySet<Int>()) }
+    // sun: the event, and [number] minutes before or after it
+    var sun by remember { mutableStateOf("sunset") }
+    var before by remember { mutableStateOf(false) }
     val is24Hour = rememberIs24HourFormat()
     val start = rememberTimePickerState(7, 0, is24Hour = is24Hour)
     val end = rememberTimePickerState(22, 0, is24Hour = is24Hour)
@@ -111,6 +121,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
         "scene" -> sceneId != null
         "notify" -> heading.isNotBlank()
         "device_command" -> power != null || dim
+        "sun" -> number.isBlank() || number.toIntOrNull() in 0..360
         else -> true
     }
     fun build() = buildJsonObject {
@@ -118,6 +129,11 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
         if (needsDevice) put("device_id", deviceId)
         when (kind) {
             "time" -> { put("at", time(start)); put("days", JsonArray(days.sorted().map(::JsonPrimitive))) }
+            "sun" -> {
+                put("event", sun)
+                put("offset_minutes", (number.toIntOrNull() ?: 0) * if (before) -1 else 1)
+                put("days", JsonArray(days.sorted().map(::JsonPrimitive)))
+            }
             "device_state" -> when (state) {
                 "on", "off" -> { put("property", "is_on"); put("equals", state == "on") }
                 else -> { put("property", state); put(if (above) "above" else "below", number.toDouble()) }
@@ -135,8 +151,12 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
         Choice(kinds, kind, { kind = it; number = "" })
         if (needsDevice) Picker("Device", devices.map { it.id to it.name }, deviceId, { deviceId = it })
         when (kind) {
-            "time" -> {
-                TimeInput(start)
+            "time", "sun" -> {
+                if (kind == "time") TimeInput(start) else {
+                    Choice(listOf("sunrise" to "Sunrise", "sunset" to "Sunset"), sun, { sun = it })
+                    Choice(listOf(false to "After", true to "Before"), before, { before = it })
+                    Field(number, { number = it }, "Minutes", keyboard = KeyboardType.Number, supporting = "Empty runs it at $sun. Needs the home location in Settings.")
+                }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Days.forEachIndexed { i, day -> FilterChip(i in days, { days = if (i in days) days - i else days + i }, { Text(day) }) }
                 }

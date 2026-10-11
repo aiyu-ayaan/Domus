@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -112,6 +113,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             RowCard("Rooms", null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
             RowCard("People", "Accounts, roles and room access", Icons.Rounded.Group, onClick = { open("people") })
             RowCard("Electricity tariff", "Rate, billing cycle and budget", Icons.Rounded.Payments, onClick = { open("tariff") })
+            RowCard("Home location", "For sunrise and sunset automations", Icons.Rounded.WbTwilight, onClick = { open("location") })
         }
         RowCard("Notifications", "What your home reported", Icons.Rounded.Notifications, onClick = { open("notices") })
         // Opt-in: without a cloud push service, alerts need a connection that stays open.

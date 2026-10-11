@@ -13,7 +13,7 @@ import { UpdateProgress, useDesktopUpdate } from '@/components/UpdatePrompt'
 import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
 import { api, desktop, type UpdateChannel } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
-import { keys, useDevices, useRooms, useServerLinks } from '@/lib/queries'
+import { keys, useDevices, useHomeLocation, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { formatTime } from '@/lib/format'
 import { useTheme } from '@/lib/theme'
@@ -150,6 +150,7 @@ export function SettingsView() {
         </Card>
         <PasswordCard />
         <ServerCard />
+        <LocationCard />
         <BackupCard />
         <AboutCard />
       </div>
@@ -288,6 +289,57 @@ function ServerCard() {
         {admin && (
           <Button type="submit" loading={save.isPending} disabled={!form} className="self-start">
             Save addresses
+          </Button>
+        )}
+      </form>
+    </Card>
+  )
+}
+
+function LocationCard() {
+  const admin = useIsAdmin()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { data } = useHomeLocation()
+  const [form, setForm] = useState<{ latitude: string; longitude: string } | null>(null)
+  const value = form ?? { latitude: data?.latitude?.toString() ?? '', longitude: data?.longitude?.toString() ?? '' }
+  const save = useMutation({
+    mutationFn: () => api.saveHomeLocation({ latitude: Number(value.latitude), longitude: Number(value.longitude) }),
+    onSuccess: (place) => {
+      qc.setQueryData(keys.homeLocation, place)
+      setForm(null)
+    },
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+  })
+  const locate = () =>
+    navigator.geolocation.getCurrentPosition(
+      // Two decimals is about a kilometre: enough for the sun, and not the address.
+      (p) => setForm({ latitude: p.coords.latitude.toFixed(2), longitude: p.coords.longitude.toFixed(2) }),
+      () => toast.push({ tone: 'error', title: 'Could not read the location', message: 'Type the latitude and longitude instead.' }),
+    )
+  const filled = value.latitude.trim() !== '' && value.longitude.trim() !== '' && !Number.isNaN(Number(value.latitude)) && !Number.isNaN(Number(value.longitude))
+  return (
+    <Card>
+      <CardHeader title="Home location" action={admin && <Button size="sm" onClick={locate}>Use this device</Button>} />
+      <form
+        className="flex flex-col gap-4 p-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          save.mutate()
+        }}
+      >
+        <p className="text-label text-muted">
+          {data?.sunrise && data.sunset
+            ? `Automations can run at sunrise and sunset. Today the sun rises at ${formatTime(data.sunrise)} and sets at ${formatTime(data.sunset)}.`
+            : 'Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.'}
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Latitude" inputMode="decimal" placeholder="18.52" disabled={!admin} value={value.latitude} onChange={(e) => setForm({ ...value, latitude: e.target.value })} />
+          <Field label="Longitude" inputMode="decimal" placeholder="73.86" disabled={!admin} value={value.longitude} onChange={(e) => setForm({ ...value, longitude: e.target.value })} />
+        </div>
+        {admin && (
+          <Button type="submit" loading={save.isPending} disabled={!form || !filled} className="self-start">
+            Save location
           </Button>
         )}
       </form>
