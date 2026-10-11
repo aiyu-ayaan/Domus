@@ -4,6 +4,10 @@
       "mcp__codegraph__*"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/statusline.sh\""
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
