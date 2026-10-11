@@ -140,6 +140,14 @@ export const sceneSyncUrl = (sceneId: string) => {
   return `${origin.replace(/^http/, 'ws')}/api/v1/scenes/${encodeURIComponent(sceneId)}/sync?token=${encodeURIComponent(session.token ?? '')}`
 }
 
+/** What a member or guest may reach; the `view_only_*` lists are the subset they may not control. */
+export interface Grants {
+  room_ids: string[]
+  device_ids: string[]
+  view_only_room_ids: string[]
+  view_only_device_ids: string[]
+}
+
 export const api = {
   setupStatus: () => get<{ needs_admin_setup: boolean }>('/auth/setup-status'),
   setup: (b: { username: string; email: string; password: string; avatar?: string }) => post<AuthResponse>('/auth/setup', b),
@@ -222,9 +230,9 @@ export const api = {
   clearNotifications: () => del<Ok>('/notifications'),
 
   users: () => get<User[]>('/users'),
-  createUser: (b: { username: string; email: string; password: string; role: string; avatar?: string; all_rooms: boolean; room_ids: string[] }) =>
+  createUser: (b: { username: string; email: string; password: string; role: string; avatar?: string; all_rooms: boolean } & Grants) =>
     post<User>('/users', b),
-  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; avatar: string; all_rooms: boolean; room_ids: string[] }>) =>
+  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; avatar: string; all_rooms: boolean } & Grants>) =>
     put<User>(`/users/${id}`, b),
   removeUser: (id: string) => del<Ok>(`/users/${id}`),
 

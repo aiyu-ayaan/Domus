@@ -1,5 +1,5 @@
-use super::model::{AdoptRequest, DeviceDto, DiscoveryRecord, ManualAddRequest, UpdateDeviceRequest};
-use super::service::{visible_device, visible_devices};
+use super::model::{AdoptRequest, DeviceDto, DeviceRecord, DiscoveryRecord, ManualAddRequest, UpdateDeviceRequest};
+use super::service::{access, can_control, can_see, Access};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
@@ -34,8 +34,17 @@ pub fn discovery_routes() -> Router<AppState> {
         .route("/:id/restore", post(restore))
 }
 
+/// The device as this user gets it, or 404 when it is not theirs to see (so ids are not confirmed).
+fn dto_for(access: &Option<Access>, user: &AuthUser, rec: &DeviceRecord) -> ApiResult<DeviceDto> {
+    if !can_see(access, rec) {
+        return Err(ApiError::NotFound("Device not found".into()));
+    }
+    Ok(DeviceDto { can_control: can_control(access, user, rec), ..rec.to_dto() })
+}
+
 async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<DeviceDto>>> {
-    Ok(Json(visible_devices(&s, &user).await?.iter().map(|d| d.to_dto()).collect()))
+    let access = access(&s, &user).await?;
+    Ok(Json(s.manager.repo.list_all().await?.iter().filter_map(|d| dto_for(&access, &user, d).ok()).collect()))
 }
 
 /// Light moods and effects clients can offer. Which effects a light can play is in its `options.effect`.
@@ -44,7 +53,7 @@ async fn effects(_user: AuthUser) -> Json<Value> {
 }
 
 async fn get_one(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<DeviceDto>> {
-    Ok(Json(visible_device(&s, &user, &id).await?.to_dto()))
+    Ok(Json(dto_for(&access(&s, &user).await?, &user, &s.manager.get(&id).await?)?))
 }
 
 async fn update(
@@ -79,15 +88,19 @@ async fn command(
     Json(cmd): Json<DeviceCommand>,
 ) -> ApiResult<Json<DeviceDto>> {
     user.require_control()?;
-    visible_device(&s, &user, &id).await?;
+    let access = access(&s, &user).await?;
+    if !dto_for(&access, &user, &s.manager.get(&id).await?)?.can_control {
+        return Err(ApiError::Forbidden("You can see this device but not control it".into()));
+    }
     s.manager.command(&id, &cmd).await?;
-    Ok(Json(s.manager.get(&id).await?.to_dto()))
+    dto_for(&access, &user, &s.manager.get(&id).await?).map(Json)
 }
 
 async fn refresh(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<DeviceDto>> {
-    visible_device(&s, &user, &id).await?;
+    let access = access(&s, &user).await?;
+    dto_for(&access, &user, &s.manager.get(&id).await?)?;
     s.manager.refresh(&id).await?;
-    Ok(Json(s.manager.get(&id).await?.to_dto()))
+    dto_for(&access, &user, &s.manager.get(&id).await?).map(Json)
 }
 
 async fn add_manual(

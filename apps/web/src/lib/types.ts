@@ -7,7 +7,13 @@ export interface User {
   role: Role
   avatar?: string
   all_rooms: boolean
+  /** Rooms granted as a whole. */
   room_ids: string[]
+  /** Devices granted one by one. A device grant overrides the grant of its room. */
+  device_ids: string[]
+  /** The granted rooms and devices the user may see but not control. */
+  view_only_room_ids: string[]
+  view_only_device_ids: string[]
   created_at: string
 }
 
@@ -62,6 +68,8 @@ export interface Device {
   state: DeviceState
   last_seen: string | null
   created_at: string
+  /** Whether the signed-in user may operate it (false for guests and see-only access). */
+  can_control: boolean
 }
 
 export type DeviceCommand = Partial<{

@@ -299,11 +299,53 @@ flowchart TB
     HTTPS --> Pub{"public route?<br/>health, setup-status,<br/>setup, login"}
     Pub -- no --> JWT["verify JWT (HS256,<br/>secret in data/jwt.secret)"]
     JWT --> Load["load user from DB<br/>role + all_rooms"]
-    Load --> Role{"handler checks"}
+    Load --> Role{"role: what may they do?"}
     Role --> Admin["admin: manage everything"]
-    Role --> Member["member: control devices in allowed rooms"]
-    Role --> Guest["guest: view devices in allowed rooms"]
+    Role --> Member["member: view and control"]
+    Role --> Guest["guest: view only"]
+    Member --> Scope{"scope: what may they reach?"}
+    Guest --> Scope
+    Scope -- "all_rooms" --> Home["every device"]
+    Scope -- "user_room_access" --> RoomG["all devices of the room,<br/>also ones added later"]
+    Scope -- "user_device_access" --> DevG["that device only;<br/>its room is listed with just it"]
+    Home --> Vis["visible devices"]
+    RoomG --> Vis
+    DevG --> Vis
+    Vis --> Level{"grant level<br/>(device grant wins over its room)"}
+    Level -- "see only" --> See["shown, state and history;<br/>commands answer 403"]
+    Level -- "control" --> Ctl["shown and operable<br/>(members only, guests never)"]
+    Vis --> Derived["groups: visible members only<br/>scenes, automations: listed when every device<br/>they touch is visible, run when all are controllable<br/>energy, air, WebSocket: visible devices"]
 ```
+
+### Access model
+
+A user has a **role** (what they may do) and a **scope** (what they may reach).
+Admins ignore scope. For members and guests the scope is either the whole home
+(`users.all_rooms`) or a set of grants:
+
+| Grant | Table | Reaches |
+|---|---|---|
+| Room | `user_room_access` | Every device in the room, including ones added later |
+| Device | `user_device_access` | That device, wherever it is moved; also devices without a room |
+
+Every grant has a level, `can_control`: full, or **see only** (state and history
+but no commands). A device grant wins over the grant of its room, so one device
+can be see-only in a controllable room, or the reverse. Each device in the API
+carries `can_control` for the user asking, which is what the clients use to
+disable controls.
+
+Everything else follows from the devices (`modules/devices/service.rs`):
+a group shows only its visible members and commands only the controllable ones,
+and a scene or automation is listed when the user can see every device it
+touches (through groups and nested scenes too) and can be run when they can
+control all of them. Hidden items answer 404, so ids are not confirmed;
+see-only ones answer 403.
+
+On the users API `room_ids` and `device_ids` list the grants, and
+`view_only_room_ids` / `view_only_device_ids` the subset that is see-only. A
+client that sends only the ids keeps the see-only marks of the grants that stay.
+The WebSocket re-reads the user's access when users or rooms change and closes
+when the account is deleted.
 
 - **Transport:** HTTPS/WSS by default; a self-signed certificate covering
   localhost, the hostname and LAN IP is generated on first start. Electron
@@ -312,8 +354,8 @@ flowchart TB
   miIO tokens) are sealed with AES-256-GCM. The master key is kept outside the
   database (`DOMUS_MASTER_KEY` or `data/master.key`, mode 0600). Passwords use Argon2.
 - **Accounts:** first-run setup creates the admin and then locks; only admins
-  create users. Roles and room access are re-read on every request, so changes
-  apply immediately. Device and WebSocket data are filtered by room access.
+  create users. Roles and grants are re-read on every request, so changes
+  apply immediately. See the access model above.
 
 ### Air quality history
 
@@ -362,6 +404,8 @@ Translucent blur is limited to the sticky mobile top bar and tab bar.
 erDiagram
     users ||--o{ user_room_access : "allowed rooms"
     rooms ||--o{ user_room_access : ""
+    users ||--o{ user_device_access : "allowed devices"
+    devices ||--o{ user_device_access : ""
     rooms ||--o{ devices : contains
     integration_accounts ||--o{ devices : "linked via"
     integration_accounts ||--o{ discovered_devices : "found via"

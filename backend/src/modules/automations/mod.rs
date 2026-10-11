@@ -1,6 +1,7 @@
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::modules::devices::service::{action_devices, require_control_of, sees_all, visible_ids};
 use axum::{
     extract::{Path, State},
     routing::{get, post},
@@ -10,6 +11,7 @@ use chrono::{DateTime, Utc};
 use home_core::{Action, Condition, Trigger};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::collections::HashSet;
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow)]
@@ -113,15 +115,62 @@ async fn fetch(s: &AppState, id: &str) -> ApiResult<AutomationRow> {
         .ok_or_else(|| ApiError::NotFound("Automation not found".into()))
 }
 
-async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Vec<AutomationDto>>> {
+/// An automation is offered only to users who can see every device it watches or acts on.
+async fn sees_rule(s: &AppState, visible: &Option<HashSet<String>>, row: &AutomationRow) -> ApiResult<bool> {
+    if visible.is_none() {
+        return Ok(true);
+    }
+    let (Ok(triggers), Ok(conditions), Ok(actions)) = (
+        serde_json::from_str::<Vec<Trigger>>(&row.triggers_json),
+        serde_json::from_str::<Vec<Condition>>(&row.conditions_json),
+        serde_json::from_str::<Vec<Action>>(&row.actions_json),
+    ) else {
+        return Ok(false);
+    };
+    let mut ids = action_devices(s, actions).await?;
+    for t in triggers {
+        match t {
+            Trigger::DeviceState { device_id, .. } | Trigger::PowerAbove { device_id, .. } | Trigger::DeviceOffline { device_id } => {
+                ids.push(device_id)
+            }
+            Trigger::Time { .. } | Trigger::DeviceDiscovered => {}
+        }
+    }
+    for c in conditions {
+        match c {
+            Condition::DeviceState { device_id, .. } => ids.push(device_id),
+            Condition::TimeBetween { .. } => {}
+        }
+    }
+    Ok(sees_all(visible, &ids))
+}
+
+/// Like [`fetch`], but 404 for an automation the user is not offered.
+async fn fetch_visible(s: &AppState, user: &AuthUser, id: &str) -> ApiResult<AutomationRow> {
+    let row = fetch(s, id).await?;
+    if sees_rule(s, &visible_ids(s, user).await?, &row).await? {
+        Ok(row)
+    } else {
+        Err(ApiError::NotFound("Automation not found".into()))
+    }
+}
+
+async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<AutomationDto>>> {
     let rows: Vec<AutomationRow> = sqlx::query_as("SELECT * FROM automations ORDER BY created_at DESC")
         .fetch_all(&s.pool)
         .await?;
-    Ok(Json(rows.into_iter().map(Into::into).collect()))
+    let visible = visible_ids(&s, &user).await?;
+    let mut out = Vec::with_capacity(rows.len());
+    for row in rows {
+        if sees_rule(&s, &visible, &row).await? {
+            out.push(row.into());
+        }
+    }
+    Ok(Json(out))
 }
 
-async fn get_one(State(s): State<AppState>, _user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<AutomationDto>> {
-    Ok(Json(fetch(&s, &id).await?.into()))
+async fn get_one(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<AutomationDto>> {
+    Ok(Json(fetch_visible(&s, &user, &id).await?.into()))
 }
 
 fn to_json<T: Serialize>(v: &T) -> String {
@@ -192,9 +241,10 @@ async fn toggle(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
 
 async fn run_now(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
     user.require_control()?;
-    let row = fetch(&s, &id).await?;
+    let row = fetch_visible(&s, &user, &id).await?;
     let actions: Vec<Action> =
         serde_json::from_str(&row.actions_json).map_err(|e| ApiError::BadRequest(format!("invalid actions: {e}")))?;
+    require_control_of(&s, &user, &action_devices(&s, actions.clone()).await?).await?;
     let errors = s.automations.execute(&actions, 0).await;
     Ok(Json(json!({ "success": errors.is_empty(), "errors": errors })))
 }

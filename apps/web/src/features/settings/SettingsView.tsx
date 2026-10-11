@@ -5,22 +5,22 @@ import { CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosp
 import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
-import { Checkbox, Field, SelectField } from '@/components/ui/Field'
+import { Field, SelectField } from '@/components/ui/Field'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Avatar } from '@/components/ui/Avatar'
 import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal'
 import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
 import { api, desktop, type UpdateChannel } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
-import { keys, useRooms, useServerLinks } from '@/lib/queries'
+import { keys, useDevices, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { useTheme } from '@/lib/theme'
-import type { Role, User } from '@/lib/types'
+import type { Device, Role, Room, User } from '@/lib/types'
 
 const roleHelp: Record<Role, string> = {
   admin: 'Full access, including devices, integrations, people and settings.',
-  member: 'Can view and control devices in their rooms.',
-  guest: 'Can view devices in their rooms.',
+  member: 'Can see the rooms and devices they are given, and control the ones not set to see only.',
+  guest: 'Can view the rooms and devices they are given, but not control them.',
 }
 
 export function SettingsView() {
@@ -322,7 +322,7 @@ function People() {
                 {u.id === me?.id && <span className="font-normal text-subtle"> (you)</span>}
               </p>
               <p className="truncate text-label text-muted">
-                {u.role === 'admin' || u.all_rooms ? 'All rooms' : u.room_ids.map((id) => rooms.find((r) => r.id === id)?.name).filter(Boolean).join(', ') || 'No rooms'}
+                {accessSummary(u, rooms)}
               </p>
             </div>
             <Badge tone={u.role === 'admin' ? 'info' : 'neutral'}>{u.role}</Badge>
@@ -337,11 +337,67 @@ function People() {
   )
 }
 
+function accessSummary(u: User, rooms: Room[]) {
+  if (u.role === 'admin' || u.all_rooms) return 'All rooms'
+  const parts = u.room_ids.flatMap((id) => {
+    const name = rooms.find((r) => r.id === id)?.name
+    return name ? [u.view_only_room_ids.includes(id) ? `${name} (see only)` : name] : []
+  })
+  if (u.device_ids.length) parts.push(`${u.device_ids.length} ${u.device_ids.length === 1 ? 'device' : 'devices'}`)
+  return parts.join(', ') || 'No access'
+}
+
+type Level = 'none' | 'view' | 'control'
+/** Granted ids and their level; an id that is missing has no access. */
+type Levels = Record<string, Exclude<Level, 'none'>>
+const levelOptions: { value: Level; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: 'view', label: 'See only' },
+  { value: 'control', label: 'Control' },
+]
+const toLevels = (ids: string[], viewOnly: string[]): Levels => Object.fromEntries(ids.map((id) => [id, viewOnly.includes(id) ? 'view' : 'control']))
+const without = (levels: Levels, ids: string[]): Levels => Object.fromEntries(Object.entries(levels).filter(([id]) => !ids.includes(id)))
+const viewOnly = (levels: Levels) => Object.keys(levels).filter((id) => levels[id] === 'view')
+
+function AccessRow({ label, hint, value, onChange }: { label: string; hint?: string; value: Level; onChange: (v: Level) => void }) {
+  return (
+    <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-1.5">
+      <span className="min-w-0">
+        {label}
+        {hint && <span className="text-label text-muted"> · {hint}</span>}
+      </span>
+      <Segmented size="sm" label={`Access to ${label}`} value={value} options={levelOptions} onChange={onChange} />
+    </div>
+  )
+}
+
+/** One room in the access editor: grant it whole, or set single devices (which also override the room). */
+function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: string; devices: Device[]; room?: Level; levelOf: (d: Device) => Level; onRoom?: (v: Level) => void; onDevice: (id: string, v: Level) => void }) {
+  const count = devices.filter((d) => levelOf(d) !== 'none').length
+  const status = room && room !== 'none' ? `Whole room · ${room === 'view' ? 'see only' : 'control'}` : count ? `${count} of ${devices.length} devices` : 'No access'
+  return (
+    <details className="border-t border-border first:border-t-0">
+      <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3 hover:bg-raised">
+        <span>{name}</span>
+        <span className="text-label text-muted">{status}</span>
+      </summary>
+      <div className="border-t border-border pb-1">
+        {onRoom && <AccessRow label="Whole room" hint="includes devices added later" value={room ?? 'none'} onChange={onRoom} />}
+        {devices.map((d) => (
+          <AccessRow key={d.id} label={d.name} value={levelOf(d)} onChange={(v) => onDevice(d.id, v)} />
+        ))}
+        {devices.length === 0 && <p className="px-3 py-2 text-label text-muted">No devices in this room yet.</p>}
+      </div>
+    </details>
+  )
+}
+
 function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () => void }) {
   const { user: me, updateUser } = useAuth()
   const qc = useQueryClient()
   const toast = useToast()
   const { data: rooms = [] } = useRooms()
+  const { data: devices = [] } = useDevices()
   const existing = user && user !== 'new' ? user : null
   const [form, setForm] = useState({
     username: '',
@@ -350,7 +406,8 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     role: 'member' as Role,
     avatar: '',
     all_rooms: true,
-    room_ids: [] as string[],
+    rooms: {} as Levels,
+    devices: {} as Levels,
   })
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [key, setKey] = useState<string | null>(null)
@@ -366,25 +423,28 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       role: existing?.role ?? 'member',
       avatar: existing?.avatar ?? `dicebear:bottts:${existing?.username || 'member'}`,
       all_rooms: existing?.all_rooms ?? true,
-      room_ids: existing?.room_ids ?? [],
+      rooms: toLevels(existing?.room_ids ?? [], existing?.view_only_room_ids ?? []),
+      devices: toLevels(existing?.device_ids ?? [], existing?.view_only_device_ids ?? []),
     })
   }
   const save = useMutation({
     mutationFn: async () => {
+      const { rooms: roomLevels, devices: deviceLevels, ...account } = form
+      const grants = { room_ids: Object.keys(roomLevels), device_ids: Object.keys(deviceLevels), view_only_room_ids: viewOnly(roomLevels), view_only_device_ids: viewOnly(deviceLevels) }
       if (existing) {
         const updated = await api.updateUser(existing.id, {
           email: form.email,
           role: form.role,
           avatar: form.avatar,
           all_rooms: form.all_rooms,
-          room_ids: form.room_ids,
+          ...grants,
           ...(form.password ? { password: form.password } : {}),
         })
         if (existing.id === me?.id) {
           updateUser(updated)
         }
       } else {
-        await api.createUser(form)
+        await api.createUser({ ...account, ...grants })
       }
     },
     onSuccess: () => {
@@ -394,7 +454,27 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     },
     onError: (e) => setError(errorMessage(e)),
   })
-  const toggleRoom = (id: string) => setForm((f) => ({ ...f, room_ids: f.room_ids.includes(id) ? f.room_ids.filter((x) => x !== id) : [...f.room_ids, id] }))
+  const inRoom = (id: string | null) => devices.filter((d) => (d.room_id ?? null) === id)
+  const levelOf = (d: Device): Level => form.devices[d.id] ?? (d.room_id ? form.rooms[d.room_id] : undefined) ?? 'none'
+  // Setting the whole room starts it clean: single-device settings in it are dropped.
+  const setRoom = (id: string, level: Level) =>
+    setForm((f) => ({
+      ...f,
+      rooms: level === 'none' ? without(f.rooms, [id]) : { ...f.rooms, [id]: level },
+      devices: without(f.devices, inRoom(id).map((d) => d.id)),
+    }))
+  const setDevice = (roomId: string | null, id: string, level: Level) =>
+    setForm((f) => {
+      const room = roomId ? f.rooms[roomId] : undefined
+      const rest = without(f.devices, [id])
+      // Taking one device out of a whole room keeps the others, each at the room's level.
+      if (level === 'none' && roomId && room) {
+        const kept = Object.fromEntries(inRoom(roomId).filter((d) => d.id !== id && !rest[d.id]).map((d) => [d.id, room]))
+        return { ...f, rooms: without(f.rooms, [roomId]), devices: { ...rest, ...kept } }
+      }
+      // The same level as the room needs no entry of its own.
+      return { ...f, devices: level === 'none' || level === room ? rest : { ...rest, [id]: level } }
+    })
 
   const handleRollAvatar = () => {
     const rolled = rollRandomAvatar()
@@ -449,19 +529,18 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
               <div className="flex min-h-12 items-center justify-between gap-3 px-3">
                 <div>
                   <p>All rooms</p>
-                  <p className="text-label text-muted">Turn off to choose specific rooms.</p>
+                  <p className="text-label text-muted">Turn off to choose rooms and devices.</p>
                 </div>
                 <Switch checked={form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: v })} label="Access to all rooms" />
               </div>
               {!form.all_rooms && (
-                <fieldset className="border-t border-border p-1">
-                  <legend className="sr-only">Rooms</legend>
-                  {rooms.length === 0 && <p className="p-2 text-label text-muted">Create rooms first.</p>}
+                <fieldset className="border-t border-border">
+                  <legend className="sr-only">Rooms and devices</legend>
+                  {rooms.length === 0 && devices.length === 0 && <p className="p-3 text-label text-muted">Create rooms first.</p>}
                   {rooms.map((r) => (
-                    <Checkbox key={r.id} checked={form.room_ids.includes(r.id)} onChange={() => toggleRoom(r.id)}>
-                      {r.name}
-                    </Checkbox>
+                    <RoomAccess key={r.id} name={r.name} devices={inRoom(r.id)} room={form.rooms[r.id]} levelOf={levelOf} onRoom={(v) => setRoom(r.id, v)} onDevice={(id, v) => setDevice(r.id, id, v)} />
                   ))}
+                  {inRoom(null).length > 0 && <RoomAccess name="No room" devices={inRoom(null)} levelOf={levelOf} onDevice={(id, v) => setDevice(null, id, v)} />}
                 </fieldset>
               )}
             </div>

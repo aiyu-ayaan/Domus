@@ -6,6 +6,7 @@ pub mod screen_sync;
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::modules::devices::service::{action_devices, require_control_of, sees_all, visible_ids};
 use axum::{
     extract::{Path, State},
     routing::{get, post, put},
@@ -157,11 +158,48 @@ pub fn scene_routes() -> Router<AppState> {
         .route("/:id/sync", get(screen_sync::sync_ws))
 }
 
-async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Vec<SceneDto>>> {
+/// Every device a scene touches: its actions, or the lights of a Screen Sync scene.
+async fn scene_devices(s: &AppState, row: &SceneRow) -> ApiResult<Vec<String>> {
+    if row.kind != KIND_SCREEN_SYNC {
+        return action_devices(s, serde_json::from_str(&row.actions_json).unwrap_or_default()).await;
+    }
+    let cfg: ScreenSyncConfig = serde_json::from_str(&row.config_json).unwrap_or_default();
+    let mut ids = cfg.device_ids;
+    for g in &cfg.group_ids {
+        ids.extend(s.manager.group_device_ids(g).await?);
+    }
+    Ok(ids)
+}
+
+/// A scene is offered only to users who can see every device it touches.
+async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<SceneDto>>> {
     let rows: Vec<SceneRow> = sqlx::query_as("SELECT * FROM scenes ORDER BY name COLLATE NOCASE")
         .fetch_all(&s.pool)
         .await?;
-    Ok(Json(rows.into_iter().map(Into::into).collect()))
+    let visible = visible_ids(&s, &user).await?;
+    let mut out = Vec::with_capacity(rows.len());
+    for row in rows {
+        if visible.is_none() || sees_all(&visible, &scene_devices(&s, &row).await?) {
+            out.push(row.into());
+        }
+    }
+    Ok(Json(out))
+}
+
+/// Running a scene needs control of every device it touches: 404 when the user
+/// is not offered the scene at all, 403 when some of its devices are see-only.
+pub(super) async fn ensure_runnable(s: &AppState, user: &AuthUser, id: &str) -> ApiResult<()> {
+    let visible = visible_ids(s, user).await?;
+    if visible.is_none() {
+        return Ok(());
+    }
+    let row: Option<SceneRow> = sqlx::query_as("SELECT * FROM scenes WHERE id = ?").bind(id).fetch_optional(&s.pool).await?;
+    let Some(row) = row else { return Err(ApiError::NotFound("Scene not found".into())) };
+    let ids = scene_devices(s, &row).await?;
+    if !sees_all(&visible, &ids) {
+        return Err(ApiError::NotFound("Scene not found".into()));
+    }
+    require_control_of(s, user, &ids).await
 }
 
 /// Validated scene columns: (kind, actions_json, config_json).
@@ -254,6 +292,7 @@ async fn update(
 
 async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
     user.require_control()?;
+    ensure_runnable(&s, &user, &id).await?;
     if screen_sync_config(&s, &id).await.is_some() {
         return Err(ApiError::BadRequest(
             "Screen Sync needs a screen to share. Start it from the Domus app on the device showing the content.".into(),
@@ -286,6 +325,7 @@ pub struct ToggleRequest {
 
 async fn deactivate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
     user.require_control()?;
+    ensure_runnable(&s, &user, &id).await?;
     // Stopping a Screen Sync scene ends its live session; the session restores the lights.
     if screen_sync_config(&s, &id).await.is_some() {
         screen_sync::stop_session(&id);

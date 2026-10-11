@@ -163,7 +163,7 @@ export function OverviewInsights({
                       </div>
                       <Switch
                         checked={Boolean(s.is_on && d.is_online)}
-                        disabled={!control || !d.is_online}
+                        disabled={!control || !d.can_control || !d.is_online}
                         label={`${d.name} power`}
                         onChange={(v) =>
                           command.mutate({ id: d.id, cmd: { is_on: v } })
@@ -181,11 +181,11 @@ export function OverviewInsights({
                             value={s.mode}
                             options={modes.map((m) => ({ value: m, label: m }))}
                             onChange={(v) =>
-                              control && command.mutate({ id: d.id, cmd: { mode: v } })
+                              control && d.can_control && command.mutate({ id: d.id, cmd: { mode: v } })
                             }
                           />
                         </div>
-                        <FanSpeedSlider device={d} disabled={!control || !d.is_online} className="pt-3" />
+                        <FanSpeedSlider device={d} disabled={!control || !d.can_control || !d.is_online} className="pt-3" />
                       </div>
                     )}
 
@@ -198,7 +198,7 @@ export function OverviewInsights({
                           value={s.fan_speed}
                           options={fan.map((f) => ({ value: f, label: f }))}
                           onChange={(v) =>
-                            control && command.mutate({ id: d.id, cmd: { fan_speed: v } })
+                            control && d.can_control && command.mutate({ id: d.id, cmd: { fan_speed: v } })
                           }
                         />
                       </div>

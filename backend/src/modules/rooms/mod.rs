@@ -2,7 +2,7 @@ use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::infrastructure::event_bus::SystemEvent;
-use crate::modules::devices::service::allowed_rooms;
+use crate::modules::devices::service::access;
 use axum::{
     extract::{Path, State},
     routing::{get, put},
@@ -40,13 +40,11 @@ async fn list_rooms(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json
     let rooms: Vec<RoomRecord> = sqlx::query_as("SELECT * FROM rooms ORDER BY floor ASC, name COLLATE NOCASE ASC")
         .fetch_all(&s.pool)
         .await?;
-    let allowed = allowed_rooms(&s, &user).await?;
-    Ok(Json(
-        rooms
-            .into_iter()
-            .filter(|r| allowed.as_ref().is_none_or(|a| a.contains(&r.id)))
-            .collect(),
-    ))
+    let Some(access) = access(&s, &user).await? else { return Ok(Json(rooms)) };
+    // A room shows up when it was granted as a whole or holds a granted device.
+    let mut allowed: std::collections::HashSet<String> = access.rooms.keys().cloned().collect();
+    allowed.extend(s.manager.repo.list_all().await?.into_iter().filter(|d| access.allows(d)).filter_map(|d| d.room_id));
+    Ok(Json(rooms.into_iter().filter(|r| allowed.contains(&r.id)).collect()))
 }
 
 async fn create_room(State(s): State<AppState>, user: AuthUser, Json(req): Json<RoomRequest>) -> ApiResult<Json<RoomRecord>> {

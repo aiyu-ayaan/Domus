@@ -49,6 +49,7 @@ impl DeviceRecord {
             state: self.state(),
             last_seen: self.last_seen,
             created_at: self.created_at,
+            can_control: true,
         }
     }
 }
@@ -69,6 +70,8 @@ pub struct DeviceDto {
     pub state: DeviceState,
     pub last_seen: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
+    /// Whether the user asking may operate the device (false for guests and see-only grants).
+    pub can_control: bool,
 }
 
 #[derive(Debug, Deserialize)]

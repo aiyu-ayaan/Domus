@@ -18,7 +18,7 @@ use super::ScreenSyncConfig;
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::integrations::manager::StreamTarget;
-use crate::modules::devices::service::{allowed_rooms, can_see};
+use crate::modules::devices::service::{access, can_control, Access};
 use axum::{
     extract::{ws::Message, ws::WebSocket, Path, State, WebSocketUpgrade},
     response::{IntoResponse, Response},
@@ -128,6 +128,9 @@ pub async fn sync_ws(
     if let Err(e) = user.require_control() {
         return e.into_response();
     }
+    if let Err(e) = super::ensure_runnable(&s, &user, &scene_id).await {
+        return e.into_response();
+    }
     ws.on_upgrade(move |socket| run_session(socket, s, user, scene_id))
 }
 
@@ -160,12 +163,12 @@ async fn resolve_targets(
             }
         }
     }
-    let rooms = allowed_rooms(s, user).await.unwrap_or(Some(HashSet::new()));
+    let rooms = access(s, user).await.unwrap_or(Some(Access::default()));
     let mut targets = Vec::new();
     let mut skipped = Vec::new();
     for id in ids {
         let Ok(t) = s.manager.stream_target(&id).await else { continue };
-        if !can_see(&rooms, &t.record) {
+        if !can_control(&rooms, user, &t.record) {
             continue;
         }
         if t.record.device_type != "light" {

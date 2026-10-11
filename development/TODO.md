@@ -216,3 +216,14 @@
 - [ ] MQTT: covers and climate, devices without Home Assistant discovery (manual topics), state pushed as it arrives instead of on the poll
 - [ ] Hue: motion sensors and scenes; follow the bridge when its IP changes
 - [ ] Show sensor readings (`motion`, `contact`, `battery`) on the device page, not only in the tile summary
+
+## Milestone 19: Access per room and per device (2026-10-11)
+- [x] Device grants (`0007_device_access.sql`, `user_device_access`): a user gets whole rooms, single devices, or both; `device_ids` on the users API next to `room_ids`
+- [x] Grant level per room and per device: see only or control (`can_control`, `view_only_room_ids` / `view_only_device_ids`); a device grant overrides its room; devices carry `can_control` for the user asking
+- [x] Scenes and automations are listed and runnable only when the user can see every device they touch (they were open to every signed-in user)
+- [x] Live stream re-reads access when users or rooms change and closes for a deleted account
+- [x] Web: Settings > People, each room opens to None / See only / Control for the whole room and for each device; `development/docs/ARCHITECTURE.md` section 7
+- [ ] Android people editor: pick single devices and levels (it sends rooms only and leaves device grants and levels untouched)
+- [ ] Android: read `can_control` per device (a see-only device still looks operable there and the command answers 403)
+- [ ] Web: grey out scenes and automations the user can see but not run (they answer 403 today)
+- [ ] Notifications inbox is still shared by every signed-in user

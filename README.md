@@ -12,7 +12,7 @@ Home Assistant discovery).
 - Automatic discovery of new devices, with an inbox or auto-add
 - Live dashboard: power draw, bill so far and projected bill, air quality
 - Rooms, device groups, scenes and automations
-- Multiple users with admin / member / guest roles and per-room access
+- Multiple users with admin / member / guest roles and access per room or per device, each see-only or full control
 - HTTPS by default; credentials and device keys encrypted at rest
 
 Architecture and diagrams: [`development/docs/ARCHITECTURE.md`](development/docs/ARCHITECTURE.md).

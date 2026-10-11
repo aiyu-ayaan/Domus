@@ -88,6 +88,20 @@ impl AuthUser {
     pub fn sees_everything(&self) -> bool {
         self.is_admin() || self.all_rooms
     }
+
+    /// The account as it is stored now; `None` once it was deleted.
+    pub async fn load(pool: &sqlx::SqlitePool, id: &str) -> Result<Option<Self>, ApiError> {
+        let row: Option<(String, String, bool)> = sqlx::query_as("SELECT username, role, all_rooms FROM users WHERE id = ?")
+            .bind(id)
+            .fetch_optional(pool)
+            .await?;
+        Ok(row.map(|(username, role, all_rooms)| Self {
+            id: id.to_string(),
+            username,
+            role: Role::parse(&role).unwrap_or(Role::Guest),
+            all_rooms,
+        }))
+    }
 }
 
 #[async_trait]
@@ -125,19 +139,9 @@ pub async fn auth_middleware(
         .ok_or_else(|| ApiError::Unauthorized("Missing Authorization header".into()))?;
     let claims = state.jwt.verify(&token)?;
 
-    let row: Option<(String, String, bool)> =
-        sqlx::query_as("SELECT username, role, all_rooms FROM users WHERE id = ?")
-            .bind(&claims.sub)
-            .fetch_optional(&state.pool)
-            .await?;
-    let (username, role, all_rooms) =
-        row.ok_or_else(|| ApiError::Unauthorized("Account no longer exists".into()))?;
-
-    req.extensions_mut().insert(AuthUser {
-        id: claims.sub,
-        username,
-        role: Role::parse(&role).unwrap_or(Role::Guest),
-        all_rooms,
-    });
+    let user = AuthUser::load(&state.pool, &claims.sub)
+        .await?
+        .ok_or_else(|| ApiError::Unauthorized("Account no longer exists".into()))?;
+    req.extensions_mut().insert(user);
     Ok(next.run(req).await)
 }

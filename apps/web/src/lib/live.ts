@@ -51,7 +51,8 @@ export function useLiveEvents(enabled: boolean) {
             break
           }
           case 'users_changed':
-            qc.invalidateQueries({ queryKey: keys.users })
+            // Someone's access may have changed, and with it every list this user is shown.
+            qc.invalidateQueries()
             break
           case 'device_state_changed': {
             const list = qc.getQueryData<Device[]>(keys.devices)

@@ -10,7 +10,7 @@ import type { Device, Room } from '@/lib/types'
 /** One device as a list row: icon · name/status · power · switch. */
 export function DeviceRow({ device, room, onOpen }: { device: Device; room?: Room; onOpen: () => void }) {
   const command = useCommand()
-  const control = useCanControl()
+  const control = useCanControl() && device.can_control
   const Icon = deviceIcons[device.device_type]
   const on = device.is_online && device.state.is_on === true
   const watts = device.is_online ? device.state.current_power_watts : undefined

@@ -1,9 +1,9 @@
-//! Live event stream for the UI. Device events are filtered by room access.
+//! Live event stream for the UI. Device events are filtered by the user's access.
 
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::infrastructure::event_bus::SystemEvent;
-use crate::modules::devices::service::visible_devices;
+use crate::modules::devices::service::visible_ids;
 use axum::{
     extract::{ws::Message, ws::WebSocket, State, WebSocketUpgrade},
     response::Response,
@@ -15,23 +15,14 @@ pub async fn ws_handler(State(s): State<AppState>, user: AuthUser, ws: WebSocket
     ws.on_upgrade(move |socket| stream(socket, s, user))
 }
 
-async fn visible_ids(s: &AppState, user: &AuthUser) -> Option<HashSet<String>> {
-    if user.sees_everything() {
-        return None;
-    }
-    Some(
-        visible_devices(s, user)
-            .await
-            .unwrap_or_default()
-            .into_iter()
-            .map(|d| d.id)
-            .collect(),
-    )
+/// On a failed lookup the user sees no device events rather than all of them.
+async fn visible(s: &AppState, user: &AuthUser) -> Option<HashSet<String>> {
+    visible_ids(s, user).await.unwrap_or_else(|_| Some(HashSet::new()))
 }
 
-async fn stream(mut socket: WebSocket, s: AppState, user: AuthUser) {
+async fn stream(mut socket: WebSocket, s: AppState, mut user: AuthUser) {
     let mut rx = s.bus.subscribe();
-    let mut visible = visible_ids(&s, &user).await;
+    let mut visible = visible(&s, &user).await;
     let _ = socket.send(Message::Text(r#"{"type":"connected"}"#.into())).await;
 
     loop {
@@ -46,8 +37,17 @@ async fn stream(mut socket: WebSocket, s: AppState, user: AuthUser) {
                     }
                     Err(RecvError::Closed) => return,
                 };
+                // Access may have changed: an open socket must not outlive a revoked grant or a deleted account.
+                if matches!(event, SystemEvent::UsersChanged | SystemEvent::UserUpdated { .. } | SystemEvent::RoomsChanged) {
+                    match AuthUser::load(&s.pool, &user.id).await {
+                        Ok(Some(u)) => user = u,
+                        Ok(None) => return,
+                        Err(_) => {}
+                    }
+                    visible = self::visible(&s, &user).await;
+                }
                 if matches!(event, SystemEvent::DeviceAdded { .. } | SystemEvent::DeviceUpdated { .. } | SystemEvent::DeviceRemoved { .. }) {
-                    visible = visible_ids(&s, &user).await;
+                    visible = self::visible(&s, &user).await;
                 }
                 if let (Some(set), Some(id)) = (&visible, event.device_id()) {
                     if !set.contains(id) && !matches!(event, SystemEvent::DeviceRemoved { .. }) {

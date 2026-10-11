@@ -93,7 +93,7 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
     };
     user.insert(&s.pool).await?;
     let token = s.jwt.issue(&user.id, Role::Admin)?;
-    Ok(Json(json!({ "token": token, "user": UserDto::from_record(&user, vec![]) })))
+    Ok(Json(json!({ "token": token, "user": UserDto::from_record(&user, vec![], vec![]) })))
 }
 
 async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiResult<Json<Value>> {
@@ -111,8 +111,7 @@ async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiR
     };
     let role = Role::parse(&user.role).unwrap_or(Role::Guest);
     let token = s.jwt.issue(&user.id, role)?;
-    let rooms = super::room_ids(&s.pool, &user.id).await?;
-    Ok(Json(json!({ "token": token, "user": UserDto::from_record(&user, rooms) })))
+    Ok(Json(json!({ "token": token, "user": UserDto::load(&s.pool, &user).await? })))
 }
 
 async fn me(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<UserDto>> {
@@ -120,8 +119,7 @@ async fn me(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<UserDto
         .bind(&user.id)
         .fetch_one(&s.pool)
         .await?;
-    let rooms = super::room_ids(&s.pool, &user.id).await?;
-    Ok(Json(UserDto::from_record(&rec, rooms)))
+    Ok(Json(UserDto::load(&s.pool, &rec).await?))
 }
 
 async fn change_password(
@@ -165,8 +163,7 @@ async fn update_avatar(
         .bind(&user.id)
         .fetch_one(&s.pool)
         .await?;
-    let rooms = super::room_ids(&s.pool, &user.id).await?;
-    let dto = UserDto::from_record(&rec, rooms);
+    let dto = UserDto::load(&s.pool, &rec).await?;
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UserUpdated {
         user_id: rec.id.clone(),
         username: rec.username.clone(),

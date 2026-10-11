@@ -40,15 +40,6 @@ impl DeviceRepository {
             .await
     }
 
-    /// Room ids the user may access (only meaningful when `all_rooms` is false).
-    pub async fn allowed_rooms(&self, user_id: &str) -> sqlx::Result<Vec<String>> {
-        let rows: Vec<(String,)> = sqlx::query_as("SELECT room_id FROM user_room_access WHERE user_id = ?")
-            .bind(user_id)
-            .fetch_all(&self.pool)
-            .await?;
-        Ok(rows.into_iter().map(|r| r.0).collect())
-    }
-
     pub async fn insert(&self, d: &DeviceRecord) -> sqlx::Result<()> {
         sqlx::query(
             r#"INSERT INTO devices (

@@ -46,7 +46,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const command = useCommand()
-  const control = useCanControl() && device.is_online
+  const control = useCanControl() && device.can_control && device.is_online
   const admin = useIsAdmin()
   const { data: rooms = [] } = useRooms()
   const { data: energy } = useEnergy()

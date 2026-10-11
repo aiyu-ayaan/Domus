@@ -1,6 +1,7 @@
-//! Household members: roles (admin / member / guest) and per-room access.
+//! Household members: roles (admin / member / guest) and what each may reach:
+//! the whole home, whole rooms, or single devices.
 
-use super::auth::{hash_password, room_ids, routes::validate_credentials, UserDto, UserRecord};
+use super::auth::{grants, hash_password, routes::validate_credentials, UserDto, UserRecord};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
@@ -26,6 +27,12 @@ pub struct CreateUserRequest {
     pub all_rooms: bool,
     #[serde(default)]
     pub room_ids: Vec<String>,
+    #[serde(default)]
+    pub device_ids: Vec<String>,
+    #[serde(default)]
+    pub view_only_room_ids: Vec<String>,
+    #[serde(default)]
+    pub view_only_device_ids: Vec<String>,
 }
 
 fn yes() -> bool {
@@ -40,6 +47,9 @@ pub struct UpdateUserRequest {
     pub avatar: Option<String>,
     pub all_rooms: Option<bool>,
     pub room_ids: Option<Vec<String>>,
+    pub device_ids: Option<Vec<String>>,
+    pub view_only_room_ids: Option<Vec<String>>,
+    pub view_only_device_ids: Option<Vec<String>>,
 }
 
 pub fn user_routes() -> Router<AppState> {
@@ -52,18 +62,32 @@ fn parse_role(r: &str) -> ApiResult<Role> {
     Role::parse(r).ok_or_else(|| ApiError::BadRequest("role must be admin, member or guest".into()))
 }
 
-async fn set_rooms(s: &AppState, user_id: &str, rooms: &[String]) -> ApiResult<()> {
+/// Replace the user's `room` or `device` grants; `None` keeps that part as it is.
+/// Ids that no longer exist are dropped. A client that sends only the ids
+/// (no see-only list) keeps the see-only marks of the grants that stay.
+async fn set_grants(s: &AppState, user_id: &str, kind: &str, ids: Option<&[String]>, view_only: Option<&[String]>) -> ApiResult<()> {
+    if ids.is_none() && view_only.is_none() {
+        return Ok(());
+    }
+    let old = grants(&s.pool, kind, user_id).await?;
+    let old_ids: Vec<String> = old.iter().map(|g| g.0.clone()).collect();
+    let old_view: Vec<String> = old.into_iter().filter(|g| !g.1).map(|g| g.0).collect();
+    let ids = ids.unwrap_or(&old_ids);
+    let view_only = view_only.unwrap_or(&old_view);
     let mut tx = s.pool.begin().await?;
-    sqlx::query("DELETE FROM user_room_access WHERE user_id = ?")
+    sqlx::query(&format!("DELETE FROM user_{kind}_access WHERE user_id = ?"))
         .bind(user_id)
         .execute(&mut *tx)
         .await?;
-    for r in rooms {
-        sqlx::query("INSERT INTO user_room_access (user_id, room_id) VALUES (?, ?)")
-            .bind(user_id)
-            .bind(r)
-            .execute(&mut *tx)
-            .await?;
+    for id in ids {
+        sqlx::query(&format!(
+            "INSERT OR IGNORE INTO user_{kind}_access (user_id, {kind}_id, can_control) SELECT ?, id, ? FROM {kind}s WHERE id = ?"
+        ))
+        .bind(user_id)
+        .bind(!view_only.contains(id))
+        .bind(id)
+        .execute(&mut *tx)
+        .await?;
     }
     tx.commit().await?;
     Ok(())
@@ -83,7 +107,7 @@ async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<U
         .await?;
     let mut out = Vec::with_capacity(users.len());
     for u in &users {
-        out.push(UserDto::from_record(u, room_ids(&s.pool, &u.id).await?));
+        out.push(UserDto::load(&s.pool, u).await?);
     }
     Ok(Json(out))
 }
@@ -111,9 +135,10 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
         updated_at: now,
     };
     rec.insert(&s.pool).await?;
-    set_rooms(&s, &rec.id, &req.room_ids).await?;
+    set_grants(&s, &rec.id, "room", Some(&req.room_ids), Some(&req.view_only_room_ids)).await?;
+    set_grants(&s, &rec.id, "device", Some(&req.device_ids), Some(&req.view_only_device_ids)).await?;
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
-    Ok(Json(UserDto::from_record(&rec, req.room_ids)))
+    Ok(Json(UserDto::load(&s.pool, &rec).await?))
 }
 
 async fn update(
@@ -159,9 +184,8 @@ async fn update(
         .bind(&id)
         .execute(&s.pool)
         .await?;
-    if let Some(rooms) = &req.room_ids {
-        set_rooms(&s, &id, rooms).await?;
-    }
+    set_grants(&s, &id, "room", req.room_ids.as_deref(), req.view_only_room_ids.as_deref()).await?;
+    set_grants(&s, &id, "device", req.device_ids.as_deref(), req.view_only_device_ids.as_deref()).await?;
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UserUpdated {
         user_id: rec.id.clone(),
         username: rec.username.clone(),
@@ -169,7 +193,7 @@ async fn update(
         avatar: rec.avatar.clone(),
     });
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
-    Ok(Json(UserDto::from_record(&rec, room_ids(&s.pool, &id).await?)))
+    Ok(Json(UserDto::load(&s.pool, &rec).await?))
 }
 
 async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {

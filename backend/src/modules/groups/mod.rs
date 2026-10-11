@@ -4,7 +4,7 @@
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
-use crate::modules::devices::service::{allowed_rooms, can_see};
+use crate::modules::devices::service::{controllable_ids, visible_ids};
 use axum::{
     extract::{Path, State},
     routing::{get, post, put},
@@ -50,16 +50,15 @@ async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<G
     let groups: Vec<GroupRecord> = sqlx::query_as("SELECT * FROM device_groups ORDER BY name COLLATE NOCASE")
         .fetch_all(&s.pool)
         .await?;
-    let rooms = allowed_rooms(&s, &user).await?;
-    let devices = s.manager.repo.list_all().await?;
+    let allowed = visible_ids(&s, &user).await?;
     let mut out = Vec::new();
     for g in groups {
         let ids = s.manager.group_device_ids(&g.id).await?;
         let visible: Vec<String> = ids
             .into_iter()
-            .filter(|id| devices.iter().any(|d| &d.id == id && can_see(&rooms, d)))
+            .filter(|id| allowed.as_ref().is_none_or(|a| a.contains(id)))
             .collect();
-        if rooms.is_none() || !visible.is_empty() {
+        if allowed.is_none() || !visible.is_empty() {
             out.push(GroupDto { group: g, device_ids: visible });
         }
     }
@@ -138,14 +137,13 @@ async fn command(
     Json(cmd): Json<DeviceCommand>,
 ) -> ApiResult<Json<Value>> {
     user.require_control()?;
-    let rooms = allowed_rooms(&s, &user).await?;
-    let devices = s.manager.repo.list_all().await?;
+    let allowed = controllable_ids(&s, &user).await?;
     let ids: Vec<String> = s
         .manager
         .group_device_ids(&id)
         .await?
         .into_iter()
-        .filter(|i| devices.iter().any(|d| &d.id == i && can_see(&rooms, d)))
+        .filter(|i| allowed.as_ref().is_none_or(|a| a.contains(i)))
         .collect();
     let failures = s.manager.command_many(&ids, &cmd).await;
     Ok(Json(json!({
