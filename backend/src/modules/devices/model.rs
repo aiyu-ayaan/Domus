@@ -50,6 +50,7 @@ impl DeviceRecord {
             last_seen: self.last_seen,
             created_at: self.created_at,
             can_control: true,
+            can_edit: true,
         }
     }
 }
@@ -72,6 +73,8 @@ pub struct DeviceDto {
     pub created_at: DateTime<Utc>,
     /// Whether the user asking may operate the device (false for guests and see-only grants).
     pub can_control: bool,
+    /// Whether it may rename the device (administrators, and edit grants).
+    pub can_edit: bool,
 }
 
 #[derive(Debug, Deserialize)]

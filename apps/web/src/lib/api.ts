@@ -140,12 +140,14 @@ export const sceneSyncUrl = (sceneId: string) => {
   return `${origin.replace(/^http/, 'ws')}/api/v1/scenes/${encodeURIComponent(sceneId)}/sync?token=${encodeURIComponent(session.token ?? '')}`
 }
 
-/** What a member or guest may reach; the `view_only_*` lists are the subset they may not control. */
+/** What a member or guest may reach; the `view_only_*` lists are the subset they may not control, the `edit_*` lists the subset they may also rename. */
 export interface Grants {
   room_ids: string[]
   device_ids: string[]
   view_only_room_ids: string[]
   view_only_device_ids: string[]
+  edit_room_ids: string[]
+  edit_device_ids: string[]
 }
 
 export const api = {
@@ -235,6 +237,12 @@ export const api = {
   updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; avatar: string; all_rooms: boolean } & Grants>) =>
     put<User>(`/users/${id}`, b),
   removeUser: (id: string) => del<Ok>(`/users/${id}`),
+  /** Whether another account already uses the address; `userId` is the account being edited. */
+  emailAvailable: (email: string, userId?: string) =>
+    get<{ available: boolean }>(`/users/email/check?email=${encodeURIComponent(email)}${userId ? `&user_id=${userId}` : ''}`),
+  /** The first free address for a username, at @domus.home. */
+  suggestEmail: (username: string, userId?: string) =>
+    get<{ email: string }>(`/users/email/suggest?username=${encodeURIComponent(username)}${userId ? `&user_id=${userId}` : ''}`),
 
   integrations: () => get<Integration[]>('/integrations'),
   removeAccount: (id: string) => del<Ok & { removed_devices: number }>(`/integrations/accounts/${id}`),

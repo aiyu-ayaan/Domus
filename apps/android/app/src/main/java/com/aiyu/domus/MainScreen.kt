@@ -48,8 +48,12 @@ private val Tabs = listOf(
     "settings" to NavTab("Settings", Icons.Outlined.Settings, Icons.Rounded.Settings),
 )
 
-/** How deep a page sits: tabs 0, pages 1, About's Acknowledgements 2. Decides which way a change slides. */
-private fun pageDepth(page: String?) = when (page) { null -> 0; "acknowledgements" -> 2; else -> 1 }
+/** How deep a page sits: tabs 0, pages 1, About's Acknowledgements and a person under People 2. Decides which way a change slides. */
+private fun pageDepth(page: String?) = when {
+    page == null -> 0
+    page == "acknowledgements" || page.startsWith("person:") -> 2
+    else -> 1
+}
 
 @Composable
 fun MainScreen(session: Session.SignedIn) {
@@ -66,8 +70,8 @@ fun MainScreen(session: Session.SignedIn) {
     // Each screen keeps its scroll while another one covers it. Opening a page drops what it kept, so it starts at the top.
     val saved = rememberSaveableStateHolder()
     val open = { key: String -> saved.removeState(key); page = key }
-    // Acknowledgements sits one level under About; every other page returns to the tabs.
-    val close = { page = if (page == "acknowledgements") "about" else null }
+    // Acknowledgements sits one level under About and a person under People; every other page returns to the tabs.
+    val close = { page = when { page == "acknowledgements" -> "about"; page?.startsWith("person:") == true -> "people"; else -> null } }
     // Back from a tab or a page previews as the screen shrinking, then returns to Home or the tabs.
     val pageBack = rememberPredictiveBack(page != null, close)
     val tabBack = rememberPredictiveBack(page == null && tab != "home") { tab = "home" }
@@ -101,7 +105,8 @@ fun MainScreen(session: Session.SignedIn) {
                 current == "discover" -> DiscoverPage(close, onOpenPlugins = { open("plugins") })
                 current == "plugins" -> IntegrationsPage(close, onFindDevices = { open("discover") })
                 current == "rooms" -> RoomsPage(close)
-                current == "people" -> UsersPage(user, close)
+                current == "people" -> UsersPage(open, close)
+                current.startsWith("person:") -> PersonEditorPage(current.removePrefix("person:"), user, close)
                 current == "tariff" -> TariffPage(close)
                 current == "notices" -> NoticesPage(close)
                 current == "links" -> ServerLinksPage(user.isAdmin, close)

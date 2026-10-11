@@ -384,10 +384,10 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 }
             }
             Text(listOfNotNull(device.model, device.integration.replaceFirstChar(Char::uppercase)).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
-            if (user.isAdmin) {
+            if (user.isAdmin || device.canEdit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton({ editing = true }) { Text("Rename or move") }
-                    TextButton({ removing = true }, colors = ButtonDefaults.textButtonColors(contentColor = c.error)) { Text("Remove") }
+                    OutlinedButton({ editing = true }) { Text(if (user.isAdmin) "Rename or move" else "Rename") }
+                    if (user.isAdmin) TextButton({ removing = true }, colors = ButtonDefaults.textButtonColors(contentColor = c.error)) { Text("Remove") }
                 }
             }
         }
@@ -397,10 +397,10 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
         var room by remember { mutableStateOf(device.roomId) }
         FormDialog("Edit device", canSave = name.isNotBlank(), onDismiss = { editing = false }, onSave = {
             editing = false
-            scope.launch { repository.change { it.updateDevice(device.id, name.trim(), room) } }
+            scope.launch { repository.change { it.updateDevice(device.id, name.trim(), room, moveRoom = user.isAdmin) } }
         }) {
             Field(name, { name = it }, "Name")
-            Picker("Room", listOf<Pair<String?, String>>(null to "No room") + rooms.map { it.id to it.name }, room, { room = it })
+            if (user.isAdmin) Picker("Room", listOf<Pair<String?, String>>(null to "No room") + rooms.map { it.id to it.name }, room, { room = it })
         }
     }
     if (removing) {

@@ -225,7 +225,12 @@
 - [x] Web: Settings > People, each room opens to None / See only / Control for the whole room and for each device; `development/docs/ARCHITECTURE.md` section 7
 - [x] Android people editor: None / See only / Control per room and per device (`Grants` in `core/Models.kt`), saved from the emulator against the new server
 - [x] Android: tiles and the device sheet disable controls from `can_control`; the device list reloads when access changes
+- [x] Edit level above control (`0008_grant_edit.sql`): renames a device; the editors show None / See only / Control / Edit; the "All rooms" switch became "Custom access"
+- [x] Person editor is a full screen on Android (`person:<id>` page, predictive back returns to People); the dialog is gone
+- [x] Email: Generate button (`name@domus.home`, combinations of the username) and a live availability check on web and Android; duplicate emails answer 409
+- [x] Android password fields have a show/hide eye
 - [ ] Android: sign in as a see-only member on a device and check the disabled controls by eye
+- [ ] Android: check the new person screen's Generate and Edit level on the emulator (the dev server there must be restarted to pick up the new backend)
 - [ ] Android: grey out scenes and automations the user can see but not run (they answer 403 today)
 - [ ] Web: grey out scenes and automations the user can see but not run (they answer 403 today)
 - [ ] Notifications inbox is still shared by every signed-in user

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
@@ -19,7 +19,7 @@ import type { Device, Role, Room, User } from '@/lib/types'
 
 const roleHelp: Record<Role, string> = {
   admin: 'Full access, including devices, integrations, people and settings.',
-  member: 'Can see the rooms and devices they are given, and control the ones not set to see only.',
+  member: 'Can see what they are given. Control, or edit to also rename a device, is set per room and device.',
   guest: 'Can view the rooms and devices they are given, but not control them.',
 }
 
@@ -338,7 +338,7 @@ function People() {
 }
 
 function accessSummary(u: User, rooms: Room[]) {
-  if (u.role === 'admin' || u.all_rooms) return 'All rooms'
+  if (u.role === 'admin' || u.all_rooms) return 'Whole home'
   const parts = u.room_ids.flatMap((id) => {
     const name = rooms.find((r) => r.id === id)?.name
     return name ? [u.view_only_room_ids.includes(id) ? `${name} (see only)` : name] : []
@@ -347,17 +347,19 @@ function accessSummary(u: User, rooms: Room[]) {
   return parts.join(', ') || 'No access'
 }
 
-type Level = 'none' | 'view' | 'control'
+type Level = 'none' | 'view' | 'control' | 'edit'
 /** Granted ids and their level; an id that is missing has no access. */
 type Levels = Record<string, Exclude<Level, 'none'>>
 const levelOptions: { value: Level; label: string }[] = [
   { value: 'none', label: 'None' },
   { value: 'view', label: 'See only' },
   { value: 'control', label: 'Control' },
+  { value: 'edit', label: 'Edit' },
 ]
-const toLevels = (ids: string[], viewOnly: string[]): Levels => Object.fromEntries(ids.map((id) => [id, viewOnly.includes(id) ? 'view' : 'control']))
+const toLevels = (ids: string[], viewOnly: string[], edit: string[]): Levels =>
+  Object.fromEntries(ids.map((id) => [id, viewOnly.includes(id) ? 'view' : edit.includes(id) ? 'edit' : 'control']))
 const without = (levels: Levels, ids: string[]): Levels => Object.fromEntries(Object.entries(levels).filter(([id]) => !ids.includes(id)))
-const viewOnly = (levels: Levels) => Object.keys(levels).filter((id) => levels[id] === 'view')
+const idsAt = (levels: Levels, level: Level) => Object.keys(levels).filter((id) => levels[id] === level)
 
 function AccessRow({ label, hint, value, onChange }: { label: string; hint?: string; value: Level; onChange: (v: Level) => void }) {
   return (
@@ -374,7 +376,7 @@ function AccessRow({ label, hint, value, onChange }: { label: string; hint?: str
 /** One room in the access editor: grant it whole, or set single devices (which also override the room). */
 function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: string; devices: Device[]; room?: Level; levelOf: (d: Device) => Level; onRoom?: (v: Level) => void; onDevice: (id: string, v: Level) => void }) {
   const count = devices.filter((d) => levelOf(d) !== 'none').length
-  const status = room && room !== 'none' ? `Whole room · ${room === 'view' ? 'see only' : 'control'}` : count ? `${count} of ${devices.length} devices` : 'No access'
+  const status = room && room !== 'none' ? `Whole room · ${levelOptions.find((o) => o.value === room)?.label.toLowerCase()}` : count ? `${count} of ${devices.length} devices` : 'No access'
   return (
     <details className="border-t border-border first:border-t-0">
       <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3 hover:bg-raised">
@@ -390,6 +392,28 @@ function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: 
       </div>
     </details>
   )
+}
+
+type EmailStatus = 'idle' | 'checking' | 'free' | 'taken'
+
+/** Looks the address up shortly after typing stops. An empty address, or the account's own, needs no check. */
+function useEmailStatus(email: string, userId?: string, own?: string): EmailStatus {
+  const [state, setState] = useState<{ email: string; status: 'free' | 'taken' } | null>(null)
+  const value = email.trim()
+  const skip = !value.includes('@') || value === own
+  useEffect(() => {
+    if (skip) return
+    let live = true
+    const timer = setTimeout(() => {
+      api.emailAvailable(value, userId).then((r) => live && setState({ email: value, status: r.available ? 'free' : 'taken' })).catch(() => {})
+    }, 400)
+    return () => {
+      live = false
+      clearTimeout(timer)
+    }
+  }, [value, userId, skip])
+  if (skip) return 'idle'
+  return state?.email === value ? state.status : 'checking'
 }
 
 function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () => void }) {
@@ -412,6 +436,13 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [key, setKey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const emailStatus = useEmailStatus(form.email, existing?.id, existing?.email)
+  const name = (existing?.username ?? form.username).trim()
+  const generate = useMutation({
+    mutationFn: () => api.suggestEmail(name, existing?.id),
+    onSuccess: (r) => setForm((f) => ({ ...f, email: r.email })),
+    onError: (e) => setError(errorMessage(e)),
+  })
   const current = existing?.id ?? (user === 'new' ? 'new' : null)
   if (current !== key) {
     setKey(current)
@@ -423,14 +454,14 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       role: existing?.role ?? 'member',
       avatar: existing?.avatar ?? `dicebear:bottts:${existing?.username || 'member'}`,
       all_rooms: existing?.all_rooms ?? true,
-      rooms: toLevels(existing?.room_ids ?? [], existing?.view_only_room_ids ?? []),
-      devices: toLevels(existing?.device_ids ?? [], existing?.view_only_device_ids ?? []),
+      rooms: toLevels(existing?.room_ids ?? [], existing?.view_only_room_ids ?? [], existing?.edit_room_ids ?? []),
+      devices: toLevels(existing?.device_ids ?? [], existing?.view_only_device_ids ?? [], existing?.edit_device_ids ?? []),
     })
   }
   const save = useMutation({
     mutationFn: async () => {
       const { rooms: roomLevels, devices: deviceLevels, ...account } = form
-      const grants = { room_ids: Object.keys(roomLevels), device_ids: Object.keys(deviceLevels), view_only_room_ids: viewOnly(roomLevels), view_only_device_ids: viewOnly(deviceLevels) }
+      const grants = { room_ids: Object.keys(roomLevels), device_ids: Object.keys(deviceLevels), view_only_room_ids: idsAt(roomLevels, 'view'), view_only_device_ids: idsAt(deviceLevels, 'view'), edit_room_ids: idsAt(roomLevels, 'edit'), edit_device_ids: idsAt(deviceLevels, 'edit') }
       if (existing) {
         const updated = await api.updateUser(existing.id, {
           email: form.email,
@@ -492,7 +523,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary" loading={save.isPending} disabled={!existing && (!form.username || form.password.length < 8)} onClick={() => save.mutate()}>
+            <Button variant="primary" loading={save.isPending} disabled={emailStatus === 'taken' || (!existing && (!form.username || form.password.length < 8))} onClick={() => save.mutate()}>
               Save
             </Button>
           </>
@@ -517,7 +548,20 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
           </div>
 
           {!existing && <Field label="Username" required autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />}
-          <Field label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <div className="flex items-start gap-2">
+            <Field
+              label="Email"
+              type="email"
+              className="min-w-0 flex-1"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              error={emailStatus === 'taken' ? 'Already used by another account' : undefined}
+              hint={emailStatus === 'free' ? 'Available' : emailStatus === 'checking' ? 'Checking...' : 'Type one, or generate it from the username.'}
+            />
+            <Button type="button" className="mt-[26px]" loading={generate.isPending} disabled={name.length < 3} onClick={() => generate.mutate()}>
+              Generate
+            </Button>
+          </div>
           <Field label={existing ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing} hint={existing ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
             <option value="admin">Admin</option>
@@ -528,10 +572,10 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
             <div className="rounded-lg border border-border">
               <div className="flex min-h-12 items-center justify-between gap-3 px-3">
                 <div>
-                  <p>All rooms</p>
-                  <p className="text-label text-muted">Turn off to choose rooms and devices.</p>
+                  <p>Custom access</p>
+                  <p className="text-label text-muted">Choose rooms and devices, each at its own level. Off gives the whole home.</p>
                 </div>
-                <Switch checked={form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: v })} label="Access to all rooms" />
+                <Switch checked={!form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: !v })} label="Custom access" />
               </div>
               {!form.all_rooms && (
                 <fieldset className="border-t border-border">

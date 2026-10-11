@@ -14,6 +14,9 @@ export interface User {
   /** The granted rooms and devices the user may see but not control. */
   view_only_room_ids: string[]
   view_only_device_ids: string[]
+  /** The granted rooms and devices the user may also rename (edit includes control). */
+  edit_room_ids: string[]
+  edit_device_ids: string[]
   created_at: string
 }
 
@@ -70,6 +73,8 @@ export interface Device {
   created_at: string
   /** Whether the signed-in user may operate it (false for guests and see-only access). */
   can_control: boolean
+  /** Whether the signed-in user may rename it (administrators, and edit access). */
+  can_edit: boolean
 }
 
 export type DeviceCommand = Partial<{

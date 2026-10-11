@@ -20,17 +20,23 @@ data class User(
     /** The granted rooms and devices the user may see but not control. */
     @SerialName("view_only_room_ids") val viewOnlyRoomIds: List<String> = emptyList(),
     @SerialName("view_only_device_ids") val viewOnlyDeviceIds: List<String> = emptyList(),
+    /** The granted rooms and devices the user may also rename (edit includes control). */
+    @SerialName("edit_room_ids") val editRoomIds: List<String> = emptyList(),
+    @SerialName("edit_device_ids") val editDeviceIds: List<String> = emptyList(),
 ) {
     val isAdmin get() = role == "admin"
     val canControl get() = role != "guest"
     val grants get() = Grants(
-        roomIds.associateWith { if (it in viewOnlyRoomIds) "view" else "control" },
-        deviceIds.associateWith { if (it in viewOnlyDeviceIds) "view" else "control" },
+        roomIds.associateWith { levelOf(it, viewOnlyRoomIds, editRoomIds) },
+        deviceIds.associateWith { levelOf(it, viewOnlyDeviceIds, editDeviceIds) },
     )
+
+    private fun levelOf(id: String, viewOnly: List<String>, edit: List<String>) = when (id) { in viewOnly -> "view"; in edit -> "edit"; else -> "control" }
 }
 
 /**
- * What a member or guest may reach: id to "view" (see only) or "control"; a missing id has no access.
+ * What a member or guest may reach: id to "view" (see only), "control" or "edit" (control plus renaming);
+ * a missing id has no access.
  * A device's own level wins over its room's.
  */
 data class Grants(val rooms: Map<String, String> = emptyMap(), val devices: Map<String, String> = emptyMap()) {
@@ -57,6 +63,12 @@ data class Grants(val rooms: Map<String, String> = emptyMap(), val devices: Map<
 
 @Serializable
 data class AuthResponse(val token: String, val user: User)
+
+@Serializable
+data class EmailCheck(val available: Boolean)
+
+@Serializable
+data class EmailSuggestion(val email: String)
 
 /** Where the server is reached at home and from outside; [fingerprint] is its own certificate (null with TLS off). */
 @Serializable
@@ -146,6 +158,8 @@ data class Device(
     val state: DeviceState = DeviceState(),
     /** Whether the signed-in user may operate it (false for guests and see-only access). */
     @SerialName("can_control") val canControl: Boolean = true,
+    /** Whether the signed-in user may rename it (administrators, and edit access). */
+    @SerialName("can_edit") val canEdit: Boolean = false,
 ) {
     /** What the server will report once [cmd] lands; shown at once so controls feel instant. */
     fun applying(cmd: DeviceCommand) = copy(

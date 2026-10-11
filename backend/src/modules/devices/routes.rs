@@ -1,5 +1,5 @@
 use super::model::{AdoptRequest, DeviceDto, DeviceRecord, DiscoveryRecord, ManualAddRequest, UpdateDeviceRequest};
-use super::service::{access, can_control, can_see, Access};
+use super::service::{access, can_control, can_edit, can_see, Access};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
@@ -39,7 +39,7 @@ fn dto_for(access: &Option<Access>, user: &AuthUser, rec: &DeviceRecord) -> ApiR
     if !can_see(access, rec) {
         return Err(ApiError::NotFound("Device not found".into()));
     }
-    Ok(DeviceDto { can_control: can_control(access, user, rec), ..rec.to_dto() })
+    Ok(DeviceDto { can_control: can_control(access, user, rec), can_edit: can_edit(access, user, rec), ..rec.to_dto() })
 }
 
 async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<DeviceDto>>> {
@@ -62,8 +62,16 @@ async fn update(
     Path(id): Path<String>,
     Json(req): Json<UpdateDeviceRequest>,
 ) -> ApiResult<Json<DeviceDto>> {
-    user.require_admin()?;
     let rec = s.manager.get(&id).await?;
+    // Administrators change anything. Others need an edit grant, and may rename but not move a device.
+    if !user.is_admin() {
+        if !dto_for(&access(&s, &user).await?, &user, &rec)?.can_edit {
+            return Err(ApiError::Forbidden("You cannot edit this device".into()));
+        }
+        if req.room_id.is_some() {
+            return Err(ApiError::Forbidden("Only an administrator can move a device to another room".into()));
+        }
+    }
     let name = req.name.map(|n| n.trim().to_string()).unwrap_or(rec.name.clone());
     if name.is_empty() {
         return Err(ApiError::BadRequest("Name cannot be empty".into()));

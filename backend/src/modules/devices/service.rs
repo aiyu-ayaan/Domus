@@ -1,6 +1,6 @@
 //! Per-user device access. Admins and "whole home" users reach everything;
 //! everyone else reaches the rooms granted as a whole plus the devices granted
-//! one by one, each either fully or see-only. Scenes, automations and groups
+//! one by one, each at a level: see only, control, or edit (control plus renaming). Scenes, automations and groups
 //! follow from the devices they touch.
 
 use super::model::DeviceRecord;
@@ -11,18 +11,36 @@ use crate::modules::auth::grants;
 use home_core::Action;
 use std::collections::{HashMap, HashSet};
 
-/// What a restricted user was granted: id -> may control (`false` = see only).
+/// What a grant lets the user do with a device. Each level includes the ones before it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Level {
+    View,
+    Control,
+    Edit,
+}
+
+impl Level {
+    fn of(control: bool, edit: bool) -> Self {
+        match (control, edit) {
+            (false, _) => Self::View,
+            (true, false) => Self::Control,
+            (true, true) => Self::Edit,
+        }
+    }
+}
+
+/// What a restricted user was granted: id -> level.
 #[derive(Default)]
 pub struct Access {
     /// Rooms granted as a whole, including devices added to them later.
-    pub rooms: HashMap<String, bool>,
+    pub rooms: HashMap<String, Level>,
     /// Single devices; the grant follows the device when it changes room.
-    pub devices: HashMap<String, bool>,
+    pub devices: HashMap<String, Level>,
 }
 
 impl Access {
     /// The grant that applies to a device: its own, else its room's.
-    fn grant(&self, device: &DeviceRecord) -> Option<bool> {
+    fn grant(&self, device: &DeviceRecord) -> Option<Level> {
         self.devices
             .get(&device.id)
             .or_else(|| device.room_id.as_ref().and_then(|r| self.rooms.get(r)))
@@ -34,8 +52,16 @@ impl Access {
     }
 
     pub fn controls(&self, device: &DeviceRecord) -> bool {
-        self.grant(device) == Some(true)
+        self.grant(device) >= Some(Level::Control)
     }
+
+    pub fn edits(&self, device: &DeviceRecord) -> bool {
+        self.grant(device) == Some(Level::Edit)
+    }
+}
+
+async fn levels(s: &AppState, kind: &str, user: &AuthUser) -> ApiResult<HashMap<String, Level>> {
+    Ok(grants(&s.pool, kind, &user.id).await?.into_iter().map(|(id, c, e)| (id, Level::of(c, e))).collect())
 }
 
 /// `None` means no restriction.
@@ -43,10 +69,7 @@ pub async fn access(s: &AppState, user: &AuthUser) -> ApiResult<Option<Access>> 
     if user.sees_everything() {
         return Ok(None);
     }
-    Ok(Some(Access {
-        rooms: grants(&s.pool, "room", &user.id).await?.into_iter().collect(),
-        devices: grants(&s.pool, "device", &user.id).await?.into_iter().collect(),
-    }))
+    Ok(Some(Access { rooms: levels(s, "room", user).await?, devices: levels(s, "device", user).await? }))
 }
 
 pub fn can_see(access: &Option<Access>, device: &DeviceRecord) -> bool {
@@ -68,6 +91,16 @@ pub async fn visible_devices(s: &AppState, user: &AuthUser) -> ApiResult<Vec<Dev
 /// Whether the user may operate the device: guests never, others unless the grant is see-only.
 pub fn can_control(access: &Option<Access>, user: &AuthUser, device: &DeviceRecord) -> bool {
     user.role.can_control() && access.as_ref().is_none_or(|a| a.controls(device))
+}
+
+/// Whether the user may rename the device. Whole-home members control but do not edit: that takes an
+/// edit grant (custom access) or the administrator role.
+pub fn can_edit(access: &Option<Access>, user: &AuthUser, device: &DeviceRecord) -> bool {
+    user.role.can_control()
+        && match access {
+            None => user.is_admin(),
+            Some(a) => a.edits(device),
+        }
 }
 
 /// Ids of the devices the user can see; `None` means all of them.
@@ -150,8 +183,8 @@ mod tests {
     #[test]
     fn room_and_device_grants() {
         let access = Some(Access {
-            rooms: HashMap::from([("bedroom".to_string(), true), ("study".to_string(), false)]),
-            devices: HashMap::from([("lamp".to_string(), true), ("loose".to_string(), false), ("safe".to_string(), false)]),
+            rooms: HashMap::from([("bedroom".to_string(), Level::Control), ("study".to_string(), Level::View), ("den".to_string(), Level::Edit)]),
+            devices: HashMap::from([("lamp".to_string(), Level::Control), ("loose".to_string(), Level::View), ("safe".to_string(), Level::View)]),
         });
         // A whole-room grant covers everything in the room.
         assert!(can_see(&access, &device("fan", Some("bedroom"))));
@@ -172,6 +205,9 @@ mod tests {
         // The device's own grant wins over its room's, both ways.
         assert!(!a.controls(&device("safe", Some("bedroom"))));
         assert!(a.controls(&device("lamp", Some("study"))));
+        // Edit includes control; control does not include edit.
+        assert!(a.controls(&device("tv", Some("den"))) && a.edits(&device("tv", Some("den"))));
+        assert!(!a.edits(&device("fan", Some("bedroom"))) && !a.edits(&device("desk", Some("study"))));
     }
 
     #[test]

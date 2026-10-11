@@ -76,7 +76,8 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const send = (cmd: DeviceCommand) => command.mutate({ id: device.id, cmd })
 
   const save = useMutation({
-    mutationFn: () => api.updateDevice(device.id, { name, room_id: roomId || null }),
+    // Only administrators may move a device; the server refuses a room from anyone else.
+    mutationFn: () => api.updateDevice(device.id, admin ? { name, room_id: roomId || null } : { name }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.devices })
       toast.push({ tone: 'success', title: 'Device updated' })
@@ -210,24 +211,30 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
         </Section>
       )}
 
-      {admin && (
+      {(admin || device.can_edit) && (
         <Section title="Settings">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <SelectField label="Room" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-              <option value="">No room</option>
-              {rooms.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </SelectField>
+            {admin && (
+              <SelectField label="Room" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+                <option value="">No room</option>
+                {rooms.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </SelectField>
+            )}
           </div>
           <div className="mt-4 flex flex-wrap justify-between gap-2">
-            <Button variant="danger" onClick={() => setConfirm(true)}>
-              Remove device
-            </Button>
-            <Button variant="primary" loading={save.isPending} disabled={!name.trim() || (name === device.name && roomId === (device.room_id ?? ''))} onClick={() => save.mutate()}>
+            {admin ? (
+              <Button variant="danger" onClick={() => setConfirm(true)}>
+                Remove device
+              </Button>
+            ) : (
+              <span />
+            )}
+            <Button variant="primary" loading={save.isPending} disabled={!name.trim() || (name === device.name && (!admin || roomId === (device.room_id ?? '')))} onClick={() => save.mutate()}>
               Save changes
             </Button>
           </div>

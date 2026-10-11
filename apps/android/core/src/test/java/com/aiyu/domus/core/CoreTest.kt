@@ -113,6 +113,8 @@ class CoreTest {
         val all = listOf(lamp, fan, Device("lock", "Lock"))
         val user = User("1", "kid", roomIds = listOf("bed"), deviceIds = listOf("lock"), viewOnlyDeviceIds = listOf("lock"))
         assertEquals(Grants(mapOf("bed" to "control"), mapOf("lock" to "view")), user.grants)
+        // Edit comes back from the server's edit lists.
+        assertEquals(Grants(mapOf("bed" to "edit"), mapOf("lock" to "view")), user.copy(editRoomIds = listOf("bed")).grants)
         // A device overrides its room; the room's own level needs no entry.
         val seeLamp = user.grants.withDevice(lamp, "view", all)
         assertEquals("view", seeLamp.levelOf(lamp))

@@ -158,11 +158,13 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   WHO scale, purifier / filter / climate facts, a trend line (PM2.5, temperature, humidity) from
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text.
-- **People and access** — the person dialog (`Manage.kt`) lists each room when "All rooms" is off; a room
-  opens to None / See only / Control for the whole room and for each device. The editing rules live in
+- **People and access** — a person opens as a full page (`person:<id>` over People, so the predictive back
+  gesture returns to the list; `PersonEditorPage` in `Manage.kt`). With "Custom access" on, each room opens
+  to None / See only / Control / Edit for the whole room and for each device. Email has a Generate button
+  (`name@domus.home`) and an availability line; password fields can be revealed. The editing rules live in
   `Grants` (`core/Models.kt`, tested in `CoreTest`) and match the web editor: a device's level overrides its
   room's, and taking one device out of a whole room keeps the rest as single devices. Tiles and the device
-  sheet disable their controls from `Device.canControl`, which the server sets for the signed-in user. The
+  sheet disable their controls from `Device.canControl`, and offer Rename from `Device.canEdit`; the server sets both for the signed-in user. The
   model is in `ARCHITECTURE.md` section 7.
 - **Clock format** — `rememberIs24HourFormat()` reads `DateFormat.is24HourFormat(context)` and refreshes on
   `ON_RESUME`, so chart bucket labels (`formatBucket`), rule trigger/condition summaries (`formatClockTime`),

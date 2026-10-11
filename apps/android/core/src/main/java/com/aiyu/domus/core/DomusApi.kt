@@ -103,9 +103,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     private suspend fun write(method: String, path: String, body: JsonElement? = null) =
         call(method, path, JsonElement.serializer(), body?.toString())
 
-    /** [roomId] null moves the device out of every room. */
-    suspend fun updateDevice(id: String, name: String, roomId: String?) =
-        call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("name", name); put("room_id", roomId) }.toString())
+    /** [roomId] null moves the device out of every room; [moveRoom] false leaves the room alone (only administrators may move a device). */
+    suspend fun updateDevice(id: String, name: String, roomId: String?, moveRoom: Boolean = true) =
+        call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("name", name); if (moveRoom) put("room_id", roomId) }.toString())
     suspend fun removeDevice(id: String) = write("DELETE", "/devices/$id")
     suspend fun addManual(integration: String, host: String, token: String?, name: String?) =
         call("POST", "/devices/manual", Device.serializer(), buildJsonObject {
@@ -152,8 +152,16 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
             fun ids(key: String, ids: Collection<String>) = put(key, JsonArray(ids.map(::JsonPrimitive)))
             ids("room_ids", grants.rooms.keys); ids("view_only_room_ids", grants.rooms.filterValues { it == "view" }.keys)
             ids("device_ids", grants.devices.keys); ids("view_only_device_ids", grants.devices.filterValues { it == "view" }.keys)
+            ids("edit_room_ids", grants.rooms.filterValues { it == "edit" }.keys); ids("edit_device_ids", grants.devices.filterValues { it == "edit" }.keys)
         })
     suspend fun removeUser(id: String) = write("DELETE", "/users/$id")
+    /** Whether another account already uses [email]; [userId] is the account being edited. */
+    suspend fun emailAvailable(email: String, userId: String?) =
+        call("GET", "/users/email/check?email=${encoded(email)}${userId?.let { "&user_id=$it" }.orEmpty()}", EmailCheck.serializer())
+    /** The first free address for [username], at @domus.home. */
+    suspend fun suggestEmail(username: String, userId: String?) =
+        call("GET", "/users/email/suggest?username=${encoded(username)}${userId?.let { "&user_id=$it" }.orEmpty()}", EmailSuggestion.serializer())
+    private fun encoded(text: String) = java.net.URLEncoder.encode(text, "UTF-8")
 
     suspend fun integrations() = call("GET", "/integrations", ListSerializer(Integration.serializer()))
     suspend fun removeAccount(id: String) = write("DELETE", "/integrations/accounts/$id")

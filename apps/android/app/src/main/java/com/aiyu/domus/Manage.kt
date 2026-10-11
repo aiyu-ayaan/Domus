@@ -12,6 +12,8 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Person
@@ -42,6 +44,7 @@ import com.aiyu.domus.core.Slab
 import com.aiyu.domus.core.User
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** A full-screen page opened from a tab: back arrow, title, scrolling body capped at 840dp. */
@@ -68,15 +71,21 @@ fun SubPage(title: String, onBack: () -> Unit, actions: @Composable RowScope.() 
 @Composable
 fun Field(
     value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier.fillMaxWidth(),
-    keyboard: KeyboardType = KeyboardType.Text, secret: Boolean = false, supporting: String? = null,
+    keyboard: KeyboardType = KeyboardType.Text, secret: Boolean = false, supporting: String? = null, error: Boolean = false,
 ) {
+    // A secret field can be revealed to check what was typed.
+    var shown by remember { mutableStateOf(false) }
     OutlinedTextField(
         value, onChange,
         label = { Text(label) },
         supportingText = supporting?.let { { Text(it) } },
+        isError = error,
         singleLine = true,
-        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboard),
+        visualTransformation = if (secret && !shown) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(keyboardType = if (secret) KeyboardType.Password else keyboard),
+        trailingIcon = if (secret) {
+            { IconButton({ shown = !shown }) { Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (shown) "Hide $label" else "Show $label") } }
+        } else null,
         modifier = modifier,
     )
 }
@@ -213,7 +222,7 @@ fun RoomsPage(onBack: () -> Unit) {
 }
 
 private val Roles = listOf("admin" to "Admin", "member" to "Member", "guest" to "Guest")
-private val Levels = listOf("none" to "None", "view" to "See only", "control" to "Control")
+private val Levels = listOf("none" to "None", "view" to "See only", "control" to "Control", "edit" to "Edit")
 
 /** One room in the access editor: tap to open, then set the whole room or single devices (which also override the room). */
 @Composable
@@ -221,7 +230,7 @@ private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room
     var open by remember { mutableStateOf(false) }
     val count = devices.count { grants.levelOf(it) != "none" }
     val status = when {
-        room != null -> "Whole room · ${if (room == "view") "see only" else "control"}"
+        room != null -> "Whole room · ${Levels.first { it.first == room }.second.lowercase()}"
         count > 0 -> "$count of ${devices.size} devices"
         else -> "No access"
     }
@@ -244,24 +253,17 @@ private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun UsersPage(me: User, onBack: () -> Unit) {
+fun UsersPage(open: (String) -> Unit, onBack: () -> Unit) {
     val repository = LocalRepository.current
-    val scope = rememberCoroutineScope()
-    val rooms by repository.rooms.collectAsStateWithLifecycle()
-    val devices by repository.devices.collectAsStateWithLifecycle()
     var users by remember { mutableStateOf<List<User>?>(null) }
-    var reload by remember { mutableIntStateOf(0) }
-    var editing by remember { mutableStateOf<User?>(null) }
-    var open by remember { mutableStateOf(false) }
-    LaunchedEffect(reload) { users = repository.request { it.users() } ?: users ?: emptyList() }
+    LaunchedEffect(Unit) { users = repository.request { it.users() } ?: users ?: emptyList() }
 
-    SubPage("People", onBack, actions = { IconButton({ editing = null; open = true }) { Icon(Icons.Rounded.Add, "Add person") } }) {
+    SubPage("People", onBack, actions = { IconButton({ open("person:new") }) { Icon(Icons.Rounded.Add, "Add person") } }) {
         val list = users
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         list?.forEach { user ->
-            val access = if (user.isAdmin || user.allRooms) "all rooms" else listOfNotNull(
+            val access = if (user.isAdmin || user.allRooms) "whole home" else listOfNotNull(
                 "${user.roomIds.size} rooms".takeIf { user.roomIds.isNotEmpty() },
                 "${user.deviceIds.size} devices".takeIf { user.deviceIds.isNotEmpty() },
             ).joinToString(", ").ifEmpty { "no access" }
@@ -270,73 +272,118 @@ fun UsersPage(me: User, onBack: () -> Unit) {
                 subtitle = "${user.role.replaceFirstChar(Char::uppercase)} · $access",
                 icon = Icons.Rounded.Person,
                 leading = { UserAvatar(avatarSpec = user.avatar, username = user.username, size = 44.dp) },
-                onClick = { editing = user; open = true },
+                onClick = { open("person:${user.id}") },
             )
         }
     }
-    if (open) {
-        val user = editing
-        var username by remember { mutableStateOf(user?.username.orEmpty()) }
-        var email by remember { mutableStateOf(user?.email.orEmpty()) }
-        var password by remember { mutableStateOf("") }
-        var role by remember { mutableStateOf(user?.role ?: "member") }
-        var avatar by remember { mutableStateOf(user?.avatar ?: "dicebear:bottts:${user?.username ?: "member"}") }
-        var allRooms by remember { mutableStateOf(user?.allRooms ?: true) }
-        var grants by remember { mutableStateOf(user?.grants ?: Grants()) }
-        FormDialog(
-            if (user == null) "New person" else user.username,
-            canSave = if (user == null) username.trim().length >= 3 && password.length >= 8 else password.isEmpty() || password.length >= 8,
-            onSave = {
-                open = false
-                scope.launch {
-                    repository.request { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, grants, avatar = avatar) }
-                    reload++
-                }
-            },
-            onDismiss = { open = false },
-            // You can't delete the account you are signed in with.
-            onDelete = user?.takeIf { it.id != me.id }?.let { { open = false; scope.launch { repository.request { api -> api.removeUser(it.id) }; reload++ } } },
-        ) {
-            // Avatar picker preview row
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                UserAvatar(avatarSpec = avatar, username = username.ifEmpty { "User" }, size = 48.dp)
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("Avatar", style = MaterialTheme.typography.titleSmall)
-                    Text(parseDiceBearSpec(avatar).first, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                androidx.compose.material3.FilledTonalButton(onClick = { avatar = randomDiceBearSpec() }) {
-                    Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Roll")
-                }
-            }
+}
 
-            if (user == null) Field(username, { username = it }, "Username", supporting = "At least 3 characters")
-            Field(email, { email = it }, "Email", keyboard = KeyboardType.Email)
-            Field(password, { password = it }, if (user == null) "Password" else "New password", secret = true, supporting = if (user == null) "At least 8 characters" else "Leave empty to keep the current one")
-            Choice(Roles, role, { role = it })
-            Text(
-                when (role) { "admin" -> "Manages everything."; "member" -> "Sees what they are given and controls what isn't set to see only."; else -> "Sees what they are given, can't control it." },
-                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (role != "admin") {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("All rooms", Modifier.weight(1f))
-                    HapticSwitch(allRooms, { allRooms = it })
-                }
-                if (!allRooms) {
-                    rooms.forEach { room ->
-                        RoomAccess(room.name, devices.filter { it.roomId == room.id }, grants, grants.rooms[room.id], { grants = grants.withRoom(room.id, it, devices) }) { device, level -> grants = grants.withDevice(device, level, devices) }
-                    }
-                    val loose = devices.filter { it.roomId == null }
-                    if (loose.isNotEmpty()) RoomAccess("No room", loose, grants, null, null) { device, level -> grants = grants.withDevice(device, level, devices) }
-                }
+/** [id] is a person's id, or `new`. Opened over People, which reloads when this page closes. */
+@Composable
+fun PersonEditorPage(id: String, me: User, onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    var person by remember(id) { mutableStateOf<User?>(null) }
+    var loaded by remember(id) { mutableStateOf(id == "new") }
+    LaunchedEffect(id) {
+        if (id != "new") {
+            person = repository.request { it.users() }?.firstOrNull { it.id == id }
+            loaded = true
+        }
+    }
+    if (!loaded) {
+        SubPage("Person", onBack) { LoadingIndicator(Modifier.align(Alignment.CenterHorizontally)) }
+        return
+    }
+    PersonForm(person, me, onBack)
+}
+
+@Composable
+private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    val rooms by repository.rooms.collectAsStateWithLifecycle()
+    val devices by repository.devices.collectAsStateWithLifecycle()
+    var username by remember { mutableStateOf(user?.username.orEmpty()) }
+    var email by remember { mutableStateOf(user?.email.orEmpty()) }
+    var password by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf(user?.role ?: "member") }
+    var avatar by remember { mutableStateOf(user?.avatar ?: "dicebear:bottts:${user?.username ?: "member"}") }
+    var allRooms by remember { mutableStateOf(user?.allRooms ?: true) }
+    var grants by remember { mutableStateOf(user?.grants ?: Grants()) }
+    var deleting by remember { mutableStateOf(false) }
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    // Whether the typed address is free: null while unknown. The account's own address, or none, needs no check.
+    var emailFree by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(email) {
+        emailFree = null
+        val value = email.trim()
+        if (!value.contains('@') || value == user?.email) return@LaunchedEffect
+        delay(400)
+        emailFree = repository.request { it.emailAvailable(value, user?.id) }?.available
+    }
+    val name = user?.username ?: username.trim()
+    val valid = emailFree != false && (if (user == null) username.trim().length >= 3 && password.length >= 8 else password.isEmpty() || password.length >= 8)
+
+    SubPage(user?.username ?: "New person", onBack, actions = {
+        // You can't delete the account you are signed in with.
+        if (user != null && user.id != me.id) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Delete") }
+    }) {
+        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            UserAvatar(avatarSpec = avatar, username = username.ifEmpty { "User" }, size = 56.dp)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Avatar", style = MaterialTheme.typography.titleSmall)
+                Text(parseDiceBearSpec(avatar).first, style = MaterialTheme.typography.bodySmall, color = muted)
+            }
+            FilledTonalButton(onClick = { avatar = randomDiceBearSpec() }) {
+                Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Roll")
             }
         }
+        if (user == null) Field(username, { username = it }, "Username", supporting = "At least 3 characters")
+        Field(
+            email, { email = it }, "Email", keyboard = KeyboardType.Email, error = emailFree == false,
+            supporting = when (emailFree) { false -> "Already used by another account"; true -> "Available"; null -> "Type one, or generate it from the username" },
+        )
+        TextButton(
+            { scope.launch { repository.request { it.suggestEmail(name, user?.id) }?.let { email = it.email } } },
+            Modifier.align(Alignment.End), enabled = name.length >= 3,
+        ) { Text("Generate @domus.home email") }
+        Field(password, { password = it }, if (user == null) "Password" else "New password", secret = true, supporting = if (user == null) "At least 8 characters" else "Leave empty to keep the current one")
+
+        SectionTitle("Role")
+        Choice(Roles, role, { role = it })
+        Text(
+            when (role) { "admin" -> "Manages everything."; "member" -> "Sees what they are given. Control, or edit to also rename a device, is set per room and device."; else -> "Sees what they are given, can't control it." },
+            style = MaterialTheme.typography.bodyMedium, color = muted,
+        )
+
+        if (role != "admin") {
+            SectionTitle("Access")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Custom access")
+                    Text("Choose rooms and devices, each at its own level. Off gives the whole home.", style = MaterialTheme.typography.bodySmall, color = muted)
+                }
+                HapticSwitch(!allRooms, { allRooms = !it })
+            }
+            if (!allRooms) {
+                if (rooms.isEmpty() && devices.isEmpty()) Text("Create rooms first.", color = muted)
+                rooms.forEach { room ->
+                    RoomAccess(room.name, devices.filter { it.roomId == room.id }, grants, grants.rooms[room.id], { grants = grants.withRoom(room.id, it, devices) }) { device, level -> grants = grants.withDevice(device, level, devices) }
+                }
+                val loose = devices.filter { it.roomId == null }
+                if (loose.isNotEmpty()) RoomAccess("No room", loose, grants, null, null) { device, level -> grants = grants.withDevice(device, level, devices) }
+            }
+        }
+        Button(
+            { scope.launch { repository.change { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, grants, avatar = avatar) }?.let { onBack() } } },
+            Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid,
+        ) { Text("Save") }
+    }
+    if (deleting && user != null) {
+        Confirm("Remove ${user.username}?", "They lose access immediately.", "Remove", { scope.launch { repository.change { it.removeUser(user.id) }?.let { onBack() } } }, { deleting = false })
     }
 }
 

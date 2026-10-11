@@ -59,6 +59,9 @@ pub struct UserDto {
     /// The granted rooms and devices the user may see but not control.
     pub view_only_room_ids: Vec<String>,
     pub view_only_device_ids: Vec<String>,
+    /// The granted rooms and devices the user may also rename (edit implies control).
+    pub edit_room_ids: Vec<String>,
+    pub edit_device_ids: Vec<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -67,8 +70,9 @@ impl UserDto {
         Ok(Self::from_record(u, grants(pool, "room", &u.id).await?, grants(pool, "device", &u.id).await?))
     }
 
-    pub fn from_record(u: &UserRecord, rooms: Vec<(String, bool)>, devices: Vec<(String, bool)>) -> Self {
-        let view_only = |g: &[(String, bool)]| g.iter().filter(|g| !g.1).map(|g| g.0.clone()).collect();
+    pub fn from_record(u: &UserRecord, rooms: Vec<Grant>, devices: Vec<Grant>) -> Self {
+        let view_only = |g: &[Grant]| g.iter().filter(|g| !g.1).map(|g| g.0.clone()).collect();
+        let edit = |g: &[Grant]| g.iter().filter(|g| g.1 && g.2).map(|g| g.0.clone()).collect();
         let avatar = u
             .avatar
             .as_deref()
@@ -84,6 +88,8 @@ impl UserDto {
             all_rooms: u.all_rooms,
             view_only_room_ids: view_only(&rooms),
             view_only_device_ids: view_only(&devices),
+            edit_room_ids: edit(&rooms),
+            edit_device_ids: edit(&devices),
             room_ids: rooms.into_iter().map(|g| g.0).collect(),
             device_ids: devices.into_iter().map(|g| g.0).collect(),
             created_at: u.created_at,
@@ -91,9 +97,12 @@ impl UserDto {
     }
 }
 
-/// The user's `room` or `device` grants as (id, can control).
-pub async fn grants(pool: &SqlitePool, kind: &str, user_id: &str) -> Result<Vec<(String, bool)>, ApiError> {
-    Ok(sqlx::query_as(&format!("SELECT {kind}_id, can_control FROM user_{kind}_access WHERE user_id = ?"))
+/// One grant: the room or device id, may control, may edit.
+pub type Grant = (String, bool, bool);
+
+/// The user's `room` or `device` grants.
+pub async fn grants(pool: &SqlitePool, kind: &str, user_id: &str) -> Result<Vec<Grant>, ApiError> {
+    Ok(sqlx::query_as(&format!("SELECT {kind}_id, can_control, can_edit FROM user_{kind}_access WHERE user_id = ?"))
         .bind(user_id)
         .fetch_all(pool)
         .await?)

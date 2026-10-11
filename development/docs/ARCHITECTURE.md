@@ -314,6 +314,7 @@ flowchart TB
     Vis --> Level{"grant level<br/>(device grant wins over its room)"}
     Level -- "see only" --> See["shown, state and history;<br/>commands answer 403"]
     Level -- "control" --> Ctl["shown and operable<br/>(members only, guests never)"]
+    Level -- "edit" --> Edt["control, plus rename the device<br/>(not move or remove it)"]
     Vis --> Derived["groups: visible members only<br/>scenes, automations: listed when every device<br/>they touch is visible, run when all are controllable<br/>energy, air, WebSocket: visible devices"]
 ```
 
@@ -328,11 +329,13 @@ Admins ignore scope. For members and guests the scope is either the whole home
 | Room | `user_room_access` | Every device in the room, including ones added later |
 | Device | `user_device_access` | That device, wherever it is moved; also devices without a room |
 
-Every grant has a level, `can_control`: full, or **see only** (state and history
-but no commands). A device grant wins over the grant of its room, so one device
-can be see-only in a controllable room, or the reverse. Each device in the API
-carries `can_control` for the user asking, which is what the clients use to
-disable controls.
+Every grant has a level: **see only** (state and history, no commands),
+**control**, or **edit** (control, plus renaming the device; moving it to another
+room and removing it stay administrator-only). A device grant wins over the grant
+of its room, so one device can be see-only in a controllable room, or the reverse.
+Each device in the API carries `can_control` and `can_edit` for the user asking,
+which is what the clients use to disable controls and offer Rename. Whole-home
+users (`all_rooms`) control everything but do not edit: edit needs custom access.
 
 Everything else follows from the devices (`modules/devices/service.rs`):
 a group shows only its visible members and commands only the controllable ones,
@@ -342,8 +345,13 @@ control all of them. Hidden items answer 404, so ids are not confirmed;
 see-only ones answer 403.
 
 On the users API `room_ids` and `device_ids` list the grants, and
-`view_only_room_ids` / `view_only_device_ids` the subset that is see-only. A
-client that sends only the ids keeps the see-only marks of the grants that stay.
+`view_only_*` and `edit_*` the subsets at those levels. A client that sends only
+the ids keeps the marks of the grants that stay; see only wins over edit.
+
+Addresses: `GET /users/email/check` says whether an address is free and
+`GET /users/email/suggest` returns the first free one for a username
+(`john.doe@domus.home`, `johndoe@domus.home`, `john.doe2@domus.home` ...). Email
+is unique, compared without case, and a duplicate answers 409.
 The WebSocket re-reads the user's access when users or rooms change and closes
 when the account is deleted.
 
@@ -413,6 +421,8 @@ erDiagram
     device_groups ||--o{ device_group_members : ""
     devices ||--o{ energy_metrics : samples
     users { text id PK; text role; bool all_rooms }
+    user_room_access { text user_id; text room_id; bool can_control; bool can_edit }
+    user_device_access { text user_id; text device_id; bool can_control; bool can_edit }
     devices { text id PK; text integration_type; text external_id; text state_json; text secrets_enc; bool is_online }
     discovered_devices { text id PK; text status; text note; text secrets_enc }
     integration_accounts { text id PK; text credentials_enc; text status }
