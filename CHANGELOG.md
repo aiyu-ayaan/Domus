@@ -1,3 +1,37 @@
+## v0.0.1-alpha.4 (2026-10-11)
+
+- !alpha(Release) : Tap haptics on every Android control and build artifacts deleted once a release is published
+- ci(Release) : Delete the build artifacts once the release is published
+- docs(Android) : Describe the tap haptics, the rule for dialogs, sheets and menus, and add the flow diagram
+- fix(Android) : Tick on every handled tap, including Material buttons, chips, cards and dialogs, by watching taps at the window root
+- fix(Docs) : Put each ER attribute on its own line so the data model diagrams render
+- docs(Readme) : Add the MIT license, architecture and data diagrams, backup and restore, admin password reset and the new features
+- fix(Android) : Give the Ask before switching row a card, padding and a gap before the switch
+- fix(UI) : Keep the red confirm button for deletions and use the neutral one for switch warnings
+- feat(Devices) : Ask before switching a device on or off, per device, on every platform and for groups, scenes and automation runs
+- docs(About) : Update the acknowledgements on web, desktop and Android with the libraries and data sources now in use
+- feat(Android) : Put Appearance and Account in collapsible cards like the Server card
+- docs(Release) : Describe the Updates pages, where release notes come from and how they are rendered
+- feat(Web) : Add an Updates page with Markdown release notes for web and desktop and show the notes in the update dialog
+- feat(Android) : Add an Updates page with Markdown release notes and show the notes in the update dialog
+- feat(Location) : Find the home by place name or the phone's location on web, desktop and Android
+- feat(Auth) : Skip the sign-in lockout in the development environment
+- fix(Backup) : Leave nothing behind when the file to restore is not a Domus backup
+- feat(Devices) : Show motion, contact, leak, alarm and battery readings on the device page
+- feat(Energy) : Add time-of-use windows on top of the flat or slab tariff on web and Android
+- feat(Automations) : Add sunrise and sunset triggers with an offset and a home location setting
+- feat(Android) : Add a change-password page to Settings
+- perf(Web) : Bundle the Inter font instead of loading it from Google Fonts
+- feat(Backup) : Download the database with its master key from Settings and restore it from the CLI
+- feat(Notifications) : Keep account, discovery and automation failure alerts to administrators
+- feat(Auth) : Lock a username for 15 minutes after five wrong passwords
+- feat(Analytics) : Add a Live range for power and air on Android and web and name the per-minute range 1 min
+- feat(Web) : Send the viewer's time zone, add the 60 min energy range and icon range tabs
+- feat(Android) : Show history on the phone's clock, add the per-minute range and an icon range picker
+- fix(Backend) : Resolve history buckets in the viewer's IANA time zone so days survive DST
+- fix(Backend) : Keep the per-minute history range to energy and air sampling at five intervals
+- feat(Backend) : Bucket energy and air history on the viewer's clock and add a per-minute range
+
 ## v0.0.1-alpha.3 (2026-10-11)
 
 - !alpha release(Domus) : Ship account recovery and in-app update offers

@@ -2,7 +2,7 @@
   "name": "@domus/desktop",
   "productName": "Domus",
   "desktopName": "domus.desktop",
-  "version": "0.0.1-alpha.3",
+  "version": "0.0.1-alpha.4",
   "private": true,
   "description": "Domus smart home, desktop app",
   "author": "Domus Team <ayaan35200@gmail.com>",
