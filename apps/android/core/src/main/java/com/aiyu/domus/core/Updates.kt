@@ -62,14 +62,28 @@ object Updates {
         }
     }
 
-    /** Downloads [update]'s APK into [directory], replacing any earlier download. Throws when it fails. */
-    suspend fun download(update: AppUpdate, directory: java.io.File): java.io.File = withContext(Dispatchers.IO) {
+    /** Downloads [update]'s APK into [directory], replacing any earlier download; [onProgress] hears 0..1. Throws when it fails. */
+    suspend fun download(update: AppUpdate, directory: java.io.File, onProgress: (Float) -> Unit = {}): java.io.File = withContext(Dispatchers.IO) {
         directory.deleteRecursively()
         directory.mkdirs()
         val file = java.io.File(directory, "Domus-${update.version}.apk")
         OkHttpClient().newCall(Request.Builder().url(update.url).build()).execute().use { response ->
             if (!response.isSuccessful) throw java.io.IOException("The download answered ${response.code}")
-            file.outputStream().use { response.body!!.byteStream().copyTo(it) }
+            val body = response.body!!
+            // -1 when the server doesn't say; then nothing is reported and the bar stays at 0.
+            val total = body.contentLength()
+            val buffer = ByteArray(64 * 1024)
+            var done = 0L
+            file.outputStream().use { out ->
+                val input = body.byteStream()
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    out.write(buffer, 0, read)
+                    done += read
+                    if (total > 0) onProgress(done.toFloat() / total)
+                }
+            }
         }
         file
     }

@@ -52,9 +52,6 @@ import kotlinx.coroutines.launch
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
-import java.io.File
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -83,10 +80,10 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
     val live by repository.live.collectAsStateWithLifecycle()
     val c = MaterialTheme.colorScheme
     val context = LocalContext.current
-    val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() }
+    val version = remember { installedVersion(context) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     ScreenColumn {
-        ScreenHeader("Settings", "Domus ${version.orEmpty()}")
+        ScreenHeader("Settings", "Domus $version")
 
         Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -233,7 +230,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         }
 
         RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
-        RowCard("About Domus", "Version ${version ?: ""}, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
+        RowCard("About Domus", "Version $version, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
 
         SectionTitle("Appearance")
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().enterStaggered(2)) {
@@ -260,7 +257,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         }
 
         // A dev build is its own app; a release APK would install beside it, not over it.
-        val installed = version.orEmpty()
+        val installed = version
         if (Updates.versionKey(installed) != null) {
             SectionTitle("Updates")
             val chosen by repository.updateChannel.collectAsStateWithLifecycle()
@@ -277,39 +274,36 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 }
             }
             val found = update?.getOrNull()
-            // null: idle. true: downloading. false: the download failed.
-            var downloading by remember { mutableStateOf<Boolean?>(null) }
+            // null: not downloading.
+            var progress by remember { mutableStateOf<Float?>(null) }
+            var failed by remember { mutableStateOf(false) }
             RowCard(
                 when {
-                    downloading == true -> "Downloading Domus ${found?.version.orEmpty()}…"
+                    progress != null -> "Downloading Domus ${found?.version.orEmpty()}… ${((progress ?: 0f) * 100).toInt()}%"
                     found != null -> "Domus ${found.version} is available"
                     update == null -> "Checking for updates…"
                     update?.isFailure == true -> "Couldn't check for updates"
                     else -> "Domus is up to date"
                 },
                 when {
-                    downloading == false -> "The download failed. Tap to try again"
-                    found != null && downloading == null -> "Tap to download and install"
+                    progress != null -> "Version $installed"
+                    failed -> "The download failed. Tap to try again"
+                    found != null -> "Tap to download and install"
                     else -> "Version $installed"
                 },
                 Icons.Rounded.SystemUpdate,
-                onClick = found?.takeIf { downloading != true }?.let {
+                onClick = found?.takeIf { progress == null }?.let {
                     {
                         scope.launch {
-                            downloading = true
-                            downloading = runCatching {
-                                val apk = Updates.download(it, File(context.cacheDir, "updates"))
-                                // Android's own installer; it asks to allow installs from Domus the first time.
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW)
-                                        .setDataAndType(FileProvider.getUriForFile(context, "${context.packageName}.updates", apk), "application/vnd.android.package-archive")
-                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
-                                )
-                            }.fold({ null }, { false })
+                            failed = false
+                            progress = 0f
+                            failed = runCatching { installUpdate(context, it) { done -> progress = done } }.isFailure
+                            progress = null
                         }
                     }
                 },
             )
+            progress?.let { UpdateProgress(it) }
         }
 
         SectionTitle("Account")

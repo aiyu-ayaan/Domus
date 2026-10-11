@@ -116,6 +116,11 @@ class DomusRepository(context: Context) {
         _updateChannel.value = channel
     }
 
+    /** The release answered with "Later" when it was offered at start; it is not offered again. */
+    val skippedUpdate: String? get() = store.get(SKIPPED_UPDATE)
+
+    fun skipUpdate(version: String) = store.put(SKIPPED_UPDATE, version)
+
     private val _onboarded = MutableStateFlow(store.get(ONBOARDED) == "true")
     /** False until the first-run introduction has been seen. */
     val onboarded: StateFlow<Boolean> = _onboarded
@@ -536,5 +541,6 @@ class DomusRepository(context: Context) {
         const val ALERTS = "alerts"
         const val ONBOARDED = "onboarded"
         const val CHANNEL = "update_channel"
+        const val SKIPPED_UPDATE = "skipped_update"
     }
 }

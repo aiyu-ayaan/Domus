@@ -128,4 +128,5 @@ private fun DomusRoot() {
             is Session.SignedIn -> if (s.user.mustChangePassword) ChangePasswordScreen(s) else MainScreen(s)
         }
     }
+    UpdatePrompt()
 }
