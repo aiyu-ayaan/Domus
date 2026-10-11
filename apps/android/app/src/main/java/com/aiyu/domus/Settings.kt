@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.FilledTonalButton
@@ -237,32 +238,43 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         RowCard("Updates", "Version $version, release notes and channel", Icons.Rounded.SystemUpdate, onClick = { open("updates") })
         RowCard("About Domus", "Version $version, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
 
-        SectionTitle("Appearance")
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().enterStaggered(2)) {
-            Themes.forEachIndexed { index, (key, label) ->
-                SegmentedButton(appearance.theme == key, { repository.setAppearance(appearance.copy(theme = key)) }, SegmentedButtonDefaults.itemShape(index, Themes.size)) { Text(label) }
-            }
-        }
-        // Wallpaper colors exist from Android 12.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(3)) {
-                Row(
-                    Modifier
-                        .toggleable(appearance.dynamicColor, role = Role.Switch) { repository.setAppearance(appearance.copy(dynamicColor = it)) }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Wallpaper colors", style = MaterialTheme.typography.titleMedium)
-                        Text("Match the app to your wallpaper", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+        CollapsibleCard(
+            title = "Appearance",
+            subtitle = Themes.firstOrNull { it.first == appearance.theme }?.second,
+            leading = { ShapedIcon(Icons.Rounded.Palette, MaterialShapes.Clover4Leaf, c.surfaceContainerHighest, c.onSurfaceVariant) },
+        ) {
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                    Themes.forEachIndexed { index, (key, label) ->
+                        SegmentedButton(appearance.theme == key, { repository.setAppearance(appearance.copy(theme = key)) }, SegmentedButtonDefaults.itemShape(index, Themes.size)) { Text(label) }
                     }
-                    Switch(appearance.dynamicColor, onCheckedChange = null)
+                }
+                // Wallpaper colors exist from Android 12.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Row(
+                        Modifier.toggleable(appearance.dynamicColor, role = Role.Switch) { repository.setAppearance(appearance.copy(dynamicColor = it)) },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Wallpaper colors", style = MaterialTheme.typography.titleMedium)
+                            Text("Match the app to your wallpaper", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                        }
+                        Switch(appearance.dynamicColor, onCheckedChange = null)
+                    }
                 }
             }
         }
 
         SectionTitle("Account")
-        FilledTonalButton(repository::logout, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Sign out") }
-        OutlinedButton(repository::forgetServer, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Use another server") }
+        CollapsibleCard(
+            title = session.user.username,
+            subtitle = "Sign out or use another server",
+            leading = { ShapedIcon(Icons.Rounded.Person, MaterialShapes.Clover4Leaf, c.surfaceContainerHighest, c.onSurfaceVariant) },
+        ) {
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(repository::logout, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Sign out") }
+                OutlinedButton(repository::forgetServer, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Use another server") }
+            }
+        }
     }
 }
