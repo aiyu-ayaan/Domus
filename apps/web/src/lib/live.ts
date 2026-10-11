@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { wsUrl } from './api'
+import { api, wsUrl } from './api'
 import { useAuth } from './auth'
 import { keys } from './queries'
 import { useToast } from './toast'
@@ -53,6 +53,8 @@ export function useLiveEvents(enabled: boolean) {
           case 'users_changed':
             // Someone's access may have changed, and with it every list this user is shown.
             qc.invalidateQueries()
+            // An administrator may have just reset this account's password: the app then gives way to the password change.
+            api.me().then((me) => updateUserRef.current(me)).catch(() => {})
             break
           case 'device_state_changed': {
             const list = qc.getQueryData<Device[]>(keys.devices)
