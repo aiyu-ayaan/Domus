@@ -29,6 +29,7 @@ export function useConfirmSwitch(): { ask: (devices: Device[], on: boolean, run:
         title={pending ? `Turn ${pending.names.length === 1 ? pending.names[0] : `${pending.names.length} devices`} ${pending.on ? 'on' : 'off'}?` : ''}
         message={pending && (pending.names.length === 1 ? 'You asked to be warned before this device is switched.' : `You asked to be warned before switching ${pending.names.join(', ')}.`)}
         confirmLabel={pending?.on ? 'Turn on' : 'Turn off'}
+        tone="neutral"
       />
     ),
   }
@@ -57,6 +58,7 @@ export function ConfirmHost() {
       title={names.length === 1 ? `Switch ${names[0]}?` : `Switch ${names.length} devices?`}
       message={`This includes ${names.join(', ')}, which ${names.length === 1 ? 'asks' : 'ask'} before switching. Switching ${names.length === 1 ? 'it' : 'them'} can cut power to whatever is connected.`}
       confirmLabel="Switch"
+      tone="neutral"
     />
   )
 }

@@ -101,6 +101,7 @@ export function Confirm({
   title,
   message,
   confirmLabel = 'Delete',
+  tone = 'danger',
   loading,
 }: {
   open: boolean
@@ -109,6 +110,8 @@ export function Confirm({
   title: string
   message: ReactNode
   confirmLabel?: string
+  /** `danger` (red) for something that cannot be undone; `neutral` for a plain yes. */
+  tone?: 'danger' | 'neutral'
   loading?: boolean
 }) {
   const closeRef = useRef(onClose)
@@ -130,7 +133,7 @@ export function Confirm({
           <Button variant="ghost" onClick={onClose} autoFocus>
             Cancel
           </Button>
-          <Button variant="primary" className="bg-danger text-white hover:bg-danger/90" onClick={onConfirm} loading={loading}>
+          <Button variant="primary" className={tone === 'danger' ? 'bg-danger text-white hover:bg-danger/90' : undefined} onClick={onConfirm} loading={loading}>
             {confirmLabel}
           </Button>
         </div>
