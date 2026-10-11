@@ -17,6 +17,7 @@ import {
   openPeeps,
   bigSmile,
 } from '@dicebear/collection/async'
+import { t } from '@/lib/i18n'
 
 // Each style's artwork is 50-200KB of SVG parts, so it is its own chunk, fetched when first drawn.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,21 +56,21 @@ export interface AvatarStyleDef {
 }
 
 export const AVATAR_STYLES: AvatarStyleDef[] = [
-  { id: 'bottts', name: 'Robots', emoji: '🤖', description: 'Smart & mechanical bots' },
-  { id: 'lorelei', name: 'Lorelei', emoji: '🎨', description: 'Modern clean illustration' },
-  { id: 'avataaars', name: 'Avataaars', emoji: '🧑', description: 'Classic cartoon humans' },
-  { id: 'adventurer', name: 'Adventurer', emoji: '🗡️', description: 'Fantasy RPG adventurers' },
-  { id: 'micah', name: 'Micah', emoji: '✨', description: 'Contemporary portraits' },
-  { id: 'notionists', name: 'Notionists', emoji: '📝', description: 'Hand-drawn minimalist sketches' },
-  { id: 'pixelArt', name: 'Pixel Art', emoji: '👾', description: 'Retro 8-bit characters' },
-  { id: 'funEmoji', name: 'Fun Emoji', emoji: '😎', description: 'Playful emoji faces' },
-  { id: 'thumbs', name: 'Thumbs', emoji: '👍', description: 'Cute thumb characters' },
-  { id: 'shapes', name: 'Shapes', emoji: '🔷', description: 'Abstract geometric art' },
-  { id: 'rings', name: 'Rings', emoji: '🪐', description: 'Cybernetic planetary rings' },
-  { id: 'identicon', name: 'Identicon', emoji: '🔐', description: 'Cryptographic block shapes' },
-  { id: 'personas', name: 'Personas', emoji: '🕶️', description: 'Distinct stylized personas' },
-  { id: 'openPeeps', name: 'Open Peeps', emoji: '🚶', description: 'Casual hand-drawn people' },
-  { id: 'bigSmile', name: 'Big Smile', emoji: '😄', description: 'Bright cheerful faces' },
+  { id: 'bottts', name: t('avatar.style.bottts.name'), emoji: '🤖', description: t('avatar.style.bottts.desc') },
+  { id: 'lorelei', name: t('avatar.style.lorelei.name'), emoji: '🎨', description: t('avatar.style.lorelei.desc') },
+  { id: 'avataaars', name: t('avatar.style.avataaars.name'), emoji: '🧑', description: t('avatar.style.avataaars.desc') },
+  { id: 'adventurer', name: t('avatar.style.adventurer.name'), emoji: '🗡️', description: t('avatar.style.adventurer.desc') },
+  { id: 'micah', name: t('avatar.style.micah.name'), emoji: '✨', description: t('avatar.style.micah.desc') },
+  { id: 'notionists', name: t('avatar.style.notionists.name'), emoji: '📝', description: t('avatar.style.notionists.desc') },
+  { id: 'pixelArt', name: t('avatar.style.pixelArt.name'), emoji: '👾', description: t('avatar.style.pixelArt.desc') },
+  { id: 'funEmoji', name: t('avatar.style.funEmoji.name'), emoji: '😎', description: t('avatar.style.funEmoji.desc') },
+  { id: 'thumbs', name: t('avatar.style.thumbs.name'), emoji: '👍', description: t('avatar.style.thumbs.desc') },
+  { id: 'shapes', name: t('avatar.style.shapes.name'), emoji: '🔷', description: t('avatar.style.shapes.desc') },
+  { id: 'rings', name: t('avatar.style.rings.name'), emoji: '🪐', description: t('avatar.style.rings.desc') },
+  { id: 'identicon', name: t('avatar.style.identicon.name'), emoji: '🔐', description: t('avatar.style.identicon.desc') },
+  { id: 'personas', name: t('avatar.style.personas.name'), emoji: '🕶️', description: t('avatar.style.personas.desc') },
+  { id: 'openPeeps', name: t('avatar.style.openPeeps.name'), emoji: '🚶', description: t('avatar.style.openPeeps.desc') },
+  { id: 'bigSmile', name: t('avatar.style.bigSmile.name'), emoji: '😄', description: t('avatar.style.bigSmile.desc') },
 ]
 
 export const STYLE_MAP = new Map<string, AvatarStyleDef>(

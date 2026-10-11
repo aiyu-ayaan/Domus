@@ -9,22 +9,23 @@ import { TrendChart } from '@/components/devices/TrendChart'
 import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
+import { t } from '@/lib/i18n'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
 import { airQuality, formatBucket, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
 type Range = 'live' | 'day' | 'week' | 'month'
 const RANGES = [
-  { value: 'live' as const, label: 'Live', icon: Pulse },
-  { value: 'day' as const, label: '24 hours', icon: CalendarDot },
-  { value: 'week' as const, label: '7 days', icon: CalendarDots },
-  { value: 'month' as const, label: '30 days', icon: CalendarBlank },
+  { value: 'live' as const, label: 'common.live', icon: Pulse },
+  { value: 'day' as const, label: 'energy.range.day', icon: CalendarDot },
+  { value: 'week' as const, label: 'energy.range.week', icon: CalendarDots },
+  { value: 'month' as const, label: 'energy.range.month', icon: CalendarBlank },
 ]
 type Reading = 'pm25' | 'temperature' | 'humidity'
 const READINGS: Record<Reading, { label: string; unit: string; digits: number }> = {
-  pm25: { label: 'PM2.5', unit: 'µg/m³', digits: 0 },
-  temperature: { label: 'Temperature', unit: '°C', digits: 1 },
-  humidity: { label: 'Humidity', unit: '%', digits: 0 },
+  pm25: { label: 'reading.pm25', unit: 'µg/m³', digits: 0 },
+  temperature: { label: 'reading.temperature', unit: '°C', digits: 1 },
+  humidity: { label: 'reading.humidity', unit: '%', digits: 0 },
 }
 
 /** Recorded history: the chart, and what it says about the period. */
@@ -56,20 +57,20 @@ function Trend() {
   const average = pm.length ? pm.reduce((s, p) => s + p.pm25!, 0) / pm.length : null
   const peak = pm.reduce<(typeof pm)[number] | null>((best, p) => (p.pm25! > (best?.pm25 ?? -1) ? p : best), null)
   const clean = pm.length ? (pm.filter((p) => p.pm25! <= 35).length / pm.length) * 100 : null
-  const when = (t: string) => formatBucket(t, range)
-  const period = range === 'live' ? '5 min' : range === 'day' ? '24 h' : range === 'week' ? '7 d' : '30 d'
+  const when = (ts: string) => formatBucket(ts, range)
+  const lastTitle = range === 'live' ? t('air.last.live') : range === 'day' ? t('air.last.day') : range === 'week' ? t('air.last.week') : t('air.last.month')
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardHeader
-          title="Trend"
+          title={t('air.trend')}
           action={
             <div className="flex flex-wrap justify-end gap-2">
               {available.length > 1 && (
-                <Segmented size="sm" label="Reading" value={shown} onChange={setReading} options={available.map((r) => ({ value: r, label: READINGS[r].label }))} />
+                <Segmented size="sm" label={t('air.reading')} value={shown} onChange={setReading} options={available.map((r) => ({ value: r, label: t(READINGS[r].label) }))} />
               )}
-              <Segmented<Range> size="sm" label="Range" value={range} onChange={setRange} options={RANGES} />
+              <Segmented<Range> size="sm" label={t('energy.range')} value={range} onChange={setRange} options={RANGES.map((r) => ({ ...r, label: t(r.label) }))} />
             </div>
           }
         />
@@ -82,8 +83,8 @@ function Trend() {
               range={range}
               unit={meta.unit}
               digits={meta.digits}
-              marks={shown === 'pm25' ? [{ value: 15, label: 'Clean ≤ 15' }, { value: 35, label: 'Good ≤ 35' }] : []}
-              empty="No history yet. Readings are recorded every few minutes while a sensor is online."
+              marks={shown === 'pm25' ? [{ value: 15, label: t('air.mark.clean') }, { value: 35, label: t('air.mark.good') }] : []}
+              empty={t('air.noHistory')}
               height={200}
             />
           )}
@@ -91,11 +92,11 @@ function Trend() {
       </Card>
 
       <Card>
-        <CardHeader title={`Last ${period}`} />
+        <CardHeader title={lastTitle} />
         <dl className="divide-y divide-border">
-          <TrendFact label="Average PM2.5" value={average != null ? `${formatNumber(average, 0)} µg/m³` : '—'} sub={airQuality(average ?? undefined)?.label ?? 'No readings yet'} />
-          <TrendFact label="Peak" value={peak ? `${formatNumber(peak.pm25!, 0)} µg/m³` : '—'} sub={peak ? when(peak.t) : 'No readings yet'} />
-          <TrendFact label="Time with good air" value={clean != null ? `${formatNumber(clean, 0)}%` : '—'} sub="PM2.5 at or below 35 µg/m³" />
+          <TrendFact label={t('air.averagePm25')} value={average != null ? `${formatNumber(average, 0)} µg/m³` : '—'} sub={airQuality(average ?? undefined)?.label ?? t('air.noReadingsYet')} />
+          <TrendFact label={t('air.peak')} value={peak ? `${formatNumber(peak.pm25!, 0)} µg/m³` : '—'} sub={peak ? when(peak.t) : t('air.noReadingsYet')} />
+          <TrendFact label={t('air.timeWithGoodAir')} value={clean != null ? `${formatNumber(clean, 0)}%` : '—'} sub={t('air.pm25Below35')} />
         </dl>
       </Card>
     </div>
@@ -158,12 +159,12 @@ export function AirQualityView() {
   if (aqDevices.length === 0) {
     return (
       <>
-        <PageHeader title="Air Quality" description="Real-time air health and purifier performance" />
+        <PageHeader title={t('nav.airQuality')} description={t('air.emptySubtitle')} />
         <Card className="p-8">
           <EmptyState
             icon={<Wind size={32} />}
-            title="No air quality devices connected"
-            message="Add a Xiaomi Air Purifier, Tuya purifier, or environmental PM2.5 monitor under Integrations to enable real-time air analytics and control."
+            title={t('air.empty.title')}
+            message={t('air.empty.message')}
           />
         </Card>
       </>
@@ -174,13 +175,13 @@ export function AirQualityView() {
     <>
       {confirm.dialog}
       <PageHeader
-        title="Air Quality"
-        description="Real-time air health, PM2.5 particulate levels & purifier performance"
+        title={t('nav.airQuality')}
+        description={t('air.subtitle')}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Metric
-          label="PM2.5 Level"
+          label={t('air.pm25Level')}
           live
           value={
             maxPm != null ? (
@@ -192,25 +193,25 @@ export function AirQualityView() {
               '—'
             )
           }
-          sub={aq?.label ? `Status · ${aq.label}` : 'No sensor data'}
+          sub={aq?.label ? t('air.statusLabel', { label: aq.label }) : t('air.noSensorData')}
         />
 
         <Metric
-          label="Purifiers"
+          label={t('air.purifiers')}
           value={`${runningCount}`}
-          sub={`${purifiers.length} total ${purifiers.length === 1 ? 'purifier' : 'purifiers'}`}
+          sub={t('air.totalPurifiers', { count: purifiers.length })}
         />
 
         <Metric
-          label="HEPA Filter"
+          label={t('insights.hepa')}
           value={avgFilter != null ? `${avgFilter}%` : '—'}
-          sub={avgFilter != null ? (avgFilter < 15 ? 'Replacement suggested' : 'Filter life healthy') : 'No filter sensor'}
+          sub={avgFilter != null ? (avgFilter < 15 ? t('air.filterReplace') : t('air.filterHealthy')) : t('air.noFilterSensor')}
         />
 
         <Metric
-          label="Environment"
+          label={t('air.environment')}
           value={avgTemp != null ? `${formatNumber(avgTemp)} °C` : '—'}
-          sub={avgHum != null ? `${avgHum}% humidity` : 'Sensors online'}
+          sub={avgHum != null ? t('overview.humidity', { value: avgHum }) : t('overview.sensorsOnline')}
         />
       </div>
 
@@ -224,12 +225,12 @@ export function AirQualityView() {
               title={
                 <span className="flex items-center gap-2">
                   <Wind size={16} className="text-muted" />
-                  <span>Air Purifiers</span>
+                  <span>{t('air.airPurifiers')}</span>
                 </span>
               }
               action={
                 <Badge tone={runningCount > 0 ? 'on' : 'neutral'}>
-                  {runningCount > 0 ? `${runningCount} running` : 'All standby'}
+                  {runningCount > 0 ? t('air.runningCount', { count: runningCount }) : t('air.allStandby')}
                 </Badge>
               }
             />
@@ -251,19 +252,19 @@ export function AirQualityView() {
                         <div className="flex items-center gap-2">
                           <h3 className="text-title font-medium">{d.name}</h3>
                           <Badge tone={d.is_online ? 'on' : 'danger'}>
-                            {d.is_online ? 'Online' : 'Offline'}
+                            {d.is_online ? t('device.online') : t('device.offline')}
                           </Badge>
                         </div>
                         <p className="mt-0.5 text-label text-muted">
                           {room ? `${room.name} · ` : ''}
-                          {d.is_online ? (s.is_on ? 'Active' : 'Standby') : 'Disconnected'}
+                          {d.is_online ? (s.is_on ? t('device.active') : t('device.standby')) : t('air.disconnected')}
                         </p>
                       </div>
 
                       <Switch
                         checked={Boolean(s.is_on && d.is_online)}
                         disabled={!control || !d.can_control || !d.is_online}
-                        label={`${d.name} power`}
+                        label={t('deviceRow.power', { name: d.name })}
                         onChange={(v) => confirm.ask([d], v, () => command.mutate({ id: d.id, cmd: { is_on: v } }))}
                       />
                     </div>
@@ -271,26 +272,26 @@ export function AirQualityView() {
                     {/* Sensor snapshot */}
                     <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-raised/40 p-3 sm:grid-cols-4">
                       <div>
-                        <span className="text-caption text-muted">PM2.5</span>
+                        <span className="text-caption text-muted">{t('reading.pm25')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
                           {devPm != null ? `${formatNumber(devPm, 0)} µg/m³` : '—'}
                           {devAq?.label && <span className="ml-1 text-caption text-muted">({devAq.label})</span>}
                         </p>
                       </div>
                       <div>
-                        <span className="text-caption text-muted">Temperature</span>
+                        <span className="text-caption text-muted">{t('reading.temperature')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
                           {s.temperature != null ? `${formatNumber(s.temperature)} °C` : '—'}
                         </p>
                       </div>
                       <div>
-                        <span className="text-caption text-muted">Humidity</span>
+                        <span className="text-caption text-muted">{t('reading.humidity')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
                           {s.humidity != null ? `${formatNumber(s.humidity, 0)} %` : '—'}
                         </p>
                       </div>
                       <div>
-                        <span className="text-caption text-muted">Filter</span>
+                        <span className="text-caption text-muted">{t('air.filter')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
                           {filterLife != null ? `${filterLife}%` : '—'}
                         </p>
@@ -301,10 +302,10 @@ export function AirQualityView() {
                     {modes && modes.length > 0 && (
                       <div className="border-t border-border pt-3">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <span className="text-body text-muted">Operating Mode</span>
+                          <span className="text-body text-muted">{t('air.operatingMode')}</span>
                           <Segmented
                             size="sm"
-                            label={`${d.name} mode`}
+                            label={t('insights.modeOf', { name: d.name })}
                             value={s.mode}
                             options={modes.map((m) => ({ value: m, label: m }))}
                             onChange={(v) =>
@@ -319,10 +320,10 @@ export function AirQualityView() {
                     {/* Fan speed selector */}
                     {fan && fan.length > 0 && (
                       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                        <span className="text-body text-muted">Fan Speed</span>
+                        <span className="text-body text-muted">{t('insights.fanSpeed')}</span>
                         <Segmented
                           size="sm"
-                          label={`${d.name} fan speed`}
+                          label={t('insights.fanSpeedOf', { name: d.name })}
                           value={s.fan_speed}
                           options={fan.map((f) => ({ value: f, label: f }))}
                           onChange={(v) =>
@@ -336,8 +337,8 @@ export function AirQualityView() {
                     {filterLife != null && (
                       <div className="border-t border-border pt-3">
                         <div className="mb-1.5 flex justify-between text-label">
-                          <span className="text-muted">HEPA Filter Health</span>
-                          <span className="tabular font-medium">{filterLife}% remaining</span>
+                          <span className="text-muted">{t('air.hepaHealth')}</span>
+                          <span className="tabular font-medium">{t('air.filterRemaining', { percent: filterLife })}</span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-raised">
                           <div
@@ -368,7 +369,7 @@ export function AirQualityView() {
               title={
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck size={16} className="text-muted" />
-                  <span>WHO Air Quality Scale</span>
+                  <span>{t('air.whoScale')}</span>
                 </span>
               }
             />
@@ -379,40 +380,40 @@ export function AirQualityView() {
                     <span className="h-2 w-2 rounded-full bg-on/60" />
                     <span>0 – 12 µg/m³</span>
                   </span>
-                  <span className="text-on font-medium">Excellent</span>
+                  <span className="text-on font-medium">{t('air.excellent')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-on" />
                     <span>13 – 35 µg/m³</span>
                   </span>
-                  <span className="text-on font-medium">Good</span>
+                  <span className="text-on font-medium">{t('air.good')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-warn" />
                     <span>36 – 55 µg/m³</span>
                   </span>
-                  <span className="text-warn font-medium">Moderate</span>
+                  <span className="text-warn font-medium">{t('air.moderate')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-danger" />
                     <span>&gt; 55 µg/m³</span>
                   </span>
-                  <span className="text-danger font-medium">Poor</span>
+                  <span className="text-danger font-medium">{t('air.poor')}</span>
                 </div>
               </div>
 
               <div className="border-t border-border pt-3 text-caption text-muted">
-                Fine particulate matter (PM2.5) consists of microscopic particles that penetrate deep into the lungs. Clean indoor target: ≤ 15 µg/m³.
+                {t('air.pm25Explain')}
               </div>
             </div>
           </Card>
 
           {/* Sensors list */}
           <Card>
-            <CardHeader title="Sensors by Room" />
+            <CardHeader title={t('air.sensorsByRoom')} />
             <div className="divide-y divide-border">
               {aqDevices.map((d) => {
                 const room = rooms.find((r) => r.id === d.room_id)
@@ -423,7 +424,7 @@ export function AirQualityView() {
                   <div key={d.id} className="flex items-center justify-between px-4 py-3 text-label">
                     <div>
                       <p className="font-medium text-fg">{d.name}</p>
-                      <p className="text-caption text-muted">{room ? room.name : 'Unassigned'}</p>
+                      <p className="text-caption text-muted">{room ? room.name : t('devices.unassigned')}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold tabular text-fg">
@@ -445,3 +446,4 @@ export function AirQualityView() {
     </>
   )
 }
+

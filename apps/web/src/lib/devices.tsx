@@ -66,7 +66,7 @@ export function deviceSummary(d: Device): string {
   if (s.is_on !== undefined && d.device_type !== 'sensor') parts.push(t(s.is_on ? 'device.on' : 'device.off'))
   if (d.device_type === 'light' && s.is_on && s.brightness != null) parts.push(`${s.brightness}%`)
   if (d.device_type === 'air_purifier' && s.air_quality_pm25 != null) {
-    parts.push(`PM2.5 ${formatNumber(s.air_quality_pm25, 0)} · ${airQuality(s.air_quality_pm25)?.label}`)
+    parts.push(t('device.pm25Summary', { value: formatNumber(s.air_quality_pm25, 0), label: airQuality(s.air_quality_pm25)?.label ?? '' }))
   } else if (s.temperature != null) {
     parts.push(`${formatNumber(s.temperature)}°`)
     if (s.humidity != null) parts.push(`${formatNumber(s.humidity, 0)}%`)

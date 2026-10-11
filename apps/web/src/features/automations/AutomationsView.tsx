@@ -17,6 +17,7 @@ import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Checkbox, Field } from '@/components/ui/Field'
 import { api } from '@/lib/api'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
+import { t } from '@/lib/i18n'
 import { keys, useAutomations, useDevices, useGroups, useScenes } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { timeAgo } from '@/lib/format'
@@ -46,19 +47,28 @@ export function AutomationsView() {
   const toggle = useMutation({
     mutationFn: api.toggleAutomation,
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.automations }),
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not update', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('automations.updateFailed'), message: errorMessage(e) }),
   })
   const run = useMutation({
     mutationFn: (a: Automation) => api.runAutomation(a.id),
-    onSuccess: (r, a) => toast.push(r.success ? { tone: 'success', title: `Ran ${a.name}` } : { tone: 'warning', title: `${a.name} had problems`, message: r.errors.join('; ') }),
-    onError: (e) => toast.push({ tone: 'error', title: 'Run failed', message: errorMessage(e) }),
+    onSuccess: (r, a) =>
+      toast.push(
+        r.success
+          ? { tone: 'success', title: t('automations.ran', { name: a.name }) }
+          : { tone: 'warning', title: t('automations.hadProblems', { name: a.name }), message: r.errors.join('; ') },
+      ),
+    onError: (e) => toast.push({ tone: 'error', title: t('automations.runFailed'), message: errorMessage(e) }),
   })
   const activate = useMutation({
     mutationFn: (s: Scene) => api.activateScene(s.id),
     onSuccess: (r, s) => {
       qc.invalidateQueries({ queryKey: keys.scenes })
       qc.invalidateQueries({ queryKey: keys.devices })
-      toast.push(r.success ? { tone: 'success', title: `${s.name} applied` } : { tone: 'warning', title: `${s.name} partly applied`, message: r.errors.join('; ') })
+      toast.push(
+        r.success
+          ? { tone: 'success', title: t('overview.sceneApplied', { name: s.name }) }
+          : { tone: 'warning', title: t('overview.scenePartly', { name: s.name }), message: r.errors.join('; ') },
+      )
     },
   })
   const toggleScene = useMutation({
@@ -68,11 +78,11 @@ export function AutomationsView() {
       qc.invalidateQueries({ queryKey: keys.devices })
       toast.push(
         r.success
-          ? { tone: 'success', title: `Scene switched ${on ? 'on' : 'off'}` }
-          : { tone: 'warning', title: `Scene partly applied`, message: r.errors.join('; ') },
+          ? { tone: 'success', title: t(on ? 'automations.sceneSwitched_on' : 'automations.sceneSwitched_off') }
+          : { tone: 'warning', title: t('automations.scenePartly'), message: r.errors.join('; ') },
       )
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Scene toggle failed', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('overview.sceneToggleFailed'), message: errorMessage(e) }),
   })
   const remove = useMutation({
     mutationFn: async () => {
@@ -88,9 +98,9 @@ export function AutomationsView() {
   return (
     <>
       <PageHeader
-        title="Automations"
-        description="Rules that run on their own, and scenes you trigger with one tap."
-        actions={admin && <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>New automation</Button>}
+        title={t('automations.title')}
+        description={t('automations.description')}
+        actions={admin && <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>{t('automations.new')}</Button>}
       />
 
       {isLoading ? (
@@ -98,31 +108,34 @@ export function AutomationsView() {
       ) : !automations?.length ? (
         <EmptyState
           icon={<Lightning size={28} />}
-          title="No automations"
-          message="For example: switch the purifier on when PM2.5 rises above 35, or turn everything off at midnight."
-          action={admin && <Button variant="primary" onClick={() => setEditing('new')}>Create automation</Button>}
+          title={t('automations.empty.title')}
+          message={t('automations.empty.message')}
+          action={admin && <Button variant="primary" onClick={() => setEditing('new')}>{t('automations.create')}</Button>}
         />
       ) : (
         <Card>
-          <CardHeader title={`Automations · ${automations.length}`} />
+          <CardHeader title={t('automations.count', { count: automations.length })} />
           <ul className="divide-y divide-border">
             {automations.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1 basis-64">
                   <p className="text-body font-medium">{a.name}</p>
                   <p className="text-label text-muted">
-                    {a.triggers.map((t) => describeTrigger(t, devices)).join(' or ')}, then {a.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', ')}.
+                    {t('automations.ruleSummary', {
+                      triggers: a.triggers.map((trig) => describeTrigger(trig, devices)).join(t('automations.orJoin')),
+                      actions: a.actions.map((x) => describeAction(x, devices, groups, scenes)).join(', '),
+                    })}
                   </p>
-                  <p className="mt-0.5 text-caption text-subtle">Last ran {timeAgo(a.last_triggered_at)}</p>
+                  <p className="mt-0.5 text-caption text-subtle">{t('automations.lastRan', { when: timeAgo(a.last_triggered_at) })}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {control && <Button variant="ghost" size="sm" aria-label={`Run ${a.name} now`} icon={<Play size={16} />} onClick={() => run.mutate(a)} />}
+                  {control && <Button variant="ghost" size="sm" aria-label={t('automations.runNow', { name: a.name })} icon={<Play size={16} />} onClick={() => run.mutate(a)} />}
                   {admin && (
                     <>
-                      <Button variant="ghost" size="sm" aria-label={`Edit ${a.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(a)} />
-                      <Button variant="ghost" size="sm" aria-label={`Delete ${a.name}`} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'automation', id: a.id, name: a.name })} />
+                      <Button variant="ghost" size="sm" aria-label={t('groups.edit', { name: a.name })} icon={<PencilSimple size={16} />} onClick={() => setEditing(a)} />
+                      <Button variant="ghost" size="sm" aria-label={t('groups.delete', { name: a.name })} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'automation', id: a.id, name: a.name })} />
                       <span className="ml-2">
-                        <Switch checked={a.is_enabled} onChange={() => toggle.mutate(a.id)} label={`${a.name} enabled`} />
+                        <Switch checked={a.is_enabled} onChange={() => toggle.mutate(a.id)} label={t('automations.enabled', { name: a.name })} />
                       </span>
                     </>
                   )}
@@ -134,9 +147,9 @@ export function AutomationsView() {
       )}
 
       <Card className="mt-6">
-        <CardHeader title={`Scenes · ${scenes.length}`} action={admin && <Button size="sm" icon={<Plus size={14} />} onClick={() => setEditingScene('new')}>New scene</Button>} />
+        <CardHeader title={t('automations.scenesCount', { count: scenes.length })} action={admin && <Button size="sm" icon={<Plus size={14} />} onClick={() => setEditingScene('new')}>{t('automations.newScene')}</Button>} />
         {scenes.length === 0 ? (
-          <p className="px-4 py-6 text-label text-muted">A scene sets several devices at once, for example “Movie night” or “Leaving home”.</p>
+          <p className="px-4 py-6 text-label text-muted">{t('automations.scenesEmpty')}</p>
         ) : (
           <ul className="divide-y divide-border">
             {scenes.map((s) => {
@@ -149,7 +162,7 @@ export function AutomationsView() {
                       <div className="flex items-center gap-2">
                         <Monitor size={16} className="shrink-0 text-info" />
                         <span className="text-body font-medium">{s.name}</span>
-                        <Badge tone="info">Screen Sync</Badge>
+                        <Badge tone="info">{t('overview.screenSync')}</Badge>
                       </div>
                       <p className="truncate text-label text-muted">{describeScreenSyncSubtitle(s, groups)}</p>
                     </div>
@@ -167,14 +180,14 @@ export function AutomationsView() {
                             icon={<StopCircle size={16} />}
                             onClick={() => stopScreenSync()}
                           >
-                            Stop Sync
+                            {t('automations.stopSync')}
                           </Button>
                         </div>
                       ) : isRemote ? (
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 text-caption font-medium text-info mr-1">
                             <span className="h-2 w-2 rounded-full bg-info animate-pulse shadow-[0_0_8px_rgb(var(--info))]" />
-                            Live
+                            {t('common.live')}
                           </span>
                           <Button
                             variant="ghost"
@@ -184,7 +197,7 @@ export function AutomationsView() {
                             disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
                             onClick={() => toggleScene.mutate({ id: s.id, on: false })}
                           >
-                            Stop
+                            {t('overview.stop')}
                           </Button>
                         </div>
                       ) : (
@@ -194,13 +207,13 @@ export function AutomationsView() {
                           disabled={!control}
                           onClick={() => void startScreenSync(s)}
                         >
-                          Sync screen
+                          {t('automations.syncScreen')}
                         </Button>
                       )}
                       {admin && (
                         <>
-                          <Button variant="ghost" size="sm" aria-label={`Edit ${s.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
-                          <Button variant="ghost" size="sm" aria-label={`Delete ${s.name}`} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
+                          <Button variant="ghost" size="sm" aria-label={t('groups.edit', { name: s.name })} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
+                          <Button variant="ghost" size="sm" aria-label={t('groups.delete', { name: s.name })} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
                         </>
                       )}
                     </div>
@@ -218,17 +231,17 @@ export function AutomationsView() {
                     <Switch
                       checked={isSceneActive(s, devices, groups)}
                       disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
-                      label={`Toggle ${s.name}`}
+                      label={t('overview.toggle', { name: s.name })}
                       onChange={(on) => toggleScene.mutate({ id: s.id, on })}
                     />
                     {admin && (
                       <>
-                        <Button variant="ghost" size="sm" aria-label={`Edit ${s.name}`} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
-                        <Button variant="ghost" size="sm" aria-label={`Delete ${s.name}`} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
+                        <Button variant="ghost" size="sm" aria-label={t('groups.edit', { name: s.name })} icon={<PencilSimple size={16} />} onClick={() => setEditingScene(s)} />
+                        <Button variant="ghost" size="sm" aria-label={t('groups.delete', { name: s.name })} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'scene', id: s.id, name: s.name })} />
                       </>
                     )}
                     <Button size="sm" disabled={!control} loading={activate.isPending && activate.variables?.id === s.id} onClick={() => activate.mutate(s)}>
-                      Run
+                      {t('overview.run')}
                     </Button>
                   </div>
                 </li>
@@ -240,7 +253,7 @@ export function AutomationsView() {
 
       <AutomationSheet automation={editing} onClose={() => setEditing(null)} />
       <SceneSheet scene={editingScene} onClose={() => setEditingScene(null)} devices={devices} groups={groups} />
-      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={`Delete ${deleting?.name}?`} message="This cannot be undone." />
+      <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={t('groups.deleteTitle', { name: deleting?.name ?? '' })} message={t('automations.deleteMessage')} />
     </>
   )
 }
@@ -282,13 +295,13 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.automations })
-      toast.push({ tone: 'success', title: 'Automation saved' })
+      toast.push({ tone: 'success', title: t('automations.saved') })
       onClose()
     },
     onError: (e) => setError(errorMessage(e)),
   })
   const submit = () => {
-    const problem = !name.trim() ? 'Give the automation a name.' : validateRule(triggers, actions)
+    const problem = !name.trim() ? t('automations.nameRequired') : validateRule(triggers, actions)
     if (problem) setError(problem)
     else save.mutate()
   }
@@ -297,27 +310,27 @@ function AutomationSheet({ automation, onClose }: { automation: Automation | 'ne
       open={!!automation}
       onClose={onClose}
       size="lg"
-      title={existing ? 'Edit automation' : 'New automation'}
+      title={existing ? t('automations.editTitle') : t('automations.new')}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={save.isPending} onClick={submit}>
-            Save
+            {t('common.save')}
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-6">
-        <Field label="Name" required placeholder="Purifier on when air is poor" value={name} onChange={(e) => setName(e.target.value)} />
-        <SheetSection title="When">
+        <Field label={t('common.name')} required placeholder={t('automations.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} />
+        <SheetSection title={t('automations.when')}>
           <TriggerEditor value={triggers} onChange={setTriggers} />
         </SheetSection>
-        <SheetSection title="Only if" hint="Optional. All conditions must be true.">
+        <SheetSection title={t('automations.onlyIf')} hint={t('automations.onlyIfHint')}>
           <ConditionEditor value={conditions} onChange={setConditions} />
         </SheetSection>
-        <SheetSection title="Then">
+        <SheetSection title={t('automations.then')}>
           <ActionEditor value={actions} onChange={setActions} />
         </SheetSection>
         <ErrorText>{error}</ErrorText>
@@ -333,11 +346,15 @@ function describeScreenSyncSubtitle(s: Scene, groups: Group[]): string {
     ...cfg.group_ids.flatMap((gid) => groups.find((g) => g.id === gid)?.device_ids ?? []),
   ])
   const count = allDeviceIds.size || (cfg.device_ids.length + cfg.group_ids.length)
-  const targetsDesc = `${count} light${count === 1 ? '' : 's'}`
-  const styleDesc = cfg.style === 'vivid' ? 'Vivid mode' : cfg.style === 'dominant' ? 'Dominant mode' : 'Soft Average mode'
-  const regionDesc = cfg.region === 'edges' ? 'Edges (Ambilight)' : 'Entire screen'
-  const fpsDesc = `${cfg.fps} fps`
-  return `Screen Sync · ${targetsDesc} · ${styleDesc} · ${regionDesc} · ${fpsDesc}`
+  const targetsDesc = t('automations.sync.lights', { count })
+  const styleDesc =
+    cfg.style === 'vivid'
+      ? t('automations.sync.style.vividMode')
+      : cfg.style === 'dominant'
+        ? t('automations.sync.style.dominantMode')
+        : t('automations.sync.style.averageMode')
+  const regionDesc = cfg.region === 'edges' ? t('automations.sync.region.edgesShort') : t('automations.sync.region.full')
+  return t('automations.sync.subtitle', { targets: targetsDesc, style: styleDesc, region: regionDesc, fps: cfg.fps })
 }
 
 function SceneSheet({
@@ -385,19 +402,19 @@ function SceneSheet({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.scenes })
-      toast.push({ tone: 'success', title: 'Scene saved' })
+      toast.push({ tone: 'success', title: t('automations.sceneSaved') })
       onClose()
     },
     onError: (e) => setError(errorMessage(e)),
   })
   const submit = () => {
     if (!name.trim()) {
-      setError('Give the scene a name.')
+      setError(t('automations.sceneNameRequired'))
       return
     }
     if (kind === 'screen_sync') {
       if (syncConfig.device_ids.length === 0 && syncConfig.group_ids.length === 0) {
-        setError('Select at least one target light or device group.')
+        setError(t('automations.sync.targetRequired'))
         return
       }
     } else {
@@ -420,65 +437,65 @@ function SceneSheet({
       open={!!scene}
       onClose={onClose}
       size="lg"
-      title={existing ? 'Edit scene' : 'New scene'}
+      title={existing ? t('automations.editScene') : t('automations.newScene')}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={save.isPending} onClick={submit}>
-            Save
+            {t('common.save')}
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-6">
-        <SheetSection title="Scene Type">
+        <SheetSection title={t('automations.sceneType')}>
           <Segmented<SceneKind>
-            label="Scene type"
+            label={t('automations.sceneTypeLabel')}
             value={kind}
             onChange={setKind}
             options={[
-              { value: 'standard', label: 'Standard scene' },
-              { value: 'screen_sync', label: 'Screen Sync (Ambient light)' },
+              { value: 'standard', label: t('automations.sceneKind.standard') },
+              { value: 'screen_sync', label: t('automations.sceneKind.screenSync') },
             ]}
           />
         </SheetSection>
 
         <Field
-          label="Name"
+          label={t('common.name')}
           required
-          placeholder={kind === 'screen_sync' ? 'Screen Sync - TV Backlight' : 'Movie night'}
+          placeholder={kind === 'screen_sync' ? t('automations.sync.namePlaceholder') : t('automations.sceneNamePlaceholder')}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         {kind === 'standard' ? (
-          <SheetSection title="Actions">
+          <SheetSection title={t('overview.actions')}>
             <ActionEditor value={actions} onChange={setActions} allowScenes={false} />
           </SheetSection>
         ) : (
           <>
             <Notice tone="info">
-              Screen Sync mirrors your screen’s dominant colors onto smart lights in real-time, creating an immersive ambient backlight effect for movies and gaming.
+              {t('automations.sync.intro')}
             </Notice>
 
             {!isScreenSyncSupported() && (
               <Notice tone="warn">
-                Screen sharing is not supported in this browser window. You can still configure and save this scene.
+                {t('automations.sync.unsupported')}
               </Notice>
             )}
 
-            <SheetSection title="Target Lights" hint="Choose color lights and device groups to mirror the screen.">
+            <SheetSection title={t('automations.sync.targetLights')} hint={t('automations.sync.targetLightsHint')}>
               <div className="flex max-h-56 flex-col gap-1 overflow-y-auto rounded-md border border-border bg-raised/40 p-2">
                 {lightDevices.length === 0 && groups.length === 0 ? (
-                  <p className="px-2 py-3 text-caption text-subtle">No lights or device groups available.</p>
+                  <p className="px-2 py-3 text-caption text-subtle">{t('automations.sync.noLights')}</p>
                 ) : (
                   <>
                     {groups.length > 0 && (
                       <div className="mb-2">
                         <span className="px-2 text-caption font-semibold uppercase tracking-wider text-subtle">
-                          Device Groups
+                          {t('overview.deviceGroups')}
                         </span>
                         <div className="mt-1 flex flex-col gap-0.5">
                           {groups.map((g) => {
@@ -496,7 +513,7 @@ function SceneSheet({
                               >
                                 <div className="flex min-w-0 items-center gap-2">
                                   <span className="truncate text-body font-medium">{g.name}</span>
-                                  <span className="text-caption text-subtle">({g.device_ids.length} devices)</span>
+                                  <span className="text-caption text-subtle">{t('automations.sync.groupDevices', { count: g.device_ids.length })}</span>
                                 </div>
                               </Checkbox>
                             )
@@ -508,7 +525,7 @@ function SceneSheet({
                       <div>
                         {groups.length > 0 && (
                           <span className="px-2 text-caption font-semibold uppercase tracking-wider text-subtle">
-                            Individual Lights
+                            {t('automations.sync.individualLights')}
                           </span>
                         )}
                         <div className="mt-1 flex flex-col gap-0.5">
@@ -547,51 +564,51 @@ function SceneSheet({
               </div>
             </SheetSection>
 
-            <SheetSection title="Extraction Style" hint="How colors are sampled from the screen.">
+            <SheetSection title={t('automations.sync.style.title')} hint={t('automations.sync.style.hint')}>
               <Segmented<'vivid' | 'dominant' | 'average'>
-                label="Extraction style"
+                label={t('automations.sync.style.label')}
                 value={syncConfig.style}
                 onChange={(style) => setSyncConfig({ ...syncConfig, style })}
                 options={[
-                  { value: 'vivid', label: 'Vivid (Dynamic)' },
-                  { value: 'dominant', label: 'Dominant' },
-                  { value: 'average', label: 'Soft Average' },
+                  { value: 'vivid', label: t('automations.sync.style.vivid') },
+                  { value: 'dominant', label: t('automations.sync.style.dominant') },
+                  { value: 'average', label: t('automations.sync.style.average') },
                 ]}
               />
               <p className="mt-2 text-caption text-subtle">
-                {syncConfig.style === 'vivid' && 'Strongest hue, ideal for gaming & movies.'}
-                {syncConfig.style === 'dominant' && 'Most common color across the sample area.'}
-                {syncConfig.style === 'average' && 'Mean ambient color blended smoothly.'}
+                {syncConfig.style === 'vivid' && t('automations.sync.style.vividHelp')}
+                {syncConfig.style === 'dominant' && t('automations.sync.style.dominantHelp')}
+                {syncConfig.style === 'average' && t('automations.sync.style.averageHelp')}
               </p>
             </SheetSection>
 
-            <SheetSection title="Capture Area" hint="Area of the screen analyzed for color.">
+            <SheetSection title={t('automations.sync.region.title')} hint={t('automations.sync.region.hint')}>
               <Segmented<'full' | 'edges'>
-                label="Capture area"
+                label={t('automations.sync.region.label')}
                 value={syncConfig.region}
                 onChange={(region) => setSyncConfig({ ...syncConfig, region })}
                 options={[
-                  { value: 'full', label: 'Entire screen' },
-                  { value: 'edges', label: 'Edges only (Ambilight)' },
+                  { value: 'full', label: t('automations.sync.region.full') },
+                  { value: 'edges', label: t('automations.sync.region.edges') },
                 ]}
               />
               <p className="mt-2 text-caption text-subtle">
                 {syncConfig.region === 'edges'
-                  ? 'Perimeters only, for TV backlights and lightstrips.'
-                  : 'Entire screen display.'}
+                  ? t('automations.sync.region.edgesHelp')
+                  : t('automations.sync.region.fullHelp')}
               </p>
             </SheetSection>
 
-            <SheetSection title="Brightness Sync">
+            <SheetSection title={t('automations.sync.brightness.title')}>
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <span className="text-label font-medium">Sync light brightness with screen luminance</span>
-                  <p className="text-caption text-subtle">Dim lights during dark scenes and brighten during light scenes.</p>
+                  <span className="text-label font-medium">{t('automations.sync.brightness.label')}</span>
+                  <p className="text-caption text-subtle">{t('automations.sync.brightness.hint')}</p>
                 </div>
                 <Switch
                   checked={syncConfig.follow_brightness}
                   onChange={(follow_brightness) => setSyncConfig({ ...syncConfig, follow_brightness })}
-                  label="Sync light brightness with screen luminance"
+                  label={t('automations.sync.brightness.label')}
                 />
               </div>
 
@@ -599,12 +616,12 @@ function SceneSheet({
                 <div className="mt-4 flex flex-col gap-4 rounded-md border border-border bg-raised/40 p-3">
                   <div>
                     <div className="flex items-center justify-between text-caption font-medium">
-                      <span>Minimum brightness (1–50%)</span>
+                      <span>{t('automations.sync.brightness.minRange')}</span>
                       <span className="tabular text-subtle">{syncConfig.min_brightness}%</span>
                     </div>
                     <div className="mt-1.5">
                       <Slider
-                        label="Minimum brightness"
+                        label={t('automations.sync.brightness.min')}
                         min={1}
                         max={50}
                         value={syncConfig.min_brightness}
@@ -614,12 +631,12 @@ function SceneSheet({
                   </div>
                   <div>
                     <div className="flex items-center justify-between text-caption font-medium">
-                      <span>Maximum brightness (50–100%)</span>
+                      <span>{t('automations.sync.brightness.maxRange')}</span>
                       <span className="tabular text-subtle">{syncConfig.max_brightness}%</span>
                     </div>
                     <div className="mt-1.5">
                       <Slider
-                        label="Maximum brightness"
+                        label={t('automations.sync.brightness.max')}
                         min={50}
                         max={100}
                         value={syncConfig.max_brightness}
@@ -631,16 +648,16 @@ function SceneSheet({
               )}
             </SheetSection>
 
-            <SheetSection title="Smoothing" hint="0 = Instant, 100 = Smooth transition (default 40).">
+            <SheetSection title={t('automations.sync.smoothing.title')} hint={t('automations.sync.smoothing.hint')}>
               <div className="flex items-center justify-between text-caption font-medium">
-                <span>Transition smoothing</span>
+                <span>{t('automations.sync.smoothing.label')}</span>
                 <span className="tabular text-subtle">
-                  {syncConfig.smoothing === 0 ? 'Instant (0%)' : `${syncConfig.smoothing}%`}
+                  {syncConfig.smoothing === 0 ? t('automations.sync.smoothing.instantValue') : `${syncConfig.smoothing}%`}
                 </span>
               </div>
               <div className="mt-1.5">
                 <Slider
-                  label="Smoothing"
+                  label={t('automations.sync.smoothing.title')}
                   min={0}
                   max={100}
                   value={syncConfig.smoothing}
@@ -648,37 +665,37 @@ function SceneSheet({
                 />
               </div>
               <div className="mt-1 flex justify-between text-caption text-subtle">
-                <span>0 (Instant)</span>
-                <span>100 (Smooth transition)</span>
+                <span>{t('automations.sync.smoothing.min')}</span>
+                <span>{t('automations.sync.smoothing.max')}</span>
               </div>
             </SheetSection>
 
-            <SheetSection title="Frame Rate" hint="Samples per second sent to the lights.">
+            <SheetSection title={t('automations.sync.fps.title')} hint={t('automations.sync.fps.hint')}>
               <Segmented<string>
-                label="Frame rate"
+                label={t('automations.sync.fps.label')}
                 value={String(syncConfig.fps)}
                 onChange={(val) => setSyncConfig({ ...syncConfig, fps: Number(val) })}
                 options={[
-                  { value: '5', label: '5 fps' },
-                  { value: '10', label: '10 fps' },
-                  { value: '15', label: '15 fps' },
-                  { value: '20', label: '20 fps' },
+                  { value: '5', label: t('automations.sync.fps.value', { fps: 5 }) },
+                  { value: '10', label: t('automations.sync.fps.value', { fps: 10 }) },
+                  { value: '15', label: t('automations.sync.fps.value', { fps: 15 }) },
+                  { value: '20', label: t('automations.sync.fps.value', { fps: 20 }) },
                 ]}
               />
             </SheetSection>
 
-            <SheetSection title="Restore on Stop">
+            <SheetSection title={t('automations.sync.restore.title')}>
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <span className="text-label font-medium">Restore lights to previous color &amp; state</span>
+                  <span className="text-label font-medium">{t('automations.sync.restore.label')}</span>
                   <p className="text-caption text-subtle">
-                    Restore lights to previous color &amp; state when sharing stops.
+                    {t('automations.sync.restore.hint')}
                   </p>
                 </div>
                 <Switch
                   checked={syncConfig.restore_on_stop}
                   onChange={(restore_on_stop) => setSyncConfig({ ...syncConfig, restore_on_stop })}
-                  label="Restore lights to previous color & state when sharing stops"
+                  label={t('automations.sync.restore.hint')}
                 />
               </div>
             </SheetSection>

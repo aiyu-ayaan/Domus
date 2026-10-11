@@ -18,6 +18,7 @@ import { Avatar } from './Avatar'
 import { Button } from './Button'
 import { Sheet } from './Sheet'
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 
 interface AvatarPickerModalProps {
   open: boolean
@@ -34,7 +35,7 @@ export function AvatarPickerModal({
   currentAvatar,
   username = 'user',
   onSave,
-  title = 'Customize Avatar',
+  title = t('avatar.customize'),
 }: AvatarPickerModalProps) {
   const initial = useMemo(
     () => parseAvatarSpec(currentAvatar, username),
@@ -107,13 +108,13 @@ export function AvatarPickerModal({
             variant="ghost"
             icon={<ArrowsClockwise size={16} className={rolling ? 'animate-spin' : ''} />}
             onClick={handleRollAll}
-            title="Generate a completely random avatar"
+            title={t('avatar.randomizeHint')}
           >
-            Randomize
+            {t('avatar.randomize')}
           </Button>
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={onClose} disabled={saving}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -121,7 +122,7 @@ export function AvatarPickerModal({
               icon={<Check size={16} />}
               onClick={handleSave}
             >
-              Apply avatar
+              {t('avatar.apply')}
             </Button>
           </div>
         </div>
@@ -157,7 +158,7 @@ export function AvatarPickerModal({
               <button
                 type="button"
                 onClick={handleRollSeed}
-                title="Roll a new random seed"
+                title={t('avatar.rollSeedHint')}
                 className="absolute -bottom-1 -right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-on-primary shadow-lg ring-2 ring-panel transition-transform hover:scale-110 active:scale-95"
               >
                 <DiceFive size={20} weight="fill" className={rolling ? 'animate-spin' : ''} />
@@ -166,10 +167,10 @@ export function AvatarPickerModal({
 
             <div className="mt-4 flex flex-col items-center">
               <span className="text-caption font-semibold uppercase tracking-wider text-muted">
-                {AVATAR_STYLES.find((s) => s.id === selectedStyle)?.name || selectedStyle} Style
+                {t('avatar.styleBadge', { style: AVATAR_STYLES.find((s) => s.id === selectedStyle)?.name || selectedStyle })}
               </span>
               <p className="text-label text-fg/80 max-w-xs truncate">
-                Seed: <span className="font-mono text-fg">{seed}</span>
+                {t('avatar.seedLabel')} <span className="font-mono text-fg">{seed}</span>
               </p>
             </div>
           </div>
@@ -178,8 +179,8 @@ export function AvatarPickerModal({
         {/* Style selection grid */}
         <div>
           <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-label font-semibold text-fg">Choose Style</span>
-            <span className="text-caption text-muted">{AVATAR_STYLES.length} collections</span>
+            <span className="text-label font-semibold text-fg">{t('avatar.chooseStyle')}</span>
+            <span className="text-caption text-muted">{t('avatar.collections', { count: AVATAR_STYLES.length })}</span>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
             {AVATAR_STYLES.map((style) => {
@@ -210,16 +211,16 @@ export function AvatarPickerModal({
 
         {/* Custom Seed Input & Roll */}
         <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-raised/30 p-3.5 backdrop-blur-sm">
-          <span className="text-label font-semibold text-fg">Custom Seed</span>
+          <span className="text-label font-semibold text-fg">{t('avatar.customSeed')}</span>
           <p className="text-caption text-muted">
-            Type anything (your name, a word, numbers) or roll a random seed to change the avatar features.
+            {t('avatar.customSeedHint')}
           </p>
           <div className="mt-1 flex items-center gap-2">
             <input
               type="text"
               value={seed}
               onChange={(e) => setSeed(e.target.value)}
-              placeholder="e.g. Felix, AstroBot, 42"
+              placeholder={t('avatar.seedPlaceholder')}
               className="flex-1 rounded-lg border border-border bg-panel px-3 py-2 text-body text-fg placeholder:text-subtle focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <Button
@@ -227,9 +228,9 @@ export function AvatarPickerModal({
               variant="ghost"
               icon={<DiceFive size={18} />}
               onClick={handleRollSeed}
-              title="Roll random seed"
+              title={t('avatar.rollRandomSeed')}
             >
-              Roll
+              {t('settings.roll')}
             </Button>
           </div>
         </div>
@@ -238,7 +239,7 @@ export function AvatarPickerModal({
         <div>
           <div className="mb-2 flex items-center gap-1.5 text-label font-semibold text-fg">
             <Sparkle size={16} weight="fill" className="text-primary" />
-            <span>Quick Suggestions</span>
+            <span>{t('avatar.quickSuggestions')}</span>
           </div>
           <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
             {presets.map((preset, idx) => {

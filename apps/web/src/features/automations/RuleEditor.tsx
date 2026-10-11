@@ -5,74 +5,94 @@ import { Button } from '@/components/ui/Button'
 import { useDevices, useGroups, useHomeLocation, useScenes } from '@/lib/queries'
 import { formatClockTime, formatTime } from '@/lib/format'
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import { COLOR_PRESETS, WHITE_PRESETS } from '@/components/devices/LightColorControls'
 import type { Action, Condition, Device, DeviceCommand, Trigger } from '@/lib/types'
 
 export const PROPERTIES: { value: string; label: string; kind: 'bool' | 'number' }[] = [
-  { value: 'is_on', label: 'Power', kind: 'bool' },
-  { value: 'is_online', label: 'Online', kind: 'bool' },
-  { value: 'current_power_watts', label: 'Power draw (W)', kind: 'number' },
-  { value: 'air_quality_pm25', label: 'PM2.5', kind: 'number' },
-  { value: 'temperature', label: 'Temperature', kind: 'number' },
-  { value: 'humidity', label: 'Humidity', kind: 'number' },
-  { value: 'brightness', label: 'Brightness', kind: 'number' },
-  { value: 'color_temp', label: 'Color temperature', kind: 'number' },
+  { value: 'is_on', label: t('reading.power'), kind: 'bool' },
+  { value: 'is_online', label: t('device.online'), kind: 'bool' },
+  { value: 'current_power_watts', label: t('rule.prop.powerWatts'), kind: 'number' },
+  { value: 'air_quality_pm25', label: t('reading.pm25'), kind: 'number' },
+  { value: 'temperature', label: t('reading.temperature'), kind: 'number' },
+  { value: 'humidity', label: t('reading.humidity'), kind: 'number' },
+  { value: 'brightness', label: t('drawer.brightness'), kind: 'number' },
+  { value: 'color_temp', label: t('rule.prop.colorTemp'), kind: 'number' },
 ]
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const DAYS = [
+  t('rule.day.mon'),
+  t('rule.day.tue'),
+  t('rule.day.wed'),
+  t('rule.day.thu'),
+  t('rule.day.fri'),
+  t('rule.day.sat'),
+  t('rule.day.sun'),
+]
 
-const deviceName = (devices: Device[], id: string) => devices.find((d) => d.id === id)?.name ?? 'a device'
+const deviceName = (devices: Device[], id: string) => devices.find((d) => d.id === id)?.name ?? t('rule.deviceFallback')
 
-function compareText(c: { equals?: unknown; above?: number; below?: number }, prop: string) {
-  const p = PROPERTIES.find((x) => x.value === prop)
+function describeStateTrigger(device: string, c: { equals?: unknown; above?: number; below?: number }, propName: string): string {
+  const prop = PROPERTIES.find((x) => x.value === propName)?.label ?? propName
   if (c.equals !== undefined) {
-    if (prop === 'is_on') return c.equals ? 'turns on' : 'turns off'
-    if (prop === 'is_online') return c.equals ? 'comes online' : 'goes offline'
-    return `${p?.label ?? prop} is ${String(c.equals)}`
+    if (propName === 'is_on') return c.equals ? t('rule.when.turnsOn', { device }) : t('rule.when.turnsOff', { device })
+    if (propName === 'is_online') return c.equals ? t('rule.when.comesOnline', { device }) : t('rule.when.goesOffline', { device })
+    return t('rule.when.equals', { device, prop, value: String(c.equals) })
   }
-  if (c.above !== undefined) return `${p?.label ?? prop} rises above ${c.above}`
-  if (c.below !== undefined) return `${p?.label ?? prop} drops below ${c.below}`
-  return `${p?.label ?? prop} changes`
+  if (c.above !== undefined) return t('rule.when.above', { device, prop, value: c.above })
+  if (c.below !== undefined) return t('rule.when.below', { device, prop, value: c.below })
+  return t('rule.when.changes', { device, prop })
 }
 
-const daysText = (days: number[]) => (days.length && days.length < 7 ? ` on ${days.map((d) => DAYS[d]).join(', ')}` : ' every day')
-
-export function describeTrigger(t: Trigger, devices: Device[]): string {
-  switch (t.type) {
-    case 'time':
-      return `At ${formatClockTime(t.at)}${daysText(t.days)}`
+export function describeTrigger(trig: Trigger, devices: Device[]): string {
+  switch (trig.type) {
+    case 'time': {
+      const hasDays = trig.days.length > 0 && trig.days.length < 7
+      return hasDays
+        ? t('rule.time.onDays', { time: formatClockTime(trig.at), days: trig.days.map((d) => DAYS[d]).join(', ') })
+        : t('rule.time.everyDay', { time: formatClockTime(trig.at) })
+    }
     case 'sun': {
-      const shift = t.offset_minutes ? `${Math.abs(t.offset_minutes)} min ${t.offset_minutes < 0 ? 'before' : 'after'} ` : 'At '
-      return `${shift}${t.event}${daysText(t.days)}`
+      const event = t(trig.event === 'sunrise' ? 'rule.sunriseLower' : 'rule.sunsetLower')
+      const hasDays = trig.days.length > 0 && trig.days.length < 7
+      const days = trig.days.map((d) => DAYS[d]).join(', ')
+      if (!trig.offset_minutes) {
+        return hasDays ? t('rule.sun.at.onDays', { event, days }) : t('rule.sun.at.everyDay', { event })
+      }
+      const minutes = Math.abs(trig.offset_minutes)
+      if (trig.offset_minutes < 0) {
+        return hasDays ? t('rule.sun.before.onDays', { minutes, event, days }) : t('rule.sun.before.everyDay', { minutes, event })
+      }
+      return hasDays ? t('rule.sun.after.onDays', { minutes, event, days }) : t('rule.sun.after.everyDay', { minutes, event })
     }
     case 'device_state':
-      return `When ${deviceName(devices, t.device_id)} ${compareText(t, t.property)}`
+      return describeStateTrigger(deviceName(devices, trig.device_id), trig, trig.property)
     case 'power_above':
-      return `When ${deviceName(devices, t.device_id)} draws over ${t.watts} W`
+      return t('rule.when.powerAbove', { device: deviceName(devices, trig.device_id), watts: trig.watts })
     case 'device_offline':
-      return `When ${deviceName(devices, t.device_id)} goes offline`
+      return t('rule.when.goesOffline', { device: deviceName(devices, trig.device_id) })
     case 'device_discovered':
-      return 'When a new device is found'
+      return t('rule.when.deviceDiscovered')
   }
 }
 
 export function describeAction(a: Action, devices: Device[], groups: { id: string; name: string }[], scenes: { id: string; name: string }[]): string {
-  const cmd = (c: DeviceCommand) => {
-    if (c.color) return `set color ${c.color}`
-    if (c.color_temp !== undefined) return `set color temp ${c.color_temp}%`
-    if (c.brightness !== undefined) return `set brightness ${c.brightness}%`
-    return c.is_on ? 'turn on' : 'turn off'
+  const cmd = (c: DeviceCommand, target: string) => {
+    if (c.color) return t('rule.action.setColor', { target, color: c.color })
+    if (c.color_temp !== undefined) return t('rule.action.setColorTemp', { target, value: c.color_temp })
+    if (c.brightness !== undefined) return t('rule.action.setBrightness', { target, value: c.brightness })
+    return c.is_on ? t('rule.action.turnOn', { target }) : t('rule.action.turnOff', { target })
   }
   switch (a.type) {
     case 'device_command':
-      return `${cmd(a.command)} ${deviceName(devices, a.device_id)}`
+      return cmd(a.command, deviceName(devices, a.device_id))
     case 'group_command':
-      return `${cmd(a.command)} ${groups.find((g) => g.id === a.group_id)?.name ?? 'group'}`
+      return cmd(a.command, groups.find((g) => g.id === a.group_id)?.name ?? t('rule.groupFallback'))
     case 'notify':
-      return `notify “${a.title}”`
+      return t('rule.action.notify', { title: a.title })
     case 'scene':
-      return `run ${scenes.find((s) => s.id === a.scene_id)?.name ?? 'scene'}`
+      return t('rule.action.scene', { name: scenes.find((s) => s.id === a.scene_id)?.name ?? t('rule.sceneFallback') })
     case 'delay':
-      return `wait ${a.seconds}s`
+      return t('rule.action.delay', { seconds: a.seconds })
   }
 }
 
@@ -83,7 +103,7 @@ function Row({ children, onRemove }: { children: ReactNode; onRemove: () => void
       <button
         type="button"
         onClick={onRemove}
-        aria-label="Remove"
+        aria-label={t('drawer.removeConfirm')}
         className="absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger"
       >
         <Trash size={16} />
@@ -95,8 +115,8 @@ function Row({ children, onRemove }: { children: ReactNode; onRemove: () => void
 function DeviceSelect({ value, onChange, filter }: { value: string; onChange: (v: string) => void; filter?: (d: Device) => boolean }) {
   const { data: devices = [] } = useDevices()
   return (
-    <SelectField label="Device" value={value} onChange={(e) => onChange(e.target.value)} required>
-      <option value="">Choose…</option>
+    <SelectField label={t('device.type.other')} value={value} onChange={(e) => onChange(e.target.value)} required>
+      <option value="">{t('rule.choose')}</option>
       {devices.filter(filter ?? (() => true)).map((d) => (
         <option key={d.id} value={d.id}>
           {d.name}
@@ -119,7 +139,7 @@ function StateCompare<T extends { property: string; equals?: unknown; above?: nu
   return (
     <>
       <SelectField
-        label="Property"
+        label={t('rule.property')}
         value={value.property}
         onChange={(e) => {
           const p = PROPERTIES.find((x) => x.value === e.target.value)!
@@ -133,26 +153,26 @@ function StateCompare<T extends { property: string; equals?: unknown; above?: nu
         ))}
       </SelectField>
       {prop.kind === 'bool' ? (
-        <SelectField label="Is" value={String(value.equals ?? true)} onChange={(e) => onChange({ ...base, equals: e.target.value === 'true' } as T)}>
-          <option value="true">{prop.value === 'is_online' ? 'Online' : 'On'}</option>
-          <option value="false">{prop.value === 'is_online' ? 'Offline' : 'Off'}</option>
+        <SelectField label={t('rule.is')} value={String(value.equals ?? true)} onChange={(e) => onChange({ ...base, equals: e.target.value === 'true' } as T)}>
+          <option value="true">{prop.value === 'is_online' ? t('device.online') : t('device.on')}</option>
+          <option value="false">{prop.value === 'is_online' ? t('device.offline') : t('device.off')}</option>
         </SelectField>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           <SelectField
-            label="Is"
+            label={t('rule.is')}
             value={op}
             onChange={(e) => {
               const n = Number(value.above ?? value.below ?? value.equals ?? 0)
               onChange({ ...base, [e.target.value]: n } as T)
             }}
           >
-            <option value="above">Above</option>
-            <option value="below">Below</option>
-            <option value="equals">Equal to</option>
+            <option value="above">{t('rule.op.above')}</option>
+            <option value="below">{t('rule.op.below')}</option>
+            <option value="equals">{t('rule.op.equals')}</option>
           </SelectField>
           <Field
-            label="Value"
+            label={t('rule.value')}
             type="number"
             inputMode="decimal"
             value={String(value.above ?? value.below ?? value.equals ?? 0)}
@@ -170,18 +190,19 @@ function SunFields({ value, onChange }: { value: SunTrigger; onChange: (v: SunTr
   const { data: place } = useHomeLocation()
   const today = value.event === 'sunrise' ? place?.sunrise : place?.sunset
   const before = value.offset_minutes < 0
+  const eventLower = t(value.event === 'sunrise' ? 'rule.sunriseLower' : 'rule.sunsetLower')
   return (
     <>
-      <SelectField label="Event" value={value.event} onChange={(e) => onChange({ ...value, event: e.target.value as SunTrigger['event'] })}>
-        <option value="sunrise">Sunrise</option>
-        <option value="sunset">Sunset</option>
+      <SelectField label={t('rule.sun.event')} value={value.event} onChange={(e) => onChange({ ...value, event: e.target.value as SunTrigger['event'] })}>
+        <option value="sunrise">{t('rule.sunrise')}</option>
+        <option value="sunset">{t('rule.sunset')}</option>
       </SelectField>
-      <SelectField label="Shift" value={before ? 'before' : 'after'} onChange={(e) => onChange({ ...value, offset_minutes: Math.abs(value.offset_minutes) * (e.target.value === 'before' ? -1 : 1) })}>
-        <option value="after">After</option>
-        <option value="before">Before</option>
+      <SelectField label={t('rule.sun.shift')} value={before ? 'before' : 'after'} onChange={(e) => onChange({ ...value, offset_minutes: Math.abs(value.offset_minutes) * (e.target.value === 'before' ? -1 : 1) })}>
+        <option value="after">{t('rule.sun.after')}</option>
+        <option value="before">{t('rule.sun.before')}</option>
       </SelectField>
       <Field
-        label="Minutes"
+        label={t('rule.sun.minutes')}
         type="number"
         min={0}
         max={360}
@@ -189,14 +210,14 @@ function SunFields({ value, onChange }: { value: SunTrigger; onChange: (v: SunTr
         onChange={(e) => onChange({ ...value, offset_minutes: Math.min(360, Math.abs(Math.round(Number(e.target.value)) || 0)) * (before ? -1 : 1) })}
       />
       <p className={cn('text-label sm:col-span-2', place && !today ? 'text-warn' : 'text-muted')}>
-        {today ? `Today's ${value.event} at your home is at ${formatTime(today)}.` : place?.latitude == null ? 'Set the home location in Settings first; until then this never fires.' : `There is no ${value.event} at your home today.`}
+        {today ? t('rule.sun.today', { event: eventLower, time: formatTime(today) }) : place?.latitude == null ? t('rule.sun.noLocation') : t('rule.sun.noneToday', { event: eventLower })}
       </p>
     </>
   )
 }
 
 export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange: (v: Trigger[]) => void }) {
-  const set = (i: number, t: Trigger) => onChange(value.map((x, j) => (j === i ? t : x)))
+  const set = (i: number, trig: Trigger) => onChange(value.map((x, j) => (j === i ? trig : x)))
   const defaults: Record<Trigger['type'], Trigger> = {
     time: { type: 'time', at: '07:00', days: [] },
     sun: { type: 'sun', event: 'sunset', offset_minutes: 0, days: [] },
@@ -207,30 +228,32 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
   }
   return (
     <div className="flex flex-col gap-3">
-      {value.map((t, i) => (
+      {value.map((trig, i) => (
         <Row key={i} onRemove={() => onChange(value.filter((_, j) => j !== i))}>
-          <SelectField label="When" value={t.type} onChange={(e) => set(i, defaults[e.target.value as Trigger['type']])}>
-            <option value="time">At a time</option>
-            <option value="sun">At sunrise or sunset</option>
-            <option value="device_state">A device changes</option>
-            <option value="power_above">Power goes above</option>
-            <option value="device_offline">A device goes offline</option>
-            <option value="device_discovered">A new device is found</option>
+          <SelectField label={t('automations.when')} value={trig.type} onChange={(e) => set(i, defaults[e.target.value as Trigger['type']])}>
+            <option value="time">{t('rule.trigger.time')}</option>
+            <option value="sun">{t('rule.trigger.sun')}</option>
+            <option value="device_state">{t('rule.trigger.deviceState')}</option>
+            <option value="power_above">{t('rule.trigger.powerAbove')}</option>
+            <option value="device_offline">{t('rule.trigger.deviceOffline')}</option>
+            <option value="device_discovered">{t('rule.trigger.deviceDiscovered')}</option>
           </SelectField>
-          {t.type === 'time' && <Field label="Time" type="time" value={t.at} onChange={(e) => set(i, { ...t, at: e.target.value })} />}
-          {t.type === 'sun' && <SunFields value={t} onChange={(v) => set(i, v)} />}
-          {(t.type === 'time' || t.type === 'sun') && (
+          {trig.type === 'time' && <Field label={t('rule.time')} type="time" value={trig.at} onChange={(e) => set(i, { ...trig, at: e.target.value })} />}
+          {trig.type === 'sun' && <SunFields value={trig} onChange={(v) => set(i, v)} />}
+          {(trig.type === 'time' || trig.type === 'sun') && (
             <fieldset className="sm:col-span-2">
-              <legend className="mb-2 text-label font-medium">Days <span className="font-normal text-subtle">(none selected = every day)</span></legend>
+              <legend className="mb-2 text-label font-medium">
+                {t('rule.days')} <span className="font-normal text-subtle">{t('rule.daysHint')}</span>
+              </legend>
               <div className="flex flex-wrap gap-2">
                 {DAYS.map((d, n) => {
-                  const on = t.days.includes(n)
+                  const on = trig.days.includes(n)
                   return (
                     <button
                       type="button"
                       key={d}
                       aria-pressed={on}
-                      onClick={() => set(i, { ...t, days: on ? t.days.filter((x) => x !== n) : [...t.days, n].sort() })}
+                      onClick={() => set(i, { ...trig, days: on ? trig.days.filter((x) => x !== n) : [...trig.days, n].sort() })}
                       className={cn('h-8 w-11 cursor-pointer rounded-md border text-label font-medium transition-colors', on ? 'border-fg bg-fg text-bg' : 'border-border text-muted hover:text-fg')}
                     >
                       {d}
@@ -240,23 +263,23 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
               </div>
             </fieldset>
           )}
-          {t.type === 'device_state' && (
+          {trig.type === 'device_state' && (
             <>
-              <DeviceSelect value={t.device_id} onChange={(id) => set(i, { ...t, device_id: id })} />
-              <StateCompare value={t} onChange={(v) => set(i, v)} />
+              <DeviceSelect value={trig.device_id} onChange={(id) => set(i, { ...trig, device_id: id })} />
+              <StateCompare value={trig} onChange={(v) => set(i, v)} />
             </>
           )}
-          {t.type === 'power_above' && (
+          {trig.type === 'power_above' && (
             <>
-              <DeviceSelect value={t.device_id} onChange={(id) => set(i, { ...t, device_id: id })} filter={(d) => d.state.current_power_watts != null} />
-              <Field label="Watts" type="number" value={String(t.watts)} onChange={(e) => set(i, { ...t, watts: Number(e.target.value) })} />
+              <DeviceSelect value={trig.device_id} onChange={(id) => set(i, { ...trig, device_id: id })} filter={(d) => d.state.current_power_watts != null} />
+              <Field label={t('rule.watts')} type="number" value={String(trig.watts)} onChange={(e) => set(i, { ...trig, watts: Number(e.target.value) })} />
             </>
           )}
-          {t.type === 'device_offline' && <DeviceSelect value={t.device_id} onChange={(id) => set(i, { ...t, device_id: id })} />}
+          {trig.type === 'device_offline' && <DeviceSelect value={trig.device_id} onChange={(id) => set(i, { ...trig, device_id: id })} />}
         </Row>
       ))}
       <Button type="button" variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => onChange([...value, defaults.time])} className="self-start">
-        Add trigger
+        {t('rule.addTrigger')}
       </Button>
     </div>
   )
@@ -269,19 +292,19 @@ export function ConditionEditor({ value, onChange }: { value: Condition[]; onCha
       {value.map((c, i) => (
         <Row key={i} onRemove={() => onChange(value.filter((_, j) => j !== i))}>
           <SelectField
-            label="Only if"
+            label={t('automations.onlyIf')}
             value={c.type}
             onChange={(e) =>
               set(i, e.target.value === 'time_between' ? { type: 'time_between', start: '22:00', end: '06:00' } : { type: 'device_state', device_id: '', property: 'is_on', equals: true })
             }
           >
-            <option value="time_between">Time is between</option>
-            <option value="device_state">A device is</option>
+            <option value="time_between">{t('rule.condition.timeBetween')}</option>
+            <option value="device_state">{t('rule.condition.deviceState')}</option>
           </SelectField>
           {c.type === 'time_between' ? (
             <div className="grid grid-cols-2 gap-3">
-              <Field label="From" type="time" value={c.start} onChange={(e) => set(i, { ...c, start: e.target.value })} />
-              <Field label="To" type="time" value={c.end} onChange={(e) => set(i, { ...c, end: e.target.value })} />
+              <Field label={t('rule.from')} type="time" value={c.start} onChange={(e) => set(i, { ...c, start: e.target.value })} />
+              <Field label={t('rule.to')} type="time" value={c.end} onChange={(e) => set(i, { ...c, end: e.target.value })} />
             </div>
           ) : (
             <>
@@ -299,7 +322,7 @@ export function ConditionEditor({ value, onChange }: { value: Condition[]; onCha
         onClick={() => onChange([...value, { type: 'time_between', start: '22:00', end: '06:00' }])}
         className="self-start"
       >
-        Add condition
+        {t('rule.addCondition')}
       </Button>
     </div>
   )
@@ -355,17 +378,17 @@ function CommandSelect({
   return (
     <div className="flex flex-col gap-3">
       <div className="grid gap-3 sm:grid-cols-2">
-        <SelectField label="Do" value={kind} onChange={(e) => handleKindChange(e.target.value)}>
-          <option value="on">Turn on</option>
-          <option value="off">Turn off</option>
-          <option value="brightness">Set brightness</option>
-          {isLight && <option value="color">Set color</option>}
-          {isLight && <option value="color_temp">Set color temperature</option>}
+        <SelectField label={t('rule.do')} value={kind} onChange={(e) => handleKindChange(e.target.value)}>
+          <option value="on">{t('confirmSwitch.turnOn')}</option>
+          <option value="off">{t('confirmSwitch.turnOff')}</option>
+          <option value="brightness">{t('rule.cmd.brightness')}</option>
+          {isLight && <option value="color">{t('rule.cmd.color')}</option>}
+          {isLight && <option value="color_temp">{t('rule.cmd.colorTemp')}</option>}
         </SelectField>
 
         {kind === 'brightness' && (
           <Field
-            label="Brightness %"
+            label={t('rule.brightnessPct')}
             type="number"
             min={1}
             max={100}
@@ -376,7 +399,7 @@ function CommandSelect({
 
         {kind === 'color' && (
           <div className="flex flex-col gap-1">
-            <span className="text-caption font-medium text-muted">Light color</span>
+            <span className="text-caption font-medium text-muted">{t('rule.lightColor')}</span>
             <div className="flex items-center gap-2">
               <label className="relative flex h-9 cursor-pointer items-center gap-2 rounded-md border border-border bg-raised px-2.5 hover:bg-raised/80">
                 <span
@@ -393,7 +416,7 @@ function CommandSelect({
                     onCommand({ is_on: true, color: e.target.value.toUpperCase(), color_mode: 'color' })
                   }
                   className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  aria-label="Color picker"
+                  aria-label={t('rule.colorPicker')}
                 />
               </label>
               <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
@@ -418,7 +441,7 @@ function CommandSelect({
         {kind === 'color_temp' && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between text-caption">
-              <span className="font-medium text-muted">Temperature</span>
+              <span className="font-medium text-muted">{t('reading.temperature')}</span>
               <span className="text-subtle tabular">
                 {Math.round(2000 + ((command.color_temp ?? 50) / 100) * 4500)}K ({command.color_temp ?? 50}%)
               </span>
@@ -433,14 +456,14 @@ function CommandSelect({
                   onCommand({ is_on: true, color_temp: Number(e.target.value), color_mode: 'white' })
                 }
                 className="range flex-1"
-                aria-label="Color temperature slider"
+                aria-label={t('light.tempSlider')}
               />
               <div className="flex shrink-0 items-center gap-1">
                 {WHITE_PRESETS.map((p) => (
                   <button
                     key={p.name}
                     type="button"
-                    title={`${p.name} (${p.kelvin}K)`}
+                    title={t('rule.whitePresetTitle', { name: p.name, kelvin: p.kelvin })}
                     onClick={() => onCommand({ is_on: true, color_temp: p.pct, color_mode: 'white' })}
                     className={cn(
                       'h-5 w-5 shrink-0 rounded-full border border-white/30 transition-transform hover:scale-110',
@@ -474,12 +497,12 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
     <div className="flex flex-col gap-3">
       {value.map((a, i) => (
         <Row key={i} onRemove={() => onChange(value.filter((_, j) => j !== i))}>
-          <SelectField label="Then" value={a.type} onChange={(e) => set(i, defaults[e.target.value as Action['type']])}>
-            <option value="device_command">Control a device</option>
-            <option value="group_command">Control a group</option>
-            <option value="notify">Send a notification</option>
-            {allowScenes && <option value="scene">Run a scene</option>}
-            <option value="delay">Wait</option>
+          <SelectField label={t('automations.then')} value={a.type} onChange={(e) => set(i, defaults[e.target.value as Action['type']])}>
+            <option value="device_command">{t('rule.actionType.device')}</option>
+            <option value="group_command">{t('rule.actionType.group')}</option>
+            <option value="notify">{t('rule.actionType.notify')}</option>
+            {allowScenes && <option value="scene">{t('rule.actionType.scene')}</option>}
+            <option value="delay">{t('rule.actionType.delay')}</option>
           </SelectField>
           {a.type === 'device_command' && (
             <>
@@ -495,8 +518,8 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
           )}
           {a.type === 'group_command' && (
             <>
-              <SelectField label="Group" value={a.group_id} onChange={(e) => set(i, { ...a, group_id: e.target.value })}>
-                <option value="">Choose…</option>
+              <SelectField label={t('overview.groupFallback')} value={a.group_id} onChange={(e) => set(i, { ...a, group_id: e.target.value })}>
+                <option value="">{t('rule.choose')}</option>
                 {groups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -510,13 +533,13 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
           )}
           {a.type === 'notify' && (
             <>
-              <Field label="Title" value={a.title} onChange={(e) => set(i, { ...a, title: e.target.value })} />
-              <Field label="Message" value={a.message} onChange={(e) => set(i, { ...a, message: e.target.value })} className="sm:col-span-2" />
+              <Field label={t('rule.notifyTitle')} value={a.title} onChange={(e) => set(i, { ...a, title: e.target.value })} />
+              <Field label={t('rule.notifyMessage')} value={a.message} onChange={(e) => set(i, { ...a, message: e.target.value })} className="sm:col-span-2" />
             </>
           )}
           {a.type === 'scene' && (
-            <SelectField label="Scene" value={a.scene_id} onChange={(e) => set(i, { ...a, scene_id: e.target.value })}>
-              <option value="">Choose…</option>
+            <SelectField label={t('overview.sceneFallback')} value={a.scene_id} onChange={(e) => set(i, { ...a, scene_id: e.target.value })}>
+              <option value="">{t('rule.choose')}</option>
               {scenes.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -525,12 +548,12 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
             </SelectField>
           )}
           {a.type === 'delay' && (
-            <Field label="Seconds" type="number" min={1} value={String(a.seconds)} onChange={(e) => set(i, { ...a, seconds: Number(e.target.value) })} />
+            <Field label={t('rule.seconds')} type="number" min={1} value={String(a.seconds)} onChange={(e) => set(i, { ...a, seconds: Number(e.target.value) })} />
           )}
         </Row>
       ))}
       <Button type="button" variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => onChange([...value, defaults.device_command])} className="self-start">
-        Add action
+        {t('rule.addAction')}
       </Button>
     </div>
   )
@@ -538,14 +561,14 @@ export function ActionEditor({ value, onChange, allowScenes = true }: { value: A
 
 /** Client-side check so incomplete rules are caught before saving. */
 export function validateRule(triggers: Trigger[] | null, actions: Action[]): string | null {
-  if (triggers && !triggers.length) return 'Add at least one trigger'
-  if (!actions.length) return 'Add at least one action'
-  if (triggers?.some((t) => 'device_id' in t && !t.device_id)) return 'Choose a device for every trigger'
+  if (triggers && !triggers.length) return t('rule.err.noTrigger')
+  if (!actions.length) return t('rule.err.noAction')
+  if (triggers?.some((trig) => 'device_id' in trig && !trig.device_id)) return t('rule.err.triggerDevice')
   for (const a of actions) {
-    if (a.type === 'device_command' && !a.device_id) return 'Choose a device for every action'
-    if (a.type === 'group_command' && !a.group_id) return 'Choose a group for every action'
-    if (a.type === 'scene' && !a.scene_id) return 'Choose a scene for every action'
-    if (a.type === 'notify' && !a.title.trim()) return 'Notifications need a title'
+    if (a.type === 'device_command' && !a.device_id) return t('rule.err.actionDevice')
+    if (a.type === 'group_command' && !a.group_id) return t('rule.err.actionGroup')
+    if (a.type === 'scene' && !a.scene_id) return t('rule.err.actionScene')
+    if (a.type === 'notify' && !a.title.trim()) return t('rule.err.notifyTitle')
   }
   return null
 }

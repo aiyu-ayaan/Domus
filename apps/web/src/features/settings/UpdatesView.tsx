@@ -5,12 +5,13 @@ import { Segmented } from '@/components/ui/Controls'
 import { UpdateProgress, useDesktopUpdate } from '@/components/UpdatePrompt'
 import { ReleaseNotes, useReleaseNotes } from '@/lib/releases'
 import type { UpdateChannel } from '@/lib/api'
+import { t } from '@/lib/i18n'
 import { BackLink } from './AboutView'
 
 const channels: { value: UpdateChannel; label: string }[] = [
-  { value: 'stable', label: 'Stable' },
-  { value: 'beta', label: 'Beta' },
-  { value: 'alpha', label: 'Alpha' },
+  { value: 'stable', label: t('updates.channel.stable') },
+  { value: 'beta', label: t('updates.channel.beta') },
+  { value: 'alpha', label: t('updates.channel.alpha') },
 ]
 
 const line = 'flex min-h-12 flex-wrap items-center justify-between gap-3 px-4 py-2'
@@ -33,36 +34,36 @@ export function UpdatesView() {
   }
   return (
     <>
-      <BackLink to="/settings" label="Settings" />
-      <PageHeader title="Updates" description="What you are running, what is new, and where new builds come from." />
+      <BackLink to="/settings" label={t('settings.title')} />
+      <PageHeader title={t('settings.updates')} description={t('updates.description')} />
       <div className="grid max-w-2xl gap-6">
         <Card>
-          <CardHeader title={info ? 'Desktop app' : 'Web app'} />
+          <CardHeader title={info ? t('settings.desktopApp') : t('updates.webApp')} />
           <div className="divide-y divide-border">
             <div className={line}>
-              <span className="text-muted">Version</span>
+              <span className="text-muted">{t('settings.version')}</span>
               <span>
-                {running} {!info && <span className="text-subtle">(build {__APP_BUILD__})</span>}
+                {running} {!info && <span className="text-subtle">{t('settings.build', { build: __APP_BUILD__ })}</span>}
               </span>
             </div>
             {info ? (
               <>
                 <div className={line}>
                   <div>
-                    <p>Update channel</p>
-                    <p className="text-label text-muted">Beta and Alpha get new builds earlier, and every stable one.</p>
+                    <p>{t('updates.channel')}</p>
+                    <p className="text-label text-muted">{t('updates.channelHint')}</p>
                   </div>
-                  <Segmented size="sm" label="Update channel" value={info.channel} onChange={setChannel} options={channels} />
+                  <Segmented size="sm" label={t('updates.channel')} value={info.channel} onChange={setChannel} options={channels} />
                 </div>
                 <div className={line}>
-                  <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : found ? `Domus ${found.version} is available` : 'Up to date'}</p>
+                  <p>{check.isFetching ? t('updates.checking') : check.isError ? t('updates.checkFailed') : found ? t('update.available', { version: found.version }) : t('updates.upToDate')}</p>
                   {found ? (
                     <Button size="sm" variant="primary" loading={busy} onClick={() => install.mutate()}>
-                      {info.selfInstall ? 'Update and restart' : 'Download'}
+                      {info.selfInstall ? t('update.restart') : t('update.download')}
                     </Button>
                   ) : (
                     <Button size="sm" variant="ghost" disabled={check.isFetching} onClick={() => check.refetch()}>
-                      Check now
+                      {t('updates.checkNow')}
                     </Button>
                   )}
                   {progress !== null && (
@@ -73,19 +74,19 @@ export function UpdatesView() {
                 </div>
               </>
             ) : (
-              <p className="px-4 py-3 text-label text-muted">This page is served by your Domus server, so it is updated together with the server. Nothing is installed in the browser.</p>
+              <p className="px-4 py-3 text-label text-muted">{t('updates.webExplain')}</p>
             )}
           </div>
         </Card>
 
         <Card>
-          <CardHeader title={found ? `What's new in ${found.version}` : `In this version · ${shown}`} />
+          <CardHeader title={found ? t('updates.whatsNew', { version: found.version }) : t('updates.inVersion', { version: shown })} />
           <div className="p-4">
             {notes.data ? (
               <ReleaseNotes markdown={notes.data} />
             ) : (
               <p className="text-label text-muted">
-                {notes.isPending ? 'Loading the release notes…' : notes.isError ? "Couldn't load the release notes. They need an internet connection." : 'There are no release notes for this version.'}
+                {notes.isPending ? t('releases.loading') : notes.isError ? t('releases.loadFailed') : t('releases.empty')}
               </p>
             )}
           </div>

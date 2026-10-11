@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Field, SelectField } from '@/components/ui/Field'
 import { api } from '@/lib/api'
+import { t } from '@/lib/i18n'
 import { keys, useIntegrations } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { timeAgo } from '@/lib/format'
@@ -24,14 +25,14 @@ export function IntegrationsView() {
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: keys.integrations })
       qc.invalidateQueries({ queryKey: keys.devices })
-      toast.push({ tone: 'success', title: 'Account unlinked', message: r.removed_devices ? `${r.removed_devices} device(s) removed.` : undefined })
+      toast.push({ tone: 'success', title: t('integrations.unlinked'), message: r.removed_devices ? t('integrations.removedDevices', { count: r.removed_devices }) : undefined })
       setRemoving(null)
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not unlink', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('integrations.unlinkFailed'), message: errorMessage(e) }),
   })
   return (
     <>
-      <PageHeader title="Integrations" description="Connect device brands. Credentials are encrypted on this server." />
+      <PageHeader title={t('nav.integrations')} description={t('integrations.description')} />
       {isLoading ? (
         <Skeleton className="h-64" />
       ) : (
@@ -49,9 +50,9 @@ export function IntegrationsView() {
         onClose={() => setRemoving(null)}
         onConfirm={() => removing && remove.mutate(removing.id)}
         loading={remove.isPending}
-        title={`Unlink ${removing?.name}?`}
-        message="Devices added through this account are removed too."
-        confirmLabel="Unlink"
+        title={t('integrations.unlinkTitle', { name: removing?.name ?? '' })}
+        message={t('integrations.unlinkMessage')}
+        confirmLabel={t('integrations.unlinkConfirm')}
       />
     </>
   )
@@ -64,17 +65,17 @@ function IntegrationCard({ plugin: p, onLink, onRemove }: { plugin: Integration;
         <div className="min-w-0 flex-1 basis-72">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-title font-semibold">{p.name}</h2>
-            <Badge>{p.local ? 'Local control' : 'Cloud'}</Badge>
-            {!p.enabled && <Badge tone="warn">Disabled in config</Badge>}
+            <Badge>{p.local ? t('integrations.localControl') : t('integrations.cloud')}</Badge>
+            {!p.enabled && <Badge tone="warn">{t('integrations.disabledInConfig')}</Badge>}
           </div>
           <p className="mt-1 max-w-2xl text-body text-muted">{p.description}</p>
           <p className="mt-2 text-label text-subtle">
-            {p.device_count} {p.device_count === 1 ? 'device' : 'devices'}
+            {t('common.deviceCount', { count: p.device_count })}
           </p>
         </div>
         {p.enabled && (
           <Button variant={p.accounts.length ? 'secondary' : 'primary'} onClick={onLink}>
-            {p.link === 'form' ? (p.accounts.length ? 'Link another' : 'Link') : p.accounts.length ? 'Link another account' : p.link === 'qr' ? 'Link with QR code' : 'Link account'}
+            {p.link === 'form' ? (p.accounts.length ? t('integrations.linkAnother') : t('integrations.link')) : p.accounts.length ? t('integrations.linkAnotherAccount') : p.link === 'qr' ? t('integrations.linkQr') : t('integrations.linkAccount')}
           </Button>
         )}
       </div>
@@ -82,14 +83,14 @@ function IntegrationCard({ plugin: p, onLink, onRemove }: { plugin: Integration;
         <ul className="divide-y divide-border border-t border-border">
           {p.accounts.map((a) => (
             <li key={a.id} className="flex items-center gap-3 px-4 py-2.5">
-              {a.status === 'ok' ? <CheckCircle size={16} className="shrink-0 text-on" aria-label="Connected" /> : <WarningCircle size={16} className="shrink-0 text-warn" aria-label="Needs attention" />}
+              {a.status === 'ok' ? <CheckCircle size={16} className="shrink-0 text-on" aria-label={t('integrations.connected')} /> : <WarningCircle size={16} className="shrink-0 text-warn" aria-label={t('integrations.needsAttention')} />}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-body">{a.name}</p>
                 <p className="truncate text-label text-muted" title={a.last_error ?? undefined}>
-                  {a.status === 'ok' ? `Linked ${timeAgo(a.created_at)}` : a.last_error}
+                  {a.status === 'ok' ? t('integrations.linkedWhen', { when: timeAgo(a.created_at) }) : a.last_error}
                 </p>
               </div>
-              <Button variant="ghost" size="sm" aria-label={`Unlink ${a.name}`} icon={<Trash size={16} />} onClick={() => onRemove(a)} />
+              <Button variant="ghost" size="sm" aria-label={t('integrations.unlinkName', { name: a.name })} icon={<Trash size={16} />} onClick={() => onRemove(a)} />
             </li>
           ))}
         </ul>
@@ -145,54 +146,54 @@ function TuyaSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
       setStep('done')
       qc.invalidateQueries({ queryKey: keys.integrations })
     } else if (status.data?.status === 'expired') {
-      setError('The QR code expired. Generate a new one.')
+      setError(t('integrations.tuya.qrExpired'))
       setStep('code')
     }
   }, [status.data, qc])
   useEffect(() => {
     if (step !== 'qr') return
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
   }, [step])
   const left = qr ? Math.max(0, Math.round((qr.expires - now) / 1000)) : 0
 
   return (
-    <Sheet open={open} onClose={close} title="Link Tuya / Smart Life" description="Same QR login Home Assistant uses. No Tuya developer account needed.">
+    <Sheet open={open} onClose={close} title={t('integrations.tuya.title')} description={t('integrations.tuya.description')}>
       {step === 'code' && (
         <form className="flex flex-col gap-5" onSubmit={(e) => (e.preventDefault(), code.trim() && start.mutate())}>
           <Steps
             items={[
-              <>Open the <span className="text-fg">Smart Life</span> or <span className="text-fg">Tuya Smart</span> app.</>,
-              <>Go to <span className="text-fg">Me → Settings → Account and Security → User Code</span>.</>,
-              'Copy the code and paste it below.',
+              t('integrations.tuya.step1'),
+              t('integrations.tuya.step2'),
+              t('integrations.tuya.step3'),
             ]}
           />
-          <Field label="User code" required spellCheck={false} autoComplete="off" value={code} onChange={(e) => setCode(e.target.value)} data-autofocus />
+          <Field label={t('integrations.tuya.userCode')} required spellCheck={false} autoComplete="off" value={code} onChange={(e) => setCode(e.target.value)} data-autofocus />
           <ErrorText>{error}</ErrorText>
           <Button type="submit" variant="primary" loading={start.isPending} disabled={!code.trim()}>
-            Generate QR code
+            {t('integrations.tuya.generateQr')}
           </Button>
         </form>
       )}
       {step === 'qr' && qr && (
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="rounded-lg bg-white p-4">
-            <QRCode value={qr.content} size={200} aria-label="Tuya login QR code" />
+            <QRCode value={qr.content} size={200} aria-label={t('integrations.tuya.qrLabel')} />
           </div>
-          <Steps items={['In Smart Life, tap the scan icon on the Home tab.', 'Scan this code and confirm the login.']} />
+          <Steps items={[t('integrations.tuya.qrStep1'), t('integrations.tuya.qrStep2')]} />
           <p className="text-label text-muted tabular" aria-live="polite">
-            Waiting for confirmation · {Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}
+            {t('integrations.tuya.waiting', { time: `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}` })}
           </p>
           <Button variant="ghost" size="sm" onClick={reset}>
-            Use a different code
+            {t('integrations.tuya.differentCode')}
           </Button>
         </div>
       )}
       {step === 'done' && (
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <CheckCircle size={40} className="text-on" aria-hidden />
-          <p className="text-title font-semibold">Linked{linkedName ? ` ${linkedName}` : ''}</p>
-          <p className="text-body text-muted">Your Smart Life devices are being discovered.</p>
+          <p className="text-title font-semibold">{linkedName ? t('integrations.tuya.linkedNamed', { name: linkedName }) : t('integrations.tuya.linked')}</p>
+          <p className="text-body text-muted">{t('integrations.tuya.discovering')}</p>
           <Button
             variant="primary"
             className="mt-2"
@@ -201,7 +202,7 @@ function TuyaSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
               navigate('/devices?tab=discovered')
             }}
           >
-            View discovered devices
+            {t('integrations.viewDiscovered')}
           </Button>
         </div>
       )}
@@ -224,7 +225,7 @@ function FormSheet({ plugin, onClose }: { plugin: Integration | null; onClose: (
     mutationFn: () => api.linkForm(plugin!.id, Object.fromEntries(fields.map((f) => [f.key, value(f.key)]))),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.integrations })
-      toast.push({ tone: 'success', title: `${plugin?.name} linked`, message: 'Scanning for devices.' })
+      toast.push({ tone: 'success', title: t('integrations.formLinked', { name: plugin?.name ?? '' }), message: t('integrations.scanningDevices') })
       close()
       navigate('/devices?tab=discovered')
     },
@@ -234,15 +235,15 @@ function FormSheet({ plugin, onClose }: { plugin: Integration | null; onClose: (
     <Sheet
       open={!!plugin}
       onClose={close}
-      title={`Link ${plugin?.name ?? ''}`}
+      title={t('integrations.linkTitle', { name: plugin?.name ?? '' })}
       description={plugin?.description}
       footer={
         <>
           <Button variant="ghost" onClick={close}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={link.isPending} disabled={!ready} onClick={() => link.mutate()}>
-            Link
+            {t('integrations.link')}
           </Button>
         </>
       }
@@ -269,13 +270,13 @@ function FormSheet({ plugin, onClose }: { plugin: Integration | null; onClose: (
 }
 
 const REGIONS = [
-  { value: 'i2', label: 'India' },
-  { value: 'de', label: 'Europe' },
-  { value: 'us', label: 'United States' },
-  { value: 'sg', label: 'Singapore' },
-  { value: 'cn', label: 'China mainland' },
-  { value: 'ru', label: 'Russia' },
-  { value: 'tw', label: 'Taiwan' },
+  { value: 'i2', label: 'integrations.region.i2' },
+  { value: 'de', label: 'integrations.region.de' },
+  { value: 'us', label: 'integrations.region.us' },
+  { value: 'sg', label: 'integrations.region.sg' },
+  { value: 'cn', label: 'integrations.region.cn' },
+  { value: 'ru', label: 'integrations.region.ru' },
+  { value: 'tw', label: 'integrations.region.tw' },
 ]
 
 function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; onClose: () => void }) {
@@ -305,7 +306,7 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
         return
       }
       qc.invalidateQueries({ queryKey: keys.integrations })
-      toast.push({ tone: 'success', title: 'Account linked', message: 'Scanning for devices.' })
+      toast.push({ tone: 'success', title: t('integrations.accountLinked'), message: t('integrations.scanningDevices') })
       setPassword('')
       setError(null)
       close()
@@ -317,35 +318,35 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
     <Sheet
       open={!!kind}
       onClose={close}
-      title={tapo ? 'Link TP-Link Tapo' : 'Link Xiaomi Mi Home'}
-      description={tapo ? 'Your TP-Link ID only unlocks devices on your local network. Nothing is sent to the cloud.' : 'Signs in once to fetch device tokens. Control then stays on your network.'}
+      title={tapo ? t('integrations.tapo.title') : t('integrations.xiaomi.title')}
+      description={tapo ? t('integrations.tapo.description') : t('integrations.xiaomi.description')}
       footer={
         <>
           <Button variant="ghost" onClick={close}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={link.isPending} disabled={!username || !password || (!!verify && !code)} onClick={() => link.mutate()}>
-            {verify ? 'Verify' : 'Link account'}
+            {verify ? t('integrations.xiaomi.verify') : t('integrations.linkAccount')}
           </Button>
         </>
       }
     >
       <form className="flex flex-col gap-4" onSubmit={(e) => (e.preventDefault(), username && password && (!verify || code) && link.mutate())}>
-        <Field label={tapo ? 'TP-Link ID (email)' : 'Xiaomi account'} hint={tapo ? undefined : 'Email, phone number with country code (e.g. +91…) or Xiaomi ID.'} required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
-        <Field label="Password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Field label={tapo ? t('integrations.tapo.idLabel') : t('integrations.xiaomi.accountLabel')} hint={tapo ? undefined : t('integrations.xiaomi.accountHint')} required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <Field label={t('auth.password')} type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {!tapo && (
-          <SelectField label="Server region" value={region} onChange={(e) => setRegion(e.target.value)} hint="The region selected in the Mi Home app.">
+          <SelectField label={t('integrations.xiaomi.regionLabel')} value={region} onChange={(e) => setRegion(e.target.value)} hint={t('integrations.xiaomi.regionHint')}>
             {REGIONS.map((r) => (
               <option key={r.value} value={r.value}>
-                {r.label}
+                {t(r.label)}
               </option>
             ))}
           </SelectField>
         )}
         {verify && (
           <Field
-            label="Verification code"
-            hint={`Xiaomi sent a code to your ${verify.via === 'phone' ? 'phone by SMS' : 'email'}.`}
+            label={t('integrations.xiaomi.codeLabel')}
+            hint={verify.via === 'phone' ? t('integrations.xiaomi.sentPhone') : t('integrations.xiaomi.sentEmail')}
             required
             autoFocus
             inputMode="numeric"
@@ -359,3 +360,4 @@ function CredentialsSheet({ kind, onClose }: { kind: 'tapo' | 'xiaomi' | null; o
     </Sheet>
   )
 }
+

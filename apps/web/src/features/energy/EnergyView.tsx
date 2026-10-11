@@ -9,17 +9,18 @@ import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
 import { useIsAdmin } from '@/lib/auth'
+import { t } from '@/lib/i18n'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
 import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, type Range } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
 const RANGES = [
-  { value: 'live' as const, label: 'Live', icon: Pulse },
-  { value: 'hour' as const, label: '1 min', icon: Clock },
-  { value: 'day' as const, label: '24 hours', icon: CalendarDot },
-  { value: 'week' as const, label: '7 days', icon: CalendarDots },
-  { value: 'month' as const, label: '30 days', icon: CalendarBlank },
+  { value: 'live' as const, label: 'common.live', icon: Pulse },
+  { value: 'hour' as const, label: 'energy.range.hour', icon: Clock },
+  { value: 'day' as const, label: 'energy.range.day', icon: CalendarDot },
+  { value: 'week' as const, label: 'energy.range.week', icon: CalendarDots },
+  { value: 'month' as const, label: 'energy.range.month', icon: CalendarBlank },
 ]
 
 export function EnergyView() {
@@ -46,23 +47,23 @@ export function EnergyView() {
 
   return (
     <>
-      <PageHeader title="Energy" description={`Billing cycle ${fmt(new Date(o.cycle_start))} – ${fmt(end)} · day ${o.cycle_day} of ${o.cycle_days}`} />
+      <PageHeader title={t('nav.energy')} description={t('energy.cycleSubtitle', { start: fmt(new Date(o.cycle_start)), end: fmt(end), day: o.cycle_day, days: o.cycle_days })} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Power now" live value={formatWatts(totalWatts)} />
-        <Metric label="Today" value={formatKwh(o.today_kwh)} sub={formatMoney(o.today_cost, currency)} />
-        <Metric label="Bill so far" value={formatMoney(o.cycle_cost, currency)} sub={`${formatKwh(o.cycle_kwh)} this cycle`} />
+        <Metric label={t('overview.powerNow')} live value={formatWatts(totalWatts)} />
+        <Metric label={t('overview.today')} value={formatKwh(o.today_kwh)} sub={formatMoney(o.today_cost, currency)} />
+        <Metric label={t('energy.billSoFar')} value={formatMoney(o.cycle_cost, currency)} sub={t('energy.thisCycle', { kwh: formatKwh(o.cycle_kwh) })} />
         <Metric
-          label="Projected bill"
+          label={t('energy.projectedBill')}
           value={formatMoney(o.projected_cost, currency)}
-          sub={o.budget_used_percent != null ? `${formatNumber(o.budget_used_percent, 0)}% of budget used` : `≈ ${formatKwh(o.projected_kwh)}`}
+          sub={o.budget_used_percent != null ? t('energy.percentOfBudget', { percent: formatNumber(o.budget_used_percent, 0) }) : `≈ ${formatKwh(o.projected_kwh)}`}
         />
       </div>
 
       <Card className="mt-6">
         <CardHeader
-          title="Consumption"
+          title={t('energy.consumption')}
           action={
-            <Segmented<Range> size="sm" label="Range" value={range} onChange={setRange} options={RANGES} />
+            <Segmented<Range> size="sm" label={t('energy.range')} value={range} onChange={setRange} options={RANGES.map((r) => ({ ...r, label: t(r.label) }))} />
           }
         />
         <div className="p-4">{range !== 'live' && history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={range === 'live' ? live : history.data ?? []} range={range} currency={currency} height={220} />}</div>
@@ -71,18 +72,18 @@ export function EnergyView() {
       <Insights o={o} day={day.data ?? []} week={week.data ?? []} />
 
       <Card className="mt-6">
-        <CardHeader title="By device · this cycle" />
+        <CardHeader title={t('energy.byDevice')} />
         {o.devices.length === 0 ? (
-          <p className="px-4 py-6 text-label text-muted">Devices with power metering, such as the Tapo P110 or Tuya energy plugs, appear here.</p>
+          <p className="px-4 py-6 text-label text-muted">{t('energy.noMeteredDevices')}</p>
         ) : (
           <table className="w-full text-body">
             <thead>
               <tr className="border-b border-border text-left text-label text-muted">
-                <th className="px-4 py-2 font-medium">Device</th>
-                <th className="hidden px-4 py-2 font-medium sm:table-cell">Share</th>
-                <th className="px-4 py-2 text-right font-medium">Now</th>
-                <th className="px-4 py-2 text-right font-medium">Energy</th>
-                <th className="px-4 py-2 text-right font-medium">Cost</th>
+                <th className="px-4 py-2 font-medium">{t('device.type.other')}</th>
+                <th className="hidden px-4 py-2 font-medium sm:table-cell">{t('energy.col.share')}</th>
+                <th className="px-4 py-2 text-right font-medium">{t('energy.col.now')}</th>
+                <th className="px-4 py-2 text-right font-medium">{t('nav.energy')}</th>
+                <th className="px-4 py-2 text-right font-medium">{t('energy.col.cost')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border tabular">
@@ -125,34 +126,34 @@ function Insights({ o, day, week }: { o: EnergyOverview; day: EnergyPoint[]; wee
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-2">
-        <CardHeader title="Insights" />
+        <CardHeader title={t('energy.insights')} />
         <dl className="grid grid-cols-2 divide-border max-sm:divide-y sm:grid-cols-4 sm:divide-x">
           <Insight
-            label="Peak hour (24 h)"
+            label={t('energy.peakHour')}
             value={peak ? formatBucket(peak.t, 'hour') : '—'}
-            sub={peak ? formatKwh(peak.kwh) : 'No usage yet'}
+            sub={peak ? formatKwh(peak.kwh) : t('energy.noUsageYet')}
           />
-          <Insight label="Daily average" value={average != null ? formatKwh(average) : '—'} sub={average != null ? `Over the last ${earlier.length} ${earlier.length === 1 ? 'day' : 'days'}` : 'Needs a full day'} />
+          <Insight label={t('energy.dailyAverage')} value={average != null ? formatKwh(average) : '—'} sub={average != null ? t('energy.overLastDays', { count: earlier.length }) : t('energy.needsFullDay')} />
           <Insight
-            label="Today vs average"
+            label={t('energy.todayVsAverage')}
             value={change != null ? `${change > 0 ? '+' : ''}${formatNumber(change, 0)}%` : '—'}
-            sub={change == null ? 'Needs a full day' : change > 10 ? 'Above your usual day' : change < -10 ? 'Below your usual day' : 'About your usual day'}
+            sub={change == null ? t('energy.needsFullDay') : change > 10 ? t('energy.aboveUsual') : change < -10 ? t('energy.belowUsual') : t('energy.aboutUsual')}
           />
-          <Insight label="Top device" value={top ? `${formatNumber((top.kwh / Math.max(o.cycle_kwh, 0.0001)) * 100, 0)}%` : '—'} sub={top?.name ?? 'No metered device'} />
+          <Insight label={t('energy.topDevice')} value={top ? `${formatNumber((top.kwh / Math.max(o.cycle_kwh, 0.0001)) * 100, 0)}%` : '—'} sub={top?.name ?? t('energy.noMeteredDevice')} />
         </dl>
       </Card>
 
       <Card>
-        <CardHeader title="Billing cycle" />
+        <CardHeader title={t('energy.billingCycle')} />
         <div className="space-y-4 p-4">
-          <Progress label="Time elapsed" value={`Day ${o.cycle_day} of ${o.cycle_days}`} percent={elapsed} />
+          <Progress label={t('energy.timeElapsed')} value={t('energy.dayOfDays', { day: o.cycle_day, days: o.cycle_days })} percent={elapsed} />
           {spent != null ? (
-            <Progress label="Budget used" value={`${formatMoney(o.cycle_cost, currency)} of ${formatMoney(budget!, currency)}`} percent={spent} warn={spent > elapsed + 10} />
+            <Progress label={t('insights.budgetUsed')} value={t('energy.spentOfBudget', { spent: formatMoney(o.cycle_cost, currency), budget: formatMoney(budget!, currency) })} percent={spent} warn={spent > elapsed + 10} />
           ) : (
-            <p className="text-label text-muted">Set a monthly budget in the plan below to track spending against it.</p>
+            <p className="text-label text-muted">{t('energy.setBudgetHint')}</p>
           )}
           <p className="text-label text-muted tabular">
-            On track for {formatMoney(o.projected_cost, currency)} ({formatKwh(o.projected_kwh)}) by the end of the cycle.
+            {t('energy.onTrackFor', { cost: formatMoney(o.projected_cost, currency), kwh: formatKwh(o.projected_kwh) })}
           </p>
         </div>
       </Card>
@@ -180,7 +181,7 @@ function Progress({ label, value, percent, warn }: { label: string; value: strin
       <div className="h-1.5 rounded-full bg-raised" role="progressbar" aria-label={label} aria-valuenow={Math.round(percent)} aria-valuemin={0} aria-valuemax={100}>
         <div className={warn ? 'h-full rounded-full bg-warn' : 'h-full rounded-full bg-fg/70'} style={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }} />
       </div>
-      {warn && <p className="mt-1 text-caption text-warn">Spending is ahead of the calendar.</p>}
+      {warn && <p className="mt-1 text-caption text-warn">{t('energy.spendingAhead')}</p>}
     </div>
   )
 }
@@ -240,14 +241,14 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['energy'] })
-      toast.push({ tone: 'success', title: 'Electricity plan saved' })
+      toast.push({ tone: 'success', title: t('energy.plan.saved') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.saveFailed'), message: errorMessage(e) }),
   })
   const set = (k: keyof typeof s) => (e: React.ChangeEvent<HTMLInputElement>) => setS({ ...s, [k]: e.target.value })
   return (
     <Card className="mt-6">
-      <CardHeader title="Electricity plan" />
+      <CardHeader title={t('energy.plan.title')} />
       <form
         className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3"
         onSubmit={(e) => {
@@ -256,84 +257,85 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
         }}
       >
         <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-3">
-          <span className="text-label font-medium text-fg">Pricing</span>
+          <span className="text-label font-medium text-fg">{t('energy.plan.pricing')}</span>
           <Segmented
             size="sm"
-            label="Pricing"
+            label={t('energy.plan.pricing')}
             value={slabbed ? 'slabs' : 'flat'}
             onChange={(v) => setSlabbed(v === 'slabs')}
             options={[
-              { value: 'flat', label: 'Flat rate' },
-              { value: 'slabs', label: 'Slabs (per units)' },
+              { value: 'flat', label: t('energy.plan.flatRate') },
+              { value: 'slabs', label: t('energy.plan.slabs') },
             ]}
           />
         </div>
         {slabbed ? (
           <fieldset className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
-            <legend className="mb-1 text-label text-muted">Units (kWh) per billing cycle, billed slab by slab — e.g. MSEDCL: 0–100, 101–300, 301–500, above 500.</legend>
+            <legend className="mb-1 text-label text-muted">{t('energy.plan.slabsLegend')}</legend>
             {slabs.map((x, i) => {
               const last = i === slabs.length - 1
               const from = i === 0 ? 0 : Number(slabs[i - 1].up_to_kwh || 0)
               return (
                 <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-3">
                   {last ? (
-                    <Field label={i === 0 ? 'Units' : `Above ${formatNumber(from, 0)} units`} disabled value="" placeholder="and above" />
+                    <Field label={i === 0 ? t('energy.plan.units') : t('energy.plan.aboveUnits', { from: formatNumber(from, 0) })} disabled value="" placeholder={t('energy.plan.andAbove')} />
                   ) : (
-                    <Field label={`From ${formatNumber(from, 0)} up to`} type="number" min="0" step="1" required value={x.up_to_kwh} onChange={(e) => setSlab(i, 'up_to_kwh', e.target.value)} />
+                    <Field label={t('energy.plan.fromUpTo', { from: formatNumber(from, 0) })} type="number" min="0" step="1" required value={x.up_to_kwh} onChange={(e) => setSlab(i, 'up_to_kwh', e.target.value)} />
                   )}
-                  <Field label="Price per unit" type="number" step="0.0001" min="0" required value={x.rate} onChange={(e) => setSlab(i, 'rate', e.target.value)} />
-                  <Button variant="ghost" size="sm" aria-label="Remove slab" disabled={slabs.length < 2} onClick={() => setSlabs(slabs.filter((_, j) => j !== i))}>
-                    Remove
+                  <Field label={t('energy.plan.pricePerUnit')} type="number" step="0.0001" min="0" required value={x.rate} onChange={(e) => setSlab(i, 'rate', e.target.value)} />
+                  <Button variant="ghost" size="sm" aria-label={t('energy.plan.removeSlab')} disabled={slabs.length < 2} onClick={() => setSlabs(slabs.filter((_, j) => j !== i))}>
+                    {t('drawer.removeConfirm')}
                   </Button>
                 </div>
               )
             })}
             <div>
               <Button size="sm" onClick={() => setSlabs([...slabs.slice(0, -1), { up_to_kwh: '', rate: '' }, slabs[slabs.length - 1]])}>
-                Add slab
+                {t('energy.plan.addSlab')}
               </Button>
             </div>
           </fieldset>
         ) : (
-          <Field label="Price per kWh" type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
+          <Field label={t('energy.plan.pricePerKwh')} type="number" step="0.0001" min="0" required value={s.rate_per_kwh} onChange={set('rate_per_kwh')} />
         )}
         <fieldset className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
-          <legend className="mb-1 text-label font-medium text-fg">Time of day</legend>
+          <legend className="mb-1 text-label font-medium text-fg">{t('energy.plan.timeOfDay')}</legend>
           <p className="text-label text-muted">
-            Hours when a unit costs more or less than the price above, on the home's clock. Enter the difference per unit: 1.10 for a peak surcharge, -1.50 for a night rebate.
+            {t('energy.plan.timeOfDayHelp')}
           </p>
           {windows.map((w, i) => (
             <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-3">
-              <Field label="From" type="time" required value={w.start} onChange={(e) => setWindow(i, 'start', e.target.value)} />
-              <Field label="Until" type="time" required value={w.end} onChange={(e) => setWindow(i, 'end', e.target.value)} />
-              <Field label="Per unit" type="number" step="0.0001" required value={w.adjust} onChange={(e) => setWindow(i, 'adjust', e.target.value)} />
-              <Button variant="ghost" size="sm" aria-label="Remove time window" onClick={() => setWindows(windows.filter((_, j) => j !== i))}>
-                Remove
+              <Field label={t('energy.plan.from')} type="time" required value={w.start} onChange={(e) => setWindow(i, 'start', e.target.value)} />
+              <Field label={t('energy.plan.until')} type="time" required value={w.end} onChange={(e) => setWindow(i, 'end', e.target.value)} />
+              <Field label={t('energy.plan.perUnit')} type="number" step="0.0001" required value={w.adjust} onChange={(e) => setWindow(i, 'adjust', e.target.value)} />
+              <Button variant="ghost" size="sm" aria-label={t('energy.plan.removeWindow')} onClick={() => setWindows(windows.filter((_, j) => j !== i))}>
+                {t('drawer.removeConfirm')}
               </Button>
             </div>
           ))}
           <div>
             <Button size="sm" onClick={() => setWindows([...windows, { start: '22:00', end: '06:00', adjust: '' }])}>
-              Add time window
+              {t('energy.plan.addWindow')}
             </Button>
           </div>
         </fieldset>
-        <SelectField label="Currency" required value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value })}>
+        <SelectField label={t('energy.plan.currency')} required value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value })}>
           {currencies.map((c) => (
             <option key={c.code} value={c.code}>
               {c.label}
             </option>
           ))}
         </SelectField>
-        <Field label="Fixed monthly charge" type="number" step="0.01" min="0" value={s.fixed_monthly_charge} onChange={set('fixed_monthly_charge')} hint="Meter rent and fixed fees." />
-        <Field label="Monthly budget" type="number" step="0.01" min="0" value={s.monthly_budget} onChange={set('monthly_budget')} hint="Optional." />
-        <Field label="Billing cycle starts on day" type="number" min="1" max="28" required value={s.billing_cycle_day} onChange={set('billing_cycle_day')} hint="1–28." />
+        <Field label={t('energy.plan.fixedCharge')} type="number" step="0.01" min="0" value={s.fixed_monthly_charge} onChange={set('fixed_monthly_charge')} hint={t('energy.plan.fixedChargeHint')} />
+        <Field label={t('insights.budget')} type="number" step="0.01" min="0" value={s.monthly_budget} onChange={set('monthly_budget')} hint={t('devices.optional')} />
+        <Field label={t('energy.plan.cycleDay')} type="number" min="1" max="28" required value={s.billing_cycle_day} onChange={set('billing_cycle_day')} hint="1–28." />
         <div className="flex items-end">
           <Button type="submit" variant="primary" loading={save.isPending} className="w-full sm:w-auto">
-            Save plan
+            {t('energy.plan.save')}
           </Button>
         </div>
       </form>
     </Card>
   )
 }
+

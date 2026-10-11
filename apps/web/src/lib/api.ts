@@ -24,6 +24,7 @@ import type {
 } from './types'
 
 import { getStorageKey, type AppFlavor } from './flavor'
+import { t } from '@/lib/i18n'
 
 const TOKEN_KEY = getStorageKey('domus.token')
 
@@ -117,17 +118,17 @@ async function request<T>(method: string, path: string, body?: unknown, confirme
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
-    throw new ApiError('Cannot reach the Domus server. Check that it is running.', 0)
+    throw new ApiError(t('api.unreachable'), 0)
   }
   const data = res.status === 204 ? null : await res.json().catch(() => null)
   if (!res.ok) {
     if (res.status === 401 && token) onUnauthorized?.()
     const names: string[] | undefined = data?.error?.confirm
     if (res.status === 428 && names?.length && askToConfirm && !confirmed) {
-      if (!(await askToConfirm(names))) throw new ApiError('Not switched', 428)
+      if (!(await askToConfirm(names))) throw new ApiError(t('api.notSwitched'), 428)
       return request<T>(method, `${path}${path.includes('?') ? '&' : '?'}confirmed=true`, body, true)
     }
-    throw new ApiError(data?.error?.message ?? `Request failed (${res.status})`, res.status, names)
+    throw new ApiError(data?.error?.message ?? t('api.requestFailed', { status: res.status }), res.status, names)
   }
   return data as T
 }
@@ -192,7 +193,7 @@ export const api = {
   /** Saves the database, with the key that opens its stored accounts, as one file. */
   downloadBackup: async () => {
     const res = await fetch(`${BASE}/api/v1/server/backup`, { headers: { Authorization: `Bearer ${session.token}` } }).catch(() => null)
-    if (!res?.ok) throw new ApiError((await res?.json().catch(() => null))?.error?.message ?? 'Could not make the backup', res?.status ?? 0)
+    if (!res?.ok) throw new ApiError((await res?.json().catch(() => null))?.error?.message ?? t('settings.backup.failed'), res?.status ?? 0)
     const link = document.createElement('a')
     link.href = URL.createObjectURL(await res.blob())
     link.download = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ?? 'domus-backup.db'

@@ -5,6 +5,7 @@ import { sceneSyncUrl } from '@/lib/api'
 import { keys } from '@/lib/queries'
 import { useToast } from '@/lib/toast'
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import type { Scene, ScreenSyncConfig } from '@/lib/types'
 
 /** Defaults mirror `ScreenSyncConfig::default()` on the server. */
@@ -88,7 +89,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
     const socket = ws.current
     ws.current = null
     if (socket && socket.readyState <= WebSocket.OPEN) socket.close(1000, 'stopped')
-    stream.current?.getTracks().forEach((t) => t.stop())
+    stream.current?.getTracks().forEach((track) => track.stop())
     stream.current = null
     if (worker.current) {
       worker.current.postMessage({ type: 'stop' })
@@ -136,7 +137,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
           setState((s) => ({ ...s, status: 'live', devices: (m.devices as SyncDevice[]) ?? [], skipped }))
           qc.invalidateQueries({ queryKey: keys.scenes })
           if (skipped.length) {
-            toast.push({ tone: 'warning', title: 'Some lights were skipped', message: skipped.map((x) => `${x.name} (${x.reason})`).join(', ') })
+            toast.push({ tone: 'warning', title: t('screenSync.someSkipped'), message: skipped.map((x) => `${x.name} (${x.reason})`).join(', ') })
           }
         } else if (m.type === 'device_error') {
           const id = String(m.device_id)
@@ -145,22 +146,22 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
           if (!reported.current.has(id)) {
             reported.current.add(id)
             const name = scene.name
-            toast.push({ tone: 'warning', title: `A light in ${name} is not keeping up`, message })
+            toast.push({ tone: 'warning', title: t('screenSync.notKeepingUp', { name }), message })
           }
         } else if (m.type === 'error') {
           fatal = true
-          toast.push({ tone: 'error', title: 'Screen Sync could not start', message: String(m.message) })
+          toast.push({ tone: 'error', title: t('screenSync.startFailed'), message: String(m.message) })
           stop()
         } else if (m.type === 'stopped') {
           fatal = true
-          toast.push({ tone: 'info', title: `${scene.name} stopped` })
+          toast.push({ tone: 'info', title: t('screenSync.sceneStopped', { name: scene.name }) })
           stop()
         }
       }
       socket.onclose = () => {
         if (!active.current || fatal || ws.current !== socket) return
         if (attempts.current >= MAX_RECONNECTS) {
-          toast.push({ tone: 'error', title: 'Lost connection to Domus', message: 'Screen Sync stopped.' })
+          toast.push({ tone: 'error', title: t('screenSync.lostConnection'), message: t('screenSync.stopped') })
           stop()
           return
         }
@@ -175,7 +176,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
   const start = useCallback(
     async (scene: Scene) => {
       if (!isScreenSyncSupported()) {
-        toast.push({ tone: 'error', title: 'Screen sharing is not available', message: 'Use Domus in Chrome, Edge, Firefox, Safari or the desktop app over HTTPS.' })
+        toast.push({ tone: 'error', title: t('screenSync.notAvailable'), message: t('screenSync.notAvailableHint') })
         return
       }
       if (active.current || stream.current) stop()
@@ -194,7 +195,7 @@ export function ScreenSyncProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         setState(IDLE)
         const denied = e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'AbortError')
-        if (!denied) toast.push({ tone: 'error', title: 'Could not share the screen', message: e instanceof Error ? e.message : undefined })
+        if (!denied) toast.push({ tone: 'error', title: t('screenSync.shareFailed'), message: e instanceof Error ? e.message : undefined })
         return
       }
 
@@ -280,12 +281,19 @@ function ScreenSyncPill() {
   const color = state.color ?? '#9ca3af'
   const n = state.devices.length
   const failing = Object.keys(state.deviceErrors).length
+  const lights = t('automations.sync.lights', { count: n })
   const label =
     state.status === 'starting'
-      ? 'Choose a screen to share…'
+      ? t('screenSync.chooseScreen')
       : state.status === 'reconnecting'
-        ? 'Reconnecting…'
-        : `Live · ${n} light${n === 1 ? '' : 's'}${failing ? ` · ${failing} lagging` : ''}${state.brightness != null ? ` · ${state.brightness}%` : ''}`
+        ? t('screenSync.reconnecting')
+        : failing && state.brightness != null
+          ? t('screenSync.pill.liveLaggingBrightness', { lights, failing, brightness: state.brightness })
+          : failing
+            ? t('screenSync.pill.liveLagging', { lights, failing })
+            : state.brightness != null
+              ? t('screenSync.pill.liveBrightness', { lights, brightness: state.brightness })
+              : t('screenSync.pill.live', { lights })
   return (
     <div
       role="status"
@@ -314,7 +322,7 @@ function ScreenSyncPill() {
         className="ml-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-raised px-3 text-label font-medium transition-colors hover:bg-danger hover:text-white"
       >
         <StopCircle size={16} weight="fill" />
-        Stop
+        {t('overview.stop')}
       </button>
     </div>
   )
