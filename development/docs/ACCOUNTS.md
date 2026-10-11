@@ -59,7 +59,9 @@ sequenceDiagram
   refuse every further sign-in for that name with 429 for `LOGIN_LOCK` (15 minutes), the right password
   included. It is checked before the password, so parallel requests cannot outrun it, and it counts unknown
   names too, so a lock does not reveal which accounts exist. A correct sign-in or a redeemed reset code clears
-  it. The count lives in memory: restarting the server lifts every lock.
+  it. The count lives in memory: restarting the server lifts every lock. In the development environment
+  (`APP_ENV` unset or `development`, what `pnpm dev` runs) nothing is ever locked; the Docker image runs as
+  `production`.
 - **Administrator alerts** (`notifications.admin_only`, `Notifier::notify_admins`): "Password reset
   requested", discovery and failing automations are listed, pushed over the live stream, marked read and
   deleted only for administrators. What an automation sends on purpose goes to everyone.

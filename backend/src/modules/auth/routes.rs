@@ -121,7 +121,7 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
 
 async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiResult<Json<Value>> {
     // Checked before the password, so a locked name cannot be guessed at even with parallel requests.
-    if let Some(minutes) = LOGIN_THROTTLE.locked(&req.username) {
+    if let Some(minutes) = LOGIN_THROTTLE.locked(&req.username).filter(|_| s.server.login_lockout) {
         return Err(ApiError::TooManyRequests(format!(
             "Too many wrong passwords. Try again in {minutes} minute{}.",
             if minutes == 1 { "" } else { "s" }

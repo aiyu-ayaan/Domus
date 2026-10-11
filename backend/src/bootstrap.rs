@@ -104,6 +104,7 @@ pub async fn bootstrap() -> anyhow::Result<()> {
         ),
         fingerprint: rustls.as_ref().and_then(|(_, fp)| fp.clone()),
         data_dir: config.server.data_dir.clone(),
+        login_lockout: config.server.env != "development",
     };
 
     let state = AppState {

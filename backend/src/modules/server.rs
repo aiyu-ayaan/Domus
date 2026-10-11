@@ -31,6 +31,8 @@ pub struct ServerInfo {
     pub fingerprint: Option<String>,
     /// Where the database and the master key live; a backup is staged here.
     pub data_dir: std::path::PathBuf,
+    /// Off in the development environment, where wrong passwords are part of testing.
+    pub login_lockout: bool,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
