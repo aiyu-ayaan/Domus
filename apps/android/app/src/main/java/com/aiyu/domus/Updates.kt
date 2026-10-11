@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.clickHaptics
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
@@ -121,7 +122,7 @@ fun UpdatePrompt() {
     }
     val update = found ?: return
     val progress = installer.progress
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = { if (progress == null) found = null },
         icon = { Icon(Icons.Rounded.SystemUpdate, null) },
         title = { Text("Domus ${update.version} is available") },

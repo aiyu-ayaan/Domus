@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.clickHaptics
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.LruCache
@@ -373,7 +374,7 @@ fun AvatarPickerDialog(
     var seed by remember { mutableStateOf(initial.second) }
     val spec = remember(selectedStyle, seed) { "dicebear:$selectedStyle:$seed" }
 
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDismiss,
         title = { Text("Customize Avatar") },
         text = {

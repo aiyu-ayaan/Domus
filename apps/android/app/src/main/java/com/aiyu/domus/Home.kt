@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.clickHaptics
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.horizontalScroll
@@ -96,7 +97,7 @@ fun StatCard(
 ) {
     var showInfo by remember { mutableStateOf(false) }
     if (showInfo && info != null) {
-        AlertDialog(onDismissRequest = { showInfo = false }, confirmButton = { TextButton({ showInfo = false }) { Text("Got it") } }, title = { Text(label) }, text = { Text(info) })
+        AlertDialog(modifier = Modifier.clickHaptics(), onDismissRequest = { showInfo = false }, confirmButton = { TextButton({ showInfo = false }) { Text("Got it") } }, title = { Text(label) }, text = { Text(info) })
     }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.large, modifier = modifier.semantics(mergeDescendants = true) {}) {
         Column(Modifier.padding(16.dp)) {

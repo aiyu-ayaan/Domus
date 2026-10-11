@@ -1,6 +1,6 @@
 package com.aiyu.domus
 
-import com.aiyu.domus.ui.theme.HapticSwitch
+import com.aiyu.domus.ui.theme.clickHaptics
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -170,7 +170,7 @@ fun <T> Picker(label: String, options: List<Pair<T, String>>, selected: T, onSel
         }
     }
     if (open) {
-        AlertDialog(
+        AlertDialog(modifier = Modifier.clickHaptics(), 
             onDismissRequest = { open = false },
             title = { Text(label) },
             text = {
@@ -199,7 +199,7 @@ fun <T> Choice(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Uni
 
 @Composable
 fun Confirm(title: String, text: String, action: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(text) },
@@ -211,7 +211,7 @@ fun Confirm(title: String, text: String, action: String, onConfirm: () -> Unit, 
 /** Dialog with a form: Save on the right, an optional Delete on the left. */
 @Composable
 fun FormDialog(title: String, canSave: Boolean, onSave: () -> Unit, onDismiss: () -> Unit, onDelete: (() -> Unit)? = null, save: String = "Save", content: @Composable ColumnScope.() -> Unit) {
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp), content = content) },
@@ -274,7 +274,7 @@ private fun LevelMenu(what: String, level: String, onLevel: (String) -> Unit) {
             trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null, Modifier.size(18.dp)) },
             modifier = Modifier.semantics { contentDescription = "Access to $what" },
         )
-        DropdownMenu(open, { open = false }) {
+        DropdownMenu(open, { open = false }, Modifier.clickHaptics()) {
             Levels.forEach { (value, name) ->
                 DropdownMenuItem(
                     text = { Text(name) },
@@ -392,7 +392,7 @@ private fun ToggleCard(title: String, text: String, checked: Boolean, enabled: B
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            HapticSwitch(checked, onChange, enabled = enabled)
+            Switch(checked, onChange, enabled = enabled)
         }
     }
 }
@@ -403,7 +403,7 @@ private fun Handover(user: User, onDone: () -> Unit) {
     val context = LocalContext.current
     val server = (LocalRepository.current.session.collectAsStateWithLifecycle().value as? Session.SignedIn)?.server.orEmpty()
     val text = remember(user, server) { user.handoverText(server, DateFormat.is24HourFormat(context)) }
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDone,
         title = { Text(if (user.resetCode != null) "Reset code for ${user.username}" else "Sign-in details for ${user.username}") },
         text = {

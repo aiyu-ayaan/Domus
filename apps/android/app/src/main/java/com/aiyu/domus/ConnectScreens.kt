@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import com.aiyu.domus.ui.theme.clickHaptics
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
@@ -313,7 +314,7 @@ fun ConnectScreen() {
     }
 
     untrusted?.let { pending ->
-        AlertDialog(
+        AlertDialog(modifier = Modifier.clickHaptics(), 
             onDismissRequest = { untrusted = null },
             title = { Text("Trust this server?") },
             text = {

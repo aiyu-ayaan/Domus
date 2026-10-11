@@ -1,6 +1,6 @@
 package com.aiyu.domus
 
-import com.aiyu.domus.ui.theme.HapticSwitch
+import com.aiyu.domus.ui.theme.clickHaptics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
@@ -171,7 +171,7 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
                 Icon(deviceIcon(device.type), contentDescription = null, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.weight(1f))
                 device.state.isOn?.let { isOn ->
-                    HapticSwitch(
+                    Switch(
                         checked = isOn,
                         onCheckedChange = { repository.command(device, DeviceCommand(isOn = it)) },
                         enabled = canControl && device.canControl && device.isOnline,
@@ -292,7 +292,7 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
     val enabled = canControl && device.isOnline
     val send = { command: DeviceCommand -> repository.command(device, command) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(onDismissRequest = onDismiss, modifier = Modifier.clickHaptics()) {
         Column(
             Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -631,7 +631,7 @@ fun ConfirmSwitchDialog() {
     val confirmation by LocalRepository.current.confirmation.collectAsStateWithLifecycle()
     val asking = confirmation ?: return
     val names = asking.names
-    AlertDialog(
+    AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = { asking.answer(false) },
         title = { Text(if (names.size == 1) "Switch ${names[0]}?" else "Switch ${names.size} devices?") },
         text = {

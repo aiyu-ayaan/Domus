@@ -1,6 +1,5 @@
 package com.aiyu.domus
 
-import com.aiyu.domus.ui.theme.HapticSwitch
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -175,7 +174,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
                 Choice(listOf<Pair<Boolean?, String>>(true to "Turn on", false to "Turn off", null to "Leave power"), power, { power = it })
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Set brightness${if (dim) " ${brightness.roundToInt()}%" else ""}", Modifier.weight(1f))
-                    HapticSwitch(dim, { dim = it })
+                    Switch(dim, { dim = it })
                 }
                 if (dim) Slider(brightness, { brightness = it }, valueRange = 1f..100f)
             }
@@ -254,8 +253,8 @@ fun SceneEditorPage(id: String, onBack: () -> Unit) {
             Choice(SyncStyles, style, { style = it })
             Text(when (style) { "vivid" -> "The strongest color on screen."; "dominant" -> "The most common color."; else -> "The mean of the whole picture." }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Choice(listOf("full" to "Whole screen", "edges" to "Edges only"), region, { region = it })
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Dim with dark scenes", Modifier.weight(1f)); HapticSwitch(follow, { follow = it }) }
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Restore lights when it stops", Modifier.weight(1f)); HapticSwitch(restore, { restore = it }) }
+            Row(verticalAlignment = Alignment.CenterVertically) { Text("Dim with dark scenes", Modifier.weight(1f)); Switch(follow, { follow = it }) }
+            Row(verticalAlignment = Alignment.CenterVertically) { Text("Restore lights when it stops", Modifier.weight(1f)); Switch(restore, { restore = it }) }
         } else {
             RuleList("Actions", "Add action", ActionKinds, actions, devices, scenes)
         }
@@ -295,7 +294,7 @@ fun AutomationEditorPage(id: String, onBack: () -> Unit) {
     }) {
         Field(name, { name = it }, "Name")
         Field(description, { description = it }, "Description (optional)")
-        Row(verticalAlignment = Alignment.CenterVertically) { Text("Enabled", Modifier.weight(1f)); HapticSwitch(enabled, { enabled = it }) }
+        Row(verticalAlignment = Alignment.CenterVertically) { Text("Enabled", Modifier.weight(1f)); Switch(enabled, { enabled = it }) }
         RuleList("When any of these happens", "Add trigger", TriggerKinds, triggers, devices, scenes)
         RuleList("Only if all of these hold", "Add condition", ConditionKinds, conditions, devices, scenes)
         RuleList("Do this", "Add action", ActionKinds, actions, devices, scenes)
