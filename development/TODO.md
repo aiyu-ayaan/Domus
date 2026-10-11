@@ -245,3 +245,13 @@
 - [ ] Check the web forgot-password and change-password screens and the person sheet by eye
 - [x] Android: Settings > Change password (`ChangePasswordPage`)
 - [x] Send "Password reset requested" to administrators only
+
+
+## Milestone 20: Hardening, sun triggers, tariffs and the Updates page (2026-10-12)
+- [x] Sign-in lockout (off in development), administrator-only alerts, backup and restore, bundled Inter font
+- [x] Sunrise / sunset triggers, home location by place search or the device's location, time-of-use tariffs, sensor readings on the device page
+- [x] Updates page on Android (`UpdatesPage`) and web / desktop (`/updates`) with Markdown release notes (tables and images), notes in the update dialog too; the Settings card is gone (`development/docs/RELEASE.md`)
+- [ ] Android: open the Updates page, the update dialog with notes and the predictive back gesture on a device (compiled and shrunk with R8, not opened)
+- [ ] Desktop: open `/updates` in the Electron window with a real update on the channel
+- [ ] Write a release whose notes have a table and an image and check both renderers
+- [ ] The repository was renamed to `aiyu-ayaan/Domus`; the apps still ask `aiyu-ayaan/Domus-Rust` and rely on GitHub's redirect

@@ -77,13 +77,47 @@ stable releases, Stable gets stable releases. The default is the channel of the 
 
 | Client | Where | How it updates |
 |---|---|---|
-| Android | Offer at start (`app/Updates.kt`), Settings → Updates (`core/Updates.kt`) | Downloads the APK with a progress bar and hands it to Android's installer, which asks to allow installs from Domus the first time (`REQUEST_INSTALL_PACKAGES`, FileProvider `<applicationId>.updates`) |
-| Desktop AppImage | Offer at start (`apps/web/src/components/UpdatePrompt.tsx`), Settings → About (`apps/desktop/src/updates.js`, `main.js`) | Downloads the AppImage over its own file with a progress bar and restarts |
+| Android | Offer at start and the Updates page (`app/Updates.kt`, page `updates`), found by `core/Updates.kt` | Downloads the APK with a progress bar and hands it to Android's installer, which asks to allow installs from Domus the first time (`REQUEST_INSTALL_PACKAGES`, FileProvider `<applicationId>.updates`) |
+| Desktop AppImage | Offer at start (`apps/web/src/components/UpdatePrompt.tsx`), Settings → Updates (`features/settings/UpdatesView.tsx`; found by `apps/desktop/src/updates.js`, `main.js`) | Downloads the AppImage over its own file with a progress bar and restarts |
 | Desktop deb / Windows | same | Downloads the `.deb` / `Domus-<version>-Setup.exe` into Downloads with a progress bar and opens it |
 | Server | `DOMUS_VERSION` in `docker-compose.yml` | Docker tags `latest`, `beta`, `alpha` or an exact version; `docker compose pull && docker compose up -d` |
 | `scripts/install-linux.sh` | `--channel`, `--version` | Re-run to update |
 
 Dev flavors never update this way; they are rebuilt.
+
+### The Updates page and release notes
+
+Each app has one Updates page instead of a card in Settings: what is installed, the channel, the update
+with its download, and the release notes. The notes are those of the update when the channel has one,
+otherwise those of the version that is running. The dialog at start shows the update's notes too, in a
+box that scrolls so its buttons stay in reach.
+
+The notes are the GitHub Release's description: the `## vX` section of `CHANGELOG.md` that the release
+workflow passes to `gh release create`. They are Markdown, and both renderers take the GitHub flavour:
+headings, lists, links, code, **tables** and **images**. To ship richer notes, edit the CHANGELOG entry in
+the release PR (or the Release on GitHub afterwards); the apps show whatever is there.
+
+```mermaid
+flowchart LR
+    CL["CHANGELOG.md<br/>## vX section"] -- "release workflow" --> GH["GitHub Release vX<br/>body (Markdown) + files"]
+    GH -- "release list, one request" --> AC["Android core/Updates.kt<br/>pick(): update + notes<br/>notesOf(): installed version"]
+    AC --> AP["UpdatesPage / UpdatePrompt<br/>ReleaseNotes (mikepenz Markdown, Coil images)"]
+    GH -- "list" --> DM["Desktop main.js<br/>update:check -> version"]
+    DM --> WP["UpdatesView / UpdatePrompt"]
+    GH -- "releases/tags/vX, from the page" --> WN["useReleaseNotes(version)"]
+    WN --> WP
+    WP --> RN["ReleaseNotes<br/>react-markdown + remark-gfm, lazy chunk"]
+```
+
+| | Android | Web / desktop |
+| --- | --- | --- |
+| Page | `UpdatesPage` (`app/Updates.kt`), opened from Settings as page `updates` | `/updates` (`UpdatesView.tsx`), linked from Settings → About |
+| Back | The page is one of `MainScreen`'s pages, so the predictive back gesture shrinks it and returns to Settings like every other page | "Settings" link at the top; the dialog closes on Escape |
+| Notes come from | the same release list as the check (`UpdateCheck.installedNotes`, `AppUpdate.notes`) | `GET api.github.com/.../releases/tags/v<version>` from the page, so desktop builds that predate notes show them too |
+| Renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` with the Coil image transformer | `react-markdown` + `remark-gfm` in `components/ReleaseNotes.tsx`, loaded on demand (`lib/releases.tsx`) |
+| Dev build | no update is offered; the page shows the notes of the release it was built from (`-dev` is dropped) | same page; a browser tab has nothing to install and says so |
+
+The notes need the internet. Without it the page says so and everything else on it still works.
 
 ### The offer at start and the download
 

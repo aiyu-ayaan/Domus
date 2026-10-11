@@ -67,6 +67,9 @@ the run ends, which deletes its session on that device. `pnpm android:dev` after
 - Inter is bundled (`@fontsource-variable/inter/wght.css`, imported by `main.tsx`), one variable woff2 per
   script served from `/assets` with the immutable cache. Nothing is fetched from another host, so the first
   paint does not wait on Google Fonts and the UI looks the same on a network without internet.
+- The Markdown parser for release notes (`react-markdown`, `remark-gfm`, about 160 kB) is its own chunk,
+  loaded the first time notes are drawn (`lib/releases.tsx`). `UpdatePrompt` sits in the shell, so it must
+  keep importing the lazy wrapper and never `components/ReleaseNotes` directly.
 - Before adding a dependency to something imported by `main.tsx`, `App.tsx` or `AppShell`, check the entry
   size in the `pnpm build` output.
 
