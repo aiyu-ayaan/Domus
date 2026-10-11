@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useState } from 'react'
 import { bucketOf, formatBucket, formatKwh, formatMoney, type Range } from '@/lib/format'
 import { cn } from '@/lib/cn'
@@ -21,7 +22,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
     )
   }
   const toggle = (
-    <span role="group" aria-label="Chart unit" className="flex rounded-md border border-border text-caption">
+    <span role="group" aria-label={t('chart.unit')} className="flex rounded-md border border-border text-caption">
       {(['kwh', 'watts'] as const).map((m) => (
         <button key={m} aria-pressed={metric === m} onClick={() => setMetric(m)} className={cn('cursor-pointer px-1.5 py-0.5', metric === m ? 'bg-raised text-fg' : 'text-muted')}>
           {m === 'kwh' ? 'kWh' : 'W'}
@@ -53,7 +54,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
         {[0.25, 0.5, 0.75].map((f) => (
           <div key={f} className="absolute inset-x-0 border-t border-border/70" style={{ bottom: `${f * 100}%` }} aria-hidden />
         ))}
-        <div role="list" aria-label={`Energy per ${bucketOf(range)}, total ${formatKwh(total)}`} className="relative flex h-full items-end gap-px" onMouseLeave={() => setActive(null)}>
+        <div role="list" aria-label={t('chart.energyPer', { bucket: bucketOf(range), total: formatKwh(total) })} className="relative flex h-full items-end gap-px" onMouseLeave={() => setActive(null)}>
           {points.map((p, i) => (
             <button
               key={p.t}

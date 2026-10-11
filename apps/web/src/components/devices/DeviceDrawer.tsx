@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useState } from 'react'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -82,48 +83,48 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
     mutationFn: () => api.updateDevice(device.id, admin ? { name, room_id: roomId || null } : { name }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.devices })
-      toast.push({ tone: 'success', title: 'Device updated' })
+      toast.push({ tone: 'success', title: t('drawer.updated') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.saveFailed'), message: errorMessage(e) }),
   })
   // Saved at once, not with "Save changes": it is a setting of how the device is handled, not of its name.
   const ask = useMutation({
     mutationFn: (on: boolean) => api.updateDevice(device.id, { confirm_changes: on }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.devices }),
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.saveFailed'), message: errorMessage(e) }),
   })
   const remove = useMutation({
     mutationFn: () => api.removeDevice(device.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.devices })
-      toast.push({ tone: 'success', title: `${device.name} removed` })
+      toast.push({ tone: 'success', title: t('drawer.removed', { name: device.name }) })
       setConfirm(false)
       onClose()
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not remove', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.removeFailed'), message: errorMessage(e) }),
   })
   const refresh = useMutation({
     mutationFn: () => api.refresh(device.id),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.devices }),
-    onError: (e) => toast.push({ tone: 'error', title: 'Refresh failed', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.refreshFailed'), message: errorMessage(e) }),
   })
 
   const readings: [string, string][] = []
-  if (s.air_quality_pm25 != null) readings.push(['PM2.5', `${formatNumber(s.air_quality_pm25, 0)} µg/m³ · ${airQuality(s.air_quality_pm25)?.label}`])
-  if (s.temperature != null) readings.push(['Temperature', `${formatNumber(s.temperature)} °C`])
-  if (s.humidity != null) readings.push(['Humidity', `${formatNumber(s.humidity, 0)} %`])
-  if (s.current_power_watts != null) readings.push(['Power', formatWatts(s.current_power_watts)])
-  if (s.voltage != null) readings.push(['Voltage', `${formatNumber(s.voltage)} V`])
-  if (s.current_amps != null) readings.push(['Current', `${formatNumber(s.current_amps, 2)} A`])
-  if (s.today_energy_kwh != null) readings.push(['Energy today', formatKwh(s.today_energy_kwh)])
-  if (s.filter_life != null) readings.push(['Filter life', `${formatNumber(s.filter_life, 0)} %`])
+  if (s.air_quality_pm25 != null) readings.push([t('reading.pm25'), `${formatNumber(s.air_quality_pm25, 0)} µg/m³ · ${airQuality(s.air_quality_pm25)?.label}`])
+  if (s.temperature != null) readings.push([t('reading.temperature'), `${formatNumber(s.temperature)} °C`])
+  if (s.humidity != null) readings.push([t('reading.humidity'), `${formatNumber(s.humidity, 0)} %`])
+  if (s.current_power_watts != null) readings.push([t('reading.power'), formatWatts(s.current_power_watts)])
+  if (s.voltage != null) readings.push([t('reading.voltage'), `${formatNumber(s.voltage)} V`])
+  if (s.current_amps != null) readings.push([t('reading.current'), `${formatNumber(s.current_amps, 2)} A`])
+  if (s.today_energy_kwh != null) readings.push([t('reading.energyToday'), formatKwh(s.today_energy_kwh)])
+  if (s.filter_life != null) readings.push([t('reading.filterLife'), `${formatNumber(s.filter_life, 0)} %`])
   // What a sensor last saw, and how its battery is doing.
-  if (typeof s.motion === 'boolean') readings.push(['Motion', s.motion ? 'Detected' : 'Clear'])
-  if (typeof s.contact === 'boolean') readings.push(['Door or window', s.contact ? 'Open' : 'Closed'])
-  if (typeof s.water_leak === 'boolean') readings.push(['Water', s.water_leak ? 'Leak' : 'Dry'])
-  if (typeof s.alarm === 'boolean') readings.push(['Alarm', s.alarm ? 'Sounding' : 'Quiet'])
-  if (typeof s.battery === 'number') readings.push(['Battery', `${formatNumber(s.battery, 0)} %`])
-  else if (typeof s.battery_low === 'boolean') readings.push(['Battery', s.battery_low ? 'Low' : 'OK'])
+  if (typeof s.motion === 'boolean') readings.push([t('reading.motion'), t(s.motion ? 'reading.detected' : 'reading.clear')])
+  if (typeof s.contact === 'boolean') readings.push([t('reading.doorWindow'), t(s.contact ? 'reading.open' : 'reading.closed')])
+  if (typeof s.water_leak === 'boolean') readings.push([t('reading.water'), t(s.water_leak ? 'reading.leak' : 'reading.dry')])
+  if (typeof s.alarm === 'boolean') readings.push([t('reading.alarm'), t(s.alarm ? 'reading.sounding' : 'reading.quiet')])
+  if (typeof s.battery === 'number') readings.push([t('reading.battery'), `${formatNumber(s.battery, 0)} %`])
+  else if (typeof s.battery_low === 'boolean') readings.push([t('reading.battery'), t(s.battery_low ? 'reading.low' : 'reading.ok')])
   const fan = s.options?.fan_speed
   const modes = s.options?.mode
 
@@ -133,32 +134,32 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
     <div>
       {guard.dialog}
       <div className="mb-6 flex items-center gap-2">
-        <Badge tone={device.is_online ? 'on' : 'danger'}>{device.is_online ? 'Online' : 'Offline'}</Badge>
+        <Badge tone={device.is_online ? 'on' : 'danger'}>{t(device.is_online ? 'device.online' : 'device.offline')}</Badge>
         <span className="min-w-0 flex-1 truncate text-label text-muted">
-          {[device.model, device.ip_address, `seen ${timeAgo(device.last_seen)}`].filter(Boolean).join(' · ')}
+          {[device.model, device.ip_address, t('drawer.seen', { when: timeAgo(device.last_seen) })].filter(Boolean).join(' · ')}
         </span>
-        <Button variant="ghost" size="sm" aria-label="Refresh state" icon={<ArrowsClockwise size={16} />} loading={refresh.isPending} onClick={() => refresh.mutate()} />
+        <Button variant="ghost" size="sm" aria-label={t('drawer.refresh')} icon={<ArrowsClockwise size={16} />} loading={refresh.isPending} onClick={() => refresh.mutate()} />
       </div>
 
       {(canToggle(device) || isLight || fan?.length || modes?.length) && (
-        <Section title="Controls">
+        <Section title={t('drawer.controls')}>
           <div className="rounded-lg border border-border px-4">
             {canToggle(device) && (
               <div className="flex min-h-12 items-center justify-between border-b border-border last:border-0">
-                <span className="text-body">Power</span>
+                <span className="text-body">{t('drawer.power')}</span>
                 <span className="flex items-center gap-3">
-                  <span className="text-label text-muted">{s.is_on ? 'On' : 'Off'}</span>
-                  <Switch checked={!!s.is_on} onChange={(v) => guard.ask([device], v, () => send({ is_on: v }))} label="Power" disabled={!control} />
+                  <span className="text-label text-muted">{t(s.is_on ? 'device.on' : 'device.off')}</span>
+                  <Switch checked={!!s.is_on} onChange={(v) => guard.ask([device], v, () => send({ is_on: v }))} label={t('drawer.power')} disabled={!control} />
                 </span>
               </div>
             )}
             {s.brightness != null && (
               <div className="border-b border-border py-3 last:border-0">
                 <div className="flex justify-between text-body">
-                  <span>Brightness</span>
+                  <span>{t('drawer.brightness')}</span>
                   <span className="text-muted tabular">{brightness}%</span>
                 </div>
-                <Slider label="Brightness" min={1} value={brightness} onChange={setBrightness} onCommit={(v) => send({ brightness: v })} disabled={!control} />
+                <Slider label={t('drawer.brightness')} min={1} value={brightness} onChange={setBrightness} onCommit={(v) => send({ brightness: v })} disabled={!control} />
               </div>
             )}
             {isLight && (
@@ -192,15 +193,15 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
             )}
             {fan && fan.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-0">
-                <span className="text-body">Fan speed</span>
-                <Segmented size="sm" label="Fan speed" value={s.fan_speed} options={fan.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ fan_speed: v })} />
+                <span className="text-body">{t('drawer.fanSpeed')}</span>
+                <Segmented size="sm" label={t('drawer.fanSpeed')} value={s.fan_speed} options={fan.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ fan_speed: v })} />
               </div>
             )}
             {modes && modes.length > 0 && (
               <div className="border-b border-border last:border-0">
                 <div className="flex flex-wrap items-center justify-between gap-3 py-3">
-                  <span className="text-body">Mode</span>
-                  <Segmented size="sm" label="Mode" value={s.mode} options={modes.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ mode: v })} />
+                  <span className="text-body">{t('drawer.mode')}</span>
+                  <Segmented size="sm" label={t('drawer.mode')} value={s.mode} options={modes.map((o) => ({ value: o, label: o }))} onChange={(v) => control && send({ mode: v })} />
                 </div>
                 <FanSpeedSlider device={device} disabled={!control} className="pb-3" />
               </div>
@@ -210,7 +211,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
       )}
 
       {readings.length > 0 && (
-        <Section title="Readings">
+        <Section title={t('drawer.readings')}>
           <div className="rounded-lg border border-border px-4">
             {readings.map(([k, v]) => (
               <Row key={k} label={k}>
@@ -222,18 +223,18 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
       )}
 
       {metered && (
-        <Section title="Energy · last 24 hours">
+        <Section title={t('drawer.energy24')}>
           <EnergyChart points={history.data ?? []} range="day" currency={energy?.settings.currency ?? 'USD'} height={120} />
         </Section>
       )}
 
       {(admin || device.can_edit) && (
-        <Section title="Settings">
+        <Section title={t('drawer.settings')}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Field label={t('common.name')} value={name} onChange={(e) => setName(e.target.value)} />
             {admin && (
-              <SelectField label="Room" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-                <option value="">No room</option>
+              <SelectField label={t('common.room')} value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+                <option value="">{t('devices.noRoom')}</option>
                 {rooms.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.name}
@@ -245,22 +246,22 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
           {canToggle(device) && (
             <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border px-4 py-2">
               <div>
-                <p className="text-body">Ask before switching</p>
-                <p className="text-label text-muted">Warns before this device is turned on or off from any app, a group or a scene. Use it for a main switch.</p>
+                <p className="text-body">{t('drawer.askBefore.title')}</p>
+                <p className="text-label text-muted">{t('drawer.askBefore.hint')}</p>
               </div>
-              <Switch checked={device.confirm_changes} onChange={(on) => ask.mutate(on)} label="Ask before switching" disabled={ask.isPending} />
+              <Switch checked={device.confirm_changes} onChange={(on) => ask.mutate(on)} label={t('drawer.askBefore.title')} disabled={ask.isPending} />
             </div>
           )}
           <div className="mt-4 flex flex-wrap justify-between gap-2">
             {admin ? (
               <Button variant="danger" onClick={() => setConfirm(true)}>
-                Remove device
+                {t('drawer.remove')}
               </Button>
             ) : (
               <span />
             )}
             <Button variant="primary" loading={save.isPending} disabled={!name.trim() || (name === device.name && (!admin || roomId === (device.room_id ?? '')))} onClick={() => save.mutate()}>
-              Save changes
+              {t('drawer.saveChanges')}
             </Button>
           </div>
         </Section>
@@ -271,9 +272,9 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
         onClose={() => setConfirm(false)}
         onConfirm={() => remove.mutate()}
         loading={remove.isPending}
-        title={`Remove ${device.name}?`}
-        message="It is removed from rooms, groups and automations. If it is still on your network, discovery will offer it again."
-        confirmLabel="Remove"
+        title={t('drawer.removeTitle', { name: device.name })}
+        message={t('drawer.removeMessage')}
+        confirmLabel={t('drawer.removeConfirm')}
       />
     </div>
   )

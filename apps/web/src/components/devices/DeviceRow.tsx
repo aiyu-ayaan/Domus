@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { WifiSlash } from '@phosphor-icons/react'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Switch } from '@/components/ui/Controls'
@@ -19,7 +20,7 @@ export function DeviceRow({ device, room, onOpen }: { device: Device; room?: Roo
 
   return (
     <li className="group relative flex min-h-14 items-center gap-3 px-4 py-2 transition-colors duration-fast hover:bg-raised/60">
-      <button onClick={onOpen} className="absolute inset-0 cursor-pointer focus-visible:outline-offset-[-2px]" aria-label={`Open ${device.name}`} />
+      <button onClick={onOpen} className="absolute inset-0 cursor-pointer focus-visible:outline-offset-[-2px]" aria-label={t('deviceRow.open', { name: device.name })} />
       <Icon size={18} className={cn('pointer-events-none relative shrink-0', on ? 'text-on' : 'text-subtle')} aria-hidden />
       <div className="pointer-events-none relative min-w-0 flex-1">
         <p className="truncate text-body font-medium">{device.name}</p>
@@ -37,7 +38,7 @@ export function DeviceRow({ device, room, onOpen }: { device: Device; room?: Roo
           <Switch
             checked={on}
             disabled={!control || !device.is_online}
-            label={`${device.name} power`}
+            label={t('deviceRow.power', { name: device.name })}
             onChange={(v) => confirm.ask([device], v, () => command.mutate({ id: device.id, cmd: { is_on: v } }))}
           />
         </span>

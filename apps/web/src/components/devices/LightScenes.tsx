@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useQuery } from '@tanstack/react-query'
 import { Stop } from '@phosphor-icons/react'
 import { api } from '@/lib/api'
@@ -46,7 +47,7 @@ export function LightMoods({ device, disabled, onPick }: { device: Device; disab
   if (!data?.moods.length) return null
   return (
     <div className="flex flex-col gap-1.5 pt-1">
-      <span className="text-caption font-medium text-muted">Moods</span>
+      <span className="text-caption font-medium text-muted">{t('light.moods')}</span>
       <Tiles
         presets={data.moods}
         disabled={disabled}
@@ -67,7 +68,7 @@ export function LightEffects({ device, disabled, onPick }: { device: Device; dis
     <div className="flex flex-col gap-2">
       {playing && (
         <button type="button" disabled={disabled} onClick={() => onPick('')} className="flex cursor-pointer items-center gap-1 self-start text-caption text-muted hover:text-fg disabled:cursor-not-allowed">
-          <Stop size={12} weight="fill" /> Stop effect
+          <Stop size={12} weight="fill" /> {t('light.stopEffect')}
         </button>
       )}
       <Tiles presets={(data?.effects ?? []).filter((e) => playable.has(e.id))} disabled={disabled} onPick={onPick} active={(e) => e.id === playing} />

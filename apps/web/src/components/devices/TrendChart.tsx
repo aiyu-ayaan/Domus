@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useState } from 'react'
 import { bucketOf, formatBucket, formatNumber, type Range } from '@/lib/format'
 
@@ -45,7 +46,7 @@ export function TrendChart({
   const d = measured.map((m, k) => `${k > 0 && measured[k - 1].i === m.i - 1 ? 'L' : 'M'}${x(m.i)},${y(m.value)}`).join(' ')
   const shown = active ?? measured[measured.length - 1].i
   const sel = points[shown]
-  const value = (v: number | null) => (v == null ? 'No reading' : `${formatNumber(v, digits)} ${unit}`)
+  const value = (v: number | null) => (v == null ? t('chart.noReading') : `${formatNumber(v, digits)} ${unit}`)
 
   return (
     <div>
@@ -65,7 +66,7 @@ export function TrendChart({
         {sel.value != null && (
           <span className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on" style={{ left: `${x(shown)}%`, top: `${y(sel.value)}%` }} aria-hidden />
         )}
-        <div role="list" aria-label={`Trend per ${bucketOf(range)}`} className="absolute inset-0 flex" onMouseLeave={() => setActive(null)}>
+        <div role="list" aria-label={t('chart.trendPer', { bucket: bucketOf(range) })} className="absolute inset-0 flex" onMouseLeave={() => setActive(null)}>
           {points.map((p, i) => (
             <button
               key={p.t}

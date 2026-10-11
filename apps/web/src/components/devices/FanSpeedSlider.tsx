@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useState } from 'react'
 import { Slider } from '@/components/ui/Controls'
 import { useCommand } from '@/lib/queries'
@@ -31,15 +32,15 @@ export function FanSpeedSlider({ device, disabled, className }: { device: Device
       <div className="-mx-1 min-h-0 overflow-hidden px-1">
         <div className={className}>
           <div className="flex items-baseline justify-between gap-3">
-            <span className="text-body">Speed</span>
+            <span className="text-body">{t('fan.speed')}</span>
             {cadr > 0 && (
               <span className="text-label text-muted tabular">
-                Coverage {Math.floor(cadr * 0.07)}–{Math.floor(cadr * 0.12)} m²
+                {t('fan.coverage', { from: Math.floor(cadr * 0.07), to: Math.floor(cadr * 0.12) })}
               </span>
             )}
           </div>
           <Slider
-            label={`${device.name} speed`}
+            label={t('fan.speedLabel', { name: device.name })}
             value={value}
             onChange={setValue}
             onCommit={(v) => command.mutate({ id: device.id, cmd: { fan_percent: v } })}
