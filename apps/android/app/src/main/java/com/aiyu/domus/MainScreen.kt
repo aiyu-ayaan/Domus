@@ -34,19 +34,12 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Session
 import com.aiyu.domus.ui.components.FloatingNavScaffold
 import com.aiyu.domus.ui.components.NavTab
-
-private val Tabs = listOf(
-    "home" to NavTab("Home", Icons.Outlined.Home, Icons.Rounded.Home),
-    "devices" to NavTab("Devices", Icons.Outlined.Devices, Icons.Rounded.Devices),
-    "scenes" to NavTab("Scenes", Icons.Outlined.AutoAwesome, Icons.Rounded.AutoAwesome),
-    "analytics" to NavTab("Analytics", Icons.Outlined.Insights, Icons.Rounded.Insights),
-    "settings" to NavTab("Settings", Icons.Outlined.Settings, Icons.Rounded.Settings),
-)
 
 /** How deep a page sits: tabs 0, pages 1, About's Acknowledgements and a person under People 2. Decides which way a change slides. */
 private fun pageDepth(page: String?) = when {
@@ -89,8 +82,15 @@ fun MainScreen(session: Session.SignedIn) {
         ) { current -> saved.SaveableStateProvider(current ?: "tabs") {
             when {
                 current == null -> {
+                    val allTabs = listOf(
+                        "home" to NavTab(stringResource(R.string.nav_home), Icons.Outlined.Home, Icons.Rounded.Home),
+                        "devices" to NavTab(stringResource(R.string.nav_devices), Icons.Outlined.Devices, Icons.Rounded.Devices),
+                        "scenes" to NavTab(stringResource(R.string.nav_scenes), Icons.Outlined.AutoAwesome, Icons.Rounded.AutoAwesome),
+                        "analytics" to NavTab(stringResource(R.string.nav_analytics), Icons.Outlined.Insights, Icons.Rounded.Insights),
+                        "settings" to NavTab(stringResource(R.string.nav_settings), Icons.Outlined.Settings, Icons.Rounded.Settings),
+                    )
                     // Analytics exists only when the home measures power or air.
-                    val tabs = Tabs.filter { it.first != "analytics" || devices.measuresPower() || devices.measuresAir() }
+                    val tabs = allTabs.filter { it.first != "analytics" || devices.measuresPower() || devices.measuresAir() }
                     val index = tabs.indexOfFirst { it.first == tab }.coerceAtLeast(0)
                     FloatingNavScaffold(tabs.map { it.second }, index, { tab = tabs[it].first }) { selected ->
                         when (tabs[selected].first) {

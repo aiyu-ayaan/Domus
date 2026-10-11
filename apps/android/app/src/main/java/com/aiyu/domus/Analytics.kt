@@ -31,6 +31,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -69,14 +71,22 @@ fun List<Device>.measuresAir() = any { it.type == "air_purifier" || it.state.pm2
 // "live" is what the devices report right now, sampled by the app while the page is open.
 // "hour" is the last 60 minutes, one bucket a minute. Air is sampled too coarsely for it.
 private val Ranges = listOf(
-    Triple("live", "Live", Icons.Rounded.MonitorHeart),
-    Triple("hour", "1 min", Icons.Rounded.Schedule),
-    Triple("day", "Day", Icons.Rounded.Today),
-    Triple("week", "Week", Icons.Rounded.DateRange),
-    Triple("month", "Month", Icons.Rounded.CalendarMonth),
+    Triple("live", R.string.analytics_range_live, Icons.Rounded.MonitorHeart),
+    Triple("hour", R.string.analytics_range_hour, Icons.Rounded.Schedule),
+    Triple("day", R.string.analytics_range_day, Icons.Rounded.Today),
+    Triple("week", R.string.analytics_range_week, Icons.Rounded.DateRange),
+    Triple("month", R.string.analytics_range_month, Icons.Rounded.CalendarMonth),
 )
 /** What one bucket of [range] covers. */
-private fun bucketOf(range: String) = when (range) { "live" -> "5 seconds"; "hour" -> "minute"; "day" -> "hour"; else -> "day" }
+@Composable
+private fun bucketOf(range: String) = stringResource(
+    when (range) {
+        "live" -> R.string.analytics_bucket_5s
+        "hour" -> R.string.analytics_bucket_minute
+        "day" -> R.string.analytics_bucket_hour
+        else -> R.string.analytics_bucket_day
+    }
+)
 
 /** The last five minutes of what [sample] reads (it is given the time as ISO-8601), taken every five seconds while on screen. */
 // shortcut: held by the page, so the line starts empty on each visit; keep the samples in the repository if it should outlive the page.
@@ -115,9 +125,10 @@ fun rememberIs24HourFormat(): Boolean {
  * the chosen one widens and spells its name, like a navigation bar item.
  */
 @Composable
-private fun RangePicker(range: String, ranges: List<Triple<String, String, ImageVector>>, onChange: (String) -> Unit) {
+private fun RangePicker(range: String, ranges: List<Triple<String, Int, ImageVector>>, onChange: (String) -> Unit) {
     Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        ranges.forEachIndexed { index, (key, label, icon) ->
+        ranges.forEachIndexed { index, (key, labelRes, icon) ->
+            val label = stringResource(labelRes)
             val selected = range == key
             val weight by animateFloatAsState(if (selected) 2f else 1f, MaterialTheme.motionScheme.fastEffectsSpec(), label = "weight")
             ToggleButton(
@@ -183,13 +194,13 @@ fun AnalyticsScreen(user: User, onOpenDevice: (String) -> Unit, onEditTariff: ()
     val motion = MaterialTheme.motionScheme
 
     ScreenColumn {
-        ScreenHeader("Analytics", if (shown == "power") "Power use and cost" else "Air health and purifiers") {
-            if (shown == "power" && user.isAdmin) FilledTonalIconButton(onEditTariff) { Icon(Icons.Rounded.Payments, "Electricity tariff") }
+        ScreenHeader(stringResource(R.string.analytics_title), stringResource(if (shown == "power") R.string.analytics_subtitle_power else R.string.analytics_subtitle_air)) {
+            if (shown == "power" && user.isAdmin) FilledTonalIconButton(onEditTariff) { Icon(Icons.Rounded.Payments, stringResource(R.string.analytics_electricity_tariff)) }
         }
         if (power && air) {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                SegmentedButton(shown == "power", { section = "power" }, SegmentedButtonDefaults.itemShape(0, 2), icon = { Icon(Icons.Rounded.Bolt, null, Modifier.size(18.dp)) }) { Text("Electricity") }
-                SegmentedButton(shown == "air", { section = "air" }, SegmentedButtonDefaults.itemShape(1, 2), icon = { Icon(Icons.Rounded.Air, null, Modifier.size(18.dp)) }) { Text("Air quality") }
+                SegmentedButton(shown == "power", { section = "power" }, SegmentedButtonDefaults.itemShape(0, 2), icon = { Icon(Icons.Rounded.Bolt, null, Modifier.size(18.dp)) }) { Text(stringResource(R.string.analytics_tab_electricity)) }
+                SegmentedButton(shown == "air", { section = "air" }, SegmentedButtonDefaults.itemShape(1, 2), icon = { Icon(Icons.Rounded.Air, null, Modifier.size(18.dp)) }) { Text(stringResource(R.string.analytics_tab_air)) }
             }
         }
         AnimatedContent(shown, transitionSpec = { fadeIn(motion.defaultEffectsSpec()).togetherWith(fadeOut(motion.fastEffectsSpec())) }, label = "section") { which ->
@@ -226,7 +237,7 @@ private fun ColumnScope.ElectricitySection() {
     val overview = energy
     if (overview == null) {
         if (loading) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
-        else EmptyState("No energy data yet", "Readings appear a minute after a metering plug or switch comes online.")
+        else EmptyState(stringResource(R.string.analytics_no_energy_title), stringResource(R.string.analytics_no_energy_subtitle))
         return
     }
     val currency = overview.settings.currency
@@ -236,24 +247,24 @@ private fun ColumnScope.ElectricitySection() {
 
     Surface(color = c.primaryContainer, contentColor = c.onPrimaryContainer, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Using now", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.analytics_using_now), style = MaterialTheme.typography.labelLarge)
             RollingText(formatWatts(wattsToDisplay), MaterialTheme.typography.displayMedium)
-            Text("On track for ${formatMoney(overview.projectedCost, currency)} this billing cycle", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.analytics_projected_cost, formatMoney(overview.projectedCost, currency)), style = MaterialTheme.typography.bodyMedium)
         }
     }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(1), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard("Today", formatKwh(overview.todayKwh), formatMoney(overview.todayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Energy used since midnight. The amount below it is the estimated cost at your electricity rate.")
-        StatCard("This cycle", formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Energy used and estimated bill so far in the current billing cycle.")
+        StatCard(stringResource(R.string.analytics_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_today_info))
+        StatCard(stringResource(R.string.analytics_this_cycle), formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_this_cycle_info))
     }
 
     val live = rememberLive { EnergyPoint(it, watts = wattsToDisplay) }
-    SectionTitle("History")
+    SectionTitle(stringResource(R.string.analytics_history))
     RangePicker(range, Ranges) { range = it }
     ChartCard {
         val isLive = range == "live"
         val points = when (range) { "live" -> live; "hour" -> hour; "day" -> day; "week" -> week; else -> month }
         if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        else if (!isLive && points.sumOf { it.kwh } <= 0) Text("Nothing recorded in this period yet.", color = c.onSurfaceVariant)
+        else if (!isLive && points.sumOf { it.kwh } <= 0) Text(stringResource(R.string.analytics_nothing_recorded), color = c.onSurfaceVariant)
         else {
             // Starts on the latest bucket; a tap or drag picks another.
             var picked by remember(range) { mutableStateOf<Int?>(null) }
@@ -261,25 +272,25 @@ private fun ColumnScope.ElectricitySection() {
             // Live has no energy yet, only the power being drawn.
             val watts = metric || isLive
             if (!isLive) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!metric, { metric = false }, { Text("Energy") })
-                FilterChip(metric, { metric = true }, { Text("Power") })
+                FilterChip(!metric, { metric = false }, { Text(stringResource(R.string.analytics_metric_energy)) })
+                FilterChip(metric, { metric = true }, { Text(stringResource(R.string.analytics_metric_power)) })
             }
             // Power starts on the latest measured bucket.
             val selected = (picked ?: if (watts) points.indexOfLast { it.watts != null } else points.lastIndex).coerceIn(0, points.lastIndex)
             val point = points[selected]
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                RollingText(if (watts) point.watts?.let(::formatWatts) ?: "No reading" else "${formatKwh(point.kwh)} · ${formatMoney(point.cost, currency)}", MaterialTheme.typography.titleMedium)
+                RollingText(if (watts) point.watts?.let(::formatWatts) ?: stringResource(R.string.analytics_no_reading) else stringResource(R.string.analytics_kwh_and_cost, formatKwh(point.kwh), formatMoney(point.cost, currency)), MaterialTheme.typography.titleMedium)
             }
             val per = bucketOf(range)
-            if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, "Average power per $per", Modifier.fillMaxWidth().height(160.dp))
-            else BarChart(points.map { it.kwh }, selected, { picked = it }, "Energy used per $per, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
+            if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, stringResource(R.string.analytics_chart_avg_power, per), Modifier.fillMaxWidth().height(160.dp))
+            else BarChart(points.map { it.kwh }, selected, { picked = it }, stringResource(R.string.analytics_chart_energy_used, per, formatKwh(points.sumOf { it.kwh })), Modifier.fillMaxWidth().height(160.dp))
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
-            Text(if (isLive) "The last 5 minutes, a reading every 5 seconds while this page is open." else "Total ${formatKwh(points.sumOf { it.kwh })} · ${formatMoney(points.sumOf { it.cost }, currency)}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            Text(if (isLive) stringResource(R.string.analytics_live_caption) else stringResource(R.string.analytics_total_caption, formatKwh(points.sumOf { it.kwh }), formatMoney(points.sumOf { it.cost }, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
 
-    SectionTitle("Insights")
+    SectionTitle(stringResource(R.string.analytics_insights))
     val peak = day?.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
     // Days before today that recorded anything: an empty day means "not measured yet", not "used nothing".
     val earlier = week.orEmpty().dropLast(1).filter { it.kwh > 0 }
@@ -287,37 +298,37 @@ private fun ColumnScope.ElectricitySection() {
     val change = average?.let { (overview.todayKwh - it) / it * 100 }
     val top = overview.devices.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
     FactRow(
-        Triple("Peak hour", peak?.let { formatBucket(it.t, "hour", is24Hour) } ?: "—", peak?.let { "${formatKwh(it.kwh)} in the last 24 h" } ?: "No usage yet"),
-        Triple("Daily average", average?.let(::formatKwh) ?: "—", if (average == null) "Needs a full day" else "Over the last ${earlier.size} ${if (earlier.size == 1) "day" else "days"}"),
+        Triple(stringResource(R.string.analytics_peak_hour), peak?.let { formatBucket(it.t, "hour", is24Hour) } ?: "—", peak?.let { stringResource(R.string.analytics_peak_last_24h, formatKwh(it.kwh)) } ?: stringResource(R.string.analytics_no_usage_yet)),
+        Triple(stringResource(R.string.analytics_daily_average), average?.let(::formatKwh) ?: "—", if (average == null) stringResource(R.string.analytics_needs_full_day) else pluralStringResource(R.plurals.analytics_over_last_days, earlier.size, earlier.size)),
         index = 2,
     )
     FactRow(
         Triple(
-            "Today vs average", change?.let { "${if (it > 0) "+" else ""}${it.roundToInt()}%" } ?: "—",
-            when { change == null -> "Needs a full day"; change > 10 -> "Above your usual day"; change < -10 -> "Below your usual day"; else -> "About your usual day" },
+            stringResource(R.string.analytics_today_vs_average), change?.let { "${if (it > 0) "+" else ""}${it.roundToInt()}%" } ?: "—",
+            stringResource(when { change == null -> R.string.analytics_needs_full_day; change > 10 -> R.string.analytics_above_usual_day; change < -10 -> R.string.analytics_below_usual_day; else -> R.string.analytics_about_usual_day }),
         ),
-        Triple("Top device", top?.let { "${(it.kwh / overview.cycleKwh.coerceAtLeast(0.0001) * 100).roundToInt()}%" } ?: "—", top?.name ?: "No metered device"),
+        Triple(stringResource(R.string.analytics_top_device), top?.let { "${(it.kwh / overview.cycleKwh.coerceAtLeast(0.0001) * 100).roundToInt()}%" } ?: "—", top?.name ?: stringResource(R.string.analytics_no_metered_device)),
         index = 3,
     )
 
-    SectionTitle("Billing cycle")
+    SectionTitle(stringResource(R.string.analytics_billing_cycle))
     ChartCard {
         val elapsed = overview.cycleDay.toFloat() / overview.cycleDays.coerceAtLeast(1)
-        Row { Text("Time elapsed", Modifier.weight(1f)); Text("Day ${overview.cycleDay} of ${overview.cycleDays}", color = c.onSurfaceVariant) }
+        Row { Text(stringResource(R.string.analytics_time_elapsed), Modifier.weight(1f)); Text(stringResource(R.string.analytics_day_of_days, overview.cycleDay, overview.cycleDays), color = c.onSurfaceVariant) }
         LinearProgressIndicator(progress = { elapsed.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
         val budget = overview.settings.monthlyBudget
         val used = overview.budgetUsedPercent
         if (budget != null && used != null) {
             val ahead = used / 100 > elapsed + 0.1
-            Row { Text("Budget used", Modifier.weight(1f)); Text("${formatMoney(overview.cycleCost, currency)} of ${formatMoney(budget, currency)}", color = c.onSurfaceVariant) }
+            Row { Text(stringResource(R.string.analytics_budget_used), Modifier.weight(1f)); Text(stringResource(R.string.analytics_cost_of_budget, formatMoney(overview.cycleCost, currency), formatMoney(budget, currency)), color = c.onSurfaceVariant) }
             LinearWavyProgressIndicator(progress = { (used / 100).toFloat().coerceIn(0f, 1f) }, color = if (ahead) c.error else c.primary, modifier = Modifier.fillMaxWidth())
-            if (ahead) Text("Spending is ahead of the calendar.", color = c.error, style = MaterialTheme.typography.bodyMedium)
+            if (ahead) Text(stringResource(R.string.analytics_spending_ahead), color = c.error, style = MaterialTheme.typography.bodyMedium)
         } else {
-            Text("Set a monthly budget in the tariff to track spending against it.", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            Text(stringResource(R.string.analytics_budget_hint), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
 
-    if (overview.devices.isNotEmpty()) SectionTitle("By device")
+    if (overview.devices.isNotEmpty()) SectionTitle(stringResource(R.string.analytics_by_device))
     val most = overview.devices.maxOfOrNull { it.kwh }?.takeIf { it > 0 } ?: 1.0
     overview.devices.sortedByDescending { it.kwh }.forEachIndexed { index, device ->
         Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(4 + index)) {
@@ -327,16 +338,17 @@ private fun ColumnScope.ElectricitySection() {
                     RollingText(formatWatts(device.watts), MaterialTheme.typography.titleMedium)
                 }
                 LinearProgressIndicator(progress = { (device.kwh / most).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                Text("${formatKwh(device.kwh)} · ${formatMoney(device.cost, currency)} this cycle", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                Text(stringResource(R.string.analytics_device_cycle_summary, formatKwh(device.kwh), formatMoney(device.cost, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
             }
         }
     }
 }
 
-private val Readings = listOf("pm25" to "PM2.5", "temperature" to "Temperature", "humidity" to "Humidity")
+private val Readings = listOf("pm25" to R.string.analytics_reading_pm25, "temperature" to R.string.analytics_reading_temperature, "humidity" to R.string.analytics_reading_humidity)
 private fun AirPoint.reading(key: String) = when (key) { "temperature" -> temperature; "humidity" -> humidity; else -> pm25 }
+@Composable
 private fun readingText(key: String, value: Double?) = when {
-    value == null -> "No reading"
+    value == null -> stringResource(R.string.analytics_no_reading)
     key == "temperature" -> "${"%.1f".format(value)} °C"
     key == "humidity" -> "${value.roundToInt()}%"
     else -> "${value.roundToInt()} µg/m³"
@@ -386,24 +398,26 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     }
     Surface(color = tone, contentColor = onTone, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("PM2.5 now", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.analytics_pm25_now), style = MaterialTheme.typography.labelLarge)
             Row(verticalAlignment = Alignment.Bottom) {
                 RollingText(pm?.roundToInt()?.toString() ?: "—", MaterialTheme.typography.displayMedium)
                 Text(" µg/m³", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             }
             Text(
-                when (level) {
-                    null -> "No sensor is online"
-                    AirLevel.EXCELLENT -> "Excellent · clean indoor air"
-                    AirLevel.GOOD -> "Good · within the healthy range"
-                    AirLevel.MODERATE -> "Moderate · run a purifier or air the room"
-                    AirLevel.POOR -> "Poor · run purifiers on high and keep windows shut"
-                },
+                stringResource(
+                    when (level) {
+                        null -> R.string.analytics_air_no_sensor_online
+                        AirLevel.EXCELLENT -> R.string.analytics_air_status_excellent
+                        AirLevel.GOOD -> R.string.analytics_air_status_good
+                        AirLevel.MODERATE -> R.string.analytics_air_status_moderate
+                        AirLevel.POOR -> R.string.analytics_air_status_poor
+                    }
+                ),
                 style = MaterialTheme.typography.bodyLarge,
             )
             if (pm != null) {
                 AirScale(pm, Modifier.fillMaxWidth().padding(top = 12.dp))
-                Row { listOf("Excellent", "Good", "Moderate", "Poor").forEach { Text(it, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall) } }
+                Row { AirLevel.entries.forEach { Text(it.text(), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall) } }
             }
         }
     }
@@ -413,24 +427,24 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     val temperature = sensors.mapNotNull { it.state.temperature }.takeIf { it.isNotEmpty() }?.average()
     val humidity = sensors.mapNotNull { it.state.humidity }.takeIf { it.isNotEmpty() }?.average()
     val facts = listOfNotNull(
-        if (purifiers.isNotEmpty()) Triple("Purifiers", "$running of ${purifiers.size}", if (running == 0) "All on standby" else "Running now") else null,
-        filter?.let { Triple("Filter life", "${it.roundToInt()}%", if (it < 15) "Replace soon" else "Healthy") },
-        temperature?.let { Triple("Temperature", "${"%.1f".format(it)} °C", "Average of your sensors") },
-        humidity?.let { Triple("Humidity", "${it.roundToInt()}%", if (it < 30) "Dry" else if (it > 60) "Humid" else "Comfortable") },
+        if (purifiers.isNotEmpty()) Triple(stringResource(R.string.analytics_purifiers), stringResource(R.string.analytics_running_of_total, running, purifiers.size), stringResource(if (running == 0) R.string.analytics_all_on_standby else R.string.analytics_running_now)) else null,
+        filter?.let { Triple(stringResource(R.string.analytics_filter_life), "${it.roundToInt()}%", stringResource(if (it < 15) R.string.analytics_filter_replace_soon else R.string.analytics_filter_healthy)) },
+        temperature?.let { Triple(stringResource(R.string.analytics_reading_temperature), "${"%.1f".format(it)} °C", stringResource(R.string.analytics_sensors_average)) },
+        humidity?.let { Triple(stringResource(R.string.analytics_reading_humidity), "${it.roundToInt()}%", stringResource(if (it < 30) R.string.analytics_humidity_dry else if (it > 60) R.string.analytics_humidity_humid else R.string.analytics_humidity_comfortable)) },
     )
     facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) }
 
-    SectionTitle("Trend")
+    SectionTitle(stringResource(R.string.analytics_trend))
     RangePicker(range, Ranges.filter { it.first != "hour" }) { range = it }
     val live = rememberLive { AirPoint(it, pm?.toDouble(), temperature, humidity) }
     val points = if (range == "live") live else history
     // Offer only the readings the home's devices report.
     val available = Readings.filter { (key, _) -> key == "pm25" || points.orEmpty().any { it.reading(key) != null } }
     val shown = if (available.any { it.first == reading }) reading else "pm25"
-    if (available.size > 1) Choice(available, shown, { reading = it })
+    if (available.size > 1) Choice(available.map { it.first to stringResource(it.second) }, shown, { reading = it })
     ChartCard {
         if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        else if (points.none { it.reading(shown) != null }) Text("No history yet. Readings are recorded every few minutes while a sensor is online.", color = c.onSurfaceVariant)
+        else if (points.none { it.reading(shown) != null }) Text(stringResource(R.string.analytics_no_air_history), color = c.onSurfaceVariant)
         else {
             var picked by remember(range, shown) { mutableStateOf<Int?>(null) }
             val selected = (picked ?: points.indexOfLast { it.reading(shown) != null }).coerceIn(0, points.lastIndex)
@@ -441,42 +455,42 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
             val measured = points.mapNotNull { it.reading(shown) }
             LineChart(
                 points.map { it.reading(shown) }, selected, { picked = it },
-                "${Readings.first { it.first == shown }.second} per ${bucketOf(range)}, average ${readingText(shown, measured.average())}",
+                stringResource(R.string.analytics_air_chart_summary, stringResource(Readings.first { it.first == shown }.second), bucketOf(range), readingText(shown, measured.average())),
                 Modifier.fillMaxWidth().height(160.dp),
                 marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
             )
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
-            if (shown == "pm25") Text("Dashed lines: 15 µg/m³ clean-air target, 35 µg/m³ upper limit of good.", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+            if (shown == "pm25") Text(stringResource(R.string.analytics_pm25_dashed_caption), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
         }
     }
 
     val measuredPm = points.orEmpty().filter { it.pm25 != null }
     if (measuredPm.isNotEmpty()) {
-        SectionTitle("Insights")
+        SectionTitle(stringResource(R.string.analytics_insights))
         val average = measuredPm.map { it.pm25!! }.average()
         val peak = measuredPm.maxBy { it.pm25!! }
         val good = measuredPm.count { it.pm25!! <= 35 } * 100 / measuredPm.size
-        val period = when (range) { "live" -> "5 min"; "day" -> "24 h"; "week" -> "7 days"; else -> "30 days" }
+        val period = stringResource(when (range) { "live" -> R.string.analytics_period_5m; "day" -> R.string.analytics_period_24h; "week" -> R.string.analytics_period_7d; else -> R.string.analytics_period_30d })
         FactRow(
-            Triple("Average", "${average.roundToInt()} µg/m³", "${airLevel(average.toFloat()).label} over $period"),
-            Triple("Peak", "${peak.pm25!!.roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
+            Triple(stringResource(R.string.analytics_average), "${average.roundToInt()} µg/m³", stringResource(R.string.analytics_air_level_over_period, airLevel(average.toFloat()).text(), period)),
+            Triple(stringResource(R.string.analytics_peak), "${peak.pm25!!.roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
             index = 3,
         )
-        FactRow(Triple("Time with good air", "$good%", "PM2.5 at or below 35 µg/m³ over $period"), index = 4)
+        FactRow(Triple(stringResource(R.string.analytics_time_good_air), "$good%", stringResource(R.string.analytics_pm25_good_over_period, period)), index = 4)
     }
 
     if (purifiers.isNotEmpty()) {
-        SectionTitle("Purifiers")
+        SectionTitle(stringResource(R.string.analytics_purifiers))
         DeviceGrid(purifiers, user.canControl, onOpenDevice, firstIndex = 5)
     }
     val others = sensors - purifiers.toSet()
     if (others.isNotEmpty()) {
-        SectionTitle("Sensors")
+        SectionTitle(stringResource(R.string.analytics_sensors))
         others.forEach { sensor ->
             val value = sensor.state.pm25
             RowCard(
                 sensor.name,
-                listOfNotNull(rooms.firstOrNull { it.id == sensor.roomId }?.name, if (!sensor.isOnline) "Offline" else value?.let { "${it.roundToInt()} µg/m³ · ${airLevel(it).label}" }).joinToString(" · "),
+                listOfNotNull(rooms.firstOrNull { it.id == sensor.roomId }?.name, if (!sensor.isOnline) stringResource(R.string.analytics_offline) else value?.let { stringResource(R.string.analytics_sensor_pm25_level, it.roundToInt(), airLevel(it).text()) }).joinToString(" · "),
                 Icons.Rounded.Sensors, onClick = { onOpenDevice(sensor.id) },
             )
         }

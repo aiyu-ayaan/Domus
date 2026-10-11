@@ -360,6 +360,8 @@ data class Notice(
     val level: String = "info",
     val title: String = "",
     val message: String = "",
+    val code: String? = null,
+    val params: Map<String, String> = emptyMap(),
     @SerialName("is_read") val isRead: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null,
 )

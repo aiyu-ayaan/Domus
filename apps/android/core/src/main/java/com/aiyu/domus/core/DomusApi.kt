@@ -27,10 +27,21 @@ import okhttp3.WebSocketListener
 
 /** [status] is the HTTP status, [OFFLINE] when the server can't be reached, [UNTRUSTED] when its certificate isn't accepted. */
 /** [confirm] names the devices that ask before switching when the server wants a yes first (428). */
-class ApiException(message: String, val status: Int, val confirm: List<String> = emptyList()) : Exception(message) {
+/** [code] and [params] let the app resolve a localized string resource while keeping [message] as a fallback. */
+class ApiException(
+    message: String,
+    val status: Int,
+    val confirm: List<String> = emptyList(),
+    val code: String? = null,
+    val params: Map<String, String> = emptyMap(),
+) : Exception(message) {
     companion object {
         const val OFFLINE = 0
         const val UNTRUSTED = -1
+        const val CODE_UNTRUSTED = "api.untrusted"
+        const val CODE_OFFLINE = "api.offline"
+        const val CODE_BAD_RESPONSE = "api.bad_response"
+        const val CODE_REQUEST_FAILED = "api.request_failed"
     }
 }
 
@@ -70,17 +81,23 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
                     if (!response.isSuccessful) {
                         val error = runCatching { json.parseToJsonElement(text).jsonObject["error"]?.jsonObject }.getOrNull()
                         val message = error?.get("message")?.jsonPrimitive?.contentOrNull
+                        val code = error?.get("code")?.jsonPrimitive?.contentOrNull
+                            ?: if (message == null) ApiException.CODE_REQUEST_FAILED else null
+                        val params = (error?.get("params") as? JsonObject)
+                            ?.mapNotNull { (k, v) -> v.jsonPrimitive.contentOrNull?.let { k to it } }
+                            ?.toMap()
+                            ?: if (message == null) mapOf("status" to response.code.toString()) else emptyMap()
                         val confirm = (error?.get("confirm") as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { it.jsonPrimitive.contentOrNull }
-                        throw ApiException(message ?: "Request failed (${response.code})", response.code, confirm)
+                        throw ApiException(message ?: "Request failed (${response.code})", response.code, confirm, code, params)
                     }
                     json.decodeFromString(out, text)
                 }
             } catch (e: SSLException) {
-                throw ApiException("The server's certificate is not trusted.", ApiException.UNTRUSTED)
+                throw ApiException("The server's certificate is not trusted.", ApiException.UNTRUSTED, code = ApiException.CODE_UNTRUSTED)
             } catch (e: IOException) {
-                throw ApiException("Can't reach the Domus server. Check that it is running.", ApiException.OFFLINE)
+                throw ApiException("Can't reach the Domus server. Check that it is running.", ApiException.OFFLINE, code = ApiException.CODE_OFFLINE)
             } catch (e: kotlinx.serialization.SerializationException) {
-                throw ApiException("The server sent an answer this app version doesn't understand.", 500)
+                throw ApiException("The server sent an answer this app version doesn't understand.", 500, code = ApiException.CODE_BAD_RESPONSE)
             }
         }
 

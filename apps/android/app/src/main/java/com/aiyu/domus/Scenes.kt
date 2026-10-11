@@ -1,6 +1,7 @@
 package com.aiyu.domus
 
 import android.app.Activity
+import android.content.Context
 import android.media.projection.MediaProjectionManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import com.aiyu.domus.core.User
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,15 +57,18 @@ import java.time.Duration
 import java.time.Instant
 
 /** "5 min ago" for a server timestamp; null when it never happened or can't be read. */
-fun timeAgo(iso: String?): String? {
+fun timeAgo(iso: String?, context: Context): String? {
     val seconds = runCatching { Duration.between(Instant.parse(iso), Instant.now()).seconds }.getOrNull() ?: return null
     return when {
-        seconds < 60 -> "just now"
-        seconds < 3600 -> "${seconds / 60} min ago"
-        seconds < 86_400 -> "${seconds / 3600} h ago"
-        else -> "${seconds / 86_400} d ago"
+        seconds < 60 -> context.getString(R.string.scene_time_just_now)
+        seconds < 3600 -> context.getString(R.string.scene_time_minutes_ago, seconds / 60)
+        seconds < 86_400 -> context.getString(R.string.scene_time_hours_ago, seconds / 3600)
+        else -> context.getString(R.string.scene_time_days_ago, seconds / 86_400)
     }
 }
+
+@Composable
+fun timeAgo(iso: String?): String? = timeAgo(iso, LocalContext.current)
 
 @Composable
 private fun SwitchRow(
@@ -70,10 +76,11 @@ private fun SwitchRow(
     onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier, onEdit: (() -> Unit)? = null, action: @Composable () -> Unit = {},
 ) {
     val c = MaterialTheme.colorScheme
+    val editLabel = stringResource(R.string.scene_edit_item, title)
     // Admins tap the row to edit it.
     Surface(
         color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large,
-        modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).then(if (onEdit != null) Modifier.clickable(onClickLabel = "Edit $title", onClick = onEdit) else Modifier),
+        modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).then(if (onEdit != null) Modifier.clickable(onClickLabel = editLabel, onClick = onEdit) else Modifier),
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             ShapedIcon(icon, shape, if (checked) c.primary else c.surfaceContainerHighest, if (checked) c.onPrimary else c.onSurfaceVariant)
@@ -108,27 +115,36 @@ fun ScenesScreen(user: User, open: (String) -> Unit) {
     val loading by repository.loading.collectAsStateWithLifecycle()
 
     ScreenColumn {
-        ScreenHeader("Scenes", "${scenes.count { it.isActive }} active · ${automations.count { it.isEnabled }.let { if (it == 1) "1 automation" else "$it automations" }} on")
+        val activeScenes = scenes.count { it.isActive }
+        val enabledAutomations = automations.count { it.isEnabled }
+        ScreenHeader(
+            stringResource(R.string.scene_title),
+            pluralStringResource(R.plurals.scene_header_subtitle, enabledAutomations, activeScenes, enabledAutomations),
+        )
         if (loading && scenes.isEmpty() && automations.isEmpty()) {
             LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
             return@ScreenColumn
         }
         if (scenes.isEmpty() && automations.isEmpty()) {
-            EmptyState("Nothing here yet", "A scene sets several devices at once. An automation does it for you when something happens.")
+            EmptyState(stringResource(R.string.scene_empty_title), stringResource(R.string.scene_empty_subtitle))
         }
         if (user.isAdmin) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton({ open("scene:new") }) { Text("New scene") }
-                FilledTonalButton({ open("automation:new") }) { Text("New automation") }
-                OutlinedButton({ open("scene:newsync") }) { Text("New Screen Sync") }
+                FilledTonalButton({ open("scene:new") }) { Text(stringResource(R.string.scene_new_scene)) }
+                FilledTonalButton({ open("automation:new") }) { Text(stringResource(R.string.scene_new_automation)) }
+                OutlinedButton({ open("scene:newsync") }) { Text(stringResource(R.string.scene_new_screen_sync)) }
             }
         }
-        if (scenes.isNotEmpty()) SectionTitle("Scenes")
+        if (scenes.isNotEmpty()) SectionTitle(stringResource(R.string.scene_title))
         scenes.forEachIndexed { index, scene ->
             val sync = scene.kind == "screen_sync"
             SwitchRow(
                 scene.name,
-                if (sync) (if (scene.isActive) "Screen Sync · lights follow a screen" else "Screen Sync · mirrors this screen onto lights") else if (scene.isActive) "Active" else null,
+                if (sync) {
+                    if (scene.isActive) stringResource(R.string.scene_sync_active_subtitle) else stringResource(R.string.scene_sync_inactive_subtitle)
+                } else if (scene.isActive) {
+                    stringResource(R.string.scene_active)
+                } else null,
                 Icons.Rounded.AutoAwesome, MaterialShapes.Clover4Leaf,
                 checked = scene.isActive,
                 enabled = canControl,
@@ -142,11 +158,11 @@ fun ScenesScreen(user: User, open: (String) -> Unit) {
                 modifier = Modifier.enterStaggered(index),
             )
         }
-        if (automations.isNotEmpty()) SectionTitle("Automations")
+        if (automations.isNotEmpty()) SectionTitle(stringResource(R.string.scene_section_automations))
         automations.forEachIndexed { index, automation ->
             SwitchRow(
                 automation.name,
-                automation.description?.ifBlank { null } ?: timeAgo(automation.lastTriggeredAt)?.let { "Last ran $it" } ?: "Never ran",
+                automation.description?.ifBlank { null } ?: timeAgo(automation.lastTriggeredAt)?.let { stringResource(R.string.scene_last_ran, it) } ?: stringResource(R.string.scene_never_ran),
                 Icons.Rounded.Bolt, MaterialShapes.Sunny,
                 checked = automation.isEnabled,
                 enabled = canControl,
@@ -155,7 +171,7 @@ fun ScenesScreen(user: User, open: (String) -> Unit) {
                 modifier = Modifier.enterStaggered(scenes.size + index),
             ) {
                 FilledTonalIconButton({ repository.runAutomation(automation) }, enabled = canControl) {
-                    Icon(Icons.Rounded.PlayArrow, "Run ${automation.name} now")
+                    Icon(Icons.Rounded.PlayArrow, stringResource(R.string.scene_run_now, automation.name))
                 }
             }
         }

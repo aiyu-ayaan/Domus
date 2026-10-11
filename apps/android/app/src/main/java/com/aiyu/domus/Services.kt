@@ -40,8 +40,8 @@ private const val STATUS = "status" // quiet, ongoing: "listening", "Screen Sync
 private const val ALERTS = "alerts" // what the home reports
 
 private fun Context.notifications() = getSystemService(NotificationManager::class.java).also {
-    it.createNotificationChannel(NotificationChannel(STATUS, "Background activity", NotificationManager.IMPORTANCE_LOW))
-    it.createNotificationChannel(NotificationChannel(ALERTS, "Home alerts", NotificationManager.IMPORTANCE_DEFAULT))
+    it.createNotificationChannel(NotificationChannel(STATUS, getString(R.string.service_channel_status), NotificationManager.IMPORTANCE_LOW))
+    it.createNotificationChannel(NotificationChannel(ALERTS, getString(R.string.service_channel_alerts), NotificationManager.IMPORTANCE_DEFAULT))
 }
 
 private fun Context.openApp(): PendingIntent =
@@ -63,7 +63,7 @@ class AlertsService : Service() {
     override fun onCreate() {
         super.onCreate()
         val manager = notifications()
-        val status = notification(STATUS, "Domus is listening for alerts", null).setOngoing(true).build()
+        val status = notification(STATUS, getString(R.string.service_listening_alerts), null).setOngoing(true).build()
         if (Build.VERSION.SDK_INT >= 34) startForeground(1, status, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE) else startForeground(1, status)
         repository.keepLive = true
         var next = 100
@@ -117,10 +117,10 @@ class ScreenSyncService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         notifications()
         val stop = PendingIntent.getService(this, 1, Intent(this, ScreenSyncService::class.java).setAction(STOP), PendingIntent.FLAG_IMMUTABLE)
-        val status = notification(STATUS, "Screen Sync is on", "Your lights follow this screen")
+        val status = notification(STATUS, getString(R.string.service_screen_sync_title), getString(R.string.service_screen_sync_body))
             .setOngoing(true)
             .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .addAction(Notification.Action.Builder(null, "Stop", stop).build())
+            .addAction(Notification.Action.Builder(null, getString(R.string.service_stop), stop).build())
             .build()
             .also { it.flags = it.flags or Notification.FLAG_NO_CLEAR } // not swipe-able on any Android version
         // Must be in the foreground, as mediaProjection, before the projection is taken.

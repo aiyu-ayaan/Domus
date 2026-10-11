@@ -76,8 +76,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.RoundedPolygon
+import com.aiyu.domus.ui.R
 import com.aiyu.domus.ui.theme.rememberReducedMotion
 import kotlinx.coroutines.delay
 
@@ -200,9 +202,10 @@ fun ColorWheel(onPick: (String) -> Unit, modifier: Modifier = Modifier, enabled:
         val saturation = (d.getDistance() / (minOf(size.width, size.height) / 2f)).coerceIn(0f, 1f)
         return "#%06X".format(0xFFFFFF and android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, 1f)))
     }
+    val wheelLabel = stringResource(R.string.ui_color_wheel)
     Canvas(
         modifier
-            .semantics { contentDescription = "Color wheel" }
+            .semantics { contentDescription = wheelLabel }
             .then(
                 if (!enabled) Modifier else Modifier
                     .pointerInput(Unit) { detectTapGestures { picked = it; onPick(hexAt(it, size)) } }
@@ -265,6 +268,8 @@ fun CollapsibleCard(
         animationSpec = spatialSpec,
         label = "chevronRotation",
     )
+    val stateLabel = stringResource(if (isExpanded) R.string.ui_expanded else R.string.ui_collapsed)
+    val actionLabel = stringResource(if (isExpanded) R.string.ui_collapse else R.string.ui_expand)
 
     Surface(
         color = containerColor,
@@ -280,7 +285,7 @@ fun CollapsibleCard(
                         onClick = toggle,
                     )
                     .semantics {
-                        stateDescription = if (isExpanded) "Expanded" else "Collapsed"
+                        stateDescription = stateLabel
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -301,7 +306,7 @@ fun CollapsibleCard(
                 }
                 Icon(
                     imageVector = Icons.Rounded.ExpandMore,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    contentDescription = actionLabel,
                     tint = c.onSurfaceVariant,
                     modifier = Modifier
                         .size(24.dp)

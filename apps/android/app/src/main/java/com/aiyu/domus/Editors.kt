@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,68 +31,81 @@ import kotlinx.serialization.json.put
 // The app builds the common kinds and carries the rest through untouched, so a rule made on the web survives an edit here.
 
 private fun JsonObject.text(key: String) = (this[key] as? JsonPrimitive)?.contentOrNull
-private val Days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun") // the server counts from Monday = 0
-private val Properties = listOf("temperature" to "Temperature", "humidity" to "Humidity", "air_quality_pm25" to "PM2.5", "brightness" to "Brightness", "current_power_watts" to "Power (W)")
+private val Days = listOf(R.string.editor_day_mon, R.string.editor_day_tue, R.string.editor_day_wed, R.string.editor_day_thu, R.string.editor_day_fri, R.string.editor_day_sat, R.string.editor_day_sun) // the server counts from Monday = 0
+private val Properties = listOf("temperature" to R.string.editor_prop_temperature, "humidity" to R.string.editor_prop_humidity, "air_quality_pm25" to R.string.editor_prop_pm25, "brightness" to R.string.editor_prop_brightness, "current_power_watts" to R.string.editor_prop_power_watts)
 
 /** One trigger, condition or action as a sentence. */
+@Composable
 fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24Hour: Boolean = true): String {
-    val device = devices.firstOrNull { it.id == rule.text("device_id") }?.name ?: "a removed device"
-    fun comparison(): String {
-        val property = Properties.firstOrNull { it.first == rule.text("property") }?.second?.lowercase() ?: rule.text("property").orEmpty()
-        return when {
-            rule.text("property") == "is_on" -> if ((rule["equals"] as? JsonPrimitive)?.booleanOrNull == false) "is off" else "is on"
-            rule["above"] != null -> "$property above ${rule.text("above")}"
-            rule["below"] != null -> "$property below ${rule.text("below")}"
-            else -> "$property is ${rule.text("equals")}"
-        }
-    }
+    val device = devices.firstOrNull { it.id == rule.text("device_id") }?.name ?: stringResource(R.string.editor_removed_device)
+    val property = Properties.firstOrNull { it.first == rule.text("property") }?.let { stringResource(it.second).lowercase() } ?: rule.text("property").orEmpty()
     return when (rule.text("type")) {
-        "device_state" -> "$device ${comparison()}"
+        "device_state" -> when {
+            rule.text("property") == "is_on" -> if ((rule["equals"] as? JsonPrimitive)?.booleanOrNull == false) stringResource(R.string.editor_rule_device_is_off, device) else stringResource(R.string.editor_rule_device_is_on, device)
+            rule["above"] != null -> stringResource(R.string.editor_rule_device_prop_above, device, property, rule.text("above").orEmpty())
+            rule["below"] != null -> stringResource(R.string.editor_rule_device_prop_below, device, property, rule.text("below").orEmpty())
+            else -> stringResource(R.string.editor_rule_device_prop_is, device, property, rule.text("equals").orEmpty())
+        }
         "time" -> {
             val at = rule.text("at")?.let { formatClockTime(it, is24Hour) }.orEmpty()
-            val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }
-            "At $at" + if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
+            val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }.map { stringResource(it) }
+            if (days.isEmpty() || days.size == 7) stringResource(R.string.editor_rule_time_every_day, at) else stringResource(R.string.editor_rule_time_on_days, at, days.joinToString(", "))
         }
         "sun" -> {
             val offset = rule.text("offset_minutes")?.toIntOrNull() ?: 0
-            val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }
-            (if (offset == 0) "At " else "${abs(offset)} min ${if (offset < 0) "before" else "after"} ") + rule.text("event") +
-                if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
+            val event = when (rule.text("event")) {
+                "sunrise" -> stringResource(R.string.editor_sun_event_sunrise)
+                "sunset" -> stringResource(R.string.editor_sun_event_sunset)
+                else -> rule.text("event").orEmpty()
+            }
+            val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }.map { stringResource(it) }
+            val everyDay = days.isEmpty() || days.size == 7
+            val dayList = days.joinToString(", ")
+            when {
+                offset == 0 && everyDay -> stringResource(R.string.editor_rule_sun_at_every_day, event)
+                offset == 0 -> stringResource(R.string.editor_rule_sun_at_on_days, event, dayList)
+                offset < 0 && everyDay -> stringResource(R.string.editor_rule_sun_before_every_day, abs(offset), event)
+                offset < 0 -> stringResource(R.string.editor_rule_sun_before_on_days, abs(offset), event, dayList)
+                everyDay -> stringResource(R.string.editor_rule_sun_after_every_day, abs(offset), event)
+                else -> stringResource(R.string.editor_rule_sun_after_on_days, abs(offset), event, dayList)
+            }
         }
-        "power_above" -> "$device uses more than ${rule.text("watts")} W"
-        "device_offline" -> "$device goes offline"
-        "device_discovered" -> "A new device is found"
+        "power_above" -> stringResource(R.string.editor_rule_power_above, device, rule.text("watts").orEmpty())
+        "device_offline" -> stringResource(R.string.editor_rule_device_offline, device)
+        "device_discovered" -> stringResource(R.string.editor_rule_device_discovered)
         "time_between" -> {
             val start = rule.text("start")?.let { formatClockTime(it, is24Hour) }.orEmpty()
             val end = rule.text("end")?.let { formatClockTime(it, is24Hour) }.orEmpty()
-            "Between $start and $end"
+            stringResource(R.string.editor_rule_time_between, start, end)
         }
         "device_command", "group_command" -> {
             val command = rule["command"] as? JsonObject ?: JsonObject(emptyMap())
             val parts = listOfNotNull(
-                (command["is_on"] as? JsonPrimitive)?.booleanOrNull?.let { if (it) "on" else "off" },
-                command.text("brightness")?.let { "$it%" },
+                (command["is_on"] as? JsonPrimitive)?.booleanOrNull?.let { stringResource(if (it) R.string.editor_cmd_on else R.string.editor_cmd_off) },
+                command.text("brightness")?.let { stringResource(R.string.editor_cmd_brightness_pct, it) },
                 command.text("color"),
-                command.text("color_temp")?.let { "white $it" },
+                command.text("color_temp")?.let { stringResource(R.string.editor_cmd_white, it) },
                 command.text("fan_speed"), command.text("mode"),
             )
-            "${if (rule.text("type") == "group_command") "Device group" else device}: ${parts.joinToString(", ").ifEmpty { "custom command" }}"
+            val target = if (rule.text("type") == "group_command") stringResource(R.string.editor_device_group) else device
+            val summary = parts.joinToString(", ").ifEmpty { stringResource(R.string.editor_cmd_custom) }
+            stringResource(R.string.editor_rule_command, target, summary)
         }
-        "notify" -> "Notify: ${rule.text("title")}"
-        "scene" -> "Run scene ${scenes.firstOrNull { it.id == rule.text("scene_id") }?.name ?: "(removed)"}"
-        "delay" -> "Wait ${rule.text("seconds")} s"
-        else -> rule.text("type") ?: "Unknown"
+        "notify" -> stringResource(R.string.editor_rule_notify, rule.text("title").orEmpty())
+        "scene" -> stringResource(R.string.editor_rule_scene, scenes.firstOrNull { it.id == rule.text("scene_id") }?.name ?: stringResource(R.string.editor_removed_scene))
+        "delay" -> stringResource(R.string.editor_rule_delay, rule.text("seconds").orEmpty())
+        else -> rule.text("type") ?: stringResource(R.string.editor_rule_unknown)
     }
 }
 
-private val TriggerKinds = listOf("time" to "Time", "sun" to "Sunrise / sunset", "device_state" to "Device state", "power_above" to "Power", "device_offline" to "Goes offline", "device_discovered" to "New device")
-private val ConditionKinds = listOf("device_state" to "Device state", "time_between" to "Time window")
-private val ActionKinds = listOf("device_command" to "Device", "scene" to "Scene", "notify" to "Notify", "delay" to "Wait")
+private val TriggerKinds = listOf("time" to R.string.editor_trigger_time, "sun" to R.string.editor_trigger_sun, "device_state" to R.string.editor_trigger_device_state, "power_above" to R.string.editor_trigger_power, "device_offline" to R.string.editor_trigger_offline, "device_discovered" to R.string.editor_trigger_discovered)
+private val ConditionKinds = listOf("device_state" to R.string.editor_condition_device_state, "time_between" to R.string.editor_condition_time_between)
+private val ActionKinds = listOf("device_command" to R.string.editor_action_device, "scene" to R.string.editor_action_scene, "notify" to R.string.editor_action_notify, "delay" to R.string.editor_action_delay)
 
 /** Builds one rule of any of [kinds]. One dialog for triggers, conditions and actions: they share most fields. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devices: List<Device>, scenes: List<Scene>, onAdd: (JsonObject) -> Unit, onDismiss: () -> Unit) {
+private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices: List<Device>, scenes: List<Scene>, onAdd: (JsonObject) -> Unit, onDismiss: () -> Unit) {
     var kind by remember { mutableStateOf(kinds.first().first) }
     var deviceId by remember { mutableStateOf(devices.firstOrNull()?.id) }
     var sceneId by remember { mutableStateOf(scenes.firstOrNull { it.kind == "standard" }?.id) }
@@ -146,48 +160,48 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
         }
     }
 
-    FormDialog(title, canSave = valid, save = "Add", onSave = { onAdd(build()); onDismiss() }, onDismiss = onDismiss) {
-        Choice(kinds, kind, { kind = it; number = "" })
-        if (needsDevice) Picker("Device", devices.map { it.id to it.name }, deviceId, { deviceId = it })
+    FormDialog(title, canSave = valid, save = stringResource(R.string.editor_add), onSave = { onAdd(build()); onDismiss() }, onDismiss = onDismiss) {
+        Choice(kinds.map { it.first to stringResource(it.second) }, kind, { kind = it; number = "" })
+        if (needsDevice) Picker(stringResource(R.string.editor_field_device), devices.map { it.id to it.name }, deviceId, { deviceId = it })
         when (kind) {
             "time", "sun" -> {
                 if (kind == "time") TimeInput(start) else {
-                    Choice(listOf("sunrise" to "Sunrise", "sunset" to "Sunset"), sun, { sun = it })
-                    Choice(listOf(false to "After", true to "Before"), before, { before = it })
-                    Field(number, { number = it }, "Minutes", keyboard = KeyboardType.Number, supporting = "Empty runs it at $sun. Needs the home location in Settings.")
+                    Choice(listOf("sunrise" to stringResource(R.string.editor_sun_sunrise), "sunset" to stringResource(R.string.editor_sun_sunset)), sun, { sun = it })
+                    Choice(listOf(false to stringResource(R.string.editor_sun_after), true to stringResource(R.string.editor_sun_before)), before, { before = it })
+                    Field(number, { number = it }, stringResource(R.string.editor_field_minutes), keyboard = KeyboardType.Number, supporting = stringResource(if (sun == "sunrise") R.string.editor_sun_supporting_sunrise else R.string.editor_sun_supporting_sunset))
                 }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Days.forEachIndexed { i, day -> FilterChip(i in days, { days = if (i in days) days - i else days + i }, { Text(day) }) }
+                    Days.forEachIndexed { i, dayRes -> FilterChip(i in days, { days = if (i in days) days - i else days + i }, { Text(stringResource(dayRes)) }) }
                 }
-                Text(if (days.isEmpty()) "Every day" else "Only on the chosen days", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(if (days.isEmpty()) R.string.editor_every_day else R.string.editor_chosen_days), style = MaterialTheme.typography.bodySmall)
             }
             "device_state" -> {
-                Picker("Is", listOf("on" to "On", "off" to "Off") + Properties, state, { state = it; number = "" })
+                Picker(stringResource(R.string.editor_field_is), listOf("on" to stringResource(R.string.editor_state_on), "off" to stringResource(R.string.editor_state_off)) + Properties.map { it.first to stringResource(it.second) }, state, { state = it; number = "" })
                 if (needsNumber) {
-                    Choice(listOf(true to "Above", false to "Below"), above, { above = it })
-                    Field(number, { number = it }, "Value", keyboard = KeyboardType.Decimal)
+                    Choice(listOf(true to stringResource(R.string.editor_compare_above), false to stringResource(R.string.editor_compare_below)), above, { above = it })
+                    Field(number, { number = it }, stringResource(R.string.editor_field_value), keyboard = KeyboardType.Decimal)
                 }
             }
-            "power_above" -> Field(number, { number = it }, "Watts", keyboard = KeyboardType.Decimal)
-            "time_between" -> { Text("From"); TimeInput(start); Text("Until"); TimeInput(end) }
+            "power_above" -> Field(number, { number = it }, stringResource(R.string.editor_field_watts), keyboard = KeyboardType.Decimal)
+            "time_between" -> { Text(stringResource(R.string.editor_time_from)); TimeInput(start); Text(stringResource(R.string.editor_time_until)); TimeInput(end) }
             "device_command" -> {
-                Choice(listOf<Pair<Boolean?, String>>(true to "Turn on", false to "Turn off", null to "Leave power"), power, { power = it })
+                Choice(listOf<Pair<Boolean?, String>>(true to stringResource(R.string.editor_power_turn_on), false to stringResource(R.string.editor_power_turn_off), null to stringResource(R.string.editor_power_leave)), power, { power = it })
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Set brightness${if (dim) " ${brightness.roundToInt()}%" else ""}", Modifier.weight(1f))
+                    Text(if (dim) stringResource(R.string.editor_set_brightness_value, brightness.roundToInt()) else stringResource(R.string.editor_set_brightness), Modifier.weight(1f))
                     Switch(dim, { dim = it })
                 }
                 if (dim) Slider(brightness, { brightness = it }, valueRange = 1f..100f)
             }
-            "scene" -> Picker("Scene", scenes.filter { it.kind == "standard" }.map { it.id to it.name }, sceneId, { sceneId = it })
-            "notify" -> { Field(heading, { heading = it }, "Title"); Field(message, { message = it }, "Message") }
-            "delay" -> Field(number, { number = it }, "Seconds", keyboard = KeyboardType.Number)
+            "scene" -> Picker(stringResource(R.string.editor_field_scene), scenes.filter { it.kind == "standard" }.map { it.id to it.name }, sceneId, { sceneId = it })
+            "notify" -> { Field(heading, { heading = it }, stringResource(R.string.editor_field_title)); Field(message, { message = it }, stringResource(R.string.editor_field_message)) }
+            "delay" -> Field(number, { number = it }, stringResource(R.string.editor_field_seconds), keyboard = KeyboardType.Number)
         }
     }
 }
 
 /** A titled list of rules with remove buttons and an Add dialog. */
 @Composable
-private fun RuleList(title: String, add: String, kinds: List<Pair<String, String>>, rules: SnapshotStateList<JsonObject>, devices: List<Device>, scenes: List<Scene>) {
+private fun RuleList(title: String, add: String, kinds: List<Pair<String, Int>>, rules: SnapshotStateList<JsonObject>, devices: List<Device>, scenes: List<Scene>) {
     var adding by remember { mutableStateOf(false) }
     val is24Hour = rememberIs24HourFormat()
     SectionTitle(title)
@@ -196,7 +210,7 @@ private fun RuleList(title: String, add: String, kinds: List<Pair<String, String
         Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
             Row(Modifier.padding(start = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(text, Modifier.weight(1f).padding(vertical = 12.dp))
-                IconButton({ rules.removeAt(index) }) { Icon(Icons.Rounded.Close, "Remove: $text") }
+                IconButton({ rules.removeAt(index) }) { Icon(Icons.Rounded.Close, stringResource(R.string.editor_remove_rule, text)) }
             }
         }
     }
@@ -204,7 +218,7 @@ private fun RuleList(title: String, add: String, kinds: List<Pair<String, String
     if (adding) AddRuleDialog(add, kinds, devices, scenes, { rules.add(it) }, { adding = false })
 }
 
-private val SyncStyles = listOf("vivid" to "Vivid", "dominant" to "Dominant", "average" to "Average")
+private val SyncStyles = listOf("vivid" to R.string.editor_style_vivid, "dominant" to R.string.editor_style_dominant, "average" to R.string.editor_style_average)
 
 /** [id] is a scene id, or `new` / `newsync` for a new standard / Screen Sync scene. */
 @OptIn(ExperimentalLayoutApi::class)
@@ -238,30 +252,30 @@ fun SceneEditorPage(id: String, onBack: () -> Unit) {
     }
     val valid = name.isNotBlank() && if (sync) lights.isNotEmpty() || (config["group_ids"] as? JsonArray).orEmpty().isNotEmpty() else actions.isNotEmpty()
 
-    SubPage(if (existing == null) (if (sync) "New Screen Sync" else "New scene") else "Edit scene", onBack, actions = {
-        if (existing != null) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Delete") }
+    SubPage(stringResource(if (existing == null) (if (sync) R.string.editor_new_screen_sync else R.string.editor_new_scene) else R.string.editor_edit_scene), onBack, actions = {
+        if (existing != null) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.editor_delete)) }
     }) {
-        Field(name, { name = it }, "Name")
+        Field(name, { name = it }, stringResource(R.string.editor_field_name))
         if (sync) {
-            SectionTitle("Lights that follow the screen")
+            SectionTitle(stringResource(R.string.editor_sync_lights_title))
             val bulbs = devices.filter { it.type == "light" }
-            if (bulbs.isEmpty()) Text("No lights in your home yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (bulbs.isEmpty()) Text(stringResource(R.string.editor_sync_no_lights), color = MaterialTheme.colorScheme.onSurfaceVariant)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 bulbs.forEach { light -> FilterChip(light.id in lights, { lights = if (light.id in lights) lights - light.id else lights + light.id }, { Text(light.name) }) }
             }
-            SectionTitle("Color")
-            Choice(SyncStyles, style, { style = it })
-            Text(when (style) { "vivid" -> "The strongest color on screen."; "dominant" -> "The most common color."; else -> "The mean of the whole picture." }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Choice(listOf("full" to "Whole screen", "edges" to "Edges only"), region, { region = it })
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Dim with dark scenes", Modifier.weight(1f)); Switch(follow, { follow = it }) }
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Restore lights when it stops", Modifier.weight(1f)); Switch(restore, { restore = it }) }
+            SectionTitle(stringResource(R.string.editor_sync_color_title))
+            Choice(SyncStyles.map { it.first to stringResource(it.second) }, style, { style = it })
+            Text(stringResource(when (style) { "vivid" -> R.string.editor_style_vivid_desc; "dominant" -> R.string.editor_style_dominant_desc; else -> R.string.editor_style_average_desc }), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Choice(listOf("full" to stringResource(R.string.editor_region_full), "edges" to stringResource(R.string.editor_region_edges)), region, { region = it })
+            Row(verticalAlignment = Alignment.CenterVertically) { Text(stringResource(R.string.editor_sync_dim_dark), Modifier.weight(1f)); Switch(follow, { follow = it }) }
+            Row(verticalAlignment = Alignment.CenterVertically) { Text(stringResource(R.string.editor_sync_restore_lights), Modifier.weight(1f)); Switch(restore, { restore = it }) }
         } else {
-            RuleList("Actions", "Add action", ActionKinds, actions, devices, scenes)
+            RuleList(stringResource(R.string.editor_actions_title), stringResource(R.string.editor_add_action), ActionKinds, actions, devices, scenes)
         }
-        Button({ scope.launch { repository.change { it.saveScene(existing?.id, body) }?.let { onBack() } } }, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid) { Text("Save") }
+        Button({ scope.launch { repository.change { it.saveScene(existing?.id, body) }?.let { onBack() } } }, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid) { Text(stringResource(R.string.editor_save)) }
     }
     if (deleting && existing != null) {
-        Confirm("Delete ${existing.name}?", "Automations that run this scene will skip it.", "Delete", { scope.launch { repository.change { it.removeScene(existing.id) }?.let { onBack() } } }, { deleting = false })
+        Confirm(stringResource(R.string.editor_delete_confirm_title, existing.name), stringResource(R.string.editor_delete_scene_body), stringResource(R.string.editor_delete), { scope.launch { repository.change { it.removeScene(existing.id) }?.let { onBack() } } }, { deleting = false })
     }
 }
 
@@ -289,21 +303,21 @@ fun AutomationEditorPage(id: String, onBack: () -> Unit) {
         put("actions", JsonArray(actions.toList()))
         put("is_enabled", enabled)
     }
-    SubPage(if (existing == null) "New automation" else "Edit automation", onBack, actions = {
-        if (existing != null) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Delete") }
+    SubPage(stringResource(if (existing == null) R.string.editor_new_automation else R.string.editor_edit_automation), onBack, actions = {
+        if (existing != null) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.editor_delete)) }
     }) {
-        Field(name, { name = it }, "Name")
-        Field(description, { description = it }, "Description (optional)")
-        Row(verticalAlignment = Alignment.CenterVertically) { Text("Enabled", Modifier.weight(1f)); Switch(enabled, { enabled = it }) }
-        RuleList("When any of these happens", "Add trigger", TriggerKinds, triggers, devices, scenes)
-        RuleList("Only if all of these hold", "Add condition", ConditionKinds, conditions, devices, scenes)
-        RuleList("Do this", "Add action", ActionKinds, actions, devices, scenes)
+        Field(name, { name = it }, stringResource(R.string.editor_field_name))
+        Field(description, { description = it }, stringResource(R.string.editor_field_description_optional))
+        Row(verticalAlignment = Alignment.CenterVertically) { Text(stringResource(R.string.editor_enabled), Modifier.weight(1f)); Switch(enabled, { enabled = it }) }
+        RuleList(stringResource(R.string.editor_triggers_title), stringResource(R.string.editor_add_trigger), TriggerKinds, triggers, devices, scenes)
+        RuleList(stringResource(R.string.editor_conditions_title), stringResource(R.string.editor_add_condition), ConditionKinds, conditions, devices, scenes)
+        RuleList(stringResource(R.string.editor_do_this_title), stringResource(R.string.editor_add_action), ActionKinds, actions, devices, scenes)
         Button(
             { scope.launch { repository.change { it.saveAutomation(existing?.id, body) }?.let { onBack() } } },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = name.isNotBlank() && triggers.isNotEmpty() && actions.isNotEmpty(),
-        ) { Text("Save") }
+        ) { Text(stringResource(R.string.editor_save)) }
     }
     if (deleting && existing != null) {
-        Confirm("Delete ${existing.name}?", "It stops running.", "Delete", { scope.launch { repository.change { it.removeAutomation(existing.id) }?.let { onBack() } } }, { deleting = false })
+        Confirm(stringResource(R.string.editor_delete_confirm_title, existing.name), stringResource(R.string.editor_delete_automation_body), stringResource(R.string.editor_delete), { scope.launch { repository.change { it.removeAutomation(existing.id) }?.let { onBack() } } }, { deleting = false })
     }
 }

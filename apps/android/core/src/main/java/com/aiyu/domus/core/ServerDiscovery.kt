@@ -16,12 +16,13 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-data class FoundServer(val name: String, val url: String)
+data class FoundServer(val name: String, val url: String, val code: String? = null)
 
 /** Finds Domus servers on the local network: broadcasts a probe, servers answer (backend `infrastructure/beacon.rs`). */
 object ServerDiscovery {
     private const val PORT = 48443
     private val PROBE = "DOMUS_DISCOVER".toByteArray()
+    const val CODE_THIS_COMPUTER = "connect.this_computer"
 
     suspend fun scan(timeoutMillis: Long = 1_800): List<FoundServer> = withContext(Dispatchers.IO) {
         val found = LinkedHashMap<String, FoundServer>()
@@ -53,7 +54,7 @@ object ServerDiscovery {
         if (found.isEmpty()) {
             listOf("localhost", "10.0.2.2").firstOrNull { host ->
                 runCatching { Socket().use { it.connect(InetSocketAddress(host, 8443), 400) } }.isSuccess
-            }?.let { found["dev"] = FoundServer("This computer", "https://$it:8443") }
+            }?.let { found["dev"] = FoundServer("This computer", "https://$it:8443", CODE_THIS_COMPUTER) }
         }
         found.values.toList()
     }

@@ -88,7 +88,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.StringRes
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -131,20 +134,21 @@ fun deviceIcon(type: String): ImageVector = when (type) {
 }
 
 /** The one line under a device's name: the most useful live reading it has. */
+@Composable
 fun deviceStatus(device: Device): String {
     val s = device.state
-    if (!device.isOnline) return "Offline"
+    if (!device.isOnline) return stringResource(R.string.device_offline)
     val on = s.isOn != false
     return when {
         on && s.watts != null -> formatWatts(s.watts!!.toDouble())
         on && s.brightness != null -> "${s.brightness}%"
-        s.pm25 != null -> "PM2.5 ${s.pm25!!.roundToInt()} · ${airLevel(s.pm25!!).label}"
+        s.pm25 != null -> stringResource(R.string.device_status_pm25, s.pm25!!.roundToInt(), airLevel(s.pm25!!).text())
         s.temperature != null -> "${s.temperature!!.roundToInt()}°"
-        s.waterLeak == true -> "Leak"
-        s.motion != null -> if (s.motion == true) "Motion" else "Clear"
-        s.contact != null -> if (s.contact == true) "Open" else "Closed"
-        s.isOn != null -> if (on) "On" else "Off"
-        else -> "Online"
+        s.waterLeak == true -> stringResource(R.string.device_leak)
+        s.motion != null -> stringResource(if (s.motion == true) R.string.device_motion else R.string.device_clear)
+        s.contact != null -> stringResource(if (s.contact == true) R.string.device_open else R.string.device_closed)
+        s.isOn != null -> stringResource(if (on) R.string.device_on else R.string.device_off)
+        else -> stringResource(R.string.device_online)
     }
 }
 
@@ -159,6 +163,7 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
     val content by animateColorAsState(if (on) c.onPrimaryContainer else c.onSurface, motion.defaultEffectsSpec(), label = "tileContent")
     val corner by animateDpAsState(if (on) 36.dp else 20.dp, motion.defaultSpatialSpec(), label = "tileCorner")
     val source = remember { MutableInteractionSource() }
+    val powerA11y = stringResource(R.string.device_power_a11y, device.name)
     Card(
         onClick = onOpen,
         shape = RoundedCornerShape(corner.coerceAtLeast(0.dp)), // the spring can undershoot
@@ -175,7 +180,7 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
                         checked = isOn,
                         onCheckedChange = { repository.command(device, DeviceCommand(isOn = it)) },
                         enabled = canControl && device.canControl && device.isOnline,
-                        modifier = Modifier.semantics { contentDescription = "${device.name} power" },
+                        modifier = Modifier.semantics { contentDescription = powerA11y },
                     )
                 }
             }
@@ -197,11 +202,13 @@ fun DeviceGrid(devices: List<Device>, canControl: Boolean, onOpenDevice: (String
     }
 }
 
+private data class DeviceCategory(val key: String, @StringRes val labelRes: Int, val types: Set<String>)
+
 private val Categories = listOf(
-    "Lights" to setOf("light"),
-    "Power" to setOf("plug", "switch"),
-    "Air" to setOf("air_purifier", "fan"),
-    "Climate" to setOf("climate", "sensor"),
+    DeviceCategory("lights", R.string.device_category_lights, setOf("light")),
+    DeviceCategory("power", R.string.device_category_power, setOf("plug", "switch")),
+    DeviceCategory("air", R.string.device_category_air, setOf("air_purifier", "fan")),
+    DeviceCategory("climate", R.string.device_category_climate, setOf("climate", "sensor")),
 )
 
 private const val NO_ROOM = "\u0000none"
@@ -215,37 +222,37 @@ fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit,
     val loading by repository.loading.collectAsStateWithLifecycle()
     var category by rememberSaveable { mutableStateOf<String?>(null) }
     // Only categories that have a device, like the web app.
-    val categories = Categories.filter { (_, types) -> devices.any { it.type in types } }
-    val types = categories.firstOrNull { it.first == category }?.second
+    val categories = Categories.filter { cat -> devices.any { it.type in cat.types } }
+    val types = categories.firstOrNull { it.key == category }?.types
     // null = every room; NO_ROOM = devices that are in none.
     var roomFilter by rememberSaveable { mutableStateOf<String?>(null) }
     val inRoom = { d: Device -> roomFilter == null || (if (roomFilter == NO_ROOM) rooms.none { it.id == d.roomId } else d.roomId == roomFilter) }
     val shown = devices.filter { (types == null || it.type in types) && inRoom(it) }
 
     ScreenColumn {
-        ScreenHeader("Devices", "${devices.count { it.isOnline }} of ${devices.size} online") {
-            if (user.isAdmin) FilledTonalIconButton(onAdd) { Icon(Icons.Rounded.Add, "Add devices") }
+        ScreenHeader(stringResource(R.string.device_title), stringResource(R.string.device_online_of_total, devices.count { it.isOnline }, devices.size)) {
+            if (user.isAdmin) FilledTonalIconButton(onAdd) { Icon(Icons.Rounded.Add, stringResource(R.string.device_add_devices)) }
         }
         if (categories.size > 1) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(types == null, { category = null }, { Text("All") })
-                categories.forEach { (name, _) -> FilterChip(category == name, { category = name }, { Text(name) }) }
+                FilterChip(types == null, { category = null }, { Text(stringResource(R.string.device_filter_all)) })
+                categories.forEach { cat -> FilterChip(category == cat.key, { category = cat.key }, { Text(stringResource(cat.labelRes)) }) }
             }
         }
         if (rooms.isNotEmpty() || user.isAdmin) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (rooms.isNotEmpty()) {
-                    FilterChip(roomFilter == null, { roomFilter = null }, { Text("All rooms") })
+                    FilterChip(roomFilter == null, { roomFilter = null }, { Text(stringResource(R.string.device_all_rooms)) })
                     rooms.sortedBy { it.floor }.forEach { room -> FilterChip(roomFilter == room.id, { roomFilter = room.id }, { Text(room.name) }) }
-                    if (devices.any { d -> rooms.none { it.id == d.roomId } }) FilterChip(roomFilter == NO_ROOM, { roomFilter = NO_ROOM }, { Text("No room") })
+                    if (devices.any { d -> rooms.none { it.id == d.roomId } }) FilterChip(roomFilter == NO_ROOM, { roomFilter = NO_ROOM }, { Text(stringResource(R.string.device_no_room)) })
                 }
-                if (user.isAdmin) AssistChip(onManageRooms, { Text("Manage rooms") }, leadingIcon = { Icon(Icons.Rounded.MeetingRoom, null, Modifier.size(18.dp)) })
+                if (user.isAdmin) AssistChip(onManageRooms, { Text(stringResource(R.string.device_manage_rooms)) }, leadingIcon = { Icon(Icons.Rounded.MeetingRoom, null, Modifier.size(18.dp)) })
             }
         }
         when {
             loading && devices.isEmpty() -> LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
-            shown.isEmpty() && devices.isNotEmpty() -> EmptyState("Nothing here", "No device matches this room and category.")
-            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Tap + to link Tuya, Tapo, Xiaomi, Hue or MQTT and add what they find." else "Ask an admin to add devices or give you access to a room.")
+            shown.isEmpty() && devices.isNotEmpty() -> EmptyState(stringResource(R.string.device_empty_filtered_title), stringResource(R.string.device_empty_filtered_body))
+            devices.isEmpty() -> EmptyState(stringResource(R.string.home_no_devices_title), stringResource(if (user.isAdmin) R.string.device_empty_admin else R.string.home_no_devices_member))
             else -> {
                 // Rooms in floor order, then devices without a room.
                 val groups: List<Pair<Room?, List<Device>>> =
@@ -253,7 +260,7 @@ fun DevicesScreen(user: User, onOpenDevice: (String) -> Unit, onAdd: () -> Unit,
                         (null to shown.filter { d -> rooms.none { it.id == d.roomId } })
                 var index = 0
                 groups.filter { it.second.isNotEmpty() }.forEach { (room, list) ->
-                    SectionTitle(room?.name ?: "No room")
+                    SectionTitle(room?.name ?: stringResource(R.string.device_no_room))
                     DeviceGrid(list, canControl, onOpenDevice, firstIndex = index)
                     index += (list.size + 1) / 2
                 }
@@ -306,28 +313,34 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     Text(device.name, style = MaterialTheme.typography.headlineSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    val place = listOfNotNull(rooms.firstOrNull { it.id == device.roomId }?.name, if (device.isOnline) "Online" else "Offline")
+                    val place = listOfNotNull(rooms.firstOrNull { it.id == device.roomId }?.name, stringResource(if (device.isOnline) R.string.device_online else R.string.device_offline))
                     Text(place.joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = if (device.isOnline) c.onSurfaceVariant else c.error)
                 }
-                IconButton({ repository.refreshDevice(device.id) }) { Icon(Icons.Rounded.Refresh, "Refresh ${device.name}") }
+                IconButton({ repository.refreshDevice(device.id) }) { Icon(Icons.Rounded.Refresh, stringResource(R.string.device_refresh_a11y, device.name)) }
             }
-            if (!canControl) Text(if (user.canControl) "You can see this device but not control it." else "Guests can view devices but not control them.", color = c.onSurfaceVariant)
+            if (!canControl) Text(stringResource(if (user.canControl) R.string.device_view_only_member else R.string.device_view_only_guest), color = c.onSurfaceVariant)
 
             s.isOn?.let { isOn ->
                 // Expressive toggle: morphs from a pill to a rounded square when on.
                 ToggleButton(isOn, { send(DeviceCommand(isOn = it)) }, Modifier.fillMaxWidth().heightIn(min = 64.dp), enabled = enabled) {
                     Icon(Icons.Rounded.PowerSettingsNew, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text(if (isOn) "On" else "Off", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(if (isOn) R.string.device_on else R.string.device_off), style = MaterialTheme.typography.titleMedium)
                 }
             }
-            s.brightness?.let { CommitSlider("Brightness", it, 1f..100f, { v -> "$v%" }, enabled) { v -> send(DeviceCommand(brightness = v)) } }
+            s.brightness?.let { CommitSlider(stringResource(R.string.device_brightness), it, 1f..100f, { v -> "$v%" }, enabled) { v -> send(DeviceCommand(brightness = v)) } }
             // Every light gets the White / Color controls, whatever it reports right now (same rule as the web app).
             if (device.type == "light") LightControls(device, enabled, send)
             else s.colorTemp?.let {
-                CommitSlider("White", it, 0f..100f, { v -> if (v < 34) "Warm" else if (v < 67) "Neutral" else "Cool" }, enabled) { v -> send(DeviceCommand(colorTemp = v)) }
+                CommitSlider(
+                    stringResource(R.string.device_white),
+                    it,
+                    0f..100f,
+                    { v -> stringResource(if (v < 34) R.string.device_white_warm else if (v < 67) R.string.device_white_neutral else R.string.device_white_cool) },
+                    enabled,
+                ) { v -> send(DeviceCommand(colorTemp = v)) }
             }
-            listOf(Triple("Fan speed", "fan_speed", s.fanSpeed), Triple("Mode", "mode", s.mode)).forEach { (label, key, current) ->
+            listOf(Triple(stringResource(R.string.device_fan_speed), "fan_speed", s.fanSpeed), Triple(stringResource(R.string.device_mode), "mode", s.mode)).forEach { (label, key, current) ->
                 val options = s.options[key].orEmpty()
                 if (options.isNotEmpty()) Column {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -354,9 +367,14 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                         ) {
                             // Rated room size is 0.07-0.12 m² per m³/h of CADR; airflow is taken as linear in speed.
                             val (low, high) = s.fanCadr?.takeIf { it.size == 2 } ?: listOf(0, 0)
-                            val coverage = { v: Int -> (low + (high - low) * v / 100).let { if (it > 0) "Coverage ${it * 7 / 100}–${it * 12 / 100} m²" else "" } }
                             Box(Modifier.padding(top = 20.dp)) {
-                                CommitSlider("Speed", speed, 0f..100f, coverage, enabled) { v -> send(DeviceCommand(fanPercent = v)) }
+                                CommitSlider(
+                                    stringResource(R.string.device_speed),
+                                    speed,
+                                    0f..100f,
+                                    { v -> (low + (high - low) * v / 100).let { if (it > 0) stringResource(R.string.device_coverage, it * 7 / 100, it * 12 / 100) else "" } },
+                                    enabled,
+                                ) { v -> send(DeviceCommand(fanPercent = v)) }
                             }
                         }
                     }
@@ -364,19 +382,19 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             }
 
             val readings = listOfNotNull(
-                s.watts?.let { "Power" to formatWatts(it.toDouble()) },
-                s.todayKwh?.let { "Today" to formatKwh(it.toDouble()) },
-                s.voltage?.let { "Voltage" to "${it.roundToInt()} V" },
-                s.amps?.let { "Current" to "${"%.2f".format(it)} A" },
-                s.temperature?.let { "Temperature" to "${"%.1f".format(it)}°" },
-                s.humidity?.let { "Humidity" to "${it.roundToInt()}%" },
-                s.pm25?.let { "PM2.5" to "${it.roundToInt()} µg/m³ · ${airLevel(it).label}" },
-                s.filterLife?.let { "Filter" to "${it.roundToInt()}% left" },
-                s.motion?.let { "Motion" to if (it) "Detected" else "Clear" },
-                s.contact?.let { "Door or window" to if (it) "Open" else "Closed" },
-                s.waterLeak?.let { "Water" to if (it) "Leak" else "Dry" },
-                s.alarm?.let { "Alarm" to if (it) "Sounding" else "Quiet" },
-                s.battery?.let { "Battery" to "${it.roundToInt()}%" } ?: s.batteryLow?.let { "Battery" to if (it) "Low" else "OK" },
+                s.watts?.let { stringResource(R.string.device_reading_power) to formatWatts(it.toDouble()) },
+                s.todayKwh?.let { stringResource(R.string.home_today) to formatKwh(it.toDouble()) },
+                s.voltage?.let { stringResource(R.string.device_reading_voltage) to "${it.roundToInt()} V" },
+                s.amps?.let { stringResource(R.string.device_reading_current) to "${"%.2f".format(it)} A" },
+                s.temperature?.let { stringResource(R.string.device_reading_temperature) to "${"%.1f".format(it)}°" },
+                s.humidity?.let { stringResource(R.string.device_reading_humidity) to "${it.roundToInt()}%" },
+                s.pm25?.let { stringResource(R.string.device_reading_pm25) to stringResource(R.string.device_pm25_value, it.roundToInt(), airLevel(it).text()) },
+                s.filterLife?.let { stringResource(R.string.device_reading_filter) to stringResource(R.string.device_filter_left, it.roundToInt()) },
+                s.motion?.let { stringResource(R.string.device_motion) to stringResource(if (it) R.string.device_motion_detected else R.string.device_clear) },
+                s.contact?.let { stringResource(R.string.device_reading_contact) to stringResource(if (it) R.string.device_open else R.string.device_closed) },
+                s.waterLeak?.let { stringResource(R.string.device_reading_water) to stringResource(if (it) R.string.device_leak else R.string.device_water_dry) },
+                s.alarm?.let { stringResource(R.string.device_reading_alarm) to stringResource(if (it) R.string.device_alarm_sounding else R.string.device_alarm_quiet) },
+                s.battery?.let { stringResource(R.string.device_reading_battery) to "${it.roundToInt()}%" } ?: s.batteryLow?.let { stringResource(R.string.device_reading_battery) to stringResource(if (it) R.string.device_battery_low else R.string.device_battery_ok) },
             )
             if (readings.isNotEmpty()) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -403,8 +421,8 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text("Ask before switching", style = MaterialTheme.typography.titleMedium)
-                            Text("Warns before it is turned on or off, from any app, a group or a scene", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                            Text(stringResource(R.string.device_ask_before_switching), style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.device_ask_before_switching_desc), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                         }
                         Switch(device.confirmChanges, onCheckedChange = null)
                     }
@@ -412,8 +430,8 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             }
             if (user.isAdmin || device.canEdit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton({ editing = true }) { Text(if (user.isAdmin) "Rename or move" else "Rename") }
-                    if (user.isAdmin) TextButton({ removing = true }, colors = ButtonDefaults.textButtonColors(contentColor = c.error)) { Text("Remove") }
+                    OutlinedButton({ editing = true }) { Text(stringResource(if (user.isAdmin) R.string.device_rename_or_move else R.string.device_rename)) }
+                    if (user.isAdmin) TextButton({ removing = true }, colors = ButtonDefaults.textButtonColors(contentColor = c.error)) { Text(stringResource(R.string.device_remove)) }
                 }
             }
         }
@@ -421,16 +439,16 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
     if (editing) {
         var name by remember { mutableStateOf(device.name) }
         var room by remember { mutableStateOf(device.roomId) }
-        FormDialog("Edit device", canSave = name.isNotBlank(), onDismiss = { editing = false }, onSave = {
+        FormDialog(stringResource(R.string.device_edit_title), canSave = name.isNotBlank(), onDismiss = { editing = false }, onSave = {
             editing = false
             scope.launch { repository.change { it.updateDevice(device.id, name.trim(), room, moveRoom = user.isAdmin) } }
         }) {
-            Field(name, { name = it }, "Name")
-            if (user.isAdmin) Picker("Room", listOf<Pair<String?, String>>(null to "No room") + rooms.map { it.id to it.name }, room, { room = it })
+            Field(name, { name = it }, stringResource(R.string.device_field_name))
+            if (user.isAdmin) Picker(stringResource(R.string.device_field_room), listOf<Pair<String?, String>>(null to stringResource(R.string.device_no_room)) + rooms.map { it.id to it.name }, room, { room = it })
         }
     }
     if (removing) {
-        Confirm("Remove ${device.name}?", "It leaves your home and its scenes. You can add it again from Add devices.", "Remove", {
+        Confirm(stringResource(R.string.device_remove_confirm_title, device.name), stringResource(R.string.device_remove_confirm_body), stringResource(R.string.device_remove), {
             onDismiss()
             scope.launch { repository.change { it.removeDevice(device.id) } }
         }, { removing = false })
@@ -439,15 +457,23 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
 
 // Colors of light itself (white temperatures, bulb colors): device data, not theme colors. Same values as the web app.
 private val WhiteTrack = listOf(0xFFFF890E, 0xFFFFA757, 0xFFFFE4CE, 0xFFD6E6FF, 0xFFB2D4FF).map(::Color)
-private val WhitePresets = listOf("Candle" to 0, "Soft White" to 16, "Daylight" to 67, "Cool White" to 100)
+private val WhitePresets = listOf(
+    R.string.device_white_candle to 0,
+    R.string.device_white_soft to 16,
+    R.string.device_white_daylight to 67,
+    R.string.device_white_cool_preset to 100,
+)
 
-private fun whiteName(percent: Int) = when {
-    percent < 10 -> "Candle"
-    percent < 30 -> "Soft White"
-    percent < 60 -> "Neutral White"
-    percent < 85 -> "Daylight"
-    else -> "Cool White"
-}
+@Composable
+private fun whiteName(percent: Int) = stringResource(
+    when {
+        percent < 10 -> R.string.device_white_candle
+        percent < 30 -> R.string.device_white_soft
+        percent < 60 -> R.string.device_white_neutral_preset
+        percent < 85 -> R.string.device_white_daylight
+        else -> R.string.device_white_cool_preset
+    },
+)
 
 /**
  * White / Color controls of a light, like the web app's: a preview of the light it gives, the mode switch,
@@ -480,9 +506,9 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
             Box(Modifier.size(48.dp).clip(MaterialShapes.Sunny.toShape()).background(shown).border(1.dp, c.outlineVariant, MaterialShapes.Sunny.toShape()))
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(if (!on) "Light off" else if (s.effect != null) "Effect" else if (lit == "white") "White light" else "Color light", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(if (!on) R.string.device_light_off else if (s.effect != null) R.string.device_light_effect else if (lit == "white") R.string.device_light_white else R.string.device_light_color), style = MaterialTheme.typography.titleMedium)
                 RollingText(
-                    s.effect?.let { "Playing ${playing?.name ?: it}" } ?: if (lit == "white") "${whiteName(shownTemp)} · ${whiteKelvin(shownTemp)}K" else color.uppercase(),
+                    s.effect?.let { stringResource(R.string.device_light_playing, playing?.name ?: it) } ?: if (lit == "white") stringResource(R.string.device_white_preset_kelvin, whiteName(shownTemp), whiteKelvin(shownTemp)) else color.uppercase(),
                     MaterialTheme.typography.bodyMedium, c.onSurfaceVariant,
                 )
             }
@@ -493,17 +519,19 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
         // Switching mode re-sends that mode's current setting, so the bulb changes at once.
         val tabs = if (playable.isEmpty()) 2 else 3
-        SegmentedButton(mode == "white", { mode = "white"; send(DeviceCommand(colorTemp = temp, colorMode = "white")) }, SegmentedButtonDefaults.itemShape(0, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.LightMode, null, Modifier.size(18.dp)) }) { Text("White") }
-        SegmentedButton(mode == "color", { mode = "color"; send(DeviceCommand(color = color, colorMode = "color")) }, SegmentedButtonDefaults.itemShape(1, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.Palette, null, Modifier.size(18.dp)) }) { Text("Color") }
+        SegmentedButton(mode == "white", { mode = "white"; send(DeviceCommand(colorTemp = temp, colorMode = "white")) }, SegmentedButtonDefaults.itemShape(0, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.LightMode, null, Modifier.size(18.dp)) }) { Text(stringResource(R.string.device_white)) }
+        SegmentedButton(mode == "color", { mode = "color"; send(DeviceCommand(color = color, colorMode = "color")) }, SegmentedButtonDefaults.itemShape(1, tabs), enabled = enabled, icon = { Icon(Icons.Rounded.Palette, null, Modifier.size(18.dp)) }) { Text(stringResource(R.string.device_color)) }
         // Opening Effects changes nothing on the light until one is picked.
-        if (tabs == 3) SegmentedButton(mode == "effect", { mode = "effect" }, SegmentedButtonDefaults.itemShape(2, 3), icon = { Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp)) }) { Text("Effects") }
+        if (tabs == 3) SegmentedButton(mode == "effect", { mode = "effect" }, SegmentedButtonDefaults.itemShape(2, 3), icon = { Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp)) }) { Text(stringResource(R.string.device_effects)) }
     }
 
     if (mode == "white") {
+        val colorTempLabel = stringResource(R.string.device_color_temp)
+        val tempTone = stringResource(if (shownTemp < 35) R.string.device_white_warm else if (shownTemp > 65) R.string.device_white_cool else R.string.device_white_neutral)
         Column {
             Row {
-                Text("Color temperature", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-                Text("${whiteKelvin(shownTemp)}K · ${if (shownTemp < 35) "Warm" else if (shownTemp > 65) "Cool" else "Neutral"}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                Text(colorTempLabel, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.device_kelvin_tone, whiteKelvin(shownTemp), tempTone), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
             }
             Slider(
                 value = dragTemp ?: temp.toFloat(),
@@ -513,19 +541,19 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
                 enabled = enabled,
                 // The track shows the light each position gives.
                 track = { Box(Modifier.fillMaxWidth().height(16.dp).clip(CircleShape).background(Brush.horizontalGradient(WhiteTrack)).border(1.dp, c.outlineVariant, CircleShape)) },
-                modifier = Modifier.semantics { contentDescription = "Color temperature" },
+                modifier = Modifier.semantics { contentDescription = colorTempLabel },
             )
             Row {
-                Text("2000K warm", style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                Text("6500K cool", style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant)
+                Text(stringResource(R.string.device_kelvin_min), style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.device_kelvin_max), style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant)
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            WhitePresets.forEach { (name, percent) ->
+            WhitePresets.forEach { (nameRes, percent) ->
                 FilterChip(
                     selected = kotlin.math.abs(temp - percent) <= 7,
                     onClick = { send(DeviceCommand(colorTemp = percent, colorMode = "white")) },
-                    label = { Text("$name · ${whiteKelvin(percent)}K") },
+                    label = { Text(stringResource(R.string.device_white_preset_kelvin, stringResource(nameRes), whiteKelvin(percent))) },
                     leadingIcon = { Box(Modifier.size(16.dp).clip(CircleShape).background(Color(0xFF000000 or kelvinRgb(whiteKelvin(percent)).toLong())).border(1.dp, c.outlineVariant, CircleShape)) },
                     enabled = enabled,
                 )
@@ -533,19 +561,21 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
         }
         // Moods are white presets with a brightness, so they live with the other white settings.
         if (catalog.moods.isNotEmpty()) {
-            Text("Moods", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.device_moods), style = MaterialTheme.typography.titleSmall)
             PresetGrid(catalog.moods, enabled, { send(DeviceCommand(effect = it.id)) }) { mood ->
                 // A mood is "on" when the light shows exactly its setting and no effect runs.
                 s.effect == null && s.isOn == true && s.colorMode == "white" && s.brightness == mood.brightness && s.colorTemp == mood.colorTemp
             }
         }
     } else if (mode == "effect") {
-        if (s.effect != null) OutlinedButton({ send(DeviceCommand(effect = "")) }, enabled = enabled) { Text("Stop effect") }
+        if (s.effect != null) OutlinedButton({ send(DeviceCommand(effect = "")) }, enabled = enabled) { Text(stringResource(R.string.device_stop_effect)) }
         PresetGrid(playable, enabled, { send(DeviceCommand(effect = it.id)) }) { it.id == s.effect }
     } else {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LightColors.forEach { hex ->
                 val selected = color.equals(hex, ignoreCase = true)
+                val colorA11y = stringResource(R.string.device_color_swatch_a11y, hex)
+                val stateA11y = stringResource(if (selected) R.string.device_selected else R.string.device_not_selected)
                 Box(
                     Modifier
                         .size(48.dp)
@@ -553,7 +583,7 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
                         .background(parseColor(hex) ?: c.surfaceVariant)
                         .border(1.dp, c.outlineVariant, CircleShape)
                         .clickable(enabled, role = Role.RadioButton) { send(DeviceCommand(color = hex, colorMode = "color")) }
-                        .semantics { contentDescription = "Color $hex"; stateDescription = if (selected) "Selected" else "Not selected" },
+                        .semantics { contentDescription = colorA11y; stateDescription = stateA11y },
                     contentAlignment = Alignment.Center,
                 ) {
                     // Dark tick: every preset is a light, saturated color.
@@ -571,6 +601,8 @@ private fun ColumnScope.LightControls(device: Device, enabled: Boolean, send: (D
 private fun PresetGrid(presets: List<LightPreset>, enabled: Boolean, onPick: (LightPreset) -> Unit, active: (LightPreset) -> Boolean) {
     val c = MaterialTheme.colorScheme
     val motion = MaterialTheme.motionScheme
+    val stateOn = stringResource(R.string.device_on)
+    val stateOff = stringResource(R.string.device_off)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -584,7 +616,7 @@ private fun PresetGrid(presets: List<LightPreset>, enabled: Boolean, onPick: (Li
                         enabled = enabled,
                         color = container,
                         shape = RoundedCornerShape(corner.coerceAtLeast(0.dp)),
-                        modifier = Modifier.weight(1f).semantics { role = Role.RadioButton; stateDescription = if (on) "On" else "Off" },
+                        modifier = Modifier.weight(1f).semantics { role = Role.RadioButton; stateDescription = if (on) stateOn else stateOff },
                     ) {
                         Row(Modifier.heightIn(min = 56.dp).padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             // The light itself: device data, not theme color. A loop is drawn as a sweep through its colors.
@@ -606,7 +638,7 @@ private fun PresetGrid(presets: List<LightPreset>, enabled: Boolean, onPick: (Li
 
 /** Slider that follows the finger locally and sends one command when released. */
 @Composable
-private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRange<Float>, valueText: (Int) -> String, enabled: Boolean, onCommit: (Int) -> Unit) {
+private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRange<Float>, valueText: @Composable (Int) -> String, enabled: Boolean, onCommit: (Int) -> Unit) {
     // Null when not dragging: the slider then follows the device (which already shows the sent value).
     var drag by remember { mutableStateOf<Float?>(null) }
     Column {
@@ -631,16 +663,28 @@ fun ConfirmSwitchDialog() {
     val confirmation by LocalRepository.current.confirmation.collectAsStateWithLifecycle()
     val asking = confirmation ?: return
     val names = asking.names
+    val joined = names.joinToString(", ")
     AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = { asking.answer(false) },
-        title = { Text(if (names.size == 1) "Switch ${names[0]}?" else "Switch ${names.size} devices?") },
-        text = {
+        title = {
             Text(
-                "This includes ${names.joinToString(", ")}, which ${if (names.size == 1) "asks" else "ask"} before switching. " +
-                    "Switching ${if (names.size == 1) "it" else "them"} can cut power to whatever is connected.",
+                if (names.size == 1) {
+                    stringResource(R.string.device_confirm_switch_one_title, names[0])
+                } else {
+                    pluralStringResource(R.plurals.device_confirm_switch_many_title, names.size, names.size)
+                },
             )
         },
-        confirmButton = { TextButton({ asking.answer(true) }) { Text("Switch") } },
-        dismissButton = { TextButton({ asking.answer(false) }) { Text("Cancel") } },
+        text = {
+            Text(
+                if (names.size == 1) {
+                    stringResource(R.string.device_confirm_switch_one_body, joined)
+                } else {
+                    stringResource(R.string.device_confirm_switch_many_body, joined)
+                },
+            )
+        },
+        confirmButton = { TextButton({ asking.answer(true) }) { Text(stringResource(R.string.device_confirm_switch_action)) } },
+        dismissButton = { TextButton({ asking.answer(false) }) { Text(stringResource(R.string.device_cancel)) } },
     )
 }

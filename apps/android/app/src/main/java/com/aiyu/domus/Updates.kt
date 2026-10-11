@@ -42,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.aiyu.domus.core.AppUpdate
@@ -125,10 +126,10 @@ fun UpdatePrompt() {
     AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = { if (progress == null) found = null },
         icon = { Icon(Icons.Rounded.SystemUpdate, null) },
-        title = { Text("Domus ${update.version} is available") },
+        title = { Text(stringResource(R.string.update_available_title, update.version)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(if (installer.failed) "The download failed. Try again?" else "You have $installed. Release notes and the update channel are in Settings, under Updates.")
+                Text(if (installer.failed) stringResource(R.string.update_download_failed_retry_prompt) else stringResource(R.string.update_prompt_body, installed))
                 // Long notes scroll inside the dialog so its buttons stay in reach.
                 if (update.notes.isNotBlank()) ReleaseNotes(update.notes, Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState()))
                 progress?.let { UpdateProgress(it) }
@@ -136,11 +137,11 @@ fun UpdatePrompt() {
         },
         confirmButton = {
             TextButton(enabled = progress == null, onClick = { installer.start(update) { found = null } }) {
-                Text(progress?.let { "Downloading ${(it * 100).toInt()}%" } ?: "Update")
+                Text(progress?.let { stringResource(R.string.update_downloading_percent, (it * 100).toInt()) } ?: stringResource(R.string.update_action))
             }
         },
         dismissButton = {
-            TextButton(enabled = progress == null, onClick = { repository.skipUpdate(update.version); found = null }) { Text("Later") }
+            TextButton(enabled = progress == null, onClick = { repository.skipUpdate(update.version); found = null }) { Text(stringResource(R.string.update_later)) }
         },
     )
 }
@@ -170,56 +171,56 @@ fun UpdatesPage(onBack: () -> Unit) {
     val progress = installer.progress
     val found = result?.getOrNull()?.update
 
-    SubPage("Updates", onBack) {
+    SubPage(stringResource(R.string.update_title), onBack) {
         Surface(color = if (found != null) c.primaryContainer else c.surfaceContainerHigh, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Rounded.SystemUpdate, contentDescription = null)
                 Text(
                     when {
-                        found != null -> "Domus ${found.version} is available"
-                        result == null -> "Checking for updates…"
-                        result?.isFailure == true -> "Couldn't check for updates"
-                        !released -> "Development build"
-                        else -> "Domus is up to date"
+                        found != null -> stringResource(R.string.update_available_title, found.version)
+                        result == null -> stringResource(R.string.update_checking)
+                        result?.isFailure == true -> stringResource(R.string.update_check_failed)
+                        !released -> stringResource(R.string.update_dev_build)
+                        else -> stringResource(R.string.update_up_to_date)
                     },
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Text(
                     when {
-                        installer.failed -> "The download failed. Try again."
-                        result?.isFailure == true -> "You have $installed. Check your connection and try again."
-                        !released -> "You have $installed. A development build is updated by rebuilding it."
-                        else -> "You have $installed."
+                        installer.failed -> stringResource(R.string.update_download_failed_retry)
+                        result?.isFailure == true -> stringResource(R.string.update_check_failed_body, installed)
+                        !released -> stringResource(R.string.update_dev_build_body, installed)
+                        else -> stringResource(R.string.update_you_have, installed)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 progress?.let { UpdateProgress(it) }
                 if (found != null) {
                     Button({ installer.start(found) }, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = progress == null) {
-                        Text(progress?.let { "Downloading ${(it * 100).toInt()}%" } ?: "Download and install")
+                        Text(progress?.let { stringResource(R.string.update_downloading_percent, (it * 100).toInt()) } ?: stringResource(R.string.update_download_install))
                     }
                 } else if (result != null) {
-                    OutlinedButton({ asked++ }, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Check again") }
+                    OutlinedButton({ asked++ }, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(stringResource(R.string.update_check_again)) }
                 }
             }
         }
 
         if (released) {
-            SectionTitle("Channel")
+            SectionTitle(stringResource(R.string.update_channel))
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 UpdateChannel.entries.forEachIndexed { index, item ->
-                    SegmentedButton(channel == item, { repository.setUpdateChannel(item) }, SegmentedButtonDefaults.itemShape(index, UpdateChannel.entries.size), enabled = progress == null) { Text(item.label) }
+                    SegmentedButton(channel == item, { repository.setUpdateChannel(item) }, SegmentedButtonDefaults.itemShape(index, UpdateChannel.entries.size), enabled = progress == null) { Text(item.text()) }
                 }
             }
-            Text("Beta and Alpha get new builds earlier, and every stable one.", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            Text(stringResource(R.string.update_channel_hint), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
 
         val notes = found?.notes ?: result?.getOrNull()?.installedNotes
-        SectionTitle(if (found != null) "What's new in ${found.version}" else "In this version")
+        SectionTitle(if (found != null) stringResource(R.string.update_whats_new_in, found.version) else stringResource(R.string.update_in_this_version))
         when {
             !notes.isNullOrBlank() -> ReleaseNotes(notes)
-            result == null -> Text("Loading the release notes…", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
-            else -> Text("There are no release notes for this version.", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            result == null -> Text(stringResource(R.string.update_loading_notes), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            else -> Text(stringResource(R.string.update_no_notes), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
 }

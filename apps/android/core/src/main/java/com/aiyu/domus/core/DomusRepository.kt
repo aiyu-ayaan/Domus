@@ -47,12 +47,21 @@ sealed interface ConnectResult {
 data class Appearance(val theme: String = "system", val dynamicColor: Boolean = false)
 
 /** Everything the screens show, kept current by the server's event stream. One instance per process. */
-class DomusRepository(context: Context) {
+class DomusRepository(
+    context: Context,
+    private val resolveMessage: (code: String?, params: Map<String, String>, fallback: String) -> String = { _, _, fallback -> fallback },
+) {
     private val store = SecureStore(context.applicationContext)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var api: DomusApi? = null
     private var socket: WebSocket? = null
     private var liveJob: Job? = null
+
+    private fun msg(code: String, fallback: String, params: Map<String, String> = emptyMap()): String =
+        resolveMessage(code, params, fallback)
+
+    private fun msg(e: ApiException): String =
+        resolveMessage(e.code, e.params, e.message.orEmpty())
 
     private val _session = MutableStateFlow<Session>(Session.Loading)
     val session: StateFlow<Session> = _session
@@ -184,12 +193,12 @@ class DomusRepository(context: Context) {
 
     /** Admin only. Null on success, otherwise the reason to show. Every app picks the change up from the server. */
     suspend fun saveLinks(localUrl: String, remoteUrl: String): String? {
-        val api = api ?: return "No server"
+        val api = api ?: return msg(CODE_NO_SERVER, "No server")
         return try {
             remember(api.saveServerLinks(localUrl.trim(), remoteUrl.trim()))
             null
         } catch (e: ApiException) {
-            e.message
+            msg(e)
         }
     }
 
@@ -215,8 +224,8 @@ class DomusRepository(context: Context) {
             _session.value = Session.SignedOut(server, api.setupStatus().needsAdminSetup)
         } catch (e: ApiException) {
             val message = if (e.status == ApiException.UNTRUSTED) {
-                "The server's certificate changed since you approved it. Connect again to review the new one."
-            } else e.message.orEmpty()
+                msg(CODE_CERT_CHANGED, "The server's certificate changed since you approved it. Connect again to review the new one.")
+            } else msg(e)
             _session.value = Session.Unreachable(server, message)
         }
     }
@@ -227,7 +236,7 @@ class DomusRepository(context: Context) {
      */
     suspend fun connect(input: String, trustFingerprint: String? = null): ConnectResult {
         val url = normalizeServerUrl(input)
-            ?: return ConnectResult.Failed("Enter an address like 192.168.1.10:8443 or home.example.com. Only https is supported.")
+            ?: return ConnectResult.Failed(msg(CODE_ADDRESS_INVALID, "Enter an address like 192.168.1.10:8443 or home.example.com. Only https is supported."))
         val candidate = DomusApi(url, trustFingerprint) { null }
         return try {
             val needsSetup = candidate.setupStatus().needsAdminSetup
@@ -239,10 +248,10 @@ class DomusRepository(context: Context) {
             _session.value = Session.SignedOut(url, needsSetup)
             ConnectResult.Connected
         } catch (e: ApiException) {
-            if (e.status != ApiException.UNTRUSTED || trustFingerprint != null) return ConnectResult.Failed(e.message.orEmpty())
+            if (e.status != ApiException.UNTRUSTED || trustFingerprint != null) return ConnectResult.Failed(msg(e))
             val uri = URI(url)
             runCatching { Tls.fetchFingerprint(uri.host, if (uri.port == -1) 443 else uri.port) }
-                .fold({ ConnectResult.Untrusted(url, it) }, { ConnectResult.Failed("Couldn't read the server's certificate.") })
+                .fold({ ConnectResult.Untrusted(url, it) }, { ConnectResult.Failed(msg(CODE_CERT_UNREADABLE, "Couldn't read the server's certificate.")) })
         }
     }
 
@@ -253,14 +262,14 @@ class DomusRepository(context: Context) {
         authenticate { it.setup(username.trim(), email.trim(), password) }
 
     private suspend fun authenticate(request: suspend (DomusApi) -> AuthResponse): String? {
-        val api = api ?: return "No server"
+        val api = api ?: return msg(CODE_NO_SERVER, "No server")
         return try {
             val auth = request(api)
             store.put(TOKEN, auth.token)
             signedIn(api.baseUrl, auth.user)
             null
         } catch (e: ApiException) {
-            e.message
+            msg(e)
         }
     }
 
@@ -280,12 +289,12 @@ class DomusRepository(context: Context) {
     suspend fun changePassword(current: String, password: String): String? = entry { it.changePassword(current, password) }
 
     private suspend fun entry(request: suspend (DomusApi) -> Unit): String? {
-        val api = api ?: return "No server"
+        val api = api ?: return msg(CODE_NO_SERVER, "No server")
         return try {
             request(api)
             null
         } catch (e: ApiException) {
-            e.message
+            msg(e)
         }
     }
 
@@ -368,7 +377,7 @@ class DomusRepository(context: Context) {
                 kotlinx.coroutines.withContext(Confirmed) { block(api) }
             }
         } catch (e: ApiException) {
-            if (e.status == 401) logout() else _messages.tryEmit(e.message.orEmpty())
+            if (e.status == 401) logout() else _messages.tryEmit(msg(e))
             null
         }
     }
@@ -449,7 +458,7 @@ class DomusRepository(context: Context) {
     fun runAutomation(automation: Automation) {
         scope.launch {
             attempt { it.runAutomation(automation.id) }?.let {
-                _messages.tryEmit(it.errors.firstOrNull() ?: "Ran “${automation.name}”")
+                _messages.tryEmit(it.errors.firstOrNull() ?: msg(CODE_AUTOMATION_RAN, "Ran “${automation.name}”", mapOf("name" to automation.name)))
             }
         }
     }
@@ -554,23 +563,35 @@ class DomusRepository(context: Context) {
             "device_discovered", "discovery_finished", "integrations_changed", "notifications_changed" -> _revision.update { it + 1 }
             "notification" -> {
                 _revision.update { it + 1 }
-                _messages.tryEmit(listOfNotNull(text("title"), text("message")).joinToString(": "))
-                _alerts.tryEmit(text("title").orEmpty() to text("message").orEmpty())
+                val code = text("code")
+                val params = (event["params"] as? JsonObject)
+                    ?.mapNotNull { (k, v) -> v.jsonPrimitive.contentOrNull?.let { k to it } }
+                    ?.toMap()
+                    .orEmpty()
+                val title = if (code != null) resolveMessage("$code.title", params, text("title").orEmpty()) else text("title").orEmpty()
+                val body = if (code != null) resolveMessage(code, params, text("message").orEmpty()) else text("message").orEmpty()
+                _messages.tryEmit(listOf(title, body).filter { it.isNotBlank() }.joinToString(": "))
+                _alerts.tryEmit(title to body)
             }
         }
     }
 
-    private companion object {
-        const val SERVER = "server"
-        const val PIN = "pin"
-        const val TOKEN = "token"
-        const val LOCAL = "local"
-        const val REMOTE = "remote"
-        const val THEME = "theme"
-        const val DYNAMIC = "dynamic"
-        const val ALERTS = "alerts"
-        const val ONBOARDED = "onboarded"
-        const val CHANNEL = "update_channel"
-        const val SKIPPED_UPDATE = "skipped_update"
+    companion object {
+        const val CODE_NO_SERVER = "error.no_server"
+        const val CODE_CERT_CHANGED = "connect.cert_changed"
+        const val CODE_ADDRESS_INVALID = "connect.address_invalid"
+        const val CODE_CERT_UNREADABLE = "connect.cert_unreadable"
+        const val CODE_AUTOMATION_RAN = "automation.ran"
+        private const val SERVER = "server"
+        private const val PIN = "pin"
+        private const val TOKEN = "token"
+        private const val LOCAL = "local"
+        private const val REMOTE = "remote"
+        private const val THEME = "theme"
+        private const val DYNAMIC = "dynamic"
+        private const val ALERTS = "alerts"
+        private const val ONBOARDED = "onboarded"
+        private const val CHANNEL = "update_channel"
+        private const val SKIPPED_UPDATE = "skipped_update"
     }
 }

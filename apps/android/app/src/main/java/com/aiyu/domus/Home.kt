@@ -65,6 +65,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.RoundedPolygon
@@ -82,12 +84,15 @@ import com.aiyu.domus.ui.components.enterStaggered
 import java.util.Calendar
 import kotlin.math.roundToInt
 
-private fun greeting(): String = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-    in 0..4 -> "Good night"
-    in 5..11 -> "Good morning"
-    in 12..17 -> "Good afternoon"
-    else -> "Good evening"
-}
+@Composable
+private fun greeting(): String = stringResource(
+    when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 0..4 -> R.string.home_greeting_night
+        in 5..11 -> R.string.home_greeting_morning
+        in 12..17 -> R.string.home_greeting_afternoon
+        else -> R.string.home_greeting_evening
+    },
+)
 
 /** One live number on a tonal card. */
 @Composable
@@ -97,13 +102,13 @@ fun StatCard(
 ) {
     var showInfo by remember { mutableStateOf(false) }
     if (showInfo && info != null) {
-        AlertDialog(modifier = Modifier.clickHaptics(), onDismissRequest = { showInfo = false }, confirmButton = { TextButton({ showInfo = false }) { Text("Got it") } }, title = { Text(label) }, text = { Text(info) })
+        AlertDialog(modifier = Modifier.clickHaptics(), onDismissRequest = { showInfo = false }, confirmButton = { TextButton({ showInfo = false }) { Text(stringResource(R.string.home_got_it)) } }, title = { Text(label) }, text = { Text(info) })
     }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.large, modifier = modifier.semantics(mergeDescendants = true) {}) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 ShapedIcon(icon, shape, content, container, size = 40.dp)
-                if (info != null) IconButton({ showInfo = true }, Modifier.size(32.dp)) { Icon(Icons.Rounded.Info, "About $label", Modifier.size(18.dp)) }
+                if (info != null) IconButton({ showInfo = true }, Modifier.size(32.dp)) { Icon(Icons.Rounded.Info, stringResource(R.string.home_about_stat, label), Modifier.size(18.dp)) }
             }
             Spacer(Modifier.height(12.dp))
             Text(label, style = MaterialTheme.typography.labelLarge)
@@ -122,19 +127,20 @@ private fun SceneCard(scene: Scene, enabled: Boolean, onToggle: () -> Unit) {
     val content by animateColorAsState(if (scene.isActive) c.onPrimaryContainer else c.onSurface, motion.defaultEffectsSpec(), label = "sceneContent")
     val corner by animateDpAsState(if (scene.isActive) 36.dp else 20.dp, motion.defaultSpatialSpec(), label = "sceneCorner")
     val source = remember { MutableInteractionSource() }
+    val stateText = stringResource(if (scene.isActive) R.string.device_on else R.string.device_off)
     Card(
         onClick = onToggle,
         enabled = enabled,
         shape = RoundedCornerShape(corner.coerceAtLeast(0.dp)),
         colors = CardDefaults.cardColors(containerColor = container, contentColor = content),
         interactionSource = source,
-        modifier = Modifier.width(156.dp).pressScale(source).semantics { role = Role.Switch; stateDescription = if (scene.isActive) "On" else "Off" },
+        modifier = Modifier.width(156.dp).pressScale(source).semantics { role = Role.Switch; stateDescription = stateText },
     ) {
         Column(Modifier.padding(16.dp)) {
             ShapedIcon(Icons.Rounded.AutoAwesome, MaterialShapes.Clover4Leaf, if (scene.isActive) c.primary else c.surfaceContainerHighest, if (scene.isActive) c.onPrimary else c.onSurfaceVariant)
             Spacer(Modifier.height(16.dp))
             Text(scene.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(if (scene.isActive) "On · tap to turn off" else "Tap to run", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(if (scene.isActive) R.string.home_scene_on_hint else R.string.home_scene_off_hint), style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -151,7 +157,7 @@ private fun SceneCard(scene: Scene, enabled: Boolean, onToggle: () -> Unit) {
 private fun HomeHeader(user: User, status: String, onAvatar: () -> Unit) {
     val c = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.size(48.dp).clip(CircleShape).background(c.surfaceContainerHigh).clickable(onClickLabel = "Change avatar", role = Role.Button, onClick = onAvatar)) {
+        Box(Modifier.size(48.dp).clip(CircleShape).background(c.surfaceContainerHigh).clickable(onClickLabel = stringResource(R.string.home_change_avatar), role = Role.Button, onClick = onAvatar)) {
             UserAvatar(avatarSpec = user.avatar, username = user.username, size = 48.dp)
         }
         Column(Modifier.weight(1f)) {
@@ -179,13 +185,13 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     var notices by remember { mutableStateOf(emptyList<Notice>()) }
     var clearNotices by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    if (clearNotices) Confirm("Delete all notifications?", "They are removed on every device.", "Delete all", { clearNotices = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearNotices = false })
+    if (clearNotices) Confirm(stringResource(R.string.home_clear_notices_title), stringResource(R.string.home_clear_notices_body), stringResource(R.string.home_delete_all), { clearNotices = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearNotices = false })
     LaunchedEffect(revision) { repository.request { it.notices() }?.let { notices = it.items.take(3) } }
 
     ScreenColumn {
         HomeHeader(
             user,
-            if (!live && !loading) "Reconnecting…" else devices.filter { it.type != "sensor" }.let { all -> "${all.count { it.isOnline && it.state.isOn == true }} of ${all.size} on" },
+            if (!live && !loading) stringResource(R.string.home_reconnecting) else devices.filter { it.type != "sensor" }.let { all -> stringResource(R.string.home_devices_on_of_total, all.count { it.isOnline && it.state.isOn == true }, all.size) },
             onAvatar = { open("avatar") },
         )
         if (loading && devices.isEmpty()) {
@@ -202,51 +208,56 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
 
             // Both cards take the height of the taller one.
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard("Using now", formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Combined live power draw of all your metered devices.")
+                StatCard(stringResource(R.string.home_using_now), formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.home_using_now_info))
                 StatCard(
-                    "Today", formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
+                    stringResource(R.string.home_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
                     Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
-                    info = "Energy used since midnight. The amount below it is the estimated cost at your electricity rate.",
+                    info = stringResource(R.string.home_today_info),
                 )
             }
         }
         devices.filter { it.isOnline }.mapNotNull { it.state.pm25 }.maxOrNull()?.let { pm ->
             StatCard(
-                "Air quality", airLevel(pm).label, "PM2.5 ${pm.roundToInt()} µg/m³",
+                stringResource(R.string.home_air_quality), airLevel(pm).text(), stringResource(R.string.home_pm25_reading, pm.roundToInt()),
                 Icons.Rounded.Air, MaterialShapes.Flower, c.tertiaryContainer, c.onTertiaryContainer, Modifier.fillMaxWidth().enterStaggered(1),
             )
         }
 
         val quick = scenes.filter { it.kind == "standard" }
         if (quick.isNotEmpty()) {
-            SectionTitle("Scenes")
+            SectionTitle(stringResource(R.string.home_scenes))
             Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(2), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 quick.forEach { scene -> SceneCard(scene, user.canControl) { repository.toggleScene(scene, !scene.isActive) } }
             }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionTitle("On right now", Modifier.weight(1f))
-            TextButton(onShowDevices) { Text("All devices") }
+            SectionTitle(stringResource(R.string.home_on_right_now), Modifier.weight(1f))
+            TextButton(onShowDevices) { Text(stringResource(R.string.home_all_devices)) }
         }
         when {
-            devices.isEmpty() -> EmptyState("No devices yet", if (user.isAdmin) "Open Devices and tap + to link Tuya, Tapo, Xiaomi, Hue or MQTT." else "Ask an admin to add devices or give you access to a room.")
-            on.isEmpty() -> Text("Everything is off.", color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+            devices.isEmpty() -> EmptyState(stringResource(R.string.home_no_devices_title), stringResource(if (user.isAdmin) R.string.home_no_devices_admin else R.string.home_no_devices_member))
+            on.isEmpty() -> Text(stringResource(R.string.home_everything_off), color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
             else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
         }
 
         val lived = rooms.sortedBy { it.floor }.map { room -> room to devices.filter { it.roomId == room.id } }.filter { it.second.isNotEmpty() }
         if (lived.isNotEmpty()) {
-            SectionTitle("Rooms")
+            SectionTitle(stringResource(R.string.home_rooms))
             Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(5), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 lived.forEach { (room, inRoom) ->
                     val active = inRoom.count { it.isOnline && it.state.isOn == true }
+                    val summary = if (active == 0) {
+                        pluralStringResource(R.plurals.home_room_summary_off, inRoom.size, inRoom.size)
+                    } else {
+                        pluralStringResource(R.plurals.home_room_summary_on, inRoom.size, inRoom.size, active)
+                    }
                     Surface(onShowDevices, Modifier.width(156.dp), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large) {
                         Column(Modifier.padding(16.dp)) {
                             ShapedIcon(Icons.Rounded.MeetingRoom, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
                             Spacer(Modifier.height(16.dp))
                             Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text("${inRoom.size} ${if (inRoom.size == 1) "device" else "devices"} · ${if (active == 0) "all off" else "$active on"}", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+                            Text(summary, style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
                             // The room's temperature, when something in it measures one.
                             inRoom.firstNotNullOfOrNull { it.state.temperature }?.let { Text("${it.roundToInt()}°", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant) }
                         }
@@ -257,9 +268,9 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
 
         if (notices.isNotEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionTitle("Recent activity", Modifier.weight(1f))
-                TextButton({ clearNotices = true }) { Text("Delete all") }
-                TextButton({ open("notices") }) { Text("See all") }
+                SectionTitle(stringResource(R.string.home_recent_activity), Modifier.weight(1f))
+                TextButton({ clearNotices = true }) { Text(stringResource(R.string.home_delete_all)) }
+                TextButton({ open("notices") }) { Text(stringResource(R.string.home_see_all)) }
             }
             notices.forEachIndexed { i, notice ->
                 key(notice.id) {

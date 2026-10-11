@@ -59,10 +59,13 @@ import java.time.ZoneId
 import java.time.OffsetDateTime
 import com.aiyu.domus.core.formatClockTime
 import com.aiyu.domus.core.HomeLocation
+import androidx.annotation.StringRes
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -92,7 +95,7 @@ fun SubPage(title: String, onBack: () -> Unit, actions: @Composable RowScope.() 
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.widthIn(max = 840.dp).fillMaxSize().statusBarsPadding().imePadding()) {
                 Row(Modifier.padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back") }
+                    IconButton(onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.manage_back)) }
                     Text(title, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).semantics { heading() })
                     actions()
                 }
@@ -122,7 +125,7 @@ fun Field(
         visualTransformation = if (secret && !shown) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = KeyboardOptions(keyboardType = if (secret) KeyboardType.Password else keyboard),
         trailingIcon = if (secret) {
-            { IconButton({ shown = !shown }) { Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (shown) "Hide $label" else "Show $label") } }
+            { IconButton({ shown = !shown }) { Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (shown) stringResource(R.string.manage_hide_field, label) else stringResource(R.string.manage_show_field, label)) } }
         } else null,
         modifier = modifier,
     )
@@ -166,7 +169,7 @@ fun <T> Picker(label: String, options: List<Pair<T, String>>, selected: T, onSel
     OutlinedCard({ open = true }, modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(options.firstOrNull { it.first == selected }?.second ?: "Choose…", style = MaterialTheme.typography.bodyLarge)
+            Text(options.firstOrNull { it.first == selected }?.second ?: stringResource(R.string.manage_choose), style = MaterialTheme.typography.bodyLarge)
         }
     }
     if (open) {
@@ -183,7 +186,7 @@ fun <T> Picker(label: String, options: List<Pair<T, String>>, selected: T, onSel
                     }
                 }
             },
-            confirmButton = { TextButton({ open = false }) { Text("Close") } },
+            confirmButton = { TextButton({ open = false }) { Text(stringResource(R.string.manage_close)) } },
         )
     }
 }
@@ -204,13 +207,13 @@ fun Confirm(title: String, text: String, action: String, onConfirm: () -> Unit, 
         title = { Text(title) },
         text = { Text(text) },
         confirmButton = { Button({ onDismiss(); onConfirm() }, colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.onError)) { Text(action) } },
-        dismissButton = { TextButton(onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onDismiss) { Text(stringResource(R.string.manage_cancel)) } },
     )
 }
 
 /** Dialog with a form: Save on the right, an optional Delete on the left. */
 @Composable
-fun FormDialog(title: String, canSave: Boolean, onSave: () -> Unit, onDismiss: () -> Unit, onDelete: (() -> Unit)? = null, save: String = "Save", content: @Composable ColumnScope.() -> Unit) {
+fun FormDialog(title: String, canSave: Boolean, onSave: () -> Unit, onDismiss: () -> Unit, onDelete: (() -> Unit)? = null, save: String = stringResource(R.string.manage_save), content: @Composable ColumnScope.() -> Unit) {
     AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -218,8 +221,8 @@ fun FormDialog(title: String, canSave: Boolean, onSave: () -> Unit, onDismiss: (
         confirmButton = { Button(onSave, enabled = canSave) { Text(save) } },
         dismissButton = {
             Row {
-                if (onDelete != null) TextButton(onDelete, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Delete") }
-                TextButton(onDismiss) { Text("Cancel") }
+                if (onDelete != null) TextButton(onDelete, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.manage_delete)) }
+                TextButton(onDismiss) { Text(stringResource(R.string.manage_cancel)) }
             }
         },
     )
@@ -234,11 +237,12 @@ fun RoomsPage(onBack: () -> Unit) {
     var editing by remember { mutableStateOf<Room?>(null) }
     var open by remember { mutableStateOf(false) }
 
-    SubPage("Rooms", onBack, actions = { IconButton({ editing = null; open = true }) { Icon(Icons.Rounded.Add, "Add room") } }) {
-        if (rooms.isEmpty()) EmptyState("No rooms yet", "Rooms group devices and decide which ones a member or guest can see.")
+    SubPage(stringResource(R.string.manage_rooms_title), onBack, actions = { IconButton({ editing = null; open = true }) { Icon(Icons.Rounded.Add, stringResource(R.string.manage_add_room)) } }) {
+        if (rooms.isEmpty()) EmptyState(stringResource(R.string.manage_no_rooms), stringResource(R.string.manage_no_rooms_subtitle))
         rooms.sortedBy { it.floor }.forEach { room ->
             val count = devices.count { it.roomId == room.id }
-            RowCard(room.name, "Floor ${room.floor} · $count ${if (count == 1) "device" else "devices"}", Icons.Rounded.MeetingRoom, onClick = { editing = room; open = true })
+            val devicesText = pluralStringResource(R.plurals.manage_device_count, count, count)
+            RowCard(room.name, stringResource(R.string.manage_room_subtitle, room.floor, devicesText), Icons.Rounded.MeetingRoom, onClick = { editing = room; open = true })
         }
     }
     if (open) {
@@ -246,38 +250,48 @@ fun RoomsPage(onBack: () -> Unit) {
         var name by remember { mutableStateOf(room?.name.orEmpty()) }
         var floor by remember { mutableStateOf((room?.floor ?: 1).toString()) }
         FormDialog(
-            if (room == null) "New room" else "Edit room",
+            if (room == null) stringResource(R.string.manage_new_room) else stringResource(R.string.manage_edit_room),
             canSave = name.isNotBlank() && floor.toIntOrNull() != null,
             onSave = { open = false; scope.launch { repository.change { it.saveRoom(room?.id, name.trim(), floor.toInt()) } } },
             onDismiss = { open = false },
             // Devices stay; they just move to "No room".
             onDelete = room?.let { { open = false; scope.launch { repository.change { api -> api.removeRoom(it.id) } } } },
         ) {
-            Field(name, { name = it }, "Name")
-            Field(floor, { floor = it }, "Floor", keyboard = KeyboardType.Number)
+            Field(name, { name = it }, stringResource(R.string.manage_field_name))
+            Field(floor, { floor = it }, stringResource(R.string.manage_field_floor), keyboard = KeyboardType.Number)
         }
     }
 }
 
-private val Roles = listOf("admin" to "Admin", "member" to "Member", "guest" to "Guest")
-private val Levels = listOf("none" to "None", "view" to "See only", "control" to "Control", "edit" to "Edit")
+private val Roles: List<Pair<String, Int>> = listOf(
+    "admin" to R.string.manage_role_admin,
+    "member" to R.string.manage_role_member,
+    "guest" to R.string.manage_role_guest,
+)
+private val Levels: List<Pair<String, Int>> = listOf(
+    "none" to R.string.manage_level_none,
+    "view" to R.string.manage_level_view,
+    "control" to R.string.manage_level_control,
+    "edit" to R.string.manage_level_edit,
+)
 
 /** The level of one room or device: a chip that opens the four levels. It is tinted while access is given. */
 @Composable
 private fun LevelMenu(what: String, level: String, onLevel: (String) -> Unit) {
     var open by remember { mutableStateOf(false) }
+    val accessDesc = stringResource(R.string.manage_access_to, what)
     Box {
         FilterChip(
             selected = level != "none",
             onClick = { open = true },
-            label = { Text(Levels.first { it.first == level }.second) },
+            label = { Text(stringResource(Levels.first { it.first == level }.second)) },
             trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null, Modifier.size(18.dp)) },
-            modifier = Modifier.semantics { contentDescription = "Access to $what" },
+            modifier = Modifier.semantics { contentDescription = accessDesc },
         )
         DropdownMenu(open, { open = false }, Modifier.clickHaptics()) {
-            Levels.forEach { (value, name) ->
+            Levels.forEach { (value, nameRes) ->
                 DropdownMenuItem(
-                    text = { Text(name) },
+                    text = { Text(stringResource(nameRes)) },
                     onClick = { open = false; onLevel(value) },
                     trailingIcon = if (value == level) { { Icon(Icons.Rounded.Check, null, Modifier.size(18.dp)) } } else null,
                 )
@@ -305,15 +319,16 @@ private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room
     val c = MaterialTheme.colorScheme
     val count = devices.count { grants.levelOf(it) != "none" }
     val status = when {
-        room != null -> "Whole room · ${Levels.first { it.first == room }.second.lowercase()}"
-        count > 0 -> "$count of ${devices.size} devices"
-        else -> "No access"
+        room != null -> stringResource(R.string.manage_whole_room_level, stringResource(Levels.first { it.first == room }.second).lowercase())
+        count > 0 -> stringResource(R.string.manage_room_devices_of_total, count, devices.size)
+        else -> stringResource(R.string.manage_no_access)
     }
     val turn by animateFloatAsState(if (open) 180f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "chevron")
+    val clickLabel = if (open) stringResource(R.string.manage_close_item, name) else stringResource(R.string.manage_open_item, name)
     Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
         Column {
             Row(
-                Modifier.fillMaxWidth().clickable(onClickLabel = if (open) "Close $name" else "Open $name") { open = !open }.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp),
+                Modifier.fillMaxWidth().clickable(onClickLabel = clickLabel) { open = !open }.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
@@ -326,11 +341,11 @@ private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room
                 Column(Modifier.padding(bottom = 8.dp)) {
                     HorizontalDivider(color = c.outlineVariant)
                     if (onRoom != null) {
-                        AccessRow("Whole room", room ?: "none", onRoom, hint = "Also covers devices added later")
+                        AccessRow(stringResource(R.string.manage_whole_room), room ?: "none", onRoom, hint = stringResource(R.string.manage_whole_room_hint))
                         if (devices.isNotEmpty()) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = c.outlineVariant)
                     }
                     devices.forEach { device -> AccessRow(device.name, grants.levelOf(device), { onDevice(device, it) }) }
-                    if (devices.isEmpty()) Text("No devices in this room yet.", Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    if (devices.isEmpty()) Text(stringResource(R.string.manage_no_devices_in_room), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
             }
         }
@@ -343,18 +358,22 @@ fun UsersPage(open: (String) -> Unit, onBack: () -> Unit) {
     var users by remember { mutableStateOf<List<User>?>(null) }
     LaunchedEffect(Unit) { users = repository.request { it.users() } ?: users ?: emptyList() }
 
-    SubPage("People", onBack, actions = { IconButton({ open("person:new") }) { Icon(Icons.Rounded.Add, "Add person") } }) {
+    SubPage(stringResource(R.string.manage_people_title), onBack, actions = { IconButton({ open("person:new") }) { Icon(Icons.Rounded.Add, stringResource(R.string.manage_add_person)) } }) {
         val list = users
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         list?.forEach { user ->
-            val access = if (user.isAdmin || user.allRooms) "whole home" else listOfNotNull(
-                "${user.roomIds.size} rooms".takeIf { user.roomIds.isNotEmpty() },
-                "${user.deviceIds.size} devices".takeIf { user.deviceIds.isNotEmpty() },
-            ).joinToString(", ").ifEmpty { "no access" }
+            val access = if (user.isAdmin || user.allRooms) stringResource(R.string.manage_access_whole_home) else listOfNotNull(
+                pluralStringResource(R.plurals.manage_room_count, user.roomIds.size, user.roomIds.size).takeIf { user.roomIds.isNotEmpty() },
+                pluralStringResource(R.plurals.manage_device_count, user.deviceIds.size, user.deviceIds.size).takeIf { user.deviceIds.isNotEmpty() },
+            ).joinToString(", ").ifEmpty { stringResource(R.string.manage_access_none) }
+            val roleText = Roles.firstOrNull { it.first == user.role }?.second?.let { stringResource(it) } ?: user.role.replaceFirstChar(Char::uppercase)
             RowCard(
                 title = user.username,
                 subtitle = listOfNotNull(
-                    user.role.replaceFirstChar(Char::uppercase), access, "kid".takeIf { user.kid }, "asked for a password reset".takeIf { user.resetRequested },
+                    roleText,
+                    access,
+                    stringResource(R.string.manage_user_tag_kid).takeIf { user.kid },
+                    stringResource(R.string.manage_user_tag_reset_requested).takeIf { user.resetRequested },
                 ).joinToString(" · "),
                 icon = Icons.Rounded.Person,
                 leading = { UserAvatar(avatarSpec = user.avatar, username = user.username, size = 44.dp) },
@@ -377,7 +396,7 @@ fun PersonEditorPage(id: String, me: User, onBack: () -> Unit) {
         }
     }
     if (!loaded) {
-        SubPage("Person", onBack) { LoadingIndicator(Modifier.align(Alignment.CenterHorizontally)) }
+        SubPage(stringResource(R.string.manage_person_title), onBack) { LoadingIndicator(Modifier.align(Alignment.CenterHorizontally)) }
         return
     }
     PersonForm(person, me, onBack)
@@ -402,13 +421,13 @@ private fun ToggleCard(title: String, text: String, checked: Boolean, enabled: B
 private fun Handover(user: User, onDone: () -> Unit) {
     val context = LocalContext.current
     val server = (LocalRepository.current.session.collectAsStateWithLifecycle().value as? Session.SignedIn)?.server.orEmpty()
-    val text = remember(user, server) { user.handoverText(server, DateFormat.is24HourFormat(context)) }
+    val text = remember(user, server, context) { user.localizedHandoverText(context, server, DateFormat.is24HourFormat(context)) }
     AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDone,
-        title = { Text(if (user.resetCode != null) "Reset code for ${user.username}" else "Sign-in details for ${user.username}") },
+        title = { Text(if (user.resetCode != null) stringResource(R.string.manage_handover_reset_title, user.username) else stringResource(R.string.manage_handover_signin_title, user.username)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Shown only once. Send it to them now.")
+                Text(stringResource(R.string.manage_handover_shown_once))
                 Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
                     SelectionContainer { Text(text, Modifier.padding(12.dp), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodyMedium) }
                 }
@@ -421,19 +440,19 @@ private fun Handover(user: User, onDone: () -> Unit) {
                     }) {
                         Icon(Icons.Rounded.ContentCopy, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Copy")
+                        Text(stringResource(R.string.manage_copy))
                     }
                     FilledTonalButton({
                         context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), null))
                     }) {
                         Icon(Icons.Rounded.Share, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Share")
+                        Text(stringResource(R.string.manage_share))
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onDone) { Text("Done") } },
+        confirmButton = { TextButton(onDone) { Text(stringResource(R.string.manage_done)) } },
     )
 }
 
@@ -484,71 +503,84 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
         }
     }
 
-    SubPage(user?.username ?: "New person", onBack, actions = {
+    SubPage(user?.username ?: stringResource(R.string.manage_new_person), onBack, actions = {
         // You can't delete the account you are signed in with.
-        if (user != null && user.id != me.id) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Delete") }
+        if (user != null && user.id != me.id) TextButton({ deleting = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.manage_delete)) }
     }) {
         Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             UserAvatar(avatarSpec = avatar, username = username.ifEmpty { "User" }, size = 56.dp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Avatar", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.manage_avatar), style = MaterialTheme.typography.titleSmall)
                 Text(parseDiceBearSpec(avatar).first, style = MaterialTheme.typography.bodySmall, color = muted)
             }
             FilledTonalButton(onClick = { avatar = randomDiceBearSpec() }) {
                 Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Roll")
+                Text(stringResource(R.string.manage_roll))
             }
         }
-        if (user == null) Field(username, { username = it }, "Username", supporting = "At least 3 characters")
+        if (user == null) Field(username, { username = it }, stringResource(R.string.manage_field_username), supporting = stringResource(R.string.manage_username_supporting))
         Field(
-            email, { email = it }, "Email", keyboard = KeyboardType.Email, error = emailFree == false,
-            supporting = when (emailFree) { false -> "Already used by another account"; true -> "Available"; null -> "Type one, or generate it from the username" },
+            email, { email = it }, stringResource(R.string.manage_field_email), keyboard = KeyboardType.Email, error = emailFree == false,
+            supporting = when (emailFree) {
+                false -> stringResource(R.string.manage_email_taken)
+                true -> stringResource(R.string.manage_email_available)
+                null -> stringResource(R.string.manage_email_hint)
+            },
         )
         TextButton(
             { scope.launch { repository.request { it.suggestEmail(name, user?.id) }?.let { email = it.email } } },
             Modifier.align(Alignment.End), enabled = name.length >= 3,
-        ) { Text("Generate @domus.home email") }
+        ) { Text(stringResource(R.string.manage_generate_email)) }
         // Your own password is changed by you, not from here.
         if (user?.id != me.id) {
-            SectionTitle("Password")
-            ToggleCard("Kid's account", if (kid) "You set the password and it stays as it is." else "Off: Domus makes a password, and they choose their own at first sign-in.", kid) { kid = it }
+            SectionTitle(stringResource(R.string.manage_section_password))
+            ToggleCard(stringResource(R.string.manage_kid_account), if (kid) stringResource(R.string.manage_kid_account_on) else stringResource(R.string.manage_kid_account_off), kid) { kid = it }
             val account = current
             when {
-                kid -> Field(password, { password = it }, if (user?.kid == true) "New password" else "Password", secret = true, supporting = if (user?.kid == true) "Leave empty to keep the current one" else "At least 8 characters")
-                account == null -> Text("You get the password to copy or share after saving.", style = MaterialTheme.typography.bodyMedium, color = muted)
+                kid -> Field(
+                    password, { password = it },
+                    if (user?.kid == true) stringResource(R.string.manage_field_new_password) else stringResource(R.string.manage_field_password),
+                    secret = true,
+                    supporting = if (user?.kid == true) stringResource(R.string.manage_password_keep_current) else stringResource(R.string.manage_password_min_length),
+                )
+                account == null -> Text(stringResource(R.string.manage_password_after_saving), style = MaterialTheme.typography.bodyMedium, color = muted)
                 else -> {
-                    if (account.resetRequested) Text("${account.username} forgot their password and asked for a reset.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
+                    if (account.resetRequested) Text(stringResource(R.string.manage_reset_requested_notice, account.username), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
                     val until = account.resetUntil(DateFormat.is24HourFormat(LocalContext.current))
                     ToggleCard(
-                        "Reset code",
-                        if (account.resetAllowed && until != null) "A code is active until $until. Turn off to withdraw it."
-                        else "A one-time code they enter under \"Forgot password?\" to choose a new password. Good for 30 minutes.",
+                        stringResource(R.string.manage_reset_code),
+                        if (account.resetAllowed && until != null) stringResource(R.string.manage_reset_code_active, until)
+                        else stringResource(R.string.manage_reset_code_help),
                         account.resetAllowed, enabled = !issuing,
                     ) { issue("reset_allowed", it) }
-                    FilledTonalButton({ issue("reset_password") }, enabled = !issuing) { Text("Generate a new password") }
+                    FilledTonalButton({ issue("reset_password") }, enabled = !issuing) { Text(stringResource(R.string.manage_generate_new_password)) }
                 }
             }
         }
 
-        SectionTitle("Role")
-        Choice(Roles, role, { role = it })
+        SectionTitle(stringResource(R.string.manage_section_role))
+        Choice(Roles.map { it.first to stringResource(it.second) }, role, { role = it })
         Text(
-            when (role) { "admin" -> "Manages everything."; "member" -> "Sees what they are given. Control, or edit to also rename a device, is set per room and device."; else -> "Sees what they are given, can't control it." },
+            when (role) {
+                "admin" -> stringResource(R.string.manage_role_admin_desc)
+                "member" -> stringResource(R.string.manage_role_member_desc)
+                else -> stringResource(R.string.manage_role_guest_desc)
+            },
             style = MaterialTheme.typography.bodyMedium, color = muted,
         )
 
         if (role != "admin") {
-            SectionTitle("Access")
-            ToggleCard("Custom access", if (allRooms) "Off: they reach the whole home." else "Set a level for each room, or for single devices in it.", !allRooms) { allRooms = !it }
+            SectionTitle(stringResource(R.string.manage_section_access))
+            ToggleCard(stringResource(R.string.manage_custom_access), if (allRooms) stringResource(R.string.manage_custom_access_off) else stringResource(R.string.manage_custom_access_on), !allRooms) { allRooms = !it }
             if (!allRooms) {
-                if (rooms.isEmpty() && devices.isEmpty()) Text("Create rooms first.", color = muted)
+                if (rooms.isEmpty() && devices.isEmpty()) Text(stringResource(R.string.manage_create_rooms_first), color = muted)
                 rooms.forEach { room ->
                     RoomAccess(room.name, devices.filter { it.roomId == room.id }, grants, grants.rooms[room.id], { grants = grants.withRoom(room.id, it, devices) }) { device, level -> grants = grants.withDevice(device, level, devices) }
                 }
                 val loose = devices.filter { it.roomId == null }
-                if (loose.isNotEmpty()) RoomAccess("No room", loose, grants, null, null) { device, level -> grants = grants.withDevice(device, level, devices) }
+                if (loose.isNotEmpty()) RoomAccess(stringResource(R.string.manage_no_room), loose, grants, null, null) { device, level -> grants = grants.withDevice(device, level, devices) }
             }
         }
         Button(
@@ -560,11 +592,11 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
                 }
             },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid,
-        ) { Text("Save") }
+        ) { Text(stringResource(R.string.manage_save)) }
     }
     handover?.let { Handover(it) { handover = null; if (closeAfter) onBack() } }
     if (deleting && user != null) {
-        Confirm("Remove ${user.username}?", "They lose access immediately.", "Remove", { scope.launch { repository.change { it.removeUser(user.id) }?.let { onBack() } } }, { deleting = false })
+        Confirm(stringResource(R.string.manage_remove_user_title, user.username), stringResource(R.string.manage_remove_user_text), stringResource(R.string.manage_remove), { scope.launch { repository.change { it.removeUser(user.id) }?.let { onBack() } } }, { deleting = false })
     }
 }
 
@@ -607,54 +639,54 @@ fun TariffPage(onBack: () -> Unit) {
         (budget.isBlank() || typed.monthlyBudget != null) && typed.slabs.all { it.rate >= 0 } &&
         windows.all { clock.matches(it.first.trim()) && clock.matches(it.second.trim()) && it.third.toDoubleOrNull() != null }
 
-    SubPage("Electricity tariff", onBack) {
+    SubPage(stringResource(R.string.manage_tariff_title), onBack) {
         if (!loaded) {
             LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
             return@SubPage
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Field(rate, { rate = it }, "Rate per kWh", Modifier.weight(1f), KeyboardType.Decimal)
-            Field(currency, { currency = it.take(3) }, "Currency", Modifier.weight(1f), supporting = "ISO code, e.g. INR")
+            Field(rate, { rate = it }, stringResource(R.string.manage_rate_per_kwh), Modifier.weight(1f), KeyboardType.Decimal)
+            Field(currency, { currency = it.take(3) }, stringResource(R.string.manage_currency), Modifier.weight(1f), supporting = stringResource(R.string.manage_currency_supporting))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Field(fixed, { fixed = it }, "Fixed monthly charge", Modifier.weight(1f), KeyboardType.Decimal)
-            Field(day, { day = it }, "Billing day", Modifier.weight(1f), KeyboardType.Number, supporting = "1 to 28")
+            Field(fixed, { fixed = it }, stringResource(R.string.manage_fixed_monthly_charge), Modifier.weight(1f), KeyboardType.Decimal)
+            Field(day, { day = it }, stringResource(R.string.manage_billing_day), Modifier.weight(1f), KeyboardType.Number, supporting = stringResource(R.string.manage_billing_day_supporting))
         }
-        Field(budget, { budget = it }, "Monthly budget (optional)", keyboard = KeyboardType.Decimal)
+        Field(budget, { budget = it }, stringResource(R.string.manage_monthly_budget), keyboard = KeyboardType.Decimal)
 
-        SectionTitle("Usage slabs")
+        SectionTitle(stringResource(R.string.manage_usage_slabs))
         Text(
-            if (slabs.isEmpty()) "Flat rate. Add slabs if your price changes with how much you use in a billing cycle." else "Each slab's rate applies up to its limit. Leave the last limit empty for everything above.",
+            if (slabs.isEmpty()) stringResource(R.string.manage_slabs_empty) else stringResource(R.string.manage_slabs_help),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         slabs.forEachIndexed { index, (upTo, slabRate) ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Field(upTo, { slabs[index] = it to slabRate }, "Up to kWh", Modifier.weight(1f), KeyboardType.Decimal)
-                Field(slabRate, { slabs[index] = upTo to it }, "Rate", Modifier.weight(1f), KeyboardType.Decimal)
-                IconButton({ slabs.removeAt(index) }) { Icon(Icons.Rounded.Close, "Remove slab ${index + 1}") }
+                Field(upTo, { slabs[index] = it to slabRate }, stringResource(R.string.manage_up_to_kwh), Modifier.weight(1f), KeyboardType.Decimal)
+                Field(slabRate, { slabs[index] = upTo to it }, stringResource(R.string.manage_slab_rate), Modifier.weight(1f), KeyboardType.Decimal)
+                IconButton({ slabs.removeAt(index) }) { Icon(Icons.Rounded.Close, stringResource(R.string.manage_remove_slab, index + 1)) }
             }
         }
-        OutlinedButton({ slabs.add("" to "") }) { Text("Add slab") }
+        OutlinedButton({ slabs.add("" to "") }) { Text(stringResource(R.string.manage_add_slab)) }
 
-        SectionTitle("Time of day")
+        SectionTitle(stringResource(R.string.manage_time_of_day))
         Text(
-            "Hours when a unit costs more or less than the rate above, on the home's clock. Enter the difference per kWh: 1.1 for a peak surcharge, -1.5 for a night rebate.",
+            stringResource(R.string.manage_time_of_day_help),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         windows.forEachIndexed { index, (from, until, adjust) ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Field(from, { windows[index] = Triple(it, until, adjust) }, "From", Modifier.weight(1f), supporting = "22:00")
-                Field(until, { windows[index] = Triple(from, it, adjust) }, "Until", Modifier.weight(1f), supporting = "06:00")
-                Field(adjust, { windows[index] = Triple(from, until, it) }, "Per kWh", Modifier.weight(1f))
-                IconButton({ windows.removeAt(index) }) { Icon(Icons.Rounded.Close, "Remove time window ${index + 1}") }
+                Field(from, { windows[index] = Triple(it, until, adjust) }, stringResource(R.string.manage_window_from), Modifier.weight(1f), supporting = "22:00")
+                Field(until, { windows[index] = Triple(from, it, adjust) }, stringResource(R.string.manage_window_until), Modifier.weight(1f), supporting = "06:00")
+                Field(adjust, { windows[index] = Triple(from, until, it) }, stringResource(R.string.manage_window_per_kwh), Modifier.weight(1f))
+                IconButton({ windows.removeAt(index) }) { Icon(Icons.Rounded.Close, stringResource(R.string.manage_remove_time_window, index + 1)) }
             }
         }
-        OutlinedButton({ windows.add(Triple("", "", "")) }) { Text("Add time window") }
+        OutlinedButton({ windows.add(Triple("", "", "")) }) { Text(stringResource(R.string.manage_add_time_window)) }
 
         Button(
             { scope.launch { repository.change { it.saveEnergySettings(typed) }?.let { show(it); onBack() } } },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid,
-        ) { Text("Save") }
+        ) { Text(stringResource(R.string.manage_save)) }
     }
 }
 
@@ -668,22 +700,22 @@ fun ServerLinksPage(admin: Boolean, onBack: () -> Unit) {
     var remote by remember(links) { mutableStateOf(links.remoteUrl) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    SubPage("Server addresses", onBack) {
+    SubPage(stringResource(R.string.manage_server_addresses_title), onBack) {
         Text(
-            "Domus uses the home address on your network and the remote one everywhere else. You stay signed in on both.",
+            stringResource(R.string.manage_server_addresses_help),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (admin) {
-            Field(local, { local = it }, "Home network", keyboard = KeyboardType.Uri, supporting = "For example https://192.168.1.10:8443")
-            Field(remote, { remote = it }, "Remote", keyboard = KeyboardType.Uri, supporting = "For example a Cloudflare Tunnel hostname")
+            Field(local, { local = it }, stringResource(R.string.manage_home_network), keyboard = KeyboardType.Uri, supporting = stringResource(R.string.manage_home_network_supporting))
+            Field(remote, { remote = it }, stringResource(R.string.manage_remote), keyboard = KeyboardType.Uri, supporting = stringResource(R.string.manage_remote_supporting))
             error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
             Button(
                 { scope.launch { error = repository.saveLinks(local, remote); if (error == null) onBack() } },
                 Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = local != links.localUrl || remote != links.remoteUrl,
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.manage_save)) }
         } else {
-            RowCard("Home network", links.localUrl.ifBlank { "Not set" }, Icons.Rounded.Home)
-            RowCard("Remote", links.remoteUrl.ifBlank { "Not set" }, Icons.Rounded.Public)
+            RowCard(stringResource(R.string.manage_home_network), links.localUrl.ifBlank { stringResource(R.string.manage_not_set) }, Icons.Rounded.Home)
+            RowCard(stringResource(R.string.manage_remote), links.remoteUrl.ifBlank { stringResource(R.string.manage_not_set) }, Icons.Rounded.Public)
         }
     }
 }
@@ -717,23 +749,25 @@ fun LocationPage(onBack: () -> Unit) {
         val manager = context.getSystemService(LocationManager::class.java)
         val provider = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER).firstOrNull { runCatching { manager.isProviderEnabled(it) }.getOrDefault(false) }
         if (provider == null) {
-            notice = "Location is turned off on this phone. Search for the place instead."
+            notice = context.getString(R.string.manage_location_disabled)
             return
         }
         busy = true
         LocationManagerCompat.getCurrentLocation(manager, provider, null as CancellationSignal?, ContextCompat.getMainExecutor(context)) { found ->
             busy = false
-            if (found == null) notice = "This phone could not find where it is. Search for the place instead." else fill(found.latitude, found.longitude)
+            if (found == null) notice = context.getString(R.string.manage_location_not_found) else fill(found.latitude, found.longitude)
         }
     }
     val askLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) locate() else notice = "Without location access, search for the place or type the coordinates."
+        if (granted) locate() else notice = context.getString(R.string.manage_location_permission_denied)
     }
 
-    SubPage("Home location", onBack) {
+    SubPage(stringResource(R.string.manage_location_title), onBack) {
+        val rise = clock(place?.sunrise)
+        val set = clock(place?.sunset)
         Text(
-            clock(place?.sunrise)?.let { rise -> "Today the sun rises at $rise and sets at ${clock(place?.sunset)}." }
-                ?: "Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.",
+            if (rise != null && set != null) stringResource(R.string.manage_location_sun_times, rise, set)
+            else stringResource(R.string.manage_location_help),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         FilledTonalButton(
@@ -744,27 +778,27 @@ fun LocationPage(onBack: () -> Unit) {
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = !busy,
         ) {
             Icon(Icons.Rounded.MyLocation, contentDescription = null)
-            Text("Use this phone's location", Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.manage_use_phone_location), Modifier.padding(start = 8.dp))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Field(query, { query = it }, "Find a place", Modifier.weight(1f), supporting = "Town or city")
+            Field(query, { query = it }, stringResource(R.string.manage_find_place), Modifier.weight(1f), supporting = stringResource(R.string.manage_find_place_supporting))
             FilledTonalIconButton(
                 { scope.launch { busy = true; notice = null; places = repository.request { it.searchPlaces(query.trim()) }; busy = false } },
                 enabled = !busy && query.trim().length >= 2,
-            ) { Icon(Icons.Rounded.Search, "Search for the place") }
+            ) { Icon(Icons.Rounded.Search, stringResource(R.string.manage_search_place)) }
         }
         if (busy) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
         places?.let { found ->
-            if (found.isEmpty()) Text("No place by that name. Try the nearest town.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (found.isEmpty()) Text(stringResource(R.string.manage_no_place_found), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             found.forEach { RowCard(it.name, "${it.latitude}, ${it.longitude}", Icons.Rounded.Place, onClick = { fill(it.latitude, it.longitude) }) }
         }
-        Field(latitude, { latitude = it }, "Latitude", keyboard = KeyboardType.Text, supporting = "For example 18.52", error = latitude.isNotBlank() && lat == null)
-        Field(longitude, { longitude = it }, "Longitude", keyboard = KeyboardType.Text, supporting = "For example 73.86", error = longitude.isNotBlank() && lon == null)
+        Field(latitude, { latitude = it }, stringResource(R.string.manage_latitude), keyboard = KeyboardType.Text, supporting = stringResource(R.string.manage_latitude_supporting), error = latitude.isNotBlank() && lat == null)
+        Field(longitude, { longitude = it }, stringResource(R.string.manage_longitude), keyboard = KeyboardType.Text, supporting = stringResource(R.string.manage_longitude_supporting), error = longitude.isNotBlank() && lon == null)
         Button(
             { scope.launch { repository.request { it.saveHomeLocation(lat!!, lon!!) }?.let(::show) } },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = lat != null && lon != null && (lat != place?.latitude || lon != place?.longitude),
-        ) { Text("Save") }
+        ) { Text(stringResource(R.string.manage_save)) }
     }
 }
 
@@ -780,16 +814,16 @@ fun ChangePasswordPage(onBack: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     val mismatch = confirm.isNotEmpty() && confirm != password
 
-    SubPage("Change password", onBack) {
-        Text("You stay signed in on this and every other device.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Field(current, { current = it; error = null }, "Current password", keyboard = KeyboardType.Password, secret = true)
-        Field(password, { password = it; error = null }, "New password", keyboard = KeyboardType.Password, secret = true, supporting = "At least 8 characters")
-        Field(confirm, { confirm = it }, "Repeat new password", keyboard = KeyboardType.Password, secret = true, supporting = if (mismatch) "The passwords do not match" else null, error = mismatch)
+    SubPage(stringResource(R.string.manage_change_password_title), onBack) {
+        Text(stringResource(R.string.manage_change_password_help), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Field(current, { current = it; error = null }, stringResource(R.string.manage_current_password), keyboard = KeyboardType.Password, secret = true)
+        Field(password, { password = it; error = null }, stringResource(R.string.manage_field_new_password), keyboard = KeyboardType.Password, secret = true, supporting = stringResource(R.string.manage_password_min_length))
+        Field(confirm, { confirm = it }, stringResource(R.string.manage_repeat_new_password), keyboard = KeyboardType.Password, secret = true, supporting = if (mismatch) stringResource(R.string.manage_passwords_mismatch) else null, error = mismatch)
         error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
         Button(
             { scope.launch { busy = true; error = repository.changePassword(current, password); busy = false; if (error == null) onBack() } },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = !busy && current.isNotEmpty() && password.length >= 8 && password == confirm,
-        ) { Text("Change password") }
+        ) { Text(stringResource(R.string.manage_change_password_title)) }
     }
 }
 
@@ -804,11 +838,12 @@ fun SwipeNotice(notice: Notice, onDelete: () -> Unit, modifier: Modifier = Modif
         modifier = modifier,
         backgroundContent = {
             Box(Modifier.fillMaxSize().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 24.dp), contentAlignment = if (state.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd) {
-                Icon(Icons.Rounded.Delete, "Delete", tint = MaterialTheme.colorScheme.onErrorContainer)
+                Icon(Icons.Rounded.Delete, stringResource(R.string.manage_delete), tint = MaterialTheme.colorScheme.onErrorContainer)
             }
         },
     ) {
-        RowCard(notice.title, listOfNotNull(notice.message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString("\n"), Icons.Rounded.Notifications, onClick = onClick, trailing = trailing)
+        val message = notice.localizedMessage()
+        RowCard(notice.localizedTitle(), listOfNotNull(message.ifBlank { null }, timeAgo(notice.createdAt)).joinToString("\n"), Icons.Rounded.Notifications, onClick = onClick, trailing = trailing)
     }
 }
 
@@ -822,15 +857,15 @@ fun NoticesPage(onBack: () -> Unit) {
     var clearing by remember { mutableStateOf(false) }
     // The server tells every client when the inbox changes, so this reloads after a delete anywhere.
     LaunchedEffect(revision) { notices = repository.request { it.notices() }?.items ?: notices ?: emptyList() }
-    if (clearing) Confirm("Delete all notifications?", "They are removed on every device.", "Delete all", { clearing = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearing = false })
+    if (clearing) Confirm(stringResource(R.string.manage_delete_all_notices_title), stringResource(R.string.manage_delete_all_notices_text), stringResource(R.string.manage_delete_all), { clearing = false; scope.launch { repository.request { it.clearNotices() }; notices = emptyList() } }, { clearing = false })
 
-    SubPage("Notifications", onBack, actions = {
-        TextButton({ scope.launch { repository.request { it.readAllNotices() }; notices = notices?.map { it.copy(isRead = true) } } }, enabled = notices?.any { !it.isRead } == true) { Text("Mark all read") }
-        IconButton({ clearing = true }, enabled = notices?.isNotEmpty() == true) { Icon(Icons.Rounded.DeleteSweep, "Delete all") }
+    SubPage(stringResource(R.string.manage_notifications_title), onBack, actions = {
+        TextButton({ scope.launch { repository.request { it.readAllNotices() }; notices = notices?.map { it.copy(isRead = true) } } }, enabled = notices?.any { !it.isRead } == true) { Text(stringResource(R.string.manage_mark_all_read)) }
+        IconButton({ clearing = true }, enabled = notices?.isNotEmpty() == true) { Icon(Icons.Rounded.DeleteSweep, stringResource(R.string.manage_delete_all)) }
     }) {
         val list = notices
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        if (list?.isEmpty() == true) EmptyState("Nothing yet", "Alerts from automations, new devices and offline devices appear here.")
+        if (list?.isEmpty() == true) EmptyState(stringResource(R.string.manage_no_notices), stringResource(R.string.manage_no_notices_subtitle))
         list?.forEach { notice ->
             key(notice.id) {
                 SwipeNotice(notice, { notices = notices?.filter { it.id != notice.id }; scope.launch { repository.request { it.removeNotice(notice.id) } } }) { if (!notice.isRead) Badge() }

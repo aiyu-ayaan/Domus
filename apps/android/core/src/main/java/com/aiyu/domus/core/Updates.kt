@@ -11,7 +11,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /** Release streams. A channel takes its own builds and every steadier one. [stage] orders them: alpha < beta < stable. */
-enum class UpdateChannel(val label: String, val stage: Int) { STABLE("Stable", 2), BETA("Beta", 1), ALPHA("Alpha", 0) }
+enum class UpdateChannel(val label: String, val stage: Int, val code: String) {
+    STABLE("Stable", 2, "channel.stable"),
+    BETA("Beta", 1, "channel.beta"),
+    ALPHA("Alpha", 0, "channel.alpha"),
+}
 
 /** [notes] is the release's description in Markdown; empty when it has none. */
 data class AppUpdate(val version: String, val url: String, val notes: String = "")

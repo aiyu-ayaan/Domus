@@ -82,8 +82,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -146,12 +148,12 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
     }
 }
 
-private class Intro(val icon: ImageVector, val shape: RoundedPolygon, val title: String, val body: String)
+private class Intro(val icon: ImageVector, val shape: RoundedPolygon, @StringRes val titleRes: Int, @StringRes val bodyRes: Int)
 
 private val Intros = listOf(
-    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, "Your whole home, one app", "Lights, plugs, purifiers and sensors from Tuya, Tapo, Xiaomi, Philips Hue and MQTT, side by side."),
-    Intro(Icons.Rounded.Lock, MaterialShapes.Clover4Leaf, "Private by design", "Domus talks only to the server in your home, over an encrypted connection. No cloud account."),
-    Intro(Icons.Rounded.Router, MaterialShapes.Sunny, "It finds your server", "On your Wi‑Fi the app finds the server by itself. Away from home, enter its address."),
+    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, R.string.connect_intro_1_title, R.string.connect_intro_1_body),
+    Intro(Icons.Rounded.Lock, MaterialShapes.Clover4Leaf, R.string.connect_intro_2_title, R.string.connect_intro_2_body),
+    Intro(Icons.Rounded.Router, MaterialShapes.Sunny, R.string.connect_intro_3_title, R.string.connect_intro_3_body),
 )
 
 /** First-run introduction: three pages to swipe or step through, then the connect screen. */
@@ -164,10 +166,11 @@ fun OnboardingScreen() {
     val last = pager.currentPage == Intros.lastIndex
     // Back steps to the previous intro page; on the first page it leaves the app as usual.
     val back = rememberPredictiveBack(pager.currentPage > 0) { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }
+    val pageDesc = stringResource(R.string.connect_page_of, pager.currentPage + 1, Intros.size)
     Box(Modifier.fillMaxSize().predictiveBackEffect { back.value }) {
         Backdrop()
         Column(Modifier.fillMaxSize().systemBarsPadding().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            TextButton(repository::finishOnboarding, Modifier.align(Alignment.End)) { Text("Skip") }
+            TextButton(repository::finishOnboarding, Modifier.align(Alignment.End)) { Text(stringResource(R.string.connect_skip)) }
             HorizontalPager(pager, Modifier.weight(1f)) { page ->
                 val intro = Intros[page]
                 Column(Modifier.fillMaxSize().padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -186,12 +189,12 @@ fun OnboardingScreen() {
                         contentAlignment = Alignment.Center,
                     ) { Icon(intro.icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(96.dp)) }
                     Spacer(Modifier.height(40.dp))
-                    Text(intro.title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+                    Text(stringResource(intro.titleRes), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
                     Spacer(Modifier.height(12.dp))
-                    Text(intro.body, style = MaterialTheme.typography.bodyLarge, color = c.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Text(stringResource(intro.bodyRes), style = MaterialTheme.typography.bodyLarge, color = c.onSurfaceVariant, textAlign = TextAlign.Center)
                 }
             }
-            Row(Modifier.padding(vertical = 24.dp).semantics { contentDescription = "Page ${pager.currentPage + 1} of ${Intros.size}" }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.padding(vertical = 24.dp).semantics { contentDescription = pageDesc }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 repeat(Intros.size) { i ->
                     val width by animateDpAsState(if (i == pager.currentPage) 28.dp else 8.dp, MaterialTheme.motionScheme.fastSpatialSpec(), label = "dot")
                     Box(Modifier.height(8.dp).width(width.coerceAtLeast(8.dp)).clip(CircleShape).background(if (i == pager.currentPage) c.primary else c.outlineVariant))
@@ -200,7 +203,7 @@ fun OnboardingScreen() {
             Button(
                 { if (last) repository.finishOnboarding() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
                 Modifier.widthIn(max = 520.dp).fillMaxWidth().heightIn(min = 56.dp),
-            ) { Text(if (last) "Get started" else "Next") }
+            ) { Text(stringResource(if (last) R.string.connect_get_started else R.string.connect_next)) }
         }
     }
 }
@@ -256,8 +259,8 @@ fun ConnectScreen() {
         }
     }
 
-    EntryColumn(Icons.Rounded.Home, "Welcome to Domus", "Connect to the server that runs your home.") {
-        Text("On this network", style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().semantics { heading() })
+    EntryColumn(Icons.Rounded.Home, stringResource(R.string.connect_welcome_title), stringResource(R.string.connect_welcome_subtitle)) {
+        Text(stringResource(R.string.connect_on_this_network), style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().semantics { heading() })
         found.forEachIndexed { index, server ->
             Card(
                 onClick = { connect(server.url) },
@@ -269,7 +272,7 @@ fun ConnectScreen() {
                     ShapedIcon(Icons.Rounded.Dns, MaterialShapes.Cookie9Sided, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f)) {
-                        Text(server.name, style = MaterialTheme.typography.titleMedium)
+                        Text(server.displayName(), style = MaterialTheme.typography.titleMedium)
                         Text(server.url.removePrefix("https://"), style = MaterialTheme.typography.bodyMedium)
                     }
                     Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
@@ -280,12 +283,12 @@ fun ConnectScreen() {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 LoadingIndicator()
                 Spacer(Modifier.width(12.dp))
-                Text("Looking for servers…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.connect_looking_for_servers), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             if (found.isEmpty()) {
                 Text(
-                    "No server answered. Check that this phone is on the same Wi‑Fi as the server, or enter its address below.",
+                    stringResource(R.string.connect_no_server_found),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -293,16 +296,16 @@ fun ConnectScreen() {
             FilledTonalButton({ scan++ }, Modifier.align(Alignment.Start)) {
                 Icon(Icons.Rounded.Refresh, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Scan again")
+                Text(stringResource(R.string.connect_scan_again))
             }
         }
 
-        Text("Or enter the address", style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().padding(top = 8.dp).semantics { heading() })
+        Text(stringResource(R.string.connect_or_enter_address), style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().padding(top = 8.dp).semantics { heading() })
         OutlinedTextField(
             value = address,
             onValueChange = { address = it; error = null },
-            label = { Text("Server address") },
-            placeholder = { Text("192.168.1.10:8443 or home.example.com") },
+            label = { Text(stringResource(R.string.connect_server_address)) },
+            placeholder = { Text(stringResource(R.string.connect_server_address_placeholder)) },
             singleLine = true,
             isError = error != null,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
@@ -310,21 +313,21 @@ fun ConnectScreen() {
             modifier = Modifier.fillMaxWidth(),
         )
         ErrorText(error)
-        SubmitButton("Connect", busy, enabled = address.isNotBlank()) { connect(address) }
+        SubmitButton(stringResource(R.string.connect_action), busy, enabled = address.isNotBlank()) { connect(address) }
     }
 
     untrusted?.let { pending ->
         AlertDialog(modifier = Modifier.clickHaptics(), 
             onDismissRequest = { untrusted = null },
-            title = { Text("Trust this server?") },
+            title = { Text(stringResource(R.string.connect_trust_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("${pending.url.removePrefix("https://")} uses a certificate it made itself, which is normal for a home server. Trust it only if the fingerprint matches the one the server prints when it starts.")
+                    Text(stringResource(R.string.connect_trust_body, pending.url.removePrefix("https://")))
                     Text(pending.fingerprint, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
                 }
             },
-            confirmButton = { Button({ untrusted = null; connect(pending.url, pending.fingerprint) }) { Text("Trust") } },
-            dismissButton = { TextButton({ untrusted = null }) { Text("Cancel") } },
+            confirmButton = { Button({ untrusted = null; connect(pending.url, pending.fingerprint) }) { Text(stringResource(R.string.connect_trust_action)) } },
+            dismissButton = { TextButton({ untrusted = null }) { Text(stringResource(R.string.connect_cancel)) } },
         )
     }
 }
@@ -346,7 +349,7 @@ private fun PasswordField(
         visualTransformation = if (shown) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton({ shown = !shown }) {
-                Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (shown) "Hide password" else "Show password")
+                Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, stringResource(if (shown) R.string.auth_hide_password else R.string.auth_show_password))
             }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = action),
@@ -359,7 +362,7 @@ private fun PasswordField(
 private fun UsernameField(value: String, onChange: (String) -> Unit, action: ImeAction = ImeAction.Next, onGo: () -> Unit = {}) {
     OutlinedTextField(
         value, onChange,
-        label = { Text("Username") },
+        label = { Text(stringResource(R.string.auth_username)) },
         leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = action),
@@ -372,8 +375,8 @@ private fun UsernameField(value: String, onChange: (String) -> Unit, action: Ime
 @Composable
 private fun NewPasswordFields(password: String, onPassword: (String) -> Unit, confirm: String, onConfirm: (String) -> Unit, onGo: () -> Unit) {
     val mismatch = confirm.isNotEmpty() && confirm != password
-    PasswordField(password, onPassword, "New password", supporting = "At least 8 characters")
-    PasswordField(confirm, onConfirm, "Confirm password", supporting = if (mismatch) "The passwords do not match" else null, error = mismatch, action = ImeAction.Go, onGo = onGo)
+    PasswordField(password, onPassword, stringResource(R.string.auth_new_password), supporting = stringResource(R.string.auth_password_min_length))
+    PasswordField(confirm, onConfirm, stringResource(R.string.auth_confirm_password), supporting = if (mismatch) stringResource(R.string.auth_passwords_mismatch) else null, error = mismatch, action = ImeAction.Go, onGo = onGo)
 }
 
 private fun newPasswordValid(password: String, confirm: String) = password.length >= 8 && password == confirm
@@ -419,13 +422,13 @@ private fun SignInPage(session: Session.SignedOut, username: String, onUsername:
 
     EntryColumn(
         if (session.needsSetup) Icons.Rounded.AdminPanelSettings else Icons.Rounded.Home,
-        if (session.needsSetup) "Create the admin account" else "Welcome back",
-        if (session.needsSetup) "This server is new. The first account manages everything." else "Sign in to your home.",
+        stringResource(if (session.needsSetup) R.string.auth_create_admin_title else R.string.auth_welcome_back_title),
+        stringResource(if (session.needsSetup) R.string.auth_create_admin_subtitle else R.string.auth_welcome_back_subtitle),
     ) {
         // Which server, and that the connection to it is encrypted.
         Surface(color = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) {
             Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Lock, contentDescription = "Encrypted connection to", modifier = Modifier.size(18.dp))
+                Icon(Icons.Rounded.Lock, contentDescription = stringResource(R.string.auth_encrypted_connection), modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(session.server.removePrefix("https://"), style = MaterialTheme.typography.labelLarge)
             }
@@ -434,7 +437,7 @@ private fun SignInPage(session: Session.SignedOut, username: String, onUsername:
         if (session.needsSetup) {
             OutlinedTextField(
                 email, { email = it; error = null },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 leadingIcon = { Icon(Icons.Rounded.Mail, contentDescription = null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -442,13 +445,13 @@ private fun SignInPage(session: Session.SignedOut, username: String, onUsername:
             )
         }
         PasswordField(
-            password, { password = it; error = null }, "Password",
-            supporting = if (session.needsSetup) "At least 8 characters" else null, error = error != null, action = ImeAction.Go, onGo = ::submit,
+            password, { password = it; error = null }, stringResource(R.string.auth_password),
+            supporting = if (session.needsSetup) stringResource(R.string.auth_password_min_length) else null, error = error != null, action = ImeAction.Go, onGo = ::submit,
         )
         ErrorText(error)
-        SubmitButton(if (session.needsSetup) "Create account" else "Sign in", busy, enabled = username.isNotBlank() && password.isNotEmpty()) { submit() }
-        if (!session.needsSetup) TextButton(onForgot) { Text("Forgot password?") }
-        TextButton(repository::forgetServer) { Text("Use another server") }
+        SubmitButton(stringResource(if (session.needsSetup) R.string.auth_create_account else R.string.auth_sign_in), busy, enabled = username.isNotBlank() && password.isNotEmpty()) { submit() }
+        if (!session.needsSetup) TextButton(onForgot) { Text(stringResource(R.string.auth_forgot_password)) }
+        TextButton(repository::forgetServer) { Text(stringResource(R.string.connect_use_another_server)) }
     }
 }
 
@@ -470,11 +473,11 @@ private fun ForgotPage(username: String, onUsername: (String) -> Unit, onAsked: 
         }
     }
 
-    EntryColumn(Icons.Rounded.LockReset, "Forgot your password?", "Domus sends no email. An administrator of this home is told instead, and gives you a one-time code.") {
+    EntryColumn(Icons.Rounded.LockReset, stringResource(R.string.auth_forgot_title), stringResource(R.string.auth_forgot_subtitle)) {
         UsernameField(username, { onUsername(it); error = null }, action = ImeAction.Go, onGo = ::submit)
         ErrorText(error)
-        SubmitButton("Ask an administrator", busy, enabled = username.isNotBlank()) { submit() }
-        TextButton(onBack) { Text("Back to sign in") }
+        SubmitButton(stringResource(R.string.auth_ask_admin), busy, enabled = username.isNotBlank()) { submit() }
+        TextButton(onBack) { Text(stringResource(R.string.auth_back_to_sign_in)) }
     }
 }
 
@@ -499,10 +502,10 @@ private fun ResetCodePage(username: String, onBack: () -> Unit) {
         }
     }
 
-    EntryColumn(Icons.Rounded.Pin, "Enter your reset code", "An administrator has been told. Ask them for the 8-digit code for ${username.trim()}; it works once and for 30 minutes.") {
+    EntryColumn(Icons.Rounded.Pin, stringResource(R.string.auth_reset_code_title), stringResource(R.string.auth_reset_code_subtitle, username.trim())) {
         OutlinedTextField(
             code, { code = it.filter(Char::isDigit).take(8); error = null },
-            label = { Text("Reset code") },
+            label = { Text(stringResource(R.string.auth_reset_code_label)) },
             leadingIcon = { Icon(Icons.Rounded.Pin, contentDescription = null) },
             singleLine = true,
             isError = error != null,
@@ -512,8 +515,8 @@ private fun ResetCodePage(username: String, onBack: () -> Unit) {
         )
         NewPasswordFields(password, { password = it; error = null }, confirm, { confirm = it }, ::submit)
         ErrorText(error)
-        SubmitButton("Set password and sign in", busy, enabled = valid) { submit() }
-        TextButton(onBack) { Text("Back") }
+        SubmitButton(stringResource(R.string.auth_set_password_sign_in), busy, enabled = valid) { submit() }
+        TextButton(onBack) { Text(stringResource(R.string.auth_back)) }
     }
 }
 
@@ -537,11 +540,11 @@ fun ChangePasswordScreen(session: Session.SignedIn) {
         }
     }
 
-    EntryColumn(Icons.Rounded.LockReset, "Choose your password", "Welcome, ${session.user.username}. The password you signed in with was made for you and has been seen by someone else. Choose your own to continue.") {
+    EntryColumn(Icons.Rounded.LockReset, stringResource(R.string.auth_choose_password_title), stringResource(R.string.auth_choose_password_subtitle, session.user.username)) {
         NewPasswordFields(password, { password = it; error = null }, confirm, { confirm = it }, ::submit)
         ErrorText(error)
-        SubmitButton("Save and continue", busy, enabled = valid) { submit() }
-        TextButton(repository::logout) { Text("Sign out") }
+        SubmitButton(stringResource(R.string.auth_save_continue), busy, enabled = valid) { submit() }
+        TextButton(repository::logout) { Text(stringResource(R.string.auth_sign_out)) }
     }
 }
 
@@ -549,9 +552,9 @@ fun ChangePasswordScreen(session: Session.SignedIn) {
 fun UnreachableScreen(session: Session.Unreachable) {
     val repository = LocalRepository.current
     val scope = rememberCoroutineScope()
-    EntryColumn(Icons.Rounded.CloudOff, "Can't reach your home", session.server.removePrefix("https://")) {
+    EntryColumn(Icons.Rounded.CloudOff, stringResource(R.string.connect_unreachable_title), session.server.removePrefix("https://")) {
         Text(session.message, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Button({ scope.launch { repository.restore() } }, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Try again") }
-        TextButton(repository::forgetServer) { Text("Use another server") }
+        Button({ scope.launch { repository.restore() } }, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(stringResource(R.string.connect_try_again)) }
+        TextButton(repository::forgetServer) { Text(stringResource(R.string.connect_use_another_server)) }
     }
 }

@@ -36,7 +36,7 @@ import com.aiyu.domus.core.Session
 import com.aiyu.domus.ui.theme.DomusTheme
 
 class DomusApp : Application() {
-    val repository by lazy { DomusRepository(this) }
+    val repository by lazy { DomusRepository(this) { code, params, fallback -> resolveDomusMessage(code, params, fallback) } }
 }
 
 val LocalRepository = staticCompositionLocalOf<DomusRepository> { error("No repository") }

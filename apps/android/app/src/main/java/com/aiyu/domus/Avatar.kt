@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,18 +64,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 val DICEBEAR_STYLES = listOf(
-    "bottts" to "Robots",
-    "lorelei" to "Lorelei",
-    "avataaars" to "Avataaars",
-    "adventurer" to "Adventurer",
-    "micah" to "Micah",
-    "pixel-art" to "Pixel Art",
-    "fun-emoji" to "Fun Emoji",
-    "thumbs" to "Thumbs",
-    "shapes" to "Shapes",
-    "rings" to "Rings",
-    "identicon" to "Identicon",
-    "notionists" to "Notionists",
+    "bottts" to R.string.avatar_style_bottts,
+    "lorelei" to R.string.avatar_style_lorelei,
+    "avataaars" to R.string.avatar_style_avataaars,
+    "adventurer" to R.string.avatar_style_adventurer,
+    "micah" to R.string.avatar_style_micah,
+    "pixel-art" to R.string.avatar_style_pixel_art,
+    "fun-emoji" to R.string.avatar_style_fun_emoji,
+    "thumbs" to R.string.avatar_style_thumbs,
+    "shapes" to R.string.avatar_style_shapes,
+    "rings" to R.string.avatar_style_rings,
+    "identicon" to R.string.avatar_style_identicon,
+    "notionists" to R.string.avatar_style_notionists,
 )
 
 private val bitmapCache = LruCache<String, Bitmap>(50)
@@ -205,7 +206,7 @@ fun AvatarCustomizationPage(
     val c = MaterialTheme.colorScheme
 
     SubPage(
-        title = "Customize Avatar",
+        title = stringResource(R.string.avatar_customize_title),
         onBack = onBack,
         actions = {
             Button(
@@ -226,7 +227,7 @@ fun AvatarCustomizationPage(
                     Icon(Icons.Rounded.Check, null, Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                 }
-                Text("Save")
+                Text(stringResource(R.string.avatar_save))
             }
         }
     ) {
@@ -247,12 +248,12 @@ fun AvatarCustomizationPage(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = DICEBEAR_STYLES.firstOrNull { it.first == selectedStyle }?.second ?: selectedStyle,
+                    text = DICEBEAR_STYLES.firstOrNull { it.first == selectedStyle }?.let { stringResource(it.second) } ?: selectedStyle,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "Seed: $seed",
+                    text = stringResource(R.string.avatar_seed_value, seed),
                     style = MaterialTheme.typography.bodyMedium,
                     color = c.onSurfaceVariant,
                 )
@@ -275,7 +276,7 @@ fun AvatarCustomizationPage(
             ) {
                 Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Randomize")
+                Text(stringResource(R.string.avatar_randomize))
             }
             FilledTonalButton(
                 onClick = {
@@ -285,7 +286,7 @@ fun AvatarCustomizationPage(
             ) {
                 Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Roll Seed")
+                Text(stringResource(R.string.avatar_roll_seed))
             }
         }
 
@@ -293,7 +294,7 @@ fun AvatarCustomizationPage(
 
         // Avatar Style collection selector
         Text(
-            text = "Avatar Style",
+            text = stringResource(R.string.avatar_style_label),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -303,11 +304,11 @@ fun AvatarCustomizationPage(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            DICEBEAR_STYLES.forEach { (id, label) ->
+            DICEBEAR_STYLES.forEach { (id, labelRes) ->
                 FilterChip(
                     selected = id == selectedStyle,
                     onClick = { selectedStyle = id },
-                    label = { Text(label) },
+                    label = { Text(stringResource(labelRes)) },
                 )
             }
         }
@@ -316,24 +317,24 @@ fun AvatarCustomizationPage(
 
         // Custom seed input
         Text(
-            text = "Seed Phrase",
+            text = stringResource(R.string.avatar_seed_phrase_label),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Enter any keyword, name, or character string to morph this avatar style.",
+            text = stringResource(R.string.avatar_seed_phrase_hint),
             style = MaterialTheme.typography.bodySmall,
             color = c.onSurfaceVariant,
         )
         OutlinedTextField(
             value = seed,
             onValueChange = { seed = it },
-            label = { Text("Seed") },
+            label = { Text(stringResource(R.string.avatar_seed_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = { seed = "${SEED_WORDS.random()}${(100..999).random()}" }) {
-                    Icon(Icons.Rounded.Refresh, "Roll seed")
+                    Icon(Icons.Rounded.Refresh, stringResource(R.string.avatar_roll_seed_action))
                 }
             }
         )
@@ -354,7 +355,7 @@ fun AvatarCustomizationPage(
         ) {
             Icon(Icons.Rounded.Check, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Apply Avatar")
+            Text(stringResource(R.string.avatar_apply_avatar))
         }
     }
 }
@@ -376,7 +377,7 @@ fun AvatarPickerDialog(
 
     AlertDialog(modifier = Modifier.clickHaptics(), 
         onDismissRequest = onDismiss,
-        title = { Text("Customize Avatar") },
+        title = { Text(stringResource(R.string.avatar_customize_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -400,12 +401,12 @@ fun AvatarPickerDialog(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = DICEBEAR_STYLES.firstOrNull { it.first == selectedStyle }?.second ?: selectedStyle,
+                            text = DICEBEAR_STYLES.firstOrNull { it.first == selectedStyle }?.let { stringResource(it.second) } ?: selectedStyle,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            text = "Seed: $seed",
+                            text = stringResource(R.string.avatar_seed_value, seed),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -429,7 +430,7 @@ fun AvatarPickerDialog(
                     ) {
                         Icon(Icons.Rounded.AutoAwesome, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Randomize")
+                        Text(stringResource(R.string.avatar_randomize))
                     }
                     Button(
                         onClick = {
@@ -439,14 +440,14 @@ fun AvatarPickerDialog(
                     ) {
                         Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Roll seed")
+                        Text(stringResource(R.string.avatar_roll_seed_action))
                     }
                 }
 
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "Avatar Style",
+                    text = stringResource(R.string.avatar_style_label),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.align(Alignment.Start),
                 )
@@ -457,11 +458,11 @@ fun AvatarPickerDialog(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    DICEBEAR_STYLES.forEach { (id, label) ->
+                    DICEBEAR_STYLES.forEach { (id, labelRes) ->
                         FilterChip(
                             selected = id == selectedStyle,
                             onClick = { selectedStyle = id },
-                            label = { Text(label) },
+                            label = { Text(stringResource(labelRes)) },
                         )
                     }
                 }
@@ -471,7 +472,7 @@ fun AvatarPickerDialog(
                 OutlinedTextField(
                     value = seed,
                     onValueChange = { seed = it },
-                    label = { Text("Seed") },
+                    label = { Text(stringResource(R.string.avatar_seed_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -481,12 +482,12 @@ fun AvatarPickerDialog(
             Button(onClick = { onSave(spec); onDismiss() }) {
                 Icon(Icons.Rounded.Check, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Apply")
+                Text(stringResource(R.string.avatar_apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.avatar_cancel))
             }
         },
     )

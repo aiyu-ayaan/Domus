@@ -55,9 +55,11 @@ import kotlinx.coroutines.launch
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -74,7 +76,11 @@ import com.aiyu.domus.ui.components.ShapedIcon
 import com.aiyu.domus.ui.components.enterStaggered
 import kotlinx.coroutines.delay
 
-private val Themes = listOf("system" to "System", "light" to "Light", "dark" to "Dark")
+private val Themes: List<Pair<String, Int>> = listOf(
+    "system" to R.string.settings_theme_system,
+    "light" to R.string.settings_theme_light,
+    "dark" to R.string.settings_theme_dark,
+)
 
 @Composable
 fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
@@ -86,7 +92,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
     val version = remember { installedVersion(context) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     ScreenColumn {
-        ScreenHeader("Settings", "Domus $version")
+        ScreenHeader(stringResource(R.string.settings_title), stringResource(R.string.settings_subtitle_version, version))
 
         Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -99,24 +105,30 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     Text(session.user.username, style = MaterialTheme.typography.titleLarge)
-                    Text(session.user.role.replaceFirstChar(Char::uppercase), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    val roleLabel = when (session.user.role) {
+                        "admin" -> stringResource(R.string.settings_role_admin)
+                        "member" -> stringResource(R.string.settings_role_member)
+                        "guest" -> stringResource(R.string.settings_role_guest)
+                        else -> session.user.role.replaceFirstChar(Char::uppercase)
+                    }
+                    Text(roleLabel, style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
                 FilledTonalButton(onClick = { open("avatar") }) {
-                    Text("Avatar")
+                    Text(stringResource(R.string.settings_avatar))
                 }
             }
         }
 
-        SectionTitle("Home")
+        SectionTitle(stringResource(R.string.settings_section_home))
         if (session.user.isAdmin) {
-            RowCard("Add devices", "Find and add what your accounts and network offer", Icons.Rounded.AddHome, onClick = { open("discover") })
-            RowCard("Plugins", "Tuya, Tapo, Xiaomi, Hue and MQTT", Icons.Rounded.Extension, onClick = { open("plugins") })
-            RowCard("Rooms", null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
-            RowCard("People", "Accounts, roles and room access", Icons.Rounded.Group, onClick = { open("people") })
-            RowCard("Electricity tariff", "Rate, billing cycle and budget", Icons.Rounded.Payments, onClick = { open("tariff") })
-            RowCard("Home location", "For sunrise and sunset automations", Icons.Rounded.WbTwilight, onClick = { open("location") })
+            RowCard(stringResource(R.string.settings_add_devices), stringResource(R.string.settings_add_devices_subtitle), Icons.Rounded.AddHome, onClick = { open("discover") })
+            RowCard(stringResource(R.string.settings_plugins), stringResource(R.string.settings_plugins_subtitle), Icons.Rounded.Extension, onClick = { open("plugins") })
+            RowCard(stringResource(R.string.settings_rooms), null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
+            RowCard(stringResource(R.string.settings_people), stringResource(R.string.settings_people_subtitle), Icons.Rounded.Group, onClick = { open("people") })
+            RowCard(stringResource(R.string.settings_tariff), stringResource(R.string.settings_tariff_subtitle), Icons.Rounded.Payments, onClick = { open("tariff") })
+            RowCard(stringResource(R.string.settings_location), stringResource(R.string.settings_location_subtitle), Icons.Rounded.WbTwilight, onClick = { open("location") })
         }
-        RowCard("Notifications", "What your home reported", Icons.Rounded.Notifications, onClick = { open("notices") })
+        RowCard(stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_subtitle), Icons.Rounded.Notifications, onClick = { open("notices") })
         // Opt-in: without a cloud push service, alerts need a connection that stays open.
         val alerts by repository.backgroundAlerts.collectAsStateWithLifecycle()
         val setAlerts = { on: Boolean -> repository.setBackgroundAlerts(on); AlertsService.apply(context) }
@@ -131,18 +143,18 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text("Alerts while the app is closed", style = MaterialTheme.typography.titleMedium)
-                    Text("Keeps a connection to your server open. Uses a little battery.", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    Text(stringResource(R.string.settings_background_alerts), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.settings_background_alerts_subtitle), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                 }
                 Switch(alerts, onCheckedChange = null)
             }
         }
 
-        SectionTitle("Server")
+        SectionTitle(stringResource(R.string.settings_section_server))
         val pin = repository.pinnedFingerprint
         CollapsibleCard(
             title = session.server.removePrefix("https://"),
-            subtitle = if (live) (if (pin != null) "Live · Pinned certificate" else "Live · Public certificate") else "Reconnecting…",
+            subtitle = if (live) (if (pin != null) stringResource(R.string.settings_server_live_pinned) else stringResource(R.string.settings_server_live_public)) else stringResource(R.string.settings_server_reconnecting),
             leading = {
                 ShapedIcon(Icons.Rounded.Dns, MaterialShapes.Clover4Leaf, if (live) c.primary else c.surfaceContainerHighest, if (live) c.onPrimary else c.onSurfaceVariant)
             },
@@ -153,7 +165,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                         shape = MaterialTheme.shapes.extraSmall,
                     ) {
                         Text(
-                            "LIVE",
+                            stringResource(R.string.settings_server_live_badge),
                             style = MaterialTheme.typography.labelSmall,
                             color = c.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -164,7 +176,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth().enterStaggered(1),
         ) {
             Text(
-                if (pin == null) "Encrypted · certificate verified by a public authority" else "Encrypted · you approved this server's own certificate on first use:",
+                if (pin == null) stringResource(R.string.settings_server_cert_public) else stringResource(R.string.settings_server_cert_pinned),
                 style = MaterialTheme.typography.bodyMedium,
                 color = c.onSurfaceVariant,
             )
@@ -183,13 +195,13 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                "SHA-256 Fingerprint",
+                                stringResource(R.string.settings_sha256_fingerprint),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = c.onSurfaceVariant,
                             )
                             FilledTonalButton(
                                 onClick = {
-                                    clipboard?.setPrimaryClip(ClipData.newPlainText("Fingerprint", pin))
+                                    clipboard?.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.settings_fingerprint_clip_label), pin))
                                     copied = true
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
@@ -209,7 +221,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                                             modifier = Modifier.size(16.dp),
                                         )
                                         Text(
-                                            if (isCopied) "Copied" else "Copy",
+                                            if (isCopied) stringResource(R.string.settings_copied) else stringResource(R.string.settings_copy),
                                             style = MaterialTheme.typography.labelMedium,
                                         )
                                     }
@@ -233,20 +245,20 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             }
         }
 
-        RowCard("Change password", "For signing in to Domus", Icons.Rounded.LockReset, onClick = { open("password") })
-        RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
-        RowCard("Updates", "Version $version, release notes and channel", Icons.Rounded.SystemUpdate, onClick = { open("updates") })
-        RowCard("About Domus", "Version $version, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
+        RowCard(stringResource(R.string.settings_change_password), stringResource(R.string.settings_change_password_subtitle), Icons.Rounded.LockReset, onClick = { open("password") })
+        RowCard(stringResource(R.string.settings_server_addresses), stringResource(R.string.settings_server_addresses_subtitle), Icons.Rounded.Public, onClick = { open("links") })
+        RowCard(stringResource(R.string.settings_updates), stringResource(R.string.settings_updates_subtitle, version), Icons.Rounded.SystemUpdate, onClick = { open("updates") })
+        RowCard(stringResource(R.string.settings_about), stringResource(R.string.settings_about_subtitle, version), Icons.Rounded.Info, onClick = { open("about") })
 
         CollapsibleCard(
-            title = "Appearance",
-            subtitle = Themes.firstOrNull { it.first == appearance.theme }?.second,
+            title = stringResource(R.string.settings_appearance),
+            subtitle = Themes.firstOrNull { it.first == appearance.theme }?.second?.let { stringResource(it) },
             leading = { ShapedIcon(Icons.Rounded.Palette, MaterialShapes.Clover4Leaf, c.surfaceContainerHighest, c.onSurfaceVariant) },
         ) {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    Themes.forEachIndexed { index, (key, label) ->
-                        SegmentedButton(appearance.theme == key, { repository.setAppearance(appearance.copy(theme = key)) }, SegmentedButtonDefaults.itemShape(index, Themes.size)) { Text(label) }
+                    Themes.forEachIndexed { index, (key, labelRes) ->
+                        SegmentedButton(appearance.theme == key, { repository.setAppearance(appearance.copy(theme = key)) }, SegmentedButtonDefaults.itemShape(index, Themes.size)) { Text(stringResource(labelRes)) }
                     }
                 }
                 // Wallpaper colors exist from Android 12.
@@ -256,8 +268,8 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text("Wallpaper colors", style = MaterialTheme.typography.titleMedium)
-                            Text("Match the app to your wallpaper", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                            Text(stringResource(R.string.settings_wallpaper_colors), style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.settings_wallpaper_colors_subtitle), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                         }
                         Switch(appearance.dynamicColor, onCheckedChange = null)
                     }
@@ -265,15 +277,15 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             }
         }
 
-        SectionTitle("Account")
+        SectionTitle(stringResource(R.string.settings_section_account))
         CollapsibleCard(
             title = session.user.username,
-            subtitle = "Sign out or use another server",
+            subtitle = stringResource(R.string.settings_account_subtitle),
             leading = { ShapedIcon(Icons.Rounded.Person, MaterialShapes.Clover4Leaf, c.surfaceContainerHighest, c.onSurfaceVariant) },
         ) {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(repository::logout, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Sign out") }
-                OutlinedButton(repository::forgetServer, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Use another server") }
+                FilledTonalButton(repository::logout, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(stringResource(R.string.settings_sign_out)) }
+                OutlinedButton(repository::forgetServer, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(stringResource(R.string.settings_use_another_server)) }
             }
         }
     }

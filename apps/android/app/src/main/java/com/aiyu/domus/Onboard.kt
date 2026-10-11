@@ -12,9 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.annotation.StringRes
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,7 +39,8 @@ import kotlinx.coroutines.launch
 @Composable
 private fun QrCode(content: String, modifier: Modifier = Modifier) {
     val matrix = remember(content) { runCatching { QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0) }.getOrNull() }
-    Canvas(modifier.background(Color.White).padding(12.dp).semantics { contentDescription = "QR code to scan with the Smart Life app" }) {
+    val qrDesc = stringResource(R.string.onboard_qr_content_description)
+    Canvas(modifier.background(Color.White).padding(12.dp).semantics { contentDescription = qrDesc }) {
         val m = matrix ?: return@Canvas
         val cell = size.minDimension / m.width
         for (y in 0 until m.height) for (x in 0 until m.width) {
@@ -45,7 +49,16 @@ private fun QrCode(content: String, modifier: Modifier = Modifier) {
     }
 }
 
-private val XiaomiRegions = listOf("i2" to "India", "cn" to "China", "de" to "Europe", "us" to "United States", "sg" to "Singapore", "ru" to "Russia", "tw" to "Taiwan", "in" to "India (old)")
+private val XiaomiRegions: List<Pair<String, Int>> = listOf(
+    "i2" to R.string.onboard_region_india,
+    "cn" to R.string.onboard_region_china,
+    "de" to R.string.onboard_region_europe,
+    "us" to R.string.onboard_region_us,
+    "sg" to R.string.onboard_region_singapore,
+    "ru" to R.string.onboard_region_russia,
+    "tw" to R.string.onboard_region_taiwan,
+    "in" to R.string.onboard_region_india_old,
+)
 
 /** Link accounts of the device makers. Linked accounts are what discovery finds devices through. */
 @Composable
@@ -69,7 +82,7 @@ fun IntegrationsPage(onBack: () -> Unit, onFindDevices: () -> Unit) {
         return@AnimatedContent
     }
 
-    SubPage("Plugins", onBack) {
+    SubPage(stringResource(R.string.onboard_plugins_title), onBack) {
         val list = integrations
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         list?.forEach { integration ->
@@ -79,7 +92,10 @@ fun IntegrationsPage(onBack: () -> Unit, onFindDevices: () -> Unit) {
                     Text(integration.name, style = MaterialTheme.typography.titleLarge)
                     Text(integration.description, style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
                     Text(
-                        listOf(if (integration.local) "Local control" else "Cloud", "${integration.deviceCount} ${if (integration.deviceCount == 1) "device" else "devices"}").joinToString(" · "),
+                        listOf(
+                            if (integration.local) stringResource(R.string.onboard_local_control) else stringResource(R.string.onboard_cloud),
+                            pluralStringResource(R.plurals.onboard_device_count, integration.deviceCount, integration.deviceCount),
+                        ).joinToString(" · "),
                         style = MaterialTheme.typography.labelLarge,
                     )
                     integration.accounts.forEach { account ->
@@ -87,24 +103,24 @@ fun IntegrationsPage(onBack: () -> Unit, onFindDevices: () -> Unit) {
                             Column(Modifier.weight(1f)) {
                                 Text(account.name, style = MaterialTheme.typography.titleSmall)
                                 Text(
-                                    if (account.status == "ok") "Linked" else account.lastError ?: "Needs attention",
+                                    if (account.status == "ok") stringResource(R.string.onboard_account_linked) else account.lastError ?: stringResource(R.string.onboard_account_needs_attention),
                                     style = MaterialTheme.typography.bodySmall, color = if (account.status == "ok") c.onSurfaceVariant else c.error,
                                 )
                             }
-                            IconButton({ removing = account }) { Icon(Icons.Rounded.Close, "Unlink ${account.name}") }
+                            IconButton({ removing = account }) { Icon(Icons.Rounded.Close, stringResource(R.string.onboard_unlink_account, account.name)) }
                         }
                     }
-                    if (!integration.enabled) Text("Turned off in the server configuration.", color = c.error, style = MaterialTheme.typography.bodyMedium)
-                    else if (integration.link != "none") FilledTonalButton({ linking = integration }) { Text(if (integration.accounts.isEmpty()) "Link account" else "Link another account") }
+                    if (!integration.enabled) Text(stringResource(R.string.onboard_integration_disabled), color = c.error, style = MaterialTheme.typography.bodyMedium)
+                    else if (integration.link != "none") FilledTonalButton({ linking = integration }) { Text(if (integration.accounts.isEmpty()) stringResource(R.string.onboard_link_account) else stringResource(R.string.onboard_link_another_account)) }
                 }
             }
         }
-        if (list != null) Button(onFindDevices, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Find devices") }
+        if (list != null) Button(onFindDevices, Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(stringResource(R.string.onboard_find_devices)) }
     }
     }
 
     removing?.let { account ->
-        Confirm("Unlink ${account.name}?", "Devices that came from this account are removed from Domus.", "Unlink", { scope.launch { repository.change { it.removeAccount(account.id) }; reload++ } }, { removing = null })
+        Confirm(stringResource(R.string.onboard_unlink_title, account.name), stringResource(R.string.onboard_unlink_text), stringResource(R.string.onboard_unlink), { scope.launch { repository.change { it.removeAccount(account.id) }; reload++ } }, { removing = null })
     }
 }
 
@@ -170,7 +186,7 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
         else -> username.isNotBlank() && password.isNotEmpty()
     }
 
-    SubPage("Link ${integration.name}", onBack) {
+    SubPage(stringResource(R.string.onboard_link_integration, integration.name), onBack) {
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val motion = MaterialTheme.motionScheme
         // 0 sign-in / user code, 1 verification code, 2 QR: each step moves in like a page.
@@ -179,26 +195,26 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         when {
             s == 2 -> {
-                Text("Scan this with the Smart Life or Tuya Smart app (the scan button on its home screen), then confirm there. On the same phone, show this code on another screen.", color = muted)
+                Text(stringResource(R.string.onboard_tuya_qr_instructions), color = muted)
                 QrCode(qr?.content.orEmpty(), Modifier.align(Alignment.CenterHorizontally).size(240.dp))
                 Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
                     LoadingIndicator(Modifier.size(32.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Waiting for the scan…")
+                    Text(stringResource(R.string.onboard_waiting_for_scan))
                 }
             }
             tuya -> {
-                Text("In the Smart Life app open Me → Settings → Account and Security → User Code, and type that code here.", color = muted)
-                Field(userCode, { userCode = it }, "User Code")
-                if (expired) Text("That QR code expired. Try again.", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.onboard_tuya_user_code_instructions), color = muted)
+                Field(userCode, { userCode = it }, stringResource(R.string.onboard_user_code))
+                if (expired) Text(stringResource(R.string.onboard_qr_expired), color = MaterialTheme.colorScheme.error)
             }
             s == 1 -> {
-                Text("Verify it is you", style = MaterialTheme.typography.titleLarge)
-                Text("Xiaomi sent a verification code to your ${if (via == "phone") "phone" else "email"}. Type it here. It expires after a few minutes.", color = muted)
-                Field(code, { code = it }, "Verification code", keyboard = KeyboardType.Number)
+                Text(stringResource(R.string.onboard_verify_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(if (via == "phone") R.string.onboard_xiaomi_sent_phone else R.string.onboard_xiaomi_sent_email), color = muted)
+                Field(code, { code = it }, stringResource(R.string.onboard_verification_code), keyboard = KeyboardType.Number)
                 Row {
-                    TextButton({ scope.launch { busy = true; xiaomiSignIn(); busy = false } }, enabled = !busy) { Text("Send a new code") }
-                    TextButton({ verifyId = null; code = "" }, enabled = !busy) { Text("Use another account") }
+                    TextButton({ scope.launch { busy = true; xiaomiSignIn(); busy = false } }, enabled = !busy) { Text(stringResource(R.string.onboard_send_new_code)) }
+                    TextButton({ verifyId = null; code = "" }, enabled = !busy) { Text(stringResource(R.string.onboard_use_another_account)) }
                 }
             }
             form -> {
@@ -208,11 +224,11 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
                 }
             }
             else -> {
-                Text(if (integration.id == "tapo") "Sign in with your TP-Link account. It is used to talk to your Tapo devices on your network." else "Sign in with your Xiaomi account. Device tokens are fetched once; control stays local. Xiaomi may then send you a code.", color = muted)
-                if (integration.id == "xiaomi") Field(username, { username = it }, "Email, phone or Xiaomi ID", supporting = "A phone number needs its country code, like +91…")
-                else Field(username, { username = it }, "Email or username", keyboard = KeyboardType.Email)
-                Field(password, { password = it }, "Password", secret = true)
-                if (integration.id == "xiaomi") Picker("Server region", XiaomiRegions, region, { region = it })
+                Text(if (integration.id == "tapo") stringResource(R.string.onboard_tapo_instructions) else stringResource(R.string.onboard_xiaomi_instructions), color = muted)
+                if (integration.id == "xiaomi") Field(username, { username = it }, stringResource(R.string.onboard_xiaomi_username), supporting = stringResource(R.string.onboard_xiaomi_username_supporting))
+                else Field(username, { username = it }, stringResource(R.string.onboard_email_or_username), keyboard = KeyboardType.Email)
+                Field(password, { password = it }, stringResource(R.string.onboard_password), secret = true)
+                if (integration.id == "xiaomi") Picker(stringResource(R.string.onboard_server_region), XiaomiRegions.map { it.first to stringResource(it.second) }, region, { region = it })
             }
         }
         }
@@ -220,7 +236,14 @@ private fun LinkPage(integration: Integration, onBack: () -> Unit, onDone: () ->
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (!(tuya && qr != null)) {
             Button(::submit, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = canSubmit) {
-                Text(when { tuya -> "Show QR code"; verifyId != null -> "Verify"; integration.id == "xiaomi" -> "Continue"; else -> "Link" })
+                Text(
+                    when {
+                        tuya -> stringResource(R.string.onboard_show_qr_code)
+                        verifyId != null -> stringResource(R.string.onboard_verify)
+                        integration.id == "xiaomi" -> stringResource(R.string.onboard_continue)
+                        else -> stringResource(R.string.onboard_link)
+                    },
+                )
             }
         }
     }
@@ -248,18 +271,18 @@ fun DiscoverPage(onBack: () -> Unit, onOpenPlugins: () -> Unit) {
     }
     LaunchedEffect(Unit) { scan() }
 
-    SubPage("Add devices", onBack) {
+    SubPage(stringResource(R.string.onboard_add_devices_title), onBack) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Button(::scan, enabled = !scanning) { Text(if (scanning) "Scanning…" else "Scan again") }
-            OutlinedButton({ manual = true }) { Text("Add by address") }
+            Button(::scan, enabled = !scanning) { Text(if (scanning) stringResource(R.string.onboard_scanning) else stringResource(R.string.onboard_scan_again)) }
+            OutlinedButton({ manual = true }) { Text(stringResource(R.string.onboard_add_by_address)) }
             if (scanning) LoadingIndicator(Modifier.size(40.dp))
         }
         val list = found
         if (list?.isEmpty() == true && !scanning) {
-            EmptyState("No new devices", "Everything found is already in your home. Link an account under Plugins to find more.")
-            TextButton(onOpenPlugins) { Text("Open Plugins") }
+            EmptyState(stringResource(R.string.onboard_no_new_devices), stringResource(R.string.onboard_no_new_devices_subtitle))
+            TextButton(onOpenPlugins) { Text(stringResource(R.string.onboard_open_plugins)) }
         }
-        if (!list.isNullOrEmpty()) SectionTitle("${list.size} found")
+        if (!list.isNullOrEmpty()) SectionTitle(stringResource(R.string.onboard_found_count, list.size))
         list?.forEach { device ->
             val c = MaterialTheme.colorScheme
             Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
@@ -274,8 +297,8 @@ fun DiscoverPage(onBack: () -> Unit, onOpenPlugins: () -> Unit) {
                     }
                     device.note?.takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant) }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilledTonalButton({ adopting = device }) { Text("Add") }
-                        TextButton({ scope.launch { repository.request { it.ignore(device.id) }; found = found?.filter { it.id != device.id } } }) { Text("Ignore") }
+                        FilledTonalButton({ adopting = device }) { Text(stringResource(R.string.onboard_add)) }
+                        TextButton({ scope.launch { repository.request { it.ignore(device.id) }; found = found?.filter { it.id != device.id } } }) { Text(stringResource(R.string.onboard_ignore)) }
                     }
                 }
             }
@@ -286,29 +309,29 @@ fun DiscoverPage(onBack: () -> Unit, onOpenPlugins: () -> Unit) {
         var name by remember(device) { mutableStateOf(device.name) }
         var room by remember(device) { mutableStateOf<String?>(null) }
         var token by remember(device) { mutableStateOf("") }
-        FormDialog("Add ${device.name}", canSave = name.isNotBlank(), save = "Add", onDismiss = { adopting = null }, onSave = {
+        FormDialog(stringResource(R.string.onboard_add_device_title, device.name), canSave = name.isNotBlank(), save = stringResource(R.string.onboard_add), onDismiss = { adopting = null }, onSave = {
             adopting = null
             scope.launch {
                 repository.change { it.adopt(device.id, name.trim(), room, token.trim().ifEmpty { null }) }?.let { found = found?.filter { d -> d.id != device.id } }
             }
         }) {
-            Field(name, { name = it }, "Name")
-            Picker("Room", listOf<Pair<String?, String>>(null to "No room") + rooms.map { it.id to it.name }, room, { room = it })
+            Field(name, { name = it }, stringResource(R.string.onboard_field_name))
+            Picker(stringResource(R.string.onboard_field_room), listOf<Pair<String?, String>>(null to stringResource(R.string.onboard_no_room)) + rooms.map { it.id to it.name }, room, { room = it })
             // Only LAN-found Xiaomi devices need one; with a linked account the server already has it.
-            if (device.integration == "xiaomi") Field(token, { token = it }, "Device token (optional)", supporting = "Needed only without a linked Xiaomi account")
+            if (device.integration == "xiaomi") Field(token, { token = it }, stringResource(R.string.onboard_device_token_optional), supporting = stringResource(R.string.onboard_device_token_supporting))
         }
     }
     if (manual) {
         var integration by remember { mutableStateOf("tapo") }
         var host by remember { mutableStateOf("") }
         var token by remember { mutableStateOf("") }
-        FormDialog("Add by address", canSave = host.isNotBlank(), save = "Add", onDismiss = { manual = false }, onSave = {
+        FormDialog(stringResource(R.string.onboard_add_by_address), canSave = host.isNotBlank(), save = stringResource(R.string.onboard_add), onDismiss = { manual = false }, onSave = {
             manual = false
             scope.launch { repository.change { it.addManual(integration, host.trim(), token.trim().ifEmpty { null }, null) } }
         }) {
             Choice(listOf("tapo" to "Tapo", "xiaomi" to "Xiaomi", "tuya" to "Tuya"), integration, { integration = it })
-            Field(host, { host = it }, "IP address", keyboard = KeyboardType.Uri)
-            if (integration == "xiaomi") Field(token, { token = it }, "Device token (optional)")
+            Field(host, { host = it }, stringResource(R.string.onboard_ip_address), keyboard = KeyboardType.Uri)
+            if (integration == "xiaomi") Field(token, { token = it }, stringResource(R.string.onboard_device_token_optional))
         }
     }
 }

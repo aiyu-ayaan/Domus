@@ -59,7 +59,12 @@ fun formatClockTime(hhmm: String, is24Hour: Boolean): String = runCatching {
     LocalTime.parse(hhmm.trim()).format(DateTimeFormatter.ofPattern(if (is24Hour) "HH:mm" else "h:mm a"))
 }.getOrDefault(hhmm)
 
-enum class AirLevel(val label: String) { EXCELLENT("Excellent"), GOOD("Good"), MODERATE("Moderate"), POOR("Poor") }
+enum class AirLevel(val label: String, val code: String) {
+    EXCELLENT("Excellent", "air.excellent"),
+    GOOD("Good", "air.good"),
+    MODERATE("Moderate", "air.moderate"),
+    POOR("Poor", "air.poor"),
+}
 
 /** PM2.5 µg/m³ -> level. */
 fun airLevel(pm: Float): AirLevel = when {
