@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import type { Icon } from '@phosphor-icons/react'
 import { cn } from '@/lib/cn'
 
 export function Switch({
@@ -45,6 +46,7 @@ export function Switch({
   )
 }
 
+/** Options with an `icon` show it alone until chosen; the chosen one spells its label too. */
 export function Segmented<T extends string>({
   value,
   options,
@@ -54,7 +56,7 @@ export function Segmented<T extends string>({
   size = 'md',
 }: {
   value: T | undefined
-  options: { value: T; label: string }[]
+  options: { value: T; label: string; icon?: Icon }[]
   onChange: (v: T) => void
   label: string
   className?: string
@@ -70,14 +72,17 @@ export function Segmented<T extends string>({
             type="button"
             role="radio"
             aria-checked={active}
+            aria-label={o.icon ? o.label : undefined}
+            title={o.icon ? o.label : undefined}
             onClick={() => onChange(o.value)}
             className={cn(
-              'flex-1 cursor-pointer whitespace-nowrap rounded-[5px] font-medium transition-colors duration-base ease-std',
+              'inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[5px] font-medium transition-colors duration-base ease-std',
               size === 'sm' ? 'h-7 px-2.5 text-caption' : 'h-8 px-3 text-label',
               active ? 'bg-panel text-fg shadow-[0_0_0_1px_rgb(var(--border-strong))]' : 'text-muted hover:text-fg',
             )}
           >
-            {o.label}
+            {o.icon && <o.icon size={14} aria-hidden />}
+            {(!o.icon || active) && o.label}
           </button>
         )
       })}

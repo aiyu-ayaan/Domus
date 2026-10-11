@@ -59,7 +59,7 @@ Charts use `on` for the series and `raised`/`border` for the track and grid line
 - **Button**: height 32 (sm) / 36 (md). Variants: `primary` (solid fg), `secondary` (raised + border), `ghost`, `danger` (danger text, danger/10 bg on hover).
 - **Input / Select**: height 36, `raised` background, 1px border, focus ring 2px `fg/30` + border-strong.
 - **Switch**: 32×18 track, `on` when checked, neutral `border-strong` otherwise.
-- **Segmented**: `raised` track, `panel` thumb with border; thumb slides 150ms.
+- **Segmented**: `raised` track, `panel` thumb with border; thumb slides 150ms. Options may carry an icon: those show the icon alone (neutral, 14px) and only the chosen one spells its label (history ranges).
 - **Card**: `panel` + border, radius 10, header row = 13px label in `muted` + optional action.
 - **Device row/tile**: name 14/500, status 13 `muted`, icon 18 neutral (or `on`), power toggle as a Switch — no circular white buttons.
 - **Badge**: 20px tall, 12px text, `raised` background; semantic variants tint text only.

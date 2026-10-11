@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
+import { CalendarBlank, CalendarDot, CalendarDots, Clock } from '@phosphor-icons/react'
 import { Segmented } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
@@ -8,11 +9,16 @@ import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
 import { useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
-import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
+import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, type Range } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
-type Range = 'day' | 'week' | 'month'
+const RANGES = [
+  { value: 'hour' as const, label: '60 min', icon: Clock },
+  { value: 'day' as const, label: '24 hours', icon: CalendarDot },
+  { value: 'week' as const, label: '7 days', icon: CalendarDots },
+  { value: 'month' as const, label: '30 days', icon: CalendarBlank },
+]
 
 export function EnergyView() {
   const admin = useIsAdmin()
@@ -53,7 +59,7 @@ export function EnergyView() {
         <CardHeader
           title="Consumption"
           action={
-            <Segmented size="sm" label="Range" value={range} onChange={setRange} options={[{ value: 'day', label: '24 hours' }, { value: 'week', label: '7 days' }, { value: 'month', label: '30 days' }]} />
+            <Segmented<Range> size="sm" label="Range" value={range} onChange={setRange} options={RANGES} />
           }
         />
         <div className="p-4">{history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={history.data ?? []} range={range} currency={currency} height={220} />}</div>
@@ -120,7 +126,7 @@ function Insights({ o, day, week }: { o: EnergyOverview; day: EnergyPoint[]; wee
         <dl className="grid grid-cols-2 divide-border max-sm:divide-y sm:grid-cols-4 sm:divide-x">
           <Insight
             label="Peak hour (24 h)"
-            value={peak ? formatBucket(peak.t, 'day') : '—'}
+            value={peak ? formatBucket(peak.t, 'hour') : '—'}
             sub={peak ? formatKwh(peak.kwh) : 'No usage yet'}
           />
           <Insight label="Daily average" value={average != null ? formatKwh(average) : '—'} sub={average != null ? `Over the last ${earlier.length} ${earlier.length === 1 ? 'day' : 'days'}` : 'Needs a full day'} />

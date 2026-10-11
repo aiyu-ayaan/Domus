@@ -51,11 +51,21 @@ export const formatClockTime = (hhmm: string) => {
   return formatTime(new Date(2000, 0, 1, Number(m[1]), Number(m[2])))
 }
 
-/** Formats a chart bucket timestamp: local clock time for 24h range, weekday+day for 7d, month+day for 30d. */
-export const formatBucket = (iso: string, range: 'day' | 'week' | 'month') => {
+/** A history range: "hour" is the last 60 minutes with a bucket a minute, the others have hourly or daily buckets. */
+export type Range = 'hour' | 'day' | 'week' | 'month'
+
+/** What one bucket of a range covers. */
+export const bucketOf = (range: Range) => (range === 'hour' ? 'minute' : range === 'day' ? 'hour' : 'day')
+
+/**
+ * Formats a chart bucket timestamp on the viewer's clock: the minute for the 60 min range, the hour's span
+ * ("12:00 am – 1:00 am") for 24h, weekday+day for 7d, month+day for 30d.
+ */
+export const formatBucket = (iso: string, range: Range) => {
   const d = new Date(iso)
+  if (range === 'hour') return formatTime(d)
   return range === 'day'
-    ? formatTime(d)
+    ? `${formatTime(d)} – ${formatTime(new Date(d.getTime() + 3_600_000))}`
     : d.toLocaleDateString(undefined, range === 'week' ? { weekday: 'short', day: 'numeric' } : { day: 'numeric', month: 'short' })
 }
 

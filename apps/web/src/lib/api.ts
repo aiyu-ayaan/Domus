@@ -1,3 +1,4 @@
+import type { Range } from './format'
 import type {
   AirPoint,
   Automation,
@@ -117,6 +118,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T
 }
 
+/** The viewer's time zone: history buckets are hours and days on their clock, not the server's. */
+const zone = () => encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)
+
 const get = <T>(p: string) => request<T>('GET', p)
 const post = <T>(p: string, b?: unknown) => request<T>('POST', p, b ?? {})
 const put = <T>(p: string, b: unknown) => request<T>('PUT', p, b)
@@ -228,9 +232,10 @@ export const api = {
   removeScene: (id: string) => del<Ok>(`/scenes/${id}`),
 
   energyOverview: () => get<EnergyOverview>('/energy/overview'),
-  energyHistory: (range: 'day' | 'week' | 'month', deviceId?: string) =>
-    get<EnergyPoint[]>(`/energy/history?range=${range}${deviceId ? `&device_id=${deviceId}` : ''}`),
-  airHistory: (range: 'day' | 'week' | 'month') => get<AirPoint[]>(`/air/history?range=${range}`),
+  energyHistory: (range: Range, deviceId?: string) =>
+    get<EnergyPoint[]>(`/energy/history?range=${range}&tz=${zone()}${deviceId ? `&device_id=${deviceId}` : ''}`),
+  /** Air is sampled every few minutes, so it has no per-minute range. */
+  airHistory: (range: Exclude<Range, 'hour'>) => get<AirPoint[]>(`/air/history?range=${range}&tz=${zone()}`),
   energySettings: () => get<ElectricitySettings>('/energy/settings'),
   saveEnergySettings: (b: ElectricitySettings) => put<ElectricitySettings>('/energy/settings', b),
 

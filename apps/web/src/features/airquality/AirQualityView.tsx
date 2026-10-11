@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Wind, ShieldCheck } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarDot, CalendarDots, Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
@@ -12,6 +12,11 @@ import { airQuality, formatBucket, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
 type Range = 'day' | 'week' | 'month'
+const RANGES = [
+  { value: 'day' as const, label: '24 hours', icon: CalendarDot },
+  { value: 'week' as const, label: '7 days', icon: CalendarDots },
+  { value: 'month' as const, label: '30 days', icon: CalendarBlank },
+]
 type Reading = 'pm25' | 'temperature' | 'humidity'
 const READINGS: Record<Reading, { label: string; unit: string; digits: number }> = {
   pm25: { label: 'PM2.5', unit: 'µg/m³', digits: 0 },
@@ -46,7 +51,7 @@ function Trend() {
               {available.length > 1 && (
                 <Segmented size="sm" label="Reading" value={shown} onChange={setReading} options={available.map((r) => ({ value: r, label: READINGS[r].label }))} />
               )}
-              <Segmented size="sm" label="Range" value={range} onChange={setRange} options={[{ value: 'day', label: '24 hours' }, { value: 'week', label: '7 days' }, { value: 'month', label: '30 days' }]} />
+              <Segmented<Range> size="sm" label="Range" value={range} onChange={setRange} options={RANGES} />
             </div>
           }
         />

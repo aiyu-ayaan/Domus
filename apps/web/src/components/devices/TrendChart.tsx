@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatBucket, formatNumber } from '@/lib/format'
+import { bucketOf, formatBucket, formatNumber, type Range } from '@/lib/format'
 
 export interface TrendPoint {
   t: string
@@ -21,7 +21,7 @@ export function TrendChart({
   height = 200,
 }: {
   points: TrendPoint[]
-  range: 'day' | 'week' | 'month'
+  range: Range
   unit: string
   digits?: number
   marks?: { value: number; label: string }[]
@@ -65,7 +65,7 @@ export function TrendChart({
         {sel.value != null && (
           <span className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on" style={{ left: `${x(shown)}%`, top: `${y(sel.value)}%` }} aria-hidden />
         )}
-        <div role="list" aria-label={`Trend per ${range === 'day' ? 'hour' : 'day'}`} className="absolute inset-0 flex" onMouseLeave={() => setActive(null)}>
+        <div role="list" aria-label={`Trend per ${bucketOf(range)}`} className="absolute inset-0 flex" onMouseLeave={() => setActive(null)}>
           {points.map((p, i) => (
             <button
               key={p.t}

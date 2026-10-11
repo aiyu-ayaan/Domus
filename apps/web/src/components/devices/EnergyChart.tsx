@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { formatBucket, formatKwh, formatMoney } from '@/lib/format'
+import { bucketOf, formatBucket, formatKwh, formatMoney, type Range } from '@/lib/format'
 import { cn } from '@/lib/cn'
 import type { EnergyPoint } from '@/lib/types'
 import { TrendChart } from './TrendChart'
 
 /** Energy as a bar chart with focusable bars, or the measured power as a line; the selected value is shown above. */
-export function EnergyChart({ points, range, currency, height = 160 }: { points: EnergyPoint[]; range: 'day' | 'week' | 'month'; currency: string; height?: number }) {
+export function EnergyChart({ points, range, currency, height = 160 }: { points: EnergyPoint[]; range: Range; currency: string; height?: number }) {
   const [active, setActive] = useState<number | null>(null)
   const [metric, setMetric] = useState<'kwh' | 'watts'>('kwh')
   const max = Math.max(...points.map((p) => p.kwh), 0.0001)
@@ -51,7 +51,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
         {[0.25, 0.5, 0.75].map((f) => (
           <div key={f} className="absolute inset-x-0 border-t border-border/70" style={{ bottom: `${f * 100}%` }} aria-hidden />
         ))}
-        <div role="list" aria-label={`Energy per ${range === 'day' ? 'hour' : 'day'}, total ${formatKwh(total)}`} className="relative flex h-full items-end gap-px" onMouseLeave={() => setActive(null)}>
+        <div role="list" aria-label={`Energy per ${bucketOf(range)}, total ${formatKwh(total)}`} className="relative flex h-full items-end gap-px" onMouseLeave={() => setActive(null)}>
           {points.map((p, i) => (
             <button
               key={p.t}
