@@ -100,7 +100,7 @@ curl -fsSL https://raw.githubusercontent.com/aiyu-ayaan/Domus-Rust/master/script
 
 ### Android
 
-Download the APK from the release page and open it. Later updates are offered in
+Download the APK from the release page and open it. Later updates are offered when the app opens and in
 Settings → Updates, on the Stable, Beta or Alpha channel, and installed from there; Android asks
 once to allow Domus to install them.
 
