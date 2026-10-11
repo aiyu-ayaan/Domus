@@ -153,45 +153,52 @@ pub fn local_midnight(d: NaiveDate) -> DateTime<Local> {
 
 /// The buckets of a history range, laid out on the viewer's clock.
 pub struct Buckets {
-    start: DateTime<FixedOffset>,
-    count: i64,
-    /// Bucket length in minutes: 1, 60 or 1440.
-    minutes: i64,
+    /// Where each bucket begins, with the viewer's UTC offset at that moment.
+    starts: Vec<DateTime<FixedOffset>>,
+    sql_minutes: i64,
 }
 
 impl Buckets {
     /// `range` is "hour" (60 one-minute buckets), "day" (24 hours), "week" (7 days) or "month" (30 days),
-    /// ending at `now`. `tz` is the viewer's offset from UTC in minutes; without it the server's zone is used.
-    // shortcut: a fixed offset, so a DST change inside a week or month moves earlier day edges by an hour; send an IANA zone name if that matters.
-    pub fn new(range: Option<&str>, tz: Option<i32>, now: DateTime<Utc>) -> Self {
-        let zone = tz
-            .and_then(|m| m.checked_mul(60))
-            .and_then(FixedOffset::east_opt)
-            .unwrap_or_else(|| *now.with_timezone(&Local).offset());
-        let now = now.with_timezone(&zone);
-        let midnight = |days: i64| zone.from_local_datetime(&(now.date_naive() - Duration::days(days)).and_hms_opt(0, 0, 0).unwrap()).unwrap();
-        let minute = now.with_second(0).and_then(|t| t.with_nanosecond(0)).unwrap_or(now);
-        let (start, count, minutes) = match range {
-            Some("hour") => (minute - Duration::minutes(59), 60, 1),
-            Some("week") => (midnight(6), 7, 1440),
-            Some("month") => (midnight(29), 30, 1440),
-            _ => (minute.with_minute(0).unwrap_or(minute) - Duration::hours(23), 24, 60),
+    /// ending at `now`. `tz` is the viewer's IANA zone ("Asia/Kolkata"), so days start at their midnight
+    /// across DST changes too; without a known one the server's zone is used.
+    pub fn new(range: Option<&str>, tz: Option<&str>, now: DateTime<Utc>) -> Self {
+        match tz.and_then(|z| z.parse::<chrono_tz::Tz>().ok()) {
+            Some(zone) => Self::in_zone(range, &zone, now),
+            None => Self::in_zone(range, &Local, now),
+        }
+    }
+
+    fn in_zone<Z: TimeZone>(range: Option<&str>, zone: &Z, now: DateTime<Utc>) -> Self {
+        let now = now.with_timezone(zone);
+        let minute = now.with_second(0).and_then(|t| t.with_nanosecond(0)).unwrap_or_else(|| now.clone());
+        let hour = minute.with_minute(0).unwrap_or_else(|| minute.clone());
+        // Midnight `days` ago. Where a DST jump skips midnight the day starts at the same wall time read as UTC.
+        let midnight = |days: i64| {
+            let naive = (now.date_naive() - Duration::days(days)).and_hms_opt(0, 0, 0).unwrap();
+            zone.from_local_datetime(&naive).earliest().unwrap_or_else(|| zone.from_utc_datetime(&naive))
         };
-        Self { start, count, minutes }
+        let starts: Vec<DateTime<Z>> = match range {
+            Some("hour") => (0..60).rev().map(|i| minute.clone() - Duration::minutes(i)).collect(),
+            Some("week") => (0..7).rev().map(midnight).collect(),
+            Some("month") => (0..30).rev().map(midnight).collect(),
+            _ => (0..24).rev().map(|i| hour.clone() - Duration::hours(i)).collect(),
+        };
+        Self { starts: starts.iter().map(DateTime::fixed_offset).collect(), sql_minutes: if range == Some("hour") { 1 } else { 15 } }
     }
 
     pub fn count(&self) -> usize {
-        self.count as usize
+        self.starts.len()
     }
 
     pub fn start(&self) -> DateTime<Utc> {
-        self.start.with_timezone(&Utc)
+        self.starts[0].with_timezone(&Utc)
     }
 
     /// Minutes per SQL group. Samples are grouped this fine in UTC and regrouped with `index`;
-    /// quarters keep half-hour time zones (e.g. IST) exact.
+    /// quarters keep half-hour and 45-minute time zones (India, Nepal) exact.
     pub fn sql_minutes(&self) -> i64 {
-        self.minutes.min(15)
+        self.sql_minutes
     }
 
     /// When a SQL group `(hour "YYYY-MM-DDTHH", part)` began.
@@ -201,12 +208,12 @@ impl Buckets {
     }
 
     pub fn time(&self, i: usize) -> DateTime<FixedOffset> {
-        self.start + Duration::minutes(i as i64 * self.minutes)
+        self.starts[i]
     }
 
+    /// The bucket holding `t`: the last one that began at or before it.
     pub fn index(&self, t: DateTime<Utc>) -> Option<usize> {
-        let i = (t.with_timezone(&self.start.timezone()) - self.start).num_minutes().div_euclid(self.minutes);
-        (0..self.count).contains(&i).then_some(i as usize)
+        self.starts.partition_point(|s| *s <= t).checked_sub(1)
     }
 }
 
@@ -351,8 +358,8 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
 struct HistoryQuery {
     /// "hour" (60 one-minute points), "day" (24 hourly points), "week" (7 days) or "month" (30 days).
     range: Option<String>,
-    /// The viewer's offset from UTC in minutes, so buckets follow their clock rather than the server's.
-    tz: Option<i32>,
+    /// The viewer's IANA time zone, so buckets follow their clock rather than the server's.
+    tz: Option<String>,
     device_id: Option<String>,
 }
 
@@ -367,7 +374,7 @@ struct Point {
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
     let settings = load_settings(&s.pool).await;
-    let buckets = Buckets::new(q.range.as_deref(), q.tz, Utc::now());
+    let buckets = Buckets::new(q.range.as_deref(), q.tz.as_deref(), Utc::now());
 
     let visible: Vec<String> = visible_devices(&s, &user).await?.into_iter().map(|d| d.id).collect();
     if let Some(id) = &q.device_id {
@@ -427,21 +434,27 @@ mod tests {
     fn history_buckets_follow_the_viewers_clock() {
         // 17:22 UTC is 22:52 in India (+05:30), whatever zone the server runs in.
         let now = Utc.with_ymd_and_hms(2026, 10, 11, 17, 22, 40).unwrap();
-        let day = Buckets::new(Some("day"), Some(330), now);
+        let india = Some("Asia/Kolkata");
+        let day = Buckets::new(Some("day"), india, now);
         assert_eq!(day.count(), 24);
         assert_eq!(day.time(23).to_rfc3339(), "2026-10-11T22:00:00+05:30");
         assert_eq!(day.index(now), Some(23));
         assert_eq!(day.index(day.group_time("2026-10-11T15", 2).unwrap()), Some(22)); // 15:30 UTC = 21:00 IST
         assert_eq!(day.index(now - Duration::hours(24)), None);
-        let hour = Buckets::new(Some("hour"), Some(330), now);
+        let hour = Buckets::new(Some("hour"), india, now);
         assert_eq!((hour.count(), hour.sql_minutes()), (60, 1));
         assert_eq!(hour.time(59).to_rfc3339(), "2026-10-11T22:52:00+05:30");
         assert_eq!(hour.index(hour.group_time("2026-10-11 17", 22).unwrap()), Some(59));
-        let week = Buckets::new(Some("week"), Some(330), now);
+        let week = Buckets::new(Some("week"), india, now);
         assert_eq!(week.time(0).to_rfc3339(), "2026-10-05T00:00:00+05:30");
         assert_eq!(week.index(now), Some(6));
-        // An absurd offset falls back to the server's zone instead of failing.
-        assert_eq!(Buckets::new(None, Some(i32::MAX), now).count(), 24);
+        // Days stay midnight to midnight across the end of summer time (Berlin, 25 October 2026).
+        let berlin = Buckets::new(Some("week"), Some("Europe/Berlin"), Utc.with_ymd_and_hms(2026, 10, 27, 12, 0, 0).unwrap());
+        assert_eq!(berlin.time(0).to_rfc3339(), "2026-10-21T00:00:00+02:00");
+        assert_eq!(berlin.time(6).to_rfc3339(), "2026-10-27T00:00:00+01:00");
+        assert_eq!(berlin.index(Utc.with_ymd_and_hms(2026, 10, 25, 22, 30, 0).unwrap()), Some(4)); // 23:30 on the 25-hour day
+        // An unknown zone falls back to the server's instead of failing.
+        assert_eq!(Buckets::new(None, Some("Mars/Olympus"), now).count(), 24);
     }
 
     #[test]

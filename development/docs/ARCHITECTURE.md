@@ -378,15 +378,16 @@ nothing was measured; retention follows `energy_retention_days`.
 ### History buckets and time zones
 
 `GET /energy/history` and `GET /air/history` share `Buckets` (`modules/energy`): `hour` is 60 one-minute
-buckets (energy only: air is sampled too coarsely for it), `day` 24 clock hours, `week` 7 days, `month` 30 days. Clients send `tz`, their offset from UTC in
-minutes, so an hour is a clock hour and a day starts at midnight where the viewer is; the published image
+buckets (energy only: air is sampled too coarsely for it), `day` 24 clock hours, `week` 7 days, `month` 30 days. Clients send `tz`, their IANA zone
+(`Asia/Kolkata`, resolved with `chrono-tz`), so an hour is a clock hour and a day starts at midnight where
+the viewer is, across DST changes too; the published image
 runs in UTC unless `TZ` is set, so without `tz` the buckets follow the server. Clients print bucket times in
 the device's zone and label an hourly bucket as its span ("12 am – 1 am").
 
 ```mermaid
 flowchart LR
-    C["Client<br/>range + tz (minutes from UTC)"] --> H["history handler"]
-    H --> B["Buckets::new(range, tz, now)<br/>start, count, minutes per bucket"]
+    C["Client<br/>range + tz (IANA zone)"] --> H["history handler"]
+    H --> B["Buckets::new(range, tz, now)<br/>the start of every bucket"]
     B --> Q["SQL: UTC groups of 1 min (hour)<br/>or 15 min (day, week, month)"]
     Q --> R["Buckets::index(group time)<br/>regroup on the viewer's clock"]
     R --> P["points with t in the viewer's offset"]

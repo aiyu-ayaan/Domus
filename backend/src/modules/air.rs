@@ -18,8 +18,8 @@ pub fn air_routes() -> Router<AppState> {
 struct HistoryQuery {
     /// "day" (24 hourly points), "week" (7 days) or "month" (30 days).
     range: Option<String>,
-    /// The viewer's offset from UTC in minutes, so buckets follow their clock rather than the server's.
-    tz: Option<i32>,
+    /// The viewer's IANA time zone, so buckets follow their clock rather than the server's.
+    tz: Option<String>,
     device_id: Option<String>,
 }
 
@@ -50,7 +50,7 @@ impl Acc {
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
     // Air is sampled every few minutes, too coarse for the per-minute "hour" range: it reads as "day".
-    let buckets = Buckets::new(q.range.as_deref().filter(|r| *r != "hour"), q.tz, Utc::now());
+    let buckets = Buckets::new(q.range.as_deref().filter(|r| *r != "hour"), q.tz.as_deref(), Utc::now());
     let visible: Vec<String> = visible_devices(&s, &user).await?.into_iter().map(|d| d.id).collect();
 
     // Fine UTC groups, regrouped into the viewer's buckets.
