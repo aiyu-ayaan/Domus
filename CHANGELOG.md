@@ -1,3 +1,22 @@
+## v0.0.1-alpha.3 (2026-10-11)
+
+- !alpha release(Domus) : Ship account recovery and in-app update offers
+- docs(Release) : Describe the update offer at start and the download progress
+- feat(Android) : Offer a new release at start and show the download's progress
+- feat(Web) : Add the desktop update popup at start and a download progress bar
+- feat(Desktop) : Stream the update download with progress and let the page offer it at start
+- fix(Android) : Rebuild the home top bar around the avatar so the greeting, name and status line up
+- docs(Accounts) : Link the account rules from the architecture, Android and agent docs
+- docs(Accounts) : Describe generated passwords, the forced change and reset codes
+- feat(Android) : Add forgot password pages, the forced password change and sign-in details to share
+- feat(Web) : Add forgot password, the forced password change and one-time sign-in details to share
+- feat(Auth) : Generate passwords, force a change at first sign-in and reset with a one-time code
+- fix(UI) : Lay out the access editor as room cards with a level menu per device
+- feat(Access) : Add an edit level, a full-screen person editor and generated emails
+- feat(Android) : Set access per room and per device with see-only or control
+- feat(Access) : Add per-device grants with see-only or control levels
+- fix(UI) : Respect device 12/24-hour time format across Android, web and desktop
+
 ## v0.0.1-alpha.2 (2026-10-10)
 
 - !alpha : Add Philips Hue, MQTT and Tapo hub support, and the new feature film
