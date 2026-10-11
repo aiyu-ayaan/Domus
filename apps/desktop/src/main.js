@@ -10,6 +10,7 @@ const { Readable } = require('stream')
 const { pipeline } = require('stream/promises')
 const { pathToFileURL } = require('url')
 const updates = require('./updates')
+const { t, setLanguage, messages } = require('./i18n')
 
 // The window shows the web UI served by the Domus server itself. Which server
 // is chosen on the connect page (connect.html) and remembered; once signed in,
@@ -136,9 +137,9 @@ async function start() {
       return u
     }),
   ).catch(() => null)
-  if (url) return win.loadURL(url).catch(() => showConnect(`Can't load ${url}.`))
-  const tried = urls.map((u) => new URL(u).host).join(' or ')
-  showConnect(tried ? `Can't reach ${tried}.` : '')
+  if (url) return win.loadURL(url).catch(() => showConnect(t('connect.cannotLoad', { url })))
+  const tried = urls.map((u) => new URL(u).host).join(t('connect.hostOr'))
+  showConnect(tried ? t('connect.cannotReach', { hosts: tried }) : '')
 }
 
 /** Domus servers on this network: each answers the broadcast probe with its port. */
@@ -180,17 +181,18 @@ ipcMain.handle('server:discover', (event) => (trusted(event) ? discover() : []))
 ipcMain.handle('server:connect', async (event, address) => {
   if (!trusted(event)) return ''
   const url = normalize(address)
-  if (!url) return 'Enter an address like 192.168.1.10:8443 or home.example.com. Only https is supported.'
+  if (!url) return t('connect.addressInvalid')
   const p = await probe(url, 6000)
-  if (!p.ok) return `No Domus server answers at ${new URL(url).host}.`
+  const host = new URL(url).host
+  if (!p.ok) return t('connect.noAnswer', { host })
   if (!accepts(url, p)) {
     const { response } = await dialog.showMessageBox(win, {
       type: 'question',
-      buttons: ['Cancel', 'Trust this server'],
+      buttons: [t('cert.cancel'), t('cert.trust')],
       defaultId: 0,
       cancelId: 0,
-      message: 'This server uses its own certificate',
-      detail: `No public authority vouches for ${new URL(url).host}. Compare this fingerprint with the one in the server log before you trust it.\n\n${p.fingerprint}`,
+      message: t('cert.title'),
+      detail: t('cert.detail', { host, fingerprint: p.fingerprint }),
     })
     if (response !== 1) return ''
     config.pins[url] = p.fingerprint
@@ -198,7 +200,7 @@ ipcMain.handle('server:connect', async (event, address) => {
   // Another server has its own accounts; an address of the current one keeps the session.
   if (!config.servers.includes(url)) config = { ...config, servers: [url], token: null }
   save()
-  win.loadURL(url).catch(() => showConnect(`Can't load ${url}.`))
+  win.loadURL(url).catch(() => showConnect(t('connect.cannotLoad', { url })))
   return ''
 })
 
@@ -206,6 +208,9 @@ ipcMain.on('server:choose', (event) => trusted(event) && showConnect())
 ipcMain.on('server:cancel', (event) => trusted(event) && start())
 ipcMain.on('server:hasSaved', (event) => {
   event.returnValue = trusted(event) && (config.servers.length > 0 || !!override)
+})
+ipcMain.on('i18n:get', (event) => {
+  event.returnValue = trusted(event) ? messages() : {}
 })
 
 // The signed-in server's addresses (GET /api/v1/server/links). Its certificate
@@ -274,7 +279,7 @@ async function checkForUpdate() {
   // A dev build updates by rebuilding it.
   if (!app.isPackaged || isDev) return (offer = null)
   const res = await fetch(updates.RELEASES, { headers: { Accept: 'application/vnd.github+json' } })
-  if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
+  if (!res.ok) throw new Error(t('update.githubAnswered', { status: res.status }))
   // What this install can take: its own AppImage, else the installer for the platform.
   const suffix = process.env.APPIMAGE ? '.AppImage' : process.platform === 'win32' ? '-Setup.exe' : '.deb'
   offer = updates.pick(await res.json(), app.getVersion(), updateChannel(), suffix)
@@ -291,7 +296,7 @@ function report(fraction) {
 let installing = false
 /** Returns the reason it failed, or '' (the app restarts, or the installer was opened from Downloads). */
 async function installUpdate() {
-  if (!offer) return 'No update to install.'
+  if (!offer) return t('update.none')
   if (installing) return ''
   installing = true
   const appImage = process.env.APPIMAGE
@@ -300,7 +305,7 @@ async function installUpdate() {
   try {
     report(0)
     const res = await fetch(offer.url)
-    if (!res.ok) throw new Error(`the download answered ${res.status}`)
+    if (!res.ok) throw new Error(t('update.downloadAnswered', { status: res.status }))
     // shortcut: without a Content-Length the bar stays at 0; GitHub's release assets always send one.
     const total = Number(res.headers.get('content-length')) || 0
     let done = 0
@@ -323,13 +328,13 @@ async function installUpdate() {
       const fd = fs.openSync(part, 'r')
       fs.readSync(fd, head, 0, 4, 0)
       fs.closeSync(fd)
-      if (head.toString('latin1') !== '\x7fELF') throw new Error('the download is not an AppImage')
+      if (head.toString('latin1') !== '\x7fELF') throw new Error(t('update.notAppImage'))
     }
     // A rename within one directory: a failure before it leaves the old build in place.
     fs.renameSync(part, target)
   } catch (error) {
     fs.rmSync(part, { force: true })
-    return `Could not update: ${error.message}.`
+    return t('update.failed', { reason: error.message })
   } finally {
     installing = false
     report(null)
@@ -427,6 +432,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  setLanguage(app.getLocale())
   try {
     config = { ...config, ...JSON.parse(fs.readFileSync(configFile(), 'utf8')) }
   } catch {

@@ -36,4 +36,5 @@ contextBridge.exposeInMainWorld('domus', {
   cancel: () => ipcRenderer.send('server:cancel'),
   hasSavedServer: () => ipcRenderer.sendSync('server:hasSaved'),
   getTheme: () => ipcRenderer.sendSync('theme:get'),
+  getMessages: () => ipcRenderer.sendSync('i18n:get'),
 })

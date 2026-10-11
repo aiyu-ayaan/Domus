@@ -330,8 +330,8 @@
           </g>
         </svg>
       </div>
-      <h1>Connect to your home</h1>
-      <p class="subtitle">Choose the Domus server this app should open.</p>
+      <h1 id="title">Connect to your home</h1>
+      <p class="subtitle" id="subtitle">Choose the Domus server this app should open.</p>
 
       <section class="card">
         <div class="section-header">
@@ -339,15 +339,15 @@
           <button class="link-btn" id="rescan" type="button">Search again</button>
         </div>
         <ul id="found" aria-labelledby="found-title" aria-live="polite">
-          <li class="empty"><p>Searching…</p></li>
+          <li class="empty"><p id="searching">Searching…</p></li>
         </ul>
 
         <div class="divider"></div>
 
-        <label class="section-title" for="address">Server address</label>
+        <label class="section-title" id="address-label" for="address">Server address</label>
         <form id="form">
           <input id="address" placeholder="192.168.1.10:8443 or home.example.com" autocomplete="off" spellcheck="false" required />
-          <button class="go" type="submit">Connect</button>
+          <button class="go" id="go" type="submit">Connect</button>
         </form>
         <p id="error" role="alert"></p>
       </section>
@@ -358,6 +358,18 @@
     </main>
     <script>
       const $ = (id) => document.getElementById(id)
+      const messages = window.domus?.getMessages?.() ?? {}
+      const t = (key, fallback) => messages[key] ?? fallback
+      $('title').textContent = t('connect.title', 'Connect to your home')
+      $('subtitle').textContent = t('connect.subtitle', 'Choose the Domus server this app should open.')
+      $('found-title').textContent = t('connect.onNetwork', 'On this network')
+      $('rescan').textContent = t('connect.rescan', 'Search again')
+      $('searching').textContent = t('connect.searching', 'Searching…')
+      $('address-label').textContent = t('connect.address', 'Server address')
+      $('address').placeholder = t('connect.addressPlaceholder', '192.168.1.10:8443 or home.example.com')
+      $('go').textContent = t('connect.connect', 'Connect')
+      $('cancel').textContent = t('connect.cancel', 'Cancel and return to current server')
+
       const params = new URLSearchParams(location.search)
       const isDev = params.get('flavor') === 'dev' || window.domus?.flavor === 'dev'
 
@@ -391,8 +403,17 @@
         buttons.forEach((b) => (b.disabled = false))
       }
 
+      function setEmpty(text) {
+        const li = document.createElement('li')
+        li.className = 'empty'
+        const p = document.createElement('p')
+        p.textContent = text
+        li.append(p)
+        $('found').replaceChildren(li)
+      }
+
       async function scan() {
-        $('found').innerHTML = '<li class="empty"><p>Searching…</p></li>'
+        setEmpty(t('connect.searching', 'Searching…'))
         const servers = await window.domus.discover()
         $('found').replaceChildren(
           ...servers.map(({ name, url }) => {
@@ -408,7 +429,7 @@
             return item
           }),
         )
-        if (servers.length === 0) $('found').innerHTML = '<li class="empty"><p>No server found. Enter its address below.</p></li>'
+        if (servers.length === 0) setEmpty(t('connect.noneFound', 'No server found. Enter its address below.'))
       }
 
       $('rescan').onclick = scan
