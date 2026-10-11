@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -70,7 +71,7 @@ function Count({ n, label, active, tone = 'default' }: { n: number; label: strin
             ? 'bg-on-primary-container/20 text-on-primary-container'
             : 'bg-raised text-fg',
       )}
-      aria-label={`${n} ${label}`}
+      aria-label={label}
     >
       {n > 99 ? '99+' : n}
     </span>
@@ -117,7 +118,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
         <Mark collapsed={!hovered} />
       </div>
 
-      <nav aria-label="Main" className="flex flex-col gap-1 w-full items-center overflow-y-auto scrollbar-none py-0.5">
+      <nav aria-label={t('nav.main')} className="flex flex-col gap-1 w-full items-center overflow-y-auto scrollbar-none py-0.5">
         {items.map((item) =>
           hovered ? (
             <NavLink
@@ -139,8 +140,8 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                     <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                   </span>
                   <span className="ml-3 truncate whitespace-nowrap">{item.label}</span>
-                  {item.to === '/devices' && <Count n={pending} label="new devices found" active={isActive} />}
-                  {item.admin && <span className="ml-auto text-caption uppercase tracking-wider text-muted font-bold text-[10px]">Admin</span>}
+                  {item.to === '/devices' && <Count n={pending} label={t('nav.newDevicesFound', { count: pending })} active={isActive} />}
+                  {item.admin && <span className="ml-auto text-caption uppercase tracking-wider text-muted font-bold text-[10px]">{t('nav.admin')}</span>}
                 </>
               )}
             </NavLink>
@@ -163,7 +164,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                 <>
                   <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                   {item.to === '/devices' && pending > 0 && (
-                    <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={`${pending} new devices`} />
+                    <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={t('nav.newDevices', { count: pending })} />
                   )}
                 </>
               )}
@@ -181,18 +182,18 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
             <span className="flex h-5 w-5 shrink-0 items-center justify-center">
               <Bell size={20} aria-hidden />
             </span>
-            <span className="ml-3 truncate whitespace-nowrap">Notifications</span>
-            <Count n={unread} label="unread" tone="danger" />
+            <span className="ml-3 truncate whitespace-nowrap">{t('nav.notifications')}</span>
+            <Count n={unread} label={t('nav.unreadCount', { count: unread })} tone="danger" />
           </button>
         ) : (
           <button
             onClick={onNotifications}
-            title={unread ? `Notifications (${unread} unread)` : 'Notifications'}
+            title={unread ? t('nav.notificationsUnread', { count: unread }) : t('nav.notifications')}
             className="relative flex h-8 w-14 items-center justify-center rounded-full text-muted hover:text-fg hover:bg-raised/70 cursor-pointer transition-all duration-base"
           >
             <Bell size={20} aria-hidden />
             {unread > 0 && (
-              <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={`${unread} unread notifications`} />
+              <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={t('nav.unreadNotifications', { count: unread })} />
             )}
           </button>
         )}
@@ -208,7 +209,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
               <p className="truncate text-caption capitalize text-subtle leading-tight">{user?.role}</p>
             </div>
             <ThemeToggle size="sm" className="rounded-full h-8 w-8" />
-            <Button variant="ghost" size="sm" aria-label="Sign out" title="Sign out" className="rounded-full h-8 w-8" icon={<SignOut size={16} />} onClick={signOut} />
+            <Button variant="ghost" size="sm" aria-label={t('nav.signOut')} title={t('nav.signOut')} className="rounded-full h-8 w-8" icon={<SignOut size={16} />} onClick={signOut} />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5">
@@ -234,7 +235,7 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
   return (
     <div className="fixed inset-x-0 bottom-3.5 z-nav flex justify-center pointer-events-none lg:hidden px-3 pb-[env(safe-area-inset-bottom)]">
       <nav
-        aria-label="Main"
+        aria-label={t('nav.main')}
         className={cn(
           'pointer-events-auto flex items-center gap-1 p-1.5',
           'rounded-full border border-border/80 bg-panel/95 backdrop-blur-xl shadow-xl select-none',
@@ -261,7 +262,7 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
                   {item.to === '/devices' && pending > 0 && (
                     <span
                       className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-on ring-2 ring-panel"
-                      aria-label={`${pending} new devices`}
+                      aria-label={t('nav.newDevices', { count: pending })}
                     />
                   )}
                 </span>
@@ -278,7 +279,7 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
         <button
           onClick={onMore}
           aria-haspopup="dialog"
-          aria-label="More options"
+          aria-label={t('nav.more')}
           className={cn(
             'relative flex h-11 items-center rounded-full transition-all duration-200 ease-std cursor-pointer text-body',
             moreActive
@@ -314,20 +315,20 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
     <Sheet
       open={open}
       onClose={onClose}
-      title="Notifications"
+      title={t('nav.notifications')}
       footer={
         data?.items.length ? (
           <>
-            {data.unread > 0 && <Button variant="ghost" size="sm" onClick={() => readAll.mutate()}>Mark all as read</Button>}
+            {data.unread > 0 && <Button variant="ghost" size="sm" onClick={() => readAll.mutate()}>{t('notifications.markAllRead')}</Button>}
             <Button variant="ghost" size="sm" onClick={() => (confirmClear ? clear.mutate() : setConfirmClear(true))}>
-              {confirmClear ? 'Confirm: delete all' : 'Delete all'}
+              {t(confirmClear ? 'notifications.confirmDeleteAll' : 'notifications.deleteAll')}
             </Button>
           </>
         ) : undefined
       }
     >
       {!data?.items.length ? (
-        <p className="py-10 text-center text-muted">No notifications.</p>
+        <p className="py-10 text-center text-muted">{t('notifications.empty')}</p>
       ) : (
         <ul className="-mx-5 divide-y divide-border">
           {data.items.map((n) => (
@@ -349,7 +350,7 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
                   <span className="mt-0.5 block text-caption text-subtle">{timeAgo(n.created_at)}</span>
                 </span>
               </button>
-              <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={`Delete ${n.title}`} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
+              <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={t('notifications.delete', { title: n.title })} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
             </li>
           ))}
         </ul>
@@ -382,14 +383,14 @@ export function AppShell() {
 
   const items = useMemo(() => {
     return [
-      { to: '/', label: 'Overview', icon: House },
-      { to: '/devices', label: 'Devices', icon: SquaresFour },
-      { to: '/rooms', label: 'Rooms', icon: Door },
-      { to: '/automations', label: 'Automations', icon: Lightning },
-      ...(hasAirQuality ? [{ to: '/air-quality', label: 'Air quality', icon: Wind }] : []),
-      ...(hasEnergy ? [{ to: '/energy', label: 'Energy', icon: ChartLine }] : []),
-      ...(admin ? [{ to: '/plugins', label: 'Integrations', icon: PlugsConnected, admin: true }] : []),
-      { to: '/settings', label: 'Settings', icon: Gear },
+      { to: '/', label: t('nav.overview'), icon: House },
+      { to: '/devices', label: t('nav.devices'), icon: SquaresFour },
+      { to: '/rooms', label: t('nav.rooms'), icon: Door },
+      { to: '/automations', label: t('nav.automations'), icon: Lightning },
+      ...(hasAirQuality ? [{ to: '/air-quality', label: t('nav.airQuality'), icon: Wind }] : []),
+      ...(hasEnergy ? [{ to: '/energy', label: t('nav.energy'), icon: ChartLine }] : []),
+      ...(admin ? [{ to: '/plugins', label: t('nav.integrations'), icon: PlugsConnected, admin: true }] : []),
+      { to: '/settings', label: t('nav.settings'), icon: Gear },
     ]
   }, [hasAirQuality, hasEnergy, admin])
   const unread = notifications?.unread ?? 0
@@ -405,7 +406,7 @@ export function AppShell() {
         <Mark />
         <div className="flex items-center gap-2">
           <ThemeToggle size="sm" />
-          <Button variant="ghost" size="sm" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
+          <Button variant="ghost" size="sm" aria-label={unread ? t('nav.notificationsUnreadLabel', { count: unread }) : t('nav.notifications')} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
             {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
           </Button>
           <Avatar
@@ -428,7 +429,7 @@ export function AppShell() {
       <TabBar items={items} onMore={() => setMoreOpen(true)} pending={pending.length} />
       <Notifications open={notifOpen} onClose={() => setNotifOpen(false)} />
       {desktop?.updates && <UpdatePrompt />}
-      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="Menu">
+      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title={t('nav.menu')}>
         <div className="-mx-2 flex flex-col gap-1">
           {/* User profile banner in More sheet */}
           <div className="mb-2 flex items-center gap-3 rounded-xl border border-border/70 bg-raised/40 p-3">
@@ -442,7 +443,7 @@ export function AppShell() {
               onClick={() => setMoreOpen(false)}
               className="rounded-lg bg-panel px-2.5 py-1 text-caption font-medium border border-border hover:bg-raised transition-colors"
             >
-              Avatar
+              {t('nav.avatar')}
             </NavLink>
           </div>
 
@@ -458,11 +459,11 @@ export function AppShell() {
             </NavLink>
           ))}
           <div className="flex h-11 items-center justify-between rounded-md px-2 text-body">
-            <span className="text-muted">Theme</span>
+            <span className="text-muted">{t('nav.theme')}</span>
             <ThemeToggle size="sm" showLabel />
           </div>
           <button onClick={signOut} className="mt-2 flex h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-body text-danger hover:bg-danger/10">
-            <SignOut size={18} aria-hidden /> Sign out
+            <SignOut size={18} aria-hidden /> {t('nav.signOut')}
           </button>
         </div>
       </Sheet>

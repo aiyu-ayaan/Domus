@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { DiceFive, LockSimple } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
@@ -32,8 +33,8 @@ function useNewPassword() {
   const mismatch = confirm.length > 0 && confirm !== password
   const fields = (
     <>
-      <Field label="New password" type="password" autoComplete="new-password" required minLength={8} hint="At least 8 characters." value={password} onChange={(e) => setPassword(e.target.value)} />
-      <Field label="Confirm password" type="password" autoComplete="new-password" required value={confirm} error={mismatch ? 'Passwords do not match.' : undefined} onChange={(e) => setConfirm(e.target.value)} />
+      <Field label={t('auth.newPassword')} type="password" autoComplete="new-password" required minLength={8} hint={t('auth.atLeast8')} value={password} onChange={(e) => setPassword(e.target.value)} />
+      <Field label={t('auth.confirmPassword')} type="password" autoComplete="new-password" required value={confirm} error={mismatch ? t('auth.mismatch') : undefined} onChange={(e) => setConfirm(e.target.value)} />
     </>
   )
   return { password, fields, valid: password.length >= 8 && confirm === password }
@@ -62,15 +63,15 @@ export function ChangePasswordScreen() {
   }
 
   return (
-    <Shell title="Choose your password" description={`Welcome, ${user?.username}. The password you signed in with was made for you and has been seen by someone else. Choose your own to continue.`}>
+    <Shell title={t('auth.choose.title')} description={t('auth.choose.description', { username: user?.username ?? '' })}>
       <form onSubmit={submit} className={formCls}>
         {next.fields}
         <ErrorText>{error}</ErrorText>
         <Button type="submit" variant="primary" loading={loading} disabled={!next.valid} className="mt-1 w-full">
-          Save and continue
+          {t('auth.saveContinue')}
         </Button>
         <Button type="button" variant="ghost" onClick={signOut} className="w-full">
-          Sign out
+          {t('auth.signOut')}
         </Button>
       </form>
     </Shell>
@@ -108,25 +109,25 @@ function ForgotPassword({ initialUsername, onBack }: { initialUsername: string; 
 
   return (
     <Shell
-      title={step === 'ask' ? 'Forgot your password?' : 'Enter your reset code'}
-      description={step === 'ask' ? 'Domus sends no email. An administrator of this home is told instead, and gives you a one-time code.' : `Resetting the password of ${username}.`}
+      title={step === 'ask' ? t('auth.forgot.title') : t('auth.forgot.code.title')}
+      description={step === 'ask' ? t('auth.forgot.description') : t('auth.forgot.resetting', { username })}
     >
       <form onSubmit={submit} className={formCls}>
         {step === 'ask' ? (
-          <Field label="Username" autoComplete="username" required minLength={3} value={username} onChange={(e) => setUsername(e.target.value)} />
+          <Field label={t('auth.username')} autoComplete="username" required minLength={3} value={username} onChange={(e) => setUsername(e.target.value)} />
         ) : (
           <>
-            <Notice>An administrator has been told. Ask them for the 8-digit code; it works once and for 30 minutes.</Notice>
-            <Field label="Reset code" inputMode="numeric" autoComplete="one-time-code" required data-autofocus placeholder="1234 5678" className="tabular-nums" value={code} onChange={(e) => setCode(e.target.value)} />
+            <Notice>{t('auth.forgot.told')}</Notice>
+            <Field label={t('auth.forgot.codeLabel')} inputMode="numeric" autoComplete="one-time-code" required data-autofocus placeholder="1234 5678" className="tabular-nums" value={code} onChange={(e) => setCode(e.target.value)} />
             {next.fields}
           </>
         )}
         <ErrorText>{error}</ErrorText>
         <Button type="submit" variant="primary" loading={loading} disabled={step === 'code' && (!next.valid || code.replace(/\D/g, '').length < 8)} className="mt-1 w-full">
-          {step === 'ask' ? 'Ask an administrator' : 'Set password and sign in'}
+          {step === 'ask' ? t('auth.forgot.ask') : t('auth.forgot.set')}
         </Button>
         <Button type="button" variant="ghost" onClick={onBack} className="w-full">
-          Back to sign in
+          {t('auth.backToSignIn')}
         </Button>
       </form>
     </Shell>
@@ -166,14 +167,14 @@ export function AuthScreen() {
   if (forgot) return <ForgotPassword initialUsername={username} onBack={() => setForgot(false)} />
 
   return (
-    <Shell title={setup ? 'Set up Domus' : 'Sign in to Domus'} description={setup ? 'Create the administrator account for this home. You can add other people later.' : 'Use your Domus account.'}>
+    <Shell title={setup ? t('auth.setup.title') : t('auth.signIn.title')} description={setup ? t('auth.setup.description') : t('auth.signIn.description')}>
         <form onSubmit={submit} className={formCls}>
           {setup && (
             <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-raised/40 p-3">
               <Avatar avatar={avatar || `dicebear:bottts:${username || 'admin'}`} username={username || 'Admin'} size="md" />
               <div className="min-w-0 flex-1">
-                <p className="text-label font-medium text-fg">Profile avatar</p>
-                <p className="text-caption text-muted truncate">DiceBear random avatar</p>
+                <p className="text-label font-medium text-fg">{t('auth.avatar.title')}</p>
+                <p className="text-caption text-muted truncate">{t('auth.avatar.subtitle')}</p>
               </div>
               <Button
                 type="button"
@@ -181,34 +182,34 @@ export function AuthScreen() {
                 size="sm"
                 icon={<DiceFive size={16} />}
                 onClick={() => setAvatar(rollRandomAvatar().spec)}
-                title="Roll random avatar"
+                title={t('auth.avatar.roll')}
               >
-                Roll
+                {t('auth.avatar.rollShort')}
               </Button>
             </div>
           )}
-          <Field label="Username" autoComplete="username" required minLength={3} value={username} onChange={(e) => setUsername(e.target.value)} />
-          {setup && <Field label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}
+          <Field label={t('auth.username')} autoComplete="username" required minLength={3} value={username} onChange={(e) => setUsername(e.target.value)} />
+          {setup && <Field label={t('auth.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}
           <Field
-            label="Password"
+            label={t('auth.password')}
             type="password"
             autoComplete={setup ? 'new-password' : 'current-password'}
             required
             minLength={setup ? 8 : undefined}
-            hint={setup ? 'At least 8 characters.' : undefined}
+            hint={setup ? t('auth.atLeast8') : undefined}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           {setup && (
-            <Field label="Confirm password" type="password" autoComplete="new-password" required value={confirm} error={mismatch ? 'Passwords do not match.' : undefined} onChange={(e) => setConfirm(e.target.value)} />
+            <Field label={t('auth.confirmPassword')} type="password" autoComplete="new-password" required value={confirm} error={mismatch ? t('auth.mismatch') : undefined} onChange={(e) => setConfirm(e.target.value)} />
           )}
           <ErrorText>{error}</ErrorText>
           <Button type="submit" variant="primary" loading={loading} className="mt-1 w-full">
-            {setup ? 'Create account' : 'Sign in'}
+            {setup ? t('auth.createAccount') : t('auth.signIn')}
           </Button>
           {!setup && (
             <button type="button" onClick={() => setForgot(true)} className="cursor-pointer self-center text-label text-muted underline transition-colors duration-fast hover:text-fg">
-              Forgot password?
+              {t('auth.forgotLink')}
             </button>
           )}
           {desktop && (
@@ -218,14 +219,14 @@ export function AuthScreen() {
               onClick={() => desktop?.chooseServer()}
               className="w-full"
             >
-              Change server
+              {t('auth.changeServer')}
             </Button>
           )}
         </form>
         <div className="mt-4 flex items-center justify-between text-caption text-subtle">
           <p className="flex items-center gap-1.5">
             <LockSimple size={12} aria-hidden />
-            <span>Encrypted connection.{desktop ? ` Connected to ${window.location.host}` : ' Data stays on your server.'}</span>
+            <span>{t('auth.encrypted')} {desktop ? t('auth.connectedTo', { host: window.location.host }) : t('auth.dataStays')}</span>
           </p>
           {desktop && (
             <button
@@ -233,7 +234,7 @@ export function AuthScreen() {
               onClick={() => desktop?.chooseServer()}
               className="text-muted hover:text-fg underline transition-colors cursor-pointer"
             >
-              Change
+              {t('auth.change')}
             </button>
           )}
         </div>
