@@ -35,15 +35,13 @@ pub async fn restore(backup: &Path, db: &Path, data_dir: &Path) -> anyhow::Resul
     let with = |suffix: &str| std::path::PathBuf::from(format!("{}{suffix}", db.display()));
     let staged = with(".restoring");
     std::fs::copy(backup, &staged)?;
-
-    let mut conn = SqliteConnection::connect(&format!("sqlite://{}", staged.display())).await?;
-    let key: Option<(String,)> = sqlx::query_as("SELECT value_json FROM app_settings WHERE key = ?")
-        .bind(KEY_SETTING)
-        .fetch_optional(&mut conn)
-        .await
-        .map_err(|_| anyhow::anyhow!("{} is not a Domus backup", backup.display()))?;
-    sqlx::query("DELETE FROM app_settings WHERE key = ?").bind(KEY_SETTING).execute(&mut conn).await?;
-    conn.close().await?;
+    let key = match take_key(&staged).await {
+        Ok(key) => key,
+        Err(_) => {
+            let _ = std::fs::remove_file(&staged);
+            anyhow::bail!("{} is not a Domus backup", backup.display());
+        }
+    };
 
     // The old write-ahead log belongs to the old database: left in place it would corrupt the new one.
     for suffix in ["", "-wal", "-shm"] {
@@ -62,6 +60,15 @@ pub async fn restore(backup: &Path, db: &Path, data_dir: &Path) -> anyhow::Resul
         write_private(&path, &bytes)?;
     }
     Ok(())
+}
+
+/// Removes the master key from a staged backup and returns it; fails on anything but a Domus database.
+async fn take_key(staged: &Path) -> anyhow::Result<Option<(String,)>> {
+    let mut conn = SqliteConnection::connect(&format!("sqlite://{}", staged.display())).await?;
+    let key = sqlx::query_as("SELECT value_json FROM app_settings WHERE key = ?").bind(KEY_SETTING).fetch_optional(&mut conn).await?;
+    sqlx::query("DELETE FROM app_settings WHERE key = ?").bind(KEY_SETTING).execute(&mut conn).await?;
+    conn.close().await?;
+    Ok(key)
 }
 
 #[cfg(test)]
@@ -93,6 +100,12 @@ mod tests {
         assert_eq!(std::fs::read(dir.join("master.key")).unwrap(), [7u8; 32]);
         assert_eq!(std::fs::read(dir.join("master.key.before-restore")).unwrap(), [9u8; 32]);
         pool.close().await;
+
+        // Something that is not a backup changes nothing and leaves nothing behind.
+        std::fs::write(dir.join("notes.txt"), "not a database").unwrap();
+        assert!(super::restore(&dir.join("notes.txt"), &db, &dir).await.is_err());
+        assert!(!dir.join("domus.db.restoring").exists());
+        assert_eq!(std::fs::read(dir.join("master.key")).unwrap(), [7u8; 32]);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 }
