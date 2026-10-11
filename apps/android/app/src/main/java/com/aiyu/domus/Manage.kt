@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +33,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.EnergySettings
+import com.aiyu.domus.core.Grants
 import com.aiyu.domus.core.Notice
 import com.aiyu.domus.core.Room
 import com.aiyu.domus.core.Slab
@@ -210,6 +213,36 @@ fun RoomsPage(onBack: () -> Unit) {
 }
 
 private val Roles = listOf("admin" to "Admin", "member" to "Member", "guest" to "Guest")
+private val Levels = listOf("none" to "None", "view" to "See only", "control" to "Control")
+
+/** One room in the access editor: tap to open, then set the whole room or single devices (which also override the room). */
+@Composable
+private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room: String?, onRoom: ((String) -> Unit)?, onDevice: (Device, String) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val count = devices.count { grants.levelOf(it) != "none" }
+    val status = when {
+        room != null -> "Whole room · ${if (room == "view") "see only" else "control"}"
+        count > 0 -> "$count of ${devices.size} devices"
+        else -> "No access"
+    }
+    Column {
+        Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { open = !open }.heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(name, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+            Text(status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (open) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (onRoom != null) {
+                Text("Whole room, with devices added later", style = MaterialTheme.typography.bodyMedium)
+                Choice(Levels, room ?: "none", onRoom)
+            }
+            devices.forEach { device ->
+                Text(device.name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Choice(Levels, grants.levelOf(device), { onDevice(device, it) })
+            }
+            if (devices.isEmpty()) Text("No devices in this room yet.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -217,6 +250,7 @@ fun UsersPage(me: User, onBack: () -> Unit) {
     val repository = LocalRepository.current
     val scope = rememberCoroutineScope()
     val rooms by repository.rooms.collectAsStateWithLifecycle()
+    val devices by repository.devices.collectAsStateWithLifecycle()
     var users by remember { mutableStateOf<List<User>?>(null) }
     var reload by remember { mutableIntStateOf(0) }
     var editing by remember { mutableStateOf<User?>(null) }
@@ -227,7 +261,10 @@ fun UsersPage(me: User, onBack: () -> Unit) {
         val list = users
         if (list == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
         list?.forEach { user ->
-            val access = if (user.isAdmin || user.allRooms) "all rooms" else "${user.roomIds.size} rooms"
+            val access = if (user.isAdmin || user.allRooms) "all rooms" else listOfNotNull(
+                "${user.roomIds.size} rooms".takeIf { user.roomIds.isNotEmpty() },
+                "${user.deviceIds.size} devices".takeIf { user.deviceIds.isNotEmpty() },
+            ).joinToString(", ").ifEmpty { "no access" }
             RowCard(
                 title = user.username,
                 subtitle = "${user.role.replaceFirstChar(Char::uppercase)} · $access",
@@ -245,14 +282,14 @@ fun UsersPage(me: User, onBack: () -> Unit) {
         var role by remember { mutableStateOf(user?.role ?: "member") }
         var avatar by remember { mutableStateOf(user?.avatar ?: "dicebear:bottts:${user?.username ?: "member"}") }
         var allRooms by remember { mutableStateOf(user?.allRooms ?: true) }
-        var roomIds by remember { mutableStateOf(user?.roomIds.orEmpty().toSet()) }
+        var grants by remember { mutableStateOf(user?.grants ?: Grants()) }
         FormDialog(
             if (user == null) "New person" else user.username,
             canSave = if (user == null) username.trim().length >= 3 && password.length >= 8 else password.isEmpty() || password.length >= 8,
             onSave = {
                 open = false
                 scope.launch {
-                    repository.request { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, roomIds.toList(), avatar = avatar) }
+                    repository.request { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, grants, avatar = avatar) }
                     reload++
                 }
             },
@@ -283,7 +320,7 @@ fun UsersPage(me: User, onBack: () -> Unit) {
             Field(password, { password = it }, if (user == null) "Password" else "New password", secret = true, supporting = if (user == null) "At least 8 characters" else "Leave empty to keep the current one")
             Choice(Roles, role, { role = it })
             Text(
-                when (role) { "admin" -> "Manages everything."; "member" -> "Controls devices in their rooms."; else -> "Sees devices in their rooms, can't control them." },
+                when (role) { "admin" -> "Manages everything."; "member" -> "Sees what they are given and controls what isn't set to see only."; else -> "Sees what they are given, can't control it." },
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (role != "admin") {
@@ -291,10 +328,12 @@ fun UsersPage(me: User, onBack: () -> Unit) {
                     Text("All rooms", Modifier.weight(1f))
                     HapticSwitch(allRooms, { allRooms = it })
                 }
-                if (!allRooms) FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (!allRooms) {
                     rooms.forEach { room ->
-                        FilterChip(room.id in roomIds, { roomIds = if (room.id in roomIds) roomIds - room.id else roomIds + room.id }, { Text(room.name) })
+                        RoomAccess(room.name, devices.filter { it.roomId == room.id }, grants, grants.rooms[room.id], { grants = grants.withRoom(room.id, it, devices) }) { device, level -> grants = grants.withDevice(device, level, devices) }
                     }
+                    val loose = devices.filter { it.roomId == null }
+                    if (loose.isNotEmpty()) RoomAccess("No room", loose, grants, null, null) { device, level -> grants = grants.withDevice(device, level, devices) }
                 }
             }
         }

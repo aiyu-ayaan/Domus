@@ -483,6 +483,8 @@ class DomusRepository(context: Context) {
             }
             "users_changed" -> {
                 _revision.update { it + 1 }
+                // Access may have changed, and with it the devices and rooms this user gets.
+                refresh()
                 val current = _session.value
                 if (current is Session.SignedIn) {
                     attempt { it.me() }?.let { me ->

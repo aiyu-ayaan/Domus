@@ -223,7 +223,9 @@
 - [x] Scenes and automations are listed and runnable only when the user can see every device they touch (they were open to every signed-in user)
 - [x] Live stream re-reads access when users or rooms change and closes for a deleted account
 - [x] Web: Settings > People, each room opens to None / See only / Control for the whole room and for each device; `development/docs/ARCHITECTURE.md` section 7
-- [ ] Android people editor: pick single devices and levels (it sends rooms only and leaves device grants and levels untouched)
-- [ ] Android: read `can_control` per device (a see-only device still looks operable there and the command answers 403)
+- [x] Android people editor: None / See only / Control per room and per device (`Grants` in `core/Models.kt`), saved from the emulator against the new server
+- [x] Android: tiles and the device sheet disable controls from `can_control`; the device list reloads when access changes
+- [ ] Android: sign in as a see-only member on a device and check the disabled controls by eye
+- [ ] Android: grey out scenes and automations the user can see but not run (they answer 403 today)
 - [ ] Web: grey out scenes and automations the user can see but not run (they answer 403 today)
 - [ ] Notifications inbox is still shared by every signed-in user

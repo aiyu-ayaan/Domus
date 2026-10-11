@@ -14,10 +14,45 @@ data class User(
     val role: String = "guest",
     val avatar: String? = null,
     @SerialName("all_rooms") val allRooms: Boolean = true,
+    /** Rooms granted as a whole, and devices granted one by one. */
     @SerialName("room_ids") val roomIds: List<String> = emptyList(),
+    @SerialName("device_ids") val deviceIds: List<String> = emptyList(),
+    /** The granted rooms and devices the user may see but not control. */
+    @SerialName("view_only_room_ids") val viewOnlyRoomIds: List<String> = emptyList(),
+    @SerialName("view_only_device_ids") val viewOnlyDeviceIds: List<String> = emptyList(),
 ) {
     val isAdmin get() = role == "admin"
     val canControl get() = role != "guest"
+    val grants get() = Grants(
+        roomIds.associateWith { if (it in viewOnlyRoomIds) "view" else "control" },
+        deviceIds.associateWith { if (it in viewOnlyDeviceIds) "view" else "control" },
+    )
+}
+
+/**
+ * What a member or guest may reach: id to "view" (see only) or "control"; a missing id has no access.
+ * A device's own level wins over its room's.
+ */
+data class Grants(val rooms: Map<String, String> = emptyMap(), val devices: Map<String, String> = emptyMap()) {
+    fun levelOf(device: Device) = devices[device.id] ?: device.roomId?.let { rooms[it] } ?: "none"
+
+    /** Setting the whole room starts it clean: single-device levels in it are dropped. */
+    fun withRoom(roomId: String, level: String, all: List<Device>) = Grants(
+        if (level == "none") rooms - roomId else rooms + (roomId to level),
+        devices - all.filter { it.roomId == roomId }.map { it.id }.toSet(),
+    )
+
+    fun withDevice(device: Device, level: String, all: List<Device>): Grants {
+        val room = device.roomId?.let { rooms[it] }
+        val rest = devices - device.id
+        // Taking one device out of a whole room keeps the others, each at the room's level.
+        if (level == "none" && room != null) {
+            val kept = all.filter { it.roomId == device.roomId && it.id != device.id && it.id !in rest }.associate { it.id to room }
+            return Grants(rooms - device.roomId!!, rest + kept)
+        }
+        // The same level as the room needs no entry of its own.
+        return copy(devices = if (level == "none" || level == room) rest else rest + (device.id to level))
+    }
 }
 
 @Serializable
@@ -109,6 +144,8 @@ data class Device(
     val model: String? = null,
     @SerialName("is_online") val isOnline: Boolean = false,
     val state: DeviceState = DeviceState(),
+    /** Whether the signed-in user may operate it (false for guests and see-only access). */
+    @SerialName("can_control") val canControl: Boolean = true,
 ) {
     /** What the server will report once [cmd] lands; shown at once so controls feel instant. */
     fun applying(cmd: DeviceCommand) = copy(

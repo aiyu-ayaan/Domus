@@ -105,4 +105,24 @@ class CoreTest {
         assertEquals("+916268993859", xiaomiAccount("+91 (626) 899 3859"))
         assertEquals("mi user 7", xiaomiAccount("mi user 7"))
     }
+
+    @Test
+    fun grantsFollowRoomsAndSingleDevices() {
+        val lamp = Device("lamp", "Lamp", roomId = "bed")
+        val fan = Device("fan", "Fan", roomId = "bed")
+        val all = listOf(lamp, fan, Device("lock", "Lock"))
+        val user = User("1", "kid", roomIds = listOf("bed"), deviceIds = listOf("lock"), viewOnlyDeviceIds = listOf("lock"))
+        assertEquals(Grants(mapOf("bed" to "control"), mapOf("lock" to "view")), user.grants)
+        // A device overrides its room; the room's own level needs no entry.
+        val seeLamp = user.grants.withDevice(lamp, "view", all)
+        assertEquals("view", seeLamp.levelOf(lamp))
+        assertEquals("control", seeLamp.levelOf(fan))
+        assertEquals(user.grants, seeLamp.withDevice(lamp, "control", all))
+        // Taking one device out of a whole room keeps the rest as single devices.
+        val noLamp = seeLamp.withDevice(lamp, "none", all)
+        assertEquals(Grants(devices = mapOf("lock" to "view", "fan" to "control")), noLamp)
+        // Setting the whole room clears the single levels in it.
+        assertEquals(Grants(mapOf("bed" to "view"), mapOf("lock" to "view")), noLamp.withRoom("bed", "view", all))
+        assertEquals("none", Grants().levelOf(lamp))
+    }
 }

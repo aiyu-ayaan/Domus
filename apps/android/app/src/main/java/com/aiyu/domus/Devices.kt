@@ -172,7 +172,7 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
                     HapticSwitch(
                         checked = isOn,
                         onCheckedChange = { repository.command(device, DeviceCommand(isOn = it)) },
-                        enabled = canControl && device.isOnline,
+                        enabled = canControl && device.canControl && device.isOnline,
                         modifier = Modifier.semantics { contentDescription = "${device.name} power" },
                     )
                 }
@@ -279,7 +279,7 @@ private fun parseColor(hex: String): Color? = runCatching { Color(android.graphi
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
-    val canControl = user.canControl
+    val canControl = user.canControl && device.canControl
     val scope = rememberCoroutineScope()
     var editing by remember { mutableStateOf(false) }
     var removing by remember { mutableStateOf(false) }
@@ -309,7 +309,7 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 }
                 IconButton({ repository.refreshDevice(device.id) }) { Icon(Icons.Rounded.Refresh, "Refresh ${device.name}") }
             }
-            if (!canControl) Text("Guests can view devices but not control them.", color = c.onSurfaceVariant)
+            if (!canControl) Text(if (user.canControl) "You can see this device but not control it." else "Guests can view devices but not control them.", color = c.onSurfaceVariant)
 
             s.isOn?.let { isOn ->
                 // Expressive toggle: morphs from a pill to a rounded square when on.
