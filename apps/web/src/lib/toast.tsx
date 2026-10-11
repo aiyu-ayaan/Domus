@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { t } from './i18n'
 
 export type ToastTone = 'info' | 'success' | 'warning' | 'error'
 export interface Toast {
@@ -38,4 +39,4 @@ export function useToast() {
 }
 
 /** Toast an error from a failed mutation. */
-export const errorMessage = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong')
+export const errorMessage = (e: unknown) => (e instanceof Error ? e.message : t('error.generic'))

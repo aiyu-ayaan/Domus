@@ -258,3 +258,12 @@
 - [x] Ask before switching: per-device option kept on the server, warning dialog for the device's switch, room All on/off, groups, scenes and manual automation runs on web, desktop and Android
 - [ ] Ask before switching on Android: open the dialog from a tile, a group and a scene on a device (compiled, not opened); the web group dialog was checked
 - [ ] Ask before switching: unattended automations run without asking; decide if they should skip a guarded device and tell the administrators instead
+
+
+## Milestone 21: Localization, every user-facing string in a catalog (2026-10-12)
+Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Not in scope: translating, a language picker, the server's own error texts.
+- [x] Web: `lib/i18n.ts` (`t(key, params)`, plural by `key_one` / `key_other`) over `locales/en.json`
+- [ ] Web: move every string in `apps/web/src` to `locales/en.json`
+- [ ] Desktop: move the strings in `apps/desktop/src` (menus, dialogs, update messages) to a catalog
+- [ ] Android: move every string to `res/values/strings.xml` (core's errors, `AirLevel`, `UpdateChannel` need a resource-id type, core has no Compose)
+- [ ] `development/docs/LOCALIZATION.md` with the architecture diagram and the rules for new strings

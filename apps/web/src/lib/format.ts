@@ -1,3 +1,5 @@
+import { t } from './i18n'
+
 const nf = (digits: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: digits, minimumFractionDigits: 0 })
 
 export const formatWatts = (w?: number | null) => {
@@ -24,10 +26,10 @@ export const formatMoney = (value: number, currency: string) => {
 export const formatNumber = (v: number | undefined | null, digits = 1) => (v == null ? '—' : nf(digits).format(v))
 
 export const timeAgo = (iso?: string | null) => {
-  if (!iso) return 'never'
+  if (!iso) return t('time.never')
   const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000)
   const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
-  if (s < 45) return 'just now'
+  if (s < 45) return t('time.justNow')
   if (s < 3600) return rtf.format(-Math.round(s / 60), 'minute')
   if (s < 86400) return rtf.format(-Math.round(s / 3600), 'hour')
   return rtf.format(-Math.round(s / 86400), 'day')
@@ -58,7 +60,7 @@ export const formatClockTime = (hhmm: string) => {
 export type Range = 'live' | 'hour' | 'day' | 'week' | 'month'
 
 /** What one bucket of a range covers. */
-export const bucketOf = (range: Range) => (range === 'live' ? '5 seconds' : range === 'hour' ? 'minute' : range === 'day' ? 'hour' : 'day')
+export const bucketOf = (range: Range) => t(`range.bucket.${range === 'week' || range === 'month' ? 'week' : range}`)
 
 /**
  * Formats a chart bucket timestamp on the viewer's clock: the minute for the 60 min range, the hour's span
@@ -75,18 +77,18 @@ export const formatBucket = (iso: string, range: Range) => {
 
 export const greeting = () => {
   const h = new Date().getHours()
-  if (h < 5) return 'Good night'
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (h < 5) return t('greeting.night')
+  if (h < 12) return t('greeting.morning')
+  if (h < 18) return t('greeting.afternoon')
+  return t('greeting.evening')
 }
 
 /** PM2.5 µg/m³ → label and token colour. */
 export const airQuality = (pm?: number) => {
   if (pm == null) return null
-  if (pm <= 12) return { label: 'Excellent', tone: 'text-on', bg: 'bg-on' }
-  if (pm <= 35) return { label: 'Good', tone: 'text-on', bg: 'bg-on' }
-  if (pm <= 55) return { label: 'Moderate', tone: 'text-warn', bg: 'bg-warn' }
-  return { label: 'Poor', tone: 'text-danger', bg: 'bg-danger' }
+  if (pm <= 12) return { label: t('air.excellent'), tone: 'text-on', bg: 'bg-on' }
+  if (pm <= 35) return { label: t('air.good'), tone: 'text-on', bg: 'bg-on' }
+  if (pm <= 55) return { label: t('air.moderate'), tone: 'text-warn', bg: 'bg-warn' }
+  return { label: t('air.poor'), tone: 'text-danger', bg: 'bg-danger' }
 }
 

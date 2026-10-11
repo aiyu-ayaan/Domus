@@ -1,0 +1,17 @@
+{
+  "air.excellent": "Excellent",
+  "air.good": "Good",
+  "air.moderate": "Moderate",
+  "air.poor": "Poor",
+  "error.generic": "Something went wrong",
+  "greeting.afternoon": "Good afternoon",
+  "greeting.evening": "Good evening",
+  "greeting.morning": "Good morning",
+  "greeting.night": "Good night",
+  "range.bucket.day": "hour",
+  "range.bucket.hour": "minute",
+  "range.bucket.live": "5 seconds",
+  "range.bucket.week": "day",
+  "time.justNow": "just now",
+  "time.never": "never"
+}
