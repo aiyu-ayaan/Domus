@@ -178,7 +178,15 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   and Material 3 `TimeInput` pickers follow the device's 12/24-hour system setting immediately. Web and desktop
   similarly format timestamps and `"HH:mm"` strings with `formatTime` / `formatClockTime` / `formatBucket`
   (`apps/web/src/lib/format.ts`), with Electron bridging the OS 12/24-hour setting (`window.domus.hour12`).
-- **Haptics** — `Haptics.kt` (ui-shared): `DomusTheme` provides `LocalIndication` as the M3 ripple plus a `VirtualKey` tick on press release, so every button, chip, `clickable` and list row ticks with no per-call code (a cancelled press stays silent). `Switch` draws no indication, so use `HapticSwitch` (on/off ticks) instead of `Switch` when it has its own `onCheckedChange`; a `Switch` with `onCheckedChange = null` inside a clickable row already ticks via the row. Don't pass `indication = null` on a clickable you want to tick.
+- **Haptics** — `Haptics.kt` (ui-shared): Material 3 components draw their own `ripple()` and never read `LocalIndication`, so the tick is not tied to the ripple. `DomusTheme` wraps the app in a box with `Modifier.clickHaptics()`, which watches pointer events after the children have handled them and plays one `VirtualKey` tick when a child consumed the up: every button, chip, card, switch, tab and `clickable` ticks with no per-call code. A scroll, a drag, a press that slides off and a disabled control stay silent. A dialog, sheet or menu is its own window outside that box, so pass `modifier = Modifier.clickHaptics()` to every `AlertDialog`, `ModalBottomSheet` and `DropdownMenu`. Don't add `performHapticFeedback` to a click handler (it would tick twice). Check with `adb shell dumpsys vibrator_manager`, which lists each tick.
+
+  ```mermaid
+  flowchart LR
+      T[Touch] --> C["Child: Button, Chip, Switch, clickable"]
+      C -- "consumes the up" --> H["clickHaptics() on the window root, Final pass"]
+      H -- "up consumed" --> V[VirtualKey tick]
+      H -- "move consumed (scroll, drag) or nothing consumed" --> S[Silent]
+  ```
 - **Home top bar** — `HomeHeader` (`Home.kt`), not the shared `ScreenHeader`: the avatar in a 48dp circle at the
   start (tap opens the avatar page), the greeting over the name, and "n of m on" as a pill at the end, all on one
   center line. The name ellipsizes before the pill gives way. The other tabs keep `ScreenHeader` with the morphing mark.
