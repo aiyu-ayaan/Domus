@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -45,10 +46,10 @@ export function OverviewView() {
     onSuccess: (r, id) => {
       qc.invalidateQueries({ queryKey: keys.scenes })
       qc.invalidateQueries({ queryKey: keys.devices })
-      const name = scenes.find((s) => s.id === id)?.name
-      toast.push(r.success ? { tone: 'success', title: `${name} applied` } : { tone: 'warning', title: `${name} partly applied`, message: r.errors.join('; ') })
+      const name = scenes.find((s) => s.id === id)?.name ?? t('overview.sceneFallback')
+      toast.push(r.success ? { tone: 'success', title: t('overview.sceneApplied', { name }) } : { tone: 'warning', title: t('overview.scenePartly', { name }), message: r.errors.join('; ') })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Scene failed', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('overview.sceneFailed'), message: errorMessage(e) }),
   })
 
   const toggleScene = useMutation({
@@ -56,24 +57,24 @@ export function OverviewView() {
     onSuccess: (r, { id, on }) => {
       qc.invalidateQueries({ queryKey: keys.scenes })
       qc.invalidateQueries({ queryKey: keys.devices })
-      const name = scenes.find((s) => s.id === id)?.name ?? 'Scene'
+      const name = scenes.find((s) => s.id === id)?.name ?? t('overview.sceneFallback')
       toast.push(
         r.success
-          ? { tone: 'success', title: `${name} switched ${on ? 'on' : 'off'}` }
-          : { tone: 'warning', title: `${name} partly applied`, message: r.errors.join('; ') },
+          ? { tone: 'success', title: t(on ? 'overview.sceneSwitched_on' : 'overview.sceneSwitched_off', { name }) }
+          : { tone: 'warning', title: t('overview.scenePartly', { name }), message: r.errors.join('; ') },
       )
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Scene toggle failed', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('overview.sceneToggleFailed'), message: errorMessage(e) }),
   })
 
   const toggleGroup = useMutation({
     mutationFn: ({ id, on }: { id: string; on: boolean }) => api.groupCommand(id, { is_on: on }),
     onSuccess: (_r, { id, on }) => {
       qc.invalidateQueries({ queryKey: keys.devices })
-      const name = groups.find((g) => g.id === id)?.name ?? 'Group'
-      toast.push({ tone: 'success', title: `${name} turned ${on ? 'on' : 'off'}` })
+      const name = groups.find((g) => g.id === id)?.name ?? t('overview.groupFallback')
+      toast.push({ tone: 'success', title: t(on ? 'overview.groupTurned_on' : 'overview.groupTurned_off', { name }) })
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Group toggle failed', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('overview.groupToggleFailed'), message: errorMessage(e) }),
   })
 
   const list = devices ?? []
@@ -145,19 +146,19 @@ export function OverviewView() {
   // Categories list for filtering
   const categories = useMemo(() => {
     const cats: { id: CategoryFilter; label: string; count: number }[] = [
-      { id: 'all', label: 'All', count: list.length },
+      { id: 'all', label: t('overview.cat.all'), count: list.length },
     ]
     if (powerDevices.length > 0) {
-      cats.push({ id: 'power', label: 'Power', count: powerDevices.length })
+      cats.push({ id: 'power', label: t('overview.cat.power'), count: powerDevices.length })
     }
     if (lightDevices.length > 0) {
-      cats.push({ id: 'lights', label: 'Lights', count: lightDevices.length })
+      cats.push({ id: 'lights', label: t('overview.cat.lights'), count: lightDevices.length })
     }
     if (aqDevices.length > 0) {
-      cats.push({ id: 'air', label: 'Air quality', count: aqDevices.length })
+      cats.push({ id: 'air', label: t('overview.cat.air'), count: aqDevices.length })
     }
     if (climateDevices.length > 0) {
-      cats.push({ id: 'climate', label: 'Climate', count: climateDevices.length })
+      cats.push({ id: 'climate', label: t('overview.cat.climate'), count: climateDevices.length })
     }
     return cats
   }, [list.length, powerDevices.length, lightDevices.length, aqDevices.length, climateDevices.length])
@@ -181,18 +182,18 @@ export function OverviewView() {
     metricCards.push(
       <Metric
         key="power"
-        label="Power now"
+        label={t('overview.powerNow')}
         live
-        info="Combined live power draw of all your metered devices."
+        info={t('overview.powerNow.info')}
         value={formatWatts(watts)}
-        sub={`${onCount} of ${controllable.length} devices on`}
+        sub={t('overview.devicesOn', { on: onCount, total: controllable.length })}
       />,
     )
     metricCards.push(
       <Metric
         key="today"
-        label="Today"
-        info="Energy used since midnight. The amount below is its estimated cost at your electricity rate."
+        label={t('overview.today')}
+        info={t('overview.today.info')}
         value={formatKwh(energy?.today_kwh ?? 0)}
         sub={formatMoney(energy?.today_cost ?? 0, currency)}
       />,
@@ -200,20 +201,20 @@ export function OverviewView() {
     metricCards.push(
       <Metric
         key="bill"
-        label="Bill this cycle"
-        info="Estimated bill so far in this billing cycle, plus the projection for the full cycle."
+        label={t('overview.bill')}
+        info={t('overview.bill.info')}
         value={formatMoney(energy?.cycle_cost ?? 0, currency)}
-        sub={`Projected ${formatMoney(energy?.projected_cost ?? 0, currency)}`}
+        sub={t('overview.projected', { amount: formatMoney(energy?.projected_cost ?? 0, currency) })}
       />,
     )
   } else if (controllable.length > 0) {
     metricCards.push(
       <Metric
         key="devices-active"
-        label="Active devices"
+        label={t('overview.active')}
         live={onCount > 0}
         value={`${onCount}`}
-        sub={`${controllable.length} devices connected`}
+        sub={t('overview.connected', { count: controllable.length })}
       />,
     )
     if (lightDevices.length > 0) {
@@ -221,9 +222,9 @@ export function OverviewView() {
       metricCards.push(
         <Metric
           key="lights-active"
-          label="Lights on"
+          label={t('overview.lightsOn')}
           value={`${lightsOn}`}
-          sub={`${lightDevices.length} lighting devices`}
+          sub={t('overview.lightingDevices', { count: lightDevices.length })}
         />,
       )
     }
@@ -233,23 +234,23 @@ export function OverviewView() {
     metricCards.push(
       <Metric
         key="air-quality"
-        label="Air quality"
+        label={t('overview.airQuality')}
         value={
           <span>
             {formatNumber(climate.pm25, 0)}{' '}
             <span className="text-title font-normal text-muted">µg/m³</span>
           </span>
         }
-        sub={`PM2.5 · ${aq?.label}`}
+        sub={t('overview.pm25Label', { label: aq?.label ?? '' })}
       />,
     )
   } else if (showClimate && climate.temp != null) {
     metricCards.push(
       <Metric
         key="climate"
-        label="Climate"
+        label={t('overview.climate')}
         value={`${formatNumber(climate.temp)} °C`}
-        sub={climate.humidity != null ? `${formatNumber(climate.humidity, 0)} % humidity` : 'Sensors online'}
+        sub={climate.humidity != null ? t('overview.humidity', { value: formatNumber(climate.humidity, 0) }) : t('overview.sensorsOnline')}
       />,
     )
   }
@@ -266,12 +267,12 @@ export function OverviewView() {
   return (
     <>
       <PageHeader
-        title="Overview"
+        title={t('overview.title')}
         description={date}
         actions={
           <Link
             to="/settings"
-            title="Account & Avatar Settings"
+            title={t('overview.accountSettings')}
             className="flex items-center gap-2.5 rounded-full border border-border/80 bg-raised/40 px-3 py-1 hover:bg-raised/80 hover:border-primary/40 transition-all select-none group"
           >
             <Avatar avatar={user?.avatar} username={user?.username} size="sm" className="group-hover:scale-105 transition-transform" />
@@ -282,8 +283,8 @@ export function OverviewView() {
 
       {admin && pending.length > 0 && (
         <div className="mb-6">
-          <Notice action={<Button size="sm" onClick={() => navigate('/devices?tab=discovered')}>Review</Button>}>
-            <span className="font-medium">{pending.length} new {pending.length === 1 ? 'device' : 'devices'} found</span>
+          <Notice action={<Button size="sm" onClick={() => navigate('/devices?tab=discovered')}>{t('overview.review')}</Button>}>
+            <span className="font-medium">{t('overview.newFound', { count: pending.length })}</span>
             <span className="text-muted"> — {pending.map((p) => p.name).join(', ')}</span>
           </Notice>
         </div>
@@ -300,25 +301,25 @@ export function OverviewView() {
           <CardHeader
             title={
               <span className="flex items-center gap-2">
-                <span>Devices</span>
+                <span>{t('overview.devices')}</span>
                 {offline > 0 && <span className="text-caption text-danger">({offline} offline)</span>}
               </span>
             }
             action={
               rooms.length > 0 && (
                 <select
-                  aria-label="Filter by room"
+                  aria-label={t('overview.filterRoom')}
                   value={room}
                   onChange={(e) => setRoom(e.target.value)}
                   className="h-8 cursor-pointer rounded-md border border-border bg-raised px-2 text-label text-fg focus:outline-none"
                 >
-                  <option value="all">All rooms</option>
+                  <option value="all">{t('overview.allRooms')}</option>
                   {rooms.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.name}
                     </option>
                   ))}
-                  <option value="none">Unassigned</option>
+                  <option value="none">{t('overview.unassigned')}</option>
                 </select>
               )
             }
@@ -360,13 +361,13 @@ export function OverviewView() {
             <div className="p-4">
               <EmptyState
                 icon={<PlugsConnected size={28} />}
-                title="No devices yet"
-                message={admin ? 'Connect Tuya, Tapo, Xiaomi, Philips Hue or an MQTT broker under Integrations. Devices on your network are discovered automatically.' : 'An administrator has not shared any devices with you yet.'}
-                action={admin && <Button variant="primary" onClick={() => navigate('/plugins')}>Open integrations</Button>}
+                title={t('overview.empty.title')}
+                message={t(admin ? 'overview.empty.admin' : 'overview.empty.member')}
+                action={admin && <Button variant="primary" onClick={() => navigate('/plugins')}>{t('overview.openIntegrations')}</Button>}
               />
             </div>
           ) : shown.length === 0 ? (
-            <p className="p-8 text-center text-muted">No devices match the selected filter.</p>
+            <p className="p-8 text-center text-muted">{t('overview.noMatch')}</p>
           ) : (
             <ul className="divide-y divide-border">
               {shown.map((d) => (
@@ -392,17 +393,17 @@ export function OverviewView() {
 
             <Card>
               <CardHeader
-                title={quickTab === 'scenes' ? 'Scenes' : 'Device groups'}
+                title={t(quickTab === 'scenes' ? 'overview.scenes' : 'overview.deviceGroups')}
                 action={
                   <div className="flex items-center gap-2">
                     {groups.length > 0 && scenes.length > 0 && (
                       <Segmented
-                        label="Quick control view"
+                        label={t('overview.quickView')}
                         value={quickTab}
                         onChange={(v) => setQuickTab(v as 'scenes' | 'groups')}
                         options={[
-                          { value: 'scenes', label: `Scenes (${scenes.length})` },
-                          { value: 'groups', label: `Groups (${groups.length})` },
+                          { value: 'scenes', label: t('overview.scenesCount', { count: scenes.length }) },
+                          { value: 'groups', label: t('overview.groupsCount', { count: groups.length }) },
                         ]}
                       />
                     )}
@@ -410,8 +411,7 @@ export function OverviewView() {
                       to={quickTab === 'scenes' ? '/automations' : '/devices'}
                       className="text-label text-muted hover:text-fg"
                     >
-                      Manage
-                    </Link>
+                      {t('overview.manage')}\n                    </Link>
                   </div>
                 }
               />
@@ -419,8 +419,7 @@ export function OverviewView() {
               {quickTab === 'scenes' ? (
                 scenes.length === 0 ? (
                   <p className="px-4 py-6 text-label text-muted">
-                    No scenes. Create one under Automations.
-                  </p>
+                    {t('overview.noScenes')}\n                  </p>
                 ) : (
                   <ul className="divide-y divide-border">
                     {scenes.map((s) => {
@@ -436,10 +435,10 @@ export function OverviewView() {
                                 {isScreenSync && <Monitor size={14} className="text-primary inline mr-1.5" />}
                                 {s.name}
                               </p>
-                              {isScreenSync && <Badge tone="info">Screen Sync</Badge>}
+                              {isScreenSync && <Badge tone="info">{t('overview.screenSync')}</Badge>}
                             </div>
                             <p className="text-caption text-muted">
-                              {targetCount > 0 ? `${targetCount} device${targetCount === 1 ? '' : 's'}` : 'Actions'}
+                              {targetCount > 0 ? t('common.deviceCount', { count: targetCount }) : t('overview.actions')}
                               {active && (isLocalRunning ? ' · syncing screen live' : ' · currently active')}
                             </p>
                           </div>
@@ -447,7 +446,7 @@ export function OverviewView() {
                             <div className="flex items-center gap-2">
                               {isLocalRunning ? (
                                 <>
-                                  <span className="relative flex h-2 w-2" aria-hidden title="Live screen sync in progress">
+                                  <span className="relative flex h-2 w-2" aria-hidden title={t('overview.syncLive')}>
                                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-info opacity-75" />
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-info" />
                                   </span>
@@ -457,8 +456,7 @@ export function OverviewView() {
                                     icon={<StopCircle size={14} weight="fill" />}
                                     onClick={stopScreenSync}
                                   >
-                                    Stop
-                                  </Button>
+                                    {t('overview.stop')}\n                                  </Button>
                                 </>
                               ) : (
                                 <>
@@ -470,8 +468,7 @@ export function OverviewView() {
                                       loading={toggleScene.isPending && toggleScene.variables?.id === s.id}
                                       onClick={() => toggleScene.mutate({ id: s.id, on: false })}
                                     >
-                                      Turn off
-                                    </Button>
+                                      {t('overview.turnOff')}\n                                    </Button>
                                   )}
                                   <Button
                                     size="sm"
@@ -479,8 +476,7 @@ export function OverviewView() {
                                     icon={<Monitor size={14} />}
                                     onClick={() => startScreenSync(s)}
                                   >
-                                    Sync
-                                  </Button>
+                                    {t('overview.sync')}\n                                  </Button>
                                 </>
                               )}
                             </div>
@@ -489,7 +485,7 @@ export function OverviewView() {
                               <Switch
                                 checked={active}
                                 disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
-                                label={`Toggle ${s.name}`}
+                                label={t('overview.toggle', { name: s.name })}
                                 onChange={(on) => toggleScene.mutate({ id: s.id, on })}
                               />
                               <Button
@@ -509,8 +505,7 @@ export function OverviewView() {
                 )
               ) : groups.length === 0 ? (
                 <p className="px-4 py-6 text-label text-muted">
-                  No groups. Create a group on the Devices page.
-                </p>
+                  {t('overview.noGroups')}\n                </p>
               ) : (
                 <ul className="divide-y divide-border">
                   {groups.map((g) => {
@@ -523,13 +518,13 @@ export function OverviewView() {
                           <p className="truncate text-body font-medium">{g.name}</p>
                           <p className="text-caption text-muted">
                             {memberDevices.length} devices ·{' '}
-                            {onCount === 0 ? 'All off' : `${onCount} on`}
+                            {onCount === 0 ? t('overview.allOff') : t('overview.nOn', { count: onCount })}
                           </p>
                         </div>
                         <Switch
                           checked={isGroupOn}
                           disabled={!control || (toggleGroup.isPending && toggleGroup.variables?.id === g.id)}
-                          label={`Toggle ${g.name}`}
+                          label={t('overview.toggle', { name: g.name })}
                           onChange={(on) => toggleGroup.mutate({ id: g.id, on })}
                         />
                       </li>
