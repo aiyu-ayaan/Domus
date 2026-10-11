@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CaretDown, CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
-import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
+import { CaretDown, CaretRight, Check, Copy, DiceFive, PencilSimple, Plus, ShareNetwork, Sparkle, Trash } from '@phosphor-icons/react'
+import { Badge, Card, CardHeader, ErrorText, Notice, PageHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
@@ -14,6 +14,7 @@ import { api, desktop, type UpdateChannel } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
+import { formatTime } from '@/lib/format'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/cn'
 import type { Device, Role, Room, User } from '@/lib/types'
@@ -326,6 +327,8 @@ function People() {
                 {accessSummary(u, rooms)}
               </p>
             </div>
+            {u.reset_requested && <Badge tone="warn">Reset requested</Badge>}
+            {u.kid && <Badge>Kid</Badge>}
             <Badge tone={u.role === 'admin' ? 'info' : 'neutral'}>{u.role}</Badge>
             <Button variant="ghost" size="sm" aria-label={`Edit ${u.username}`} icon={<PencilSimple size={16} />} onClick={() => setEditing(u)} />
             {u.id !== me?.id && <Button variant="ghost" size="sm" aria-label={`Remove ${u.username}`} icon={<Trash size={16} />} onClick={() => setDeleting(u)} />}
@@ -436,6 +439,58 @@ function useEmailStatus(email: string, userId?: string, own?: string): EmailStat
   return state?.email === value ? state.status : 'checking'
 }
 
+/** What an administrator passes on to a person: their first password, or a one-time reset code. */
+function handoverText(u: User) {
+  if (u.reset_code) {
+    const code = u.reset_code.replace(/(\d{4})(\d{4})/, '$1 $2')
+    const until = u.reset_allowed_until ? `, until ${formatTime(u.reset_allowed_until)}` : ''
+    return `Domus password reset for ${u.username}\nCode: ${code}\n\nOn the sign-in screen choose "Forgot password?", enter your username and then this code. It works once${until}.`
+  }
+  return `Domus sign-in\nAddress: ${window.location.origin}\nUsername: ${u.username}\nPassword: ${u.generated_password}\n\n${u.kid ? '' : 'You will be asked to choose your own password the first time you sign in.'}`.trim()
+}
+
+/** Shows the secret once, to copy or share. It is not stored readable anywhere, so closing this loses it. */
+function Handover({ user, onClose }: { user: User | null; onClose: () => void }) {
+  const [copied, setCopied] = useState(false)
+  const text = user ? handoverText(user) : ''
+  const canShare = typeof navigator.share === 'function'
+  const close = () => {
+    setCopied(false)
+    onClose()
+  }
+  return (
+    <Sheet
+      open={!!user}
+      onClose={close}
+      title={user?.reset_code ? `Reset code for ${user.username}` : `Sign-in details for ${user?.username}`}
+      description="Shown only once. Send it to them now; Domus keeps no readable copy."
+      footer={
+        <Button variant="primary" onClick={close}>
+          Done
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <pre className="select-all whitespace-pre-wrap break-words rounded-lg border border-border bg-raised p-3 font-mono text-label text-fg">{text}</pre>
+        <div className="flex gap-2">
+          <Button
+            data-autofocus
+            icon={copied ? <Check size={16} /> : <Copy size={16} />}
+            onClick={() => navigator.clipboard.writeText(text).then(() => setCopied(true))}
+          >
+            {copied ? 'Copied' : 'Copy'}
+          </Button>
+          {canShare && (
+            <Button icon={<ShareNetwork size={16} />} onClick={() => navigator.share({ text }).catch(() => {})}>
+              Share
+            </Button>
+          )}
+        </div>
+      </div>
+    </Sheet>
+  )
+}
+
 function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () => void }) {
   const { user: me, updateUser } = useAuth()
   const qc = useQueryClient()
@@ -447,6 +502,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     username: '',
     email: '',
     password: '',
+    kid: false,
     role: 'member' as Role,
     avatar: '',
     all_rooms: true,
@@ -456,6 +512,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [key, setKey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [handover, setHandover] = useState<User | null>(null)
   const emailStatus = useEmailStatus(form.email, existing?.id, existing?.email)
   const name = (existing?.username ?? form.username).trim()
   const generate = useMutation({
@@ -471,6 +528,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
       username: existing?.username ?? '',
       email: existing?.email ?? '',
       password: '',
+      kid: existing?.kid ?? false,
       role: existing?.role ?? 'member',
       avatar: existing?.avatar ?? `dicebear:bottts:${existing?.username || 'member'}`,
       all_rooms: existing?.all_rooms ?? true,
@@ -488,14 +546,16 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
           role: form.role,
           avatar: form.avatar,
           all_rooms: form.all_rooms,
+          kid: form.kid,
           ...grants,
-          ...(form.password ? { password: form.password } : {}),
+          ...(form.kid && form.password ? { password: form.password } : {}),
         })
         if (existing.id === me?.id) {
           updateUser(updated)
         }
       } else {
-        await api.createUser({ ...account, ...grants })
+        const created = await api.createUser({ ...account, ...grants, password: form.kid ? form.password : undefined })
+        if (created.generated_password) setHandover(created)
       }
     },
     onSuccess: () => {
@@ -505,6 +565,19 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
     },
     onError: (e) => setError(errorMessage(e)),
   })
+  // Not part of Save: a new password or reset code takes effect at once and is shown once.
+  const issue = useMutation({
+    mutationFn: (b: { reset_password: true } | { reset_allowed: boolean }) => api.updateUser(existing!.id, b),
+    onSuccess: (u) => {
+      qc.invalidateQueries({ queryKey: keys.users })
+      if (u.generated_password || u.reset_code) setHandover(u)
+      else toast.push({ tone: 'success', title: 'Reset code withdrawn' })
+      onClose()
+    },
+    onError: (e) => setError(errorMessage(e)),
+  })
+  const self = existing?.id === me?.id
+  const passwordMissing = form.kid && form.password.length < 8 && (!existing || !existing.kid || form.password.length > 0)
   const inRoom = (id: string | null) => devices.filter((d) => (d.room_id ?? null) === id)
   const levelOf = (d: Device): Level => form.devices[d.id] ?? (d.room_id ? form.rooms[d.room_id] : undefined) ?? 'none'
   // Setting the whole room starts it clean: single-device settings in it are dropped.
@@ -543,7 +616,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary" loading={save.isPending} disabled={emailStatus === 'taken' || (!existing && (!form.username || form.password.length < 8))} onClick={() => save.mutate()}>
+            <Button variant="primary" loading={save.isPending} disabled={emailStatus === 'taken' || (!existing && !form.username) || passwordMissing} onClick={() => save.mutate()}>
               Save
             </Button>
           </>
@@ -582,7 +655,41 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
               Generate
             </Button>
           </div>
-          <Field label={existing ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing} hint={existing ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          {!self && (
+            <section className="flex flex-col gap-2" aria-label="Password">
+              <p className="text-label font-medium text-fg">Password</p>
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
+                <div className="min-w-0">
+                  <p className="font-medium">Kid's account</p>
+                  <p className="mt-0.5 text-label text-muted">{form.kid ? 'You set the password and it stays as it is.' : 'Off: Domus makes a password, and they choose their own at first sign-in.'}</p>
+                </div>
+                <Switch checked={form.kid} onChange={(v) => setForm({ ...form, kid: v })} label="Kid's account" />
+              </div>
+              {form.kid ? (
+                <Field label={existing?.kid ? 'New password' : 'Password'} type="password" autoComplete="new-password" required={!existing?.kid} hint={existing?.kid ? 'Leave empty to keep the current password.' : 'At least 8 characters.'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+              ) : existing ? (
+                <>
+                  {existing.reset_requested && <Notice tone="warn">{existing.username} forgot their password and asked for a reset.</Notice>}
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
+                    <div className="min-w-0">
+                      <p className="font-medium">Reset code</p>
+                      <p className="mt-0.5 text-label text-muted">
+                        {existing.reset_allowed && existing.reset_allowed_until
+                          ? `A code is active until ${formatTime(existing.reset_allowed_until)}. Turn off to withdraw it.`
+                          : 'A one-time code they enter under "Forgot password?" to choose a new password. Good for 30 minutes.'}
+                      </p>
+                    </div>
+                    <Switch checked={existing.reset_allowed} disabled={issue.isPending} onChange={(v) => issue.mutate({ reset_allowed: v })} label="Reset code" />
+                  </div>
+                  <Button type="button" className="self-start" loading={issue.isPending} onClick={() => issue.mutate({ reset_password: true })}>
+                    Generate a new password
+                  </Button>
+                </>
+              ) : (
+                <p className="text-caption text-subtle">You get the password to copy or share after saving.</p>
+              )}
+            </section>
+          )}
           <SelectField label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} hint={roleHelp[form.role]}>
             <option value="admin">Admin</option>
             <option value="member">Member</option>
@@ -620,6 +727,7 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
         username={form.username || 'user'}
         onSave={(newAvatar) => setForm((f) => ({ ...f, avatar: newAvatar }))}
       />
+      <Handover user={handover} onClose={() => setHandover(null)} />
     </>
   )
 }

@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/components/AppShell'
 import { Skeleton } from '@/components/ui/Card'
-import { AuthScreen } from '@/features/auth/AuthScreen'
+import { AuthScreen, ChangePasswordScreen } from '@/features/auth/AuthScreen'
 import { OverviewView } from '@/features/overview/OverviewView'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 
@@ -25,6 +25,7 @@ export default function App() {
   const { user, loading } = useAuth()
   if (loading) return <div className="min-h-dvh" aria-busy="true" />
   if (!user) return <AuthScreen />
+  if (user.must_change_password) return <ChangePasswordScreen />
   return (
     <BrowserRouter>
       <Routes>

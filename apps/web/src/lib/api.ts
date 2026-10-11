@@ -168,7 +168,12 @@ export const api = {
       desktop?.saveLinks(links)
       return links
     }),
-  changePassword: (b: { current_password: string; new_password: string }) => post<Ok>('/auth/password', b),
+  /** `current_password` may be left out while the account is still on its generated password. */
+  changePassword: (b: { current_password?: string; new_password: string }) => post<Ok>('/auth/password', b),
+  /** Tells the administrators; the answer is the same whether or not the account exists. */
+  forgotPassword: (username: string) => post<Ok>('/auth/forgot', { username }),
+  /** Spends the one-time code an administrator handed over and signs in. */
+  resetPassword: (b: { username: string; code: string; new_password: string }) => post<AuthResponse>('/auth/reset', b),
 
   devices: () => get<Device[]>('/devices'),
   device: (id: string) => get<Device>(`/devices/${id}`),
@@ -232,9 +237,11 @@ export const api = {
   clearNotifications: () => del<Ok>('/notifications'),
 
   users: () => get<User[]>('/users'),
-  createUser: (b: { username: string; email: string; password: string; role: string; avatar?: string; all_rooms: boolean } & Grants) =>
+  /** Without `password` the server generates one and returns it once as `generated_password`; a kid's account needs one. */
+  createUser: (b: { username: string; email: string; password?: string; kid: boolean; role: string; avatar?: string; all_rooms: boolean } & Grants) =>
     post<User>('/users', b),
-  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; avatar: string; all_rooms: boolean } & Grants>) =>
+  /** `reset_password` generates a new password, `reset_allowed` issues (or withdraws) a one-time reset code; both come back once. */
+  updateUser: (id: string, b: Partial<{ email: string; role: string; password: string; kid: boolean; reset_password: boolean; reset_allowed: boolean; avatar: string; all_rooms: boolean } & Grants>) =>
     put<User>(`/users/${id}`, b),
   removeUser: (id: string) => del<Ok>(`/users/${id}`),
   /** Whether another account already uses the address; `userId` is the account being edited. */

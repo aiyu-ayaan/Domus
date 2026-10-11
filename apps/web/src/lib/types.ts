@@ -17,6 +17,19 @@ export interface User {
   /** The granted rooms and devices the user may also rename (edit includes control). */
   edit_room_ids: string[]
   edit_device_ids: string[]
+  /** An administrator sets a kid's password; everyone else gets a generated one. */
+  kid: boolean
+  /** Still on a generated password: nothing else works until it is changed. */
+  must_change_password: boolean
+  /** Asked for a password reset on the sign-in screen; no administrator has answered yet. */
+  reset_requested: boolean
+  /** A one-time reset code is waiting to be used, until `reset_allowed_until`. */
+  reset_allowed: boolean
+  reset_allowed_until?: string | null
+  /** Only in the answer to the administrator who created the account or reset its password. */
+  generated_password?: string
+  /** Only in the answer to the administrator who issued the code. */
+  reset_code?: string
   created_at: string
 }
 
