@@ -173,6 +173,11 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   similarly format timestamps and `"HH:mm"` strings with `formatTime` / `formatClockTime` / `formatBucket`
   (`apps/web/src/lib/format.ts`), with Electron bridging the OS 12/24-hour setting (`window.domus.hour12`).
 - **Haptics** — `Haptics.kt` (ui-shared): `DomusTheme` provides `LocalIndication` as the M3 ripple plus a `VirtualKey` tick on press release, so every button, chip, `clickable` and list row ticks with no per-call code (a cancelled press stays silent). `Switch` draws no indication, so use `HapticSwitch` (on/off ticks) instead of `Switch` when it has its own `onCheckedChange`; a `Switch` with `onCheckedChange = null` inside a clickable row already ticks via the row. Don't pass `indication = null` on a clickable you want to tick.
+- **Sign-in and recovery** — `AuthScreen` (`ConnectScreens.kt`) is three pages: sign in, "Forgot password?"
+  (name the account) and the reset code with the new password. They change with `sharedAxisX` and go back with
+  the predictive gesture. An account on a generated password gets `ChangePasswordScreen` before `MainScreen`;
+  the repository loads nothing until it is done. In the person editor an administrator switches "Kid's
+  account" and "Reset code" and passes the secret on from the `Handover` dialog (Copy, Share). See `ACCOUNTS.md`.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
   and swatches carry descriptions; content is capped at 840dp on wide windows.

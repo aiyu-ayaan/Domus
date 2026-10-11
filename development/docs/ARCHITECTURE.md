@@ -296,10 +296,12 @@ a reload.
 ```mermaid
 flowchart TB
     Req["Request"] --> HTTPS["TLS (rustls, ring)"]
-    HTTPS --> Pub{"public route?<br/>health, setup-status,<br/>setup, login"}
+    HTTPS --> Pub{"public route?<br/>health, setup-status,<br/>setup, login, forgot, reset"}
     Pub -- no --> JWT["verify JWT (HS256,<br/>secret in data/jwt.secret)"]
     JWT --> Load["load user from DB<br/>role + all_rooms"]
-    Load --> Role{"role: what may they do?"}
+    Load --> Must{"still on a generated<br/>password?"}
+    Must -- yes --> Only["only /auth/me and<br/>/auth/password, else 403"]
+    Must -- no --> Role{"role: what may they do?"}
     Role --> Admin["admin: manage everything"]
     Role --> Member["member: view and control"]
     Role --> Guest["guest: view only"]
@@ -317,6 +319,8 @@ flowchart TB
     Level -- "edit" --> Edt["control, plus rename the device<br/>(not move or remove it)"]
     Vis --> Derived["groups: visible members only<br/>scenes, automations: listed when every device<br/>they touch is visible, run when all are controllable<br/>energy, air, WebSocket: visible devices"]
 ```
+
+Passwords, the forced change at first sign-in and recovery with a one-time code are in `ACCOUNTS.md`.
 
 ### Access model
 
