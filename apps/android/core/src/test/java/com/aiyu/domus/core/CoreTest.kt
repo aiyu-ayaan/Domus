@@ -127,4 +127,15 @@ class CoreTest {
         assertEquals(Grants(mapOf("bed" to "view"), mapOf("lock" to "view")), noLamp.withRoom("bed", "view", all))
         assertEquals("none", Grants().levelOf(lamp))
     }
+
+    @Test
+    fun handoverCarriesTheCodeOrTheFirstPassword() {
+        val bea = User("1", "bea", generatedPassword = "abcd2345efgh")
+        assertEquals(
+            "Domus sign-in\nAddress: https://home\nUsername: bea\nPassword: abcd2345efgh\n\nYou will be asked to choose your own password the first time you sign in.",
+            bea.handoverText("https://home", true),
+        )
+        val reset = User("1", "bea", resetCode = "12345678", resetAllowedUntil = "not a time").handoverText("https://home", true)
+        assertEquals(true, reset.contains("Code: 1234 5678") && reset.endsWith("It works once."))
+    }
 }

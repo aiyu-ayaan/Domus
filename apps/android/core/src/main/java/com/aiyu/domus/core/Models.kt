@@ -23,6 +23,19 @@ data class User(
     /** The granted rooms and devices the user may also rename (edit includes control). */
     @SerialName("edit_room_ids") val editRoomIds: List<String> = emptyList(),
     @SerialName("edit_device_ids") val editDeviceIds: List<String> = emptyList(),
+    /** An administrator sets a kid's password; everyone else gets a generated one. */
+    val kid: Boolean = false,
+    /** Still on a generated password: nothing else works until it is changed. */
+    @SerialName("must_change_password") val mustChangePassword: Boolean = false,
+    /** Asked for a password reset on the sign-in screen; no administrator has answered yet. */
+    @SerialName("reset_requested") val resetRequested: Boolean = false,
+    /** A one-time reset code is waiting to be used, until [resetAllowedUntil]. */
+    @SerialName("reset_allowed") val resetAllowed: Boolean = false,
+    @SerialName("reset_allowed_until") val resetAllowedUntil: String? = null,
+    /** Only in the answer to the administrator who created the account or reset its password. */
+    @SerialName("generated_password") val generatedPassword: String? = null,
+    /** Only in the answer to the administrator who issued the code. */
+    @SerialName("reset_code") val resetCode: String? = null,
 ) {
     val isAdmin get() = role == "admin"
     val canControl get() = role != "guest"
@@ -30,6 +43,21 @@ data class User(
         roomIds.associateWith { levelOf(it, viewOnlyRoomIds, editRoomIds) },
         deviceIds.associateWith { levelOf(it, viewOnlyDeviceIds, editDeviceIds) },
     )
+
+    /** When the reset code stops working, as a clock time on this device. */
+    fun resetUntil(hour24: Boolean): String? = runCatching {
+        java.time.format.DateTimeFormatter.ofPattern(if (hour24) "HH:mm" else "h:mm a")
+            .withZone(java.time.ZoneId.systemDefault())
+            .format(java.time.Instant.parse(resetAllowedUntil))
+    }.getOrNull()
+
+    /** What an administrator passes on to this person: the one-time reset code, or their first password. */
+    fun handoverText(server: String, hour24: Boolean): String = resetCode?.let { code ->
+        "Domus password reset for $username\nCode: ${code.chunked(4).joinToString(" ")}\n\n" +
+            "On the sign-in screen choose \"Forgot password?\", enter your username and then this code. " +
+            "It works once${resetUntil(hour24)?.let { ", until $it" }.orEmpty()}."
+    } ?: ("Domus sign-in\nAddress: $server\nUsername: $username\nPassword: $generatedPassword" +
+        if (kid) "" else "\n\nYou will be asked to choose your own password the first time you sign in.")
 
     private fun levelOf(id: String, viewOnly: List<String>, edit: List<String>) = when (id) { in viewOnly -> "view"; in edit -> "edit"; else -> "control" }
 }

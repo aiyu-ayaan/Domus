@@ -1,5 +1,6 @@
 package com.aiyu.domus
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -16,6 +17,8 @@ import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockReset
+import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.Mail
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Router
@@ -325,15 +328,83 @@ fun ConnectScreen() {
     }
 }
 
-/** Sign in, or create the first administrator on a fresh server. */
+/** A password field that can be revealed to check what was typed. */
+@Composable
+private fun PasswordField(
+    value: String, onChange: (String) -> Unit, label: String,
+    supporting: String? = null, error: Boolean = false, action: ImeAction = ImeAction.Next, onGo: () -> Unit = {},
+) {
+    var shown by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value, onChange,
+        label = { Text(label) },
+        leadingIcon = { Icon(Icons.Rounded.Key, contentDescription = null) },
+        supportingText = supporting?.let { { Text(it) } },
+        singleLine = true,
+        isError = error,
+        visualTransformation = if (shown) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton({ shown = !shown }) {
+                Icon(if (shown) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (shown) "Hide password" else "Show password")
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = action),
+        keyboardActions = KeyboardActions(onGo = { onGo() }),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun UsernameField(value: String, onChange: (String) -> Unit, action: ImeAction = ImeAction.Next, onGo: () -> Unit = {}) {
+    OutlinedTextField(
+        value, onChange,
+        label = { Text("Username") },
+        leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = action),
+        keyboardActions = KeyboardActions(onGo = { onGo() }),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** The new password typed twice; [onGo] runs from the keyboard once both match. */
+@Composable
+private fun NewPasswordFields(password: String, onPassword: (String) -> Unit, confirm: String, onConfirm: (String) -> Unit, onGo: () -> Unit) {
+    val mismatch = confirm.isNotEmpty() && confirm != password
+    PasswordField(password, onPassword, "New password", supporting = "At least 8 characters")
+    PasswordField(confirm, onConfirm, "Confirm password", supporting = if (mismatch) "The passwords do not match" else null, error = mismatch, action = ImeAction.Go, onGo = onGo)
+}
+
+private fun newPasswordValid(password: String, confirm: String) = password.length >= 8 && password == confirm
+
+/**
+ * Sign in, or create the first administrator on a fresh server. "Forgot password?" opens two pages over it:
+ * name the account, then the one-time code and the new password. Each goes back with the predictive gesture.
+ */
 @Composable
 fun AuthScreen(session: Session.SignedOut) {
+    // 0 sign in, 1 name the account, 2 code and new password.
+    var step by rememberSaveable { mutableIntStateOf(0) }
+    var username by rememberSaveable { mutableStateOf("") }
+    val back = rememberPredictiveBack(step > 0) { step-- }
+    val motion = MaterialTheme.motionScheme
+    AnimatedContent(step, transitionSpec = { sharedAxisX(targetState > initialState, motion) }, label = "auth") { s ->
+        Box(Modifier.fillMaxSize().predictiveBackEffect { if (s == step) back.value else 0f }) {
+            when (s) {
+                0 -> SignInPage(session, username, { username = it }, onForgot = { step = 1 })
+                1 -> ForgotPage(username, { username = it }, onAsked = { step = 2 }, onBack = { step = 0 })
+                else -> ResetCodePage(username, onBack = { step = 1 })
+            }
+        }
+    }
+}
+
+@Composable
+private fun SignInPage(session: Session.SignedOut, username: String, onUsername: (String) -> Unit, onForgot: () -> Unit) {
     val repository = LocalRepository.current
     val scope = rememberCoroutineScope()
-    var username by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var showPassword by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -358,14 +429,7 @@ fun AuthScreen(session: Session.SignedOut) {
                 Text(session.server.removePrefix("https://"), style = MaterialTheme.typography.labelLarge)
             }
         }
-        OutlinedTextField(
-            username, { username = it; error = null },
-            label = { Text("Username") },
-            leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            modifier = Modifier.fillMaxWidth(),
-        )
+        UsernameField(username, { onUsername(it); error = null })
         if (session.needsSetup) {
             OutlinedTextField(
                 email, { email = it; error = null },
@@ -376,26 +440,107 @@ fun AuthScreen(session: Session.SignedOut) {
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        OutlinedTextField(
-            password, { password = it; error = null },
-            label = { Text("Password") },
-            leadingIcon = { Icon(Icons.Rounded.Key, contentDescription = null) },
-            supportingText = if (session.needsSetup) ({ Text("At least 8 characters") }) else null,
-            singleLine = true,
-            isError = error != null,
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton({ showPassword = !showPassword }) {
-                    Icon(if (showPassword) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, if (showPassword) "Hide password" else "Show password")
-                }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
-            keyboardActions = KeyboardActions(onGo = { submit() }),
-            modifier = Modifier.fillMaxWidth(),
+        PasswordField(
+            password, { password = it; error = null }, "Password",
+            supporting = if (session.needsSetup) "At least 8 characters" else null, error = error != null, action = ImeAction.Go, onGo = ::submit,
         )
         ErrorText(error)
         SubmitButton(if (session.needsSetup) "Create account" else "Sign in", busy, enabled = username.isNotBlank() && password.isNotEmpty()) { submit() }
+        if (!session.needsSetup) TextButton(onForgot) { Text("Forgot password?") }
         TextButton(repository::forgetServer) { Text("Use another server") }
+    }
+}
+
+/** There is no mail server: asking tells the administrators of this home, who hand over a one-time code. */
+@Composable
+private fun ForgotPage(username: String, onUsername: (String) -> Unit, onAsked: () -> Unit, onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    fun submit() {
+        if (username.isBlank()) return
+        scope.launch {
+            busy = true
+            error = repository.forgotPassword(username)
+            busy = false
+            if (error == null) onAsked()
+        }
+    }
+
+    EntryColumn(Icons.Rounded.LockReset, "Forgot your password?", "Domus sends no email. An administrator of this home is told instead, and gives you a one-time code.") {
+        UsernameField(username, { onUsername(it); error = null }, action = ImeAction.Go, onGo = ::submit)
+        ErrorText(error)
+        SubmitButton("Ask an administrator", busy, enabled = username.isNotBlank()) { submit() }
+        TextButton(onBack) { Text("Back to sign in") }
+    }
+}
+
+/** The code works once and signs in straight away. */
+@Composable
+private fun ResetCodePage(username: String, onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    var code by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirm by rememberSaveable { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val valid = code.length == 8 && newPasswordValid(password, confirm)
+
+    fun submit() {
+        if (!valid) return
+        scope.launch {
+            busy = true
+            error = repository.resetPassword(username, code, password)
+            busy = false
+        }
+    }
+
+    EntryColumn(Icons.Rounded.Pin, "Enter your reset code", "An administrator has been told. Ask them for the 8-digit code for ${username.trim()}; it works once and for 30 minutes.") {
+        OutlinedTextField(
+            code, { code = it.filter(Char::isDigit).take(8); error = null },
+            label = { Text("Reset code") },
+            leadingIcon = { Icon(Icons.Rounded.Pin, contentDescription = null) },
+            singleLine = true,
+            isError = error != null,
+            textStyle = MaterialTheme.typography.titleLarge.copy(fontFamily = FontFamily.Monospace),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        NewPasswordFields(password, { password = it; error = null }, confirm, { confirm = it }, ::submit)
+        ErrorText(error)
+        SubmitButton("Set password and sign in", busy, enabled = valid) { submit() }
+        TextButton(onBack) { Text("Back") }
+    }
+}
+
+/** Shown instead of the app while the account is still on the password an administrator handed over. */
+@Composable
+fun ChangePasswordScreen(session: Session.SignedIn) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirm by rememberSaveable { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val valid = newPasswordValid(password, confirm)
+
+    fun submit() {
+        if (!valid) return
+        scope.launch {
+            busy = true
+            error = repository.choosePassword(password)
+            busy = false
+        }
+    }
+
+    EntryColumn(Icons.Rounded.LockReset, "Choose your password", "Welcome, ${session.user.username}. The password you signed in with was made for you and has been seen by someone else. Choose your own to continue.") {
+        NewPasswordFields(password, { password = it; error = null }, confirm, { confirm = it }, ::submit)
+        ErrorText(error)
+        SubmitButton("Save and continue", busy, enabled = valid) { submit() }
+        TextButton(repository::logout) { Text("Sign out") }
     }
 }
 

@@ -247,8 +247,32 @@ class DomusRepository(context: Context) {
         }
     }
 
+    /** Null on success. An administrator is told and hands over the code for [resetPassword]. */
+    suspend fun forgotPassword(username: String): String? = entry { it.forgotPassword(username.trim()) }
+
+    suspend fun resetPassword(username: String, code: String, password: String): String? =
+        authenticate { it.resetPassword(username.trim(), code, password) }
+
+    /** Replaces the generated password, which opens the rest of the app. */
+    suspend fun choosePassword(password: String): String? = entry { api ->
+        api.choosePassword(password)
+        (_session.value as? Session.SignedIn)?.let { signedIn(it.server, it.user.copy(mustChangePassword = false)) }
+    }
+
+    private suspend fun entry(request: suspend (DomusApi) -> Unit): String? {
+        val api = api ?: return "No server"
+        return try {
+            request(api)
+            null
+        } catch (e: ApiException) {
+            e.message
+        }
+    }
+
     private fun signedIn(server: String, user: User) {
         _session.value = Session.SignedIn(server, user)
+        // Until the generated password is replaced the server answers nothing else.
+        if (user.mustChangePassword) return
         _loading.value = true
         scope.launch { refresh() }
         if (foreground || keepLive) startLive()

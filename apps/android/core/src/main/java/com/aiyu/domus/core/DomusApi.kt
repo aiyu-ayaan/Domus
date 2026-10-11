@@ -85,6 +85,13 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
         call("POST", "/auth/setup", AuthResponse.serializer(), fields("username" to username, "email" to email, "password" to password))
     suspend fun login(username: String, password: String) =
         call("POST", "/auth/login", AuthResponse.serializer(), fields("username" to username, "password" to password))
+    /** Tells the administrators; the answer is the same whether or not the account exists. */
+    suspend fun forgotPassword(username: String) = call("POST", "/auth/forgot", JsonElement.serializer(), fields("username" to username))
+    /** Spends the one-time [code] an administrator handed over and signs in. */
+    suspend fun resetPassword(username: String, code: String, newPassword: String) =
+        call("POST", "/auth/reset", AuthResponse.serializer(), fields("username" to username, "code" to code, "new_password" to newPassword))
+    /** Replaces the generated password the account is still on; the server asks for no current one then. */
+    suspend fun choosePassword(newPassword: String) = call("POST", "/auth/password", JsonElement.serializer(), fields("new_password" to newPassword))
     suspend fun me() = call("GET", "/auth/me", User.serializer())
     suspend fun updateAvatar(avatar: String) =
         call("PUT", "/auth/me/avatar", User.serializer(), fields("avatar" to avatar))
@@ -142,18 +149,24 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
         call("PUT", "/energy/settings", EnergySettings.serializer(), encode(EnergySettings.serializer(), settings))
 
     suspend fun users() = call("GET", "/users", ListSerializer(User.serializer()))
-    /** [id] null creates (then [username] and [password] are required); a null [password] keeps the current one. */
-    suspend fun saveUser(id: String?, username: String, email: String, password: String?, role: String, allRooms: Boolean, grants: Grants, avatar: String? = null) =
-        write(if (id == null) "POST" else "PUT", "/users${id?.let { "/$it" }.orEmpty()}", buildJsonObject {
+    /**
+     * [id] null creates (then [username] is required). Only a [kid]'s account takes a [password]; without one a
+     * new account gets a generated password, returned once as [User.generatedPassword], and an existing one keeps its own.
+     */
+    suspend fun saveUser(id: String?, username: String, email: String, password: String?, kid: Boolean, role: String, allRooms: Boolean, grants: Grants, avatar: String? = null) =
+        call(if (id == null) "POST" else "PUT", "/users${id?.let { "/$it" }.orEmpty()}", User.serializer(), buildJsonObject {
             if (id == null) put("username", username)
-            put("email", email); put("role", role); put("all_rooms", allRooms)
+            put("email", email); put("role", role); put("all_rooms", allRooms); put("kid", kid)
             password?.let { put("password", it) }
             avatar?.let { put("avatar", it) }
             fun ids(key: String, ids: Collection<String>) = put(key, JsonArray(ids.map(::JsonPrimitive)))
             ids("room_ids", grants.rooms.keys); ids("view_only_room_ids", grants.rooms.filterValues { it == "view" }.keys)
             ids("device_ids", grants.devices.keys); ids("view_only_device_ids", grants.devices.filterValues { it == "view" }.keys)
             ids("edit_room_ids", grants.rooms.filterValues { it == "edit" }.keys); ids("edit_device_ids", grants.devices.filterValues { it == "edit" }.keys)
-        })
+        }.toString())
+    /** [what] `reset_password` generates a new password, `reset_allowed` issues ([on]) or withdraws a one-time reset code; the answer carries it once. */
+    suspend fun issue(id: String, what: String, on: Boolean = true) =
+        call("PUT", "/users/$id", User.serializer(), buildJsonObject { put(what, on) }.toString())
     suspend fun removeUser(id: String) = write("DELETE", "/users/$id")
     /** Whether another account already uses [email]; [userId] is the account being edited. */
     suspend fun emailAvailable(email: String, userId: String?) =

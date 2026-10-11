@@ -10,6 +10,16 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Share
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
+import android.os.PersistableBundle
+import android.text.format.DateFormat
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Visibility
@@ -47,6 +57,7 @@ import com.aiyu.domus.core.EnergySettings
 import com.aiyu.domus.core.Grants
 import com.aiyu.domus.core.Notice
 import com.aiyu.domus.core.Room
+import com.aiyu.domus.core.Session
 import com.aiyu.domus.core.Slab
 import com.aiyu.domus.core.User
 import com.aiyu.domus.ui.components.SectionTitle
@@ -322,7 +333,9 @@ fun UsersPage(open: (String) -> Unit, onBack: () -> Unit) {
             ).joinToString(", ").ifEmpty { "no access" }
             RowCard(
                 title = user.username,
-                subtitle = "${user.role.replaceFirstChar(Char::uppercase)} · $access",
+                subtitle = listOfNotNull(
+                    user.role.replaceFirstChar(Char::uppercase), access, "kid".takeIf { user.kid }, "asked for a password reset".takeIf { user.resetRequested },
+                ).joinToString(" · "),
                 icon = Icons.Rounded.Person,
                 leading = { UserAvatar(avatarSpec = user.avatar, username = user.username, size = 44.dp) },
                 onClick = { open("person:${user.id}") },
@@ -350,6 +363,60 @@ fun PersonEditorPage(id: String, me: User, onBack: () -> Unit) {
     PersonForm(person, me, onBack)
 }
 
+/** A switch with its explanation, on a tonal card. */
+@Composable
+private fun ToggleCard(title: String, text: String, checked: Boolean, enabled: Boolean = true, onChange: (Boolean) -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            HapticSwitch(checked, onChange, enabled = enabled)
+        }
+    }
+}
+
+/** Shows a first password or a reset code once, to copy or share. Domus keeps no readable copy. */
+@Composable
+private fun Handover(user: User, onDone: () -> Unit) {
+    val context = LocalContext.current
+    val server = (LocalRepository.current.session.collectAsStateWithLifecycle().value as? Session.SignedIn)?.server.orEmpty()
+    val text = remember(user, server) { user.handoverText(server, DateFormat.is24HourFormat(context)) }
+    AlertDialog(
+        onDismissRequest = onDone,
+        title = { Text(if (user.resetCode != null) "Reset code for ${user.username}" else "Sign-in details for ${user.username}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Shown only once. Send it to them now.")
+                Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                    SelectionContainer { Text(text, Modifier.padding(12.dp), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodyMedium) }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilledTonalButton({
+                        val clip = ClipData.newPlainText("Domus", text)
+                        // Keeps the secret out of the keyboard's clipboard preview on Android 13+.
+                        clip.description.extras = PersistableBundle().apply { putBoolean("android.content.extra.IS_SENSITIVE", true) }
+                        context.getSystemService(ClipboardManager::class.java).setPrimaryClip(clip)
+                    }) {
+                        Icon(Icons.Rounded.ContentCopy, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Copy")
+                    }
+                    FilledTonalButton({
+                        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), null))
+                    }) {
+                        Icon(Icons.Rounded.Share, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Share")
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onDone) { Text("Done") } },
+    )
+}
+
 @Composable
 private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
     val repository = LocalRepository.current
@@ -359,6 +426,13 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
     var username by remember { mutableStateOf(user?.username.orEmpty()) }
     var email by remember { mutableStateOf(user?.email.orEmpty()) }
     var password by remember { mutableStateOf("") }
+    var kid by remember { mutableStateOf(user?.kid ?: false) }
+    // The account as last answered by the server: a reset code changes it without Save.
+    var current by remember { mutableStateOf(user) }
+    var issuing by remember { mutableStateOf(false) }
+    // A first password or reset code to pass on, and whether the page closes once it has been.
+    var handover by remember { mutableStateOf<User?>(null) }
+    var closeAfter by remember { mutableStateOf(false) }
     var role by remember { mutableStateOf(user?.role ?: "member") }
     var avatar by remember { mutableStateOf(user?.avatar ?: "dicebear:bottts:${user?.username ?: "member"}") }
     var allRooms by remember { mutableStateOf(user?.allRooms ?: true) }
@@ -375,7 +449,20 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
         emailFree = repository.request { it.emailAvailable(value, user?.id) }?.available
     }
     val name = user?.username ?: username.trim()
-    val valid = emailFree != false && (if (user == null) username.trim().length >= 3 && password.length >= 8 else password.isEmpty() || password.length >= 8)
+    // Only a kid's password is typed here; an existing kid keeps theirs when the field is left empty.
+    val passwordOk = !kid || password.length >= 8 || (user?.kid == true && password.isEmpty())
+    val valid = emailFree != false && (user != null || username.trim().length >= 3) && passwordOk
+    fun issue(what: String, on: Boolean = true) {
+        val id = user?.id ?: return
+        scope.launch {
+            issuing = true
+            repository.request { it.issue(id, what, on) }?.let {
+                current = it
+                if (it.resetCode != null || it.generatedPassword != null) handover = it
+            }
+            issuing = false
+        }
+    }
 
     SubPage(user?.username ?: "New person", onBack, actions = {
         // You can't delete the account you are signed in with.
@@ -403,7 +490,27 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
             { scope.launch { repository.request { it.suggestEmail(name, user?.id) }?.let { email = it.email } } },
             Modifier.align(Alignment.End), enabled = name.length >= 3,
         ) { Text("Generate @domus.home email") }
-        Field(password, { password = it }, if (user == null) "Password" else "New password", secret = true, supporting = if (user == null) "At least 8 characters" else "Leave empty to keep the current one")
+        // Your own password is changed by you, not from here.
+        if (user?.id != me.id) {
+            SectionTitle("Password")
+            ToggleCard("Kid's account", if (kid) "You set the password and it stays as it is." else "Off: Domus makes a password, and they choose their own at first sign-in.", kid) { kid = it }
+            val account = current
+            when {
+                kid -> Field(password, { password = it }, if (user?.kid == true) "New password" else "Password", secret = true, supporting = if (user?.kid == true) "Leave empty to keep the current one" else "At least 8 characters")
+                account == null -> Text("You get the password to copy or share after saving.", style = MaterialTheme.typography.bodyMedium, color = muted)
+                else -> {
+                    if (account.resetRequested) Text("${account.username} forgot their password and asked for a reset.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
+                    val until = account.resetUntil(DateFormat.is24HourFormat(LocalContext.current))
+                    ToggleCard(
+                        "Reset code",
+                        if (account.resetAllowed && until != null) "A code is active until $until. Turn off to withdraw it."
+                        else "A one-time code they enter under \"Forgot password?\" to choose a new password. Good for 30 minutes.",
+                        account.resetAllowed, enabled = !issuing,
+                    ) { issue("reset_allowed", it) }
+                    FilledTonalButton({ issue("reset_password") }, enabled = !issuing) { Text("Generate a new password") }
+                }
+            }
+        }
 
         SectionTitle("Role")
         Choice(Roles, role, { role = it })
@@ -414,15 +521,7 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
 
         if (role != "admin") {
             SectionTitle("Access")
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                        Text("Custom access", style = MaterialTheme.typography.titleMedium)
-                        Text(if (allRooms) "Off: they reach the whole home." else "Set a level for each room, or for single devices in it.", style = MaterialTheme.typography.bodyMedium, color = muted)
-                    }
-                    HapticSwitch(!allRooms, { allRooms = !it })
-                }
-            }
+            ToggleCard("Custom access", if (allRooms) "Off: they reach the whole home." else "Set a level for each room, or for single devices in it.", !allRooms) { allRooms = !it }
             if (!allRooms) {
                 if (rooms.isEmpty() && devices.isEmpty()) Text("Create rooms first.", color = muted)
                 rooms.forEach { room ->
@@ -433,10 +532,17 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
             }
         }
         Button(
-            { scope.launch { repository.change { it.saveUser(user?.id, username.trim(), email.trim(), password.ifEmpty { null }, role, allRooms, grants, avatar = avatar) }?.let { onBack() } } },
+            {
+                scope.launch {
+                    repository.change { it.saveUser(user?.id, username.trim(), email.trim(), password.takeIf { kid && it.isNotEmpty() }, kid, role, allRooms, grants, avatar = avatar) }?.let {
+                        if (it.generatedPassword != null) { handover = it; closeAfter = true } else onBack()
+                    }
+                }
+            },
             Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = valid,
         ) { Text("Save") }
     }
+    handover?.let { Handover(it) { handover = null; if (closeAfter) onBack() } }
     if (deleting && user != null) {
         Confirm("Remove ${user.username}?", "They lose access immediately.", "Remove", { scope.launch { repository.change { it.removeUser(user.id) }?.let { onBack() } } }, { deleting = false })
     }

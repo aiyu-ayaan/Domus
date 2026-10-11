@@ -109,7 +109,8 @@ private fun DomusRoot() {
     val motion = MaterialTheme.motionScheme
     AnimatedContent(
         targetState = session,
-        contentKey = { it::class },
+        // The forced password change is a step of its own between signing in and the home.
+        contentKey = { it::class to (it as? Session.SignedIn)?.user?.mustChangePassword },
         transitionSpec = {
             (fadeIn(motion.defaultEffectsSpec()) + scaleIn(motion.defaultSpatialSpec(), initialScale = 0.94f))
                 .togetherWith(fadeOut(motion.fastEffectsSpec()))
@@ -124,7 +125,7 @@ private fun DomusRoot() {
             }
             is Session.Unreachable -> UnreachableScreen(s)
             is Session.SignedOut -> AuthScreen(s)
-            is Session.SignedIn -> MainScreen(s)
+            is Session.SignedIn -> if (s.user.mustChangePassword) ChangePasswordScreen(s) else MainScreen(s)
         }
     }
 }
