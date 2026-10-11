@@ -174,6 +174,8 @@ export const api = {
     }),
   homeLocation: () => get<HomeLocation>('/server/location'),
   saveHomeLocation: (b: { latitude: number; longitude: number }) => put<HomeLocation>('/server/location', b),
+  /** Places named like `q`, looked up by the server. */
+  searchPlaces: (q: string) => get<{ name: string; latitude: number; longitude: number }[]>(`/server/location/search?q=${encodeURIComponent(q)}`),
   /** Saves the database, with the key that opens its stored accounts, as one file. */
   downloadBackup: async () => {
     const res = await fetch(`${BASE}/api/v1/server/backup`, { headers: { Authorization: `Bearer ${session.token}` } }).catch(() => null)

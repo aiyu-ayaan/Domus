@@ -9,7 +9,7 @@ use crate::api::AppState;
 use crate::infrastructure::database::{get_setting, set_setting};
 use axum::{
     body::Body,
-    extract::State,
+    extract::{Query, State},
     http::header,
     response::{IntoResponse, Response},
     routing::get,
@@ -61,6 +61,7 @@ pub fn server_routes() -> Router<AppState> {
     Router::new()
         .route("/links", get(get_links).put(put_links))
         .route("/location", get(get_location).put(put_location))
+        .route("/location/search", get(search_places))
         .route("/backup", get(backup))
 }
 
@@ -74,6 +75,56 @@ async fn get_location(State(s): State<AppState>, _user: AuthUser) -> Json<Value>
         "sunrise": sun.map(|s| s.0),
         "sunset": sun.map(|s| s.1),
     }))
+}
+
+#[derive(Deserialize)]
+struct PlaceQuery {
+    q: String,
+}
+
+/// A place the search found, coarse enough for the sun: two decimals is about a kilometre.
+#[derive(Debug, PartialEq, Serialize)]
+struct Place {
+    /// "Pune, Maharashtra, India"
+    name: String,
+    latitude: f64,
+    longitude: f64,
+}
+
+/// Places named like `q`, for people who would rather type a town than share a location or look up
+/// coordinates. Asked of Open-Meteo's free geocoder by the server, so the apps talk to nothing else;
+/// only the typed name leaves the home, and nothing at all unless an administrator searches.
+async fn search_places(State(_): State<AppState>, user: AuthUser, Query(q): Query<PlaceQuery>) -> ApiResult<Json<Vec<Place>>> {
+    user.require_admin()?;
+    let name = q.q.trim();
+    if name.len() < 2 {
+        return Ok(Json(vec![]));
+    }
+    let unreachable = |_| ApiError::Upstream("Place search is not reachable. Enter the latitude and longitude instead.".into());
+    let answer: Value = reqwest::Client::new()
+        .get("https://geocoding-api.open-meteo.com/v1/search")
+        .query(&[("name", name), ("count", "6"), ("language", "en"), ("format", "json")])
+        .timeout(std::time::Duration::from_secs(8))
+        .send()
+        .await
+        .map_err(unreachable)?
+        .json()
+        .await
+        .map_err(unreachable)?;
+    Ok(Json(places(&answer)))
+}
+
+fn places(answer: &Value) -> Vec<Place> {
+    let round = |v: f64| (v * 100.0).round() / 100.0;
+    answer["results"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|r| {
+            let parts = ["name", "admin1", "country"].iter().filter_map(|k| r[*k].as_str()).collect::<Vec<_>>();
+            Some(Place { name: parts.join(", "), latitude: round(r["latitude"].as_f64()?), longitude: round(r["longitude"].as_f64()?) })
+        })
+        .collect()
 }
 
 async fn put_location(State(s): State<AppState>, user: AuthUser, Json(req): Json<HomeLocation>) -> ApiResult<Json<Value>> {
@@ -149,7 +200,22 @@ fn normalize(input: &str) -> Result<String, ApiError> {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize;
+    use super::{normalize, places, Place};
+    use serde_json::json;
+
+    #[test]
+    fn search_results_become_named_coarse_places() {
+        let answer = json!({"results": [
+            {"name": "Pune", "admin1": "Maharashtra", "country": "India", "latitude": 18.51957, "longitude": 73.85535},
+            {"name": "Nowhere", "latitude": -9.36944, "longitude": 124.31722},
+            {"name": "Broken"}
+        ]});
+        assert_eq!(places(&answer), vec![
+            Place { name: "Pune, Maharashtra, India".into(), latitude: 18.52, longitude: 73.86 },
+            Place { name: "Nowhere".into(), latitude: -9.37, longitude: 124.32 },
+        ]);
+        assert!(places(&json!({"generationtime_ms": 0.4})).is_empty());
+    }
 
     #[test]
     fn addresses_become_origins() {

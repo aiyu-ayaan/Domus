@@ -311,6 +311,11 @@ function LocationCard() {
     },
     onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
   })
+  const [query, setQuery] = useState('')
+  const search = useMutation({
+    mutationFn: () => api.searchPlaces(query),
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not search', message: errorMessage(e) }),
+  })
   const locate = () =>
     navigator.geolocation.getCurrentPosition(
       // Two decimals is about a kilometre: enough for the sun, and not the address.
@@ -320,7 +325,8 @@ function LocationCard() {
   const filled = value.latitude.trim() !== '' && value.longitude.trim() !== '' && !Number.isNaN(Number(value.latitude)) && !Number.isNaN(Number(value.longitude))
   return (
     <Card>
-      <CardHeader title="Home location" action={admin && <Button size="sm" onClick={locate}>Use this device</Button>} />
+      {/* Electron has no location service of its own, so the desktop app offers the search only. */}
+      <CardHeader title="Home location" action={admin && !desktop && <Button size="sm" onClick={locate}>Use this device</Button>} />
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -333,6 +339,51 @@ function LocationCard() {
             ? `Automations can run at sunrise and sunset. Today the sun rises at ${formatTime(data.sunrise)} and sets at ${formatTime(data.sunset)}.`
             : 'Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.'}
         </p>
+        {admin && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-end gap-3">
+              <Field
+                label="Find a place"
+                placeholder="Town or city"
+                className="flex-1"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return
+                  e.preventDefault()
+                  if (query.trim().length >= 2) search.mutate()
+                }}
+              />
+              <Button loading={search.isPending} disabled={query.trim().length < 2} onClick={() => search.mutate()}>
+                Search
+              </Button>
+            </div>
+            {search.data &&
+              (search.data.length ? (
+                <ul className="flex flex-col rounded-md border border-border">
+                  {search.data.map((p) => (
+                    <li key={`${p.name}${p.latitude}${p.longitude}`} className="border-b border-border last:border-b-0">
+                      <button
+                        type="button"
+                        className="flex min-h-9 w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-label transition-colors hover:bg-raised"
+                        onClick={() => {
+                          setForm({ latitude: String(p.latitude), longitude: String(p.longitude) })
+                          search.reset()
+                        }}
+                      >
+                        <span className="text-fg">{p.name}</span>
+                        <span className="tabular-nums text-subtle">
+                          {p.latitude}, {p.longitude}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-label text-muted">No place by that name. Try the nearest town.</p>
+              ))}
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Latitude" inputMode="decimal" placeholder="18.52" disabled={!admin} value={value.latitude} onChange={(e) => setForm({ ...value, latitude: e.target.value })} />
           <Field label="Longitude" inputMode="decimal" placeholder="73.86" disabled={!admin} value={value.longitude} onChange={(e) => setForm({ ...value, longitude: e.target.value })} />

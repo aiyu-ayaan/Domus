@@ -12,6 +12,20 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Share
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.CancellationSignal
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.Search
+import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
+import com.aiyu.domus.core.Place
+import java.util.Locale
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -688,6 +702,33 @@ fun LocationPage(onBack: () -> Unit) {
     fun clock(instant: String?) = instant?.let { runCatching { OffsetDateTime.parse(it).atZoneSameInstant(ZoneId.systemDefault()).toLocalTime().toString().take(5) }.getOrNull() }?.let { formatClockTime(it, is24Hour) }
     val lat = latitude.toDoubleOrNull()?.takeIf { it in -90.0..90.0 }
     val lon = longitude.toDoubleOrNull()?.takeIf { it in -180.0..180.0 }
+    val context = LocalContext.current
+    var query by rememberSaveable { mutableStateOf("") }
+    var places by remember { mutableStateOf<List<Place>?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    // Two decimals is about a kilometre: enough for the sun, and not the address.
+    fun fill(newLatitude: Double, newLongitude: Double) {
+        latitude = "%.2f".format(Locale.US, newLatitude); longitude = "%.2f".format(Locale.US, newLongitude); places = null; notice = null
+    }
+
+    @SuppressLint("MissingPermission") // only reached once the permission is granted
+    fun locate() {
+        val manager = context.getSystemService(LocationManager::class.java)
+        val provider = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER).firstOrNull { runCatching { manager.isProviderEnabled(it) }.getOrDefault(false) }
+        if (provider == null) {
+            notice = "Location is turned off on this phone. Search for the place instead."
+            return
+        }
+        busy = true
+        LocationManagerCompat.getCurrentLocation(manager, provider, null as CancellationSignal?, ContextCompat.getMainExecutor(context)) { found ->
+            busy = false
+            if (found == null) notice = "This phone could not find where it is. Search for the place instead." else fill(found.latitude, found.longitude)
+        }
+    }
+    val askLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) locate() else notice = "Without location access, search for the place or type the coordinates."
+    }
 
     SubPage("Home location", onBack) {
         Text(
@@ -695,6 +736,29 @@ fun LocationPage(onBack: () -> Unit) {
                 ?: "Automations can run at sunrise and sunset once Domus knows roughly where the home is. It stays on your server.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        FilledTonalButton(
+            {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) locate()
+                else askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            },
+            Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = !busy,
+        ) {
+            Icon(Icons.Rounded.MyLocation, contentDescription = null)
+            Text("Use this phone's location", Modifier.padding(start = 8.dp))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Field(query, { query = it }, "Find a place", Modifier.weight(1f), supporting = "Town or city")
+            FilledTonalIconButton(
+                { scope.launch { busy = true; notice = null; places = repository.request { it.searchPlaces(query.trim()) }; busy = false } },
+                enabled = !busy && query.trim().length >= 2,
+            ) { Icon(Icons.Rounded.Search, "Search for the place") }
+        }
+        if (busy) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
+        notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
+        places?.let { found ->
+            if (found.isEmpty()) Text("No place by that name. Try the nearest town.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            found.forEach { RowCard(it.name, "${it.latitude}, ${it.longitude}", Icons.Rounded.Place, onClick = { fill(it.latitude, it.longitude) }) }
+        }
         Field(latitude, { latitude = it }, "Latitude", keyboard = KeyboardType.Text, supporting = "For example 18.52", error = latitude.isNotBlank() && lat == null)
         Field(longitude, { longitude = it }, "Longitude", keyboard = KeyboardType.Text, supporting = "For example 73.86", error = longitude.isNotBlank() && lon == null)
         Button(

@@ -110,6 +110,10 @@ data class ServerLinks(
 @Serializable
 data class HomeLocation(val latitude: Double? = null, val longitude: Double? = null, val sunrise: String? = null, val sunset: String? = null)
 
+/** A place the server's search found. */
+@Serializable
+data class Place(val name: String = "", val latitude: Double = 0.0, val longitude: Double = 0.0)
+
 @Serializable
 data class SetupStatus(@SerialName("needs_admin_setup") val needsAdminSetup: Boolean)
 

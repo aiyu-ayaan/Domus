@@ -267,6 +267,16 @@ internet. The location is the `location` setting (`GET/PUT /server/location`, se
 on web and Android); the answer carries today's sunrise and sunset so the editors can show them. Without a
 location, or on a day the sun does not rise or set there, a sun trigger does not fire.
 
+Three ways to set it, all ending in the same two numbers rounded to two decimals (about a kilometre):
+
+- **This device**: the browser's geolocation on the web, `ACCESS_COARSE_LOCATION` on Android (asked when
+  "Use this phone's location" is tapped, read once through `LocationManagerCompat`, no Play Services). The
+  desktop app has no location service, so it does not offer this.
+- **Find a place**: `GET /server/location/search?q=` (administrators). The server asks Open-Meteo's free
+  geocoder, which needs no key, and answers `name, latitude, longitude`; the apps talk to nothing but the
+  server. Only the typed name leaves the home. Without internet it answers 502 and the fields below still work.
+- **Typing** latitude and longitude.
+
 ```mermaid
 flowchart LR
     S["SchedulerWorker<br/>every minute"] --> T["AutomationEngine::tick(now)"]

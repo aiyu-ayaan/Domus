@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Restart alerts after a reboot when the user turned them on. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Home location for sunrise and sunset: read once when an administrator taps "Use this phone's location". Approximate is enough. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Install an update the user asked for. Android asks to allow it the first time, not before. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
