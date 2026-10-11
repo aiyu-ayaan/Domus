@@ -232,10 +232,10 @@ export const api = {
   removeScene: (id: string) => del<Ok>(`/scenes/${id}`),
 
   energyOverview: () => get<EnergyOverview>('/energy/overview'),
-  energyHistory: (range: Range, deviceId?: string) =>
+  energyHistory: (range: Exclude<Range, 'live'>, deviceId?: string) =>
     get<EnergyPoint[]>(`/energy/history?range=${range}&tz=${zone()}${deviceId ? `&device_id=${deviceId}` : ''}`),
   /** Air is sampled every few minutes, so it has no per-minute range. */
-  airHistory: (range: Exclude<Range, 'hour'>) => get<AirPoint[]>(`/air/history?range=${range}&tz=${zone()}`),
+  airHistory: (range: Exclude<Range, 'live' | 'hour'>) => get<AirPoint[]>(`/air/history?range=${range}&tz=${zone()}`),
   energySettings: () => get<ElectricitySettings>('/energy/settings'),
   saveEnergySettings: (b: ElectricitySettings) => put<ElectricitySettings>('/energy/settings', b),
 

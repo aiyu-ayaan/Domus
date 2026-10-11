@@ -11,6 +11,8 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
   const max = Math.max(...points.map((p) => p.kwh), 0.0001)
   const total = points.reduce((s, p) => s + p.kwh, 0)
   const label = (t: string) => formatBucket(t, range)
+  // Live samples carry no energy yet, only the power being drawn.
+  if (range === 'live') return <TrendChart points={points.map((p) => ({ t: p.t, value: p.watts }))} range={range} unit="W" empty="Waiting for the first reading." height={height} />
   if (!points.length || total === 0) {
     return (
       <div className="flex items-center justify-center rounded-md border border-dashed border-border px-4 text-center text-label text-subtle" style={{ height }}>

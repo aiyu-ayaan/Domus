@@ -158,9 +158,11 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   WHO scale, purifier / filter / climate facts, a trend line (PM2.5, temperature, humidity) from
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text. The range picker (`RangePicker` in `Analytics.kt`) is a connected group of `ToggleButton`s:
-  every range shows its icon and the chosen one widens to spell its name. Electricity offers Hour (the last
-  60 minutes, a bucket a minute), Day, Week and Month; air has no Hour because it is sampled every few
-  minutes. History calls send the phone's zone as `tz` and `formatBucket` prints on the phone's clock, so a
+  every range shows its icon and the chosen one widens to spell its name. Electricity offers Live, 1 min (the last
+  60 minutes, a bucket a minute), Day, Week and Month; air has no 1 min because it is sampled every few
+  minutes. Live is not history: `rememberLive` samples the device state the app already streams every 5
+  seconds while the page is open and keeps 5 minutes (power for electricity; PM2.5, temperature and humidity
+  for air). History calls send the phone's zone as `tz` and `formatBucket` prints on the phone's clock, so a
   server in UTC never shifts the labels; an hourly bucket reads as its span ("12 am – 1 am").
 - **People and access** — a person opens as a full page (`person:<id>` over People, so the predictive back
   gesture returns to the list; `PersonEditorPage` in `Manage.kt`). With "Custom access" on, each room is a

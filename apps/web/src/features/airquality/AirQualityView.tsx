@@ -1,18 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarBlank, CalendarDot, CalendarDots, Wind, ShieldCheck } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarDot, CalendarDots, Pulse, Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
 import { TrendChart } from '@/components/devices/TrendChart'
 import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
+import { useLive } from '@/lib/liveSamples'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
 import { airQuality, formatBucket, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
-type Range = 'day' | 'week' | 'month'
+type Range = 'live' | 'day' | 'week' | 'month'
 const RANGES = [
+  { value: 'live' as const, label: 'Live', icon: Pulse },
   { value: 'day' as const, label: '24 hours', icon: CalendarDot },
   { value: 'week' as const, label: '7 days', icon: CalendarDots },
   { value: 'month' as const, label: '30 days', icon: CalendarBlank },
@@ -28,7 +30,22 @@ const READINGS: Record<Reading, { label: string; unit: string; digits: number }>
 function Trend() {
   const [range, setRange] = useState<Range>('day')
   const [reading, setReading] = useState<Reading>('pm25')
-  const { data = [], isLoading } = useQuery({ queryKey: keys.airHistory(range), queryFn: () => api.airHistory(range), refetchInterval: 60_000 })
+  const history = useQuery({ queryKey: keys.airHistory(range), queryFn: () => api.airHistory(range as Exclude<Range, 'live'>), enabled: range !== 'live', refetchInterval: 60_000 })
+  const { data: devices = [] } = useDevices()
+  // Live follows the page's headline: the worst PM2.5 online, the sensors' average climate.
+  const mean = (values: (number | undefined)[]) => {
+    const v = values.filter((x): x is number => x != null)
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null
+  }
+  const online = devices.filter((d) => d.is_online)
+  const livePm = online.flatMap((d) => (d.state.air_quality_pm25 == null ? [] : [d.state.air_quality_pm25]))
+  const live = useLive(() => ({
+    pm25: livePm.length ? Math.max(...livePm) : null,
+    temperature: mean(online.map((d) => d.state.temperature)),
+    humidity: mean(online.map((d) => d.state.humidity)),
+  }))
+  const data = range === 'live' ? live : history.data ?? []
+  const isLoading = range !== 'live' && history.isLoading
   // Offer only the readings the home's devices actually report.
   const available = (Object.keys(READINGS) as Reading[]).filter((r) => r === 'pm25' || data.some((p) => p[r] != null))
   const shown = available.includes(reading) ? reading : 'pm25'
@@ -39,7 +56,7 @@ function Trend() {
   const peak = pm.reduce<(typeof pm)[number] | null>((best, p) => (p.pm25! > (best?.pm25 ?? -1) ? p : best), null)
   const clean = pm.length ? (pm.filter((p) => p.pm25! <= 35).length / pm.length) * 100 : null
   const when = (t: string) => formatBucket(t, range)
-  const period = range === 'day' ? '24 h' : range === 'week' ? '7 d' : '30 d'
+  const period = range === 'live' ? '5 min' : range === 'day' ? '24 h' : range === 'week' ? '7 d' : '30 d'
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">

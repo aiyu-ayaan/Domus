@@ -51,11 +51,14 @@ export const formatClockTime = (hhmm: string) => {
   return formatTime(new Date(2000, 0, 1, Number(m[1]), Number(m[2])))
 }
 
-/** A history range: "hour" is the last 60 minutes with a bucket a minute, the others have hourly or daily buckets. */
-export type Range = 'hour' | 'day' | 'week' | 'month'
+/**
+ * A chart range: "live" is what the devices report now, sampled by the page (`useLive`); "hour" is the last
+ * 60 minutes with a bucket a minute; the others have hourly or daily buckets.
+ */
+export type Range = 'live' | 'hour' | 'day' | 'week' | 'month'
 
 /** What one bucket of a range covers. */
-export const bucketOf = (range: Range) => (range === 'hour' ? 'minute' : range === 'day' ? 'hour' : 'day')
+export const bucketOf = (range: Range) => (range === 'live' ? '5 seconds' : range === 'hour' ? 'minute' : range === 'day' ? 'hour' : 'day')
 
 /**
  * Formats a chart bucket timestamp on the viewer's clock: the minute for the 60 min range, the hour's span
@@ -63,6 +66,7 @@ export const bucketOf = (range: Range) => (range === 'hour' ? 'minute' : range =
  */
 export const formatBucket = (iso: string, range: Range) => {
   const d = new Date(iso)
+  if (range === 'live') return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit', ...hour12Option() })
   if (range === 'hour') return formatTime(d)
   return range === 'day'
     ? `${formatTime(d)} – ${formatTime(new Date(d.getTime() + 3_600_000))}`

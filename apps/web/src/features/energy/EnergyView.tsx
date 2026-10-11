@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
-import { CalendarBlank, CalendarDot, CalendarDots, Clock } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarDot, CalendarDots, Clock, Pulse } from '@phosphor-icons/react'
 import { Segmented } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
+import { useLive } from '@/lib/liveSamples'
 import { useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
 import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, type Range } from '@/lib/format'
@@ -14,7 +15,8 @@ import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
 const RANGES = [
-  { value: 'hour' as const, label: '60 min', icon: Clock },
+  { value: 'live' as const, label: 'Live', icon: Pulse },
+  { value: 'hour' as const, label: '1 min', icon: Clock },
   { value: 'day' as const, label: '24 hours', icon: CalendarDot },
   { value: 'week' as const, label: '7 days', icon: CalendarDots },
   { value: 'month' as const, label: '30 days', icon: CalendarBlank },
@@ -25,7 +27,12 @@ export function EnergyView() {
   const { data: o, isLoading } = useEnergy()
   const { data: devices } = useDevices()
   const [range, setRange] = useState<Range>('day')
-  const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range), refetchInterval: 60_000 })
+  const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range as Exclude<Range, 'live'>), enabled: range !== 'live', refetchInterval: 60_000 })
+  // Watts come from the live device list; kWh and cost from the periodic energy query.
+  const power = new Map((devices ?? []).map((d) => [d.id, d.is_online ? d.state.current_power_watts ?? 0 : 0]))
+  const watts = (id: string, fallback: number) => power.get(id) ?? fallback
+  const totalWatts = o ? o.devices.reduce((sum, d) => sum + watts(d.device_id, d.current_watts), 0) : null
+  const live = useLive(() => ({ kwh: 0, cost: 0, watts: totalWatts }))
   // The insights always compare against today's hours and the last 7 days, whatever range the chart shows.
   const day = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
   const week = useQuery({ queryKey: keys.energyHistory('week'), queryFn: () => api.energyHistory('week'), refetchInterval: 60_000 })
@@ -35,10 +42,6 @@ export function EnergyView() {
   const end = new Date(o.cycle_start)
   end.setDate(end.getDate() + o.cycle_days - 1)
   const fmt = (d: Date) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-  // Watts come from the live device list; kWh and cost from the periodic energy query.
-  const live = new Map((devices ?? []).map((d) => [d.id, d.is_online ? d.state.current_power_watts ?? 0 : 0]))
-  const watts = (id: string, fallback: number) => live.get(id) ?? fallback
-  const totalWatts = o.devices.reduce((sum, d) => sum + watts(d.device_id, d.current_watts), 0)
   const maxKwh = Math.max(...o.devices.map((d) => d.kwh), 0.0001)
 
   return (
@@ -62,7 +65,7 @@ export function EnergyView() {
             <Segmented<Range> size="sm" label="Range" value={range} onChange={setRange} options={RANGES} />
           }
         />
-        <div className="p-4">{history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={history.data ?? []} range={range} currency={currency} height={220} />}</div>
+        <div className="p-4">{range !== 'live' && history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={range === 'live' ? live : history.data ?? []} range={range} currency={currency} height={220} />}</div>
       </Card>
 
       <Insights o={o} day={day.data ?? []} week={week.data ?? []} />

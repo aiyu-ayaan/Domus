@@ -57,6 +57,7 @@ class CoreTest {
         assertEquals(AirLevel.MODERATE, airLevel(40f))
         val india = java.time.ZoneId.of("Asia/Kolkata")
         assertEquals("11:05 PM", formatBucket("2026-10-11T23:05:00+05:30", "hour", is24Hour = false, india))
+        assertEquals("11:05:10 PM", formatBucket("2026-10-11T23:05:10+05:30", "live", is24Hour = false, india))
         assertEquals("23:05", formatBucket("2026-10-11T23:05:00+05:30", "hour", is24Hour = true, india))
         assertEquals("11 PM – 12 AM", formatBucket("2026-10-11T23:00:00+05:30", "day", is24Hour = false, india))
         assertEquals("23:00 – 00:00", formatBucket("2026-10-11T23:00:00+05:30", "day", is24Hour = true, india))

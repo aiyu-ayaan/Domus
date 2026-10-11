@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.MonitorHeart
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Sensors
@@ -57,21 +58,41 @@ import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.enterStaggered
+import java.time.OffsetDateTime
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 /** Does the home measure power / air? The Analytics tab and its two sections exist only for what it does. */
 fun List<Device>.measuresPower() = any { it.state.watts != null || it.state.todayKwh != null }
 fun List<Device>.measuresAir() = any { it.type == "air_purifier" || it.state.pm25 != null }
 
+// "live" is what the devices report right now, sampled by the app while the page is open.
 // "hour" is the last 60 minutes, one bucket a minute. Air is sampled too coarsely for it.
 private val Ranges = listOf(
-    Triple("hour", "Hour", Icons.Rounded.Schedule),
+    Triple("live", "Live", Icons.Rounded.MonitorHeart),
+    Triple("hour", "1 min", Icons.Rounded.Schedule),
     Triple("day", "Day", Icons.Rounded.Today),
     Triple("week", "Week", Icons.Rounded.DateRange),
     Triple("month", "Month", Icons.Rounded.CalendarMonth),
 )
 /** What one bucket of [range] covers. */
-private fun bucketOf(range: String) = when (range) { "hour" -> "minute"; "day" -> "hour"; else -> "day" }
+private fun bucketOf(range: String) = when (range) { "live" -> "5 seconds"; "hour" -> "minute"; "day" -> "hour"; else -> "day" }
+
+/** The last five minutes of what [sample] reads (it is given the time as ISO-8601), taken every five seconds while on screen. */
+// shortcut: held by the page, so the line starts empty on each visit; keep the samples in the repository if it should outlive the page.
+@Composable
+private fun <T> rememberLive(sample: (String) -> T): List<T> {
+    val current by rememberUpdatedState(sample)
+    val samples = remember { mutableStateListOf<T>() }
+    LaunchedEffect(Unit) {
+        while (true) {
+            samples += current(OffsetDateTime.now().toString())
+            if (samples.size > 60) samples.removeAt(0)
+            delay(5_000)
+        }
+    }
+    return samples
+}
 
 /** Tracks the device's 12/24-hour clock setting, refreshing when the app resumes from system settings. */
 @Composable
@@ -225,19 +246,23 @@ private fun ColumnScope.ElectricitySection() {
         StatCard("This cycle", formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = "Energy used and estimated bill so far in the current billing cycle.")
     }
 
+    val live = rememberLive { EnergyPoint(it, watts = wattsToDisplay) }
     SectionTitle("History")
     RangePicker(range, Ranges) { range = it }
     ChartCard {
-        val points = when (range) { "hour" -> hour; "day" -> day; "week" -> week; else -> month }
+        val isLive = range == "live"
+        val points = when (range) { "live" -> live; "hour" -> hour; "day" -> day; "week" -> week; else -> month }
         if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        else if (points.sumOf { it.kwh } <= 0) Text("Nothing recorded in this period yet.", color = c.onSurfaceVariant)
+        else if (!isLive && points.sumOf { it.kwh } <= 0) Text("Nothing recorded in this period yet.", color = c.onSurfaceVariant)
         else {
             // Starts on the latest bucket; a tap or drag picks another.
             var picked by remember(range) { mutableStateOf<Int?>(null) }
-            var watts by remember { mutableStateOf(false) }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!watts, { watts = false }, { Text("Energy") })
-                FilterChip(watts, { watts = true }, { Text("Power") })
+            var metric by remember { mutableStateOf(false) }
+            // Live has no energy yet, only the power being drawn.
+            val watts = metric || isLive
+            if (!isLive) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(!metric, { metric = false }, { Text("Energy") })
+                FilterChip(metric, { metric = true }, { Text("Power") })
             }
             // Power starts on the latest measured bucket.
             val selected = (picked ?: if (watts) points.indexOfLast { it.watts != null } else points.lastIndex).coerceIn(0, points.lastIndex)
@@ -250,7 +275,7 @@ private fun ColumnScope.ElectricitySection() {
             if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, "Average power per $per", Modifier.fillMaxWidth().height(160.dp))
             else BarChart(points.map { it.kwh }, selected, { picked = it }, "Energy used per $per, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
-            Text("Total ${formatKwh(points.sumOf { it.kwh })} · ${formatMoney(points.sumOf { it.cost }, currency)}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            Text(if (isLive) "The last 5 minutes, a reading every 5 seconds while this page is open." else "Total ${formatKwh(points.sumOf { it.kwh })} · ${formatMoney(points.sumOf { it.cost }, currency)}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
 
@@ -351,7 +376,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     var range by rememberSaveable { mutableStateOf("day") }
     var reading by rememberSaveable { mutableStateOf("pm25") }
     var history by remember { mutableStateOf<List<AirPoint>?>(null) }
-    LaunchedEffect(range, pm?.roundToInt()) { history = repository.request { it.airHistory(range) } ?: history ?: emptyList() }
+    LaunchedEffect(range, pm?.roundToInt()) { if (range != "live") history = repository.request { it.airHistory(range) } ?: history ?: emptyList() }
 
     val level = pm?.let(::airLevel)
     val (tone, onTone) = when (level) {
@@ -396,8 +421,9 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) }
 
     SectionTitle("Trend")
-    RangePicker(range, Ranges.drop(1)) { range = it }
-    val points = history
+    RangePicker(range, Ranges.filter { it.first != "hour" }) { range = it }
+    val live = rememberLive { AirPoint(it, pm?.toDouble(), temperature, humidity) }
+    val points = if (range == "live") live else history
     // Offer only the readings the home's devices report.
     val available = Readings.filter { (key, _) -> key == "pm25" || points.orEmpty().any { it.reading(key) != null } }
     val shown = if (available.any { it.first == reading }) reading else "pm25"
@@ -430,7 +456,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
         val average = measuredPm.map { it.pm25!! }.average()
         val peak = measuredPm.maxBy { it.pm25!! }
         val good = measuredPm.count { it.pm25!! <= 35 } * 100 / measuredPm.size
-        val period = when (range) { "day" -> "24 h"; "week" -> "7 days"; else -> "30 days" }
+        val period = when (range) { "live" -> "5 min"; "day" -> "24 h"; "week" -> "7 days"; else -> "30 days" }
         FactRow(
             Triple("Average", "${average.roundToInt()} µg/m³", "${airLevel(average.toFloat()).label} over $period"),
             Triple("Peak", "${peak.pm25!!.roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),

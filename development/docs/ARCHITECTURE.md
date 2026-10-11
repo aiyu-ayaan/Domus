@@ -382,7 +382,11 @@ buckets (energy only: air is sampled too coarsely for it), `day` 24 clock hours,
 (`Asia/Kolkata`, resolved with `chrono-tz`), so an hour is a clock hour and a day starts at midnight where
 the viewer is, across DST changes too; the published image
 runs in UTC unless `TZ` is set, so without `tz` the buckets follow the server. Clients print bucket times in
-the device's zone and label an hourly bucket as its span ("12 am – 1 am").
+the device's zone and label an hourly bucket as its span ("12 am – 1 am"). The pickers call `hour` "1 min".
+
+The **Live** range next to them never reaches these endpoints: each client samples the device state it
+already receives over the WebSocket every 5 seconds while the page is open and keeps the last 5 minutes
+(`useLive` in `apps/web/src/lib/liveSamples.ts`, `rememberLive` in Android's `Analytics.kt`).
 
 ```mermaid
 flowchart LR
