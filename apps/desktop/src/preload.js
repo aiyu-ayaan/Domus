@@ -22,6 +22,13 @@ contextBridge.exposeInMainWorld('domus', {
     check: () => ipcRenderer.invoke('update:check'),
     install: () => ipcRenderer.invoke('update:install'),
     setChannel: (channel) => ipcRenderer.invoke('update:setChannel', channel),
+    skip: () => ipcRenderer.invoke('update:skip'),
+    // Download progress, 0..1, then null. Returns the function that stops listening.
+    onProgress: (listener) => {
+      const heard = (_event, fraction) => listener(fraction)
+      ipcRenderer.on('update:progress', heard)
+      return () => ipcRenderer.removeListener('update:progress', heard)
+    },
   },
   // Connect page only.
   connect: (address) => ipcRenderer.invoke('server:connect', address),

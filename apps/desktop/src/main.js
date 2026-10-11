@@ -6,6 +6,8 @@ const http = require('http')
 const https = require('https')
 const os = require('os')
 const path = require('path')
+const { Readable } = require('stream')
+const { pipeline } = require('stream/promises')
 const { pathToFileURL } = require('url')
 const updates = require('./updates')
 
@@ -263,7 +265,8 @@ ipcMain.on('clock:hour12', (event) => {
 })
 
 // --- Updates: GitHub releases on a channel (alpha / beta / stable). See development/docs/RELEASE.md.
-// An AppImage replaces its own file and restarts; a .deb or Windows install is handed the download in the browser.
+// An AppImage replaces its own file and restarts; a .deb or Windows installer is downloaded and opened.
+// The page offers it at start and shows the progress (apps/web/src/components/UpdatePrompt.tsx).
 let offer = null // the last check's answer; install takes it from here, never from the page
 const updateChannel = () => (config.channel in updates.STAGE ? config.channel : updates.channelOf(app.getVersion()))
 
@@ -278,57 +281,78 @@ async function checkForUpdate() {
   return offer
 }
 
-/** Returns the reason it failed, or '' (the app restarts, or the browser has the download). */
+/** Download progress for the page and the taskbar: 0..1, null once it is over. */
+function report(fraction) {
+  if (!win || win.isDestroyed()) return
+  win.setProgressBar(fraction ?? -1)
+  win.webContents.send('update:progress', fraction)
+}
+
+let installing = false
+/** Returns the reason it failed, or '' (the app restarts, or the installer was opened from Downloads). */
 async function installUpdate() {
   if (!offer) return 'No update to install.'
-  const target = process.env.APPIMAGE
-  if (!target) {
-    shell.openExternal(offer.url)
-    return ''
-  }
+  if (installing) return ''
+  installing = true
+  const appImage = process.env.APPIMAGE
+  const target = appImage ?? path.join(app.getPath('downloads'), path.basename(new URL(offer.url).pathname))
   const part = `${target}.part`
   try {
+    report(0)
     const res = await fetch(offer.url)
     if (!res.ok) throw new Error(`the download answered ${res.status}`)
-    const file = Buffer.from(await res.arrayBuffer())
-    // An error page saved under the right name must not become the app.
-    if (file.subarray(0, 4).toString('latin1') !== '\x7fELF') throw new Error('the download is not an AppImage')
-    fs.writeFileSync(part, file, { mode: 0o755 })
+    // shortcut: without a Content-Length the bar stays at 0; GitHub's release assets always send one.
+    const total = Number(res.headers.get('content-length')) || 0
+    let done = 0
+    let shown = 0
+    await pipeline(
+      Readable.fromWeb(res.body),
+      async function* (chunks) {
+        for await (const chunk of chunks) {
+          done += chunk.length
+          const percent = total ? Math.floor((done * 100) / total) : 0
+          if (percent !== shown) report((shown = percent) / 100)
+          yield chunk
+        }
+      },
+      fs.createWriteStream(part, { mode: appImage ? 0o755 : 0o644 }),
+    )
+    if (appImage) {
+      // An error page saved under the right name must not become the app.
+      const head = Buffer.alloc(4)
+      const fd = fs.openSync(part, 'r')
+      fs.readSync(fd, head, 0, 4, 0)
+      fs.closeSync(fd)
+      if (head.toString('latin1') !== '\x7fELF') throw new Error('the download is not an AppImage')
+    }
     // A rename within one directory: a failure before it leaves the old build in place.
     fs.renameSync(part, target)
   } catch (error) {
     fs.rmSync(part, { force: true })
     return `Could not update: ${error.message}.`
+  } finally {
+    installing = false
+    report(null)
   }
-  app.relaunch({ execPath: target })
-  app.quit()
+  if (appImage) {
+    app.relaunch({ execPath: target })
+    app.quit()
+  } else if (await shell.openPath(target)) {
+    // Nothing on this computer opens the installer: show where it is.
+    shell.showItemInFolder(target)
+  }
   return ''
 }
 
-/** At start: offer a new release once; "Later" is remembered for that version. */
-async function offerUpdate() {
-  const found = await checkForUpdate().catch(() => null)
-  if (!found || !win || config.skipped === found.version) return
-  const { response } = await dialog.showMessageBox(win, {
-    type: 'info',
-    buttons: ['Later', process.env.APPIMAGE ? 'Update and restart' : 'Download'],
-    defaultId: 1,
-    cancelId: 0,
-    message: `Domus ${found.version} is available`,
-    detail: `You have ${app.getVersion()}. The update channel is in Settings.`,
-  })
-  if (response === 1) {
-    const failed = await installUpdate()
-    if (failed) dialog.showErrorBox('Domus update', failed)
-  } else {
-    config.skipped = found.version
-    save()
-  }
-}
-
-ipcMain.handle('update:info', (event) => (trusted(event) ? { version: app.getVersion(), channel: updateChannel(), selfInstall: !!process.env.APPIMAGE } : null))
+ipcMain.handle('update:info', (event) => (trusted(event) ? { version: app.getVersion(), channel: updateChannel(), selfInstall: !!process.env.APPIMAGE, skipped: config.skipped ?? null } : null))
 ipcMain.handle('update:check', (event) => (trusted(event) ? checkForUpdate() : null))
 ipcMain.handle('update:install', (event) => (trusted(event) ? installUpdate() : ''))
+// "Later" on the offer at start (the web UI's UpdatePrompt) is remembered for that version.
+ipcMain.handle('update:skip', (event) => {
+  if (!trusted(event) || !offer) return
+  config.skipped = offer.version
+  save()
+})
 ipcMain.handle('update:setChannel', (event, channel) => {
   if (!trusted(event) || !(channel in updates.STAGE)) return
   config.channel = channel
@@ -427,7 +451,6 @@ app.whenReady().then(() => {
     })
   }
   createWindow()
-  offerUpdate()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
