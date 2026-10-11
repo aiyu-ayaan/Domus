@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { Check, PaintBrush, Sparkle, Sun } from '@phosphor-icons/react'
 import { cn } from '@/lib/cn'
@@ -24,29 +25,29 @@ export interface LightColorControlsProps {
 
 export const WHITE_PRESETS = [
   {
-    name: 'Warm Yellow / Candle',
-    label: 'Candle',
+    name: t('light.white.candle.name'),
+    label: t('light.white.candle.label'),
     kelvin: 2000,
     pct: 0,
     hex: '#FF890E',
   },
   {
-    name: 'Soft White',
-    label: 'Soft White',
+    name: t('light.white.softWhite.name'),
+    label: t('light.white.softWhite.label'),
     kelvin: 2700,
     pct: 16,
     hex: '#FFA757',
   },
   {
-    name: 'Daylight',
-    label: 'Daylight',
+    name: t('light.white.daylight.name'),
+    label: t('light.white.daylight.label'),
     kelvin: 5000,
     pct: 67,
     hex: '#FFE4CE',
   },
   {
-    name: 'Cool White',
-    label: 'Cool White',
+    name: t('light.white.coolWhite.name'),
+    label: t('light.white.coolWhite.label'),
     kelvin: 6500,
     pct: 100,
     hex: '#B2D4FF',
@@ -54,16 +55,16 @@ export const WHITE_PRESETS = [
 ] as const
 
 export const COLOR_PRESETS = [
-  { name: 'Warm Amber/Yellow', hex: '#F59E0B' },
-  { name: 'Gold', hex: '#EAB308' },
-  { name: 'Sunset Orange', hex: '#F97316' },
-  { name: 'Crimson Red', hex: '#EF4444' },
-  { name: 'Neon Pink', hex: '#EC4899' },
-  { name: 'Purple', hex: '#A855F7' },
-  { name: 'Sky Blue', hex: '#0EA5E9' },
-  { name: 'Cyan', hex: '#06B6D4' },
-  { name: 'Emerald Green', hex: '#10B981' },
-  { name: 'Lime', hex: '#84CC16' },
+  { name: t('light.color.amber'), hex: '#F59E0B' },
+  { name: t('light.color.gold'), hex: '#EAB308' },
+  { name: t('light.color.orange'), hex: '#F97316' },
+  { name: t('light.color.red'), hex: '#EF4444' },
+  { name: t('light.color.pink'), hex: '#EC4899' },
+  { name: t('light.color.purple'), hex: '#A855F7' },
+  { name: t('light.color.blue'), hex: '#0EA5E9' },
+  { name: t('light.color.cyan'), hex: '#06B6D4' },
+  { name: t('light.color.green'), hex: '#10B981' },
+  { name: t('light.color.lime'), hex: '#84CC16' },
 ] as const
 
 /** Converts Kelvin to an RGB object based on Tanner Helland algorithm. */
@@ -302,11 +303,11 @@ export function LightColorControls({
 
   // White temp descriptive label
   const tempLabel = useMemo(() => {
-    if (internalTemp < 10) return 'Warm Amber / Candle (2000K)'
-    if (internalTemp < 30) return 'Soft White (2700K)'
-    if (internalTemp < 60) return 'Neutral White (4000K)'
-    if (internalTemp < 85) return 'Daylight (5000K)'
-    return 'Cool White (6500K)'
+    if (internalTemp < 10) return t('light.temp.warm')
+    if (internalTemp < 30) return t('light.temp.soft')
+    if (internalTemp < 60) return t('light.temp.neutral')
+    if (internalTemp < 85) return t('light.temp.daylight')
+    return t('light.temp.cool')
   }, [internalTemp])
 
   // Color name descriptor
@@ -369,11 +370,11 @@ export function LightColorControls({
                   style={{ backgroundColor: isOn ? activeRadiantHex : 'rgb(113, 113, 122)' }}
                 />
                 <span className="text-label font-semibold text-fg">
-                  {isOn ? (playing ? 'Effect' : mode === 'white' ? 'White Light' : mode === 'color' ? 'Color Light' : resolvedMode === 'white' ? 'White Light' : 'Color Light') : 'Light Off'}
+                  {isOn ? (playing ? t('light.effect') : (mode === 'white' || (mode !== 'color' && resolvedMode === 'white')) ? t('light.whiteLight') : t('light.colorLight')) : t('light.off')}
                 </span>
               </div>
               <p className="truncate text-caption text-muted">
-                {isOn ? (playing ? `Playing ${playing}` : (mode === 'effect' ? resolvedMode : mode) === 'white' ? tempLabel : activeColorName) : 'Bulb is turned off'}
+                {isOn ? (playing ? t('light.playing', { name: playing }) : (mode === 'effect' ? resolvedMode : mode) === 'white' ? tempLabel : activeColorName) : t('light.bulbOff')}
               </p>
             </div>
           </div>
@@ -390,8 +391,8 @@ export function LightColorControls({
 
       {/* 2. White vs Color Mode Tabs Toggle */}
       <div className="flex items-center justify-between gap-3">
-        <span className="text-label font-medium text-muted">Color Mode</span>
-        <div role="tablist" aria-label="Light mode toggle" className="inline-flex rounded-md border border-border bg-raised p-0.5">
+        <span className="text-label font-medium text-muted">{t('light.colorMode')}</span>
+        <div role="tablist" aria-label={t('light.modeToggle')} className="inline-flex rounded-md border border-border bg-raised p-0.5">
           <button
             type="button"
             role="tab"
@@ -406,7 +407,7 @@ export function LightColorControls({
             )}
           >
             <Sun size={15} />
-            <span>White</span>
+            <span>{t('light.white')}</span>
           </button>
           <button
             type="button"
@@ -422,7 +423,7 @@ export function LightColorControls({
             )}
           >
             <PaintBrush size={15} />
-            <span>Color</span>
+            <span>{t('light.color')}</span>
           </button>
           {effects && (
             <button
@@ -436,7 +437,7 @@ export function LightColorControls({
               )}
             >
               <Sparkle size={15} />
-              <span>Effects</span>
+              <span>{t('light.effects')}</span>
             </button>
           )}
         </div>
@@ -451,9 +452,9 @@ export function LightColorControls({
           {/* Temperature Slider with visual gradient track */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-body">
-              <span className="text-label text-fg">Color Temperature</span>
+              <span className="text-label text-fg">{t('light.colorTemperature')}</span>
               <span className="text-caption text-muted tabular">
-                {currentKelvin}K · {internalTemp < 35 ? 'Warm' : internalTemp > 65 ? 'Cool' : 'Neutral'}
+                {t('light.kelvinLine', { kelvin: currentKelvin, tone: t(internalTemp < 35 ? 'light.kelvin.warm' : internalTemp > 65 ? 'light.kelvin.cool' : 'light.kelvin.neutral') })}
               </span>
             </div>
 
@@ -472,7 +473,7 @@ export function LightColorControls({
                 max={100}
                 value={internalTemp}
                 disabled={disabled}
-                aria-label="Color temperature slider"
+                aria-label={t('light.tempSlider')}
                 onChange={(e) => handleTempSliderChange(Number(e.target.value))}
                 onPointerUp={(e) => handleTempSliderCommit(Number((e.target as HTMLInputElement).value))}
                 onKeyUp={(e) => handleTempSliderCommit(Number((e.target as HTMLInputElement).value))}
@@ -489,15 +490,15 @@ export function LightColorControls({
             </div>
 
             <div className="flex justify-between text-[11px] text-subtle">
-              <span>2000K (Warm Amber)</span>
+              <span>{t('light.warmAmber')}</span>
               <span>4000K</span>
-              <span>6500K (Cool Ice)</span>
+              <span>{t('light.coolIce')}</span>
             </div>
           </div>
 
           {/* Quick preset buttons */}
           <div className="flex flex-col gap-1.5 pt-1">
-            <span className="text-caption font-medium text-muted">White Presets</span>
+            <span className="text-caption font-medium text-muted">{t('light.whitePresets')}</span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {WHITE_PRESETS.map((p) => {
                 const active = Math.abs(internalTemp - p.pct) <= 7
@@ -536,7 +537,7 @@ export function LightColorControls({
           {/* Preset color chips */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-caption font-medium text-muted">Vivid Colors</span>
+              <span className="text-caption font-medium text-muted">{t('light.vividColors')}</span>
               <span className="text-[11px] text-subtle">{activeColorName}</span>
             </div>
             <div className="flex flex-wrap gap-2.5">
@@ -569,7 +570,7 @@ export function LightColorControls({
             {/* Hue Slider */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between text-caption">
-                <span className="text-muted">Hue Slider</span>
+                <span className="text-muted">{t('light.hueSlider')}</span>
                 <span className="text-subtle tabular">{hue}°</span>
               </div>
               <div className="relative flex h-8 items-center">
@@ -586,7 +587,7 @@ export function LightColorControls({
                   max={360}
                   value={hue}
                   disabled={disabled}
-                  aria-label="Hue spectrum slider"
+                  aria-label={t('light.hueSpectrum')}
                   onChange={(e) => handleHueChange(Number(e.target.value))}
                   onPointerUp={(e) => handleHueCommit(Number((e.target as HTMLInputElement).value))}
                   onKeyUp={(e) => handleHueCommit(Number((e.target as HTMLInputElement).value))}
@@ -615,20 +616,20 @@ export function LightColorControls({
                   className="h-4 w-4 shrink-0 rounded-full border border-white/30 shadow-sm"
                   style={{ backgroundColor: internalColor }}
                 />
-                <span className="text-caption text-fg">Palette Wheel</span>
+                <span className="text-caption text-fg">{t('light.paletteWheel')}</span>
                 <input
                   type="color"
                   value={internalColor.startsWith('#') ? internalColor.slice(0, 7) : '#F59E0B'}
                   onChange={(e) => handleNativeColorInput(e.target.value)}
                   disabled={disabled}
                   className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  aria-label="Native color picker"
+                  aria-label={t('light.nativePicker')}
                 />
               </label>
 
               {/* Live Hex Input */}
               <div className="flex items-center gap-2">
-                <span className="text-[12px] font-medium text-muted">Hex</span>
+                <span className="text-[12px] font-medium text-muted">{t('light.hex')}</span>
                 <div className="flex items-center gap-1.5 rounded-md border border-border bg-panel px-2.5 py-1 font-mono text-caption text-fg shadow-inner">
                   <span
                     className="h-3 w-3 shrink-0 rounded-full border border-white/20"
@@ -642,7 +643,7 @@ export function LightColorControls({
                     onChange={(e) => handleHexInputChange(e.target.value)}
                     onBlur={handleHexInputBlur}
                     className="w-18 border-none bg-transparent font-mono text-caption uppercase text-fg outline-none"
-                    aria-label="Hex color code"
+                    aria-label={t('light.hexCode')}
                   />
                 </div>
               </div>

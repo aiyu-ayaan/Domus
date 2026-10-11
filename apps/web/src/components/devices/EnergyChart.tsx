@@ -17,7 +17,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
   if (!points.length || total === 0) {
     return (
       <div className="flex items-center justify-center rounded-md border border-dashed border-border px-4 text-center text-label text-subtle" style={{ height }}>
-        No consumption recorded yet. Metered devices report every minute.
+        {t('chart.noConsumption')}
       </div>
     )
   }
@@ -34,7 +34,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
     return (
       <div>
         <div className="mb-2 flex">{toggle}</div>
-        <TrendChart points={points.map((p) => ({ t: p.t, value: p.watts }))} range={range} unit="W" empty="No power measured in this period." height={height} />
+        <TrendChart points={points.map((p) => ({ t: p.t, value: p.watts }))} range={range} unit="W" empty={t('chart.noPower')} height={height} />
       </div>
     )
   }
