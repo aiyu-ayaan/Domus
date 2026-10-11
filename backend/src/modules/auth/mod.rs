@@ -9,6 +9,45 @@ use chrono::{DateTime, Utc};
 use rand::{rngs::OsRng, Rng};
 use serde::Serialize;
 use sqlx::SqlitePool;
+use std::collections::HashMap;
+use std::sync::{LazyLock, Mutex};
+use std::time::{Duration, Instant};
+
+/// Wrong passwords one username may get before sign-in is refused for [LOGIN_LOCK].
+pub const LOGIN_TRIES: u32 = 5;
+pub const LOGIN_LOCK: Duration = Duration::from_secs(15 * 60);
+
+pub static LOGIN_THROTTLE: LazyLock<LoginThrottle> = LazyLock::new(LoginThrottle::default);
+
+/// Failed sign-ins per username, known or not, so a lock does not reveal which names exist.
+// shortcut: held in memory, so a restart forgets the locks and each name tried costs an entry for 15 minutes. Move it to the database if that is ever abused.
+#[derive(Default)]
+pub struct LoginThrottle(Mutex<HashMap<String, (u32, Instant)>>);
+
+impl LoginThrottle {
+    fn key(username: &str) -> String {
+        username.trim().to_lowercase()
+    }
+
+    /// Minutes left while the name is locked.
+    pub fn locked(&self, username: &str) -> Option<u64> {
+        let map = self.0.lock().unwrap();
+        let (tries, last) = map.get(&Self::key(username))?;
+        let left = LOGIN_LOCK.checked_sub(last.elapsed())?;
+        (*tries >= LOGIN_TRIES).then(|| left.as_secs() / 60 + 1)
+    }
+
+    pub fn failed(&self, username: &str) {
+        let mut map = self.0.lock().unwrap();
+        map.retain(|_, (_, last)| last.elapsed() < LOGIN_LOCK);
+        let entry = map.entry(Self::key(username)).or_insert((0, Instant::now()));
+        *entry = (entry.0 + 1, Instant::now());
+    }
+
+    pub fn clear(&self, username: &str) {
+        self.0.lock().unwrap().remove(&Self::key(username));
+    }
+}
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct UserRecord {
@@ -227,6 +266,20 @@ pub fn verify_password(password: &str, hash: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_name_locks_after_the_allowed_tries_and_opens_again() {
+        let throttle = LoginThrottle::default();
+        for _ in 1..LOGIN_TRIES {
+            throttle.failed("Bea");
+        }
+        assert_eq!(throttle.locked("bea"), None);
+        throttle.failed(" BEA ");
+        assert_eq!(throttle.locked("bea"), Some(LOGIN_LOCK.as_secs() / 60));
+        assert_eq!(throttle.locked("someone-else"), None);
+        throttle.clear("Bea");
+        assert_eq!(throttle.locked("bea"), None);
+    }
 
     #[tokio::test]
     async fn a_reset_window_closes_with_the_new_password() {

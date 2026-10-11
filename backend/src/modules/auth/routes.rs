@@ -1,4 +1,4 @@
-use super::{hash_password, verify_password, UserDto, UserRecord};
+use super::{hash_password, verify_password, UserDto, UserRecord, LOGIN_THROTTLE};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
@@ -120,14 +120,23 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
 }
 
 async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiResult<Json<Value>> {
+    // Checked before the password, so a locked name cannot be guessed at even with parallel requests.
+    if let Some(minutes) = LOGIN_THROTTLE.locked(&req.username) {
+        return Err(ApiError::TooManyRequests(format!(
+            "Too many wrong passwords. Try again in {minutes} minute{}.",
+            if minutes == 1 { "" } else { "s" }
+        )));
+    }
     let mut user = match UserRecord::by_username(&s.pool, &req.username).await? {
         Some(u) if verify_password(&req.password, &u.password_hash) => u,
         _ => {
+            LOGIN_THROTTLE.failed(&req.username);
             // Slow down credential guessing.
             tokio::time::sleep(std::time::Duration::from_millis(600)).await;
             return Err(ApiError::Unauthorized("Invalid username or password".into()));
         }
     };
+    LOGIN_THROTTLE.clear(&user.username);
     // They remembered it after all: nothing is left for an administrator to answer.
     if user.reset_requested_at.is_some() || user.reset_allowed_until.is_some() {
         sqlx::query("UPDATE users SET reset_requested_at = NULL, reset_allowed_until = NULL, reset_code_hash = NULL, reset_attempts = 0 WHERE id = ?")
@@ -183,6 +192,7 @@ async fn reset(State(s): State<AppState>, Json(req): Json<ResetRequest>) -> ApiR
     };
     validate_credentials(&user.username, &req.new_password)?;
     user.set_password(&s.pool, &req.new_password, false).await?;
+    LOGIN_THROTTLE.clear(&user.username);
     s.bus.publish(SystemEvent::UsersChanged);
     auth_response(&s, &user).await
 }

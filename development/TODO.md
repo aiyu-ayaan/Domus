@@ -22,7 +22,7 @@
 - [x] HTTPS by default (self-signed generated, custom cert supported)
 - [x] AES-256-GCM vault for credentials and device secrets; master key outside DB
 - [x] Generated JWT secret; role checks against DB per request
-- [ ] Login rate limiting per IP (currently a fixed delay on failure)
+- [x] Login lockout per username: 5 wrong passwords lock the name for 15 minutes (`LoginThrottle`, in memory)
 - [ ] Optional SQLCipher full-database encryption
 - [ ] Vite dev server over HTTPS (dev only; production is already HTTPS)
 

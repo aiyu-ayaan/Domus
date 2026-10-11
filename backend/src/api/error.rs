@@ -18,6 +18,8 @@ pub enum ApiError {
     NotFound(String),
     #[error("Conflict: {0}")]
     Conflict(String),
+    #[error("Too Many Requests: {0}")]
+    TooManyRequests(String),
     /// Upstream device/cloud failure; message is safe to show.
     #[error("Bad Gateway: {0}")]
     Upstream(String),
@@ -35,6 +37,7 @@ impl IntoResponse for ApiError {
             ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, msg),
             ApiError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             ApiError::Conflict(msg) => (StatusCode::CONFLICT, msg),
+            ApiError::TooManyRequests(msg) => (StatusCode::TOO_MANY_REQUESTS, msg),
             ApiError::Upstream(msg) => (StatusCode::BAD_GATEWAY, msg),
             ApiError::Internal(msg) => {
                 tracing::error!("internal error: {msg}");

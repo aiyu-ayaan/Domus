@@ -55,6 +55,11 @@ sequenceDiagram
   username is not enough to reset anything; that was the flaw of the plain on/off switch this replaced.
 - **No account discovery**: `/auth/forgot` answers the same for known and unknown usernames; it and a wrong
   code are slowed by 600 ms like a failed sign-in.
+- **Sign-in lockout** (`LoginThrottle` in `auth/mod.rs`): `LOGIN_TRIES` (5) wrong passwords for one username
+  refuse every further sign-in for that name with 429 for `LOGIN_LOCK` (15 minutes), the right password
+  included. It is checked before the password, so parallel requests cannot outrun it, and it counts unknown
+  names too, so a lock does not reveal which accounts exist. A correct sign-in or a redeemed reset code clears
+  it. The count lives in memory: restarting the server lifts every lock.
 - **Secrets are returned once**: `generated_password` and `reset_code` appear only in the answer to the
   request that made them. Lists and `/auth/me` never carry them.
 - A password an administrator sets on their own account does not force a change.
@@ -78,4 +83,5 @@ Schema: `migrations/0009_account_recovery.sql`. Logic: `backend/src/modules/auth
 
 - The notification inbox is shared, so every signed-in person sees "Password reset requested", not only administrators.
 - A kid cannot change their own password in the Android app (it has no change-password page yet); on the web they can.
+- Anyone who can reach the sign-in page can lock a name out for 15 minutes by guessing wrong five times.
 - `domus-backend reset-password <username>` still works from the server's shell when every administrator is locked out.
