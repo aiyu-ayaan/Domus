@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n'
 import { useState } from 'react'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -26,14 +27,14 @@ export function RoomsView() {
   return (
     <>
       <PageHeader
-        title="Rooms"
-        description="Organise devices by where they are."
-        actions={admin && <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>New room</Button>}
+        title={t('rooms.title')}
+        description={t('rooms.description')}
+        actions={admin && <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>{t('rooms.new')}</Button>}
       />
       {isLoading ? (
         <Skeleton className="h-40" />
       ) : !rooms?.length ? (
-        <EmptyState icon={<Door size={28} />} title="No rooms" message="Create rooms such as Bedroom or Kitchen, then assign devices to them." action={admin && <Button variant="primary" onClick={() => setEditing('new')}>Create room</Button>} />
+        <EmptyState icon={<Door size={28} />} title={t('rooms.empty.title')} message={t('rooms.empty.message')} action={admin && <Button variant="primary" onClick={() => setEditing('new')}>{t('rooms.create')}</Button>} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rooms.map((r) => {
@@ -48,9 +49,9 @@ export function RoomsView() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body font-medium">{r.name}</p>
                   <p className="truncate text-label text-muted tabular">
-                    {inRoom.length} {inRoom.length === 1 ? 'device' : 'devices'} · {on} on
+                    {t('rooms.summary', { devices: t('common.deviceCount', { count: inRoom.length }), on })}
                     {watts > 0 && ` · ${formatWatts(watts)}`}
-                    {offline > 0 && <span className="text-danger"> · {offline} offline</span>}
+                    {offline > 0 && <span className="text-danger"> · {t('rooms.offline', { count: offline })}</span>}
                   </p>
                 </div>
                 <CaretRight size={16} className="text-subtle transition-transform duration-fast group-hover:translate-x-0.5" aria-hidden />
@@ -88,7 +89,7 @@ export function RoomDetailView() {
     },
     onSuccess: (failed) => {
       qc.invalidateQueries({ queryKey: keys.devices })
-      if (failed) toast.push({ tone: 'warning', title: `${failed} device(s) did not respond` })
+      if (failed) toast.push({ tone: 'warning', title: t('rooms.noResponse', { count: failed }) })
     },
   })
   const remove = useMutation({
@@ -98,42 +99,42 @@ export function RoomDetailView() {
       qc.invalidateQueries({ queryKey: keys.devices })
       navigate('/rooms')
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not delete room', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('rooms.deleteFailed'), message: errorMessage(e) }),
   })
 
   if (isLoading) return <Skeleton className="h-40" />
-  if (!room) return <EmptyState icon={<Door size={28} />} title="Room not found" message="It may have been deleted." action={<Button onClick={() => navigate('/rooms')}>Back to rooms</Button>} />
+  if (!room) return <EmptyState icon={<Door size={28} />} title={t('rooms.notFound.title')} message={t('rooms.notFound.message')} action={<Button onClick={() => navigate('/rooms')}>{t('rooms.backToRooms')}</Button>} />
 
   return (
     <>
       <Link to="/rooms" className="mb-3 inline-flex h-8 items-center gap-1.5 text-label text-muted hover:text-fg">
-        <ArrowLeft size={14} aria-hidden /> Rooms
+        <ArrowLeft size={14} aria-hidden /> {t('rooms.title')}
       </Link>
       <PageHeader
         title={room.name}
-        description={`${inRoom.length} ${inRoom.length === 1 ? 'device' : 'devices'}`}
+        description={t('common.deviceCount', { count: inRoom.length })}
         actions={
           <>
             {control && inRoom.length > 0 && (
               <>
-                <Button size="sm" onClick={() => guard.ask(inRoom, true, () => setAll.mutate(true))} loading={setAll.isPending && setAll.variables}>All on</Button>
-                <Button size="sm" onClick={() => guard.ask(inRoom, false, () => setAll.mutate(false))} loading={setAll.isPending && !setAll.variables}>All off</Button>
+                <Button size="sm" onClick={() => guard.ask(inRoom, true, () => setAll.mutate(true))} loading={setAll.isPending && setAll.variables}>{t('rooms.allOn')}</Button>
+                <Button size="sm" onClick={() => guard.ask(inRoom, false, () => setAll.mutate(false))} loading={setAll.isPending && !setAll.variables}>{t('rooms.allOff')}</Button>
               </>
             )}
             {admin && (
               <>
-                <Button variant="ghost" size="sm" aria-label="Edit room" icon={<PencilSimple size={16} />} onClick={() => setEditing(true)} />
-                <Button variant="ghost" size="sm" aria-label="Delete room" icon={<Trash size={16} />} onClick={() => setDeleting(true)} />
+                <Button variant="ghost" size="sm" aria-label={t('rooms.edit')} icon={<PencilSimple size={16} />} onClick={() => setEditing(true)} />
+                <Button variant="ghost" size="sm" aria-label={t('rooms.delete')} icon={<Trash size={16} />} onClick={() => setDeleting(true)} />
               </>
             )}
           </>
         }
       />
       {inRoom.length === 0 ? (
-        <EmptyState icon={<Door size={28} />} title="No devices in this room" message="Open a device and choose this room in its settings." />
+        <EmptyState icon={<Door size={28} />} title={t('rooms.noDevices.title')} message={t('rooms.noDevices.message')} />
       ) : (
         <Card>
-          <CardHeader title="Devices" />
+          <CardHeader title={t('common.devices')} />
           <ul className="divide-y divide-border">
             {inRoom.map((d) => (
               <DeviceRow key={d.id} device={d} onOpen={() => setOpen(d.id)} />
@@ -144,7 +145,7 @@ export function RoomDetailView() {
       <DeviceDrawer device={devices.find((d) => d.id === open) ?? null} onClose={() => setOpen(null)} />
       <RoomSheet room={editing ? room : null} onClose={() => setEditing(false)} />
       {guard.dialog}
-      <Confirm open={deleting} onClose={() => setDeleting(false)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={`Delete ${room.name}?`} message="Devices in this room are kept and become unassigned." />
+      <Confirm open={deleting} onClose={() => setDeleting(false)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={t('rooms.deleteTitle', { name: room.name })} message={t('rooms.deleteMessage')} />
     </>
   )
 }
@@ -169,31 +170,31 @@ function RoomSheet({ room, onClose }: { room: Room | 'new' | null; onClose: () =
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.rooms })
-      toast.push({ tone: 'success', title: existing ? 'Room updated' : `${name} created` })
+      toast.push({ tone: 'success', title: existing ? t('rooms.updated') : t('rooms.created', { name }) })
       onClose()
     },
-    onError: (e) => toast.push({ tone: 'error', title: 'Could not save room', message: errorMessage(e) }),
+    onError: (e) => toast.push({ tone: 'error', title: t('rooms.saveFailed'), message: errorMessage(e) }),
   })
   return (
     <Sheet
       open={!!room}
       onClose={onClose}
-      title={existing ? 'Edit room' : 'New room'}
+      title={existing ? t('rooms.edit') : t('rooms.new')}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={save.isPending} disabled={!name.trim()} onClick={() => save.mutate()}>
-            Save
+            {t('common.save')}
           </Button>
         </>
       }
     >
       <form className="flex flex-col gap-5" onSubmit={(e) => (e.preventDefault(), name.trim() && save.mutate())}>
-        <Field label="Name" required placeholder="Living room" value={name} onChange={(e) => setName(e.target.value)} />
+        <Field label={t('common.name')} required placeholder={t('rooms.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} />
         <fieldset>
-          <legend className="mb-2 text-label font-medium">Icon</legend>
+          <legend className="mb-2 text-label font-medium">{t('common.icon')}</legend>
           <div className="grid grid-cols-5 gap-1.5">
             {roomIconChoices.map((c) => (
               <button
