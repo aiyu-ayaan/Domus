@@ -371,9 +371,27 @@ when the account is deleted.
 
 ### Air quality history
 
-Devices that report PM2.5 are sampled every five energy intervals into `air_metrics` (with temperature and
-humidity when present). `GET /air/history?range=day|week|month` returns per-bucket averages, `null` where
+Devices that report PM2.5 are sampled every energy interval into `air_metrics` (with temperature and
+humidity when present). `GET /air/history?range=hour|day|week|month` returns per-bucket averages, `null` where
 nothing was measured; retention follows `energy_retention_days`.
+
+### History buckets and time zones
+
+`GET /energy/history` and `GET /air/history` share `Buckets` (`modules/energy`): `hour` is 60 one-minute
+buckets, `day` 24 clock hours, `week` 7 days, `month` 30 days. Clients send `tz`, their offset from UTC in
+minutes, so an hour is a clock hour and a day starts at midnight where the viewer is; the published image
+runs in UTC unless `TZ` is set, so without `tz` the buckets follow the server. Clients print bucket times in
+the device's zone and label an hourly bucket as its span ("12 am – 1 am").
+
+```mermaid
+flowchart LR
+    C["Client<br/>range + tz (minutes from UTC)"] --> H["history handler"]
+    H --> B["Buckets::new(range, tz, now)<br/>start, count, minutes per bucket"]
+    B --> Q["SQL: UTC groups of 1 min (hour)<br/>or 15 min (day, week, month)"]
+    Q --> R["Buckets::index(group time)<br/>regroup on the viewer's clock"]
+    R --> P["points with t in the viewer's offset"]
+    P --> C
+```
 
 ### Clients finding the server
 

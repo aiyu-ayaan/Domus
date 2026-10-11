@@ -14,7 +14,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use chrono::{DateTime, Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone, Timelike, Utc};
+use chrono::{DateTime, Datelike, Duration, FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone, Timelike, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use std::collections::HashMap;
@@ -149,6 +149,65 @@ pub fn local_midnight(d: NaiveDate) -> DateTime<Local> {
         .from_local_datetime(&d.and_hms_opt(0, 0, 0).unwrap())
         .earliest()
         .unwrap_or_else(Local::now)
+}
+
+/// The buckets of a history range, laid out on the viewer's clock.
+pub struct Buckets {
+    start: DateTime<FixedOffset>,
+    count: i64,
+    /// Bucket length in minutes: 1, 60 or 1440.
+    minutes: i64,
+}
+
+impl Buckets {
+    /// `range` is "hour" (60 one-minute buckets), "day" (24 hours), "week" (7 days) or "month" (30 days),
+    /// ending at `now`. `tz` is the viewer's offset from UTC in minutes; without it the server's zone is used.
+    // shortcut: a fixed offset, so a DST change inside a week or month moves earlier day edges by an hour; send an IANA zone name if that matters.
+    pub fn new(range: Option<&str>, tz: Option<i32>, now: DateTime<Utc>) -> Self {
+        let zone = tz
+            .and_then(|m| m.checked_mul(60))
+            .and_then(FixedOffset::east_opt)
+            .unwrap_or_else(|| *now.with_timezone(&Local).offset());
+        let now = now.with_timezone(&zone);
+        let midnight = |days: i64| zone.from_local_datetime(&(now.date_naive() - Duration::days(days)).and_hms_opt(0, 0, 0).unwrap()).unwrap();
+        let minute = now.with_second(0).and_then(|t| t.with_nanosecond(0)).unwrap_or(now);
+        let (start, count, minutes) = match range {
+            Some("hour") => (minute - Duration::minutes(59), 60, 1),
+            Some("week") => (midnight(6), 7, 1440),
+            Some("month") => (midnight(29), 30, 1440),
+            _ => (minute.with_minute(0).unwrap_or(minute) - Duration::hours(23), 24, 60),
+        };
+        Self { start, count, minutes }
+    }
+
+    pub fn count(&self) -> usize {
+        self.count as usize
+    }
+
+    pub fn start(&self) -> DateTime<Utc> {
+        self.start.with_timezone(&Utc)
+    }
+
+    /// Minutes per SQL group. Samples are grouped this fine in UTC and regrouped with `index`;
+    /// quarters keep half-hour time zones (e.g. IST) exact.
+    pub fn sql_minutes(&self) -> i64 {
+        self.minutes.min(15)
+    }
+
+    /// When a SQL group `(hour "YYYY-MM-DDTHH", part)` began.
+    pub fn group_time(&self, hour: &str, part: i64) -> Option<DateTime<Utc>> {
+        let naive = NaiveDateTime::parse_from_str(&format!("{}:00:00", hour.replace(' ', "T")), "%Y-%m-%dT%H:%M:%S").ok()?;
+        Some(Utc.from_utc_datetime(&naive) + Duration::minutes(part * self.sql_minutes()))
+    }
+
+    pub fn time(&self, i: usize) -> DateTime<FixedOffset> {
+        self.start + Duration::minutes(i as i64 * self.minutes)
+    }
+
+    pub fn index(&self, t: DateTime<Utc>) -> Option<usize> {
+        let i = (t.with_timezone(&self.start.timezone()) - self.start).num_minutes().div_euclid(self.minutes);
+        (0..self.count).contains(&i).then_some(i as usize)
+    }
 }
 
 /// Id prefix of catch-up rows: they carry energy but no measured power.
@@ -290,33 +349,25 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
 
 #[derive(Deserialize)]
 struct HistoryQuery {
-    /// "day" (24 hourly points), "week" (7 days) or "month" (30 days).
+    /// "hour" (60 one-minute points), "day" (24 hourly points), "week" (7 days) or "month" (30 days).
     range: Option<String>,
+    /// The viewer's offset from UTC in minutes, so buckets follow their clock rather than the server's.
+    tz: Option<i32>,
     device_id: Option<String>,
 }
 
 #[derive(Serialize)]
 struct Point {
-    t: DateTime<Local>,
+    t: DateTime<FixedOffset>,
     kwh: f64,
     cost: f64,
-    /// Average measured power; `None` where nothing was measured.
+    /// Average measured power in the bucket; `None` where nothing was measured.
     watts: Option<f64>,
 }
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
     let settings = load_settings(&s.pool).await;
-    let range = q.range.as_deref().unwrap_or("day");
-    let now = Local::now();
-    let hourly = range == "day";
-    let (start, buckets) = match range {
-        "week" => (local_midnight(now.date_naive() - Duration::days(6)), 7),
-        "month" => (local_midnight(now.date_naive() - Duration::days(29)), 30),
-        _ => {
-            let h = now.with_minute(0).and_then(|t| t.with_second(0)).and_then(|t| t.with_nanosecond(0)).unwrap_or(now);
-            (h - Duration::hours(23), 24)
-        }
-    };
+    let buckets = Buckets::new(q.range.as_deref(), q.tz, Utc::now());
 
     let visible: Vec<String> = visible_devices(&s, &user).await?.into_iter().map(|d| d.id).collect();
     if let Some(id) = &q.device_id {
@@ -325,45 +376,29 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
         }
     }
 
-    // 15-minute UTC buckets ("YYYY-MM-DDTHH", quarter), regrouped into local
-    // buckets below. Quarters keep half-hour time zones (e.g. IST) exact.
+    // Fine UTC groups ("YYYY-MM-DDTHH", part of the hour), regrouped into the viewer's buckets below.
     let rows: Vec<(String, String, i64, f64, f64, i64)> = sqlx::query_as(
-        "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / 15 AS q,
+        "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / ?3 AS q,
                 SUM(energy_kwh),
                 COALESCE(SUM(CASE WHEN id NOT LIKE ?2 THEN power_watts END), 0.0),
                 COUNT(CASE WHEN id NOT LIKE ?2 THEN 1 END)
          FROM energy_metrics WHERE recorded_at >= ?1 GROUP BY device_id, h, q",
     )
-    .bind(start.with_timezone(&Utc))
+    .bind(buckets.start())
     .bind(format!("{FILL_PREFIX}%"))
+    .bind(buckets.sql_minutes())
     .fetch_all(&s.pool)
     .await?;
 
-    let mut points: Vec<Point> = (0..buckets)
-        .map(|i| Point {
-            t: if hourly { start + Duration::hours(i) } else { local_midnight(start.date_naive() + Duration::days(i)) },
-            kwh: 0.0,
-            cost: 0.0,
-            watts: None,
-        })
-        .collect();
+    let mut points: Vec<Point> = (0..buckets.count()).map(|i| Point { t: buckets.time(i), kwh: 0.0, cost: 0.0, watts: None }).collect();
     // (bucket, device) -> sum and count of its measured power samples.
     let mut power: HashMap<(usize, String), (f64, i64)> = HashMap::new();
 
-    for (device_id, hour, quarter, kwh, watts, samples) in rows {
+    for (device_id, hour, part, kwh, watts, samples) in rows {
         if q.device_id.as_ref().map_or(!visible.contains(&device_id), |d| *d != device_id) {
             continue;
         }
-        let Ok(naive) = NaiveDateTime::parse_from_str(&format!("{}:00:00", hour.replace(' ', "T")), "%Y-%m-%dT%H:%M:%S") else {
-            continue;
-        };
-        let local = (Utc.from_utc_datetime(&naive) + Duration::minutes(quarter * 15)).with_timezone(&Local);
-        let idx = if hourly {
-            (local - start).num_hours()
-        } else {
-            (local.date_naive() - start.date_naive()).num_days()
-        };
-        let Some(i) = usize::try_from(idx).ok().filter(|i| *i < points.len()) else { continue };
+        let Some(i) = buckets.group_time(&hour, part).and_then(|t| buckets.index(t)) else { continue };
         points[i].kwh += kwh;
         if samples > 0 {
             let e = power.entry((i, device_id)).or_default();
@@ -387,6 +422,27 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn history_buckets_follow_the_viewers_clock() {
+        // 17:22 UTC is 22:52 in India (+05:30), whatever zone the server runs in.
+        let now = Utc.with_ymd_and_hms(2026, 10, 11, 17, 22, 40).unwrap();
+        let day = Buckets::new(Some("day"), Some(330), now);
+        assert_eq!(day.count(), 24);
+        assert_eq!(day.time(23).to_rfc3339(), "2026-10-11T22:00:00+05:30");
+        assert_eq!(day.index(now), Some(23));
+        assert_eq!(day.index(day.group_time("2026-10-11T15", 2).unwrap()), Some(22)); // 15:30 UTC = 21:00 IST
+        assert_eq!(day.index(now - Duration::hours(24)), None);
+        let hour = Buckets::new(Some("hour"), Some(330), now);
+        assert_eq!((hour.count(), hour.sql_minutes()), (60, 1));
+        assert_eq!(hour.time(59).to_rfc3339(), "2026-10-11T22:52:00+05:30");
+        assert_eq!(hour.index(hour.group_time("2026-10-11 17", 22).unwrap()), Some(59));
+        let week = Buckets::new(Some("week"), Some(330), now);
+        assert_eq!(week.time(0).to_rfc3339(), "2026-10-05T00:00:00+05:30");
+        assert_eq!(week.index(now), Some(6));
+        // An absurd offset falls back to the server's zone instead of failing.
+        assert_eq!(Buckets::new(None, Some(i32::MAX), now).count(), 24);
+    }
 
     #[test]
     fn billing_cycle_wraps_month() {
