@@ -49,7 +49,7 @@ docker compose --profile mqtt up -d    # also start the optional Mosquitto broke
 |---|---|
 | Image | `Dockerfile`: Node stage builds `apps/web`, Rust stage builds `domus-backend`, runtime is `gcr.io/distroless/cc-debian12` (glibc, CA certificates, tzdata, no shell), uid 1000 |
 | Network | `network_mode: host`. Tapo and Xiaomi discovery and the app beacon are LAN broadcasts; they do not reach a bridged container |
-| Data | Named volume `domus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up; losing `master.key` loses every linked account |
+| Data | Named volume `domus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up (Settings > Backup, see below); losing `master.key` loses every linked account |
 | Config | `APP_ENV=production` (listens on `0.0.0.0`). Any key of `config/default.toml` as `DOMUS__<SECTION>__<KEY>` in `environment:` |
 
 The release binary is stripped and built with thin LTO (`[profile.release]` in `Cargo.toml`); `.dockerignore` is an allow-list, so the build context is only what the Dockerfile copies. The image has no shell: `docker exec` cannot open one, use `docker compose logs`. Published images and their tags are described in `RELEASE.md`.
@@ -69,6 +69,45 @@ domus-backend reset-password aiyu                                      # outside
 ```
 
 Existing sessions stay valid until their token expires; the new password applies to the next sign-in. Source: `backend/src/cli.rs`.
+
+### Backup and restore
+
+An administrator downloads the whole home as one file from **Settings > Backup** (`GET /api/v1/server/backup`).
+It is a SQLite copy of the database (`VACUUM INTO`, so it is consistent while the server runs) with the master
+key stored inside it, because the linked accounts in the database are sealed with that key. Whoever holds the
+file can open those accounts: keep it private. The JWT secret and the TLS certificate are not in it; after a
+restore on a new machine people sign in again and the apps ask to trust the new certificate.
+
+```mermaid
+flowchart LR
+    subgraph Running server
+      DB[(domus.db)] -- VACUUM INTO --> C[backup-uuid.db in data dir]
+      K[master.key] -- "app_settings.backup_master_key" --> C
+      C -- streamed, then unlinked --> F[domus-backup-YYYY-MM-DD.db]
+    end
+    subgraph Stopped server
+      F -- "domus-backend restore" --> S[domus.db.restoring]
+      S -- key row removed --> DB2[(domus.db)]
+      S -- key --> K2[master.key]
+      O[old domus.db, -wal, -shm, master.key] -- renamed --> B[*.before-restore]
+    end
+```
+
+Restore with the server stopped. What was there is kept as `*.before-restore` in the data directory.
+
+```bash
+# Docker
+docker compose cp domus-backup-2026-10-11.db domus:/app/data/restore.db
+docker compose stop domus
+docker compose run --rm domus domus-backend restore data/restore.db
+docker compose start domus
+
+# Outside Docker, from the repo root (uses ./data)
+domus-backend restore ~/Downloads/domus-backup-2026-10-11.db
+```
+
+When the key comes from `DOMUS_MASTER_KEY` instead of `master.key`, the backup holds no key and the restored
+server needs the same variable. Source: `backend/src/infrastructure/backup.rs`, `modules/server.rs`, `cli.rs`.
 
 A `Request failed (500)` on sign-in is a server error, not a wrong password (that is a 401): check `docker compose logs domus`.
 

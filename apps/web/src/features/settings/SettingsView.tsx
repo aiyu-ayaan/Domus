@@ -150,6 +150,7 @@ export function SettingsView() {
         </Card>
         <PasswordCard />
         <ServerCard />
+        <BackupCard />
         <AboutCard />
       </div>
       {admin && <People />}
@@ -290,6 +291,30 @@ function ServerCard() {
           </Button>
         )}
       </form>
+    </Card>
+  )
+}
+
+function BackupCard() {
+  const admin = useIsAdmin()
+  const toast = useToast()
+  const backup = useMutation({
+    mutationFn: api.downloadBackup,
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not make the backup', message: errorMessage(e) }),
+  })
+  if (!admin) return null
+  return (
+    <Card>
+      <CardHeader title="Backup" />
+      <div className="flex flex-col gap-4 p-4">
+        <p className="text-label text-muted">
+          One file with every device, room, automation, account and reading, and the key that opens your linked integrations. Keep it private: whoever has it can sign in to
+          those. Restore it on the server with <code className="text-fg">domus-backend restore</code>.
+        </p>
+        <Button loading={backup.isPending} onClick={() => backup.mutate()} className="self-start">
+          Download backup
+        </Button>
+      </div>
     </Card>
   )
 }

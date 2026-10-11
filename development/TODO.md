@@ -175,6 +175,8 @@
 - [ ] Web: self-host the Inter font (the Google Fonts stylesheet still blocks first paint and needs internet)
 
 ## Next
+- [x] Backup and restore: Settings > Backup downloads the database with the master key inside, `domus-backend restore <file>` puts it back
+- [ ] Backup: download from Android, restore from the UI, scheduled backups
 - [ ] Android: verify LAN discovery and controls on a real phone with real devices
 - [ ] Android: integration linking, device adoption, scene/automation editors, tariff settings, push notifications
 - [ ] Verify against real hardware: Tuya account (QR), Tapo P110 + L900 found on LAN, Xiaomi device at 192.168.1.7

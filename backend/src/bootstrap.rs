@@ -103,6 +103,7 @@ pub async fn bootstrap() -> anyhow::Result<()> {
             config.server.port
         ),
         fingerprint: rustls.as_ref().and_then(|(_, fp)| fp.clone()),
+        data_dir: config.server.data_dir.clone(),
     };
 
     let state = AppState {

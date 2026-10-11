@@ -7,9 +7,17 @@ use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::infrastructure::database::{get_setting, set_setting};
-use axum::{extract::State, routing::get, Json, Router};
+use axum::{
+    body::Body,
+    extract::State,
+    http::header,
+    response::{IntoResponse, Response},
+    routing::get,
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use tokio::io::AsyncReadExt;
 
 const KEY: &str = "server_links";
 
@@ -21,6 +29,8 @@ pub struct ServerInfo {
     /// SHA-256 of the TLS certificate, so an app that arrived by the remote
     /// address can trust the self-signed local one.
     pub fingerprint: Option<String>,
+    /// Where the database and the master key live; a backup is staged here.
+    pub data_dir: std::path::PathBuf,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -32,7 +42,39 @@ pub struct ServerLinks {
 }
 
 pub fn server_routes() -> Router<AppState> {
-    Router::new().route("/links", get(get_links).put(put_links))
+    Router::new().route("/links", get(get_links).put(put_links)).route("/backup", get(backup))
+}
+
+/// The whole home as one SQLite file to download: the database with the master key inside.
+/// Restored with `domus-backend restore <file>`.
+async fn backup(State(s): State<AppState>, user: AuthUser) -> ApiResult<Response> {
+    user.require_admin()?;
+    let path = s.server.data_dir.join(format!("backup-{}.db", uuid::Uuid::new_v4()));
+    let written = crate::infrastructure::backup::write(&s.pool, &s.server.data_dir, &path).await;
+    let opened = tokio::fs::File::open(&path).await;
+    // Unlinked while open: the copy is gone from disk as soon as the download ends or is dropped.
+    let _ = tokio::fs::remove_file(&path).await;
+    written?;
+    let file = opened.map_err(|e| ApiError::Internal(e.to_string()))?;
+    let len = file.metadata().await.map_err(|e| ApiError::Internal(e.to_string()))?.len();
+    // A read error ends the stream early; the length header lets the client notice.
+    let chunks = futures::stream::unfold(file, |mut file| async move {
+        let mut buf = vec![0u8; 64 * 1024];
+        let n = file.read(&mut buf).await.ok().filter(|n| *n > 0)?;
+        buf.truncate(n);
+        Some((Ok::<_, std::io::Error>(buf), file))
+    });
+    let name = format!("domus-backup-{}.db", chrono::Local::now().format("%Y-%m-%d"));
+    Ok((
+        [
+            (header::CONTENT_TYPE, "application/vnd.sqlite3".to_string()),
+            (header::CONTENT_LENGTH, len.to_string()),
+            (header::CONTENT_DISPOSITION, format!("attachment; filename=\"{name}\"")),
+            (header::CACHE_CONTROL, "no-store".to_string()),
+        ],
+        Body::from_stream(chunks),
+    )
+        .into_response())
 }
 
 async fn get_links(State(s): State<AppState>, _user: AuthUser) -> Json<Value> {

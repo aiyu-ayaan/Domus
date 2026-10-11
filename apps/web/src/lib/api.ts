@@ -171,6 +171,16 @@ export const api = {
       desktop?.saveLinks(links)
       return links
     }),
+  /** Saves the database, with the key that opens its stored accounts, as one file. */
+  downloadBackup: async () => {
+    const res = await fetch(`${BASE}/api/v1/server/backup`, { headers: { Authorization: `Bearer ${session.token}` } }).catch(() => null)
+    if (!res?.ok) throw new ApiError((await res?.json().catch(() => null))?.error?.message ?? 'Could not make the backup', res?.status ?? 0)
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(await res.blob())
+    link.download = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ?? 'domus-backup.db'
+    link.click()
+    URL.revokeObjectURL(link.href)
+  },
   saveServerLinks: (b: { local_url: string; remote_url: string }) =>
     put<ServerLinks>('/server/links', b).then((links) => {
       desktop?.saveLinks(links)

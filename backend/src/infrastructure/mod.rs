@@ -1,3 +1,4 @@
+pub mod backup;
 pub mod beacon;
 pub mod crypto;
 pub mod database;
