@@ -1,5 +1,5 @@
 //! Air quality history. The manager samples PM2.5 (with temperature and humidity
-//! when the device has them) every energy interval; this serves it as a time series.
+//! when the device has them) every few minutes; this serves it as a time series.
 
 use crate::api::error::ApiResult;
 use crate::api::middleware::AuthUser;
@@ -16,7 +16,7 @@ pub fn air_routes() -> Router<AppState> {
 
 #[derive(Deserialize)]
 struct HistoryQuery {
-    /// "hour" (60 one-minute points), "day" (24 hourly points), "week" (7 days) or "month" (30 days).
+    /// "day" (24 hourly points), "week" (7 days) or "month" (30 days).
     range: Option<String>,
     /// The viewer's offset from UTC in minutes, so buckets follow their clock rather than the server's.
     tz: Option<i32>,
@@ -49,7 +49,8 @@ impl Acc {
 }
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
-    let buckets = Buckets::new(q.range.as_deref(), q.tz, Utc::now());
+    // Air is sampled every few minutes, too coarse for the per-minute "hour" range: it reads as "day".
+    let buckets = Buckets::new(q.range.as_deref().filter(|r| *r != "hour"), q.tz, Utc::now());
     let visible: Vec<String> = visible_devices(&s, &user).await?.into_iter().map(|d| d.id).collect();
 
     // Fine UTC groups, regrouped into the viewer's buckets.

@@ -267,12 +267,12 @@ impl DeviceManager {
         }
     }
 
-    /// Store an air reading for this device, at most once per energy interval (the per-minute chart needs every one).
+    /// Store an air reading for this device, at most every five energy intervals (air changes slowly).
     async fn sample_air(&self, device_id: &str, pm25: f32, temperature: Option<f32>, humidity: Option<f32>) {
         {
             let key = format!("air:{device_id}");
             let mut last = self.last_sample.lock().await;
-            if last.get(&key).is_some_and(|t| t.elapsed() < self.energy_sample) {
+            if last.get(&key).is_some_and(|t| t.elapsed() < self.energy_sample * 5) {
                 return;
             }
             last.insert(key, Instant::now());
