@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { api, wsUrl } from './api'
 import { useAuth } from './auth'
+import { tOr } from './i18n'
 import { keys } from './queries'
 import { useToast } from './toast'
 import type { Device, LiveEvent } from './types'
@@ -81,7 +82,11 @@ export function useLiveEvents(enabled: boolean) {
             break
           case 'notification':
             qc.invalidateQueries({ queryKey: keys.notifications })
-            push({ tone: ev.level, title: ev.title, message: ev.message })
+            push({
+              tone: ev.level,
+              title: tOr(ev.code && `${ev.code}.title`, ev.params, ev.title),
+              message: tOr(ev.code, ev.params, ev.message),
+            })
             break
           case 'notifications_changed':
             qc.invalidateQueries({ queryKey: keys.notifications })

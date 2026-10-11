@@ -24,7 +24,7 @@ import type {
 } from './types'
 
 import { getStorageKey, type AppFlavor } from './flavor'
-import { t } from '@/lib/i18n'
+import { t, tOr } from '@/lib/i18n'
 
 const TOKEN_KEY = getStorageKey('domus.token')
 
@@ -88,6 +88,8 @@ export class ApiError extends Error {
     public status: number,
     /** Devices that ask before switching, when the server wants a yes first (status 428). */
     public confirm?: string[],
+    public code?: string,
+    public params?: Record<string, string | number>,
   ) {
     super(message)
   }
@@ -128,7 +130,10 @@ async function request<T>(method: string, path: string, body?: unknown, confirme
       if (!(await askToConfirm(names))) throw new ApiError(t('api.notSwitched'), 428)
       return request<T>(method, `${path}${path.includes('?') ? '&' : '?'}confirmed=true`, body, true)
     }
-    throw new ApiError(data?.error?.message ?? t('api.requestFailed', { status: res.status }), res.status, names)
+    const code: string | undefined = data?.error?.code
+    const params: Record<string, string | number> | undefined = data?.error?.params
+    const fallback: string = data?.error?.message ?? t('api.requestFailed', { status: res.status })
+    throw new ApiError(tOr(code, params, fallback), res.status, names, code, params)
   }
   return data as T
 }

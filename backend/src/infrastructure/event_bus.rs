@@ -49,6 +49,10 @@ pub enum SystemEvent {
         level: String,
         title: String,
         message: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        code: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        params: Option<serde_json::Value>,
         /// Not sent to the live stream of anyone but administrators.
         #[serde(skip)]
         admin_only: bool,

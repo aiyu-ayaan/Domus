@@ -55,8 +55,13 @@ fun Context.resolveDomusMessage(code: String?, params: Map<String, String> = emp
         DomusRepository.CODE_CERT_UNREADABLE -> R.string.connect_cert_unreadable
         DomusRepository.CODE_AUTOMATION_RAN -> R.string.automation_ran
         else -> {
-            val name = "code_" + code.lowercase().replace('.', '_').replace('-', '_')
-            resources.getIdentifier(name, "string", packageName)
+            val base = "code_" + code.lowercase().replace('.', '_').replace('-', '_')
+            val count = params["count"]
+            val pluralId = if (count != null) {
+                val suffix = if (count == "1") "_one" else "_other"
+                resources.getIdentifier(base + suffix, "string", packageName)
+            } else 0
+            if (pluralId != 0) pluralId else resources.getIdentifier(base, "string", packageName)
         }
     }
     if (resId == 0) return fallback.ifEmpty { code }

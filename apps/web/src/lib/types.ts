@@ -301,6 +301,8 @@ export interface Notification {
   level: 'info' | 'success' | 'warning' | 'error'
   title: string
   message: string
+  code?: string
+  params?: Record<string, string | number>
   link: string | null
   is_read: boolean
   created_at: string
@@ -313,7 +315,15 @@ export type LiveEvent =
   | { type: 'device_added' | 'device_updated' | 'device_removed'; device_id: string }
   | { type: 'device_discovered'; discovery_id: string; name: string; integration: string }
   | { type: 'discovery_finished'; found: number; new: number }
-  | { type: 'notification'; id: string; level: Notification['level']; title: string; message: string }
+  | {
+      type: 'notification'
+      id: string
+      level: Notification['level']
+      title: string
+      message: string
+      code?: string
+      params?: Record<string, string | number>
+    }
   | { type: 'automation_triggered'; automation_id: string; name: string }
 
 /** Where the home is, with today's sunrise and sunset there. All null until an administrator sets it. */

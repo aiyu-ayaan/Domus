@@ -819,4 +819,117 @@
     <string name="onboard_device_token_optional">Device token (optional)</string>
     <string name="onboard_device_token_supporting">Needed only without a linked Xiaomi account</string>
     <string name="onboard_ip_address">IP address</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">Already exists</string>
+    <string name="code_error_reference_missing" formatted="false">Referenced item does not exist</string>
+    <string name="code_error_internal" formatted="false">Internal server error</string>
+    <string name="code_error_session_expired" formatted="false">Invalid or expired session</string>
+    <string name="code_error_admin_required" formatted="false">Administrator access required</string>
+    <string name="code_error_guest_no_control" formatted="false">Guests cannot control devices</string>
+    <string name="code_error_not_signed_in" formatted="false">Not signed in</string>
+    <string name="code_error_missing_auth" formatted="false">Missing Authorization header</string>
+    <string name="code_error_account_gone" formatted="false">Account no longer exists</string>
+    <string name="code_error_must_change_password" formatted="false">Change your password first</string>
+    <string name="code_error_device_not_found" formatted="false">Device not found</string>
+    <string name="code_error_empty_command" formatted="false">empty command</string>
+    <string name="code_error_scan_running" formatted="false">A scan is already running</string>
+    <string name="code_error_discovered_not_found" formatted="false">Discovered device not found</string>
+    <string name="code_error_device_already_added" formatted="false">This device is already added</string>
+    <string name="code_error_username_too_short" formatted="false">Username must be at least 3 characters</string>
+    <string name="code_error_password_too_short" formatted="false">Password must be at least 8 characters</string>
+    <string name="code_error_setup_already_done" formatted="false">Setup has already been completed</string>
+    <string name="code_error_invalid_credentials" formatted="false">Invalid username or password</string>
+    <string name="code_error_invalid_reset_code" formatted="false">That code is wrong or no longer valid. Ask an administrator for a new one.</string>
+    <string name="code_error_wrong_current_password" formatted="false">Current password is incorrect</string>
+    <string name="code_error_same_password" formatted="false">Choose a password different from the current one</string>
+    <string name="code_error_avatar_too_long" formatted="false">Avatar string too long</string>
+    <string name="code_error_name_required" formatted="false">Name is required</string>
+    <string name="code_error_trigger_required" formatted="false">Add at least one trigger</string>
+    <string name="code_error_action_required" formatted="false">Add at least one action</string>
+    <string name="code_error_sun_offset_range" formatted="false">Sunrise and sunset can be shifted by at most 6 hours</string>
+    <string name="code_error_automation_not_found" formatted="false">Automation not found</string>
+    <string name="code_error_cannot_edit_device" formatted="false">You cannot edit this device</string>
+    <string name="code_error_admin_only_move_room" formatted="false">Only an administrator can move a device to another room</string>
+    <string name="code_error_name_empty" formatted="false">Name cannot be empty</string>
+    <string name="code_error_view_only_device" formatted="false">You can see this device but not control it</string>
+    <string name="code_error_view_only_devices" formatted="false">You can see these devices but not control them</string>
+    <string name="code_error_negative_rate" formatted="false">Rates cannot be negative</string>
+    <string name="code_error_invalid_billing_day" formatted="false">Billing day must be between 1 and 28</string>
+    <string name="code_error_invalid_currency" formatted="false">Currency must be a 3-letter ISO code</string>
+    <string name="code_error_slab_order" formatted="false">Each slab must end above the previous one</string>
+    <string name="code_error_slab_open_ended" formatted="false">Only the last slab can be open-ended</string>
+    <string name="code_error_tou_format" formatted="false">Time-of-use windows need a start and an end as HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">A time-of-use window cannot start and end at the same time</string>
+    <string name="code_error_tou_overlap" formatted="false">Time-of-use windows cannot overlap</string>
+    <string name="code_error_group_not_found" formatted="false">Group not found</string>
+    <string name="code_error_account_not_found" formatted="false">Account not found</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya integration is disabled</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Enter the User Code from the Smart Life app</string>
+    <string name="code_error_credentials_required" formatted="false">Email and password are required</string>
+    <string name="code_error_verification_expired" formatted="false">Verification expired; sign in again</string>
+    <string name="code_error_invalid_port" formatted="false">Port must be a number</string>
+    <string name="code_error_broker_required" formatted="false">Enter the broker address</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue integration is disabled</string>
+    <string name="code_error_room_name_required" formatted="false">Room name is required</string>
+    <string name="code_error_room_not_found" formatted="false">Room not found</string>
+    <string name="code_error_sync_lights_required" formatted="false">Pick at least one light to sync</string>
+    <string name="code_error_scene_not_found" formatted="false">Scene not found</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">Screen Sync needs a screen to share. Start it from the Domus app on the device showing the content.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">Place search is not reachable. Enter the latitude and longitude instead.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">Latitude is between -90 and 90, longitude between -180 and 180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">Every suggested address for that username is taken</string>
+    <string name="code_error_invalid_role" formatted="false">role must be admin, member or guest</string>
+    <string name="code_error_kid_password_required" formatted="false">A kid\'s account needs a password</string>
+    <string name="code_error_email_taken" formatted="false">That email is already used by another account</string>
+    <string name="code_error_user_not_found" formatted="false">User not found</string>
+    <string name="code_error_last_admin" formatted="false">There must be at least one administrator</string>
+    <string name="code_error_cannot_delete_self" formatted="false">You cannot delete your own account</string>
+    <string name="code_error_hue_press_button" formatted="false">Press the round button on the Hue bridge, then link again within 30 seconds</string>
+    <string name="code_error_hue_not_found" formatted="false">No Hue bridge found; enter its IP address</string>
+    <string name="code_error_tuya_device_gone" formatted="false">device no longer in Smart Life</string>
+    <string name="code_error_device_token_required" formatted="false">device token is required</string>
+    <string name="code_error_hue_link_expired" formatted="false">Authentication failed: the Hue bridge no longer accepts this link; link it again</string>
+    <string name="code_error_hue_removed" formatted="false">Authentication failed: Hue bridge was removed</string>
+    <string name="code_error_mqtt_removed" formatted="false">Authentication failed: MQTT broker was removed</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">Authentication failed: the device rejected your TP-Link account email/password</string>
+    <string name="code_error_tapo_account_required" formatted="false">Authentication failed: add your TP-Link account to control Tapo devices</string>
+    <string name="code_error_tapo_removed" formatted="false">Authentication failed: TP-Link account was removed</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">Authentication failed: Xiaomi asked for a captcha. Sign in once in the Mi Home app or browser, then retry</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">Authentication failed: invalid Xiaomi username or password</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">Authentication failed: wrong or expired verification code</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">Authentication failed: Xiaomi did not accept the code</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">Authentication failed: Xiaomi session expired</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">Authentication failed: Xiaomi wants a verification code; link the account again under Integrations</string>
+    <string name="code_error_unsupported_command" formatted="false">Not supported: this device does not support that command</string>
+    <string name="code_error_unsupported_effect" formatted="false">Not supported: this light cannot play that effect</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">Not supported: this Xiaomi model has no MIoT spec</string>
+    <string name="code_error_rate_limited_one" formatted="false">Too many wrong passwords. Try again in {count} minute.</string>
+    <string name="code_error_rate_limited_other" formatted="false">Too many wrong passwords. Try again in {count} minutes.</string>
+    <string name="code_error_integration_disabled" formatted="false">integration \'{integration}\' is not enabled</string>
+    <string name="code_error_invalid_time" formatted="false">Invalid time \'{time}\', use HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">invalid actions: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">region must be one of {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">Invalid Screen Sync settings: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">Unknown scene type \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" is not a server address</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">Authentication failed: Xiaomi could not send a verification code: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">Authentication failed: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">Not supported: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">Confirm switching {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">New device added</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) was found and added automatically</string>
+    <string name="code_notification_device_found_title" formatted="false">New device found</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) is ready to add</string>
+    <string name="code_notification_password_reset_title" formatted="false">Password reset requested</string>
+    <string name="code_notification_password_reset" formatted="false">{username} forgot their password. An administrator can give them a reset code in Settings, under People and access.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">Automation \"{name}\" had problems</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
 </resources>

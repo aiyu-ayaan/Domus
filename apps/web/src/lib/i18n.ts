@@ -19,3 +19,12 @@ export function t(key: MessageKey | string, params?: Record<string, string | num
   const text = (typeof count === 'number' && lookup(`${key}_${plural.select(count)}`)) || lookup(key) || key
   return params ? text.replace(/\{(\w+)\}/g, (m, name) => (name in params ? String(params[name]) : m)) : text
 }
+
+/** Resolves a server error or notification `code` when present in the catalog, falling back to `fallback`. */
+export function tOr(code: string | undefined, params: Record<string, string | number> | undefined, fallback: string): string {
+  if (!code) return fallback
+  const lookup = (k: string) => messages[k] ?? (en as Record<string, string>)[k]
+  const count = params?.count
+  const has = (typeof count === 'number' && lookup(`${code}_${plural.select(count)}`)) || lookup(code)
+  return has ? t(code, params) : fallback
+}

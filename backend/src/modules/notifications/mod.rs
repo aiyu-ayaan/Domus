@@ -25,6 +25,48 @@ pub struct NotificationRecord {
     pub created_at: DateTime<Utc>,
 }
 
+/// Gives system-authored notifications a catalog code and placeholder parameters while leaving
+/// user-authored automation notifications (`Action::Notify`) as plain text.
+pub fn classify_notification(title: &str, message: &str) -> (Option<String>, Option<Value>) {
+    if title == "New device added" {
+        if let Some(rest) = message.strip_suffix(") was found and added automatically") {
+            if let Some((name, integration)) = rest.rsplit_once(" (") {
+                return (
+                    Some("notification.device_added".into()),
+                    Some(json!({ "name": name, "integration": integration })),
+                );
+            }
+        }
+    }
+    if title == "New device found" {
+        if let Some(rest) = message.strip_suffix(") is ready to add") {
+            if let Some((name, integration)) = rest.rsplit_once(" (") {
+                return (
+                    Some("notification.device_found".into()),
+                    Some(json!({ "name": name, "integration": integration })),
+                );
+            }
+        }
+    }
+    if title == "Password reset requested" {
+        if let Some(username) =
+            message.strip_suffix(" forgot their password. An administrator can give them a reset code in Settings, under People and access.")
+        {
+            return (
+                Some("notification.password_reset".into()),
+                Some(json!({ "username": username })),
+            );
+        }
+    }
+    if let Some(name) = title.strip_prefix("Automation \"").and_then(|s| s.strip_suffix("\" had problems")) {
+        return (
+            Some("notification.automation_failed".into()),
+            Some(json!({ "name": name, "errors": message })),
+        );
+    }
+    (None, None)
+}
+
 /// Persists a notification and pushes it to connected clients.
 #[derive(Clone)]
 pub struct Notifier {
@@ -64,11 +106,14 @@ impl Notifier {
         if let Err(e) = res {
             tracing::warn!("failed to store notification: {e}");
         }
+        let (code, params) = classify_notification(title, message);
         self.bus.publish(SystemEvent::Notification {
             id,
             level: level.into(),
             title: title.into(),
             message: message.into(),
+            code,
+            params,
             admin_only,
         });
     }
@@ -86,12 +131,28 @@ pub fn notification_routes() -> Router<AppState> {
 const MINE: &str = "(admin_only = 0 OR ?)";
 
 async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Value>> {
-    let items: Vec<NotificationRecord> =
+    let rows: Vec<NotificationRecord> =
         sqlx::query_as(&format!("SELECT * FROM notifications WHERE {MINE} ORDER BY created_at DESC LIMIT 100"))
             .bind(user.is_admin())
             .fetch_all(&s.pool)
             .await?;
-    let unread = items.iter().filter(|n| !n.is_read).count();
+    let unread = rows.iter().filter(|n| !n.is_read).count();
+    let items: Vec<Value> = rows
+        .into_iter()
+        .map(|n| {
+            let (code, params) = classify_notification(&n.title, &n.message);
+            let mut obj = serde_json::to_value(&n).unwrap_or_default();
+            if let Some(map) = obj.as_object_mut() {
+                if let Some(c) = code {
+                    map.insert("code".into(), Value::String(c));
+                }
+                if let Some(p) = params {
+                    map.insert("params".into(), p);
+                }
+            }
+            obj
+        })
+        .collect();
     Ok(Json(json!({ "items": items, "unread": unread })))
 }
 

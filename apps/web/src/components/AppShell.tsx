@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n'
+import { t, tOr } from '@/lib/i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -331,28 +331,32 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
         <p className="py-10 text-center text-muted">{t('notifications.empty')}</p>
       ) : (
         <ul className="-mx-5 divide-y divide-border">
-          {data.items.map((n) => (
-            <li key={n.id} className="group flex items-start hover:bg-raised/60">
-              <button
-                onClick={() => {
-                  if (!n.is_read) api.readNotification(n.id).then(() => qc.invalidateQueries({ queryKey: keys.notifications }))
-                  if (n.link) {
-                    navigate(n.link)
-                    onClose()
-                  }
-                }}
-                className="flex min-w-0 flex-1 cursor-pointer gap-3 py-3 pl-5 text-left"
-              >
-                <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', n.is_read ? 'bg-transparent' : tone[n.level])} aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className={cn('block text-body font-medium', n.is_read && 'text-muted')}>{n.title}</span>
-                  <span className="block text-label text-muted [overflow-wrap:anywhere]">{n.message}</span>
-                  <span className="mt-0.5 block text-caption text-subtle">{timeAgo(n.created_at)}</span>
-                </span>
-              </button>
-              <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={t('notifications.delete', { title: n.title })} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
-            </li>
-          ))}
+          {data.items.map((n) => {
+            const title = tOr(n.code && `${n.code}.title`, n.params, n.title)
+            const message = tOr(n.code, n.params, n.message)
+            return (
+              <li key={n.id} className="group flex items-start hover:bg-raised/60">
+                <button
+                  onClick={() => {
+                    if (!n.is_read) api.readNotification(n.id).then(() => qc.invalidateQueries({ queryKey: keys.notifications }))
+                    if (n.link) {
+                      navigate(n.link)
+                      onClose()
+                    }
+                  }}
+                  className="flex min-w-0 flex-1 cursor-pointer gap-3 py-3 pl-5 text-left"
+                >
+                  <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', n.is_read ? 'bg-transparent' : tone[n.level])} aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className={cn('block text-body font-medium', n.is_read && 'text-muted')}>{title}</span>
+                    <span className="block text-label text-muted [overflow-wrap:anywhere]">{message}</span>
+                    <span className="mt-0.5 block text-caption text-subtle">{timeAgo(n.created_at)}</span>
+                  </span>
+                </button>
+                <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={t('notifications.delete', { title })} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
+              </li>
+            )
+          })}
         </ul>
       )}
     </Sheet>
