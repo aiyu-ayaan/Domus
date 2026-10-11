@@ -46,6 +46,8 @@ private val libraries = listOf(
     Library("AndroidX Activity, Lifecycle, Core", "https://developer.android.com/jetpack/androidx", "Apache-2.0"),
     Library("AndroidX ProfileInstaller", "https://developer.android.com/jetpack/androidx/releases/profileinstaller", "Apache-2.0"),
     Library("ZXing", "https://github.com/zxing/zxing", "Apache-2.0"),
+    Library("Markdown Renderer", "https://github.com/mikepenz/multiplatform-markdown-renderer", "Apache-2.0"),
+    Library("Coil", "https://github.com/coil-kt/coil", "Apache-2.0"),
     Library("DiceBear (avatar artwork)", "https://github.com/dicebear/dicebear", "MIT"),
     Library("Home Assistant (Tuya QR flow)", "https://www.home-assistant.io", "Inspiration"),
 )

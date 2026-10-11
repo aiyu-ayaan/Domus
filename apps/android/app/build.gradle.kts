@@ -96,6 +96,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.serialization.json) // scene / automation bodies are edited as JSON objects
     implementation(libs.zxing.core) // draws the Tuya link QR code
+    implementation(libs.markdown.m3) // release notes on the Updates page: headings, lists, tables
+    implementation(libs.markdown.coil3) // images in release notes
+    implementation(libs.coil.network.okhttp) // lets Coil fetch them
     implementation(libs.androidx.profileinstaller) // compiles the baseline profile at install, also when sideloaded
     baselineProfile(project(":baselineprofile"))
 }

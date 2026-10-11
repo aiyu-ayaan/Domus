@@ -20,6 +20,21 @@ class CoreTest {
     }
 
     @Test
+    fun releaseNotesComeWithTheUpdateAndForTheInstalledVersion() {
+        val releases = """[
+            {"tag_name":"v0.0.2","body":"## New\n- Sunrise triggers","assets":[{"browser_download_url":"https://x/Domus-0.0.2.apk"}]},
+            {"tag_name":"v0.0.1","body":"First release","assets":[]},
+            {"tag_name":"v0.0.1-beta.1","body":null,"assets":[]}
+        ]"""
+        assertEquals("## New\n- Sunrise triggers", Updates.pick(releases, "0.0.1", UpdateChannel.STABLE)?.notes)
+        assertEquals("First release", Updates.notesOf(releases, "0.0.1"))
+        // A dev build shows the notes of the release it was built from.
+        assertEquals("First release", Updates.notesOf(releases, "0.0.1-dev"))
+        assertNull(Updates.notesOf(releases, "0.0.1-beta.1"))
+        assertNull(Updates.notesOf(releases, "9.9.9"))
+    }
+
+    @Test
     fun serverUrlIsAlwaysHttps() {
         assertEquals("https://192.168.1.10:8443", normalizeServerUrl(" 192.168.1.10 "))
         assertEquals("https://192.168.1.10:9000", normalizeServerUrl("192.168.1.10:9000/"))

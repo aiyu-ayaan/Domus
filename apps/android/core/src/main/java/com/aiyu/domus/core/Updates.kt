@@ -3,6 +3,7 @@ package com.aiyu.domus.core
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -12,7 +13,11 @@ import okhttp3.Request
 /** Release streams. A channel takes its own builds and every steadier one. [stage] orders them: alpha < beta < stable. */
 enum class UpdateChannel(val label: String, val stage: Int) { STABLE("Stable", 2), BETA("Beta", 1), ALPHA("Alpha", 0) }
 
-data class AppUpdate(val version: String, val url: String)
+/** [notes] is the release's description in Markdown; empty when it has none. */
+data class AppUpdate(val version: String, val url: String, val notes: String = "")
+
+/** What GitHub said: a newer release if there is one, and the notes of the installed version (null when it was never released). */
+data class UpdateCheck(val update: AppUpdate?, val installedNotes: String?)
 
 /** Finds a newer APK among the GitHub releases (.github/workflows/release.yml names them `Domus-<version>.apk`). */
 object Updates {
@@ -48,17 +53,26 @@ object Updates {
             val apk = release.jsonObject["assets"]?.jsonArray
                 ?.mapNotNull { it.jsonObject["browser_download_url"]?.jsonPrimitive?.content }
                 ?.firstOrNull { it.endsWith(".apk") } ?: continue
-            best = key to AppUpdate(tag.removePrefix("v"), apk)
+            best = key to AppUpdate(tag.removePrefix("v"), apk, release.jsonObject["body"]?.jsonPrimitive?.contentOrNull.orEmpty())
         }
         return best?.second
     }
 
+    /** The Markdown notes of the release of [version]; a dev build shows those of the release it was built from. */
+    fun notesOf(releasesJson: String, version: String): String? {
+        val tag = "v" + version.trim().removeSuffix("-dev")
+        return Json.parseToJsonElement(releasesJson).jsonArray
+            .firstOrNull { it.jsonObject["tag_name"]?.jsonPrimitive?.content == tag }
+            ?.jsonObject?.get("body")?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
+    }
+
     /** Asks GitHub. Throws when it can't be reached. */
-    suspend fun check(installed: String, channel: UpdateChannel): AppUpdate? = withContext(Dispatchers.IO) {
+    suspend fun check(installed: String, channel: UpdateChannel): UpdateCheck = withContext(Dispatchers.IO) {
         val request = Request.Builder().url(RELEASES).header("Accept", "application/vnd.github+json").build()
         OkHttpClient().newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw java.io.IOException("GitHub answered ${response.code}")
-            pick(response.body!!.string(), installed, channel)
+            val releases = response.body!!.string()
+            UpdateCheck(pick(releases, installed, channel), notesOf(releases, installed))
         }
     }
 

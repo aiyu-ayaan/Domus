@@ -234,6 +234,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
 
         RowCard("Change password", "For signing in to Domus", Icons.Rounded.LockReset, onClick = { open("password") })
         RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
+        RowCard("Updates", "Version $version, release notes and channel", Icons.Rounded.SystemUpdate, onClick = { open("updates") })
         RowCard("About Domus", "Version $version, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
 
         SectionTitle("Appearance")
@@ -258,56 +259,6 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                     Switch(appearance.dynamicColor, onCheckedChange = null)
                 }
             }
-        }
-
-        // A dev build is its own app; a release APK would install beside it, not over it.
-        val installed = version
-        if (Updates.versionKey(installed) != null) {
-            SectionTitle("Updates")
-            val chosen by repository.updateChannel.collectAsStateWithLifecycle()
-            val channel = chosen ?: Updates.channelOf(installed)
-            // null: still asking, or GitHub can't be reached.
-            var update by remember { mutableStateOf<Result<AppUpdate?>?>(null) }
-            LaunchedEffect(channel) {
-                update = null
-                update = runCatching { Updates.check(installed, channel) }
-            }
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                UpdateChannel.entries.forEachIndexed { index, item ->
-                    SegmentedButton(channel == item, { repository.setUpdateChannel(item) }, SegmentedButtonDefaults.itemShape(index, UpdateChannel.entries.size)) { Text(item.label) }
-                }
-            }
-            val found = update?.getOrNull()
-            // null: not downloading.
-            var progress by remember { mutableStateOf<Float?>(null) }
-            var failed by remember { mutableStateOf(false) }
-            RowCard(
-                when {
-                    progress != null -> "Downloading Domus ${found?.version.orEmpty()}… ${((progress ?: 0f) * 100).toInt()}%"
-                    found != null -> "Domus ${found.version} is available"
-                    update == null -> "Checking for updates…"
-                    update?.isFailure == true -> "Couldn't check for updates"
-                    else -> "Domus is up to date"
-                },
-                when {
-                    progress != null -> "Version $installed"
-                    failed -> "The download failed. Tap to try again"
-                    found != null -> "Tap to download and install"
-                    else -> "Version $installed"
-                },
-                Icons.Rounded.SystemUpdate,
-                onClick = found?.takeIf { progress == null }?.let {
-                    {
-                        scope.launch {
-                            failed = false
-                            progress = 0f
-                            failed = runCatching { installUpdate(context, it) { done -> progress = done } }.isFailure
-                            progress = null
-                        }
-                    }
-                },
-            )
-            progress?.let { UpdateProgress(it) }
         }
 
         SectionTitle("Account")
