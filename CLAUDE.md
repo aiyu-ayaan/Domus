@@ -165,6 +165,7 @@ home-automation/
 - Releases are marker commits on `master` (`!alpha`, `!beta`, `!stable`, `!fix`, `!feat`, `!major`, `!patch`) that open a release PR; merging it builds and publishes. Versions, the build number, update channels and the required secrets are in `development/docs/RELEASE.md`. Read it before changing `.github/workflows/release.yml`, `scripts/release-version.mjs`, `scripts/set-version.mjs`, `scripts/install-linux.sh` or any version field. Never edit a version by hand; `docker-compose.yml` runs the published image, `docker-compose.local.yml` builds from source.
 - The native android app lives in `apps/android` (package `com.aiyu.domus`, modules `app`, `core`, `ui-shared`, Material 3 Expressive). Read `development/docs/ANDROID_APP.md` before changing it. It does not follow the web design profile below. Every handled tap ticks once through `Modifier.clickHaptics()` (`ui-shared/.../theme/Haptics.kt`), applied by the theme; a new `AlertDialog`, `ModalBottomSheet` or `DropdownMenu` is its own window and must pass `modifier = Modifier.clickHaptics()`. Never call `performHapticFeedback` in a click handler.
 
+- Localization (the `t()` catalog `apps/web/src/locales/en.json`, rules for new strings, what is done and left) is documented in `development/docs/LOCALIZATION.md`. Read it before adding any user-facing text: never write UI text in a component, add a key and call `t()`.
 
 ## UI
 

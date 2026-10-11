@@ -261,9 +261,11 @@
 
 
 ## Milestone 21: Localization, every user-facing string in a catalog (2026-10-12)
-Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Not in scope: translating, a language picker, the server's own error texts.
-- [x] Web: `lib/i18n.ts` (`t(key, params)`, plural by `key_one` / `key_other`) over `locales/en.json`
-- [ ] Web: move every string in `apps/web/src` to `locales/en.json`
-- [ ] Desktop: move the strings in `apps/desktop/src` (menus, dialogs, update messages) to a catalog
-- [ ] Android: move every string to `res/values/strings.xml` (core's errors, `AirLevel`, `UpdateChannel` need a resource-id type, core has no Compose)
-- [ ] `development/docs/LOCALIZATION.md` with the architecture diagram and the rules for new strings
+Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Design and rules: `development/docs/LOCALIZATION.md`. Translating and a language picker are not in scope.
+- [x] Web: `lib/i18n.ts` (`t(key, params)`, plural by `key_one` / `key_other`) over `locales/en.json`; `scripts/i18n-scan.py` lists what is left
+- [x] Web done: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview (+ insights), device drawer / row / charts / light controls, settings
+- [ ] Web to do: AutomationsView, RuleEditor, EnergyView, IntegrationsView, AirQualityView, AboutView, UpdatesView, AvatarPickerModal, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` (group names), `lib/devices.tsx` leftovers
+- [ ] Desktop: move the strings in `apps/desktop/src` (`main.js`, `updates.js`) to a catalog
+- [ ] Android: move every string to `res/values/strings.xml`; `core` has no Compose, so its errors, `AirLevel`, `UpdateChannel` and `Format` need resource ids or message codes
+- [ ] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
+- [ ] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
