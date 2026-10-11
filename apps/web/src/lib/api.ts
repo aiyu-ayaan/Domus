@@ -40,11 +40,15 @@ interface DesktopBridge {
   setTheme(theme: string): void
   /** The desktop app's own releases. Absent in desktop builds older than the update channel. */
   updates?: {
-    info(): Promise<{ version: string; channel: UpdateChannel; selfInstall: boolean } | null>
+    info(): Promise<{ version: string; channel: UpdateChannel; selfInstall: boolean; skipped?: string | null } | null>
     check(): Promise<{ version: string } | null>
-    /** The reason it failed, or '' (the app restarts, or the browser has the download). */
+    /** The reason it failed, or '' (the app restarts, or the installer was opened). */
     install(): Promise<string>
     setChannel(channel: UpdateChannel): Promise<void>
+    /** Don't offer the found version at start again. Absent, like `onProgress`, in older desktop builds. */
+    skip?(): Promise<void>
+    /** The download's progress, 0..1, then null. Returns the function that stops listening. */
+    onProgress?(listener: (fraction: number | null) => void): () => void
   }
 }
 export type UpdateChannel = 'stable' | 'beta' | 'alpha'

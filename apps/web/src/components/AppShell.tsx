@@ -19,13 +19,14 @@ import {
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { useLiveEvents } from '@/lib/live'
 import { keys, useDevices, useDiscovered, useEnergy, useNotifications, useServerLinks } from '@/lib/queries'
-import { api } from '@/lib/api'
+import { api, desktop } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { timeAgo } from '@/lib/format'
 import { Sheet } from './ui/Sheet'
 import { Button } from './ui/Button'
 import { ThemeToggle } from './ui/ThemeToggle'
 import { Avatar } from './ui/Avatar'
+import { UpdatePrompt } from './UpdatePrompt'
 import { isDevFlavor, appName } from '@/lib/flavor'
 
 interface NavItem {
@@ -426,6 +427,7 @@ export function AppShell() {
 
       <TabBar items={items} onMore={() => setMoreOpen(true)} pending={pending.length} />
       <Notifications open={notifOpen} onClose={() => setNotifOpen(false)} />
+      {desktop?.updates && <UpdatePrompt />}
       <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="Menu">
         <div className="-mx-2 flex flex-col gap-1">
           {/* User profile banner in More sheet */}

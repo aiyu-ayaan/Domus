@@ -9,6 +9,7 @@ import { Field, SelectField } from '@/components/ui/Field'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
 import { Avatar } from '@/components/ui/Avatar'
 import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal'
+import { UpdateProgress, useDesktopUpdate } from '@/components/UpdatePrompt'
 import { rollRandomAvatar, parseAvatarSpec } from '@/lib/avatar'
 import { api, desktop, type UpdateChannel } from '@/lib/api'
 import { useAuth, useIsAdmin } from '@/lib/auth'
@@ -197,15 +198,8 @@ const channels: { value: UpdateChannel; label: string }[] = [
 
 /** The web UI's version, and in the desktop app its own release channel and updates. */
 function AboutCard() {
-  const toast = useToast()
   const qc = useQueryClient()
-  const updates = desktop?.updates
-  const { data: info } = useQuery({ queryKey: ['desktop-update-info'], queryFn: () => updates!.info(), enabled: !!updates })
-  const check = useQuery({ queryKey: ['desktop-update', info?.channel], queryFn: () => updates!.check(), enabled: !!info, retry: false })
-  const install = useMutation({
-    mutationFn: () => updates!.install(),
-    onSuccess: (failed) => failed && toast.push({ tone: 'error', title: 'Update failed', message: failed }),
-  })
+  const { updates, info, check, install, progress, busy } = useDesktopUpdate()
   const setChannel = async (channel: UpdateChannel) => {
     await updates!.setChannel(channel)
     qc.invalidateQueries({ queryKey: ['desktop-update-info'] })
@@ -240,13 +234,18 @@ function AboutCard() {
             <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2">
               <p>{check.isFetching ? 'Checking for updates…' : check.isError ? "Couldn't check for updates" : check.data ? `Domus ${check.data.version} is available` : 'Up to date'}</p>
               {check.data ? (
-                <Button size="sm" loading={install.isPending} onClick={() => install.mutate()}>
+                <Button size="sm" loading={busy} onClick={() => install.mutate()}>
                   {info.selfInstall ? 'Update and restart' : 'Download'}
                 </Button>
               ) : (
                 <Button size="sm" variant="ghost" disabled={check.isFetching} onClick={() => check.refetch()}>
                   Check now
                 </Button>
+              )}
+              {progress !== null && (
+                <div className="w-full">
+                  <UpdateProgress value={progress} />
+                </div>
               )}
             </div>
           </>
