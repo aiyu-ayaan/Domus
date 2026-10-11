@@ -44,6 +44,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # delete the build artifacts once they are published
 
 # Never two at once: the second would compute its version from a state the first is changing.
 concurrency:
@@ -430,5 +431,12 @@ jobs:
           for arch in amd64 arm64; do refs="$refs $IMAGE@$(cat "artifacts/digest-$arch/$arch")"; done
           docker buildx imagetools create $tags $refs
           docker buildx imagetools inspect "$IMAGE:$VERSION"
+
+      # Everything is in the Release and on Docker Hub now. GitHub's shortest expiry is a day, so they go here;
+      # a failed release never reaches this step and keeps them that day for the retry.
+      - name: Delete the build artifacts
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" --paginate --jq '.artifacts[].id' |
+            xargs -r -I{} gh api -X DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/{}"
 
       - run: echo "Released v$VERSION ($CHANNEL) https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION" >> "$GITHUB_STEP_SUMMARY"

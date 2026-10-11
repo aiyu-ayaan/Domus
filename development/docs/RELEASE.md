@@ -26,6 +26,10 @@ Step 1 builds nothing; the PR diff is the last look at what ships and at its not
 nothing until every artifact exists, so a failed release leaves no tag, no Release and no moved
 channel. Retry it from the Actions tab: **Release → Run workflow → mode `release`**.
 
+The build artifacts on the run page (`android`, `desktop`, `windows`, `digest-*`) only hand files from the
+build jobs to `publish`. Its last step deletes them once the Release exists; a failed run keeps them for
+one day (`retention-days: 1`, the shortest GitHub allows) so it can be looked at and retried.
+
 ## 2. Markers
 
 The marker starts the commit subject; the rest follows the usual `scope(Change) : Message` form.
