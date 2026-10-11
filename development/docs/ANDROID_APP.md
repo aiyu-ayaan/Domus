@@ -173,6 +173,9 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   similarly format timestamps and `"HH:mm"` strings with `formatTime` / `formatClockTime` / `formatBucket`
   (`apps/web/src/lib/format.ts`), with Electron bridging the OS 12/24-hour setting (`window.domus.hour12`).
 - **Haptics** — `Haptics.kt` (ui-shared): `DomusTheme` provides `LocalIndication` as the M3 ripple plus a `VirtualKey` tick on press release, so every button, chip, `clickable` and list row ticks with no per-call code (a cancelled press stays silent). `Switch` draws no indication, so use `HapticSwitch` (on/off ticks) instead of `Switch` when it has its own `onCheckedChange`; a `Switch` with `onCheckedChange = null` inside a clickable row already ticks via the row. Don't pass `indication = null` on a clickable you want to tick.
+- **Home top bar** — `HomeHeader` (`Home.kt`), not the shared `ScreenHeader`: the avatar in a 48dp circle at the
+  start (tap opens the avatar page), the greeting over the name, and "n of m on" as a pill at the end, all on one
+  center line. The name ellipsizes before the pill gives way. The other tabs keep `ScreenHeader` with the morphing mark.
 - **Sign-in and recovery** — `AuthScreen` (`ConnectScreens.kt`) is three pages: sign in, "Forgot password?"
   (name the account) and the reset code with the new password. They change with `sharedAxisX` and go back with
   the predictive gesture. An account on a generated password gets `ChangePasswordScreen` before `MainScreen`;

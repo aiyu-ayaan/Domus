@@ -4,6 +4,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.AutoAwesome
@@ -69,7 +75,6 @@ import com.aiyu.domus.core.formatMoney
 import com.aiyu.domus.core.formatWatts
 import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
-import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
 import com.aiyu.domus.ui.components.enterStaggered
@@ -137,6 +142,27 @@ private fun SceneCard(scene: Scene, enabled: Boolean, onToggle: () -> Unit) {
  * The dashboard: what the home is doing right now, scenes one tap away, what is on, each room at a glance and
  * what happened lately. [open] opens a page over the tabs.
  */
+/**
+ * Home's top bar: the avatar in a circle at the start, the greeting over the name beside it, and what is on
+ * right now as a pill at the end. Everything sits on one center line, and the name gives way before the pill does.
+ */
+@Composable
+private fun HomeHeader(user: User, status: String, onAvatar: () -> Unit) {
+    val c = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.size(48.dp).clip(CircleShape).background(c.surfaceContainerHigh).clickable(onClickLabel = "Change avatar", role = Role.Button, onClick = onAvatar)) {
+            UserAvatar(avatarSpec = user.avatar, username = user.username, size = 48.dp)
+        }
+        Column(Modifier.weight(1f)) {
+            Text(greeting(), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant, maxLines = 1)
+            Text(user.username, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+        }
+        Surface(color = c.secondaryContainer, contentColor = c.onSecondaryContainer, shape = CircleShape) {
+            RollingText(status, MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        }
+    }
+}
+
 @Composable
 fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> Unit, open: (String) -> Unit) {
     val repository = LocalRepository.current
@@ -156,17 +182,10 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     LaunchedEffect(revision) { repository.request { it.notices() }?.let { notices = it.items.take(3) } }
 
     ScreenColumn {
-        ScreenHeader(
-            "${greeting()}, ${user.username}",
-            if (!live && !loading) "Reconnecting…" else devices.filter { it.type != "sensor" }.let { all -> "${all.count { it.isOnline && it.state.isOn == true }} of ${all.size} devices on" },
-            actions = {
-                UserAvatar(
-                    avatarSpec = user.avatar,
-                    username = user.username,
-                    size = 44.dp,
-                    onClick = { open("avatar") },
-                )
-            },
+        HomeHeader(
+            user,
+            if (!live && !loading) "Reconnecting…" else devices.filter { it.type != "sensor" }.let { all -> "${all.count { it.isOnline && it.state.isOn == true }} of ${all.size} on" },
+            onAvatar = { open("avatar") },
         )
         if (loading && devices.isEmpty()) {
             LoadingIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
