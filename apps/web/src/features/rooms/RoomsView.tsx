@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CaretRight, Door, PencilSimple, Plus, Trash } from '@phosphor-icons/react'
@@ -78,6 +79,7 @@ export function RoomDetailView() {
   const room = rooms.find((r) => r.id === id)
   const inRoom = devices.filter((d) => d.room_id === id)
 
+  const guard = useConfirmSwitch()
   const setAll = useMutation({
     mutationFn: async (on: boolean) => {
       const targets = inRoom.filter((d) => d.is_online && d.state.is_on !== undefined && d.device_type !== 'sensor')
@@ -114,8 +116,8 @@ export function RoomDetailView() {
           <>
             {control && inRoom.length > 0 && (
               <>
-                <Button size="sm" onClick={() => setAll.mutate(true)} loading={setAll.isPending && setAll.variables}>All on</Button>
-                <Button size="sm" onClick={() => setAll.mutate(false)} loading={setAll.isPending && !setAll.variables}>All off</Button>
+                <Button size="sm" onClick={() => guard.ask(inRoom, true, () => setAll.mutate(true))} loading={setAll.isPending && setAll.variables}>All on</Button>
+                <Button size="sm" onClick={() => guard.ask(inRoom, false, () => setAll.mutate(false))} loading={setAll.isPending && !setAll.variables}>All off</Button>
               </>
             )}
             {admin && (
@@ -141,6 +143,7 @@ export function RoomDetailView() {
       )}
       <DeviceDrawer device={devices.find((d) => d.id === open) ?? null} onClose={() => setOpen(null)} />
       <RoomSheet room={editing ? room : null} onClose={() => setEditing(false)} />
+      {guard.dialog}
       <Confirm open={deleting} onClose={() => setDeleting(false)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={`Delete ${room.name}?`} message="Devices in this room are kept and become unassigned." />
     </>
   )

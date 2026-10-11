@@ -80,6 +80,8 @@ export interface Device {
   ip_address: string | null
   mac_address: string | null
   icon: string | null
+  /** Ask before switching this device on or off. Set per device, shared by every app. */
+  confirm_changes: boolean
   is_online: boolean
   state: DeviceState
   last_seen: string | null

@@ -85,6 +85,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    /** Devices that ask before switching, when the server wants a yes first (status 428). */
+    public confirm?: string[],
   ) {
     super(message)
   }
@@ -95,7 +97,13 @@ export const setUnauthorizedHandler = (fn: () => void) => {
   onUnauthorized = fn
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+/** Asked when the server wants a yes before switching devices that ask first; resolves to the answer. */
+let askToConfirm: ((names: string[]) => Promise<boolean>) | null = null
+export const setConfirmHandler = (fn: typeof askToConfirm) => {
+  askToConfirm = fn
+}
+
+async function request<T>(method: string, path: string, body?: unknown, confirmed = false): Promise<T> {
   const headers: Record<string, string> = {}
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   const token = session.token
@@ -114,7 +122,12 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const data = res.status === 204 ? null : await res.json().catch(() => null)
   if (!res.ok) {
     if (res.status === 401 && token) onUnauthorized?.()
-    throw new ApiError(data?.error?.message ?? `Request failed (${res.status})`, res.status)
+    const names: string[] | undefined = data?.error?.confirm
+    if (res.status === 428 && names?.length && askToConfirm && !confirmed) {
+      if (!(await askToConfirm(names))) throw new ApiError('Not switched', 428)
+      return request<T>(method, `${path}${path.includes('?') ? '&' : '?'}confirmed=true`, body, true)
+    }
+    throw new ApiError(data?.error?.message ?? `Request failed (${res.status})`, res.status, names)
   }
   return data as T
 }
@@ -200,7 +213,7 @@ export const api = {
 
   devices: () => get<Device[]>('/devices'),
   device: (id: string) => get<Device>(`/devices/${id}`),
-  updateDevice: (id: string, b: { name?: string; room_id?: string | null; icon?: string | null }) =>
+  updateDevice: (id: string, b: { name?: string; room_id?: string | null; icon?: string | null; confirm_changes?: boolean }) =>
     patch<Device>(`/devices/${id}`, b),
   removeDevice: (id: string) => del<Ok>(`/devices/${id}`),
   command: (id: string, cmd: DeviceCommand) => post<Device>(`/devices/${id}/command`, cmd),

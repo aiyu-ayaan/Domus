@@ -682,6 +682,7 @@ impl DeviceManager {
             secrets_enc: self.seal_secrets(&secrets)?,
             icon: None,
             last_seen: Some(now),
+            confirm_changes: false,
         };
         self.repo.insert(&device).await?;
         self.repo.set_discovery_status(&rec.id, "adopted").await?;
@@ -725,6 +726,7 @@ impl DeviceManager {
             secrets_enc: self.seal_secrets(&d.secrets)?,
             icon: None,
             last_seen: Some(now),
+            confirm_changes: false,
         };
         self.repo.insert(&device).await?;
         self.repo.delete_discovery_for(&req.integration_type, &d.external_id).await?;

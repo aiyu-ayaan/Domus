@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from '@/lib/auth'
 import { ToastProvider } from '@/lib/toast'
 import { Toaster } from '@/components/ui/Toaster'
+import { ConfirmHost } from '@/components/devices/ConfirmSwitch'
 import { applyStoredTheme } from '@/lib/theme'
 import { applyFlavorHead } from '@/lib/flavor'
 import { desktop } from '@/lib/api'
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')!).render(
           </ScreenSyncProvider>
         </AuthProvider>
         <Toaster />
+        <ConfirmHost />
       </ToastProvider>
     </QueryClientProvider>
   </StrictMode>,

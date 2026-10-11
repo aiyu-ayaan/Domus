@@ -177,6 +177,7 @@ mod tests {
             secrets_enc: None,
             icon: None,
             last_seen: None,
+            confirm_changes: false,
         }
     }
 

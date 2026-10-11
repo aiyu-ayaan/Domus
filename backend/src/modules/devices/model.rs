@@ -23,6 +23,7 @@ pub struct DeviceRecord {
     pub secrets_enc: Option<String>,
     pub icon: Option<String>,
     pub last_seen: Option<DateTime<Utc>>,
+    pub confirm_changes: bool,
 }
 
 impl DeviceRecord {
@@ -45,6 +46,7 @@ impl DeviceRecord {
             ip_address: self.ip_address.clone(),
             mac_address: self.mac_address.clone(),
             icon: self.icon.clone(),
+            confirm_changes: self.confirm_changes,
             is_online: self.is_online,
             state: self.state(),
             last_seen: self.last_seen,
@@ -67,6 +69,8 @@ pub struct DeviceDto {
     pub ip_address: Option<String>,
     pub mac_address: Option<String>,
     pub icon: Option<String>,
+    /// Clients ask for confirmation before switching this device on or off.
+    pub confirm_changes: bool,
     pub is_online: bool,
     pub state: DeviceState,
     pub last_seen: Option<DateTime<Utc>>,
@@ -85,6 +89,7 @@ pub struct UpdateDeviceRequest {
     pub room_id: Option<Option<String>>,
     #[serde(default, with = "double_option")]
     pub icon: Option<Option<String>>,
+    pub confirm_changes: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]

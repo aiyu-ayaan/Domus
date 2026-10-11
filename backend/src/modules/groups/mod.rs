@@ -1,12 +1,12 @@
 //! Device groups: arbitrary sets of devices controlled together
 //! (e.g. "All lights", "Night mode plugs").
 
-use crate::api::error::{ApiError, ApiResult};
+use crate::api::error::{ApiError, ApiResult, Confirmed};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::modules::devices::service::{controllable_ids, visible_ids};
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     routing::{get, post, put},
     Json, Router,
 };
@@ -134,9 +134,13 @@ async fn command(
     State(s): State<AppState>,
     user: AuthUser,
     Path(id): Path<String>,
+    Query(q): Query<Confirmed>,
     Json(cmd): Json<DeviceCommand>,
 ) -> ApiResult<Json<Value>> {
     user.require_control()?;
+    s.automations
+        .require_confirmed(&[home_core::Action::GroupCommand { group_id: id.clone(), command: cmd.clone() }], q.confirmed)
+        .await?;
     let allowed = controllable_ids(&s, &user).await?;
     let ids: Vec<String> = s
         .manager

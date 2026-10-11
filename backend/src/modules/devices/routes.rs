@@ -78,7 +78,7 @@ async fn update(
     }
     let room = req.room_id.unwrap_or(rec.room_id.clone()).filter(|r| !r.is_empty());
     let icon = req.icon.unwrap_or(rec.icon.clone());
-    s.manager.repo.update_meta(&id, &name, room.as_deref(), icon.as_deref()).await?;
+    s.manager.repo.update_meta(&id, &name, room.as_deref(), icon.as_deref(), req.confirm_changes.unwrap_or(rec.confirm_changes)).await?;
     s.bus.publish(SystemEvent::DeviceUpdated { device_id: id.clone() });
     Ok(Json(s.manager.get(&id).await?.to_dto()))
 }

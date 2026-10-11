@@ -221,6 +221,52 @@ impl AutomationEngine {
         })
     }
 
+    /// Names of the devices these actions would switch on or off that ask before switching, nested scenes
+    /// and groups included. Empty when nothing needs a warning.
+    pub fn guarded<'a>(&'a self, actions: &'a [Action], depth: u8) -> futures::future::BoxFuture<'a, Vec<String>> {
+        Box::pin(async move {
+            let mut ids: Vec<String> = Vec::new();
+            let mut names: Vec<String> = Vec::new();
+            for action in actions {
+                match action {
+                    Action::DeviceCommand { device_id, command } if command.is_on.is_some() => ids.push(device_id.clone()),
+                    Action::GroupCommand { group_id, command } if command.is_on.is_some() => {
+                        ids.extend(self.manager.group_device_ids(group_id).await.unwrap_or_default())
+                    }
+                    Action::Scene { scene_id } if depth < MAX_SCENE_DEPTH => {
+                        if let Some(list) = self.scene_actions(scene_id).await {
+                            names.extend(self.guarded(&list, depth + 1).await);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            for id in ids {
+                if let Ok(device) = self.manager.get(&id).await {
+                    if device.confirm_changes {
+                        names.push(device.name);
+                    }
+                }
+            }
+            names.sort();
+            names.dedup();
+            names
+        })
+    }
+
+    /// Refuses with [ApiError::Confirm] while a device that asks before switching is in `actions`
+    /// and the person has not confirmed. Only for what a person starts: automations that fire
+    /// on their own have nobody to ask.
+    pub async fn require_confirmed(&self, actions: &[Action], confirmed: bool) -> Result<(), crate::api::error::ApiError> {
+        if confirmed {
+            return Ok(());
+        }
+        match self.guarded(actions, 0).await {
+            names if names.is_empty() => Ok(()),
+            names => Err(crate::api::error::ApiError::Confirm(names)),
+        }
+    }
+
     pub async fn scene_actions(&self, scene_id: &str) -> Option<Vec<Action>> {
         let row: Option<(String,)> = sqlx::query_as("SELECT actions_json FROM scenes WHERE id = ?")
             .bind(scene_id)

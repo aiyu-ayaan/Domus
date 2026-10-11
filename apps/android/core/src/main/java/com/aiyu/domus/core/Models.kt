@@ -200,6 +200,8 @@ data class Device(
     @SerialName("can_control") val canControl: Boolean = true,
     /** Whether the signed-in user may rename it (administrators, and edit access). */
     @SerialName("can_edit") val canEdit: Boolean = false,
+    /** Ask before switching it on or off. Kept on the server, so it is the same on every app. */
+    @SerialName("confirm_changes") val confirmChanges: Boolean = false,
 ) {
     /** What the server will report once [cmd] lands; shown at once so controls feel instant. */
     fun applying(cmd: DeviceCommand) = copy(

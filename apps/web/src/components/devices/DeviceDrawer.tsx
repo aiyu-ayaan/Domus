@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowsClockwise } from '@phosphor-icons/react'
 import { Sheet, Confirm } from '@/components/ui/Sheet'
@@ -46,6 +47,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const command = useCommand()
+  const guard = useConfirmSwitch()
   const control = useCanControl() && device.can_control && device.is_online
   const admin = useIsAdmin()
   const { data: rooms = [] } = useRooms()
@@ -82,6 +84,12 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
       qc.invalidateQueries({ queryKey: keys.devices })
       toast.push({ tone: 'success', title: 'Device updated' })
     },
+    onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
+  })
+  // Saved at once, not with "Save changes": it is a setting of how the device is handled, not of its name.
+  const ask = useMutation({
+    mutationFn: (on: boolean) => api.updateDevice(device.id, { confirm_changes: on }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.devices }),
     onError: (e) => toast.push({ tone: 'error', title: 'Could not save', message: errorMessage(e) }),
   })
   const remove = useMutation({
@@ -123,6 +131,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
 
   return (
     <div>
+      {guard.dialog}
       <div className="mb-6 flex items-center gap-2">
         <Badge tone={device.is_online ? 'on' : 'danger'}>{device.is_online ? 'Online' : 'Offline'}</Badge>
         <span className="min-w-0 flex-1 truncate text-label text-muted">
@@ -139,7 +148,7 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
                 <span className="text-body">Power</span>
                 <span className="flex items-center gap-3">
                   <span className="text-label text-muted">{s.is_on ? 'On' : 'Off'}</span>
-                  <Switch checked={!!s.is_on} onChange={(v) => send({ is_on: v })} label="Power" disabled={!control} />
+                  <Switch checked={!!s.is_on} onChange={(v) => guard.ask([device], v, () => send({ is_on: v }))} label="Power" disabled={!control} />
                 </span>
               </div>
             )}
@@ -233,6 +242,15 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
               </SelectField>
             )}
           </div>
+          {canToggle(device) && (
+            <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border px-4 py-2">
+              <div>
+                <p className="text-body">Ask before switching</p>
+                <p className="text-label text-muted">Warns before this device is turned on or off from any app, a group or a scene. Use it for a main switch.</p>
+              </div>
+              <Switch checked={device.confirm_changes} onChange={(on) => ask.mutate(on)} label="Ask before switching" disabled={ask.isPending} />
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap justify-between gap-2">
             {admin ? (
               <Button variant="danger" onClick={() => setConfirm(true)}>

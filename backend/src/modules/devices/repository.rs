@@ -77,11 +77,13 @@ impl DeviceRepository {
         name: &str,
         room_id: Option<&str>,
         icon: Option<&str>,
+        confirm_changes: bool,
     ) -> sqlx::Result<()> {
-        sqlx::query("UPDATE devices SET name = ?, room_id = ?, icon = ?, updated_at = ? WHERE id = ?")
+        sqlx::query("UPDATE devices SET name = ?, room_id = ?, icon = ?, confirm_changes = ?, updated_at = ? WHERE id = ?")
             .bind(name)
             .bind(room_id)
             .bind(icon)
+            .bind(confirm_changes)
             .bind(Utc::now())
             .bind(id)
             .execute(&self.pool)

@@ -3,12 +3,12 @@
 
 pub mod screen_sync;
 
-use crate::api::error::{ApiError, ApiResult};
+use crate::api::error::{ApiError, ApiResult, Confirmed};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
 use crate::modules::devices::service::{action_devices, require_control_of, sees_all, visible_ids};
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     routing::{get, post, put},
     Json, Router,
 };
@@ -290,7 +290,7 @@ async fn update(
     Ok(Json(json!({ "success": true })))
 }
 
-async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>, Query(q): Query<Confirmed>) -> ApiResult<Json<Value>> {
     user.require_control()?;
     ensure_runnable(&s, &user, &id).await?;
     if screen_sync_config(&s, &id).await.is_some() {
@@ -303,6 +303,7 @@ async fn activate(State(s): State<AppState>, user: AuthUser, Path(id): Path<Stri
         .scene_actions(&id)
         .await
         .ok_or_else(|| ApiError::NotFound("Scene not found".into()))?;
+    s.automations.require_confirmed(&actions, q.confirmed).await?;
     let errors = s.automations.execute(&actions, 1).await;
     sqlx::query("UPDATE scenes SET is_active = CASE WHEN id = ? THEN 1 ELSE 0 END")
         .bind(&id)
@@ -323,7 +324,7 @@ pub struct ToggleRequest {
     pub on: Option<bool>,
 }
 
-async fn deactivate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+async fn deactivate(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>, Query(q): Query<Confirmed>) -> ApiResult<Json<Value>> {
     user.require_control()?;
     ensure_runnable(&s, &user, &id).await?;
     // Stopping a Screen Sync scene ends its live session; the session restores the lights.
@@ -364,6 +365,7 @@ async fn deactivate(State(s): State<AppState>, user: AuthUser, Path(id): Path<St
         }
     }
 
+    s.automations.require_confirmed(&off_actions, q.confirmed).await?;
     let errors = s.automations.execute(&off_actions, 1).await;
     sqlx::query("UPDATE scenes SET is_active = 0 WHERE id = ?")
         .bind(&id)
@@ -376,6 +378,7 @@ async fn toggle(
     State(s): State<AppState>,
     user: AuthUser,
     Path(id): Path<String>,
+    Query(q): Query<Confirmed>,
     payload: Option<Json<ToggleRequest>>,
 ) -> ApiResult<Json<Value>> {
     user.require_control()?;
@@ -392,9 +395,9 @@ async fn toggle(
     };
 
     if turn_on {
-        activate(State(s), user, Path(id)).await
+        activate(State(s), user, Path(id), Query(q)).await
     } else {
-        deactivate(State(s), user, Path(id)).await
+        deactivate(State(s), user, Path(id), Query(q)).await
     }
 }
 

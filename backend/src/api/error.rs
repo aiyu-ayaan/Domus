@@ -18,6 +18,9 @@ pub enum ApiError {
     NotFound(String),
     #[error("Conflict: {0}")]
     Conflict(String),
+    /// Switching these devices needs the person's confirmation first (the devices that ask before switching).
+    #[error("Confirmation needed: {}", .0.join(", "))]
+    Confirm(Vec<String>),
     #[error("Too Many Requests: {0}")]
     TooManyRequests(String),
     /// Upstream device/cloud failure; message is safe to show.
@@ -29,14 +32,26 @@ pub enum ApiError {
 
 pub type ApiResult<T> = Result<T, ApiError>;
 
+/// `?confirmed=true`: the person has said yes to the warning for devices that ask before switching.
+#[derive(Debug, Default, serde::Deserialize)]
+pub struct Confirmed {
+    #[serde(default)]
+    pub confirmed: bool,
+}
+
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
+        if let ApiError::Confirm(names) = &self {
+            let body = Json(json!({ "error": { "message": format!("Confirm switching {}", names.join(", ")), "status": 428, "confirm": names } }));
+            return (StatusCode::PRECONDITION_REQUIRED, body).into_response();
+        }
         let (status, message) = match self {
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
             ApiError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),
             ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, msg),
             ApiError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             ApiError::Conflict(msg) => (StatusCode::CONFLICT, msg),
+            ApiError::Confirm(_) => unreachable!("answered above"),
             ApiError::TooManyRequests(msg) => (StatusCode::TOO_MANY_REQUESTS, msg),
             ApiError::Upstream(msg) => (StatusCode::BAD_GATEWAY, msg),
             ApiError::Internal(msg) => {

@@ -67,6 +67,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -87,6 +88,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -389,6 +391,19 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 }
             }
             Text(listOfNotNull(device.model, device.integration.replaceFirstChar(Char::uppercase)).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+            // A main switch, say: warn before it is turned on or off, from any app, a group or a scene.
+            if ((user.isAdmin || device.canEdit) && s.isOn != null && device.type != "sensor") {
+                Row(
+                    Modifier.toggleable(device.confirmChanges, role = Role.Switch) { repository.setConfirmChanges(device, it) },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Ask before switching", style = MaterialTheme.typography.titleMedium)
+                        Text("Warns before it is turned on or off, from any app, a group or a scene", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    }
+                    Switch(device.confirmChanges, onCheckedChange = null)
+                }
+            }
             if (user.isAdmin || device.canEdit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton({ editing = true }) { Text(if (user.isAdmin) "Rename or move" else "Rename") }
@@ -602,4 +617,24 @@ private fun CommitSlider(label: String, value: Int, range: ClosedFloatingPointRa
             modifier = Modifier.semantics { contentDescription = label },
         )
     }
+}
+
+/** The warning for devices that ask before switching: shown for a tap on one, and for a group, scene or automation that includes one. */
+@Composable
+fun ConfirmSwitchDialog() {
+    val confirmation by LocalRepository.current.confirmation.collectAsStateWithLifecycle()
+    val asking = confirmation ?: return
+    val names = asking.names
+    AlertDialog(
+        onDismissRequest = { asking.answer(false) },
+        title = { Text(if (names.size == 1) "Switch ${names[0]}?" else "Switch ${names.size} devices?") },
+        text = {
+            Text(
+                "This includes ${names.joinToString(", ")}, which ${if (names.size == 1) "asks" else "ask"} before switching. " +
+                    "Switching ${if (names.size == 1) "it" else "them"} can cut power to whatever is connected.",
+            )
+        },
+        confirmButton = { TextButton({ asking.answer(true) }) { Text("Switch") } },
+        dismissButton = { TextButton({ asking.answer(false) }) { Text("Cancel") } },
+    )
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarBlank, CalendarDot, CalendarDots, Pulse, Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
@@ -116,6 +117,7 @@ function TrendFact({ label, value, sub }: { label: string; value: string; sub: s
 export function AirQualityView() {
   const control = useCanControl()
   const command = useCommand()
+  const confirm = useConfirmSwitch()
   const { data: devices, isLoading } = useDevices()
   const { data: rooms = [] } = useRooms()
 
@@ -170,6 +172,7 @@ export function AirQualityView() {
 
   return (
     <>
+      {confirm.dialog}
       <PageHeader
         title="Air Quality"
         description="Real-time air health, PM2.5 particulate levels & purifier performance"
@@ -261,9 +264,7 @@ export function AirQualityView() {
                         checked={Boolean(s.is_on && d.is_online)}
                         disabled={!control || !d.can_control || !d.is_online}
                         label={`${d.name} power`}
-                        onChange={(v) =>
-                          command.mutate({ id: d.id, cmd: { is_on: v } })
-                        }
+                        onChange={(v) => confirm.ask([d], v, () => command.mutate({ id: d.id, cmd: { is_on: v } }))}
                       />
                     </div>
 

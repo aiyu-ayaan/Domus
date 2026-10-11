@@ -26,11 +26,17 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 /** [status] is the HTTP status, [OFFLINE] when the server can't be reached, [UNTRUSTED] when its certificate isn't accepted. */
-class ApiException(message: String, val status: Int) : Exception(message) {
+/** [confirm] names the devices that ask before switching when the server wants a yes first (428). */
+class ApiException(message: String, val status: Int, val confirm: List<String> = emptyList()) : Exception(message) {
     companion object {
         const val OFFLINE = 0
         const val UNTRUSTED = -1
     }
+}
+
+/** Put in a request's coroutine context to send `confirmed=true`: the person agreed to switch devices that ask first. */
+object Confirmed : kotlin.coroutines.AbstractCoroutineContextElement(Key) {
+    object Key : kotlin.coroutines.CoroutineContext.Key<Confirmed>
 }
 
 /** REST + live events of one Domus server. [pin] is the approved certificate fingerprint of a self-signed server. */
@@ -56,14 +62,16 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     private suspend fun <T> call(method: String, path: String, out: KSerializer<T>, body: String? = null): T =
         withContext(Dispatchers.IO) {
             val payload = (body ?: if (method == "GET") null else "{}")?.toRequestBody(JSON)
+            // A person said yes to the warning for devices that ask before switching (see [Confirmed]).
+            val target = if (coroutineContext[Confirmed.Key] != null) path + (if ('?' in path) "&" else "?") + "confirmed=true" else path
             try {
-                client.newCall(request(path).method(method, payload).build()).execute().use { response ->
+                client.newCall(request(target).method(method, payload).build()).execute().use { response ->
                     val text = response.body?.string().orEmpty()
                     if (!response.isSuccessful) {
-                        val message = runCatching {
-                            json.parseToJsonElement(text).jsonObject["error"]?.jsonObject?.get("message")?.jsonPrimitive?.contentOrNull
-                        }.getOrNull()
-                        throw ApiException(message ?: "Request failed (${response.code})", response.code)
+                        val error = runCatching { json.parseToJsonElement(text).jsonObject["error"]?.jsonObject }.getOrNull()
+                        val message = error?.get("message")?.jsonPrimitive?.contentOrNull
+                        val confirm = (error?.get("confirm") as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { it.jsonPrimitive.contentOrNull }
+                        throw ApiException(message ?: "Request failed (${response.code})", response.code, confirm)
                     }
                     json.decodeFromString(out, text)
                 }
@@ -111,6 +119,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun command(id: String, command: DeviceCommand) =
         call("POST", "/devices/$id/command", Device.serializer(), encode(DeviceCommand.serializer(), command))
     suspend fun effects() = call("GET", "/devices/effects", EffectCatalog.serializer())
+    suspend fun setConfirmChanges(id: String, on: Boolean) =
+        call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("confirm_changes", on) }.toString())
     suspend fun refresh(id: String) = call("POST", "/devices/$id/refresh", Device.serializer())
 
     /** A write whose answer is not needed (or is read loosely). */

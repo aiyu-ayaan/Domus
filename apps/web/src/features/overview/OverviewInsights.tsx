@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Wind, Lightning, Thermometer, DropHalf } from '@phosphor-icons/react'
 import { Card, CardHeader, Badge } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
@@ -35,6 +36,7 @@ export function OverviewInsights({
 }: OverviewInsightsProps) {
   const control = useCanControl()
   const command = useCommand()
+  const confirm = useConfirmSwitch()
 
   // Capability checks: only show cards if relevant devices actually exist
   const hasPowerDevices = devices.some(
@@ -65,6 +67,7 @@ export function OverviewInsights({
 
   return (
     <>
+      {confirm.dialog}
       {/* --- AIR QUALITY CARD (renders when air quality devices exist) --- */}
       {hasAirQuality && (
         <Card>
@@ -165,9 +168,7 @@ export function OverviewInsights({
                         checked={Boolean(s.is_on && d.is_online)}
                         disabled={!control || !d.can_control || !d.is_online}
                         label={`${d.name} power`}
-                        onChange={(v) =>
-                          command.mutate({ id: d.id, cmd: { is_on: v } })
-                        }
+                        onChange={(v) => confirm.ask([d], v, () => command.mutate({ id: d.id, cmd: { is_on: v } }))}
                       />
                     </div>
 

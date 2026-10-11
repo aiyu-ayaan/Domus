@@ -129,4 +129,5 @@ private fun DomusRoot() {
         }
     }
     UpdatePrompt()
+    ConfirmSwitchDialog()
 }

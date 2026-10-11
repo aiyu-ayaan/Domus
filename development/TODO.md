@@ -255,3 +255,6 @@
 - [ ] Desktop: open `/updates` in the Electron window with a real update on the channel
 - [ ] Write a release whose notes have a table and an image and check both renderers
 - [ ] The repository was renamed to `aiyu-ayaan/Domus`; the apps still ask `aiyu-ayaan/Domus-Rust` and rely on GitHub's redirect
+- [x] Ask before switching: per-device option kept on the server, warning dialog for the device's switch, room All on/off, groups, scenes and manual automation runs on web, desktop and Android
+- [ ] Ask before switching on Android: open the dialog from a tile, a group and a scene on a device (compiled, not opened); the web group dialog was checked
+- [ ] Ask before switching: unattended automations run without asking; decide if they should skip a guarded device and tell the administrators instead

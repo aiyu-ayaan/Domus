@@ -75,6 +75,18 @@ class DomusRepository(context: Context) {
     /** True while the event stream is connected. */
     private val _live = MutableStateFlow(false)
     val live: StateFlow<Boolean> = _live
+    /** A switch waiting for a yes: [names] are devices that ask before switching. Shown as a dialog by the app. */
+    class Confirmation(val names: List<String>, val answer: (Boolean) -> Unit)
+    private val _confirmation = MutableStateFlow<Confirmation?>(null)
+    val confirmation: StateFlow<Confirmation?> = _confirmation
+
+    /** Suspends until the person answers the warning for [names]. */
+    private suspend fun askToConfirm(names: List<String>): Boolean {
+        val answer = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        _confirmation.value = Confirmation(names) { yes -> _confirmation.value = null; answer.complete(yes) }
+        return answer.await()
+    }
+
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
     /** Short notices for a snackbar: failed commands, server notifications. */
     val messages: SharedFlow<String> = _messages
@@ -347,7 +359,14 @@ class DomusRepository(context: Context) {
     private suspend fun <T> attempt(block: suspend (DomusApi) -> T): T? {
         val api = api ?: return null
         return try {
-            block(api)
+            try {
+                block(api)
+            } catch (e: ApiException) {
+                // A group, scene or automation would switch devices that ask first: ask, then go on.
+                if (e.status != 428 || e.confirm.isEmpty()) throw e
+                if (!askToConfirm(e.confirm)) return null
+                kotlinx.coroutines.withContext(Confirmed) { block(api) }
+            }
         } catch (e: ApiException) {
             if (e.status == 401) logout() else _messages.tryEmit(e.message.orEmpty())
             null
@@ -391,11 +410,19 @@ class DomusRepository(context: Context) {
 
     /** Shows the new state at once, then sends it. A failure puts the real state back. */
     fun command(device: Device, command: DeviceCommand) {
-        replace(device.applying(command))
         scope.launch {
+            // The warning comes first: nothing changes on screen until it is answered.
+            if (device.confirmChanges && command.isOn != null && !askToConfirm(listOf(device.name))) return@launch
+            replace(device.applying(command))
             val confirmed = attempt { it.command(device.id, command) }
             if (confirmed != null) replace(confirmed) else replace(device)
         }
+    }
+
+    /** "Ask before switching" for [device]; shown at once and put back if the server refuses. */
+    fun setConfirmChanges(device: Device, on: Boolean) {
+        replace(device.copy(confirmChanges = on))
+        scope.launch { attempt { it.setConfirmChanges(device.id, on) }?.let(::replace) ?: replace(device) }
     }
 
     fun refreshDevice(id: String) {

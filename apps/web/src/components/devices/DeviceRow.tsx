@@ -1,4 +1,5 @@
 import { WifiSlash } from '@phosphor-icons/react'
+import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { Switch } from '@/components/ui/Controls'
 import { canToggle, deviceIcons, deviceSummary } from '@/lib/devices'
 import { cn } from '@/lib/cn'
@@ -10,6 +11,7 @@ import type { Device, Room } from '@/lib/types'
 /** One device as a list row: icon · name/status · power · switch. */
 export function DeviceRow({ device, room, onOpen }: { device: Device; room?: Room; onOpen: () => void }) {
   const command = useCommand()
+  const confirm = useConfirmSwitch()
   const control = useCanControl() && device.can_control
   const Icon = deviceIcons[device.device_type]
   const on = device.is_online && device.state.is_on === true
@@ -36,10 +38,11 @@ export function DeviceRow({ device, room, onOpen }: { device: Device; room?: Roo
             checked={on}
             disabled={!control || !device.is_online}
             label={`${device.name} power`}
-            onChange={(v) => command.mutate({ id: device.id, cmd: { is_on: v } })}
+            onChange={(v) => confirm.ask([device], v, () => command.mutate({ id: device.id, cmd: { is_on: v } }))}
           />
         </span>
       )}
+      {confirm.dialog}
     </li>
   )
 }

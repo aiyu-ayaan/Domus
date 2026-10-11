@@ -257,6 +257,45 @@ One shared inbox. `DELETE /notifications/{id}`, `DELETE /notifications` (all), a
 Android: swipe a row either way (Home "Recent activity" and the Notifications page); web: trash icon per row and a
 two-step "Delete all" in the sheet.
 
+### Ask before switching
+
+A device can be marked **Ask before switching** (`devices.confirm_changes`, `0012_device_confirm.sql`; the
+switch on the device page of every app, for administrators and anyone with edit access). The flag lives on
+the server, so setting it on the web is the same on desktop and Android. Its point is a main switch whose
+off cuts power to everything plugged into it.
+
+Where the warning appears:
+
+| Switched from | Who asks | How |
+| --- | --- | --- |
+| The device's own switch or sheet, a room's All on / All off | the app | checks `confirm_changes` before sending |
+| A device group, a scene (on, off, toggle, nested scenes) or a manual "Run" of an automation | the server | answers **428** `{ error: { confirm: [names] } }` while any device it would switch asks first; the app shows the dialog and sends the same request again with `?confirmed=true` |
+| A scheduled or triggered automation | nobody | runs as written: there is no one to ask. Nothing outside Domus (the Tapo app, a wall switch) is covered either |
+
+Only commands that set power (`is_on`) are guarded; brightness, color and the like are not. Source:
+`AutomationEngine::guarded` / `require_confirmed` (`automation_engine/executor.rs`), `ApiError::Confirm`,
+web `components/devices/ConfirmSwitch.tsx` (`ConfirmHost` answers 428 inside `lib/api.ts`), Android
+`DomusRepository.confirmation` and `ConfirmSwitchDialog`.
+
+```mermaid
+sequenceDiagram
+    participant U as Person
+    participant A as App
+    participant S as Server
+    U->>A: switch a group / scene / run an automation
+    A->>S: POST /scenes/:id/activate
+    S->>S: guarded(actions): devices with confirm_changes that get is_on
+    alt none
+        S-->>A: 200, runs
+    else some
+        S-->>A: 428 {confirm: ["Switch Laptop"]}
+        A->>U: dialog "Switch Switch Laptop?"
+        U->>A: Switch
+        A->>S: POST /scenes/:id/activate?confirmed=true
+        S-->>A: 200, runs
+    end
+```
+
 ### Time and sun triggers
 
 `SchedulerWorker` calls `AutomationEngine::tick` once a minute. A `time` trigger compares the minute with its
