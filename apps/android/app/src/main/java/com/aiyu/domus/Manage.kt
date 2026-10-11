@@ -19,6 +19,13 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
@@ -224,31 +231,77 @@ fun RoomsPage(onBack: () -> Unit) {
 private val Roles = listOf("admin" to "Admin", "member" to "Member", "guest" to "Guest")
 private val Levels = listOf("none" to "None", "view" to "See only", "control" to "Control", "edit" to "Edit")
 
-/** One room in the access editor: tap to open, then set the whole room or single devices (which also override the room). */
+/** The level of one room or device: a chip that opens the four levels. It is tinted while access is given. */
+@Composable
+private fun LevelMenu(what: String, level: String, onLevel: (String) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        FilterChip(
+            selected = level != "none",
+            onClick = { open = true },
+            label = { Text(Levels.first { it.first == level }.second) },
+            trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null, Modifier.size(18.dp)) },
+            modifier = Modifier.semantics { contentDescription = "Access to $what" },
+        )
+        DropdownMenu(open, { open = false }) {
+            Levels.forEach { (value, name) ->
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = { open = false; onLevel(value) },
+                    trailingIcon = if (value == level) { { Icon(Icons.Rounded.Check, null, Modifier.size(18.dp)) } } else null,
+                )
+            }
+        }
+    }
+}
+
+/** One line of the access editor: what it is on the left, its level on the right. */
+@Composable
+private fun AccessRow(label: String, level: String, onLevel: (String) -> Unit, hint: String? = null) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(start = 16.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        LevelMenu(label, level, onLevel)
+    }
+}
+
+/** One room in the access editor: a card that opens to the whole room and its devices (a device overrides the room). */
 @Composable
 private fun RoomAccess(name: String, devices: List<Device>, grants: Grants, room: String?, onRoom: ((String) -> Unit)?, onDevice: (Device, String) -> Unit) {
     var open by remember { mutableStateOf(false) }
+    val c = MaterialTheme.colorScheme
     val count = devices.count { grants.levelOf(it) != "none" }
     val status = when {
         room != null -> "Whole room · ${Levels.first { it.first == room }.second.lowercase()}"
         count > 0 -> "$count of ${devices.size} devices"
         else -> "No access"
     }
-    Column {
-        Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { open = !open }.heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(name, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
-            Text(status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        if (open) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            if (onRoom != null) {
-                Text("Whole room, with devices added later", style = MaterialTheme.typography.bodyMedium)
-                Choice(Levels, room ?: "none", onRoom)
+    val turn by animateFloatAsState(if (open) 180f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "chevron")
+    Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Row(
+                Modifier.fillMaxWidth().clickable(onClickLabel = if (open) "Close $name" else "Open $name") { open = !open }.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(status, style = MaterialTheme.typography.bodyMedium, color = if (room != null || count > 0) c.primary else c.onSurfaceVariant)
+                }
+                Icon(Icons.Rounded.ExpandMore, null, Modifier.rotate(turn), tint = c.onSurfaceVariant)
             }
-            devices.forEach { device ->
-                Text(device.name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Choice(Levels, grants.levelOf(device), { onDevice(device, it) })
+            AnimatedVisibility(open) {
+                Column(Modifier.padding(bottom = 8.dp)) {
+                    HorizontalDivider(color = c.outlineVariant)
+                    if (onRoom != null) {
+                        AccessRow("Whole room", room ?: "none", onRoom, hint = "Also covers devices added later")
+                        if (devices.isNotEmpty()) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = c.outlineVariant)
+                    }
+                    devices.forEach { device -> AccessRow(device.name, grants.levelOf(device), { onDevice(device, it) }) }
+                    if (devices.isEmpty()) Text("No devices in this room yet.", Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                }
             }
-            if (devices.isEmpty()) Text("No devices in this room yet.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -361,12 +414,14 @@ private fun PersonForm(user: User?, me: User, onBack: () -> Unit) {
 
         if (role != "admin") {
             SectionTitle("Access")
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("Custom access")
-                    Text("Choose rooms and devices, each at its own level. Off gives the whole home.", style = MaterialTheme.typography.bodySmall, color = muted)
+            Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                        Text("Custom access", style = MaterialTheme.typography.titleMedium)
+                        Text(if (allRooms) "Off: they reach the whole home." else "Set a level for each room, or for single devices in it.", style = MaterialTheme.typography.bodyMedium, color = muted)
+                    }
+                    HapticSwitch(!allRooms, { allRooms = !it })
                 }
-                HapticSwitch(!allRooms, { allRooms = !it })
             }
             if (!allRooms) {
                 if (rooms.isEmpty() && devices.isEmpty()) Text("Create rooms first.", color = muted)

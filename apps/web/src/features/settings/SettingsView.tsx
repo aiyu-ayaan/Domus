@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
+import { CaretDown, CaretRight, DiceFive, PencilSimple, Plus, Sparkle, Trash } from '@phosphor-icons/react'
 import { Badge, Card, CardHeader, ErrorText, PageHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Segmented, Switch } from '@/components/ui/Controls'
@@ -15,6 +15,7 @@ import { useAuth, useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useRooms, useServerLinks } from '@/lib/queries'
 import { errorMessage, useToast } from '@/lib/toast'
 import { useTheme } from '@/lib/theme'
+import { cn } from '@/lib/cn'
 import type { Device, Role, Room, User } from '@/lib/types'
 
 const roleHelp: Record<Role, string> = {
@@ -361,14 +362,32 @@ const toLevels = (ids: string[], viewOnly: string[], edit: string[]): Levels =>
 const without = (levels: Levels, ids: string[]): Levels => Object.fromEntries(Object.entries(levels).filter(([id]) => !ids.includes(id)))
 const idsAt = (levels: Levels, level: Level) => Object.keys(levels).filter((id) => levels[id] === level)
 
+/** One line of the access editor: what it is on the left, its level in a compact menu on the right. */
 function AccessRow({ label, hint, value, onChange }: { label: string; hint?: string; value: Level; onChange: (v: Level) => void }) {
   return (
-    <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-1.5">
-      <span className="min-w-0">
-        {label}
-        {hint && <span className="text-label text-muted"> · {hint}</span>}
-      </span>
-      <Segmented size="sm" label={`Access to ${label}`} value={value} options={levelOptions} onChange={onChange} />
+    <div className="flex min-h-12 items-center justify-between gap-3 py-2 pl-9 pr-3">
+      <div className="min-w-0">
+        <p className="truncate">{label}</p>
+        {hint && <p className="text-caption text-subtle">{hint}</p>}
+      </div>
+      <div className="relative shrink-0">
+        <select
+          aria-label={`Access to ${label}`}
+          value={value}
+          onChange={(e) => onChange(e.target.value as Level)}
+          className={cn(
+            'h-8 cursor-pointer appearance-none rounded-md border border-border bg-raised pl-2.5 pr-7 text-label transition-colors duration-fast focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-fg/15',
+            value === 'none' ? 'text-muted' : 'font-medium text-fg',
+          )}
+        >
+          {levelOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <CaretDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
+      </div>
     </div>
   )
 }
@@ -378,17 +397,18 @@ function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: 
   const count = devices.filter((d) => levelOf(d) !== 'none').length
   const status = room && room !== 'none' ? `Whole room · ${levelOptions.find((o) => o.value === room)?.label.toLowerCase()}` : count ? `${count} of ${devices.length} devices` : 'No access'
   return (
-    <details className="border-t border-border first:border-t-0">
-      <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3 hover:bg-raised">
-        <span>{name}</span>
-        <span className="text-label text-muted">{status}</span>
+    <details className="group rounded-lg border border-border">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 hover:bg-raised [&::-webkit-details-marker]:hidden">
+        <CaretRight size={14} className="shrink-0 text-subtle transition-transform duration-base group-open:rotate-90" aria-hidden />
+        <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
+        <span className={cn('shrink-0 text-label', count || (room && room !== 'none') ? 'text-fg' : 'text-muted')}>{status}</span>
       </summary>
-      <div className="border-t border-border pb-1">
-        {onRoom && <AccessRow label="Whole room" hint="includes devices added later" value={room ?? 'none'} onChange={onRoom} />}
+      <div className="divide-y divide-border border-t border-border">
+        {onRoom && <AccessRow label="Whole room" hint="Also covers devices added later" value={room ?? 'none'} onChange={onRoom} />}
         {devices.map((d) => (
           <AccessRow key={d.id} label={d.name} value={levelOf(d)} onChange={(v) => onDevice(d.id, v)} />
         ))}
-        {devices.length === 0 && <p className="px-3 py-2 text-label text-muted">No devices in this room yet.</p>}
+        {devices.length === 0 && <p className="py-3 pl-9 pr-3 text-label text-muted">No devices in this room yet.</p>}
       </div>
     </details>
   )
@@ -569,25 +589,26 @@ function UserSheet({ user, onClose }: { user: User | 'new' | null; onClose: () =
             <option value="guest">Guest</option>
           </SelectField>
           {form.role !== 'admin' && (
-            <div className="rounded-lg border border-border">
-              <div className="flex min-h-12 items-center justify-between gap-3 px-3">
-                <div>
-                  <p>Custom access</p>
-                  <p className="text-label text-muted">Choose rooms and devices, each at its own level. Off gives the whole home.</p>
+            <section className="flex flex-col gap-2" aria-label="Access">
+              <p className="text-label font-medium text-fg">Access</p>
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-3">
+                <div className="min-w-0">
+                  <p className="font-medium">Custom access</p>
+                  <p className="mt-0.5 text-label text-muted">{form.all_rooms ? 'Off: they reach the whole home.' : 'Set a level for each room, or for single devices in it.'}</p>
                 </div>
                 <Switch checked={!form.all_rooms} onChange={(v) => setForm({ ...form, all_rooms: !v })} label="Custom access" />
               </div>
               {!form.all_rooms && (
-                <fieldset className="border-t border-border">
+                <fieldset className="flex flex-col gap-2">
                   <legend className="sr-only">Rooms and devices</legend>
-                  {rooms.length === 0 && devices.length === 0 && <p className="p-3 text-label text-muted">Create rooms first.</p>}
+                  {rooms.length === 0 && devices.length === 0 && <p className="rounded-lg border border-border p-3 text-label text-muted">Create rooms first.</p>}
                   {rooms.map((r) => (
                     <RoomAccess key={r.id} name={r.name} devices={inRoom(r.id)} room={form.rooms[r.id]} levelOf={levelOf} onRoom={(v) => setRoom(r.id, v)} onDevice={(id, v) => setDevice(r.id, id, v)} />
                   ))}
                   {inRoom(null).length > 0 && <RoomAccess name="No room" devices={inRoom(null)} levelOf={levelOf} onDevice={(id, v) => setDevice(null, id, v)} />}
                 </fieldset>
               )}
-            </div>
+            </section>
           )}
           <ErrorText>{error}</ErrorText>
         </div>

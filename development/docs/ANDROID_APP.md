@@ -159,8 +159,9 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text.
 - **People and access** — a person opens as a full page (`person:<id>` over People, so the predictive back
-  gesture returns to the list; `PersonEditorPage` in `Manage.kt`). With "Custom access" on, each room opens
-  to None / See only / Control / Edit for the whole room and for each device. Email has a Generate button
+  gesture returns to the list; `PersonEditorPage` in `Manage.kt`). With "Custom access" on, each room is a
+  card that opens to one row for the whole room and one per device; the level (None / See only / Control /
+  Edit) is a chip with a menu on the right, tinted while access is given. Email has a Generate button
   (`name@domus.home`) and an availability line; password fields can be revealed. The editing rules live in
   `Grants` (`core/Models.kt`, tested in `CoreTest`) and match the web editor: a device's level overrides its
   room's, and taking one device out of a whole room keeps the rest as single devices. Tiles and the device

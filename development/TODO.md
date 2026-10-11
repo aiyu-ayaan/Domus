@@ -229,6 +229,7 @@
 - [x] Person editor is a full screen on Android (`person:<id>` page, predictive back returns to People); the dialog is gone
 - [x] Email: Generate button (`name@domus.home`, combinations of the username) and a live availability check on web and Android; duplicate emails answer 409
 - [x] Android password fields have a show/hide eye
+- [x] Access editor laid out the same on web and Android: a padded Custom access card, a card per room, one row per device with a level menu on the right
 - [ ] Android: sign in as a see-only member on a device and check the disabled controls by eye
 - [ ] Android: check the new person screen's Generate and Edit level on the emulator (the dev server there must be restarted to pick up the new backend)
 - [ ] Android: grey out scenes and automations the user can see but not run (they answer 403 today)
