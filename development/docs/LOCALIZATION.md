@@ -10,36 +10,40 @@ Branch: `feat/localization`. Progress is tracked in `development/TODO.md` (Miles
 flowchart LR
     subgraph web["apps/web (also the desktop window)"]
         EN["locales/en.json\nkey -> English"]
-        T["lib/i18n.ts: t(key, params)"]
+        T["lib/i18n.ts: t(key, params) / tOr(code, params, fallback)"]
         UI["components, views, lib/*"]
         EN --> T --> UI
     end
     subgraph desktop["apps/desktop (Electron main process)"]
-        DC["catalog for menus, dialogs,\nupdate messages (to do)"]
+        DEN["src/locales/en.json\nkey -> English"]
+        DT["src/i18n.js: t(key, params)"]
+        DM["main.js, updates.js, connect.html"]
+        DEN --> DT --> DM
     end
     subgraph android["apps/android"]
-        RES["app/src/main/res/values/strings.xml\n(+ values-xx for a language) (to do)"]
-        CORE["core: errors and labels as\nresource ids / message codes (to do)"]
+        RES["app/src/main/res/values/strings.xml\n(+ values-xx for a language)"]
+        I18N["app: I18n.kt (resolveDomusMessage)"]
+        CORE["core: errors and labels as\nmessage codes"]
+        CORE --> I18N --> RES
     end
     subgraph server["backend (Rust)"]
-        ERR["ApiError and notifications:\nEnglish message + code + params (to do)"]
+        ERR["ApiError and notifications:\nEnglish message + code + params"]
     end
     ERR -- "message (fallback), code, params" --> T
     ERR -- "message (fallback), code, params" --> CORE
-    CORE --> RES
 ```
 
-The server keeps sending its English `message`, so old clients and logs keep working. It will also send a stable
+The server keeps sending its English `message`, so old clients and logs keep working. It also sends a stable
 `code` and `params`. A client translates by `code` and shows `message` when it has no entry for it.
 
 ## 2. Web (`apps/web`)
 
 - `src/locales/en.json` is the source catalog: flat keys, `{name}` placeholders. English is the fallback for every language.
-- `src/lib/i18n.ts` exports `t(key, params?)`. The language is `navigator.language` read once at load, so `t()` also works
+- `src/lib/i18n.ts` exports `t(key, params?)` and `tOr(code, params, fallback)`. The language is `navigator.language` read once at load, so `t()` also works
   in module-level constants (`deviceTypeLabel`, `WHITE_PRESETS`, ...). A language picker would need `t()` to become reactive.
 - Plurals: pass a numeric `count`. `t('common.deviceCount', { count })` looks up `common.deviceCount_one` / `_other`
   (the `Intl.PluralRules` category of the language) before `common.deviceCount`.
-- Keys are grouped by screen (`settings.*`, `rooms.*`, `overview.*`), shared words under `common.*`, `nav.*`, `device.*`.
+- Keys are grouped by screen (`settings.*`, `rooms.*`, `overview.*`), shared words under `common.*`, `nav.*`, `device.*`, and server codes under `error.*` and `notification.*`.
 - To add a language: create the catalog, register it in `catalogs` in `lib/i18n.ts`. Missing keys fall back to English.
 
 ### Rules for new strings
@@ -57,12 +61,12 @@ hooks and the brand name show up as false positives. A file is done when only th
 
 | Area | State |
 |---|---|
-| Web catalog + `t()` | done (577 keys) |
+| Web catalog + `t()` / `tOr()` | done (1,145 keys in `apps/web/src/locales/en.json`) |
 | Web: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview, device drawer / row / charts / light controls, settings | done |
-| Web: Automations, RuleEditor, Energy, Integrations, Air quality, About, Updates, Avatar picker, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` group names | to do |
-| Desktop (`apps/desktop/src/main.js`, `updates.js`) | to do |
-| Android | to do. `core` has no Compose: `AirLevel.label`, `UpdateChannel.label`, `ApiException` texts, `Format.kt` and the repository's returned strings need resource ids or codes |
-| Server message codes | to do (see section 1) |
+| Web: Automations, RuleEditor, Energy, Integrations, Air quality, About, Updates, Avatar picker, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` group names, `lib/devices.tsx` | done |
+| Desktop (`apps/desktop/src/main.js`, `updates.js`, `connect.html`, `i18n.js`, `locales/en.json`) | done (24 keys) |
+| Android (`apps/android/app/src/main/res/values/strings.xml`, `I18n.kt`, `core` message codes) | done (868 strings + 8 plurals; `core` stays free of Android resources in signatures via message codes resolved in `:app`) |
+| Server message codes (`backend/src/api/error.rs`, `modules/notifications/mod.rs`) | done (`code` + `params` sent alongside `message`; translated in web and Android with fallback to `message`) |
 
 ## 4. Gotchas found while doing it
 

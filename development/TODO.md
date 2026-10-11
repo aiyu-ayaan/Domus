@@ -264,8 +264,8 @@
 Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Design and rules: `development/docs/LOCALIZATION.md`. Translating and a language picker are not in scope.
 - [x] Web: `lib/i18n.ts` (`t(key, params)`, plural by `key_one` / `key_other`) over `locales/en.json`; `scripts/i18n-scan.py` lists what is left
 - [x] Web done: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview (+ insights), device drawer / row / charts / light controls, settings
-- [ ] Web to do: AutomationsView, RuleEditor, EnergyView, IntegrationsView, AirQualityView, AboutView, UpdatesView, AvatarPickerModal, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` (group names), `lib/devices.tsx` leftovers
-- [ ] Desktop: move the strings in `apps/desktop/src` (`main.js`, `updates.js`) to a catalog
-- [ ] Android: move every string to `res/values/strings.xml`; `core` has no Compose, so its errors, `AirLevel`, `UpdateChannel` and `Format` need resource ids or message codes
-- [ ] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
-- [ ] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
+- [x] Web done: AutomationsView, RuleEditor, EnergyView, IntegrationsView, AirQualityView, AboutView, UpdatesView, AvatarPickerModal, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` (group names), `lib/devices.tsx` leftovers
+- [x] Desktop: move the strings in `apps/desktop/src` (`main.js`, `updates.js`, `connect.html`) to a catalog (`src/i18n.js`, `src/locales/en.json`)
+- [x] Android: move every string to `res/values/strings.xml`; `core` has no Compose, so its errors, `AirLevel`, `UpdateChannel` and `Format` use message codes resolved in `:app` (`I18n.kt`)
+- [x] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
+- [x] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
