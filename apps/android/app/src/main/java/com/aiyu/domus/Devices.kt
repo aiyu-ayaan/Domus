@@ -393,15 +393,21 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             Text(listOfNotNull(device.model, device.integration.replaceFirstChar(Char::uppercase)).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
             // A main switch, say: warn before it is turned on or off, from any app, a group or a scene.
             if ((user.isAdmin || device.canEdit) && s.isOn != null && device.type != "sensor") {
-                Row(
-                    Modifier.toggleable(device.confirmChanges, role = Role.Switch) { repository.setConfirmChanges(device, it) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Ask before switching", style = MaterialTheme.typography.titleMedium)
-                        Text("Warns before it is turned on or off, from any app, a group or a scene", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                // A card, so the press ripple has edges and the text keeps its distance from the switch.
+                Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        Modifier
+                            .toggleable(device.confirmChanges, role = Role.Switch) { repository.setConfirmChanges(device, it) }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Ask before switching", style = MaterialTheme.typography.titleMedium)
+                            Text("Warns before it is turned on or off, from any app, a group or a scene", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                        }
+                        Switch(device.confirmChanges, onCheckedChange = null)
                     }
-                    Switch(device.confirmChanges, onCheckedChange = null)
                 }
             }
             if (user.isAdmin || device.canEdit) {
