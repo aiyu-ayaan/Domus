@@ -60,6 +60,9 @@ sequenceDiagram
   included. It is checked before the password, so parallel requests cannot outrun it, and it counts unknown
   names too, so a lock does not reveal which accounts exist. A correct sign-in or a redeemed reset code clears
   it. The count lives in memory: restarting the server lifts every lock.
+- **Administrator alerts** (`notifications.admin_only`, `Notifier::notify_admins`): "Password reset
+  requested", discovery and failing automations are listed, pushed over the live stream, marked read and
+  deleted only for administrators. What an automation sends on purpose goes to everyone.
 - **Secrets are returned once**: `generated_password` and `reset_code` appear only in the answer to the
   request that made them. Lists and `/auth/me` never carry them.
 - A password an administrator sets on their own account does not force a change.
@@ -81,7 +84,7 @@ Schema: `migrations/0009_account_recovery.sql`. Logic: `backend/src/modules/auth
 
 ## Known limits
 
-- The notification inbox is shared, so every signed-in person sees "Password reset requested", not only administrators.
+- Read and deleted state of a notification is shared by everyone who can see it; there is no inbox per person.
 - A kid cannot change their own password in the Android app (it has no change-password page yet); on the web they can.
 - Anyone who can reach the sign-in page can lock a name out for 15 minutes by guessing wrong five times.
 - `domus-backend reset-password <username>` still works from the server's shell when every administrator is locked out.

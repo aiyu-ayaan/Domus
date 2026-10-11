@@ -234,10 +234,10 @@
 - [ ] Android: check the new person screen's Generate and Edit level on the emulator (the dev server there must be restarted to pick up the new backend)
 - [ ] Android: grey out scenes and automations the user can see but not run (they answer 403 today)
 - [ ] Web: grey out scenes and automations the user can see but not run (they answer 403 today)
-- [ ] Notifications inbox is still shared by every signed-in user
+- [x] Administrator alerts (`0010_notification_audience.sql`): accounts, discovery and failing automations are hidden from members and guests; read state is still shared
 - [x] Accounts (`0009_account_recovery.sql`, `development/docs/ACCOUNTS.md`): generated passwords shown once to copy or share, forced change at first sign-in (enforced in the auth middleware), kid's accounts with an admin-set password
 - [x] Forgot password without email: the request notifies administrators, who issue an 8-digit one-time code (30 minutes, 5 tries); web, desktop and Android screens
 - [ ] Check the new Android sign-in pages and the Handover dialog by eye on the emulator (they compile and the API flow was run with curl, but were not opened)
 - [ ] Check the web forgot-password and change-password screens and the person sheet by eye
 - [ ] Android: a change-password page in Settings (kids and everyone else can only change it on the web today)
-- [ ] Send "Password reset requested" to administrators only (the inbox is shared)
+- [x] Send "Password reset requested" to administrators only

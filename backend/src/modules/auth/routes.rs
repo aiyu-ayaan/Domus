@@ -170,7 +170,7 @@ async fn forgot(State(s): State<AppState>, Json(req): Json<ForgotRequest>) -> Ap
                 .execute(&s.pool)
                 .await?;
             s.notifier
-                .notify(
+                .notify_admins(
                     "warning",
                     "Password reset requested",
                     &format!("{} forgot their password. An administrator can give them a reset code in Settings, under People and access.", user.username),

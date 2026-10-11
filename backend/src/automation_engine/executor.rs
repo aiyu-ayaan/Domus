@@ -169,7 +169,7 @@ impl AutomationEngine {
             let errors = self.execute(&rule.actions, 0).await;
             if !errors.is_empty() {
                 self.notifier
-                    .notify("warning", &format!("Automation \"{}\" had problems", rule.name), &errors.join("; "), Some("/automations"))
+                    .notify_admins("warning", &format!("Automation \"{}\" had problems", rule.name), &errors.join("; "), Some("/automations"))
                     .await;
             }
         });

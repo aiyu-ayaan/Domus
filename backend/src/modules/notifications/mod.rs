@@ -21,6 +21,7 @@ pub struct NotificationRecord {
     pub message: String,
     pub link: Option<String>,
     pub is_read: bool,
+    pub admin_only: bool,
     pub created_at: DateTime<Utc>,
 }
 
@@ -36,16 +37,27 @@ impl Notifier {
         Self { pool, bus }
     }
 
+    /// For everyone who can sign in.
     pub async fn notify(&self, level: &str, title: &str, message: &str, link: Option<&str>) {
+        self.send(level, title, message, link, false).await
+    }
+
+    /// For administrators only: accounts, discovery, anything that names devices a guest may not see.
+    pub async fn notify_admins(&self, level: &str, title: &str, message: &str, link: Option<&str>) {
+        self.send(level, title, message, link, true).await
+    }
+
+    async fn send(&self, level: &str, title: &str, message: &str, link: Option<&str>, admin_only: bool) {
         let id = Uuid::new_v4().to_string();
         let res = sqlx::query(
-            "INSERT INTO notifications (id, level, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)",
+            "INSERT INTO notifications (id, level, title, message, link, is_read, admin_only, created_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)",
         )
         .bind(&id)
         .bind(level)
         .bind(title)
         .bind(message)
         .bind(link)
+        .bind(admin_only)
         .bind(Utc::now())
         .execute(&self.pool)
         .await;
@@ -57,6 +69,7 @@ impl Notifier {
             level: level.into(),
             title: title.into(),
             message: message.into(),
+            admin_only,
         });
     }
 }
@@ -69,30 +82,38 @@ pub fn notification_routes() -> Router<AppState> {
         .route("/:id", delete(remove))
 }
 
-async fn list(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Value>> {
+/// Rows the user may see: everything for an administrator, otherwise only what was sent to everyone.
+const MINE: &str = "(admin_only = 0 OR ?)";
+
+async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Value>> {
     let items: Vec<NotificationRecord> =
-        sqlx::query_as("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100")
+        sqlx::query_as(&format!("SELECT * FROM notifications WHERE {MINE} ORDER BY created_at DESC LIMIT 100"))
+            .bind(user.is_admin())
             .fetch_all(&s.pool)
             .await?;
     let unread = items.iter().filter(|n| !n.is_read).count();
     Ok(Json(json!({ "items": items, "unread": unread })))
 }
 
-async fn mark_read(State(s): State<AppState>, _user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
-    changed(&s, sqlx::query("UPDATE notifications SET is_read = 1 WHERE id = ?").bind(id)).await
+async fn mark_read(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+    let sql = format!("UPDATE notifications SET is_read = 1 WHERE id = ? AND {MINE}");
+    changed(&s, sqlx::query(&sql).bind(id).bind(user.is_admin())).await
 }
 
-async fn read_all(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Value>> {
-    changed(&s, sqlx::query("UPDATE notifications SET is_read = 1")).await
+async fn read_all(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Value>> {
+    let sql = format!("UPDATE notifications SET is_read = 1 WHERE {MINE}");
+    changed(&s, sqlx::query(&sql).bind(user.is_admin())).await
 }
 
-async fn remove(State(s): State<AppState>, _user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
-    changed(&s, sqlx::query("DELETE FROM notifications WHERE id = ?").bind(id)).await
+async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {
+    let sql = format!("DELETE FROM notifications WHERE id = ? AND {MINE}");
+    changed(&s, sqlx::query(&sql).bind(id).bind(user.is_admin())).await
 }
 
-/// The inbox is shared by everyone who can sign in, like read and delete one.
-async fn clear(State(s): State<AppState>, _user: AuthUser) -> ApiResult<Json<Value>> {
-    changed(&s, sqlx::query("DELETE FROM notifications")).await
+/// What the user can see is shared with everyone else who can see it, like read and delete one.
+async fn clear(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Value>> {
+    let sql = format!("DELETE FROM notifications WHERE {MINE}");
+    changed(&s, sqlx::query(&sql).bind(user.is_admin())).await
 }
 
 /// Runs a write on the inbox and tells every connected client to reload it.

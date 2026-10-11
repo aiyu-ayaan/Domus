@@ -588,7 +588,7 @@ impl DeviceManager {
             let device = self.adopt(&rec.id, AdoptRequest::default()).await?;
             if settings.notify {
                 self.notifier
-                    .notify(
+                    .notify_admins(
                         "success",
                         "New device added",
                         &format!("{} ({}) was found and added automatically", device.name, integration),
@@ -606,7 +606,7 @@ impl DeviceManager {
         });
         if settings.notify {
             self.notifier
-                .notify(
+                .notify_admins(
                     "info",
                     "New device found",
                     &format!("{} ({}) is ready to add", rec.name, integration),

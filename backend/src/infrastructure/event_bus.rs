@@ -49,6 +49,9 @@ pub enum SystemEvent {
         level: String,
         title: String,
         message: String,
+        /// Not sent to the live stream of anyone but administrators.
+        #[serde(skip)]
+        admin_only: bool,
     },
     /// A notification was read or deleted: clients reload their inbox.
     NotificationsChanged,

@@ -54,8 +54,8 @@ async fn stream(mut socket: WebSocket, s: AppState, mut user: AuthUser) {
                         continue;
                     }
                 }
-                // Discovery details are admin-only.
-                if !user.is_admin() && matches!(event, SystemEvent::DeviceDiscovered { .. }) {
+                // Discovery details and administrator alerts are admin-only.
+                if !user.is_admin() && matches!(event, SystemEvent::DeviceDiscovered { .. } | SystemEvent::Notification { admin_only: true, .. }) {
                     continue;
                 }
                 let Ok(text) = serde_json::to_string(&event) else { continue };
