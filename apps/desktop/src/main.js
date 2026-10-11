@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain, nativeTheme, safeStorage, shell, session, desktopCapturer } = require('electron')
+const { execFileSync } = require('child_process')
 const dgram = require('dgram')
 const fs = require('fs')
 const http = require('http')
@@ -235,6 +236,30 @@ ipcMain.on('token:set', (event, token) => {
 })
 ipcMain.on('flavor:get', (event) => {
   event.returnValue = isDev ? 'dev' : 'prod'
+})
+ipcMain.on('clock:hour12', (event) => {
+  try {
+    if (process.platform === 'linux') {
+      const out = execFileSync('gsettings', ['get', 'org.gnome.desktop.interface', 'clock-format'], {
+        encoding: 'utf8',
+        timeout: 500,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      if (out.includes('12h')) return void (event.returnValue = true)
+      if (out.includes('24h')) return void (event.returnValue = false)
+    } else if (process.platform === 'darwin') {
+      const out = execFileSync('defaults', ['read', '-g', 'AppleICUForce24HourTime'], {
+        encoding: 'utf8',
+        timeout: 500,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim()
+      if (out === '1' || out === 'true') return void (event.returnValue = false)
+      if (out === '0' || out === 'false') return void (event.returnValue = true)
+    }
+  } catch {
+    /* fall back to Intl locale default */
+  }
+  event.returnValue = new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hour12
 })
 
 // --- Updates: GitHub releases on a channel (alpha / beta / stable). See development/docs/RELEASE.md.

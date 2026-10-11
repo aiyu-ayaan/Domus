@@ -30,6 +30,7 @@ interface DesktopBridge {
   platform?: string
   isDesktop?: boolean
   flavor?: AppFlavor
+  hour12?: boolean
   apiBase?: string
   /** One token for the local and the remote address, which are different origins. */
   token: { get(): string | null; set(token: string | null): void }

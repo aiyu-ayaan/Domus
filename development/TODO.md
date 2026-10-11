@@ -210,6 +210,7 @@
 - [x] Philips Hue plugin: button pairing, lights and plugs through the local bridge API, run against a stand-in bridge
 - [x] Tapo H100 hub: child sensors, switches and KE100 thermostats through `control_child`
 - [x] Tapo cameras appear under Discovered with a "not supported yet" note; `development/docs/INTEGRATIONS.md`
+- [x] Device 12/24-hour clock format respected across Android (`DateFormat.is24HourFormat` + `ON_RESUME`, `formatBucket`, `formatClockTime`, `TimeInput`), web (`formatTime`, `formatClockTime`, `formatBucket`), and desktop (`clock:hour12` OS preference bridge)
 - [ ] Verify on hardware: a real Zigbee2MQTT device, a real Hue bridge, a Tapo H100 with a sensor
 - [ ] Tapo cameras: need TLS with RSA key exchange (OpenSSL, not rustls) and a camera to test on
 - [ ] MQTT: covers and climate, devices without Home Assistant discovery (manual topics), state pushed as it arrives instead of on the poll

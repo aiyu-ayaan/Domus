@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.Scene
+import com.aiyu.domus.core.formatClockTime
 import com.aiyu.domus.ui.components.SectionTitle
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -33,7 +34,7 @@ private val Days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun") // th
 private val Properties = listOf("temperature" to "Temperature", "humidity" to "Humidity", "air_quality_pm25" to "PM2.5", "brightness" to "Brightness", "current_power_watts" to "Power (W)")
 
 /** One trigger, condition or action as a sentence. */
-fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>): String {
+fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24Hour: Boolean = true): String {
     val device = devices.firstOrNull { it.id == rule.text("device_id") }?.name ?: "a removed device"
     fun comparison(): String {
         val property = Properties.firstOrNull { it.first == rule.text("property") }?.second?.lowercase() ?: rule.text("property").orEmpty()
@@ -47,13 +48,18 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>): Stri
     return when (rule.text("type")) {
         "device_state" -> "$device ${comparison()}"
         "time" -> {
+            val at = rule.text("at")?.let { formatClockTime(it, is24Hour) }.orEmpty()
             val days = (rule["days"] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull()?.let(Days::getOrNull) }
-            "At ${rule.text("at")}" + if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
+            "At $at" + if (days.isEmpty() || days.size == 7) " every day" else " on ${days.joinToString(", ")}"
         }
         "power_above" -> "$device uses more than ${rule.text("watts")} W"
         "device_offline" -> "$device goes offline"
         "device_discovered" -> "A new device is found"
-        "time_between" -> "Between ${rule.text("start")} and ${rule.text("end")}"
+        "time_between" -> {
+            val start = rule.text("start")?.let { formatClockTime(it, is24Hour) }.orEmpty()
+            val end = rule.text("end")?.let { formatClockTime(it, is24Hour) }.orEmpty()
+            "Between $start and $end"
+        }
         "device_command", "group_command" -> {
             val command = rule["command"] as? JsonObject ?: JsonObject(emptyMap())
             val parts = listOfNotNull(
@@ -94,8 +100,9 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
     var heading by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var days by remember { mutableStateOf(emptySet<Int>()) }
-    val start = rememberTimePickerState(7, 0, is24Hour = true)
-    val end = rememberTimePickerState(22, 0, is24Hour = true)
+    val is24Hour = rememberIs24HourFormat()
+    val start = rememberTimePickerState(7, 0, is24Hour = is24Hour)
+    val end = rememberTimePickerState(22, 0, is24Hour = is24Hour)
     fun time(s: TimePickerState) = "%02d:%02d".format(s.hour, s.minute)
 
     val needsDevice = kind in setOf("device_state", "power_above", "device_offline", "device_command")
@@ -163,9 +170,10 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, String>>, devi
 @Composable
 private fun RuleList(title: String, add: String, kinds: List<Pair<String, String>>, rules: SnapshotStateList<JsonObject>, devices: List<Device>, scenes: List<Scene>) {
     var adding by remember { mutableStateOf(false) }
+    val is24Hour = rememberIs24HourFormat()
     SectionTitle(title)
     rules.forEachIndexed { index, rule ->
-        val text = describe(rule, devices, scenes)
+        val text = describe(rule, devices, scenes, is24Hour)
         Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
             Row(Modifier.padding(start = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(text, Modifier.weight(1f).padding(vertical = 12.dp))

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatKwh, formatMoney } from '@/lib/format'
+import { formatBucket, formatKwh, formatMoney } from '@/lib/format'
 import { cn } from '@/lib/cn'
 import type { EnergyPoint } from '@/lib/types'
 import { TrendChart } from './TrendChart'
@@ -10,12 +10,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
   const [metric, setMetric] = useState<'kwh' | 'watts'>('kwh')
   const max = Math.max(...points.map((p) => p.kwh), 0.0001)
   const total = points.reduce((s, p) => s + p.kwh, 0)
-  const label = (t: string) => {
-    const d = new Date(t)
-    return range === 'day'
-      ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-      : d.toLocaleDateString(undefined, range === 'week' ? { weekday: 'short', day: 'numeric' } : { day: 'numeric', month: 'short' })
-  }
+  const label = (t: string) => formatBucket(t, range)
   if (!points.length || total === 0) {
     return (
       <div className="flex items-center justify-center rounded-md border border-dashed border-border px-4 text-center text-label text-subtle" style={{ height }}>

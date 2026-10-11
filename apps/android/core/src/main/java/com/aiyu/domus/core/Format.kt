@@ -1,6 +1,9 @@
 package com.aiyu.domus.core
 
 import java.text.NumberFormat
+import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Currency
 
 // Same rules as the web app (apps/web/src/lib/format.ts) so both clients show the same numbers.
@@ -26,6 +29,28 @@ fun formatMoney(value: Double, currency: String): String {
         NumberFormat.getCurrencyInstance().apply { this.currency = Currency.getInstance(currency); maximumFractionDigits = 2 }.format(v)
     }.getOrElse { "${number(v, 2)} $currency" }
 }
+
+/**
+ * Formats an ISO-8601 history bucket timestamp.
+ * Hourly ("day") buckets follow the device's 12/24-hour clock setting ("2:00 PM" vs "14:00");
+ * "week" buckets use weekday + day ("Mon 6"); "month" buckets use month + day ("Oct 6").
+ */
+fun formatBucket(iso: String, range: String, is24Hour: Boolean): String = runCatching {
+    val pattern = when (range) {
+        "day" -> if (is24Hour) "HH:mm" else "h:mm a"
+        "week" -> "EEE d"
+        else -> "MMM d"
+    }
+    OffsetDateTime.parse(iso).format(DateTimeFormatter.ofPattern(pattern))
+}.getOrDefault("")
+
+/**
+ * Formats a stored 24-hour rule time ("HH:mm", e.g. "07:00" or "22:00") using the
+ * device's 12/24-hour clock setting ("7:00 AM" / "10:00 PM" vs "07:00" / "22:00").
+ */
+fun formatClockTime(hhmm: String, is24Hour: Boolean): String = runCatching {
+    LocalTime.parse(hhmm.trim()).format(DateTimeFormatter.ofPattern(if (is24Hour) "HH:mm" else "h:mm a"))
+}.getOrDefault(hhmm)
 
 enum class AirLevel(val label: String) { EXCELLENT("Excellent"), GOOD("Good"), MODERATE("Moderate"), POOR("Poor") }
 

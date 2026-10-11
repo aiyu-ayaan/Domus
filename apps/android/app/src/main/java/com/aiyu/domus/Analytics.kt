@@ -19,12 +19,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.text.format.DateFormat
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.AirLevel
 import com.aiyu.domus.core.AirPoint
@@ -32,6 +37,7 @@ import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.EnergyPoint
 import com.aiyu.domus.core.User
 import com.aiyu.domus.core.airLevel
+import com.aiyu.domus.core.formatBucket
 import com.aiyu.domus.core.formatKwh
 import com.aiyu.domus.core.formatMoney
 import com.aiyu.domus.core.formatWatts
@@ -42,8 +48,6 @@ import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.enterStaggered
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 /** Does the home measure power / air? The Analytics tab and its two sections exist only for what it does. */
@@ -52,10 +56,21 @@ fun List<Device>.measuresAir() = any { it.type == "air_purifier" || it.state.pm2
 
 private val Ranges = listOf("day" to "Day", "week" to "Week", "month" to "Month")
 
-/** "14:00" for hourly buckets, "Mon 6" for daily ones. */
-private fun bucketLabel(iso: String, range: String): String = runCatching {
-    OffsetDateTime.parse(iso).format(DateTimeFormatter.ofPattern(if (range == "day") "HH:mm" else "EEE d"))
-}.getOrDefault("")
+/** Tracks the device's 12/24-hour clock setting, refreshing when the app resumes from system settings. */
+@Composable
+fun rememberIs24HourFormat(): Boolean {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var is24Hour by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) is24Hour = DateFormat.is24HourFormat(context)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    return is24Hour
+}
 
 @Composable
 private fun RangePicker(range: String, onChange: (String) -> Unit) {
@@ -136,6 +151,7 @@ private fun ColumnScope.ElectricitySection() {
     val devices by repository.devices.collectAsStateWithLifecycle()
     val energy by repository.energy.collectAsStateWithLifecycle()
     val loading by repository.loading.collectAsStateWithLifecycle()
+    val is24Hour = rememberIs24HourFormat()
     var range by rememberSaveable { mutableStateOf("day") }
     // The insights always read today's hours and the last 7 days, whatever range the chart shows.
     var day by remember { mutableStateOf<List<EnergyPoint>?>(null) }
@@ -189,13 +205,13 @@ private fun ColumnScope.ElectricitySection() {
             val selected = (picked ?: if (watts) points.indexOfLast { it.watts != null } else points.lastIndex).coerceIn(0, points.lastIndex)
             val point = points[selected]
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(bucketLabel(point.t, range), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
                 RollingText(if (watts) point.watts?.let(::formatWatts) ?: "No reading" else "${formatKwh(point.kwh)} · ${formatMoney(point.cost, currency)}", MaterialTheme.typography.titleMedium)
             }
             val per = if (range == "day") "hour" else "day"
             if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, "Average power per $per", Modifier.fillMaxWidth().height(160.dp))
             else BarChart(points.map { it.kwh }, selected, { picked = it }, "Energy used per $per, ${formatKwh(points.sumOf { it.kwh })} in total", Modifier.fillMaxWidth().height(160.dp))
-            ChartAxis(bucketLabel(points.first().t, range), bucketLabel(points.last().t, range))
+            ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
             Text("Total ${formatKwh(points.sumOf { it.kwh })} · ${formatMoney(points.sumOf { it.cost }, currency)}", style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
@@ -208,7 +224,7 @@ private fun ColumnScope.ElectricitySection() {
     val change = average?.let { (overview.todayKwh - it) / it * 100 }
     val top = overview.devices.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
     FactRow(
-        Triple("Peak hour", peak?.let { bucketLabel(it.t, "day") } ?: "—", peak?.let { "${formatKwh(it.kwh)} in the last 24 h" } ?: "No usage yet"),
+        Triple("Peak hour", peak?.let { formatBucket(it.t, "day", is24Hour) } ?: "—", peak?.let { "${formatKwh(it.kwh)} in the last 24 h" } ?: "No usage yet"),
         Triple("Daily average", average?.let(::formatKwh) ?: "—", if (average == null) "Needs a full day" else "Over the last ${earlier.size} ${if (earlier.size == 1) "day" else "days"}"),
         index = 2,
     )
@@ -288,6 +304,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     val repository = LocalRepository.current
     val devices by repository.devices.collectAsStateWithLifecycle()
     val rooms by repository.rooms.collectAsStateWithLifecycle()
+    val is24Hour = rememberIs24HourFormat()
     val c = MaterialTheme.colorScheme
     val sensors = devices.filter { it.type == "air_purifier" || it.state.pm25 != null }
     val purifiers = sensors.filter { it.type == "air_purifier" }
@@ -354,7 +371,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
             var picked by remember(range, shown) { mutableStateOf<Int?>(null) }
             val selected = (picked ?: points.indexOfLast { it.reading(shown) != null }).coerceIn(0, points.lastIndex)
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(bucketLabel(points[selected].t, range), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                Text(formatBucket(points[selected].t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
                 RollingText(readingText(shown, points[selected].reading(shown)), MaterialTheme.typography.titleMedium)
             }
             val measured = points.mapNotNull { it.reading(shown) }
@@ -364,7 +381,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
                 Modifier.fillMaxWidth().height(160.dp),
                 marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
             )
-            ChartAxis(bucketLabel(points.first().t, range), bucketLabel(points.last().t, range))
+            ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
             if (shown == "pm25") Text("Dashed lines: 15 µg/m³ clean-air target, 35 µg/m³ upper limit of good.", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
         }
     }
@@ -378,7 +395,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
         val period = when (range) { "day" -> "24 h"; "week" -> "7 days"; else -> "30 days" }
         FactRow(
             Triple("Average", "${average.roundToInt()} µg/m³", "${airLevel(average.toFloat()).label} over $period"),
-            Triple("Peak", "${peak.pm25!!.roundToInt()} µg/m³", bucketLabel(peak.t, range)),
+            Triple("Peak", "${peak.pm25!!.roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
             index = 3,
         )
         FactRow(Triple("Time with good air", "$good%", "PM2.5 at or below 35 µg/m³ over $period"), index = 4)

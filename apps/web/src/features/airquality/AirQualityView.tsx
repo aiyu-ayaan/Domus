@@ -8,7 +8,7 @@ import { TrendChart } from '@/components/devices/TrendChart'
 import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
-import { airQuality, formatNumber } from '@/lib/format'
+import { airQuality, formatBucket, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
 type Range = 'day' | 'week' | 'month'
@@ -33,8 +33,7 @@ function Trend() {
   const average = pm.length ? pm.reduce((s, p) => s + p.pm25!, 0) / pm.length : null
   const peak = pm.reduce<(typeof pm)[number] | null>((best, p) => (p.pm25! > (best?.pm25 ?? -1) ? p : best), null)
   const clean = pm.length ? (pm.filter((p) => p.pm25! <= 35).length / pm.length) * 100 : null
-  const when = (t: string) =>
-    range === 'day' ? new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : new Date(t).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+  const when = (t: string) => formatBucket(t, range)
   const period = range === 'day' ? '24 h' : range === 'week' ? '7 d' : '30 d'
 
   return (

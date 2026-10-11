@@ -33,6 +33,32 @@ export const timeAgo = (iso?: string | null) => {
   return rtf.format(-Math.round(s / 86400), 'day')
 }
 
+const hour12Option = (): { hour12?: boolean } => {
+  const h12 = (window as unknown as { domus?: { hour12?: boolean } }).domus?.hour12
+  return typeof h12 === 'boolean' ? { hour12: h12 } : {}
+}
+
+/** Formats a Date or ISO timestamp as a clock time following the device/OS 12/24-hour preference. */
+export const formatTime = (value: Date | string) => {
+  const d = typeof value === 'string' ? new Date(value) : value
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', ...hour12Option() })
+}
+
+/** Formats a stored 24-hour rule time ("HH:MM", e.g. "07:00" or "22:00") following the device/OS 12/24-hour preference. */
+export const formatClockTime = (hhmm: string) => {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim())
+  if (!m) return hhmm
+  return formatTime(new Date(2000, 0, 1, Number(m[1]), Number(m[2])))
+}
+
+/** Formats a chart bucket timestamp: local clock time for 24h range, weekday+day for 7d, month+day for 30d. */
+export const formatBucket = (iso: string, range: 'day' | 'week' | 'month') => {
+  const d = new Date(iso)
+  return range === 'day'
+    ? formatTime(d)
+    : d.toLocaleDateString(undefined, range === 'week' ? { weekday: 'short', day: 'numeric' } : { day: 'numeric', month: 'short' })
+}
+
 export const greeting = () => {
   const h = new Date().getHours()
   if (h < 5) return 'Good night'

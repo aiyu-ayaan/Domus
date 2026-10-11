@@ -8,7 +8,7 @@ import { EnergyChart } from '@/components/devices/EnergyChart'
 import { api } from '@/lib/api'
 import { useIsAdmin } from '@/lib/auth'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
-import { formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
+import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
@@ -120,7 +120,7 @@ function Insights({ o, day, week }: { o: EnergyOverview; day: EnergyPoint[]; wee
         <dl className="grid grid-cols-2 divide-border max-sm:divide-y sm:grid-cols-4 sm:divide-x">
           <Insight
             label="Peak hour (24 h)"
-            value={peak ? new Date(peak.t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—'}
+            value={peak ? formatBucket(peak.t, 'day') : '—'}
             sub={peak ? formatKwh(peak.kwh) : 'No usage yet'}
           />
           <Insight label="Daily average" value={average != null ? formatKwh(average) : '—'} sub={average != null ? `Over the last ${earlier.length} ${earlier.length === 1 ? 'day' : 'days'}` : 'Needs a full day'} />

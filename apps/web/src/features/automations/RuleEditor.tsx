@@ -3,6 +3,7 @@ import { Plus, Trash } from '@phosphor-icons/react'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { useDevices, useGroups, useScenes } from '@/lib/queries'
+import { formatClockTime } from '@/lib/format'
 import { cn } from '@/lib/cn'
 import { COLOR_PRESETS, WHITE_PRESETS } from '@/components/devices/LightColorControls'
 import type { Action, Condition, Device, DeviceCommand, Trigger } from '@/lib/types'
@@ -36,7 +37,7 @@ function compareText(c: { equals?: unknown; above?: number; below?: number }, pr
 export function describeTrigger(t: Trigger, devices: Device[]): string {
   switch (t.type) {
     case 'time':
-      return `At ${t.at}${t.days.length && t.days.length < 7 ? ` on ${t.days.map((d) => DAYS[d]).join(', ')}` : ' every day'}`
+      return `At ${formatClockTime(t.at)}${t.days.length && t.days.length < 7 ? ` on ${t.days.map((d) => DAYS[d]).join(', ')}` : ' every day'}`
     case 'device_state':
       return `When ${deviceName(devices, t.device_id)} ${compareText(t, t.property)}`
     case 'power_above':

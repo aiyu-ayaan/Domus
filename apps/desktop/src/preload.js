@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('domus', {
   platform: process.platform,
   isDesktop: true,
   flavor: ipcRenderer.sendSync('flavor:get'),
+  hour12: ipcRenderer.sendSync('clock:hour12'),
   // The session token lives in the app, not in per-origin web storage, so the
   // home and the remote address share one sign-in.
   token: {

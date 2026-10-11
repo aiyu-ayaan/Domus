@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatNumber } from '@/lib/format'
+import { formatBucket, formatNumber } from '@/lib/format'
 
 export interface TrendPoint {
   t: string
@@ -30,12 +30,7 @@ export function TrendChart({
 }) {
   const [active, setActive] = useState<number | null>(null)
   const measured = points.flatMap((p, i) => (p.value == null ? [] : [{ i, value: p.value }]))
-  const label = (t: string) => {
-    const d = new Date(t)
-    return range === 'day'
-      ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-      : d.toLocaleDateString(undefined, range === 'week' ? { weekday: 'short', day: 'numeric' } : { day: 'numeric', month: 'short' })
-  }
+  const label = (t: string) => formatBucket(t, range)
   if (measured.length === 0) {
     return (
       <div className="flex items-center justify-center rounded-md border border-dashed border-border px-4 text-center text-label text-subtle" style={{ height }}>

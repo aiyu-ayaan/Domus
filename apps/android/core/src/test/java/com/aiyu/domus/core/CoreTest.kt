@@ -55,6 +55,14 @@ class CoreTest {
         assertEquals("—", formatWatts(null))
         assertEquals("250 Wh", formatKwh(0.25))
         assertEquals(AirLevel.MODERATE, airLevel(40f))
+        assertEquals("11:00 PM", formatBucket("2026-10-11T23:00:00+05:30", "day", is24Hour = false))
+        assertEquals("23:00", formatBucket("2026-10-11T23:00:00+05:30", "day", is24Hour = true))
+        assertEquals("3:00 PM", formatBucket("2026-10-11T15:00:00+05:30", "day", is24Hour = false))
+        assertEquals("Sun 11", formatBucket("2026-10-11T15:00:00+05:30", "week", is24Hour = false))
+        assertEquals("Oct 11", formatBucket("2026-10-11T15:00:00+05:30", "month", is24Hour = false))
+        assertEquals("7:00 AM", formatClockTime("07:00", is24Hour = false))
+        assertEquals("10:00 PM", formatClockTime("22:00", is24Hour = false))
+        assertEquals("22:00", formatClockTime("22:00", is24Hour = true))
     }
 
     @Test

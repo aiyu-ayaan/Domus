@@ -29,9 +29,10 @@ flowchart TD
         DISC[ServerDiscovery: UDP broadcast]
         STORE[SecureStore: Keystore AES-GCM]
         COL[screenColor: frame -> light color]
+        FMT[Format: currency, kWh, 12/24h buckets & clock]
     end
     MA --> CS & MS
-    MS --> DS & PG
+    MS --> DS & PG & FMT
     SV --> REPO
     SV --> COL
     app --> ui
@@ -157,6 +158,11 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   WHO scale, purifier / filter / climate facts, a trend line (PM2.5, temperature, humidity) from
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text.
+- **Clock format** — `rememberIs24HourFormat()` reads `DateFormat.is24HourFormat(context)` and refreshes on
+  `ON_RESUME`, so chart bucket labels (`formatBucket`), rule trigger/condition summaries (`formatClockTime`),
+  and Material 3 `TimeInput` pickers follow the device's 12/24-hour system setting immediately. Web and desktop
+  similarly format timestamps and `"HH:mm"` strings with `formatTime` / `formatClockTime` / `formatBucket`
+  (`apps/web/src/lib/format.ts`), with Electron bridging the OS 12/24-hour setting (`window.domus.hour12`).
 - **Haptics** — `Haptics.kt` (ui-shared): `DomusTheme` provides `LocalIndication` as the M3 ripple plus a `VirtualKey` tick on press release, so every button, chip, `clickable` and list row ticks with no per-call code (a cancelled press stays silent). `Switch` draws no indication, so use `HapticSwitch` (on/off ticks) instead of `Switch` when it has its own `onCheckedChange`; a `Switch` with `onCheckedChange = null` inside a clickable row already ticks via the row. Don't pass `indication = null` on a clickable you want to tick.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
