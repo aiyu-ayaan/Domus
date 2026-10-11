@@ -80,11 +80,11 @@ Schema: `migrations/0009_account_recovery.sql`. Logic: `backend/src/modules/auth
 - **Android** — `ConnectScreens.kt`: `AuthScreen` hosts three pages (sign in → name the account → code and
   new password) with `sharedAxisX` and the predictive back gesture; `ChangePasswordScreen` is its own step in
   `DomusRoot`. `Manage.kt`: the same switches in `PersonForm`, and `Handover` (dialog with Copy and the system
-  share sheet; the clip is marked sensitive).
+  share sheet; the clip is marked sensitive). Settings > Change password (`ChangePasswordPage`, page
+  `password`) asks for the current and the new password, like the web's password card.
 
 ## Known limits
 
 - Read and deleted state of a notification is shared by everyone who can see it; there is no inbox per person.
-- A kid cannot change their own password in the Android app (it has no change-password page yet); on the web they can.
 - Anyone who can reach the sign-in page can lock a name out for 15 minutes by guessing wrong five times.
 - `domus-backend reset-password <username>` still works from the server's shell when every administrator is locked out.

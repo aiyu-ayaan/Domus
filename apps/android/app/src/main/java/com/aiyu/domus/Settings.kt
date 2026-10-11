@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.FilledTonalButton
@@ -229,6 +230,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             }
         }
 
+        RowCard("Change password", "For signing in to Domus", Icons.Rounded.LockReset, onClick = { open("password") })
         RowCard("Server addresses", "Home network and remote access", Icons.Rounded.Public, onClick = { open("links") })
         RowCard("About Domus", "Version $version, developer and acknowledgements", Icons.Rounded.Info, onClick = { open("about") })
 

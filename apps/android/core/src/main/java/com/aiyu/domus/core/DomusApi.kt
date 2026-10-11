@@ -92,6 +92,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
         call("POST", "/auth/reset", AuthResponse.serializer(), fields("username" to username, "code" to code, "new_password" to newPassword))
     /** Replaces the generated password the account is still on; the server asks for no current one then. */
     suspend fun choosePassword(newPassword: String) = call("POST", "/auth/password", JsonElement.serializer(), fields("new_password" to newPassword))
+    suspend fun changePassword(current: String, newPassword: String) =
+        call("POST", "/auth/password", JsonElement.serializer(), fields("current_password" to current, "new_password" to newPassword))
     suspend fun me() = call("GET", "/auth/me", User.serializer())
     suspend fun updateAvatar(avatar: String) =
         call("PUT", "/auth/me/avatar", User.serializer(), fields("avatar" to avatar))

@@ -109,6 +109,7 @@ fun MainScreen(session: Session.SignedIn) {
                 current.startsWith("person:") -> PersonEditorPage(current.removePrefix("person:"), user, close)
                 current == "tariff" -> TariffPage(close)
                 current == "notices" -> NoticesPage(close)
+                current == "password" -> ChangePasswordPage(close)
                 current == "links" -> ServerLinksPage(user.isAdmin, close)
                 current == "about" -> AboutPage(close, onOpenAcknowledgements = { open("acknowledgements") })
                 current == "acknowledgements" -> AcknowledgementsPage(close)

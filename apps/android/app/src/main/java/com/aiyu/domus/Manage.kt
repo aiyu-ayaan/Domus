@@ -41,6 +41,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -644,6 +645,31 @@ fun ServerLinksPage(admin: Boolean, onBack: () -> Unit) {
             RowCard("Home network", links.localUrl.ifBlank { "Not set" }, Icons.Rounded.Home)
             RowCard("Remote", links.remoteUrl.ifBlank { "Not set" }, Icons.Rounded.Public)
         }
+    }
+}
+
+/** Anyone changes their own password here; it needs the current one. */
+@Composable
+fun ChangePasswordPage(onBack: () -> Unit) {
+    val repository = LocalRepository.current
+    val scope = rememberCoroutineScope()
+    var current by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirm by rememberSaveable { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val mismatch = confirm.isNotEmpty() && confirm != password
+
+    SubPage("Change password", onBack) {
+        Text("You stay signed in on this and every other device.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Field(current, { current = it; error = null }, "Current password", keyboard = KeyboardType.Password, secret = true)
+        Field(password, { password = it; error = null }, "New password", keyboard = KeyboardType.Password, secret = true, supporting = "At least 8 characters")
+        Field(confirm, { confirm = it }, "Repeat new password", keyboard = KeyboardType.Password, secret = true, supporting = if (mismatch) "The passwords do not match" else null, error = mismatch)
+        error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
+        Button(
+            { scope.launch { busy = true; error = repository.changePassword(current, password); busy = false; if (error == null) onBack() } },
+            Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = !busy && current.isNotEmpty() && password.length >= 8 && password == confirm,
+        ) { Text("Change password") }
     }
 }
 

@@ -264,6 +264,9 @@ class DomusRepository(context: Context) {
         (_session.value as? Session.SignedIn)?.let { signedIn(it.server, it.user.copy(mustChangePassword = false)) }
     }
 
+    /** Null on success, otherwise the reason to show. */
+    suspend fun changePassword(current: String, password: String): String? = entry { it.changePassword(current, password) }
+
     private suspend fun entry(request: suspend (DomusApi) -> Unit): String? {
         val api = api ?: return "No server"
         return try {

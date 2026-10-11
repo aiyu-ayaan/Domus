@@ -241,5 +241,5 @@
 - [x] Forgot password without email: the request notifies administrators, who issue an 8-digit one-time code (30 minutes, 5 tries); web, desktop and Android screens
 - [ ] Check the new Android sign-in pages and the Handover dialog by eye on the emulator (they compile and the API flow was run with curl, but were not opened)
 - [ ] Check the web forgot-password and change-password screens and the person sheet by eye
-- [ ] Android: a change-password page in Settings (kids and everyone else can only change it on the web today)
+- [x] Android: Settings > Change password (`ChangePasswordPage`)
 - [x] Send "Password reset requested" to administrators only
