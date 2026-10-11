@@ -370,6 +370,11 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                 s.humidity?.let { "Humidity" to "${it.roundToInt()}%" },
                 s.pm25?.let { "PM2.5" to "${it.roundToInt()} µg/m³ · ${airLevel(it).label}" },
                 s.filterLife?.let { "Filter" to "${it.roundToInt()}% left" },
+                s.motion?.let { "Motion" to if (it) "Detected" else "Clear" },
+                s.contact?.let { "Door or window" to if (it) "Open" else "Closed" },
+                s.waterLeak?.let { "Water" to if (it) "Leak" else "Dry" },
+                s.alarm?.let { "Alarm" to if (it) "Sounding" else "Quiet" },
+                s.battery?.let { "Battery" to "${it.roundToInt()}%" } ?: s.batteryLow?.let { "Battery" to if (it) "Low" else "OK" },
             )
             if (readings.isNotEmpty()) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

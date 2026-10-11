@@ -109,6 +109,13 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   if (s.current_amps != null) readings.push(['Current', `${formatNumber(s.current_amps, 2)} A`])
   if (s.today_energy_kwh != null) readings.push(['Energy today', formatKwh(s.today_energy_kwh)])
   if (s.filter_life != null) readings.push(['Filter life', `${formatNumber(s.filter_life, 0)} %`])
+  // What a sensor last saw, and how its battery is doing.
+  if (typeof s.motion === 'boolean') readings.push(['Motion', s.motion ? 'Detected' : 'Clear'])
+  if (typeof s.contact === 'boolean') readings.push(['Door or window', s.contact ? 'Open' : 'Closed'])
+  if (typeof s.water_leak === 'boolean') readings.push(['Water', s.water_leak ? 'Leak' : 'Dry'])
+  if (typeof s.alarm === 'boolean') readings.push(['Alarm', s.alarm ? 'Sounding' : 'Quiet'])
+  if (typeof s.battery === 'number') readings.push(['Battery', `${formatNumber(s.battery, 0)} %`])
+  else if (typeof s.battery_low === 'boolean') readings.push(['Battery', s.battery_low ? 'Low' : 'OK'])
   const fan = s.options?.fan_speed
   const modes = s.options?.mode
 

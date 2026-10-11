@@ -144,6 +144,10 @@ data class DeviceState(
     /** True while a door or window is open. */
     val contact: Boolean? = null,
     @SerialName("water_leak") val waterLeak: Boolean? = null,
+    val alarm: Boolean? = null,
+    /** Percent left, from sensors that report it; the others only say when it is low. */
+    val battery: Float? = null,
+    @SerialName("battery_low") val batteryLow: Boolean? = null,
     /** Choices the UI can offer, keyed by `fan_speed` / `mode`. */
     val options: Map<String, List<String>> = emptyMap(),
 )

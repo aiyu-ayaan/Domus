@@ -218,7 +218,7 @@
 - [ ] Tapo cameras: need TLS with RSA key exchange (OpenSSL, not rustls) and a camera to test on
 - [ ] MQTT: covers and climate, devices without Home Assistant discovery (manual topics), state pushed as it arrives instead of on the poll
 - [ ] Hue: motion sensors and scenes; follow the bridge when its IP changes
-- [ ] Show sensor readings (`motion`, `contact`, `battery`) on the device page, not only in the tile summary
+- [x] Sensor readings (motion, door or window, leak, alarm, battery) on the device page, web and Android
 
 ## Milestone 19: Access per room and per device (2026-10-11)
 - [x] Device grants (`0007_device_access.sql`, `user_device_access`): a user gets whole rooms, single devices, or both; `device_ids` on the users API next to `room_ids`
