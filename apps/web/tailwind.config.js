@@ -25,7 +25,7 @@ export default {
         info: token('info'),
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        sans: ['Inter Variable', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       fontSize: {
         caption: ['12px', '16px'],

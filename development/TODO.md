@@ -172,7 +172,7 @@
 - [x] Backend: brotli/gzip compression, immutable caching for `/assets/*`, `no-cache` for `index.html`
 - [x] Desktop: saved server addresses probed in parallel at startup
 - [x] Docs: `development/docs/PERFORMANCE.md` with diagram
-- [ ] Web: self-host the Inter font (the Google Fonts stylesheet still blocks first paint and needs internet)
+- [x] Web: Inter bundled with the app (`@fontsource-variable/inter`), no request to Google Fonts
 
 ## Next
 - [x] Backup and restore: Settings > Backup downloads the database with the master key inside, `domus-backend restore <file>` puts it back

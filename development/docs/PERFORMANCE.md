@@ -64,6 +64,9 @@ the run ends, which deletes its session on that device. `pnpm android:dev` after
   chunk the first time it is drawn (`@dicebear/collection/async`); until then `Avatar` shows the initial.
   Components that call `getAvatarUri` also call `useAvatarArt()` so they re-render when the artwork lands.
   Entry JS went from 1.79 MB to 0.33 MB (about 590 kB to 90 kB compressed).
+- Inter is bundled (`@fontsource-variable/inter/wght.css`, imported by `main.tsx`), one variable woff2 per
+  script served from `/assets` with the immutable cache. Nothing is fetched from another host, so the first
+  paint does not wait on Google Fonts and the UI looks the same on a network without internet.
 - Before adding a dependency to something imported by `main.tsx`, `App.tsx` or `AppShell`, check the entry
   size in the `pnpm build` output.
 

@@ -9,6 +9,8 @@ import { applyStoredTheme } from '@/lib/theme'
 import { applyFlavorHead } from '@/lib/flavor'
 import { desktop } from '@/lib/api'
 import { ScreenSyncProvider } from '@/features/screensync/ScreenSync'
+// Bundled, so the page paints without the internet and nothing blocks on another host.
+import '@fontsource-variable/inter/wght.css'
 import './index.css'
 
 applyStoredTheme()
