@@ -2,6 +2,7 @@ use super::{hash_password, verify_password, UserDto, UserRecord};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::infrastructure::event_bus::SystemEvent;
 use axum::{extract::State, routing::{get, post, put}, Json, Router};
 use chrono::Utc;
 use home_core::Role;
@@ -30,7 +31,21 @@ pub struct LoginRequest {
 
 #[derive(Deserialize)]
 pub struct ChangePasswordRequest {
-    pub current_password: String,
+    /// Not needed while the account is still on its generated password.
+    pub current_password: Option<String>,
+    pub new_password: String,
+}
+
+#[derive(Deserialize)]
+pub struct ForgotRequest {
+    pub username: String,
+}
+
+#[derive(Deserialize)]
+pub struct ResetRequest {
+    pub username: String,
+    /// The one-time code an administrator handed over.
+    pub code: String,
     pub new_password: String,
 }
 
@@ -39,6 +54,8 @@ pub fn public_routes() -> Router<AppState> {
         .route("/setup-status", get(setup_status))
         .route("/setup", post(setup))
         .route("/login", post(login))
+        .route("/forgot", post(forgot))
+        .route("/reset", post(reset))
 }
 
 pub fn protected_routes() -> Router<AppState> {
@@ -88,6 +105,12 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
         role: Role::Admin.as_str().into(),
         all_rooms: true,
         avatar: Some(avatar),
+        kid: false,
+        must_change_password: false,
+        reset_requested_at: None,
+        reset_allowed_until: None,
+        reset_code_hash: None,
+        reset_attempts: 0,
         created_at: now,
         updated_at: now,
     };
@@ -97,11 +120,7 @@ async fn setup(State(s): State<AppState>, Json(req): Json<SetupRequest>) -> ApiR
 }
 
 async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiResult<Json<Value>> {
-    let user: Option<UserRecord> = sqlx::query_as("SELECT * FROM users WHERE username = ? COLLATE NOCASE")
-        .bind(req.username.trim())
-        .fetch_optional(&s.pool)
-        .await?;
-    let user = match user {
+    let mut user = match UserRecord::by_username(&s.pool, &req.username).await? {
         Some(u) if verify_password(&req.password, &u.password_hash) => u,
         _ => {
             // Slow down credential guessing.
@@ -109,9 +128,63 @@ async fn login(State(s): State<AppState>, Json(req): Json<LoginRequest>) -> ApiR
             return Err(ApiError::Unauthorized("Invalid username or password".into()));
         }
     };
+    // They remembered it after all: nothing is left for an administrator to answer.
+    if user.reset_requested_at.is_some() || user.reset_allowed_until.is_some() {
+        sqlx::query("UPDATE users SET reset_requested_at = NULL, reset_allowed_until = NULL, reset_code_hash = NULL, reset_attempts = 0 WHERE id = ?")
+            .bind(&user.id)
+            .execute(&s.pool)
+            .await?;
+        user.close_reset();
+        s.bus.publish(SystemEvent::UsersChanged);
+    }
+    auth_response(&s, &user).await
+}
+
+async fn auth_response(s: &AppState, user: &UserRecord) -> ApiResult<Json<Value>> {
     let role = Role::parse(&user.role).unwrap_or(Role::Guest);
     let token = s.jwt.issue(&user.id, role)?;
-    Ok(Json(json!({ "token": token, "user": UserDto::load(&s.pool, &user).await? })))
+    Ok(Json(json!({ "token": token, "user": UserDto::load(&s.pool, user).await? })))
+}
+
+/// The sign-in screen's "Forgot password". There is no mail server, so the way back in is an
+/// administrator: this tells them, and they hand over a one-time code for [reset].
+/// An unknown username gets the same answer as a known one.
+async fn forgot(State(s): State<AppState>, Json(req): Json<ForgotRequest>) -> ApiResult<Json<Value>> {
+    // Slow down guessing, like sign-in.
+    tokio::time::sleep(std::time::Duration::from_millis(600)).await;
+    if let Some(user) = UserRecord::by_username(&s.pool, &req.username).await? {
+        // One notification per request, however often the button is pressed.
+        if user.reset_requested_at.is_none() && !user.reset_allowed() {
+            sqlx::query("UPDATE users SET reset_requested_at = ? WHERE id = ?")
+                .bind(Utc::now())
+                .bind(&user.id)
+                .execute(&s.pool)
+                .await?;
+            s.notifier
+                .notify(
+                    "warning",
+                    "Password reset requested",
+                    &format!("{} forgot their password. An administrator can give them a reset code in Settings, under People and access.", user.username),
+                    Some("/settings"),
+                )
+                .await;
+            s.bus.publish(SystemEvent::UsersChanged);
+        }
+    }
+    Ok(Json(json!({ "success": true })))
+}
+
+/// Choose a new password with the one-time code. The code is spent by it.
+async fn reset(State(s): State<AppState>, Json(req): Json<ResetRequest>) -> ApiResult<Json<Value>> {
+    let Some(mut user) = UserRecord::redeem_reset_code(&s.pool, &req.username, &req.code).await? else {
+        tokio::time::sleep(std::time::Duration::from_millis(600)).await;
+        s.bus.publish(SystemEvent::UsersChanged);
+        return Err(ApiError::Forbidden("That code is wrong or no longer valid. Ask an administrator for a new one.".into()));
+    };
+    validate_credentials(&user.username, &req.new_password)?;
+    user.set_password(&s.pool, &req.new_password, false).await?;
+    s.bus.publish(SystemEvent::UsersChanged);
+    auth_response(&s, &user).await
 }
 
 async fn me(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<UserDto>> {
@@ -127,20 +200,20 @@ async fn change_password(
     user: AuthUser,
     Json(req): Json<ChangePasswordRequest>,
 ) -> ApiResult<Json<Value>> {
-    let rec: UserRecord = sqlx::query_as("SELECT * FROM users WHERE id = ?")
+    let mut rec: UserRecord = sqlx::query_as("SELECT * FROM users WHERE id = ?")
         .bind(&user.id)
         .fetch_one(&s.pool)
         .await?;
-    if !verify_password(&req.current_password, &rec.password_hash) {
+    // The generated password was just used to sign in and may have been read by others on its way here.
+    if !rec.must_change_password && !verify_password(req.current_password.as_deref().unwrap_or(""), &rec.password_hash) {
         return Err(ApiError::BadRequest("Current password is incorrect".into()));
     }
     validate_credentials(&rec.username, &req.new_password)?;
-    sqlx::query("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
-        .bind(hash_password(&req.new_password)?)
-        .bind(Utc::now())
-        .bind(&user.id)
-        .execute(&s.pool)
-        .await?;
+    if verify_password(&req.new_password, &rec.password_hash) {
+        return Err(ApiError::BadRequest("Choose a password different from the current one".into()));
+    }
+    rec.set_password(&s.pool, &req.new_password, false).await?;
+    s.bus.publish(SystemEvent::UsersChanged);
     Ok(Json(json!({ "success": true })))
 }
 

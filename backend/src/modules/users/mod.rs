@@ -1,7 +1,7 @@
 //! Household members: roles (admin / member / guest) and what each may reach:
 //! the whole home, whole rooms, or single devices.
 
-use super::auth::{grants, hash_password, routes::validate_credentials, UserDto, UserRecord};
+use super::auth::{generate_password, generate_reset_code, grants, hash_password, routes::validate_credentials, UserDto, UserRecord};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
@@ -20,7 +20,10 @@ use uuid::Uuid;
 pub struct CreateUserRequest {
     pub username: String,
     pub email: String,
-    pub password: String,
+    /// Only for a kid's account. Everyone else gets a generated one, returned once.
+    pub password: Option<String>,
+    #[serde(default)]
+    pub kid: bool,
     pub role: String,
     pub avatar: Option<String>,
     #[serde(default = "yes")]
@@ -48,6 +51,12 @@ pub struct UpdateUserRequest {
     pub email: Option<String>,
     pub role: Option<String>,
     pub password: Option<String>,
+    /// Replace the password with a generated one, returned once.
+    #[serde(default)]
+    pub reset_password: bool,
+    pub kid: Option<bool>,
+    /// `true` issues a one-time reset code (returned once), `false` withdraws it.
+    pub reset_allowed: Option<bool>,
     pub avatar: Option<String>,
     pub all_rooms: Option<bool>,
     pub room_ids: Option<Vec<String>>,
@@ -197,7 +206,12 @@ async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<U
 
 async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<CreateUserRequest>) -> ApiResult<Json<UserDto>> {
     user.require_admin()?;
-    validate_credentials(&req.username, &req.password)?;
+    let generated = (!req.kid && req.password.is_none()).then(generate_password);
+    let password = generated
+        .clone()
+        .or(req.password.clone())
+        .ok_or_else(|| ApiError::BadRequest("A kid's account needs a password".into()))?;
+    validate_credentials(&req.username, &password)?;
     if email_taken(&s.pool, &req.email, None).await? {
         return Err(ApiError::Conflict("That email is already used by another account".into()));
     }
@@ -213,10 +227,16 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
         id: Uuid::new_v4().to_string(),
         username: req.username.trim().into(),
         email: req.email.trim().into(),
-        password_hash: hash_password(&req.password)?,
+        password_hash: hash_password(&password)?,
         role: role.as_str().into(),
         all_rooms: req.all_rooms,
         avatar: Some(avatar),
+        kid: req.kid,
+        must_change_password: !req.kid,
+        reset_requested_at: None,
+        reset_allowed_until: None,
+        reset_code_hash: None,
+        reset_attempts: 0,
         created_at: now,
         updated_at: now,
     };
@@ -226,7 +246,7 @@ async fn create(State(s): State<AppState>, user: AuthUser, Json(req): Json<Creat
     set_grants(&s, &rec.id, "room", rooms).await?;
     set_grants(&s, &rec.id, "device", devices).await?;
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
-    Ok(Json(UserDto::load(&s.pool, &rec).await?))
+    Ok(Json(UserDto { generated_password: generated, ..UserDto::load(&s.pool, &rec).await? }))
 }
 
 async fn update(
@@ -261,16 +281,40 @@ async fn update(
     if let Some(all) = req.all_rooms {
         rec.all_rooms = all;
     }
-    if let Some(pw) = &req.password {
+    if let Some(kid) = req.kid {
+        rec.kid = kid;
+    }
+    let generated = req.reset_password.then(generate_password);
+    if let Some(pw) = generated.as_ref().or(req.password.as_ref()) {
         validate_credentials(&rec.username, pw)?;
         rec.password_hash = hash_password(pw)?;
+        // A password an administrator knows is temporary, except a kid's and their own.
+        rec.must_change_password = !rec.kid && id != user.id;
+        rec.close_reset();
     }
-    sqlx::query("UPDATE users SET email = ?, role = ?, all_rooms = ?, password_hash = ?, avatar = ?, updated_at = ? WHERE id = ?")
+    let reset_code = (req.reset_allowed == Some(true)).then(generate_reset_code);
+    if req.reset_allowed.is_some() {
+        rec.close_reset();
+    }
+    if let Some(code) = &reset_code {
+        rec.reset_code_hash = Some(hash_password(code)?);
+        rec.reset_allowed_until = Some(Utc::now() + chrono::Duration::minutes(super::auth::RESET_MINUTES));
+    }
+    sqlx::query(
+        "UPDATE users SET email = ?, role = ?, all_rooms = ?, password_hash = ?, avatar = ?, kid = ?, must_change_password = ?,
+         reset_requested_at = ?, reset_allowed_until = ?, reset_code_hash = ?, reset_attempts = ?, updated_at = ? WHERE id = ?",
+    )
         .bind(&rec.email)
         .bind(&rec.role)
         .bind(rec.all_rooms)
         .bind(&rec.password_hash)
         .bind(&rec.avatar)
+        .bind(rec.kid)
+        .bind(rec.must_change_password)
+        .bind(rec.reset_requested_at)
+        .bind(rec.reset_allowed_until)
+        .bind(&rec.reset_code_hash)
+        .bind(rec.reset_attempts)
         .bind(Utc::now())
         .bind(&id)
         .execute(&s.pool)
@@ -286,7 +330,7 @@ async fn update(
         avatar: rec.avatar.clone(),
     });
     s.bus.publish(crate::infrastructure::event_bus::SystemEvent::UsersChanged);
-    Ok(Json(UserDto::load(&s.pool, &rec).await?))
+    Ok(Json(UserDto { generated_password: generated, reset_code, ..UserDto::load(&s.pool, &rec).await? }))
 }
 
 async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Value>> {

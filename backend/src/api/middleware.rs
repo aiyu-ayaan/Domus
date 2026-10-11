@@ -62,6 +62,8 @@ pub struct AuthUser {
     pub role: Role,
     /// `true` when the user may see every room.
     pub all_rooms: bool,
+    /// Still on a generated password: only the password change is open.
+    pub must_change_password: bool,
 }
 
 impl AuthUser {
@@ -91,15 +93,16 @@ impl AuthUser {
 
     /// The account as it is stored now; `None` once it was deleted.
     pub async fn load(pool: &sqlx::SqlitePool, id: &str) -> Result<Option<Self>, ApiError> {
-        let row: Option<(String, String, bool)> = sqlx::query_as("SELECT username, role, all_rooms FROM users WHERE id = ?")
+        let row: Option<(String, String, bool, bool)> = sqlx::query_as("SELECT username, role, all_rooms, must_change_password FROM users WHERE id = ?")
             .bind(id)
             .fetch_optional(pool)
             .await?;
-        Ok(row.map(|(username, role, all_rooms)| Self {
+        Ok(row.map(|(username, role, all_rooms, must_change_password)| Self {
             id: id.to_string(),
             username,
             role: Role::parse(&role).unwrap_or(Role::Guest),
             all_rooms,
+            must_change_password,
         }))
     }
 }
@@ -142,6 +145,10 @@ pub async fn auth_middleware(
     let user = AuthUser::load(&state.pool, &claims.sub)
         .await?
         .ok_or_else(|| ApiError::Unauthorized("Account no longer exists".into()))?;
+    let path = req.uri().path();
+    if user.must_change_password && !(path.ends_with("/auth/password") || path.ends_with("/auth/me")) {
+        return Err(ApiError::Forbidden("Change your password first".into()));
+    }
     req.extensions_mut().insert(user);
     Ok(next.run(req).await)
 }
