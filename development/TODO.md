@@ -261,7 +261,7 @@
 
 
 ## Milestone 21: Localization, every user-facing string in a catalog (2026-10-12)
-Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Design and rules: `development/docs/LOCALIZATION.md`. A language picker on the web is not in scope.
+Goal: no hard-coded UI text, so another language is a new catalog file. Branch `feat/localization`. Design and rules: `development/docs/LOCALIZATION.md`. 
 - [x] Web: `lib/i18n.ts` (`t(key, params)`, plural by `key_one` / `key_other`) over `locales/en.json`; `scripts/i18n-scan.py` lists what is left
 - [x] Web done: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview (+ insights), device drawer / row / charts / light controls, settings
 - [x] Web done: AutomationsView, RuleEditor, EnergyView, IntegrationsView, AirQualityView, AboutView, UpdatesView, AvatarPickerModal, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` (group names), `lib/devices.tsx` leftovers
@@ -270,7 +270,8 @@ Goal: no hard-coded UI text, so another language is a new catalog file. Branch `
 - [x] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
 - [x] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
 - [x] Language choice: web and desktop follow the browser's / system's language list and fall back to English, one lazy catalog chunk per language on the web; Android follows the phone and has Settings > Language (`AppLocale.kt`)
-- [ ] Check the web in Arabic / Urdu on screen (`dir="rtl"` is set, the layout is not reviewed)
+- [x] Web in Arabic on screen: logical Tailwind classes everywhere, mirrored arrows and sheet, numbers / units / charts kept left to right (`ltr()` in `lib/format.ts`)
+- [x] Language picker on the web and the desktop app (Settings > Appearance > Language; the desktop app keeps the choice in its config)
 - [x] Translations (26 languages: `hi`, `es`, `pt-BR`, `id`, `ar`, `fr`, `ru`, `de`, `tr`, `ja`, `ko`, `it`, `vi`, `th`, `zh-CN`, `zh-TW`, `pl`, `bn`, `ta`, `te`, `mr`, `gu`, `kn`, `ml`, `pa`, `ur`) added and registered across Web, Desktop, and Android (`app` + `ui-shared`, `localeFilters` + `generateLocaleConfig`); machine translation, no native review
 
 
