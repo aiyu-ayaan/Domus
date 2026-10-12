@@ -269,3 +269,12 @@ Goal: no hard-coded UI text, so another language is a new catalog file. Branch `
 - [x] Android: move every string to `res/values/strings.xml`; `core` has no Compose, so its errors, `AirLevel`, `UpdateChannel` and `Format` use message codes resolved in `:app` (`I18n.kt`)
 - [x] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
 - [x] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
+
+
+## Milestone 22: Analytics that keep the peaks (2026-10-12)
+Design: `development/docs/ARCHITECTURE.md` (section 6 "Sampling", "Air quality history").
+- [x] Backend: every poll feeds a per-device window; one row a minute with the average and the peak (`peak_watts`, `pm25_max`, migration `0013`)
+- [x] Backend: `/energy/history` and `/air/history` return peaks, air returns the samples per WHO level; new `hours` range, `hour` range for air
+- [x] Web: peak line and readout on the trend, 1 min range for air, day-by-hour grid on Energy and Air quality, time at each level
+- [ ] Android: show `pm25_max` / `peak_watts` and offer 1 min for air (the API is additive, the app still shows averages)
+- [ ] The home's `peak_watts` adds the devices' peaks per SQL group; store a per-minute home total if it must be exact

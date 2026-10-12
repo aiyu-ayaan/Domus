@@ -219,16 +219,29 @@ flowchart LR
     FS --> Diff{"state or online<br/>changed?"}
     Diff -- yes --> Save["UPDATE devices"] --> Ev["DeviceStateChanged<br/>(with previous state)"]
     Diff -- 5 failures --> Off["mark offline"] --> Ev
-    FS --> Meter{"power reported?"}
-    Meter -- "≥ 60 s since last sample" --> EM["INSERT energy_metrics<br/>W, kWh = W × Δt"]
-    Meter -- "device meter today<br/>> recorded today + 10 Wh" --> Fill["INSERT fill-* rows<br/>gap spread over unsampled hours"]
-    EM --> Hist["GET /energy/history<br/>kWh, cost, avg W per bucket"]
+    FS --> Meter{"power or PM2.5<br/>reported?"}
+    Meter -- "every poll" --> Win["Window per device (memory)<br/>sum, count, max · kWh += W × Δt"]
+    Win -- "window ≥ 60 s old" --> EM["INSERT energy_metrics<br/>avg W, peak W, kWh"]
+    Win -- "window ≥ 60 s old" --> AM["INSERT air_metrics<br/>avg and max PM2.5, avg °C, avg %"]
+    Win -- "device meter today<br/>> recorded today + 10 Wh" --> Fill["INSERT fill-* rows<br/>gap spread over unsampled hours"]
+    EM --> Hist["GET /energy/history<br/>kWh, cost, avg W, peak W per bucket"]
+    AM --> AHist["GET /air/history<br/>avg, peak, level time per bucket"]
     Fill --> Hist
     Ev --> AE["AutomationEngine<br/>edge-triggered rules"]
     Ev --> WSS["WebSocket → UI cache"]
     Cmd["POST /devices/{id}/command"] --> Send["plugin.send_command"] --> Opt["optimistic state"] --> Ev
     Send -. "1.5 s later" .-> Refresh["refresh device"]
 ```
+
+**Sampling.** A stored sample is not a snapshot. Every poll (3 s local, 15 s cloud) adds what the device
+reports to its `Window` (`integrations/sampling.rs`), held in memory: a running sum, count and maximum per
+reading, and the energy `W × Δt` since the previous poll (a silence longer than the sample interval is a gap,
+not usage). `DeviceManager::store_samples` runs after each poll round and turns every window that is
+`workers.energy_sample_secs` (60 s) old into one row: average and peak power with the energy of those polls
+in `energy_metrics`, average and highest PM2.5 with the average temperature and humidity in `air_metrics`.
+So a spike that lasts a few seconds is kept as the minute's peak, at one write per device and minute; the
+polls themselves cost no write. Up to a minute of readings is lost when the server stops. A spike between
+two polls, or while the server is not running, is still not seen.
 
 Energy samples store *incremental* kWh, so usage is a plain sum: today, the
 current billing cycle (custom start day), a projection to cycle end, budget
@@ -245,9 +258,12 @@ yesterday. Web and Android both show `today_kwh` / `today_cost` from `GET /energ
 never recompute it from device state. The meter is assumed to reset at the server's local
 midnight (set the same time zone on the plug).
 
-**Power history.** Every sample stores the measured `power_watts`. `GET /energy/history` returns
-`watts` per bucket: each device's average over its real samples (fill rows are excluded), summed
-across devices, `null` where nothing was measured. The clients draw it as a line chart next to
+**Power history.** Every sample stores the average `power_watts` and the `peak_watts` of its minute
+(`NULL` on rows from before migration `0013`, which then count as their own peak). `GET /energy/history`
+returns `watts` per bucket: each device's average over its real samples (fill rows are excluded), summed
+across devices, `null` where nothing was measured. `peak_watts` is the bucket's highest power: the devices'
+peaks added up per SQL group (1 or 15 minutes), then the highest group, so for a whole home it can read a
+little high when devices peak at different moments. The clients draw it as a line chart next to
 the kWh bars (`EnergyChart` + `TrendChart` on the web, `LineChart` on Android).
 
 ### Notifications
@@ -457,14 +473,19 @@ when the account is deleted.
 
 ### Air quality history
 
-Devices that report PM2.5 are sampled every five energy intervals into `air_metrics` (with temperature and
-humidity when present). `GET /air/history?range=day|week|month` returns per-bucket averages, `null` where
-nothing was measured; retention follows `energy_retention_days`.
+Devices that report PM2.5 get a row a minute in `air_metrics` (see Sampling above): the minute's average
+and highest PM2.5, with the average temperature and humidity when present.
+`GET /air/history?range=hour|day|week|month|hours` returns per bucket the averages (`null` where nothing was
+measured), `pm25_max` (the highest single reading, which a daily average hides) and `levels`, the number of
+samples at each WHO level (≤ 12, ≤ 35, ≤ 55, above). The web draws the peak as a fainter line over the
+average, takes "Peak" and "Time with good air" from them and shows the levels as a stacked bar. Retention
+follows `energy_retention_days`.
 
 ### History buckets and time zones
 
 `GET /energy/history` and `GET /air/history` share `Buckets` (`modules/energy`): `hour` is 60 one-minute
-buckets (energy only: air is sampled too coarsely for it), `day` 24 clock hours, `week` 7 days, `month` 30 days. Clients send `tz`, their IANA zone
+buckets, `day` 24 clock hours, `week` 7 days, `month` 30 days and `hours` every clock hour from midnight six
+days ago (the web's day-by-hour grid, `HourGrid`, on the Energy and Air quality pages). Clients send `tz`, their IANA zone
 (`Asia/Kolkata`, resolved with `chrono-tz`), so an hour is a clock hour and a day starts at midnight where
 the viewer is, across DST changes too; the published image
 runs in UTC unless `TZ` is set, so without `tz` the buckets follow the server. Clients print bucket times in
