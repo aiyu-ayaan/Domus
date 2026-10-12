@@ -599,6 +599,8 @@
     <string name="settings_about">Giới thiệu về Domus</string>
     <string name="settings_about_subtitle">Phiên bản %1$s, nhà phát triển và lời cảm ơn</string>
     <string name="settings_appearance">Giao diện</string>
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="settings_language_system">Mặc định của hệ thống</string>
     <string name="settings_wallpaper_colors">Màu hình nền</string>
     <string name="settings_wallpaper_colors_subtitle">Đồng bộ màu ứng dụng với hình nền của bạn</string>
     <string name="settings_section_account">Tài khoản</string>

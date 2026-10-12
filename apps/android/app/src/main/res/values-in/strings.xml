@@ -599,6 +599,8 @@
     <string name="settings_about">Tentang Domus</string>
     <string name="settings_about_subtitle">Versi %1$s, pengembang, dan ucapan terima kasih</string>
     <string name="settings_appearance">Tampilan</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_language_system">Default sistem</string>
     <string name="settings_wallpaper_colors">Warna wallpaper</string>
     <string name="settings_wallpaper_colors_subtitle">Sesuaikan warna aplikasi dengan wallpaper Anda</string>
     <string name="settings_section_account">Akun</string>

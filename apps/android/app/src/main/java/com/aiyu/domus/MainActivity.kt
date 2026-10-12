@@ -36,7 +36,8 @@ import com.aiyu.domus.core.Session
 import com.aiyu.domus.ui.theme.DomusTheme
 
 class DomusApp : Application() {
-    val repository by lazy { DomusRepository(this) { code, params, fallback -> resolveDomusMessage(code, params, fallback) } }
+    // Wrapped per message: below Android 13 the language can change while this context lives on.
+    val repository by lazy { DomusRepository(this) { code, params, fallback -> AppLocale.wrap(this).resolveDomusMessage(code, params, fallback) } }
 }
 
 val LocalRepository = staticCompositionLocalOf<DomusRepository> { error("No repository") }
@@ -60,6 +61,8 @@ class MainActivity : ComponentActivity() {
             }
         })
     }
+
+    override fun attachBaseContext(base: android.content.Context) = super.attachBaseContext(AppLocale.wrap(base))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -58,6 +58,8 @@ private val Context.repository get() = (applicationContext as DomusApp).reposito
  * one idle connection with a ping every 25 s.
  */
 class AlertsService : Service() {
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onCreate() {
@@ -106,6 +108,8 @@ class BootReceiver : BroadcastReceiver() {
  * user ends screen sharing.
  */
 class ScreenSyncService : Service() {
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var projection: MediaProjection? = null
     private var display: VirtualDisplay? = null

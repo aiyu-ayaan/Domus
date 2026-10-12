@@ -604,6 +604,8 @@
     <string name="settings_about">Domus Hakkında</string>
     <string name="settings_about_subtitle">Sürüm %1$s, geliştirici ve teşekkürler</string>
     <string name="settings_appearance">Görünüm</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_language_system">Sistem varsayılanı</string>
     <string name="settings_wallpaper_colors">Duvar kağıdı renkleri</string>
     <string name="settings_wallpaper_colors_subtitle">Uygulamayı duvar kağıdınızla uyumlu hale getirin</string>
     <string name="settings_section_account">Hesap</string>

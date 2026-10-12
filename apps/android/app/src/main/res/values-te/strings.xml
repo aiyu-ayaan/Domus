@@ -604,6 +604,8 @@
     <string name="settings_about">Domus గురించి</string>
     <string name="settings_about_subtitle">వెర్షన్ %1$s, డెవలపర్ మరియు కృతజ్ఞతలు</string>
     <string name="settings_appearance">రూపం (Appearance)</string>
+    <string name="settings_language">భాష</string>
+    <string name="settings_language_system">సిస్టమ్ డిఫాల్ట్</string>
     <string name="settings_wallpaper_colors">వాల్‌పేపర్ రంగులు</string>
     <string name="settings_wallpaper_colors_subtitle">యాప్‌ను మీ వాల్‌పేపర్‌కు అనుగుణంగా మార్చండి</string>
     <string name="settings_section_account">ఖాతా</string>

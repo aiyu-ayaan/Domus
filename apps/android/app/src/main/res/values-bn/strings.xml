@@ -604,6 +604,8 @@
     <string name="settings_about">Domus সম্পর্কে</string>
     <string name="settings_about_subtitle">সংস্করণ %1$s, ডেভেলপার এবং কৃতজ্ঞতা স্বীকার</string>
     <string name="settings_appearance">চেহারা</string>
+    <string name="settings_language">ভাষা</string>
+    <string name="settings_language_system">সিস্টেমের ডিফল্ট</string>
     <string name="settings_wallpaper_colors">ওয়ালপেপারের রঙ</string>
     <string name="settings_wallpaper_colors_subtitle">আপনার ওয়ালপেপারের সাথে অ্যাপটি মেলান</string>
     <string name="settings_section_account">অ্যাকাউন্ট</string>

@@ -604,6 +604,8 @@
     <string name="settings_about">Domus-നെ കുറിച്ച്</string>
     <string name="settings_about_subtitle">പതിപ്പ് %1$s, ഡെവലപ്പറും കൃതജ്ഞതയും</string>
     <string name="settings_appearance">രൂപം</string>
+    <string name="settings_language">ഭാഷ</string>
+    <string name="settings_language_system">സിസ്റ്റം സ്ഥിരം</string>
     <string name="settings_wallpaper_colors">വാൾപേപ്പർ നിറങ്ങൾ</string>
     <string name="settings_wallpaper_colors_subtitle">നിങ്ങളുടെ വാൾപേപ്പറിന് അനുയോജ്യമായി ആപ്പ് മാറ്റുക</string>
     <string name="settings_section_account">അക്കൗണ്ട്</string>

@@ -599,6 +599,8 @@
     <string name="settings_about">關於 Domus</string>
     <string name="settings_about_subtitle">版本 %1$s、開發者與致謝</string>
     <string name="settings_appearance">外觀</string>
+    <string name="settings_language">語言</string>
+    <string name="settings_language_system">跟隨系統</string>
     <string name="settings_wallpaper_colors">桌布色彩</string>
     <string name="settings_wallpaper_colors_subtitle">使應用程式配色與您的桌布相符</string>
     <string name="settings_section_account">帳號</string>

@@ -614,6 +614,8 @@
     <string name="settings_about">O Domus</string>
     <string name="settings_about_subtitle">Wersja %1$s, twórca i podziękowania</string>
     <string name="settings_appearance">Wygląd</string>
+    <string name="settings_language">Język</string>
+    <string name="settings_language_system">Domyślny systemowy</string>
     <string name="settings_wallpaper_colors">Kolory tapety</string>
     <string name="settings_wallpaper_colors_subtitle">Dopasuj aplikację do swojej tapety</string>
     <string name="settings_section_account">Konto</string>

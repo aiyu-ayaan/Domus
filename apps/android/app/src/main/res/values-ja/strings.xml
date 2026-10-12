@@ -599,6 +599,8 @@
     <string name="settings_about">Domus について</string>
     <string name="settings_about_subtitle">バージョン %1$s、開発者、謝辞</string>
     <string name="settings_appearance">外観</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_language_system">システムのデフォルト</string>
     <string name="settings_wallpaper_colors">壁紙の色</string>
     <string name="settings_wallpaper_colors_subtitle">アプリの配色を壁紙に合わせる</string>
     <string name="settings_section_account">アカウント</string>

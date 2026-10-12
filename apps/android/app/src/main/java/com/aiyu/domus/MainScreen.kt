@@ -113,6 +113,7 @@ fun MainScreen(session: Session.SignedIn) {
                 current == "password" -> ChangePasswordPage(close)
                 current == "links" -> ServerLinksPage(user.isAdmin, close)
                 current == "updates" -> UpdatesPage(close)
+                current == "language" -> LanguagePage(close)
                 current == "about" -> AboutPage(close, onOpenAcknowledgements = { open("acknowledgements") })
                 current == "acknowledgements" -> AcknowledgementsPage(close)
                 current == "avatar" -> AvatarCustomizationPage(user, close)

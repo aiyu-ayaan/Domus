@@ -604,6 +604,8 @@
     <string name="settings_about">Domus बद्दल</string>
     <string name="settings_about_subtitle">आवृत्ती %1$s, डेव्हलपर आणि ऋणनिर्देश</string>
     <string name="settings_appearance">दिसणे (Appearance)</string>
+    <string name="settings_language">भाषा</string>
+    <string name="settings_language_system">सिस्टम डीफॉल्ट</string>
     <string name="settings_wallpaper_colors">वॉलपेपरचे रंग</string>
     <string name="settings_wallpaper_colors_subtitle">तुमच्या वॉलपेपरशी ॲपचे रंग जुळवा</string>
     <string name="settings_section_account">खाते</string>

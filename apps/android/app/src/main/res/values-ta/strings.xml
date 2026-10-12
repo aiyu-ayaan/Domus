@@ -604,6 +604,8 @@
     <string name="settings_about">Domus பற்றி</string>
     <string name="settings_about_subtitle">பதிப்பு %1$s, உருவாக்குநர் மற்றும் நன்றியுரைகள்</string>
     <string name="settings_appearance">தோற்றம்</string>
+    <string name="settings_language">மொழி</string>
+    <string name="settings_language_system">சிஸ்டம் இயல்பு</string>
     <string name="settings_wallpaper_colors">வால்பேப்பர் நிறங்கள்</string>
     <string name="settings_wallpaper_colors_subtitle">செயலியை உங்கள் வால்பேப்பருடன் பொருத்தவும்</string>
     <string name="settings_section_account">கணக்கு</string>

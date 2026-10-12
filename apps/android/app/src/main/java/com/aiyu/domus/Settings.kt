@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -249,6 +250,8 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
         RowCard(stringResource(R.string.settings_server_addresses), stringResource(R.string.settings_server_addresses_subtitle), Icons.Rounded.Public, onClick = { open("links") })
         RowCard(stringResource(R.string.settings_updates), stringResource(R.string.settings_updates_subtitle, version), Icons.Rounded.SystemUpdate, onClick = { open("updates") })
         RowCard(stringResource(R.string.settings_about), stringResource(R.string.settings_about_subtitle, version), Icons.Rounded.Info, onClick = { open("about") })
+
+        RowCard(stringResource(R.string.settings_language), languageLabel(), Icons.Rounded.Translate, onClick = { open("language") })
 
         CollapsibleCard(
             title = stringResource(R.string.settings_appearance),

@@ -599,6 +599,8 @@
     <string name="settings_about">Domus 정보</string>
     <string name="settings_about_subtitle">버전 %1$s, 개발자 및 오픈소스 고지</string>
     <string name="settings_appearance">화면 표시</string>
+    <string name="settings_language">언어</string>
+    <string name="settings_language_system">시스템 기본값</string>
     <string name="settings_wallpaper_colors">배경화면 색상</string>
     <string name="settings_wallpaper_colors_subtitle">앱 색상을 배경화면에 맞춥니다</string>
     <string name="settings_section_account">계정</string>

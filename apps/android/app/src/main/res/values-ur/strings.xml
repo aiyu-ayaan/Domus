@@ -604,6 +604,8 @@
     <string name="settings_about">Domus کے بارے میں</string>
     <string name="settings_about_subtitle">ورژن %1$s، ڈویلپر اور تشکرات</string>
     <string name="settings_appearance">ظاہری شکل</string>
+    <string name="settings_language">زبان</string>
+    <string name="settings_language_system">سسٹم ڈیفالٹ</string>
     <string name="settings_wallpaper_colors">وال پیپر کے رنگ</string>
     <string name="settings_wallpaper_colors_subtitle">ایپ کو اپنے وال پیپر سے ملائیں</string>
     <string name="settings_section_account">اکاؤنٹ</string>

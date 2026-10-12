@@ -609,6 +609,8 @@
     <string name="settings_about">Informazioni su Domus</string>
     <string name="settings_about_subtitle">Versione %1$s, sviluppatore e riconoscimenti</string>
     <string name="settings_appearance">Aspetto</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_language_system">Predefinita di sistema</string>
     <string name="settings_wallpaper_colors">Colori dello sfondo</string>
     <string name="settings_wallpaper_colors_subtitle">Abbina i colori dell\'app al tuo sfondo</string>
     <string name="settings_section_account">Account</string>

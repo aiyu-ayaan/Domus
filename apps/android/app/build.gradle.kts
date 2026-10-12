@@ -69,6 +69,13 @@ android {
         generateLocaleConfig = true
     }
 
+    // The language is switched in the app, so a bundle must carry every language instead of splitting by the phone's.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     buildFeatures {
         compose = true
     }
