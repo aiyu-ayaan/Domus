@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
@@ -19,6 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.aiyu.domus.core.Automation
+import com.aiyu.domus.core.Scene
 import com.aiyu.domus.core.User
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,6 +55,8 @@ import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
+import com.aiyu.domus.ui.components.LocalWideScreen
+import com.aiyu.domus.ui.components.SideBySide
 import com.aiyu.domus.ui.components.enterStaggered
 import java.time.Duration
 import java.time.Instant
@@ -135,44 +140,63 @@ fun ScenesScreen(user: User, open: (String) -> Unit) {
                 OutlinedButton({ open("scene:newsync") }) { Text(stringResource(R.string.scene_new_screen_sync)) }
             }
         }
-        if (scenes.isNotEmpty()) SectionTitle(stringResource(R.string.scene_title))
-        scenes.forEachIndexed { index, scene ->
-            val sync = scene.kind == "screen_sync"
-            SwitchRow(
-                scene.name,
-                if (sync) {
-                    if (scene.isActive) stringResource(R.string.scene_sync_active_subtitle) else stringResource(R.string.scene_sync_inactive_subtitle)
-                } else if (scene.isActive) {
-                    stringResource(R.string.scene_active)
-                } else null,
-                Icons.Rounded.AutoAwesome, MaterialShapes.Clover4Leaf,
-                checked = scene.isActive,
-                enabled = canControl,
-                onCheckedChange = { on ->
-                    if (sync && on) {
-                        syncing = scene.id
-                        capture.launch(context.getSystemService(MediaProjectionManager::class.java).createScreenCaptureIntent())
-                    } else repository.toggleScene(scene, on) // off also ends a Screen Sync running here or on a computer
-                },
-                onEdit = if (user.isAdmin) ({ open("scene:${scene.id}") }) else null,
-                modifier = Modifier.enterStaggered(index),
-            )
+        val sceneRows: @Composable ColumnScope.(List<Scene>) -> Unit = { rows ->
+            rows.forEach { scene ->
+                val index = scenes.indexOf(scene)
+                val sync = scene.kind == "screen_sync"
+                SwitchRow(
+                    scene.name,
+                    if (sync) {
+                        if (scene.isActive) stringResource(R.string.scene_sync_active_subtitle) else stringResource(R.string.scene_sync_inactive_subtitle)
+                    } else if (scene.isActive) {
+                        stringResource(R.string.scene_active)
+                    } else null,
+                    Icons.Rounded.AutoAwesome, MaterialShapes.Clover4Leaf,
+                    checked = scene.isActive,
+                    enabled = canControl,
+                    onCheckedChange = { on ->
+                        if (sync && on) {
+                            syncing = scene.id
+                            capture.launch(context.getSystemService(MediaProjectionManager::class.java).createScreenCaptureIntent())
+                        } else repository.toggleScene(scene, on) // off also ends a Screen Sync running here or on a computer
+                    },
+                    onEdit = if (user.isAdmin) ({ open("scene:${scene.id}") }) else null,
+                    modifier = Modifier.enterStaggered(index),
+                )
+            }
         }
-        if (automations.isNotEmpty()) SectionTitle(stringResource(R.string.scene_section_automations))
-        automations.forEachIndexed { index, automation ->
-            SwitchRow(
-                automation.name,
-                automation.description?.ifBlank { null } ?: timeAgo(automation.lastTriggeredAt)?.let { stringResource(R.string.scene_last_ran, it) } ?: stringResource(R.string.scene_never_ran),
-                Icons.Rounded.Bolt, MaterialShapes.Sunny,
-                checked = automation.isEnabled,
-                enabled = canControl,
-                onCheckedChange = { repository.toggleAutomation(automation) },
-                onEdit = if (user.isAdmin) ({ open("automation:${automation.id}") }) else null,
-                modifier = Modifier.enterStaggered(scenes.size + index),
-            ) {
-                FilledTonalIconButton({ repository.runAutomation(automation) }, enabled = canControl) {
-                    Icon(Icons.Rounded.PlayArrow, stringResource(R.string.scene_run_now, automation.name))
+        val automationRows: @Composable ColumnScope.(List<Automation>) -> Unit = { rows ->
+            rows.forEach { automation ->
+                val index = automations.indexOf(automation)
+                SwitchRow(
+                    automation.name,
+                    automation.description?.ifBlank { null } ?: timeAgo(automation.lastTriggeredAt)?.let { stringResource(R.string.scene_last_ran, it) } ?: stringResource(R.string.scene_never_ran),
+                    Icons.Rounded.Bolt, MaterialShapes.Sunny,
+                    checked = automation.isEnabled,
+                    enabled = canControl,
+                    onCheckedChange = { repository.toggleAutomation(automation) },
+                    onEdit = if (user.isAdmin) ({ open("automation:${automation.id}") }) else null,
+                    modifier = Modifier.enterStaggered(scenes.size + index),
+                ) {
+                    FilledTonalIconButton({ repository.runAutomation(automation) }, enabled = canControl) {
+                        Icon(Icons.Rounded.PlayArrow, stringResource(R.string.scene_run_now, automation.name))
+                    }
                 }
+            }
+        }
+        val wide = LocalWideScreen.current
+        // A wide screen puts scenes beside automations; with only one of the two, its rows fill both columns.
+        fun <T> List<T>.column(n: Int) = filterIndexed { i, _ -> i % 2 == n }
+        when {
+            wide && scenes.isNotEmpty() && automations.isNotEmpty() -> SideBySide(
+                { SectionTitle(stringResource(R.string.scene_title)); sceneRows(scenes) },
+                { SectionTitle(stringResource(R.string.scene_section_automations)); automationRows(automations) },
+            )
+            else -> {
+                if (scenes.isNotEmpty()) SectionTitle(stringResource(R.string.scene_title))
+                if (wide) SideBySide({ sceneRows(scenes.column(0)) }, { sceneRows(scenes.column(1)) }) else sceneRows(scenes)
+                if (automations.isNotEmpty()) SectionTitle(stringResource(R.string.scene_section_automations))
+                if (wide) SideBySide({ automationRows(automations.column(0)) }, { automationRows(automations.column(1)) }) else automationRows(automations)
             }
         }
     }
