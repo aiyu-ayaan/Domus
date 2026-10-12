@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">రంగుల చక్రం</string>
+    <string name="ui_expanded">విస్తరించబడింది</string>
+    <string name="ui_collapsed">కుదించబడింది</string>
+    <string name="ui_collapse">కుదించు</string>
+    <string name="ui_expand">విస్తరించు</string>
+</resources>
