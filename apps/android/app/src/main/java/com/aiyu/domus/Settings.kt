@@ -266,15 +266,21 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
                 }
                 // Wallpaper colors exist from Android 12.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Row(
-                        Modifier.toggleable(appearance.dynamicColor, role = Role.Switch) { repository.setAppearance(appearance.copy(dynamicColor = it)) },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_wallpaper_colors), style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.settings_wallpaper_colors_subtitle), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                    // A card, so the press ripple has edges and the text keeps its distance from the switch.
+                    Surface(color = c.surfaceContainerHighest, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            Modifier
+                                .toggleable(appearance.dynamicColor, role = Role.Switch) { repository.setAppearance(appearance.copy(dynamicColor = it)) }
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(stringResource(R.string.settings_wallpaper_colors), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.settings_wallpaper_colors_subtitle), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                            }
+                            Switch(appearance.dynamicColor, onCheckedChange = null)
                         }
-                        Switch(appearance.dynamicColor, onCheckedChange = null)
                     }
                 }
             }
