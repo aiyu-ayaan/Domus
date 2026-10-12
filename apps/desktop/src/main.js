@@ -45,6 +45,9 @@ let win = null
 const configFile = () => path.join(app.getPath('userData'), isDev ? 'domus-dev.json' : 'domus.json')
 const save = () => fs.writeFileSync(configFile(), JSON.stringify(config), { mode: 0o600 })
 
+/** The picked language first, then the system's own list: app.getLocale() only names languages Chromium itself is translated into. */
+const applyLanguage = () => setLanguage(config.language, app.getPreferredSystemLanguages(), app.getLocale())
+
 const origin = (url) => {
   try {
     return new URL(url).origin
@@ -214,6 +217,16 @@ ipcMain.on('i18n:get', (event) => {
 })
 ipcMain.on('i18n:language', (event) => {
   event.returnValue = trusted(event) ? getLanguage() : 'en'
+})
+// The language picked in Settings; '' follows the system. The page reloads itself afterwards.
+ipcMain.on('i18n:choice', (event) => {
+  event.returnValue = (trusted(event) && config.language) || ''
+})
+ipcMain.on('i18n:set', (event, tag) => {
+  if (!trusted(event) || typeof tag !== 'string') return
+  config.language = tag
+  save()
+  applyLanguage()
 })
 
 // The signed-in server's addresses (GET /api/v1/server/links). Its certificate
@@ -435,13 +448,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // The system's own list first: app.getLocale() only names languages Chromium itself is translated into.
-  setLanguage(app.getPreferredSystemLanguages(), app.getLocale())
   try {
     config = { ...config, ...JSON.parse(fs.readFileSync(configFile(), 'utf8')) }
   } catch {
     /* first run */
   }
+  applyLanguage()
 
   Menu.setApplicationMenu(null)
   session.defaultSession.setCertificateVerifyProc(verifyCertificate)
