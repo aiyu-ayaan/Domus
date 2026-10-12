@@ -64,6 +64,11 @@ android {
         }
     }
 
+    androidResources {
+        localeFilters += listOf("en", "hi")
+        generateLocaleConfig = true
+    }
+
     buildFeatures {
         compose = true
     }

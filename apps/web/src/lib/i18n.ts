@@ -1,11 +1,13 @@
 import en from '@/locales/en.json'
+import hi from '@/locales/hi.json'
 
 export type MessageKey = keyof typeof en
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.ts` with the same keys and register it here. */
-const catalogs: Record<string, Record<string, string>> = { en }
+const catalogs: Record<string, Record<string, string>> = { en, hi }
 
-const language = (typeof navigator !== 'undefined' && navigator.language.split('-')[0]) || 'en'
+const navLang = (typeof navigator !== 'undefined' && navigator.language) || 'en'
+const language = catalogs[navLang] ? navLang : navLang.split('-')[0] || 'en'
 const messages = catalogs[language] ?? en
 const plural = new Intl.PluralRules(language)
 

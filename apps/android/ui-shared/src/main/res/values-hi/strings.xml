@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">रंग चक्र</string>
+    <string name="ui_expanded">विस्तारित</string>
+    <string name="ui_collapsed">संक्षिप्त</string>
+    <string name="ui_collapse">संक्षिप्त करें</string>
+    <string name="ui_expand">विस्तार करें</string>
+</resources>

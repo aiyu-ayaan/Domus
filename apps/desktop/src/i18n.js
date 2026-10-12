@@ -1,11 +1,13 @@
 const en = require('./locales/en.json')
+const hi = require('./locales/hi.json')
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.json` with the same keys and register it here. */
-const catalogs = { en }
+const catalogs = { en, hi }
 
 let language = 'en'
 const setLanguage = (locale) => {
-  language = String(locale || 'en').split('-')[0] || 'en'
+  const raw = String(locale || 'en')
+  language = catalogs[raw] ? raw : raw.split('-')[0] || 'en'
 }
 setLanguage(Intl.DateTimeFormat().resolvedOptions().locale)
 
