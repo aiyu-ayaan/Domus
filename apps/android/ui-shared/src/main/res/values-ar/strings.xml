@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">عجلة الألوان</string>
+    <string name="ui_expanded">موسَّع</string>
+    <string name="ui_collapsed">مطوي</string>
+    <string name="ui_collapse">طي</string>
+    <string name="ui_expand">توسيع</string>
+</resources>

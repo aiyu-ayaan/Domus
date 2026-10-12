@@ -1,0 +1,975 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">ممتاز</string>
+    <string name="air_good">جيد</string>
+    <string name="air_moderate">متوسط</string>
+    <string name="air_poor">سيئ</string>
+    <string name="channel_stable">مستقر</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">هذا الكمبيوتر</string>
+    <string name="api_untrusted">شهادة الخادم غير موثوقة.</string>
+    <string name="api_offline">يتعذر الوصول إلى خادم Domus. تحقق من أنه قيد التشغيل.</string>
+    <string name="api_bad_response">أرسل الخادم إجابة لا يفهمها إصدار التطبيق هذا.</string>
+    <string name="api_request_failed">فشل الطلب ({status})</string>
+    <string name="error_no_server">لا يوجد خادم</string>
+    <string name="connect_cert_changed">تغيرت شهادة الخادم منذ أن وافقت عليها. اتصل مرة أخرى لمراجعة الشهادة الجديدة.</string>
+    <string name="connect_address_invalid">أدخل عنواناً مثل 192.168.1.10:8443 أو home.example.com. يُدعم https فقط.</string>
+    <string name="connect_cert_unreadable">تعذّرت قراءة شهادة الخادم.</string>
+    <string name="automation_ran">تم تشغيل «{name}»</string>
+    <string name="handover_reset_until">إعادة تعيين كلمة مرور Domus للمستخدم %1$s\nالرمز: %2$s\n\nفي شاشة تسجيل الدخول، اختر \"هل نسيت كلمة المرور؟\"، وأدخل اسم المستخدم ثم هذا الرمز. يعمل لمرة واحدة، حتى %3$s.</string>
+    <string name="handover_reset">إعادة تعيين كلمة مرور Domus للمستخدم %1$s\nالرمز: %2$s\n\nفي شاشة تسجيل الدخول، اختر \"هل نسيت كلمة المرور؟\"، وأدخل اسم المستخدم ثم هذا الرمز. يعمل لمرة واحدة.</string>
+    <string name="handover_signin_kid">تسجيل الدخول إلى Domus\nالعنوان: %1$s\nاسم المستخدم: %2$s\nكلمة المرور: %3$s</string>
+    <string name="handover_signin">تسجيل الدخول إلى Domus\nالعنوان: %1$s\nاسم المستخدم: %2$s\nكلمة المرور: %3$s\n\nسيُطلب منك اختيار كلمة مرور خاصة بك في المرة الأولى التي تسجل فيها الدخول.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_devices">الأجهزة</string>
+    <string name="nav_scenes">المشاهد</string>
+    <string name="nav_analytics">التحليلات</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">منزلك بالكامل، في تطبيق واحد</string>
+    <string name="connect_intro_1_body">الأضواء والقوابس ومنقيات الهواء والمستشعرات من Tuya وTapo وXiaomi وPhilips Hue وMQTT، جنباً إلى جنب.</string>
+    <string name="connect_intro_2_title">خصوصية مدمجة في التصميم</string>
+    <string name="connect_intro_2_body">يتحدث Domus فقط مع الخادم الموجود في منزلك، عبر اتصال مشفر. لا حاجة لحساب سحابي.</string>
+    <string name="connect_intro_3_title">يعثر على خادمك تلقائياً</string>
+    <string name="connect_intro_3_body">على شبكة Wi‑Fi الخاصة بك، يعثر التطبيق على الخادم بنفسه. وعندما تكون خارج المنزل، أدخل عنوانه.</string>
+    <string name="connect_page_of">صفحة %1$d من %2$d</string>
+    <string name="connect_skip">تخطي</string>
+    <string name="connect_get_started">البدء</string>
+    <string name="connect_next">التالي</string>
+    <string name="connect_welcome_title">مرحباً بك في Domus</string>
+    <string name="connect_welcome_subtitle">اتصل بالخادم الذي يدير منزلك.</string>
+    <string name="connect_on_this_network">على هذه الشبكة</string>
+    <string name="connect_looking_for_servers">جارٍ البحث عن خوادم…</string>
+    <string name="connect_no_server_found">لم يستجب أي خادم. تحقق من أن هذا الهاتف متصل بنفس شبكة Wi‑Fi المتصل بها الخادم، أو أدخل عنوانه أدناه.</string>
+    <string name="connect_scan_again">البحث مجدداً</string>
+    <string name="connect_or_enter_address">أو أدخل العنوان</string>
+    <string name="connect_server_address">عنوان الخادم</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 أو home.example.com</string>
+    <string name="connect_action">اتصال</string>
+    <string name="connect_trust_title">الوثوق بهذا الخادم؟</string>
+    <string name="connect_trust_body">يستخدم %1$s شهادة أنشأها بنفسه، وهو أمر طبيعي للخادم المنزلي. ثق بها فقط إذا كانت البصمة تطابق تلك التي يطبعها الخادم عند بدء تشغيله.</string>
+    <string name="connect_trust_action">وثوق</string>
+    <string name="connect_cancel">إلغاء</string>
+    <string name="connect_use_another_server">استخدام خادم آخر</string>
+    <string name="connect_unreachable_title">يتعذر الوصول إلى منزلك</string>
+    <string name="connect_try_again">إعادة المحاولة</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">إخفاء كلمة المرور</string>
+    <string name="auth_show_password">إظهار كلمة المرور</string>
+    <string name="auth_username">اسم المستخدم</string>
+    <string name="auth_new_password">كلمة المرور الجديدة</string>
+    <string name="auth_password_min_length">8 أحرف على الأقل</string>
+    <string name="auth_confirm_password">تأكيد كلمة المرور</string>
+    <string name="auth_passwords_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="auth_create_admin_title">إنشاء حساب المسؤول</string>
+    <string name="auth_welcome_back_title">مرحباً بعودتك</string>
+    <string name="auth_create_admin_subtitle">هذا الخادم جديد. الحساب الأول يدير كل شيء.</string>
+    <string name="auth_welcome_back_subtitle">سجّل الدخول إلى منزلك.</string>
+    <string name="auth_encrypted_connection">اتصال مشفر بـ</string>
+    <string name="auth_email">البريد الإلكتروني</string>
+    <string name="auth_password">كلمة المرور</string>
+    <string name="auth_create_account">إنشاء حساب</string>
+    <string name="auth_sign_in">تسجيل الدخول</string>
+    <string name="auth_forgot_password">هل نسيت كلمة المرور؟</string>
+    <string name="auth_forgot_title">هل نسيت كلمة المرور؟</string>
+    <string name="auth_forgot_subtitle">لا يرسل Domus رسائل بريد إلكتروني. يتم إبلاغ مسؤول في هذا المنزل بدلاً من ذلك، ويعطيك رمزاً يُستخدم لمرة واحدة.</string>
+    <string name="auth_ask_admin">اطلب من المسؤول</string>
+    <string name="auth_back_to_sign_in">العودة لتسجيل الدخول</string>
+    <string name="auth_reset_code_title">أدخل رمز إعادة التعيين</string>
+    <string name="auth_reset_code_subtitle">تم إبلاغ المسؤول. اطلب منه الرمز المكون من 8 أرقام الخاص بـ %1$s؛ وهو صالح لمرة واحدة ولمدة 30 دقيقة.</string>
+    <string name="auth_reset_code_label">رمز إعادة التعيين</string>
+    <string name="auth_set_password_sign_in">تعيين كلمة المرور وتسجيل الدخول</string>
+    <string name="auth_back">رجوع</string>
+    <string name="auth_choose_password_title">اختر كلمة مرورك</string>
+    <string name="auth_choose_password_subtitle">مرحباً، %1$s. كلمة المرور التي سجلت الدخول بها أُنشئت لك وقد رآها شخص آخر. اختر كلمة مرور خاصة بك للمتابعة.</string>
+    <string name="auth_save_continue">حفظ ومتابعة</string>
+    <string name="auth_sign_out">تسجيل الخروج</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">النشاط في الخلفية</string>
+    <string name="service_channel_alerts">تنبيهات المنزل</string>
+    <string name="service_listening_alerts">يستمع Domus للتنبيهات</string>
+    <string name="service_screen_sync_title">مزامنة الشاشة قيد التشغيل</string>
+    <string name="service_screen_sync_body">أضواؤك تتبع هذه الشاشة</string>
+    <string name="service_stop">إيقاف</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (رسومات الصور الرمزية)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (البحث عن الأماكن، يطلبه خادمك)</string>
+    <string name="about_lib_home_assistant">Home Assistant (آلية رمز QR لـ Tuya)</string>
+    <string name="about_license_inspiration">الإلهام</string>
+    <string name="about_version_unknown">غير معروف</string>
+    <string name="about_title">حول Domus</string>
+    <string name="about_section_app">التطبيق</string>
+    <string name="about_version_build">الإصدار %1$s · البنية %2$d</string>
+    <string name="about_privacy_title">الخصوصية</string>
+    <string name="about_privacy_subtitle">يعمل على خادمك الخاص. تظل بيانات الاعتماد مشفرة هناك.</string>
+    <string name="about_source_code">الكود المصدري</string>
+    <string name="about_section_developer">المطور</string>
+    <string name="about_developer_tagline">صُمم وبُني بواسطة مطور واحد.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">معرض الأعمال</string>
+    <string name="about_section_open_source">مفتوح المصدر</string>
+    <string name="about_acknowledgements">شكر وتقدير</string>
+    <string name="about_acknowledgements_subtitle">المكتبات والمشاريع التي بُني عليها Domus</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">يتوفر الإصدار %1$s من Domus</string>
+    <string name="update_download_failed_retry_prompt">فشل التنزيل. هل تريد المحاولة مجدداً؟</string>
+    <string name="update_prompt_body">لديك الإصدار %1$s. توجد ملاحظات الإصدار وقناة التحديث في الإعدادات، ضمن التحديثات.</string>
+    <string name="update_downloading_percent">جارٍ التنزيل %1$d%%</string>
+    <string name="update_action">تحديث</string>
+    <string name="update_later">لاحقاً</string>
+    <string name="update_title">التحديثات</string>
+    <string name="update_checking">جارٍ التحقق من وجود تحديثات…</string>
+    <string name="update_check_failed">تعذّر التحقق من وجود تحديثات</string>
+    <string name="update_dev_build">بنية تطويرية</string>
+    <string name="update_up_to_date">Domus محدّث لأحدث إصدار</string>
+    <string name="update_download_failed_retry">فشل التنزيل. حاول مجدداً.</string>
+    <string name="update_check_failed_body">لديك الإصدار %1$s. تحقق من اتصالك وحاول مجدداً.</string>
+    <string name="update_dev_build_body">لديك الإصدار %1$s. يتم تحديث البنية التطويرية عن طريق إعادة بنائها.</string>
+    <string name="update_you_have">لديك الإصدار %1$s.</string>
+    <string name="update_download_install">تنزيل وتثبيت</string>
+    <string name="update_check_again">التحقق مجدداً</string>
+    <string name="update_channel">القناة</string>
+    <string name="update_channel_hint">تحصل قناتا Beta وAlpha على الإصدارات الجديدة مبكراً، بالإضافة إلى كل إصدار مستقر.</string>
+    <string name="update_whats_new_in">ما الجديد في %1$s</string>
+    <string name="update_in_this_version">في هذا الإصدار</string>
+    <string name="update_loading_notes">جارٍ تحميل ملاحظات الإصدار…</string>
+    <string name="update_no_notes">لا توجد ملاحظات إصدار لهذا الإصدار.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">روبوتات</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">المغامر</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">فن البكسل</string>
+    <string name="avatar_style_fun_emoji">إيموجي مرح</string>
+    <string name="avatar_style_thumbs">إبهام</string>
+    <string name="avatar_style_shapes">أشكال</string>
+    <string name="avatar_style_rings">حلقات</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">تخصيص الصورة الرمزية</string>
+    <string name="avatar_save">حفظ</string>
+    <string name="avatar_seed_value">البذرة: %1$s</string>
+    <string name="avatar_randomize">عشوائي</string>
+    <string name="avatar_roll_seed">اختيار بذرة</string>
+    <string name="avatar_roll_seed_action">اختيار بذرة</string>
+    <string name="avatar_style_label">نمط الصورة الرمزية</string>
+    <string name="avatar_seed_phrase_label">عبارة البذرة</string>
+    <string name="avatar_seed_phrase_hint">أدخل أي كلمة مفتاحية أو اسم أو سلسلة أحرف لتشكيل نمط الصورة الرمزية هذا.</string>
+    <string name="avatar_seed_label">البذرة</string>
+    <string name="avatar_apply_avatar">تطبيق الصورة الرمزية</string>
+    <string name="avatar_apply">تطبيق</string>
+    <string name="avatar_cancel">إلغاء</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">تصبح على خير</string>
+    <string name="home_greeting_morning">صباح الخير</string>
+    <string name="home_greeting_afternoon">مساء الخير</string>
+    <string name="home_greeting_evening">مساء الخير</string>
+    <string name="home_got_it">فهمت</string>
+    <string name="home_about_stat">حول %1$s</string>
+    <string name="home_scene_on_hint">قيد التشغيل · اضغط للإيقاف</string>
+    <string name="home_scene_off_hint">اضغط للتشغيل</string>
+    <string name="home_change_avatar">تغيير الصورة الرمزية</string>
+    <string name="home_clear_notices_title">حذف جميع الإشعارات؟</string>
+    <string name="home_clear_notices_body">تتم إزالتها من كل جهاز.</string>
+    <string name="home_delete_all">حذف الكل</string>
+    <string name="home_reconnecting">جارٍ إعادة الاتصال…</string>
+    <string name="home_devices_on_of_total">%1$d من %2$d قيد التشغيل</string>
+    <string name="home_using_now">الاستهلاك الحالي</string>
+    <string name="home_using_now_info">إجمالي سحب الطاقة المباشر لجميع أجهزتك المزودة بعداد.</string>
+    <string name="home_today">اليوم</string>
+    <string name="home_today_info">الطاقة المستخدمة منذ منتصف الليل. المبلغ أدناه هو التكلفة المقدرة حسب تعرفة الكهرباء لديك.</string>
+    <string name="home_air_quality">جودة الهواء</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">المشاهد</string>
+    <string name="home_on_right_now">قيد التشغيل الآن</string>
+    <string name="home_all_devices">جميع الأجهزة</string>
+    <string name="home_no_devices_title">لا توجد أجهزة بعد</string>
+    <string name="home_no_devices_admin">افتح «الأجهزة» واضغط على + لربط Tuya أو Tapo أو Xiaomi أو Hue أو MQTT.</string>
+    <string name="home_no_devices_member">اطلب من المسؤول إضافة أجهزة أو منحك صلاحية الوصول إلى غرفة.</string>
+    <string name="home_everything_off">كل شيء متوقف.</string>
+    <string name="home_rooms">الغرف</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="zero">%1$d جهاز · الكل متوقف</item>
+        <item quantity="one">جهاز واحد (%1$d) · الكل متوقف</item>
+        <item quantity="two">جهازان (%1$d) · الكل متوقف</item>
+        <item quantity="few">%1$d أجهزة · الكل متوقف</item>
+        <item quantity="many">%1$d جهازاً · الكل متوقف</item>
+        <item quantity="other">%1$d جهاز · الكل متوقف</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="zero">%1$d جهاز · %2$d قيد التشغيل</item>
+        <item quantity="one">جهاز واحد (%1$d) · %2$d قيد التشغيل</item>
+        <item quantity="two">جهازان (%1$d) · %2$d قيد التشغيل</item>
+        <item quantity="few">%1$d أجهزة · %2$d قيد التشغيل</item>
+        <item quantity="many">%1$d جهازاً · %2$d قيد التشغيل</item>
+        <item quantity="other">%1$d جهاز · %2$d قيد التشغيل</item>
+    </plurals>
+    <string name="home_recent_activity">النشاط الأخير</string>
+    <string name="home_see_all">عرض الكل</string>
+
+    <!-- Devices -->
+    <string name="device_title">الأجهزة</string>
+    <string name="device_online_of_total">%1$d من %2$d متصل</string>
+    <string name="device_add_devices">إضافة أجهزة</string>
+    <string name="device_filter_all">الكل</string>
+    <string name="device_category_lights">الأضواء</string>
+    <string name="device_category_power">الطاقة</string>
+    <string name="device_category_air">الهواء</string>
+    <string name="device_category_climate">المناخ</string>
+    <string name="device_all_rooms">جميع الغرف</string>
+    <string name="device_no_room">بلا غرفة</string>
+    <string name="device_manage_rooms">إدارة الغرف</string>
+    <string name="device_empty_filtered_title">لا يوجد شيء هنا</string>
+    <string name="device_empty_filtered_body">لا يوجد جهاز يطابق هذه الغرفة والفئة.</string>
+    <string name="device_empty_admin">اضغط على + لربط Tuya أو Tapo أو Xiaomi أو Hue أو MQTT وإضافة ما يعثرون عليه.</string>
+    <string name="device_online">متصل</string>
+    <string name="device_offline">غير متصل</string>
+    <string name="device_on">قيد التشغيل</string>
+    <string name="device_off">متوقف</string>
+    <string name="device_leak">تسرب</string>
+    <string name="device_motion">حركة</string>
+    <string name="device_motion_detected">تم الكشف</string>
+    <string name="device_clear">صافٍ</string>
+    <string name="device_open">مفتوح</string>
+    <string name="device_closed">مغلق</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">طاقة %1$s</string>
+    <string name="device_refresh_a11y">تحديث %1$s</string>
+    <string name="device_view_only_member">يمكنك رؤية هذا الجهاز ولكن لا يمكنك التحكم فيه.</string>
+    <string name="device_view_only_guest">يمكن للضيوف عرض الأجهزة ولكن لا يمكنهم التحكم فيها.</string>
+    <string name="device_brightness">السطوع</string>
+    <string name="device_white">أبيض</string>
+    <string name="device_white_warm">دافئ</string>
+    <string name="device_white_neutral">محايد</string>
+    <string name="device_white_cool">بارد</string>
+    <string name="device_fan_speed">سرعة المروحة</string>
+    <string name="device_mode">الوضع</string>
+    <string name="device_speed">السرعة</string>
+    <string name="device_coverage">التغطية %1$d–%2$d م²</string>
+    <string name="device_reading_power">القدرة</string>
+    <string name="device_reading_voltage">الجهد</string>
+    <string name="device_reading_current">التيار</string>
+    <string name="device_reading_temperature">درجة الحرارة</string>
+    <string name="device_reading_humidity">الرطوبة</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">الفلتر</string>
+    <string name="device_filter_left">متبقٍ %1$d%%</string>
+    <string name="device_reading_contact">باب أو نافذة</string>
+    <string name="device_reading_water">الماء</string>
+    <string name="device_water_dry">جاف</string>
+    <string name="device_reading_alarm">إنذار</string>
+    <string name="device_alarm_sounding">يرن</string>
+    <string name="device_alarm_quiet">هادئ</string>
+    <string name="device_reading_battery">البطارية</string>
+    <string name="device_battery_low">منخفض</string>
+    <string name="device_battery_ok">جيد</string>
+    <string name="device_ask_before_switching">السؤال قبل التبديل</string>
+    <string name="device_ask_before_switching_desc">يُنبّه قبل تشغيله أو إيقافه، من أي تطبيق أو مجموعة أو مشهد</string>
+    <string name="device_rename_or_move">إعادة تسمية أو نقل</string>
+    <string name="device_rename">إعادة تسمية</string>
+    <string name="device_remove">إزالة</string>
+    <string name="device_edit_title">تعديل الجهاز</string>
+    <string name="device_field_name">الاسم</string>
+    <string name="device_field_room">الغرفة</string>
+    <string name="device_remove_confirm_title">إزالة %1$s؟</string>
+    <string name="device_remove_confirm_body">سيغادر منزلك ومشاهده. يمكنك إضافته مجدداً من «إضافة أجهزة».</string>
+    <string name="device_white_candle">شمعة</string>
+    <string name="device_white_soft">أبيض ناعم</string>
+    <string name="device_white_neutral_preset">أبيض محايد</string>
+    <string name="device_white_daylight">ضوء النهار</string>
+    <string name="device_white_cool_preset">أبيض بارد</string>
+    <string name="device_light_off">الإضاءة متوقفة</string>
+    <string name="device_light_effect">تأثير</string>
+    <string name="device_light_white">إضاءة بيضاء</string>
+    <string name="device_light_color">إضاءة ملونة</string>
+    <string name="device_light_playing">قيد التشغيل: %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">اللون</string>
+    <string name="device_effects">التأثيرات</string>
+    <string name="device_color_temp">درجة حرارة اللون</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K دافئ</string>
+    <string name="device_kelvin_max">6500K بارد</string>
+    <string name="device_moods">الأجواء</string>
+    <string name="device_stop_effect">إيقاف التأثير</string>
+    <string name="device_color_swatch_a11y">اللون %1$s</string>
+    <string name="device_selected">محدد</string>
+    <string name="device_not_selected">غير محدد</string>
+    <string name="device_confirm_switch_one_title">تبديل %1$s؟</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="zero">تبديل %1$d جهاز؟</item>
+        <item quantity="one">تبديل جهاز واحد (%1$d)؟</item>
+        <item quantity="two">تبديل جهازين (%1$d)؟</item>
+        <item quantity="few">تبديل %1$d أجهزة؟</item>
+        <item quantity="many">تبديل %1$d جهازاً؟</item>
+        <item quantity="other">تبديل %1$d جهاز؟</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">يتضمن هذا %1$s، الذي يطلب التأكيد قبل التبديل. قد يؤدي تبديله إلى قطع الطاقة عما هو متصل به.</string>
+    <string name="device_confirm_switch_many_body">يتضمن هذا %1$s، التي تطلب التأكيد قبل التبديل. قد يؤدي تبديلها إلى قطع الطاقة عما هو متصل بها.</string>
+    <string name="device_confirm_switch_action">تبديل</string>
+    <string name="device_cancel">إلغاء</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">الآن</string>
+    <string name="scene_time_minutes_ago">منذ %1$d د</string>
+    <string name="scene_time_hours_ago">منذ %1$d س</string>
+    <string name="scene_time_days_ago">منذ %1$d ي</string>
+    <string name="scene_edit_item">تعديل %1$s</string>
+    <string name="scene_title">المشاهد</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="zero">%1$d نشط · %2$d أتمتة مفعلة</item>
+        <item quantity="one">%1$d نشط · أتمتة واحدة (%2$d) مفعلة</item>
+        <item quantity="two">%1$d نشط · أتمتتان (%2$d) مفعلتان</item>
+        <item quantity="few">%1$d نشط · %2$d أتمتة مفعلة</item>
+        <item quantity="many">%1$d نشط · %2$d أتمتة مفعلة</item>
+        <item quantity="other">%1$d نشط · %2$d أتمتة مفعلة</item>
+    </plurals>
+    <string name="scene_empty_title">لا يوجد شيء هنا بعد</string>
+    <string name="scene_empty_subtitle">يضبط المشهد عدة أجهزة دفعة واحدة. وتقوم الأتمتة بذلك نيابةً عنك عند حدوث شيء ما.</string>
+    <string name="scene_new_scene">مشهد جديد</string>
+    <string name="scene_new_automation">أتمتة جديدة</string>
+    <string name="scene_new_screen_sync">مزامنة شاشة جديدة</string>
+    <string name="scene_sync_active_subtitle">مزامنة الشاشة · الأضواء تتبع شاشة</string>
+    <string name="scene_sync_inactive_subtitle">مزامنة الشاشة · تعكس هذه الشاشة على الأضواء</string>
+    <string name="scene_active">نشط</string>
+    <string name="scene_section_automations">الأتمتة</string>
+    <string name="scene_last_ran">آخر تشغيل %1$s</string>
+    <string name="scene_never_ran">لم يعمل أبداً</string>
+    <string name="scene_run_now">تشغيل %1$s الآن</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">إثنين</string>
+    <string name="editor_day_tue">ثلاثاء</string>
+    <string name="editor_day_wed">أربعاء</string>
+    <string name="editor_day_thu">خميس</string>
+    <string name="editor_day_fri">جمعة</string>
+    <string name="editor_day_sat">سبت</string>
+    <string name="editor_day_sun">أحد</string>
+    <string name="editor_prop_temperature">درجة الحرارة</string>
+    <string name="editor_prop_humidity">الرطوبة</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">السطوع</string>
+    <string name="editor_prop_power_watts">القدرة (W)</string>
+    <string name="editor_removed_device">جهاز مزال</string>
+    <string name="editor_rule_device_is_off">%1$s متوقف</string>
+    <string name="editor_rule_device_is_on">%1$s قيد التشغيل</string>
+    <string name="editor_rule_device_prop_above">%2$s في %1$s أعلى من %3$s</string>
+    <string name="editor_rule_device_prop_below">%2$s في %1$s أقل من %3$s</string>
+    <string name="editor_rule_device_prop_is">%2$s في %1$s يساوي %3$s</string>
+    <string name="editor_rule_time_every_day">في الساعة %1$s كل يوم</string>
+    <string name="editor_rule_time_on_days">في الساعة %1$s أيام %2$s</string>
+    <string name="editor_sun_event_sunrise">شروق الشمس</string>
+    <string name="editor_sun_event_sunset">غروب الشمس</string>
+    <string name="editor_rule_sun_at_every_day">عند %1$s كل يوم</string>
+    <string name="editor_rule_sun_at_on_days">عند %1$s أيام %2$s</string>
+    <string name="editor_rule_sun_before_every_day">قبل %2$s بـ %1$d د كل يوم</string>
+    <string name="editor_rule_sun_before_on_days">قبل %2$s بـ %1$d د أيام %3$s</string>
+    <string name="editor_rule_sun_after_every_day">بعد %2$s بـ %1$d د كل يوم</string>
+    <string name="editor_rule_sun_after_on_days">بعد %2$s بـ %1$d د أيام %3$s</string>
+    <string name="editor_rule_power_above">يستهلك %1$s أكثر من %2$s W</string>
+    <string name="editor_rule_device_offline">ينقطع اتصال %1$s</string>
+    <string name="editor_rule_device_discovered">العثور على جهاز جديد</string>
+    <string name="editor_rule_time_between">بين %1$s و%2$s</string>
+    <string name="editor_cmd_on">تشغيل</string>
+    <string name="editor_cmd_off">إيقاف</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">أبيض %1$s</string>
+    <string name="editor_device_group">مجموعة أجهزة</string>
+    <string name="editor_cmd_custom">أمر مخصص</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">إشعار: %1$s</string>
+    <string name="editor_removed_scene">(مزال)</string>
+    <string name="editor_rule_scene">تشغيل المشهد %1$s</string>
+    <string name="editor_rule_delay">انتظار %1$s ث</string>
+    <string name="editor_rule_unknown">غير معروف</string>
+    <string name="editor_trigger_time">الوقت</string>
+    <string name="editor_trigger_sun">الشروق / الغروب</string>
+    <string name="editor_trigger_device_state">حالة الجهاز</string>
+    <string name="editor_trigger_power">القدرة</string>
+    <string name="editor_trigger_offline">انقطاع الاتصال</string>
+    <string name="editor_trigger_discovered">جهاز جديد</string>
+    <string name="editor_condition_device_state">حالة الجهاز</string>
+    <string name="editor_condition_time_between">فترة زمنية</string>
+    <string name="editor_action_device">جهاز</string>
+    <string name="editor_action_scene">مشهد</string>
+    <string name="editor_action_notify">إشعار</string>
+    <string name="editor_action_delay">انتظار</string>
+    <string name="editor_add">إضافة</string>
+    <string name="editor_field_device">الجهاز</string>
+    <string name="editor_sun_sunrise">شروق الشمس</string>
+    <string name="editor_sun_sunset">غروب الشمس</string>
+    <string name="editor_sun_after">بعد</string>
+    <string name="editor_sun_before">قبل</string>
+    <string name="editor_field_minutes">الدقائق</string>
+    <string name="editor_sun_supporting_sunrise">تركه فارغاً يشغّله عند شروق الشمس. يتطلب تحديد موقع المنزل في الإعدادات.</string>
+    <string name="editor_sun_supporting_sunset">تركه فارغاً يشغّله عند غروب الشمس. يتطلب تحديد موقع المنزل في الإعدادات.</string>
+    <string name="editor_every_day">كل يوم</string>
+    <string name="editor_chosen_days">فقط في الأيام المحددة</string>
+    <string name="editor_field_is">الحالة</string>
+    <string name="editor_state_on">قيد التشغيل</string>
+    <string name="editor_state_off">متوقف</string>
+    <string name="editor_compare_above">أعلى من</string>
+    <string name="editor_compare_below">أقل من</string>
+    <string name="editor_field_value">القيمة</string>
+    <string name="editor_field_watts">واط</string>
+    <string name="editor_time_from">من</string>
+    <string name="editor_time_until">حتى</string>
+    <string name="editor_power_turn_on">تشغيل</string>
+    <string name="editor_power_turn_off">إيقاف التشغيل</string>
+    <string name="editor_power_leave">ترك حالة الطاقة</string>
+    <string name="editor_set_brightness">ضبط السطوع</string>
+    <string name="editor_set_brightness_value">ضبط السطوع %1$d%%</string>
+    <string name="editor_field_scene">المشهد</string>
+    <string name="editor_field_title">العنوان</string>
+    <string name="editor_field_message">الرسالة</string>
+    <string name="editor_field_seconds">الثواني</string>
+    <string name="editor_remove_rule">إزالة: %1$s</string>
+    <string name="editor_style_vivid">زاهٍ</string>
+    <string name="editor_style_dominant">سائد</string>
+    <string name="editor_style_average">متوسط</string>
+    <string name="editor_new_screen_sync">مزامنة شاشة جديدة</string>
+    <string name="editor_new_scene">مشهد جديد</string>
+    <string name="editor_edit_scene">تعديل المشهد</string>
+    <string name="editor_delete">حذف</string>
+    <string name="editor_field_name">الاسم</string>
+    <string name="editor_sync_lights_title">الأضواء التي تتبع الشاشة</string>
+    <string name="editor_sync_no_lights">لا توجد أضواء في منزلك بعد.</string>
+    <string name="editor_sync_color_title">اللون</string>
+    <string name="editor_style_vivid_desc">اللون الأقوى على الشاشة.</string>
+    <string name="editor_style_dominant_desc">اللون الأكثر شيوعاً.</string>
+    <string name="editor_style_average_desc">متوسط الصورة بأكملها.</string>
+    <string name="editor_region_full">الشاشة بالكامل</string>
+    <string name="editor_region_edges">الحواف فقط</string>
+    <string name="editor_sync_dim_dark">تخفيت مع المشاهد المظلمة</string>
+    <string name="editor_sync_restore_lights">استعادة الأضواء عند التوقف</string>
+    <string name="editor_actions_title">الإجراءات</string>
+    <string name="editor_add_action">إضافة إجراء</string>
+    <string name="editor_save">حفظ</string>
+    <string name="editor_delete_confirm_title">حذف %1$s؟</string>
+    <string name="editor_delete_scene_body">ستتخطاه عمليات الأتمتة التي تشغّل هذا المشهد.</string>
+    <string name="editor_new_automation">أتمتة جديدة</string>
+    <string name="editor_edit_automation">تعديل الأتمتة</string>
+    <string name="editor_field_description_optional">الوصف (اختياري)</string>
+    <string name="editor_enabled">مفعل</string>
+    <string name="editor_triggers_title">عند حدوث أي مما يلي</string>
+    <string name="editor_add_trigger">إضافة مشغّل</string>
+    <string name="editor_conditions_title">فقط إذا تحققت كل هذه الشروط</string>
+    <string name="editor_add_condition">إضافة شرط</string>
+    <string name="editor_do_this_title">نفّذ هذا</string>
+    <string name="editor_delete_automation_body">ستتوقف عن العمل.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">مباشر</string>
+    <string name="analytics_range_hour">دقيقة</string>
+    <string name="analytics_range_day">يوم</string>
+    <string name="analytics_range_week">أسبوع</string>
+    <string name="analytics_range_month">شهر</string>
+    <string name="analytics_bucket_5s">5 ثوانٍ</string>
+    <string name="analytics_bucket_minute">دقيقة</string>
+    <string name="analytics_bucket_hour">ساعة</string>
+    <string name="analytics_bucket_day">يوم</string>
+    <string name="analytics_title">التحليلات</string>
+    <string name="analytics_subtitle_power">استهلاك الطاقة والتكلفة</string>
+    <string name="analytics_subtitle_air">جودة الهواء والمنقيات</string>
+    <string name="analytics_electricity_tariff">تعرفة الكهرباء</string>
+    <string name="analytics_tab_electricity">الكهرباء</string>
+    <string name="analytics_tab_air">جودة الهواء</string>
+    <string name="analytics_no_energy_title">لا توجد بيانات طاقة بعد</string>
+    <string name="analytics_no_energy_subtitle">تظهر القراءات بعد دقيقة من اتصال قابس أو مفتاح مزود بعداد قياس.</string>
+    <string name="analytics_using_now">الاستهلاك الحالي</string>
+    <string name="analytics_projected_cost">في طريقه للوصول إلى %1$s في دورة الفوترة هذه</string>
+    <string name="analytics_today">اليوم</string>
+    <string name="analytics_today_info">الطاقة المستخدمة منذ منتصف الليل. المبلغ أدناه هو التكلفة المقدرة حسب تعرفة الكهرباء لديك.</string>
+    <string name="analytics_this_cycle">هذه الدورة</string>
+    <string name="analytics_this_cycle_info">الطاقة المستخدمة والفاتورة المقدرة حتى الآن في دورة الفوترة الحالية.</string>
+    <string name="analytics_history">السجل</string>
+    <string name="analytics_nothing_recorded">لم يُسجل شيء في هذه الفترة بعد.</string>
+    <string name="analytics_metric_energy">الطاقة</string>
+    <string name="analytics_metric_power">القدرة</string>
+    <string name="analytics_no_reading">لا توجد قراءة</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">متوسط القدرة لكل %1$s</string>
+    <string name="analytics_chart_energy_used">الطاقة المستخدمة لكل %1$s، الإجمالي %2$s</string>
+    <string name="analytics_live_caption">آخر 5 دقائق، قراءة كل 5 ثوانٍ طالما هذه الصفحة مفتوحة.</string>
+    <string name="analytics_total_caption">الإجمالي %1$s · %2$s</string>
+    <string name="analytics_insights">رؤى تحليلية</string>
+    <string name="analytics_peak_hour">ساعة الذروة</string>
+    <string name="analytics_peak_last_24h">%1$s في آخر 24 ساعة</string>
+    <string name="analytics_no_usage_yet">لا يوجد استخدام بعد</string>
+    <string name="analytics_daily_average">المتوسط اليومي</string>
+    <string name="analytics_needs_full_day">يتطلب يوماً كاملاً</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="zero">خلال آخر %1$d يوم</item>
+        <item quantity="one">خلال اليوم الماضي (%1$d)</item>
+        <item quantity="two">خلال اليومين الماضيين (%1$d)</item>
+        <item quantity="few">خلال آخر %1$d أيام</item>
+        <item quantity="many">خلال آخر %1$d يوماً</item>
+        <item quantity="other">خلال آخر %1$d يوم</item>
+    </plurals>
+    <string name="analytics_today_vs_average">اليوم مقابل المتوسط</string>
+    <string name="analytics_above_usual_day">أعلى من يومك المعتاد</string>
+    <string name="analytics_below_usual_day">أقل من يومك المعتاد</string>
+    <string name="analytics_about_usual_day">قريب من يومك المعتاد</string>
+    <string name="analytics_top_device">الجهاز الأكثر استهلاكاً</string>
+    <string name="analytics_no_metered_device">لا يوجد جهاز مزود بعداد</string>
+    <string name="analytics_billing_cycle">دورة الفوترة</string>
+    <string name="analytics_time_elapsed">الوقت المنقضي</string>
+    <string name="analytics_day_of_days">اليوم %1$d من %2$d</string>
+    <string name="analytics_budget_used">الميزانية المستخدمة</string>
+    <string name="analytics_cost_of_budget">%1$s من أصل %2$s</string>
+    <string name="analytics_spending_ahead">الإنفاق يسبق التقويم الزمني.</string>
+    <string name="analytics_budget_hint">حدد ميزانية شهرية في التعرفة لتتبع الإنفاق مقارنة بها.</string>
+    <string name="analytics_by_device">حسب الجهاز</string>
+    <string name="analytics_device_cycle_summary">%1$s · %2$s في هذه الدورة</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">درجة الحرارة</string>
+    <string name="analytics_reading_humidity">الرطوبة</string>
+    <string name="analytics_pm25_now">PM2.5 الآن</string>
+    <string name="analytics_air_no_sensor_online">لا يوجد مستشعر متصل</string>
+    <string name="analytics_air_status_excellent">ممتاز · هواء داخلي نقي</string>
+    <string name="analytics_air_status_good">جيد · ضمن النطاق الصحي</string>
+    <string name="analytics_air_status_moderate">متوسط · شغّل منقي الهواء أو قم بتهوية الغرفة</string>
+    <string name="analytics_air_status_poor">سيئ · شغّل المنقيات على سرعة عالية وأبقِ النوافذ مغلقة</string>
+    <string name="analytics_purifiers">المنقيات</string>
+    <string name="analytics_running_of_total">%1$d من %2$d</string>
+    <string name="analytics_all_on_standby">الكل في وضع الاستعداد</string>
+    <string name="analytics_running_now">قيد التشغيل الآن</string>
+    <string name="analytics_filter_life">عمر الفلتر</string>
+    <string name="analytics_filter_replace_soon">استبدل قريباً</string>
+    <string name="analytics_filter_healthy">جيد</string>
+    <string name="analytics_sensors_average">متوسط مستشعراتك</string>
+    <string name="analytics_humidity_dry">جاف</string>
+    <string name="analytics_humidity_humid">رطب</string>
+    <string name="analytics_humidity_comfortable">مريح</string>
+    <string name="analytics_trend">الاتجاه</string>
+    <string name="analytics_no_air_history">لا يوجد سجل بعد. تُسجل القراءات كل دقيقة طالما كان المستشعر متصلاً.</string>
+    <string name="analytics_air_chart_summary">%1$s لكل %2$s، المتوسط %3$s</string>
+    <string name="analytics_pm25_dashed_caption">الخطوط المتقطعة: 15 µg/m³ هدف الهواء النقي، 35 µg/m³ الحد الأعلى للمستوى الجيد.</string>
+    <string name="analytics_period_5m">5 دقائق</string>
+    <string name="analytics_period_60m">60 دقيقة</string>
+    <string name="analytics_period_24h">24 ساعة</string>
+    <string name="analytics_period_7d">7 أيام</string>
+    <string name="analytics_period_30d">30 يوماً</string>
+    <string name="analytics_average">المتوسط</string>
+    <string name="analytics_air_level_over_period">%1$s خلال %2$s</string>
+    <string name="analytics_peak">الذروة</string>
+    <string name="analytics_value_with_peak">%1$s · الذروة %2$s</string>
+    <string name="analytics_day_hour">%1$s، %2$s</string>
+    <string name="analytics_usage_by_hour">الاستخدام بالساعة</string>
+    <string name="analytics_peak_pm25_by_hour">ذروة PM2.5 بالساعة</string>
+    <string name="analytics_hour_grid_caption">خلية واحدة لكل ساعة من آخر 7 أيام. الخلية الأغمق تعني قيمة أعلى.</string>
+    <string name="analytics_hour_grid_summary">%1$s، كل ساعة من آخر 7 أيام</string>
+    <string name="analytics_time_at_each_level">الوقت عند كل مستوى</string>
+    <string name="analytics_time_good_air">الوقت بهواء جيد</string>
+    <string name="analytics_pm25_good_over_period">PM2.5 عند أو أقل من 35 µg/m³ خلال %1$s</string>
+    <string name="analytics_sensors">المستشعرات</string>
+    <string name="analytics_offline">غير متصل</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">النظام</string>
+    <string name="settings_theme_light">فاتح</string>
+    <string name="settings_theme_dark">داكن</string>
+    <string name="settings_role_admin">مسؤول</string>
+    <string name="settings_role_member">عضو</string>
+    <string name="settings_role_guest">ضيف</string>
+    <string name="settings_avatar">الصورة الرمزية</string>
+    <string name="settings_section_home">المنزل</string>
+    <string name="settings_add_devices">إضافة أجهزة</string>
+    <string name="settings_add_devices_subtitle">ابحث وأضف ما تقدمه حساباتك وشبكتك</string>
+    <string name="settings_plugins">الإضافات</string>
+    <string name="settings_plugins_subtitle">Tuya وTapo وXiaomi وHue وMQTT</string>
+    <string name="settings_rooms">الغرف</string>
+    <string name="settings_people">الأشخاص</string>
+    <string name="settings_people_subtitle">الحسابات والأدوار وصلاحيات الغرف</string>
+    <string name="settings_tariff">تعرفة الكهرباء</string>
+    <string name="settings_tariff_subtitle">السعر ودورة الفوترة والميزانية</string>
+    <string name="settings_location">موقع المنزل</string>
+    <string name="settings_location_subtitle">لأتمتة شروق الشمس وغروبها</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_notifications_subtitle">ما أبلغ عنه منزلك</string>
+    <string name="settings_background_alerts">التنبيهات أثناء إغلاق التطبيق</string>
+    <string name="settings_background_alerts_subtitle">يبقي اتصالاً مفتوحاً بخادمك. يستهلك القليل من البطارية.</string>
+    <string name="settings_section_server">الخادم</string>
+    <string name="settings_server_live_pinned">مباشر · شهادة مثبتة</string>
+    <string name="settings_server_live_public">مباشر · شهادة عامة</string>
+    <string name="settings_server_reconnecting">جارٍ إعادة الاتصال…</string>
+    <string name="settings_server_live_badge">مباشر</string>
+    <string name="settings_server_cert_public">مشفر · شهادة موثقة من سلطة عامة</string>
+    <string name="settings_server_cert_pinned">مشفر · لقد وافقت على شهادة هذا الخادم الخاصة عند الاستخدام الأول:</string>
+    <string name="settings_sha256_fingerprint">بصمة SHA-256</string>
+    <string name="settings_fingerprint_clip_label">البصمة</string>
+    <string name="settings_copied">تم النسخ</string>
+    <string name="settings_copy">نسخ</string>
+    <string name="settings_change_password">تغيير كلمة المرور</string>
+    <string name="settings_change_password_subtitle">لتسجيل الدخول إلى Domus</string>
+    <string name="settings_server_addresses">عناوين الخادم</string>
+    <string name="settings_server_addresses_subtitle">شبكة المنزل والوصول عن بُعد</string>
+    <string name="settings_updates">التحديثات</string>
+    <string name="settings_updates_subtitle">الإصدار %1$s، وملاحظات الإصدار والقناة</string>
+    <string name="settings_about">حول Domus</string>
+    <string name="settings_about_subtitle">الإصدار %1$s، والمطور وشكر وتقدير</string>
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_wallpaper_colors">ألوان خلفية الشاشة</string>
+    <string name="settings_wallpaper_colors_subtitle">مطابقة ألوان التطبيق مع خلفية شاشتك</string>
+    <string name="settings_section_account">الحساب</string>
+    <string name="settings_account_subtitle">تسجيل الخروج أو استخدام خادم آخر</string>
+    <string name="settings_sign_out">تسجيل الخروج</string>
+    <string name="settings_use_another_server">استخدام خادم آخر</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">رجوع</string>
+    <string name="manage_hide_field">إخفاء %1$s</string>
+    <string name="manage_show_field">إظهار %1$s</string>
+    <string name="manage_choose">اختر…</string>
+    <string name="manage_close">إغلاق</string>
+    <string name="manage_cancel">إلغاء</string>
+    <string name="manage_save">حفظ</string>
+    <string name="manage_delete">حذف</string>
+    <string name="manage_rooms_title">الغرف</string>
+    <string name="manage_add_room">إضافة غرفة</string>
+    <string name="manage_no_rooms">لا توجد غرف بعد</string>
+    <string name="manage_no_rooms_subtitle">تجمع الغرف الأجهزة وتحدد أي منها يمكن للعضو أو الضيف رؤيته.</string>
+    <plurals name="manage_device_count">
+        <item quantity="zero">%1$d جهاز</item>
+        <item quantity="one">جهاز واحد (%1$d)</item>
+        <item quantity="two">جهازان (%1$d)</item>
+        <item quantity="few">%1$d أجهزة</item>
+        <item quantity="many">%1$d جهازاً</item>
+        <item quantity="other">%1$d جهاز</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="zero">%1$d غرفة</item>
+        <item quantity="one">غرفة واحدة (%1$d)</item>
+        <item quantity="two">غرفتان (%1$d)</item>
+        <item quantity="few">%1$d غرف</item>
+        <item quantity="many">%1$d غرفة</item>
+        <item quantity="other">%1$d غرفة</item>
+    </plurals>
+    <string name="manage_room_subtitle">الطابق %1$d · %2$s</string>
+    <string name="manage_new_room">غرفة جديدة</string>
+    <string name="manage_edit_room">تعديل الغرفة</string>
+    <string name="manage_field_name">الاسم</string>
+    <string name="manage_field_floor">الطابق</string>
+    <string name="manage_role_admin">مسؤول</string>
+    <string name="manage_role_member">عضو</string>
+    <string name="manage_role_guest">ضيف</string>
+    <string name="manage_level_none">لا شيء</string>
+    <string name="manage_level_view">عرض فقط</string>
+    <string name="manage_level_control">تحكم</string>
+    <string name="manage_level_edit">تعديل</string>
+    <string name="manage_access_to">الوصول إلى %1$s</string>
+    <string name="manage_whole_room_level">الغرفة بالكامل · %1$s</string>
+    <string name="manage_room_devices_of_total">%1$d من أصل %2$d أجهزة</string>
+    <string name="manage_no_access">بلا صلاحية وصول</string>
+    <string name="manage_close_item">إغلاق %1$s</string>
+    <string name="manage_open_item">فتح %1$s</string>
+    <string name="manage_whole_room">الغرفة بالكامل</string>
+    <string name="manage_whole_room_hint">يشمل أيضاً الأجهزة المضافة لاحقاً</string>
+    <string name="manage_no_devices_in_room">لا توجد أجهزة في هذه الغرفة بعد.</string>
+    <string name="manage_people_title">الأشخاص</string>
+    <string name="manage_add_person">إضافة شخص</string>
+    <string name="manage_access_whole_home">المنزل بالكامل</string>
+    <string name="manage_access_none">بلا صلاحية وصول</string>
+    <string name="manage_user_tag_kid">طفل</string>
+    <string name="manage_user_tag_reset_requested">طلب إعادة تعيين كلمة المرور</string>
+    <string name="manage_person_title">شخص</string>
+    <string name="manage_handover_reset_title">رمز إعادة التعيين لـ %1$s</string>
+    <string name="manage_handover_signin_title">تفاصيل تسجيل الدخول لـ %1$s</string>
+    <string name="manage_handover_shown_once">يُعرض لمرة واحدة فقط. أرسله إليهم الآن.</string>
+    <string name="manage_copy">نسخ</string>
+    <string name="manage_share">مشاركة</string>
+    <string name="manage_done">تم</string>
+    <string name="manage_new_person">شخص جديد</string>
+    <string name="manage_avatar">الصورة الرمزية</string>
+    <string name="manage_roll">عشوائي</string>
+    <string name="manage_field_username">اسم المستخدم</string>
+    <string name="manage_username_supporting">3 أحرف على الأقل</string>
+    <string name="manage_field_email">البريد الإلكتروني</string>
+    <string name="manage_email_taken">مستخدم بالفعل من قبل حساب آخر</string>
+    <string name="manage_email_available">متاح</string>
+    <string name="manage_email_hint">اكتب بريداً إلكترونياً، أو ولّده من اسم المستخدم</string>
+    <string name="manage_generate_email">توليد بريد @domus.home</string>
+    <string name="manage_section_password">كلمة المرور</string>
+    <string name="manage_kid_account">حساب طفل</string>
+    <string name="manage_kid_account_on">أنت تحدد كلمة المرور وتبقى كما هي.</string>
+    <string name="manage_kid_account_off">متوقف: ينشئ Domus كلمة مرور، ويختارون كلمة مرور خاصة بهم عند أول تسجيل دخول.</string>
+    <string name="manage_field_new_password">كلمة المرور الجديدة</string>
+    <string name="manage_field_password">كلمة المرور</string>
+    <string name="manage_password_keep_current">اتركه فارغاً للاحتفاظ بالحالية</string>
+    <string name="manage_password_min_length">8 أحرف على الأقل</string>
+    <string name="manage_password_after_saving">ستحصل على كلمة المرور لنسخها أو مشاركتها بعد الحفظ.</string>
+    <string name="manage_reset_requested_notice">نسي %1$s كلمة المرور الخاصة به وطلب إعادة تعيينها.</string>
+    <string name="manage_reset_code">رمز إعادة التعيين</string>
+    <string name="manage_reset_code_active">يوجد رمز نشط حتى %1$s. أوقف تفعيله لسحبه.</string>
+    <string name="manage_reset_code_help">رمز يُستخدم لمرة واحدة يدخلونه ضمن \"هل نسيت كلمة المرور؟\" لاختيار كلمة مرور جديدة. صالح لمدة 30 دقيقة.</string>
+    <string name="manage_generate_new_password">توليد كلمة مرور جديدة</string>
+    <string name="manage_section_role">الدور</string>
+    <string name="manage_role_admin_desc">يدير كل شيء.</string>
+    <string name="manage_role_member_desc">يرى ما يُمنح له. يتم تحديد التحكم أو التعديل (لإعادة تسمية الجهاز أيضاً) لكل غرفة وجهاز.</string>
+    <string name="manage_role_guest_desc">يرى ما يُمنح له، ولا يمكنه التحكم فيه.</string>
+    <string name="manage_section_access">الصلاحيات</string>
+    <string name="manage_custom_access">صلاحيات مخصصة</string>
+    <string name="manage_custom_access_off">متوقف: يمكنهم الوصول إلى المنزل بالكامل.</string>
+    <string name="manage_custom_access_on">حدد مستوى وصول لكل غرفة، أو لأجهزة فردية داخلها.</string>
+    <string name="manage_create_rooms_first">أنشئ الغرف أولاً.</string>
+    <string name="manage_no_room">بلا غرفة</string>
+    <string name="manage_remove_user_title">إزالة %1$s؟</string>
+    <string name="manage_remove_user_text">يفقدون صلاحية الوصول فوراً.</string>
+    <string name="manage_remove">إزالة</string>
+    <string name="manage_tariff_title">تعرفة الكهرباء</string>
+    <string name="manage_rate_per_kwh">السعر لكل kWh</string>
+    <string name="manage_currency">العملة</string>
+    <string name="manage_currency_supporting">رمز ISO، مثل INR</string>
+    <string name="manage_fixed_monthly_charge">الرسوم الشهرية الثابتة</string>
+    <string name="manage_billing_day">يوم الفوترة</string>
+    <string name="manage_billing_day_supporting">من 1 إلى 28</string>
+    <string name="manage_monthly_budget">الميزانية الشهرية (اختياري)</string>
+    <string name="manage_usage_slabs">شرائح الاستخدام</string>
+    <string name="manage_slabs_empty">سعر موحد. أضف شرائح إذا كان السعر يتغير حسب كمية استهلاكك في دورة الفوترة.</string>
+    <string name="manage_slabs_help">يسري سعر كل شريحة حتى حدها الأقصى. اترك الحد الأخير فارغاً لكل ما يتجاوزه.</string>
+    <string name="manage_up_to_kwh">حتى kWh</string>
+    <string name="manage_slab_rate">السعر</string>
+    <string name="manage_remove_slab">إزالة الشريحة %1$d</string>
+    <string name="manage_add_slab">إضافة شريحة</string>
+    <string name="manage_time_of_day">وقت اليوم</string>
+    <string name="manage_time_of_day_help">الساعات التي تكلف فيها الوحدة أكثر أو أقل من السعر أعلاه، حسب توقيت المنزل. أدخل الفرق لكل kWh: ‏1.1 لرسوم الذروة الإضافية، و-1.5 لخصم الليل.</string>
+    <string name="manage_window_from">من</string>
+    <string name="manage_window_until">حتى</string>
+    <string name="manage_window_per_kwh">لكل kWh</string>
+    <string name="manage_remove_time_window">إزالة الفترة الزمنية %1$d</string>
+    <string name="manage_add_time_window">إضافة فترة زمنية</string>
+    <string name="manage_server_addresses_title">عناوين الخادم</string>
+    <string name="manage_server_addresses_help">يستخدم Domus عنوان المنزل على شبكتك والعنوان البعيد في أي مكان آخر. تظل مسجلاً للدخول في كليهما.</string>
+    <string name="manage_home_network">شبكة المنزل</string>
+    <string name="manage_home_network_supporting">على سبيل المثال https://192.168.1.10:8443</string>
+    <string name="manage_remote">عن بُعد</string>
+    <string name="manage_remote_supporting">على سبيل المثال اسم مضيف Cloudflare Tunnel</string>
+    <string name="manage_not_set">غير محدد</string>
+    <string name="manage_location_disabled">خدمة الموقع متوقفة على هذا الهاتف. ابحث عن المكان بدلاً من ذلك.</string>
+    <string name="manage_location_not_found">تعذّر على هذا الهاتف تحديد موقعه. ابحث عن المكان بدلاً من ذلك.</string>
+    <string name="manage_location_permission_denied">بدون صلاحية الوصول للموقع، ابحث عن المكان أو اكتب الإحداثيات.</string>
+    <string name="manage_location_title">موقع المنزل</string>
+    <string name="manage_location_sun_times">تشرق الشمس اليوم في %1$s وتغرب في %2$s.</string>
+    <string name="manage_location_help">يمكن تشغيل الأتمتة عند شروق الشمس وغروبها بمجرد أن يعرف Domus موقع المنزل تقريباً. وتبقى هذه المعلومة على خادمك.</string>
+    <string name="manage_use_phone_location">استخدام موقع هذا الهاتف</string>
+    <string name="manage_find_place">ابحث عن مكان</string>
+    <string name="manage_find_place_supporting">البلدة أو المدينة</string>
+    <string name="manage_search_place">البحث عن المكان</string>
+    <string name="manage_no_place_found">لا يوجد مكان بهذا الاسم. جرب أقرب مدينة.</string>
+    <string name="manage_latitude">خط العرض</string>
+    <string name="manage_latitude_supporting">على سبيل المثال 18.52</string>
+    <string name="manage_longitude">خط الطول</string>
+    <string name="manage_longitude_supporting">على سبيل المثال 73.86</string>
+    <string name="manage_change_password_title">تغيير كلمة المرور</string>
+    <string name="manage_change_password_help">تظل مسجلاً للدخول على هذا الجهاز وكل جهاز آخر.</string>
+    <string name="manage_current_password">كلمة المرور الحالية</string>
+    <string name="manage_repeat_new_password">أعد كتابة كلمة المرور الجديدة</string>
+    <string name="manage_passwords_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="manage_delete_all_notices_title">حذف جميع الإشعارات؟</string>
+    <string name="manage_delete_all_notices_text">تتم إزالتها من كل جهاز.</string>
+    <string name="manage_delete_all">حذف الكل</string>
+    <string name="manage_notifications_title">الإشعارات</string>
+    <string name="manage_mark_all_read">تعيين الكل كمقروء</string>
+    <string name="manage_no_notices">لا يوجد شيء بعد</string>
+    <string name="manage_no_notices_subtitle">تظهر هنا التنبيهات الواردة من الأتمتة والأجهزة الجديدة والأجهزة غير المتصلة.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">رمز QR لمسحه ضوئياً باستخدام تطبيق Smart Life</string>
+    <string name="onboard_region_india">الهند</string>
+    <string name="onboard_region_china">الصين</string>
+    <string name="onboard_region_europe">أوروبا</string>
+    <string name="onboard_region_us">الولايات المتحدة</string>
+    <string name="onboard_region_singapore">سنغافورة</string>
+    <string name="onboard_region_russia">روسيا</string>
+    <string name="onboard_region_taiwan">تايوان</string>
+    <string name="onboard_region_india_old">الهند (قديم)</string>
+    <string name="onboard_plugins_title">الإضافات</string>
+    <string name="onboard_local_control">تحكم محلي</string>
+    <string name="onboard_cloud">سحابي</string>
+    <plurals name="onboard_device_count">
+        <item quantity="zero">%1$d جهاز</item>
+        <item quantity="one">جهاز واحد (%1$d)</item>
+        <item quantity="two">جهازان (%1$d)</item>
+        <item quantity="few">%1$d أجهزة</item>
+        <item quantity="many">%1$d جهازاً</item>
+        <item quantity="other">%1$d جهاز</item>
+    </plurals>
+    <string name="onboard_account_linked">مربوط</string>
+    <string name="onboard_account_needs_attention">يحتاج إلى انتباه</string>
+    <string name="onboard_unlink_account">إلغاء ربط %1$s</string>
+    <string name="onboard_integration_disabled">متوقف في إعدادات الخادم.</string>
+    <string name="onboard_link_account">ربط حساب</string>
+    <string name="onboard_link_another_account">ربط حساب آخر</string>
+    <string name="onboard_find_devices">البحث عن أجهزة</string>
+    <string name="onboard_unlink_title">إلغاء ربط %1$s؟</string>
+    <string name="onboard_unlink_text">تتم إزالة الأجهزة التي جاءت من هذا الحساب من Domus.</string>
+    <string name="onboard_unlink">إلغاء الربط</string>
+    <string name="onboard_link_integration">ربط %1$s</string>
+    <string name="onboard_tuya_qr_instructions">امسح هذا الرمز ضوئياً باستخدام تطبيق Smart Life أو Tuya Smart (زر المسح الضوئي على شاشته الرئيسية)، ثم أكّد هناك. على نفس الهاتف، اعرض هذا الرمز على شاشة أخرى.</string>
+    <string name="onboard_waiting_for_scan">بانتظار المسح الضوئي…</string>
+    <string name="onboard_tuya_user_code_instructions">في تطبيق Smart Life، افتح أنا (Me) ← الإعدادات ← الحساب والأمان ← رمز المستخدم (User Code)، واكتب ذلك الرمز هنا.</string>
+    <string name="onboard_user_code">رمز المستخدم</string>
+    <string name="onboard_qr_expired">انتهت صلاحية رمز QR هذا. حاول مجدداً.</string>
+    <string name="onboard_verify_title">تحقق من هويتك</string>
+    <string name="onboard_xiaomi_sent_phone">أرسلت Xiaomi رمز تحقق إلى هاتفك. اكتبه هنا. تنتهي صلاحيته بعد بضع دقائق.</string>
+    <string name="onboard_xiaomi_sent_email">أرسلت Xiaomi رمز تحقق إلى بريدك الإلكتروني. اكتبه هنا. تنتهي صلاحيته بعد بضع دقائق.</string>
+    <string name="onboard_verification_code">رمز التحقق</string>
+    <string name="onboard_send_new_code">إرسال رمز جديد</string>
+    <string name="onboard_use_another_account">استخدام حساب آخر</string>
+    <string name="onboard_tapo_instructions">سجّل الدخول باستخدام حساب TP-Link الخاص بك. يُستخدم للتحدث مع أجهزة Tapo على شبكتك.</string>
+    <string name="onboard_xiaomi_instructions">سجّل الدخول باستخدام حساب Xiaomi الخاص بك. يتم جلب رموز الأجهزة مرة واحدة؛ ويبقى التحكم محلياً. قد ترسل لك Xiaomi بعد ذلك رمزاً.</string>
+    <string name="onboard_xiaomi_username">البريد الإلكتروني أو الهاتف أو معرف Xiaomi</string>
+    <string name="onboard_xiaomi_username_supporting">يحتاج رقم الهاتف إلى رمز الدولة الخاص به، مثل +91…</string>
+    <string name="onboard_email_or_username">البريد الإلكتروني أو اسم المستخدم</string>
+    <string name="onboard_password">كلمة المرور</string>
+    <string name="onboard_server_region">منطقة الخادم</string>
+    <string name="onboard_show_qr_code">إظهار رمز QR</string>
+    <string name="onboard_verify">تحقق</string>
+    <string name="onboard_continue">متابعة</string>
+    <string name="onboard_link">ربط</string>
+    <string name="onboard_add_devices_title">إضافة أجهزة</string>
+    <string name="onboard_scanning">جارٍ الفحص…</string>
+    <string name="onboard_scan_again">الفحص مجدداً</string>
+    <string name="onboard_add_by_address">إضافة عبر العنوان</string>
+    <string name="onboard_no_new_devices">لا توجد أجهزة جديدة</string>
+    <string name="onboard_no_new_devices_subtitle">كل ما عُثر عليه موجود بالفعل في منزلك. اربط حساباً ضمن الإضافات للعثور على المزيد.</string>
+    <string name="onboard_open_plugins">فتح الإضافات</string>
+    <string name="onboard_found_count">عُثر على %1$d</string>
+    <string name="onboard_add">إضافة</string>
+    <string name="onboard_ignore">تجاهل</string>
+    <string name="onboard_add_device_title">إضافة %1$s</string>
+    <string name="onboard_field_name">الاسم</string>
+    <string name="onboard_field_room">الغرفة</string>
+    <string name="onboard_no_room">بلا غرفة</string>
+    <string name="onboard_device_token_optional">رمز الجهاز (اختياري)</string>
+    <string name="onboard_device_token_supporting">مطلوب فقط في حال عدم وجود حساب Xiaomi مربوط</string>
+    <string name="onboard_ip_address">عنوان IP</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">موجود بالفعل</string>
+    <string name="code_error_reference_missing" formatted="false">العنصر المشار إليه غير موجود</string>
+    <string name="code_error_internal" formatted="false">خطأ داخلي في الخادم</string>
+    <string name="code_error_session_expired" formatted="false">جلسة غير صالحة أو منتهية الصلاحية</string>
+    <string name="code_error_admin_required" formatted="false">مطلوب صلاحية مسؤول</string>
+    <string name="code_error_guest_no_control" formatted="false">لا يمكن للضيوف التحكم في الأجهزة</string>
+    <string name="code_error_not_signed_in" formatted="false">لم يتم تسجيل الدخول</string>
+    <string name="code_error_missing_auth" formatted="false">ترويسة التفويض (Authorization) مفقودة</string>
+    <string name="code_error_account_gone" formatted="false">الحساب لم يعد موجوداً</string>
+    <string name="code_error_must_change_password" formatted="false">غيّر كلمة مرورك أولاً</string>
+    <string name="code_error_device_not_found" formatted="false">الجهاز غير موجود</string>
+    <string name="code_error_empty_command" formatted="false">أمر فارغ</string>
+    <string name="code_error_scan_running" formatted="false">توجد عملية فحص قيد التشغيل بالفعل</string>
+    <string name="code_error_discovered_not_found" formatted="false">الجهاز المكتشف غير موجود</string>
+    <string name="code_error_device_already_added" formatted="false">تمت إضافة هذا الجهاز بالفعل</string>
+    <string name="code_error_username_too_short" formatted="false">يجب أن يتكون اسم المستخدم من 3 أحرف على الأقل</string>
+    <string name="code_error_password_too_short" formatted="false">يجب أن تتكون كلمة المرور من 8 أحرف على الأقل</string>
+    <string name="code_error_setup_already_done" formatted="false">تم إكمال الإعداد بالفعل</string>
+    <string name="code_error_invalid_credentials" formatted="false">اسم المستخدم أو كلمة المرور غير صالحة</string>
+    <string name="code_error_invalid_reset_code" formatted="false">هذا الرمز خاطئ أو لم يعد صالحاً. اطلب من المسؤول رمزاً جديداً.</string>
+    <string name="code_error_wrong_current_password" formatted="false">كلمة المرور الحالية غير صحيحة</string>
+    <string name="code_error_same_password" formatted="false">اختر كلمة مرور مختلفة عن الحالية</string>
+    <string name="code_error_avatar_too_long" formatted="false">نص الصورة الرمزية طويل جداً</string>
+    <string name="code_error_name_required" formatted="false">الاسم مطلوب</string>
+    <string name="code_error_trigger_required" formatted="false">أضف مشغّلاً واحداً على الأقل</string>
+    <string name="code_error_action_required" formatted="false">أضف إجراءً واحداً على الأقل</string>
+    <string name="code_error_sun_offset_range" formatted="false">يمكن إزاحة وقت الشروق والغروب بحد أقصى 6 ساعات</string>
+    <string name="code_error_automation_not_found" formatted="false">الأتمتة غير موجودة</string>
+    <string name="code_error_cannot_edit_device" formatted="false">لا يمكنك تعديل هذا الجهاز</string>
+    <string name="code_error_admin_only_move_room" formatted="false">يمكن للمسؤول فقط نقل جهاز إلى غرفة أخرى</string>
+    <string name="code_error_name_empty" formatted="false">لا يمكن أن يكون الاسم فارغاً</string>
+    <string name="code_error_view_only_device" formatted="false">يمكنك رؤية هذا الجهاز ولكن لا يمكنك التحكم فيه</string>
+    <string name="code_error_view_only_devices" formatted="false">يمكنك رؤية هذه الأجهزة ولكن لا يمكنك التحكم فيها</string>
+    <string name="code_error_negative_rate" formatted="false">لا يمكن أن تكون الأسعار سالبة</string>
+    <string name="code_error_invalid_billing_day" formatted="false">يجب أن يكون يوم الفوترة بين 1 و28</string>
+    <string name="code_error_invalid_currency" formatted="false">يجب أن تكون العملة رمز ISO مكوناً من 3 أحرف</string>
+    <string name="code_error_slab_order" formatted="false">يجب أن تنتهي كل شريحة بقيمة أعلى من الشريحة السابقة</string>
+    <string name="code_error_slab_open_ended" formatted="false">يمكن للشريحة الأخيرة فقط أن تكون مفتوحة النهاية</string>
+    <string name="code_error_tou_format" formatted="false">تحتاج فترات وقت الاستخدام إلى وقت بداية ونهاية بالصيغة HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">لا يمكن أن تبدأ فترة وقت الاستخدام وتنتهي في نفس الوقت</string>
+    <string name="code_error_tou_overlap" formatted="false">لا يمكن أن تتداخل فترات وقت الاستخدام</string>
+    <string name="code_error_group_not_found" formatted="false">المجموعة غير موجودة</string>
+    <string name="code_error_account_not_found" formatted="false">الحساب غير موجود</string>
+    <string name="code_error_tuya_disabled" formatted="false">تكامل Tuya معطل</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">أدخل رمز المستخدم (User Code) من تطبيق Smart Life</string>
+    <string name="code_error_credentials_required" formatted="false">البريد الإلكتروني وكلمة المرور مطلوبان</string>
+    <string name="code_error_verification_expired" formatted="false">انتهت صلاحية التحقق؛ سجّل الدخول مجدداً</string>
+    <string name="code_error_invalid_port" formatted="false">يجب أن يكون المنفذ رقماً</string>
+    <string name="code_error_broker_required" formatted="false">أدخل عنوان الوسيط (Broker)</string>
+    <string name="code_error_hue_disabled" formatted="false">تكامل Philips Hue معطل</string>
+    <string name="code_error_room_name_required" formatted="false">اسم الغرفة مطلوب</string>
+    <string name="code_error_room_not_found" formatted="false">الغرفة غير موجودة</string>
+    <string name="code_error_sync_lights_required" formatted="false">اختر ضوءاً واحداً على الأقل للمزامنة</string>
+    <string name="code_error_scene_not_found" formatted="false">المشهد غير موجود</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">تحتاج مزامنة الشاشة إلى شاشة لمشاركتها. ابدأها من تطبيق Domus على الجهاز الذي يعرض المحتوى.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">يتعذر الوصول إلى خدمة البحث عن الأماكن. أدخل خط العرض وخط الطول بدلاً من ذلك.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">خط العرض بين -90 و90، وخط الطول بين -180 و180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">جميع العناوين المقترحة لاسم المستخدم هذا مستخدمة بالفعل</string>
+    <string name="code_error_invalid_role" formatted="false">يجب أن يكون الدور admin أو member أو guest</string>
+    <string name="code_error_kid_password_required" formatted="false">يحتاج حساب الطفل إلى كلمة مرور</string>
+    <string name="code_error_email_taken" formatted="false">هذا البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر</string>
+    <string name="code_error_user_not_found" formatted="false">المستخدم غير موجود</string>
+    <string name="code_error_last_admin" formatted="false">يجب أن يكون هناك مسؤول واحد على الأقل</string>
+    <string name="code_error_cannot_delete_self" formatted="false">لا يمكنك حذف حسابك الخاص</string>
+    <string name="code_error_hue_press_button" formatted="false">اضغط على الزر الدائري في جسر Hue، ثم اربطه مجدداً خلال 30 ثانية</string>
+    <string name="code_error_hue_not_found" formatted="false">لم يُعثر على جسر Hue؛ أدخل عنوان IP الخاص به</string>
+    <string name="code_error_tuya_device_gone" formatted="false">الجهاز لم يعد موجوداً في Smart Life</string>
+    <string name="code_error_device_token_required" formatted="false">رمز الجهاز مطلوب</string>
+    <string name="code_error_hue_link_expired" formatted="false">فشلت المصادقة: لم يعد جسر Hue يقبل هذا الربط؛ اربطه مجدداً</string>
+    <string name="code_error_hue_removed" formatted="false">فشلت المصادقة: تمت إزالة جسر Hue</string>
+    <string name="code_error_mqtt_removed" formatted="false">فشلت المصادقة: تمت إزالة وسيط MQTT</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">فشلت المصادقة: رفض الجهاز البريد الإلكتروني أو كلمة المرور لحساب TP-Link الخاص بك</string>
+    <string name="code_error_tapo_account_required" formatted="false">فشلت المصادقة: أضف حساب TP-Link الخاص بك للتحكم في أجهزة Tapo</string>
+    <string name="code_error_tapo_removed" formatted="false">فشلت المصادقة: تمت إزالة حساب TP-Link</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">فشلت المصادقة: طلبت Xiaomi التحقق عبر رمز Captcha. سجّل الدخول مرة واحدة في تطبيق Mi Home أو المتصفح، ثم أعد المحاولة</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">فشلت المصادقة: اسم مستخدم أو كلمة مرور Xiaomi غير صالحة</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">فشلت المصادقة: رمز التحقق خاطئ أو منتهي الصلاحية</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">فشلت المصادقة: لم تقبل Xiaomi الرمز</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">فشلت المصادقة: انتهت صلاحية جلسة Xiaomi</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">فشلت المصادقة: تطلب Xiaomi رمز تحقق؛ اربط الحساب مجدداً ضمن التكاملات</string>
+    <string name="code_error_unsupported_command" formatted="false">غير مدعوم: هذا الجهاز لا يدعم ذلك الأمر</string>
+    <string name="code_error_unsupported_effect" formatted="false">غير مدعوم: لا يمكن لهذا الضوء تشغيل ذلك التأثير</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">غير مدعوم: لا يحتوي طراز Xiaomi هذا على مواصفات MIoT</string>
+    <string name="code_error_rate_limited_one" formatted="false">محاولات كلمة مرور خاطئة كثيرة جداً. حاول مجدداً بعد {count} دقيقة.</string>
+    <string name="code_error_rate_limited_other" formatted="false">محاولات كلمة مرور خاطئة كثيرة جداً. حاول مجدداً بعد {count} دقائق.</string>
+    <string name="code_error_integration_disabled" formatted="false">التكامل \'{integration}\' غير مفعل</string>
+    <string name="code_error_invalid_time" formatted="false">الوقت \'{time}\' غير صالح، استخدم الصيغة HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">إجراءات غير صالحة: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">يجب أن تكون المنطقة إحدى {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">إعدادات مزامنة الشاشة غير صالحة: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">نوع المشهد \'{kind}\' غير معروف</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" ليس عنوان خادم</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">فشلت المصادقة: تعذّر على Xiaomi إرسال رمز التحقق: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">فشلت المصادقة: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">غير مدعوم: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">تأكيد تبديل {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">تمت إضافة جهاز جديد</string>
+    <string name="code_notification_device_added" formatted="false">تم العثور على {name} ({integration}) وإضافته تلقائياً</string>
+    <string name="code_notification_device_found_title" formatted="false">تم العثور على جهاز جديد</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) جاهز للإضافة</string>
+    <string name="code_notification_password_reset_title" formatted="false">طُلبت إعادة تعيين كلمة المرور</string>
+    <string name="code_notification_password_reset" formatted="false">نسي {username} كلمة المرور الخاصة به. يمكن للمسؤول منحه رمز إعادة تعيين في الإعدادات، ضمن الأشخاص والصلاحيات.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">واجهت الأتمتة \"{name}\" مشاكل</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>
