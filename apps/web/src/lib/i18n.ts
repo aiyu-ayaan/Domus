@@ -1,4 +1,5 @@
 import en from '@/locales/en.json'
+import { getStorageKey } from '@/lib/flavor'
 
 export type MessageKey = keyof typeof en
 type Catalog = Record<string, string>
@@ -37,21 +38,69 @@ export function resolveLanguage(requested: readonly (string | undefined)[], supp
   return 'en'
 }
 
-// The desktop app passes the system's language: Chromium's own (navigator.language) has no Punjabi or Marathi build to report.
-const desktopLanguage = (globalThis as { domus?: { language?: string } }).domus?.language
+/** What the desktop app's preload adds for the language (apps/desktop/src/preload.js). */
+interface DesktopLanguage {
+  /** The app's language: the choice, else the system's. Chromium's own (navigator.language) has no Punjabi or Marathi build to report. */
+  language?: string
+  languageChoice?: string
+  setLanguage?(tag: string): void
+}
+const desktop = (globalThis as { domus?: DesktopLanguage }).domus
+const CHOICE_KEY = getStorageKey('domus.language')
 const browserLanguages = typeof navigator === 'undefined' ? [] : (navigator.languages ?? [navigator.language])
 
+/** Every language with a catalog, English first. */
+export const languages = ['en', ...Object.keys(loaders).map((path) => path.slice(path.lastIndexOf('/') + 1, -'.json'.length))]
+
+/**
+ * The language picked in Settings, or '' while the app follows the system. The desktop app keeps it itself:
+ * its home and remote address are two origins with separate storage, and its connect window reads it too.
+ */
+export const languageChoice: string = (() => {
+  if (desktop?.setLanguage) return desktop.languageChoice ?? ''
+  try {
+    return localStorage.getItem(CHOICE_KEY) ?? ''
+  } catch {
+    return ''
+  }
+})()
+
 /** The language the app is shown in: a tag with a catalog, or `en`. */
-export const language = resolveLanguage([desktopLanguage, ...browserLanguages], (tag) => !!loaderOf(tag))
+export const language = resolveLanguage([languageChoice, desktop?.language, ...browserLanguages], (tag) => tag === 'en' || !!loaderOf(tag))
+
+/** Saves the choice ('' follows the system) and reloads: `t()` is read once, also by module-level constants. */
+export function setLanguage(tag: string) {
+  if (desktop?.setLanguage) desktop.setLanguage(tag)
+  else {
+    try {
+      if (tag) localStorage.setItem(CHOICE_KEY, tag)
+      else localStorage.removeItem(CHOICE_KEY)
+    } catch {
+      /* storage is blocked: nothing to keep, the reload shows the system's language */
+    }
+  }
+  location.reload()
+}
+
+/** A language's own name ("Español"), readable whatever language the app is in. */
+export function languageName(tag: string): string {
+  const name = new Intl.DisplayNames([tag], { type: 'language' }).of(tag) ?? tag
+  return name.charAt(0).toLocaleUpperCase(tag) + name.slice(1)
+}
 
 // Awaited here, so every module that imports `t()` (also for module-level constants) runs with the catalog in place.
 // A catalog that fails to load leaves the app in English instead of blank.
 const messages: Catalog = language === 'en' ? en : await loaderOf(language)().catch(() => en)
 const plural = new Intl.PluralRules(language)
 
+/** The page reads right to left. */
+export const isRtl = RTL.includes(language)
+/** For `Intl`: the picked language, or undefined so dates and numbers keep the browser's own regional format. */
+export const formatLocale = languageChoice ? language : undefined
+
 if (typeof document !== 'undefined') {
   document.documentElement.lang = language
-  document.documentElement.dir = RTL.includes(language) ? 'rtl' : 'ltr'
+  document.documentElement.dir = isRtl ? 'rtl' : 'ltr'
 }
 
 /**

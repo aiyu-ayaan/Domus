@@ -1085,6 +1085,8 @@
   "settings.server.saved": "सर्वर पते सहेजे गए",
   "settings.server.savedHint": "अगली बार खुलने पर ऐप्स उन्हें ले लेते हैं।",
   "settings.server.title": "सर्वर पते",
+  "settings.language": "भाषा",
+  "settings.language.system": "सिस्टम डिफ़ॉल्ट",
   "settings.theme": "थीम",
   "settings.theme.dark": "डार्क",
   "settings.theme.help": "सिस्टम आपके उपकरण की सेटिंग का अनुसरण करता है।",

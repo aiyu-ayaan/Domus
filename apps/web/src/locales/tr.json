@@ -1085,6 +1085,8 @@
   "settings.server.saved": "Sunucu adresleri kaydedildi",
   "settings.server.savedHint": "Uygulamalar bir sonraki açılışlarında bu adresleri alır.",
   "settings.server.title": "Sunucu adresleri",
+  "settings.language": "Dil",
+  "settings.language.system": "Sistem varsayılanı",
   "settings.theme": "Tema",
   "settings.theme.dark": "Koyu",
   "settings.theme.help": "Sistem, cihazınızın ayarını takip eder.",

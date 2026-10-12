@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n'
+import { languageChoice, languageName, languages, setLanguage, t } from '@/lib/i18n'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -65,7 +65,7 @@ export function SettingsView() {
         <Card>
           <CardHeader title={t('settings.account')} />
           {/* Avatar Profile Section */}
-          <div className="flex items-center gap-4 px-4 py-3.5 bg-raised/30 border-b border-border">
+          <div className="flex flex-wrap items-center gap-4 px-4 py-3.5 bg-raised/30 border-b border-border">
             <div className="relative group">
               <Avatar
                 avatar={user?.avatar}
@@ -148,6 +148,16 @@ export function SettingsView() {
             </div>
             <Segmented size="sm" label={t('settings.theme')} value={theme} onChange={setTheme} options={[{ value: 'system', label: t('settings.theme.system') }, { value: 'light', label: t('settings.theme.light') }, { value: 'dark', label: t('settings.theme.dark') }]} />
           </div>
+          <div className="border-t border-border px-4 py-3">
+            <SelectField label={t('settings.language')} value={languageChoice} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="">{t('settings.language.system')}</option>
+              {languages.map((tag) => (
+                <option key={tag} value={tag} lang={tag}>
+                  {languageName(tag)}
+                </option>
+              ))}
+            </SelectField>
+          </div>
         </Card>
         <PasswordCard />
         <ServerCard />
@@ -202,13 +212,13 @@ function AboutCard() {
       <div className="divide-y divide-border">
         <Link to="/about" className="flex min-h-12 items-center justify-between px-4 transition-colors duration-fast hover:bg-raised">
           <span>{t('settings.aboutDomus')}</span>
-          <CaretRight size={16} className="text-subtle" aria-hidden />
+          <CaretRight size={16} className="text-subtle rtl:-scale-x-100" aria-hidden />
         </Link>
         <Link to="/updates" className="flex min-h-12 items-center justify-between gap-3 px-4 transition-colors duration-fast hover:bg-raised">
           <span>{t('settings.updates')}</span>
           <span className="flex items-center gap-2 text-muted">
             {check.data ? t('update.available', { version: check.data.version }) : t('settings.releaseNotes')}
-            <CaretRight size={16} className="text-subtle" aria-hidden />
+            <CaretRight size={16} className="text-subtle rtl:-scale-x-100" aria-hidden />
           </span>
         </Link>
         <div className="flex min-h-12 items-center justify-between px-4">
@@ -336,7 +346,7 @@ function LocationCard() {
                     <li key={`${p.name}${p.latitude}${p.longitude}`} className="border-b border-border last:border-b-0">
                       <button
                         type="button"
-                        className="flex min-h-9 w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-label transition-colors hover:bg-raised"
+                        className="flex min-h-9 w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-start text-label transition-colors hover:bg-raised"
                         onClick={() => {
                           setForm({ latitude: String(p.latitude), longitude: String(p.longitude) })
                           search.reset()
@@ -465,7 +475,7 @@ const idsAt = (levels: Levels, level: Level) => Object.keys(levels).filter((id) 
 /** One line of the access editor: what it is on the left, its level in a compact menu on the right. */
 function AccessRow({ label, hint, value, onChange }: { label: string; hint?: string; value: Level; onChange: (v: Level) => void }) {
   return (
-    <div className="flex min-h-12 items-center justify-between gap-3 py-2 pl-9 pr-3">
+    <div className="flex min-h-12 items-center justify-between gap-3 py-2 ps-9 pe-3">
       <div className="min-w-0">
         <p className="truncate">{label}</p>
         {hint && <p className="text-caption text-subtle">{hint}</p>}
@@ -476,7 +486,7 @@ function AccessRow({ label, hint, value, onChange }: { label: string; hint?: str
           value={value}
           onChange={(e) => onChange(e.target.value as Level)}
           className={cn(
-            'h-8 cursor-pointer appearance-none rounded-md border border-border bg-raised pl-2.5 pr-7 text-label transition-colors duration-fast focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-fg/15',
+            'h-8 cursor-pointer appearance-none rounded-md border border-border bg-raised ps-2.5 pe-7 text-label transition-colors duration-fast focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-fg/15',
             value === 'none' ? 'text-muted' : 'font-medium text-fg',
           )}
         >
@@ -486,7 +496,7 @@ function AccessRow({ label, hint, value, onChange }: { label: string; hint?: str
             </option>
           ))}
         </select>
-        <CaretDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
+        <CaretDown size={12} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
       </div>
     </div>
   )
@@ -499,7 +509,7 @@ function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: 
   return (
     <details className="group rounded-lg border border-border">
       <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 hover:bg-raised [&::-webkit-details-marker]:hidden">
-        <CaretRight size={14} className="shrink-0 text-subtle transition-transform duration-base group-open:rotate-90" aria-hidden />
+        <CaretRight size={14} className="shrink-0 text-subtle transition-transform duration-base rtl:-scale-x-100 group-open:rotate-90 rtl:group-open:-rotate-90" aria-hidden />
         <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
         <span className={cn('shrink-0 text-label', count || (room && room !== 'none') ? 'text-fg' : 'text-muted')}>{status}</span>
       </summary>
@@ -508,7 +518,7 @@ function RoomAccess({ name, devices, room, levelOf, onRoom, onDevice }: { name: 
         {devices.map((d) => (
           <AccessRow key={d.id} label={d.name} value={levelOf(d)} onChange={(v) => onDevice(d.id, v)} />
         ))}
-        {devices.length === 0 && <p className="py-3 pl-9 pr-3 text-label text-muted">{t('access.noDevicesInRoom')}</p>}
+        {devices.length === 0 && <p className="py-3 ps-9 pe-3 text-label text-muted">{t('access.noDevicesInRoom')}</p>}
       </div>
     </details>
   )

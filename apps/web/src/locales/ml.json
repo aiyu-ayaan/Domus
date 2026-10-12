@@ -1085,6 +1085,8 @@
   "settings.server.saved": "സെർവർ വിലാസങ്ങൾ സേവ് ചെയ്തു",
   "settings.server.savedHint": "അടുത്ത തവണ തുറക്കുമ്പോൾ ആപ്പുകൾ ഇവ ഉപയോഗിക്കും.",
   "settings.server.title": "സെർവർ വിലാസങ്ങൾ",
+  "settings.language": "ഭാഷ",
+  "settings.language.system": "സിസ്റ്റം സ്ഥിരം",
   "settings.theme": "തീം",
   "settings.theme.dark": "ഡാർക്ക്",
   "settings.theme.help": "സിസ്റ്റം നിങ്ങളുടെ ഉപകരണ ക്രമീകരണം പിന്തുടരുന്നു.",

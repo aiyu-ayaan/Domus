@@ -1113,6 +1113,8 @@
   "settings.server.saved": "Zapisano adresy serwera",
   "settings.server.savedHint": "Aplikacje pobiorą je przy następnym otwarciu.",
   "settings.server.title": "Adresy serwera",
+  "settings.language": "Język",
+  "settings.language.system": "Domyślny systemowy",
   "settings.theme": "Motyw",
   "settings.theme.dark": "Ciemny",
   "settings.theme.help": "Opcja System podąża za ustawieniem Twojego urządzenia.",

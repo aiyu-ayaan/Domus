@@ -1085,6 +1085,8 @@
   "settings.server.saved": "सर्व्हर पत्ते सेव्ह केले",
   "settings.server.savedHint": "पुढच्या वेळी ॲप्स उघडल्यावर ते हे पत्ते वापरतील.",
   "settings.server.title": "सर्व्हर पत्ते",
+  "settings.language": "भाषा",
+  "settings.language.system": "सिस्टम डीफॉल्ट",
   "settings.theme": "थीम",
   "settings.theme.dark": "डार्क",
   "settings.theme.help": "सिस्टम तुमच्या उपकरणाच्या सेटिंगचे अनुसरण करते.",

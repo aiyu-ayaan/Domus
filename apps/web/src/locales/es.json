@@ -1099,6 +1099,8 @@
   "settings.server.saved": "Direcciones del servidor guardadas",
   "settings.server.savedHint": "Las aplicaciones las aplicarán la próxima vez que se abran.",
   "settings.server.title": "Direcciones del servidor",
+  "settings.language": "Idioma",
+  "settings.language.system": "Predeterminado del sistema",
   "settings.theme": "Tema",
   "settings.theme.dark": "Oscuro",
   "settings.theme.help": "Sistema sigue la configuración de tu dispositivo.",

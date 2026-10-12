@@ -1085,6 +1085,8 @@
   "settings.server.saved": "サーバーアドレスを保存しました",
   "settings.server.savedHint": "次回アプリを開いたときに反映されます。",
   "settings.server.title": "サーバーアドレス",
+  "settings.language": "言語",
+  "settings.language.system": "システムのデフォルト",
   "settings.theme": "テーマ",
   "settings.theme.dark": "ダーク",
   "settings.theme.help": "「システム」はお使いのデバイスの設定に従います。",

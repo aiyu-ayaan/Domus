@@ -1085,6 +1085,8 @@
   "settings.server.saved": "Serveradressen gespeichert",
   "settings.server.savedHint": "Die Apps übernehmen sie beim nächsten Öffnen.",
   "settings.server.title": "Serveradressen",
+  "settings.language": "Sprache",
+  "settings.language.system": "Systemstandard",
   "settings.theme": "Design",
   "settings.theme.dark": "Dunkel",
   "settings.theme.help": "„System“ folgt der Einstellung Ihres Geräts.",

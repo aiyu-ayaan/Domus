@@ -1085,6 +1085,8 @@
   "settings.server.saved": "సర్వర్ చిరునామాలు సేవ్ చేయబడ్డాయి",
   "settings.server.savedHint": "యాప్‌లు తదుపరిసారి తెరిచినప్పుడు వీటిని తీసుకుంటాయి.",
   "settings.server.title": "సర్వర్ చిరునామాలు",
+  "settings.language": "భాష",
+  "settings.language.system": "సిస్టమ్ డిఫాల్ట్",
   "settings.theme": "థీమ్ (Theme)",
   "settings.theme.dark": "డార్క్ (Dark)",
   "settings.theme.help": "సిస్టమ్ మీ పరికర సెట్టింగ్‌ను అనుసరిస్తుంది.",

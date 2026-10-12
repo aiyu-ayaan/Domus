@@ -1085,6 +1085,8 @@
   "settings.server.saved": "சர்வர் முகவரிகள் சேமிக்கப்பட்டன",
   "settings.server.savedHint": "செயலிகள் அடுத்த முறை திறக்கும்போது அவற்றைப் பெற்றுக்கொள்ளும்.",
   "settings.server.title": "சர்வர் முகவரிகள்",
+  "settings.language": "மொழி",
+  "settings.language.system": "சிஸ்டம் இயல்பு",
   "settings.theme": "தீம் (Theme)",
   "settings.theme.dark": "இருள் (Dark)",
   "settings.theme.help": "கணினி (System) உங்கள் சாதன அமைப்பைப் பின்பற்றும்.",

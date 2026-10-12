@@ -1085,6 +1085,8 @@
   "settings.server.saved": "سرور کے پتے محفوظ ہو گئے",
   "settings.server.savedHint": "ایپس اگلی بار کھلنے پر انہیں استعمال کر لیتی ہیں۔",
   "settings.server.title": "سرور کے پتے",
+  "settings.language": "زبان",
+  "settings.language.system": "سسٹم ڈیفالٹ",
   "settings.theme": "تھیم",
   "settings.theme.dark": "ڈارک",
   "settings.theme.help": "سسٹم آپ کے آلے کی ترتیب کی پیروی کرتا ہے۔",

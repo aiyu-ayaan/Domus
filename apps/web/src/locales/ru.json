@@ -1113,6 +1113,8 @@
   "settings.server.saved": "Адреса сервера сохранены",
   "settings.server.savedHint": "Приложения получат их при следующем запуске.",
   "settings.server.title": "Адреса сервера",
+  "settings.language": "Язык",
+  "settings.language.system": "Как в системе",
   "settings.theme": "Тема",
   "settings.theme.dark": "Тёмная",
   "settings.theme.help": "Вариант «Системная» следует настройкам вашего устройства.",

@@ -1099,6 +1099,8 @@
   "settings.server.saved": "Indirizzi del server salvati",
   "settings.server.savedHint": "Le app li recepiranno alla prossima apertura.",
   "settings.server.title": "Indirizzi del server",
+  "settings.language": "Lingua",
+  "settings.language.system": "Predefinita di sistema",
   "settings.theme": "Tema",
   "settings.theme.dark": "Scuro",
   "settings.theme.help": "Sistema segue l'impostazione del tuo dispositivo.",

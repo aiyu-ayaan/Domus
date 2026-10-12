@@ -1085,6 +1085,8 @@
   "settings.server.saved": "伺服器位址已儲存",
   "settings.server.savedHint": "應用程式將在下次開啟時套用新位址。",
   "settings.server.title": "伺服器位址",
+  "settings.language": "語言",
+  "settings.language.system": "跟隨系統",
   "settings.theme": "主題",
   "settings.theme.dark": "深色",
   "settings.theme.help": "「跟隨系統」將依據您的裝置設定。",

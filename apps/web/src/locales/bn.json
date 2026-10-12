@@ -1085,6 +1085,8 @@
   "settings.server.saved": "সার্ভারের ঠিকানা সংরক্ষিত হয়েছে",
   "settings.server.savedHint": "অ্যাপগুলো পরের বার খোলার সময় সেগুলো গ্রহণ করবে।",
   "settings.server.title": "সার্ভারের ঠিকানা",
+  "settings.language": "ভাষা",
+  "settings.language.system": "সিস্টেমের ডিফল্ট",
   "settings.theme": "থিম",
   "settings.theme.dark": "ডার্ক",
   "settings.theme.help": "সিস্টেম আপনার ডিভাইসের সেটিং অনুসরণ করে।",

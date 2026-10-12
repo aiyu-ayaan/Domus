@@ -1099,6 +1099,8 @@
   "settings.server.saved": "Endereços do servidor salvos",
   "settings.server.savedHint": "Os aplicativos passarão a usá-los na próxima vez que forem abertos.",
   "settings.server.title": "Endereços do servidor",
+  "settings.language": "Idioma",
+  "settings.language.system": "Padrão do sistema",
   "settings.theme": "Tema",
   "settings.theme.dark": "Escuro",
   "settings.theme.help": "Sistema segue a configuração do seu dispositivo.",

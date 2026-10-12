@@ -1099,6 +1099,8 @@
   "settings.server.saved": "Adresses du serveur enregistrées",
   "settings.server.savedHint": "Les applications les prendront en compte à leur prochaine ouverture.",
   "settings.server.title": "Adresses du serveur",
+  "settings.language": "Langue",
+  "settings.language.system": "Par défaut du système",
   "settings.theme": "Thème",
   "settings.theme.dark": "Sombre",
   "settings.theme.help": "Système suit le réglage de votre appareil.",

@@ -1085,6 +1085,8 @@
   "settings.server.saved": "સર્વર સરનામાં સાચવ્યા",
   "settings.server.savedHint": "એપ્લિકેશન્સ હવે પછી જ્યારે ખૂલશે ત્યારે આ સરનામાં લઈ લેશે.",
   "settings.server.title": "સર્વર સરનામાં",
+  "settings.language": "ભાષા",
+  "settings.language.system": "સિસ્ટમ ડિફૉલ્ટ",
   "settings.theme": "થીમ",
   "settings.theme.dark": "ડાર્ક",
   "settings.theme.help": "સિસ્ટમ તમારા ઉપકરણની સેટિંગને અનુસરે છે.",

@@ -1085,6 +1085,8 @@
   "settings.server.saved": "Alamat server disimpan",
   "settings.server.savedHint": "Aplikasi akan menggunakannya saat dibuka berikutnya.",
   "settings.server.title": "Alamat server",
+  "settings.language": "Bahasa",
+  "settings.language.system": "Default sistem",
   "settings.theme": "Tema",
   "settings.theme.dark": "Gelap",
   "settings.theme.help": "Sistem mengikuti pengaturan perangkat Anda.",

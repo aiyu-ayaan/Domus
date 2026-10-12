@@ -1141,6 +1141,8 @@
   "settings.server.saved": "تم حفظ عناوين الخادم",
   "settings.server.savedHint": "تلتقطها التطبيقات في المرة القادمة التي تفتح فيها.",
   "settings.server.title": "عناوين الخادم",
+  "settings.language": "اللغة",
+  "settings.language.system": "افتراضي النظام",
   "settings.theme": "المظهر",
   "settings.theme.dark": "داكن",
   "settings.theme.help": "يتبع خيار «النظام» إعدادات جهازك.",

@@ -1085,6 +1085,8 @@
   "settings.server.saved": "Đã lưu địa chỉ máy chủ",
   "settings.server.savedHint": "Các ứng dụng sẽ áp dụng địa chỉ mới trong lần mở tiếp theo.",
   "settings.server.title": "Địa chỉ máy chủ",
+  "settings.language": "Ngôn ngữ",
+  "settings.language.system": "Mặc định của hệ thống",
   "settings.theme": "Giao diện",
   "settings.theme.dark": "Tối",
   "settings.theme.help": "Hệ thống tuân theo cài đặt thiết bị của bạn.",

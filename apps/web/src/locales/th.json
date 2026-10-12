@@ -1085,6 +1085,8 @@
   "settings.server.saved": "บันทึกที่อยู่เซิร์ฟเวอร์แล้ว",
   "settings.server.savedHint": "แอปจะใช้ที่อยู่เหล่านี้ในครั้งถัดไปที่เปิด",
   "settings.server.title": "ที่อยู่เซิร์ฟเวอร์",
+  "settings.language": "ภาษา",
+  "settings.language.system": "ค่าเริ่มต้นของระบบ",
   "settings.theme": "ธีม",
   "settings.theme.dark": "มืด",
   "settings.theme.help": "ค่าระบบจะปรับตามการตั้งค่าอุปกรณ์ของคุณ",

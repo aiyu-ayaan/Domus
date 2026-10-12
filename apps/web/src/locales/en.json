@@ -1085,6 +1085,8 @@
   "settings.server.saved": "Server addresses saved",
   "settings.server.savedHint": "The apps pick them up the next time they open.",
   "settings.server.title": "Server addresses",
+  "settings.language": "Language",
+  "settings.language.system": "System default",
   "settings.theme": "Theme",
   "settings.theme.dark": "Dark",
   "settings.theme.help": "System follows your device setting.",
