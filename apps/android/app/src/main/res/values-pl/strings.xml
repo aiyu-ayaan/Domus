@@ -1,0 +1,959 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">Doskonała</string>
+    <string name="air_good">Dobra</string>
+    <string name="air_moderate">Umiarkowana</string>
+    <string name="air_poor">Zła</string>
+    <string name="channel_stable">Stabilny</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">Ten komputer</string>
+    <string name="api_untrusted">Certyfikat serwera nie jest zaufany.</string>
+    <string name="api_offline">Nie można połączyć się z serwerem Domus. Sprawdź, czy jest uruchomiony.</string>
+    <string name="api_bad_response">Serwer wysłał odpowiedź, której ta wersja aplikacji nie rozumie.</string>
+    <string name="api_request_failed">Żądanie nie powiodło się ({status})</string>
+    <string name="error_no_server">Brak serwera</string>
+    <string name="connect_cert_changed">Certyfikat serwera zmienił się od czasu jego zatwierdzenia. Połącz ponownie, aby przejrzeć nowy certyfikat.</string>
+    <string name="connect_address_invalid">Wpisz adres, np. 192.168.1.10:8443 lub home.example.com. Obsługiwany jest tylko protokół https.</string>
+    <string name="connect_cert_unreadable">Nie udało się odczytać certyfikatu serwera.</string>
+    <string name="automation_ran">Uruchomiono „{name}”</string>
+    <string name="handover_reset_until">Reset hasła Domus dla %1$s\nKod: %2$s\n\nNa ekranie logowania wybierz \"Nie pamiętasz hasła?\", wpisz swoją nazwę użytkownika, a następnie ten kod. Działa jednorazowo, do %3$s.</string>
+    <string name="handover_reset">Reset hasła Domus dla %1$s\nKod: %2$s\n\nNa ekranie logowania wybierz \"Nie pamiętasz hasła?\", wpisz swoją nazwę użytkownika, a następnie ten kod. Działa jednorazowo.</string>
+    <string name="handover_signin_kid">Logowanie do Domus\nAdres: %1$s\nNazwa użytkownika: %2$s\nHasło: %3$s</string>
+    <string name="handover_signin">Logowanie do Domus\nAdres: %1$s\nNazwa użytkownika: %2$s\nHasło: %3$s\n\nPrzy pierwszym logowaniu zostaniesz poproszony o wybranie własnego hasła.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Dom</string>
+    <string name="nav_devices">Urządzenia</string>
+    <string name="nav_scenes">Sceny</string>
+    <string name="nav_analytics">Statystyki</string>
+    <string name="nav_settings">Ustawienia</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">Cały dom w jednej aplikacji</string>
+    <string name="connect_intro_1_body">Światła, gniazdka, oczyszczacze i czujniki Tuya, Tapo, Xiaomi, Philips Hue oraz MQTT w jednym miejscu.</string>
+    <string name="connect_intro_2_title">Zaprojektowany z myślą o prywatności</string>
+    <string name="connect_intro_2_body">Domus łączy się wyłącznie z serwerem w Twoim domu przez szyfrowane połączenie. Bez konta w chmurze.</string>
+    <string name="connect_intro_3_title">Sam znajduje Twój serwer</string>
+    <string name="connect_intro_3_body">W domowej sieci Wi‑Fi aplikacja sama znajduje serwer. Poza domem wpisz jego adres.</string>
+    <string name="connect_page_of">Strona %1$d z %2$d</string>
+    <string name="connect_skip">Pomiń</string>
+    <string name="connect_get_started">Rozpocznij</string>
+    <string name="connect_next">Dalej</string>
+    <string name="connect_welcome_title">Witaj w Domus</string>
+    <string name="connect_welcome_subtitle">Połącz się z serwerem, który zarządza Twoim domem.</string>
+    <string name="connect_on_this_network">W tej sieci</string>
+    <string name="connect_looking_for_servers">Szukanie serwerów…</string>
+    <string name="connect_no_server_found">Żaden serwer nie odpowiedział. Sprawdź, czy ten telefon jest w tej samej sieci Wi‑Fi co serwer, lub wpisz jego adres poniżej.</string>
+    <string name="connect_scan_again">Skanuj ponownie</string>
+    <string name="connect_or_enter_address">Lub wpisz adres</string>
+    <string name="connect_server_address">Adres serwera</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 lub home.example.com</string>
+    <string name="connect_action">Połącz</string>
+    <string name="connect_trust_title">Zaufać temu serwerowi?</string>
+    <string name="connect_trust_body">%1$s używa certyfikatu, który sam wygenerował, co jest normalne w przypadku serwera domowego. Zaufaj mu tylko wtedy, gdy odcisk palca zgadza się z tym wyświetlanym podczas uruchamiania serwera.</string>
+    <string name="connect_trust_action">Zaufaj</string>
+    <string name="connect_cancel">Anuluj</string>
+    <string name="connect_use_another_server">Użyj innego serwera</string>
+    <string name="connect_unreachable_title">Nie można połączyć się z domem</string>
+    <string name="connect_try_again">Spróbuj ponownie</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">Ukryj hasło</string>
+    <string name="auth_show_password">Pokaż hasło</string>
+    <string name="auth_username">Nazwa użytkownika</string>
+    <string name="auth_new_password">Nowe hasło</string>
+    <string name="auth_password_min_length">Co najmniej 8 znaków</string>
+    <string name="auth_confirm_password">Potwierdź hasło</string>
+    <string name="auth_passwords_mismatch">Hasła nie są identyczne</string>
+    <string name="auth_create_admin_title">Utwórz konto administratora</string>
+    <string name="auth_welcome_back_title">Witaj ponownie</string>
+    <string name="auth_create_admin_subtitle">Ten serwer jest nowy. Pierwsze konto zarządza wszystkim.</string>
+    <string name="auth_welcome_back_subtitle">Zaloguj się do swojego domu.</string>
+    <string name="auth_encrypted_connection">Połączenie szyfrowane z</string>
+    <string name="auth_email">E-mail</string>
+    <string name="auth_password">Hasło</string>
+    <string name="auth_create_account">Utwórz konto</string>
+    <string name="auth_sign_in">Zaloguj się</string>
+    <string name="auth_forgot_password">Nie pamiętasz hasła?</string>
+    <string name="auth_forgot_title">Nie pamiętasz hasła?</string>
+    <string name="auth_forgot_subtitle">Domus nie wysyła wiadomości e-mail. Zamiast tego powiadamiany jest administrator domu, który przekaże Ci jednorazowy kod.</string>
+    <string name="auth_ask_admin">Poproś administratora</string>
+    <string name="auth_back_to_sign_in">Powrót do logowania</string>
+    <string name="auth_reset_code_title">Wprowadź kod resetowania</string>
+    <string name="auth_reset_code_subtitle">Administrator został powiadomiony. Poproś go o 8-cyfrowy kod dla %1$s; działa on jednorazowo przez 30 minut.</string>
+    <string name="auth_reset_code_label">Kod resetowania</string>
+    <string name="auth_set_password_sign_in">Ustaw hasło i zaloguj się</string>
+    <string name="auth_back">Wstecz</string>
+    <string name="auth_choose_password_title">Wybierz swoje hasło</string>
+    <string name="auth_choose_password_subtitle">Witaj, %1$s. Hasło, którym się zalogowałeś, zostało utworzone dla Ciebie i było widoczne dla innej osoby. Wybierz własne hasło, aby kontynuować.</string>
+    <string name="auth_save_continue">Zapisz i kontynuuj</string>
+    <string name="auth_sign_out">Wyloguj się</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">Aktywność w tle</string>
+    <string name="service_channel_alerts">Alerty domowe</string>
+    <string name="service_listening_alerts">Domus nasłuchuje alertów</string>
+    <string name="service_screen_sync_title">Synchronizacja ekranu jest włączona</string>
+    <string name="service_screen_sync_body">Twoje światła podążają za tym ekranem</string>
+    <string name="service_stop">Zatrzymaj</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (grafika awatarów)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (wyszukiwanie miejsc odpytywane przez Twój serwer)</string>
+    <string name="about_lib_home_assistant">Home Assistant (logowanie kodem QR Tuya)</string>
+    <string name="about_license_inspiration">Inspiracja</string>
+    <string name="about_version_unknown">nieznana</string>
+    <string name="about_title">O Domus</string>
+    <string name="about_section_app">Aplikacja</string>
+    <string name="about_version_build">Wersja %1$s · kompilacja %2$d</string>
+    <string name="about_privacy_title">Prywatność</string>
+    <string name="about_privacy_subtitle">Działa na Twoim własnym serwerze. Dane logowania pozostają tam zaszyfrowane.</string>
+    <string name="about_source_code">Kod źródłowy</string>
+    <string name="about_section_developer">Twórca</string>
+    <string name="about_developer_tagline">Zaprojektowane i stworzone przez jednego programistę.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">Portfolio</string>
+    <string name="about_section_open_source">Open source</string>
+    <string name="about_acknowledgements">Podziękowania</string>
+    <string name="about_acknowledgements_subtitle">Biblioteki i projekty, na których zbudowano Domus</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Dostępna jest wersja Domus %1$s</string>
+    <string name="update_download_failed_retry_prompt">Pobieranie nie powiodło się. Spróbować ponownie?</string>
+    <string name="update_prompt_body">Masz wersję %1$s. Informacje o wydaniu oraz kanał aktualizacji znajdują się w Ustawieniach, w sekcji Aktualizacje.</string>
+    <string name="update_downloading_percent">Pobieranie %1$d%%</string>
+    <string name="update_action">Aktualizuj</string>
+    <string name="update_later">Później</string>
+    <string name="update_title">Aktualizacje</string>
+    <string name="update_checking">Sprawdzanie aktualizacji…</string>
+    <string name="update_check_failed">Nie udało się sprawdzić aktualizacji</string>
+    <string name="update_dev_build">Wersja deweloperska</string>
+    <string name="update_up_to_date">Domus jest aktualny</string>
+    <string name="update_download_failed_retry">Pobieranie nie powiodło się. Spróbuj ponownie.</string>
+    <string name="update_check_failed_body">Masz wersję %1$s. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="update_dev_build_body">Masz wersję %1$s. Wersję deweloperską aktualizuje się poprzez jej ponowne skompilowanie.</string>
+    <string name="update_you_have">Masz wersję %1$s.</string>
+    <string name="update_download_install">Pobierz i zainstaluj</string>
+    <string name="update_check_again">Sprawdź ponownie</string>
+    <string name="update_channel">Kanał</string>
+    <string name="update_channel_hint">Kanały Beta i Alpha otrzymują nowe kompilacje wcześniej, a także każdą wersję stabilną.</string>
+    <string name="update_whats_new_in">Co nowego w wersji %1$s</string>
+    <string name="update_in_this_version">W tej wersji</string>
+    <string name="update_loading_notes">Wczytywanie informacji o wydaniu…</string>
+    <string name="update_no_notes">Brak informacji o wydaniu dla tej wersji.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">Roboty</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Poszukiwacz przygód</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Pixel Art</string>
+    <string name="avatar_style_fun_emoji">Zabawne Emoji</string>
+    <string name="avatar_style_thumbs">Kciuki</string>
+    <string name="avatar_style_shapes">Kształty</string>
+    <string name="avatar_style_rings">Pierścienie</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">Dostosuj awatar</string>
+    <string name="avatar_save">Zapisz</string>
+    <string name="avatar_seed_value">Ziarno: %1$s</string>
+    <string name="avatar_randomize">Losuj</string>
+    <string name="avatar_roll_seed">Wylosuj ziarno</string>
+    <string name="avatar_roll_seed_action">Wylosuj ziarno</string>
+    <string name="avatar_style_label">Styl awatara</string>
+    <string name="avatar_seed_phrase_label">Fraza ziarna</string>
+    <string name="avatar_seed_phrase_hint">Wpisz dowolne słowo kluczowe, imię lub ciąg znaków, aby przekształcić ten styl awatara.</string>
+    <string name="avatar_seed_label">Ziarno</string>
+    <string name="avatar_apply_avatar">Zastosuj awatar</string>
+    <string name="avatar_apply">Zastosuj</string>
+    <string name="avatar_cancel">Anuluj</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">Dobranoc</string>
+    <string name="home_greeting_morning">Dzień dobry</string>
+    <string name="home_greeting_afternoon">Dzień dobry</string>
+    <string name="home_greeting_evening">Dobry wieczór</string>
+    <string name="home_got_it">Rozumiem</string>
+    <string name="home_about_stat">O: %1$s</string>
+    <string name="home_scene_on_hint">Wł. · dotknij, aby wyłączyć</string>
+    <string name="home_scene_off_hint">Dotknij, aby uruchomić</string>
+    <string name="home_change_avatar">Zmień awatar</string>
+    <string name="home_clear_notices_title">Usunąć wszystkie powiadomienia?</string>
+    <string name="home_clear_notices_body">Zostaną usunięte na każdym urządzeniu.</string>
+    <string name="home_delete_all">Usuń wszystkie</string>
+    <string name="home_reconnecting">Ponowne łączenie…</string>
+    <string name="home_devices_on_of_total">%1$d z %2$d wł.</string>
+    <string name="home_using_now">Bieżące zużycie</string>
+    <string name="home_using_now_info">Łączny bieżący pobór mocy wszystkich urządzeń z pomiarem energii.</string>
+    <string name="home_today">Dzisiaj</string>
+    <string name="home_today_info">Energia zużyta od północy. Kwota poniżej to szacowany koszt według Twojej taryfy energii elektrycznej.</string>
+    <string name="home_air_quality">Jakość powietrza</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">Sceny</string>
+    <string name="home_on_right_now">Teraz włączone</string>
+    <string name="home_all_devices">Wszystkie urządzenia</string>
+    <string name="home_no_devices_title">Brak urządzeń</string>
+    <string name="home_no_devices_admin">Otwórz Urządzenia i dotknij +, aby połączyć Tuya, Tapo, Xiaomi, Hue lub MQTT.</string>
+    <string name="home_no_devices_member">Poproś administratora o dodanie urządzeń lub przyznanie dostępu do pokoju.</string>
+    <string name="home_everything_off">Wszystko jest wyłączone.</string>
+    <string name="home_rooms">Pokoje</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d urządzenie · wszystkie wył.</item>
+        <item quantity="few">%1$d urządzenia · wszystkie wył.</item>
+        <item quantity="many">%1$d urządzeń · wszystkie wył.</item>
+        <item quantity="other">%1$d urządzeń · wszystkie wył.</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d urządzenie · %2$d wł.</item>
+        <item quantity="few">%1$d urządzenia · %2$d wł.</item>
+        <item quantity="many">%1$d urządzeń · %2$d wł.</item>
+        <item quantity="other">%1$d urządzeń · %2$d wł.</item>
+    </plurals>
+    <string name="home_recent_activity">Ostatnia aktywność</string>
+    <string name="home_see_all">Zobacz wszystkie</string>
+
+    <!-- Devices -->
+    <string name="device_title">Urządzenia</string>
+    <string name="device_online_of_total">%1$d z %2$d online</string>
+    <string name="device_add_devices">Dodaj urządzenia</string>
+    <string name="device_filter_all">Wszystkie</string>
+    <string name="device_category_lights">Światła</string>
+    <string name="device_category_power">Zasilanie</string>
+    <string name="device_category_air">Powietrze</string>
+    <string name="device_category_climate">Klimat</string>
+    <string name="device_all_rooms">Wszystkie pokoje</string>
+    <string name="device_no_room">Brak pokoju</string>
+    <string name="device_manage_rooms">Zarządzaj pokojami</string>
+    <string name="device_empty_filtered_title">Nic tu nie ma</string>
+    <string name="device_empty_filtered_body">Żadne urządzenie nie pasuje do tego pokoju i kategorii.</string>
+    <string name="device_empty_admin">Dotknij +, aby połączyć Tuya, Tapo, Xiaomi, Hue lub MQTT i dodać wykryte urządzenia.</string>
+    <string name="device_online">Online</string>
+    <string name="device_offline">Offline</string>
+    <string name="device_on">Wł.</string>
+    <string name="device_off">Wył.</string>
+    <string name="device_leak">Wyciek</string>
+    <string name="device_motion">Ruch</string>
+    <string name="device_motion_detected">Wykryto</string>
+    <string name="device_clear">Brak</string>
+    <string name="device_open">Otwarte</string>
+    <string name="device_closed">Zamknięte</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">Zasilanie: %1$s</string>
+    <string name="device_refresh_a11y">Odśwież %1$s</string>
+    <string name="device_view_only_member">Możesz przeglądać to urządzenie, ale nie możesz nim sterować.</string>
+    <string name="device_view_only_guest">Goście mogą przeglądać urządzenia, ale nie mogą nimi sterować.</string>
+    <string name="device_brightness">Jasność</string>
+    <string name="device_white">Białe</string>
+    <string name="device_white_warm">Ciepła</string>
+    <string name="device_white_neutral">Neutralna</string>
+    <string name="device_white_cool">Chłodna</string>
+    <string name="device_fan_speed">Prędkość wentylatora</string>
+    <string name="device_mode">Tryb</string>
+    <string name="device_speed">Prędkość</string>
+    <string name="device_coverage">Zasięg %1$d–%2$d m²</string>
+    <string name="device_reading_power">Moc</string>
+    <string name="device_reading_voltage">Napięcie</string>
+    <string name="device_reading_current">Prąd</string>
+    <string name="device_reading_temperature">Temperatura</string>
+    <string name="device_reading_humidity">Wilgotność</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">Filtr</string>
+    <string name="device_filter_left">Pozostało %1$d%%</string>
+    <string name="device_reading_contact">Drzwi lub okno</string>
+    <string name="device_reading_water">Woda</string>
+    <string name="device_water_dry">Sucho</string>
+    <string name="device_reading_alarm">Alarm</string>
+    <string name="device_alarm_sounding">Dzwoni</string>
+    <string name="device_alarm_quiet">Cisza</string>
+    <string name="device_reading_battery">Bateria</string>
+    <string name="device_battery_low">Niski</string>
+    <string name="device_battery_ok">OK</string>
+    <string name="device_ask_before_switching">Pytaj przed przełączeniem</string>
+    <string name="device_ask_before_switching_desc">Ostrzega przed włączeniem lub wyłączeniem z dowolnej aplikacji, grupy lub sceny</string>
+    <string name="device_rename_or_move">Zmień nazwę lub przenieś</string>
+    <string name="device_rename">Zmień nazwę</string>
+    <string name="device_remove">Usuń</string>
+    <string name="device_edit_title">Edytuj urządzenie</string>
+    <string name="device_field_name">Nazwa</string>
+    <string name="device_field_room">Pokój</string>
+    <string name="device_remove_confirm_title">Usunąć %1$s?</string>
+    <string name="device_remove_confirm_body">Urządzenie zostanie usunięte z domu i jego scen. Możesz dodać je ponownie w sekcji Dodaj urządzenia.</string>
+    <string name="device_white_candle">Świeca</string>
+    <string name="device_white_soft">Miękka biel</string>
+    <string name="device_white_neutral_preset">Neutralna biel</string>
+    <string name="device_white_daylight">Światło dzienne</string>
+    <string name="device_white_cool_preset">Chłodna biel</string>
+    <string name="device_light_off">Światło wył.</string>
+    <string name="device_light_effect">Efekt</string>
+    <string name="device_light_white">Światło białe</string>
+    <string name="device_light_color">Światło kolorowe</string>
+    <string name="device_light_playing">Odtwarzanie: %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">Kolor</string>
+    <string name="device_effects">Efekty</string>
+    <string name="device_color_temp">Temperatura barwowa</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K ciepła</string>
+    <string name="device_kelvin_max">6500K chłodna</string>
+    <string name="device_moods">Nastroje</string>
+    <string name="device_stop_effect">Zatrzymaj efekt</string>
+    <string name="device_color_swatch_a11y">Kolor %1$s</string>
+    <string name="device_selected">Wybrano</string>
+    <string name="device_not_selected">Nie wybrano</string>
+    <string name="device_confirm_switch_one_title">Przełączyć %1$s?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">Przełączyć %1$d urządzenie?</item>
+        <item quantity="few">Przełączyć %1$d urządzenia?</item>
+        <item quantity="many">Przełączyć %1$d urządzeń?</item>
+        <item quantity="other">Przełączyć %1$d urządzeń?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">Obejmuje to urządzenie %1$s, które wymaga potwierdzenia przed przełączeniem. Przełączenie go może odciąć zasilanie podłączonych urządzeń.</string>
+    <string name="device_confirm_switch_many_body">Obejmuje to urządzenia %1$s, które wymagają potwierdzenia przed przełączeniem. Przełączenie ich może odciąć zasilanie podłączonych urządzeń.</string>
+    <string name="device_confirm_switch_action">Przełącz</string>
+    <string name="device_cancel">Anuluj</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">przed chwilą</string>
+    <string name="scene_time_minutes_ago">%1$d min temu</string>
+    <string name="scene_time_hours_ago">%1$d godz. temu</string>
+    <string name="scene_time_days_ago">%1$d dni temu</string>
+    <string name="scene_edit_item">Edytuj %1$s</string>
+    <string name="scene_title">Sceny</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">%1$d aktywna · %2$d włączona automatyzacja</item>
+        <item quantity="few">%1$d aktywne · %2$d włączone automatyzacje</item>
+        <item quantity="many">%1$d aktywnych · %2$d włączonych automatyzacji</item>
+        <item quantity="other">%1$d aktywnych · %2$d włączonych automatyzacji</item>
+    </plurals>
+    <string name="scene_empty_title">Nic tu jeszcze nie ma</string>
+    <string name="scene_empty_subtitle">Scena ustawia kilka urządzeń jednocześnie. Automatyzacja robi to za Ciebie, gdy coś się wydarzy.</string>
+    <string name="scene_new_scene">Nowa scena</string>
+    <string name="scene_new_automation">Nowa automatyzacja</string>
+    <string name="scene_new_screen_sync">Nowa Synchronizacja ekranu</string>
+    <string name="scene_sync_active_subtitle">Synchronizacja ekranu · światła podążają za ekranem</string>
+    <string name="scene_sync_inactive_subtitle">Synchronizacja ekranu · odwzorowuje ten ekran na światłach</string>
+    <string name="scene_active">Aktywne</string>
+    <string name="scene_section_automations">Automatyzacje</string>
+    <string name="scene_last_ran">Ostatnie uruchomienie: %1$s</string>
+    <string name="scene_never_ran">Nigdy nie uruchomiono</string>
+    <string name="scene_run_now">Uruchom %1$s teraz</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">Pn</string>
+    <string name="editor_day_tue">Wt</string>
+    <string name="editor_day_wed">Śr</string>
+    <string name="editor_day_thu">Cz</string>
+    <string name="editor_day_fri">Pt</string>
+    <string name="editor_day_sat">So</string>
+    <string name="editor_day_sun">Nd</string>
+    <string name="editor_prop_temperature">Temperatura</string>
+    <string name="editor_prop_humidity">Wilgotność</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">Jasność</string>
+    <string name="editor_prop_power_watts">Moc (W)</string>
+    <string name="editor_removed_device">usunięte urządzenie</string>
+    <string name="editor_rule_device_is_off">%1$s jest wył.</string>
+    <string name="editor_rule_device_is_on">%1$s jest wł.</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s powyżej %3$s</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s poniżej %3$s</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s wynosi %3$s</string>
+    <string name="editor_rule_time_every_day">O %1$s codziennie</string>
+    <string name="editor_rule_time_on_days">O %1$s w: %2$s</string>
+    <string name="editor_sun_event_sunrise">wschód słońca</string>
+    <string name="editor_sun_event_sunset">zachód słońca</string>
+    <string name="editor_rule_sun_at_every_day">O: %1$s codziennie</string>
+    <string name="editor_rule_sun_at_on_days">O: %1$s w: %2$s</string>
+    <string name="editor_rule_sun_before_every_day">%1$d min przed: %2$s codziennie</string>
+    <string name="editor_rule_sun_before_on_days">%1$d min przed: %2$s w: %3$s</string>
+    <string name="editor_rule_sun_after_every_day">%1$d min po: %2$s codziennie</string>
+    <string name="editor_rule_sun_after_on_days">%1$d min po: %2$s w: %3$s</string>
+    <string name="editor_rule_power_above">%1$s zużywa więcej niż %2$s W</string>
+    <string name="editor_rule_device_offline">%1$s przechodzi w tryb offline</string>
+    <string name="editor_rule_device_discovered">Znaleziono nowe urządzenie</string>
+    <string name="editor_rule_time_between">Pomiędzy %1$s a %2$s</string>
+    <string name="editor_cmd_on">wł.</string>
+    <string name="editor_cmd_off">wył.</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">białe %1$s</string>
+    <string name="editor_device_group">Grupa urządzeń</string>
+    <string name="editor_cmd_custom">własne polecenie</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">Powiadom: %1$s</string>
+    <string name="editor_removed_scene">(usunięto)</string>
+    <string name="editor_rule_scene">Uruchom scenę %1$s</string>
+    <string name="editor_rule_delay">Czekaj %1$s s</string>
+    <string name="editor_rule_unknown">Nieznane</string>
+    <string name="editor_trigger_time">Czas</string>
+    <string name="editor_trigger_sun">Wschód / zachód słońca</string>
+    <string name="editor_trigger_device_state">Stan urządzenia</string>
+    <string name="editor_trigger_power">Moc</string>
+    <string name="editor_trigger_offline">Przechodzi w tryb offline</string>
+    <string name="editor_trigger_discovered">Nowe urządzenie</string>
+    <string name="editor_condition_device_state">Stan urządzenia</string>
+    <string name="editor_condition_time_between">Przedział czasowy</string>
+    <string name="editor_action_device">Urządzenie</string>
+    <string name="editor_action_scene">Scena</string>
+    <string name="editor_action_notify">Powiadom</string>
+    <string name="editor_action_delay">Czekaj</string>
+    <string name="editor_add">Dodaj</string>
+    <string name="editor_field_device">Urządzenie</string>
+    <string name="editor_sun_sunrise">Wschód słońca</string>
+    <string name="editor_sun_sunset">Zachód słońca</string>
+    <string name="editor_sun_after">Po</string>
+    <string name="editor_sun_before">Przed</string>
+    <string name="editor_field_minutes">Minuty</string>
+    <string name="editor_sun_supporting_sunrise">Puste pole uruchamia o wschodzie słońca. Wymaga ustawienia lokalizacji domu w Ustawieniach.</string>
+    <string name="editor_sun_supporting_sunset">Puste pole uruchamia o zachodzie słońca. Wymaga ustawienia lokalizacji domu w Ustawieniach.</string>
+    <string name="editor_every_day">Codziennie</string>
+    <string name="editor_chosen_days">Tylko w wybrane dni</string>
+    <string name="editor_field_is">Jest</string>
+    <string name="editor_state_on">Wł.</string>
+    <string name="editor_state_off">Wył.</string>
+    <string name="editor_compare_above">Powyżej</string>
+    <string name="editor_compare_below">Poniżej</string>
+    <string name="editor_field_value">Wartość</string>
+    <string name="editor_field_watts">Waty</string>
+    <string name="editor_time_from">Od</string>
+    <string name="editor_time_until">Do</string>
+    <string name="editor_power_turn_on">Włącz</string>
+    <string name="editor_power_turn_off">Wyłącz</string>
+    <string name="editor_power_leave">Pozostaw zasilanie</string>
+    <string name="editor_set_brightness">Ustaw jasność</string>
+    <string name="editor_set_brightness_value">Ustaw jasność %1$d%%</string>
+    <string name="editor_field_scene">Scena</string>
+    <string name="editor_field_title">Tytuł</string>
+    <string name="editor_field_message">Wiadomość</string>
+    <string name="editor_field_seconds">Sekundy</string>
+    <string name="editor_remove_rule">Usuń: %1$s</string>
+    <string name="editor_style_vivid">Żywy</string>
+    <string name="editor_style_dominant">Dominujący</string>
+    <string name="editor_style_average">Średnia</string>
+    <string name="editor_new_screen_sync">Nowa Synchronizacja ekranu</string>
+    <string name="editor_new_scene">Nowa scena</string>
+    <string name="editor_edit_scene">Edytuj scenę</string>
+    <string name="editor_delete">Usuń</string>
+    <string name="editor_field_name">Nazwa</string>
+    <string name="editor_sync_lights_title">Światła podążające za ekranem</string>
+    <string name="editor_sync_no_lights">W Twoim domu nie ma jeszcze żadnych świateł.</string>
+    <string name="editor_sync_color_title">Kolor</string>
+    <string name="editor_style_vivid_desc">Najmocniejszy kolor na ekranie.</string>
+    <string name="editor_style_dominant_desc">Najczęstszy kolor.</string>
+    <string name="editor_style_average_desc">Średnia z całego obrazu.</string>
+    <string name="editor_region_full">Cały ekran</string>
+    <string name="editor_region_edges">Tylko krawędzie</string>
+    <string name="editor_sync_dim_dark">Przyciemniaj przy ciemnych scenach</string>
+    <string name="editor_sync_restore_lights">Przywróć światła po zatrzymaniu</string>
+    <string name="editor_actions_title">Akcje</string>
+    <string name="editor_add_action">Dodaj akcję</string>
+    <string name="editor_save">Zapisz</string>
+    <string name="editor_delete_confirm_title">Usunąć %1$s?</string>
+    <string name="editor_delete_scene_body">Automatyzacje uruchamiające tę scenę pominą ją.</string>
+    <string name="editor_new_automation">Nowa automatyzacja</string>
+    <string name="editor_edit_automation">Edytuj automatyzację</string>
+    <string name="editor_field_description_optional">Opis (opcjonalnie)</string>
+    <string name="editor_enabled">Włączona</string>
+    <string name="editor_triggers_title">Gdy wydarzy się którekolwiek z poniższych</string>
+    <string name="editor_add_trigger">Dodaj wyzwalacz</string>
+    <string name="editor_conditions_title">Tylko jeśli spełnione są wszystkie warunki</string>
+    <string name="editor_add_condition">Dodaj warunek</string>
+    <string name="editor_do_this_title">Wykonaj</string>
+    <string name="editor_delete_automation_body">Przestanie działać.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">Na żywo</string>
+    <string name="analytics_range_hour">1 min</string>
+    <string name="analytics_range_day">Dzień</string>
+    <string name="analytics_range_week">Tydzień</string>
+    <string name="analytics_range_month">Miesiąc</string>
+    <string name="analytics_bucket_5s">5 sekund</string>
+    <string name="analytics_bucket_minute">minutę</string>
+    <string name="analytics_bucket_hour">godzinę</string>
+    <string name="analytics_bucket_day">dzień</string>
+    <string name="analytics_title">Statystyki</string>
+    <string name="analytics_subtitle_power">Zużycie i koszt energii</string>
+    <string name="analytics_subtitle_air">Jakość powietrza i oczyszczacze</string>
+    <string name="analytics_electricity_tariff">Taryfa energii elektrycznej</string>
+    <string name="analytics_tab_electricity">Energia elektryczna</string>
+    <string name="analytics_tab_air">Jakość powietrza</string>
+    <string name="analytics_no_energy_title">Brak danych o energii</string>
+    <string name="analytics_no_energy_subtitle">Odczyty pojawią się minutę po tym, jak gniazdko lub przełącznik z pomiarem przejdzie w tryb online.</string>
+    <string name="analytics_using_now">Bieżące zużycie</string>
+    <string name="analytics_projected_cost">Prognoza na ten okres rozliczeniowy: %1$s</string>
+    <string name="analytics_today">Dzisiaj</string>
+    <string name="analytics_today_info">Energia zużyta od północy. Kwota poniżej to szacowany koszt według Twojej taryfy energii elektrycznej.</string>
+    <string name="analytics_this_cycle">Ten okres</string>
+    <string name="analytics_this_cycle_info">Zużyta energia i szacowany dotychczasowy rachunek w bieżącym okresie rozliczeniowym.</string>
+    <string name="analytics_history">Historia</string>
+    <string name="analytics_nothing_recorded">W tym okresie nic jeszcze nie zarejestrowano.</string>
+    <string name="analytics_metric_energy">Energia</string>
+    <string name="analytics_metric_power">Moc</string>
+    <string name="analytics_no_reading">Brak odczytu</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">Średnia moc na %1$s</string>
+    <string name="analytics_chart_energy_used">Zużyta energia na %1$s, łącznie %2$s</string>
+    <string name="analytics_live_caption">Ostatnie 5 minut, odczyt co 5 sekund, gdy ta strona jest otwarta.</string>
+    <string name="analytics_total_caption">Łącznie %1$s · %2$s</string>
+    <string name="analytics_insights">Analizy</string>
+    <string name="analytics_peak_hour">Godzina szczytu</string>
+    <string name="analytics_peak_last_24h">%1$s w ciągu ostatnich 24 godz.</string>
+    <string name="analytics_no_usage_yet">Brak danych o zużyciu</string>
+    <string name="analytics_daily_average">Średnia dzienna</string>
+    <string name="analytics_needs_full_day">Wymaga pełnej doby</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">Z ostatniego %1$d dnia</item>
+        <item quantity="few">Z ostatnich %1$d dni</item>
+        <item quantity="many">Z ostatnich %1$d dni</item>
+        <item quantity="other">Z ostatnich %1$d dni</item>
+    </plurals>
+    <string name="analytics_today_vs_average">Dzisiaj vs średnia</string>
+    <string name="analytics_above_usual_day">Powyżej typowego dziennego zużycia</string>
+    <string name="analytics_below_usual_day">Poniżej typowego dziennego zużycia</string>
+    <string name="analytics_about_usual_day">Około typowego dziennego zużycia</string>
+    <string name="analytics_top_device">Najbardziej obciążające urządzenie</string>
+    <string name="analytics_no_metered_device">Brak urządzenia z pomiarem</string>
+    <string name="analytics_billing_cycle">Okres rozliczeniowy</string>
+    <string name="analytics_time_elapsed">Upływ czasu</string>
+    <string name="analytics_day_of_days">Dzień %1$d z %2$d</string>
+    <string name="analytics_budget_used">Wykorzystany budżet</string>
+    <string name="analytics_cost_of_budget">%1$s z %2$s</string>
+    <string name="analytics_spending_ahead">Wydatki wyprzedzają kalendarz.</string>
+    <string name="analytics_budget_hint">Ustaw miesięczny budżet w taryfie, aby śledzić wydatki.</string>
+    <string name="analytics_by_device">Według urządzeń</string>
+    <string name="analytics_device_cycle_summary">%1$s · %2$s w tym okresie</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">Temperatura</string>
+    <string name="analytics_reading_humidity">Wilgotność</string>
+    <string name="analytics_pm25_now">PM2.5 teraz</string>
+    <string name="analytics_air_no_sensor_online">Żaden czujnik nie jest online</string>
+    <string name="analytics_air_status_excellent">Doskonała · czyste powietrze w pomieszczeniu</string>
+    <string name="analytics_air_status_good">Dobra · w zdrowym zakresie</string>
+    <string name="analytics_air_status_moderate">Umiarkowana · włącz oczyszczacz lub przewietrz pokój</string>
+    <string name="analytics_air_status_poor">Zła · włącz oczyszczacze na wysokie obroty i zamknij okna</string>
+    <string name="analytics_purifiers">Oczyszczacze</string>
+    <string name="analytics_running_of_total">%1$d z %2$d</string>
+    <string name="analytics_all_on_standby">Wszystkie w trybie czuwania</string>
+    <string name="analytics_running_now">Teraz pracują</string>
+    <string name="analytics_filter_life">Żywotność filtra</string>
+    <string name="analytics_filter_replace_soon">Wymień wkrótce</string>
+    <string name="analytics_filter_healthy">Dobry</string>
+    <string name="analytics_sensors_average">Średnia z Twoich czujników</string>
+    <string name="analytics_humidity_dry">Sucho</string>
+    <string name="analytics_humidity_humid">Wilgotno</string>
+    <string name="analytics_humidity_comfortable">Komfortowo</string>
+    <string name="analytics_trend">Trend</string>
+    <string name="analytics_no_air_history">Brak historii. Odczyty są zapisywane co minutę, gdy czujnik jest online.</string>
+    <string name="analytics_air_chart_summary">%1$s na %2$s, średnia %3$s</string>
+    <string name="analytics_pm25_dashed_caption">Linie przerywane: 15 µg/m³ cel czystego powietrza, 35 µg/m³ górna granica dobrego powietrza.</string>
+    <string name="analytics_period_5m">5 min</string>
+    <string name="analytics_period_60m">60 min</string>
+    <string name="analytics_period_24h">24 godz.</string>
+    <string name="analytics_period_7d">7 dni</string>
+    <string name="analytics_period_30d">30 dni</string>
+    <string name="analytics_average">Średnia</string>
+    <string name="analytics_air_level_over_period">%1$s w okresie: %2$s</string>
+    <string name="analytics_peak">Szczyt</string>
+    <string name="analytics_value_with_peak">%1$s · szczyt %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">Zużycie wg godzin</string>
+    <string name="analytics_peak_pm25_by_hour">Szczytowe PM2.5 wg godzin</string>
+    <string name="analytics_hour_grid_caption">Jedna komórka na każdą godzinę z ostatnich 7 dni. Intensywniejszy kolor oznacza wyższą wartość.</string>
+    <string name="analytics_hour_grid_summary">%1$s, każda godzina z ostatnich 7 dni</string>
+    <string name="analytics_time_at_each_level">Czas na poszczególnych poziomach</string>
+    <string name="analytics_time_good_air">Czas z dobrym powietrzem</string>
+    <string name="analytics_pm25_good_over_period">PM2.5 na poziomie 35 µg/m³ lub niższym przez %1$s</string>
+    <string name="analytics_sensors">Czujniki</string>
+    <string name="analytics_offline">Offline</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">Ustawienia</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Jasny</string>
+    <string name="settings_theme_dark">Ciemny</string>
+    <string name="settings_role_admin">Administrator</string>
+    <string name="settings_role_member">Członek</string>
+    <string name="settings_role_guest">Gość</string>
+    <string name="settings_avatar">Awatar</string>
+    <string name="settings_section_home">Dom</string>
+    <string name="settings_add_devices">Dodaj urządzenia</string>
+    <string name="settings_add_devices_subtitle">Znajdź i dodaj urządzenia z Twoich kont oraz sieci</string>
+    <string name="settings_plugins">Wtyczki</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue i MQTT</string>
+    <string name="settings_rooms">Pokoje</string>
+    <string name="settings_people">Osoby</string>
+    <string name="settings_people_subtitle">Konta, role i dostęp do pokoi</string>
+    <string name="settings_tariff">Taryfa energii elektrycznej</string>
+    <string name="settings_tariff_subtitle">Stawka, okres rozliczeniowy i budżet</string>
+    <string name="settings_location">Lokalizacja domu</string>
+    <string name="settings_location_subtitle">Dla automatyzacji wschodu i zachodu słońca</string>
+    <string name="settings_notifications">Powiadomienia</string>
+    <string name="settings_notifications_subtitle">Co zgłosił Twój dom</string>
+    <string name="settings_background_alerts">Alerty przy zamkniętej aplikacji</string>
+    <string name="settings_background_alerts_subtitle">Utrzymuje otwarte połączenie z Twoim serwerem. Zużywa niewielką ilość baterii.</string>
+    <string name="settings_section_server">Serwer</string>
+    <string name="settings_server_live_pinned">Na żywo · Przypięty certyfikat</string>
+    <string name="settings_server_live_public">Na żywo · Publiczny certyfikat</string>
+    <string name="settings_server_reconnecting">Ponowne łączenie…</string>
+    <string name="settings_server_live_badge">LIVE</string>
+    <string name="settings_server_cert_public">Szyfrowane · certyfikat zweryfikowany przez publiczny urząd certyfikacji</string>
+    <string name="settings_server_cert_pinned">Szyfrowane · własny certyfikat tego serwera został zatwierdzony przy pierwszym użyciu:</string>
+    <string name="settings_sha256_fingerprint">Odcisk palca SHA-256</string>
+    <string name="settings_fingerprint_clip_label">Odcisk palca</string>
+    <string name="settings_copied">Skopiowano</string>
+    <string name="settings_copy">Kopiuj</string>
+    <string name="settings_change_password">Zmień hasło</string>
+    <string name="settings_change_password_subtitle">Do logowania w Domus</string>
+    <string name="settings_server_addresses">Adresy serwera</string>
+    <string name="settings_server_addresses_subtitle">Sieć domowa i dostęp zdalny</string>
+    <string name="settings_updates">Aktualizacje</string>
+    <string name="settings_updates_subtitle">Wersja %1$s, informacje o wydaniu i kanał</string>
+    <string name="settings_about">O Domus</string>
+    <string name="settings_about_subtitle">Wersja %1$s, twórca i podziękowania</string>
+    <string name="settings_appearance">Wygląd</string>
+    <string name="settings_wallpaper_colors">Kolory tapety</string>
+    <string name="settings_wallpaper_colors_subtitle">Dopasuj aplikację do swojej tapety</string>
+    <string name="settings_section_account">Konto</string>
+    <string name="settings_account_subtitle">Wyloguj się lub użyj innego serwera</string>
+    <string name="settings_sign_out">Wyloguj się</string>
+    <string name="settings_use_another_server">Użyj innego serwera</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">Wstecz</string>
+    <string name="manage_hide_field">Ukryj: %1$s</string>
+    <string name="manage_show_field">Pokaż: %1$s</string>
+    <string name="manage_choose">Wybierz…</string>
+    <string name="manage_close">Zamknij</string>
+    <string name="manage_cancel">Anuluj</string>
+    <string name="manage_save">Zapisz</string>
+    <string name="manage_delete">Usuń</string>
+    <string name="manage_rooms_title">Pokoje</string>
+    <string name="manage_add_room">Dodaj pokój</string>
+    <string name="manage_no_rooms">Brak pokoi</string>
+    <string name="manage_no_rooms_subtitle">Pokoje grupują urządzenia i określają, które z nich widzi członek lub gość.</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d urządzenie</item>
+        <item quantity="few">%1$d urządzenia</item>
+        <item quantity="many">%1$d urządzeń</item>
+        <item quantity="other">%1$d urządzeń</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d pokój</item>
+        <item quantity="few">%1$d pokoje</item>
+        <item quantity="many">%1$d pokoi</item>
+        <item quantity="other">%1$d pokoi</item>
+    </plurals>
+    <string name="manage_room_subtitle">Piętro %1$d · %2$s</string>
+    <string name="manage_new_room">Nowy pokój</string>
+    <string name="manage_edit_room">Edytuj pokój</string>
+    <string name="manage_field_name">Nazwa</string>
+    <string name="manage_field_floor">Piętro</string>
+    <string name="manage_role_admin">Administrator</string>
+    <string name="manage_role_member">Członek</string>
+    <string name="manage_role_guest">Gość</string>
+    <string name="manage_level_none">Brak</string>
+    <string name="manage_level_view">Tylko podgląd</string>
+    <string name="manage_level_control">Sterowanie</string>
+    <string name="manage_level_edit">Edycja</string>
+    <string name="manage_access_to">Dostęp do: %1$s</string>
+    <string name="manage_whole_room_level">Cały pokój · %1$s</string>
+    <string name="manage_room_devices_of_total">%1$d z %2$d urządzeń</string>
+    <string name="manage_no_access">Brak dostępu</string>
+    <string name="manage_close_item">Zamknij %1$s</string>
+    <string name="manage_open_item">Otwórz %1$s</string>
+    <string name="manage_whole_room">Cały pokój</string>
+    <string name="manage_whole_room_hint">Obejmuje także urządzenia dodane później</string>
+    <string name="manage_no_devices_in_room">W tym pokoju nie ma jeszcze żadnych urządzeń.</string>
+    <string name="manage_people_title">Osoby</string>
+    <string name="manage_add_person">Dodaj osobę</string>
+    <string name="manage_access_whole_home">cały dom</string>
+    <string name="manage_access_none">brak dostępu</string>
+    <string name="manage_user_tag_kid">dziecko</string>
+    <string name="manage_user_tag_reset_requested">poproszono o reset hasła</string>
+    <string name="manage_person_title">Osoba</string>
+    <string name="manage_handover_reset_title">Kod resetowania dla %1$s</string>
+    <string name="manage_handover_signin_title">Dane logowania dla %1$s</string>
+    <string name="manage_handover_shown_once">Wyświetlane tylko raz. Wyślij je teraz.</string>
+    <string name="manage_copy">Kopiuj</string>
+    <string name="manage_share">Udostępnij</string>
+    <string name="manage_done">Gotowe</string>
+    <string name="manage_new_person">Nowa osoba</string>
+    <string name="manage_avatar">Awatar</string>
+    <string name="manage_roll">Losuj</string>
+    <string name="manage_field_username">Nazwa użytkownika</string>
+    <string name="manage_username_supporting">Co najmniej 3 znaki</string>
+    <string name="manage_field_email">E-mail</string>
+    <string name="manage_email_taken">Już używany przez inne konto</string>
+    <string name="manage_email_available">Dostępny</string>
+    <string name="manage_email_hint">Wpisz własny lub wygeneruj na podstawie nazwy użytkownika</string>
+    <string name="manage_generate_email">Generuj e-mail @domus.home</string>
+    <string name="manage_section_password">Hasło</string>
+    <string name="manage_kid_account">Konto dziecka</string>
+    <string name="manage_kid_account_on">Ty ustawiasz hasło i pozostaje ono bez zmian.</string>
+    <string name="manage_kid_account_off">Wył.: Domus tworzy hasło, a użytkownik wybiera własne przy pierwszym logowaniu.</string>
+    <string name="manage_field_new_password">Nowe hasło</string>
+    <string name="manage_field_password">Hasło</string>
+    <string name="manage_password_keep_current">Pozostaw puste, aby zachować bieżące</string>
+    <string name="manage_password_min_length">Co najmniej 8 znaków</string>
+    <string name="manage_password_after_saving">Po zapisaniu otrzymasz hasło do skopiowania lub udostępnienia.</string>
+    <string name="manage_reset_requested_notice">%1$s nie pamięta hasła i prosi o jego zresetowanie.</string>
+    <string name="manage_reset_code">Kod resetowania</string>
+    <string name="manage_reset_code_active">Kod jest aktywny do %1$s. Wyłącz, aby go unieważnić.</string>
+    <string name="manage_reset_code_help">Jednorazowy kod wpisywany w sekcji \"Nie pamiętasz hasła?\", aby wybrać nowe hasło. Ważny przez 30 minut.</string>
+    <string name="manage_generate_new_password">Wygeneruj nowe hasło</string>
+    <string name="manage_section_role">Rola</string>
+    <string name="manage_role_admin_desc">Zarządza wszystkim.</string>
+    <string name="manage_role_member_desc">Widzi to, co mu przydzielono. Uprawnienia do sterowania lub edycji (w tym zmiany nazwy urządzenia) ustawia się dla każdego pokoju i urządzenia.</string>
+    <string name="manage_role_guest_desc">Widzi to, co mu przydzielono, nie może tym sterować.</string>
+    <string name="manage_section_access">Dostęp</string>
+    <string name="manage_custom_access">Dostęp niestandardowy</string>
+    <string name="manage_custom_access_off">Wył.: użytkownik ma dostęp do całego domu.</string>
+    <string name="manage_custom_access_on">Ustaw poziom dostępu dla każdego pokoju lub poszczególnych urządzeń w nim.</string>
+    <string name="manage_create_rooms_first">Najpierw utwórz pokoje.</string>
+    <string name="manage_no_room">Brak pokoju</string>
+    <string name="manage_remove_user_title">Usunąć %1$s?</string>
+    <string name="manage_remove_user_text">Użytkownik natychmiast straci dostęp.</string>
+    <string name="manage_remove">Usuń</string>
+    <string name="manage_tariff_title">Taryfa energii elektrycznej</string>
+    <string name="manage_rate_per_kwh">Stawka za kWh</string>
+    <string name="manage_currency">Waluta</string>
+    <string name="manage_currency_supporting">Kod ISO, np. PLN</string>
+    <string name="manage_fixed_monthly_charge">Stała opłata miesięczna</string>
+    <string name="manage_billing_day">Dzień rozliczeniowy</string>
+    <string name="manage_billing_day_supporting">Od 1 do 28</string>
+    <string name="manage_monthly_budget">Budżet miesięczny (opcjonalnie)</string>
+    <string name="manage_usage_slabs">Progi zużycia</string>
+    <string name="manage_slabs_empty">Stawka stała. Dodaj progi, jeśli cena zmienia się wraz ze zużyciem w okresie rozliczeniowym.</string>
+    <string name="manage_slabs_help">Stawka każdego progu obowiązuje do jego limitu. Pozostaw ostatni limit pusty dla wszystkiego powyżej.</string>
+    <string name="manage_up_to_kwh">Do kWh</string>
+    <string name="manage_slab_rate">Stawka</string>
+    <string name="manage_remove_slab">Usuń próg %1$d</string>
+    <string name="manage_add_slab">Dodaj próg</string>
+    <string name="manage_time_of_day">Pora dnia</string>
+    <string name="manage_time_of_day_help">Godziny, w których jednostka kosztuje więcej lub mniej niż powyższa stawka, według zegara domowego. Wpisz różnicę za kWh: 1.1 dla dopłaty szczytowej, -1.5 dla zniżki nocnej.</string>
+    <string name="manage_window_from">Od</string>
+    <string name="manage_window_until">Do</string>
+    <string name="manage_window_per_kwh">Za kWh</string>
+    <string name="manage_remove_time_window">Usuń przedział czasowy %1$d</string>
+    <string name="manage_add_time_window">Dodaj przedział czasowy</string>
+    <string name="manage_server_addresses_title">Adresy serwera</string>
+    <string name="manage_server_addresses_help">Domus używa adresu domowego w Twojej sieci oraz adresu zdalnego w każdym innym miejscu. Pozostajesz zalogowany na obu.</string>
+    <string name="manage_home_network">Sieć domowa</string>
+    <string name="manage_home_network_supporting">Na przykład https://192.168.1.10:8443</string>
+    <string name="manage_remote">Zdalny</string>
+    <string name="manage_remote_supporting">Na przykład nazwa hosta Cloudflare Tunnel</string>
+    <string name="manage_not_set">Nie ustawiono</string>
+    <string name="manage_location_disabled">Lokalizacja jest wyłączona w tym telefonie. Zamiast tego wyszukaj miejsce.</string>
+    <string name="manage_location_not_found">Ten telefon nie mógł ustalić swojego położenia. Zamiast tego wyszukaj miejsce.</string>
+    <string name="manage_location_permission_denied">Bez dostępu do lokalizacji wyszukaj miejsce lub wpisz współrzędne.</string>
+    <string name="manage_location_title">Lokalizacja domu</string>
+    <string name="manage_location_sun_times">Dzisiaj słońce wschodzi o %1$s i zachodzi o %2$s.</string>
+    <string name="manage_location_help">Automatyzacje mogą uruchamiać się o wschodzie i zachodzie słońca, gdy Domus zna przybliżoną lokalizację domu. Dane te pozostają na Twoim serwerze.</string>
+    <string name="manage_use_phone_location">Użyj lokalizacji tego telefonu</string>
+    <string name="manage_find_place">Znajdź miejsce</string>
+    <string name="manage_find_place_supporting">Miejscowość lub miasto</string>
+    <string name="manage_search_place">Szukaj miejsca</string>
+    <string name="manage_no_place_found">Nie znaleziono miejsca o tej nazwie. Spróbuj wpisać najbliższe miasto.</string>
+    <string name="manage_latitude">Szerokość geograficzna</string>
+    <string name="manage_latitude_supporting">Na przykład 52.23</string>
+    <string name="manage_longitude">Długość geograficzna</string>
+    <string name="manage_longitude_supporting">Na przykład 21.01</string>
+    <string name="manage_change_password_title">Zmień hasło</string>
+    <string name="manage_change_password_help">Pozostaniesz zalogowany na tym i każdym innym urządzeniu.</string>
+    <string name="manage_current_password">Bieżące hasło</string>
+    <string name="manage_repeat_new_password">Powtórz nowe hasło</string>
+    <string name="manage_passwords_mismatch">Hasła nie są identyczne</string>
+    <string name="manage_delete_all_notices_title">Usunąć wszystkie powiadomienia?</string>
+    <string name="manage_delete_all_notices_text">Zostaną usunięte na każdym urządzeniu.</string>
+    <string name="manage_delete_all">Usuń wszystkie</string>
+    <string name="manage_notifications_title">Powiadomienia</string>
+    <string name="manage_mark_all_read">Oznacz wszystkie jako przeczytane</string>
+    <string name="manage_no_notices">Nic tu jeszcze nie ma</string>
+    <string name="manage_no_notices_subtitle">Pojawią się tutaj alerty z automatyzacji, nowe urządzenia oraz urządzenia offline.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Kod QR do zeskanowania w aplikacji Smart Life</string>
+    <string name="onboard_region_india">Indie</string>
+    <string name="onboard_region_china">Chiny</string>
+    <string name="onboard_region_europe">Europa</string>
+    <string name="onboard_region_us">Stany Zjednoczone</string>
+    <string name="onboard_region_singapore">Singapur</string>
+    <string name="onboard_region_russia">Rosja</string>
+    <string name="onboard_region_taiwan">Tajwan</string>
+    <string name="onboard_region_india_old">Indie (stary)</string>
+    <string name="onboard_plugins_title">Wtyczki</string>
+    <string name="onboard_local_control">Sterowanie lokalne</string>
+    <string name="onboard_cloud">Chmura</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d urządzenie</item>
+        <item quantity="few">%1$d urządzenia</item>
+        <item quantity="many">%1$d urządzeń</item>
+        <item quantity="other">%1$d urządzeń</item>
+    </plurals>
+    <string name="onboard_account_linked">Połączono</string>
+    <string name="onboard_account_needs_attention">Wymaga uwagi</string>
+    <string name="onboard_unlink_account">Odłącz %1$s</string>
+    <string name="onboard_integration_disabled">Wyłączone w konfiguracji serwera.</string>
+    <string name="onboard_link_account">Połącz konto</string>
+    <string name="onboard_link_another_account">Połącz kolejne konto</string>
+    <string name="onboard_find_devices">Znajdź urządzenia</string>
+    <string name="onboard_unlink_title">Odłączyć %1$s?</string>
+    <string name="onboard_unlink_text">Urządzenia pochodzące z tego konta zostaną usunięte z Domus.</string>
+    <string name="onboard_unlink">Odłącz</string>
+    <string name="onboard_link_integration">Połącz %1$s</string>
+    <string name="onboard_tuya_qr_instructions">Zeskanuj ten kod za pomocą aplikacji Smart Life lub Tuya Smart (przycisk skanowania na ekranie głównym), a następnie potwierdź w aplikacji. Jeśli korzystasz z tego samego telefonu, wyświetl ten kod na innym ekranie.</string>
+    <string name="onboard_waiting_for_scan">Oczekiwanie na zeskanowanie…</string>
+    <string name="onboard_tuya_user_code_instructions">W aplikacji Smart Life otwórz Ja → Ustawienia → Konto i bezpieczeństwo → Kod użytkownika i wpisz ten kod tutaj.</string>
+    <string name="onboard_user_code">Kod użytkownika</string>
+    <string name="onboard_qr_expired">Ten kod QR wygasł. Spróbuj ponownie.</string>
+    <string name="onboard_verify_title">Potwierdź swoją tożsamość</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi wysłało kod weryfikacyjny na Twój telefon. Wpisz go tutaj. Kod wygaśnie po kilku minutach.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi wysłało kod weryfikacyjny na Twój adres e-mail. Wpisz go tutaj. Kod wygaśnie po kilku minutach.</string>
+    <string name="onboard_verification_code">Kod weryfikacyjny</string>
+    <string name="onboard_send_new_code">Wyślij nowy kod</string>
+    <string name="onboard_use_another_account">Użyj innego konta</string>
+    <string name="onboard_tapo_instructions">Zaloguj się na swoje konto TP-Link. Służy ono do komunikacji z urządzeniami Tapo w Twojej sieci.</string>
+    <string name="onboard_xiaomi_instructions">Zaloguj się na swoje konto Xiaomi. Tokeny urządzeń są pobierane jednorazowo; sterowanie pozostaje lokalne. Xiaomi może wysłać Ci kod weryfikacyjny.</string>
+    <string name="onboard_xiaomi_username">E-mail, telefon lub Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">Numer telefonu wymaga kodu kraju, np. +48…</string>
+    <string name="onboard_email_or_username">E-mail lub nazwa użytkownika</string>
+    <string name="onboard_password">Hasło</string>
+    <string name="onboard_server_region">Region serwera</string>
+    <string name="onboard_show_qr_code">Pokaż kod QR</string>
+    <string name="onboard_verify">Zweryfikuj</string>
+    <string name="onboard_continue">Kontynuuj</string>
+    <string name="onboard_link">Połącz</string>
+    <string name="onboard_add_devices_title">Dodaj urządzenia</string>
+    <string name="onboard_scanning">Skanowanie…</string>
+    <string name="onboard_scan_again">Skanuj ponownie</string>
+    <string name="onboard_add_by_address">Dodaj po adresie</string>
+    <string name="onboard_no_new_devices">Brak nowych urządzeń</string>
+    <string name="onboard_no_new_devices_subtitle">Wszystkie znalezione urządzenia są już w Twoim domu. Połącz konto w sekcji Wtyczki, aby znaleźć więcej.</string>
+    <string name="onboard_open_plugins">Otwórz Wtyczki</string>
+    <string name="onboard_found_count">Znaleziono: %1$d</string>
+    <string name="onboard_add">Dodaj</string>
+    <string name="onboard_ignore">Ignoruj</string>
+    <string name="onboard_add_device_title">Dodaj %1$s</string>
+    <string name="onboard_field_name">Nazwa</string>
+    <string name="onboard_field_room">Pokój</string>
+    <string name="onboard_no_room">Brak pokoju</string>
+    <string name="onboard_device_token_optional">Token urządzenia (opcjonalnie)</string>
+    <string name="onboard_device_token_supporting">Wymagany tylko bez połączonego konta Xiaomi</string>
+    <string name="onboard_ip_address">Adres IP</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">Już istnieje</string>
+    <string name="code_error_reference_missing" formatted="false">Wskazany element nie istnieje</string>
+    <string name="code_error_internal" formatted="false">Wewnętrzny błąd serwera</string>
+    <string name="code_error_session_expired" formatted="false">Nieprawidłowa lub wygasła sesja</string>
+    <string name="code_error_admin_required" formatted="false">Wymagane uprawnienia administratora</string>
+    <string name="code_error_guest_no_control" formatted="false">Goście nie mogą sterować urządzeniami</string>
+    <string name="code_error_not_signed_in" formatted="false">Nie zalogowano</string>
+    <string name="code_error_missing_auth" formatted="false">Brak nagłówka Authorization</string>
+    <string name="code_error_account_gone" formatted="false">Konto już nie istnieje</string>
+    <string name="code_error_must_change_password" formatted="false">Najpierw zmień swoje hasło</string>
+    <string name="code_error_device_not_found" formatted="false">Nie znaleziono urządzenia</string>
+    <string name="code_error_empty_command" formatted="false">puste polecenie</string>
+    <string name="code_error_scan_running" formatted="false">Skanowanie już trwa</string>
+    <string name="code_error_discovered_not_found" formatted="false">Nie znaleziono wykrytego urządzenia</string>
+    <string name="code_error_device_already_added" formatted="false">To urządzenie zostało już dodane</string>
+    <string name="code_error_username_too_short" formatted="false">Nazwa użytkownika musi mieć co najmniej 3 znaki</string>
+    <string name="code_error_password_too_short" formatted="false">Hasło musi mieć co najmniej 8 znaków</string>
+    <string name="code_error_setup_already_done" formatted="false">Konfiguracja została już ukończona</string>
+    <string name="code_error_invalid_credentials" formatted="false">Nieprawidłowa nazwa użytkownika lub hasło</string>
+    <string name="code_error_invalid_reset_code" formatted="false">Ten kod jest nieprawidłowy lub wygasł. Poproś administratora o nowy.</string>
+    <string name="code_error_wrong_current_password" formatted="false">Bieżące hasło jest nieprawidłowe</string>
+    <string name="code_error_same_password" formatted="false">Wybierz hasło inne niż dotychczasowe</string>
+    <string name="code_error_avatar_too_long" formatted="false">Ciąg znaków awatara jest za długi</string>
+    <string name="code_error_name_required" formatted="false">Nazwa jest wymagana</string>
+    <string name="code_error_trigger_required" formatted="false">Dodaj co najmniej jeden wyzwalacz</string>
+    <string name="code_error_action_required" formatted="false">Dodaj co najmniej jedną akcję</string>
+    <string name="code_error_sun_offset_range" formatted="false">Wschód i zachód słońca można przesunąć o maksymalnie 6 godzin</string>
+    <string name="code_error_automation_not_found" formatted="false">Nie znaleziono automatyzacji</string>
+    <string name="code_error_cannot_edit_device" formatted="false">Nie możesz edytować tego urządzenia</string>
+    <string name="code_error_admin_only_move_room" formatted="false">Tylko administrator może przenieść urządzenie do innego pokoju</string>
+    <string name="code_error_name_empty" formatted="false">Nazwa nie może być pusta</string>
+    <string name="code_error_view_only_device" formatted="false">Możesz przeglądać to urządzenie, ale nie możesz nim sterować</string>
+    <string name="code_error_view_only_devices" formatted="false">Możesz przeglądać te urządzenia, ale nie możesz nimi sterować</string>
+    <string name="code_error_negative_rate" formatted="false">Stawki nie mogą być ujemne</string>
+    <string name="code_error_invalid_billing_day" formatted="false">Dzień rozliczeniowy musi mieścić się w przedziale od 1 do 28</string>
+    <string name="code_error_invalid_currency" formatted="false">Waluta musi być 3-literowym kodem ISO</string>
+    <string name="code_error_slab_order" formatted="false">Każdy próg musi kończyć się powyżej poprzedniego</string>
+    <string name="code_error_slab_open_ended" formatted="false">Tylko ostatni próg może nie mieć górnego limitu</string>
+    <string name="code_error_tou_format" formatted="false">Przedziały czasowe wymagają podania początku i końca w formacie HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">Przedział czasowy nie może zaczynać się i kończyć o tej samej godzinie</string>
+    <string name="code_error_tou_overlap" formatted="false">Przedziały czasowe nie mogą się nakładać</string>
+    <string name="code_error_group_not_found" formatted="false">Nie znaleziono grupy</string>
+    <string name="code_error_account_not_found" formatted="false">Nie znaleziono konta</string>
+    <string name="code_error_tuya_disabled" formatted="false">Integracja Tuya jest wyłączona</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Wprowadź Kod użytkownika z aplikacji Smart Life</string>
+    <string name="code_error_credentials_required" formatted="false">Wymagany jest adres e-mail i hasło</string>
+    <string name="code_error_verification_expired" formatted="false">Weryfikacja wygasła; zaloguj się ponownie</string>
+    <string name="code_error_invalid_port" formatted="false">Port musi być liczbą</string>
+    <string name="code_error_broker_required" formatted="false">Wprowadź adres brokera</string>
+    <string name="code_error_hue_disabled" formatted="false">Integracja Philips Hue jest wyłączona</string>
+    <string name="code_error_room_name_required" formatted="false">Nazwa pokoju jest wymagana</string>
+    <string name="code_error_room_not_found" formatted="false">Nie znaleziono pokoju</string>
+    <string name="code_error_sync_lights_required" formatted="false">Wybierz co najmniej jedno światło do synchronizacji</string>
+    <string name="code_error_scene_not_found" formatted="false">Nie znaleziono sceny</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">Synchronizacja ekranu wymaga udostępnienia ekranu. Uruchom ją z aplikacji Domus na urządzeniu wyświetlającym treść.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">Wyszukiwanie miejsc jest niedostępne. Wprowadź zamiast tego szerokość i długość geograficzną.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">Szerokość geograficzna musi wynosić od -90 do 90, a długość od -180 do 180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">Wszystkie proponowane adresy dla tej nazwy użytkownika są zajęte</string>
+    <string name="code_error_invalid_role" formatted="false">rola musi mieć wartość admin, member lub guest</string>
+    <string name="code_error_kid_password_required" formatted="false">Konto dziecka wymaga hasła</string>
+    <string name="code_error_email_taken" formatted="false">Ten adres e-mail jest już używany przez inne konto</string>
+    <string name="code_error_user_not_found" formatted="false">Nie znaleziono użytkownika</string>
+    <string name="code_error_last_admin" formatted="false">Musi istnieć co najmniej jeden administrator</string>
+    <string name="code_error_cannot_delete_self" formatted="false">Nie możesz usunąć własnego konta</string>
+    <string name="code_error_hue_press_button" formatted="false">Naciśnij okrągły przycisk na mostku Hue, a następnie połącz ponownie w ciągu 30 sekund</string>
+    <string name="code_error_hue_not_found" formatted="false">Nie znaleziono mostka Hue; wprowadź jego adres IP</string>
+    <string name="code_error_tuya_device_gone" formatted="false">urządzenie nie znajduje się już w Smart Life</string>
+    <string name="code_error_device_token_required" formatted="false">wymagany jest token urządzenia</string>
+    <string name="code_error_hue_link_expired" formatted="false">Uwierzytelnianie nie powiodło się: mostek Hue nie akceptuje już tego połączenia; połącz go ponownie</string>
+    <string name="code_error_hue_removed" formatted="false">Uwierzytelnianie nie powiodło się: mostek Hue został usunięty</string>
+    <string name="code_error_mqtt_removed" formatted="false">Uwierzytelnianie nie powiodło się: broker MQTT został usunięty</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">Uwierzytelnianie nie powiodło się: urządzenie odrzuciło e-mail/hasło Twojego konta TP-Link</string>
+    <string name="code_error_tapo_account_required" formatted="false">Uwierzytelnianie nie powiodło się: dodaj swoje konto TP-Link, aby sterować urządzeniami Tapo</string>
+    <string name="code_error_tapo_removed" formatted="false">Uwierzytelnianie nie powiodło się: konto TP-Link zostało usunięte</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">Uwierzytelnianie nie powiodło się: Xiaomi wymaga kodu captcha. Zaloguj się raz w aplikacji Mi Home lub przeglądarce, a następnie spróbuj ponownie</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">Uwierzytelnianie nie powiodło się: nieprawidłowa nazwa użytkownika lub hasło Xiaomi</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">Uwierzytelnianie nie powiodło się: nieprawidłowy lub wygasły kod weryfikacyjny</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">Uwierzytelnianie nie powiodło się: Xiaomi nie zaakceptowało kodu</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">Uwierzytelnianie nie powiodło się: sesja Xiaomi wygasła</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">Uwierzytelnianie nie powiodło się: Xiaomi wymaga kodu weryfikacyjnego; połącz konto ponownie w sekcji Integracje</string>
+    <string name="code_error_unsupported_command" formatted="false">Nieobsługiwane: to urządzenie nie obsługuje tego polecenia</string>
+    <string name="code_error_unsupported_effect" formatted="false">Nieobsługiwane: to światło nie może odtworzyć tego efektu</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">Nieobsługiwane: ten model Xiaomi nie ma specyfikacji MIoT</string>
+    <string name="code_error_rate_limited_one" formatted="false">Zbyt wiele błędnych haseł. Spróbuj ponownie za {count} minutę.</string>
+    <string name="code_error_rate_limited_other" formatted="false">Zbyt wiele błędnych haseł. Spróbuj ponownie za {count} minut.</string>
+    <string name="code_error_integration_disabled" formatted="false">integracja \'{integration}\' nie jest włączona</string>
+    <string name="code_error_invalid_time" formatted="false">Nieprawidłowy czas \'{time}\', użyj formatu HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">nieprawidłowe akcje: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">region musi być jednym z: {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">Nieprawidłowe ustawienia Synchronizacji ekranu: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">Nieznany typ sceny \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" nie jest adresem serwera</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">Uwierzytelnianie nie powiodło się: Xiaomi nie mogło wysłać kodu weryfikacyjnego: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">Uwierzytelnianie nie powiodło się: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">Nieobsługiwane: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">Potwierdź przełączenie {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">Dodano nowe urządzenie</string>
+    <string name="code_notification_device_added" formatted="false">Znaleziono i automatycznie dodano urządzenie {name} ({integration})</string>
+    <string name="code_notification_device_found_title" formatted="false">Znaleziono nowe urządzenie</string>
+    <string name="code_notification_device_found" formatted="false">Urządzenie {name} ({integration}) jest gotowe do dodania</string>
+    <string name="code_notification_password_reset_title" formatted="false">Poproszono o zresetowanie hasła</string>
+    <string name="code_notification_password_reset" formatted="false">Użytkownik {username} zapomniał hasła. Administrator może przekazać mu kod resetowania w Ustawieniach, w sekcji Osoby i dostęp.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">Automatyzacja \"{name}\" napotkała problemy</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

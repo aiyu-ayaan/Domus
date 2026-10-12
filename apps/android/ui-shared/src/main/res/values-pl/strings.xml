@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Koło kolorów</string>
+    <string name="ui_expanded">Rozwinięto</string>
+    <string name="ui_collapsed">Zwinięto</string>
+    <string name="ui_collapse">Zwiń</string>
+    <string name="ui_expand">Rozwiń</string>
+</resources>
