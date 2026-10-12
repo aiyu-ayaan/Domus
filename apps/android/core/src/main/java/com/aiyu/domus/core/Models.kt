@@ -298,11 +298,28 @@ data class EnergyOverview(
 )
 
 @Serializable
-data class EnergyPoint(val t: String, val kwh: Double = 0.0, val cost: Double = 0.0, /** Average measured power; null where nothing was measured. */ val watts: Double? = null)
+data class EnergyPoint(
+    val t: String,
+    val kwh: Double = 0.0,
+    val cost: Double = 0.0,
+    /** Average measured power; null where nothing was measured. */
+    val watts: Double? = null,
+    /** The highest power read in the bucket. Live samples and older servers have none. */
+    @SerialName("peak_watts") val peakWatts: Double? = null,
+)
 
-/** Averages of one hour / day; null where nothing was measured. */
+/** Averages of one bucket; null where nothing was measured. */
 @Serializable
-data class AirPoint(val t: String, val pm25: Double? = null, val temperature: Double? = null, val humidity: Double? = null)
+data class AirPoint(
+    val t: String,
+    val pm25: Double? = null,
+    val temperature: Double? = null,
+    val humidity: Double? = null,
+    /** The highest PM2.5 read in the bucket. Live samples and older servers have none. */
+    @SerialName("pm25_max") val pm25Max: Double? = null,
+    /** Samples at each [AirLevel], in its order; empty for live samples and older servers. */
+    val levels: List<Int> = emptyList(),
+)
 
 @Serializable
 data class ActionResult(val success: Boolean = true, val errors: List<String> = emptyList())

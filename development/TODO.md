@@ -276,5 +276,6 @@ Design: `development/docs/ARCHITECTURE.md` (section 6 "Sampling", "Air quality h
 - [x] Backend: every poll feeds a per-device window; one row a minute with the average and the peak (`peak_watts`, `pm25_max`, migration `0013`)
 - [x] Backend: `/energy/history` and `/air/history` return peaks, air returns the samples per WHO level; new `hours` range, `hour` range for air
 - [x] Web: peak line and readout on the trend, 1 min range for air, day-by-hour grid on Energy and Air quality, time at each level
-- [ ] Android: show `pm25_max` / `peak_watts` and offer 1 min for air (the API is additive, the app still shows averages)
+- [x] Android: peak line and readout, 1 min for air, time at each level, day-by-hour grid on both sections (opened on the emulator against a test server)
+- [ ] Android: re-record the baseline profile (`pnpm android:profile`) after the new charts
 - [ ] The home's `peak_watts` adds the devices' peaks per SQL group; store a per-minute home total if it must be exact

@@ -159,8 +159,13 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   `GET /air/history`, insights, purifier tiles, sensors. Charts select a bucket by tap or drag and print its
   value as text. The range picker (`RangePicker` in `Analytics.kt`) is a connected group of `ToggleButton`s:
   every range shows its icon and the chosen one widens to spell its name. Electricity offers Live, 1 min (the last
-  60 minutes, a bucket a minute), Day, Week and Month; air has no 1 min because it is sampled every few
-  minutes. Live is not history: `rememberLive` samples the device state the app already streams every 5
+  60 minutes, a bucket a minute), Day, Week and Month, and so does air. Where the server sends them
+  (`peak_watts`, `pm25_max`), `LineChart` draws the bucket peaks as a fainter line and the readout adds
+  "· peak N"; air's Peak and "Time with good air" facts and the "Time at each level" card come from the
+  peaks and the per-level sample counts (`AirPoint.levels`). Both sections end their charts with `HourGridCard`
+  (`HourGrid` in `Charts.kt`): the server's `hours` range as a day-by-hour grid of the last 7 days, kWh for
+  electricity and peak PM2.5 for air, tap or drag to read a cell. An older server sends none of these and
+  the page falls back to averages. Live is not history: `rememberLive` samples the device state the app already streams every 5
   seconds while the page is open and keeps 5 minutes (power for electricity; PM2.5, temperature and humidity
   for air). History calls send the phone's zone as `tz` and `formatBucket` prints on the phone's clock, so a
   server in UTC never shifts the labels; an hourly bucket reads as its span ("12 am – 1 am").

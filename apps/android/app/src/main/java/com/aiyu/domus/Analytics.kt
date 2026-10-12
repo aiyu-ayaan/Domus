@@ -8,6 +8,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import com.aiyu.domus.ui.components.HourGrid
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Air
@@ -60,7 +65,10 @@ import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.enterStaggered
+import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -69,7 +77,7 @@ fun List<Device>.measuresPower() = any { it.state.watts != null || it.state.toda
 fun List<Device>.measuresAir() = any { it.type == "air_purifier" || it.state.pm25 != null }
 
 // "live" is what the devices report right now, sampled by the app while the page is open.
-// "hour" is the last 60 minutes, one bucket a minute. Air is sampled too coarsely for it.
+// "hour" is the last 60 minutes, one bucket a minute.
 private val Ranges = listOf(
     Triple("live", R.string.analytics_range_live, Icons.Rounded.MonitorHeart),
     Triple("hour", R.string.analytics_range_hour, Icons.Rounded.Schedule),
@@ -182,6 +190,46 @@ private fun ChartAxis(first: String, last: String) {
     }
 }
 
+/**
+ * The last 7 days as a day-by-hour grid of hourly [points] (the server's "hours" range), with the picked
+ * hour's value as text above it. null points are still loading.
+ */
+@Composable
+private fun <T> HourGridCard(title: String, points: List<T>?, time: (T) -> String, value: (T) -> Double?, format: @Composable (Double) -> String, tone: (Double) -> Color, empty: String) {
+    val is24Hour = rememberIs24HourFormat()
+    val c = MaterialTheme.colorScheme
+    SectionTitle(title)
+    ChartCard {
+        if (points == null) { LoadingIndicator(Modifier.align(Alignment.CenterHorizontally)); return@ChartCard }
+        if (points.none { value(it) != null }) { Text(empty, color = c.onSurfaceVariant); return@ChartCard }
+        // The phone's days, in order, each with the point of its 24 hours (a missing hour stays empty).
+        val days = remember(points) {
+            points.mapNotNull { p -> runCatching { OffsetDateTime.parse(time(p)).atZoneSameInstant(ZoneId.systemDefault()) }.getOrNull()?.let { it to p } }
+                .groupBy { it.first.toLocalDate() }.toSortedMap().values
+                .map { day -> List(24) { h -> day.firstOrNull { it.first.hour == h }?.second } }
+        }
+        var picked by remember(points) { mutableStateOf<Pair<Int, Int>?>(null) }
+        // Starts on the latest measured hour.
+        val selected = picked ?: days.indices.reversed().firstNotNullOfOrNull { r -> days[r].indexOfLast { it != null && value(it) != null }.takeIf { it >= 0 }?.let { r to it } }
+        val point = selected?.let { (r, h) -> days.getOrNull(r)?.get(h) }
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(point?.let { stringResource(R.string.analytics_day_hour, formatBucket(time(it), "week", is24Hour), formatBucket(time(it), "day", is24Hour)) } ?: "", style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+            RollingText(point?.let { value(it) }?.let { format(it) } ?: stringResource(R.string.analytics_no_reading), MaterialTheme.typography.titleMedium)
+        }
+        val rowHeight = 22.dp
+        Row {
+            Column(Modifier.width(52.dp)) {
+                days.forEach { day -> Box(Modifier.height(rowHeight), contentAlignment = Alignment.CenterStart) { Text(day.firstNotNullOfOrNull { it }?.let { formatBucket(time(it), "week", is24Hour) } ?: "", style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant, maxLines = 1) } }
+            }
+            HourGrid(days.map { day -> day.map { p -> p?.let(value) } }, selected, { r, h -> picked = r to h }, stringResource(R.string.analytics_hour_grid_summary, title), Modifier.weight(1f).height(rowHeight * days.size), tone)
+        }
+        Row(Modifier.padding(start = 52.dp)) {
+            listOf(0, 6, 12, 18).forEach { h -> Text(LocalTime.of(h, 0).format(DateTimeFormatter.ofPattern(if (is24Hour) "HH:mm" else "h a")), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = c.onSurfaceVariant) }
+        }
+        Text(stringResource(R.string.analytics_hour_grid_caption), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+    }
+}
+
 /** One tab for everything the home measures. Shows Electricity, Air quality, or a switch between them. */
 @Composable
 fun AnalyticsScreen(user: User, onOpenDevice: (String) -> Unit, onEditTariff: () -> Unit) {
@@ -224,9 +272,11 @@ private fun ColumnScope.ElectricitySection() {
     var week by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     var month by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     var hour by remember { mutableStateOf<List<EnergyPoint>?>(null) }
+    var hours by remember { mutableStateOf<List<EnergyPoint>?>(null) }
     LaunchedEffect(energy?.todayKwh) {
         day = repository.energyHistory("day")
         week = repository.energyHistory("week")
+        hours = repository.energyHistory("hours")
     }
     LaunchedEffect(range, energy?.todayKwh) {
         if (range == "month") month = repository.energyHistory("month")
@@ -280,15 +330,19 @@ private fun ColumnScope.ElectricitySection() {
             val point = points[selected]
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                RollingText(if (watts) point.watts?.let(::formatWatts) ?: stringResource(R.string.analytics_no_reading) else stringResource(R.string.analytics_kwh_and_cost, formatKwh(point.kwh), formatMoney(point.cost, currency)), MaterialTheme.typography.titleMedium)
+                val power = point.watts?.let { w -> point.peakWatts?.let { stringResource(R.string.analytics_value_with_peak, formatWatts(w), formatWatts(it)) } ?: formatWatts(w) }
+                RollingText(if (watts) power ?: stringResource(R.string.analytics_no_reading) else stringResource(R.string.analytics_kwh_and_cost, formatKwh(point.kwh), formatMoney(point.cost, currency)), MaterialTheme.typography.titleMedium)
             }
             val per = bucketOf(range)
-            if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, stringResource(R.string.analytics_chart_avg_power, per), Modifier.fillMaxWidth().height(160.dp))
+            if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, stringResource(R.string.analytics_chart_avg_power, per), Modifier.fillMaxWidth().height(160.dp), peaks = points.map { it.peakWatts })
             else BarChart(points.map { it.kwh }, selected, { picked = it }, stringResource(R.string.analytics_chart_energy_used, per, formatKwh(points.sumOf { it.kwh })), Modifier.fillMaxWidth().height(160.dp))
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
             Text(if (isLive) stringResource(R.string.analytics_live_caption) else stringResource(R.string.analytics_total_caption, formatKwh(points.sumOf { it.kwh }), formatMoney(points.sumOf { it.cost }, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
         }
     }
+
+    // An hour without a sample was not measured, which is not the same as using nothing.
+    HourGridCard(stringResource(R.string.analytics_usage_by_hour), hours, { it.t }, { p -> p.kwh.takeIf { it > 0 || p.watts != null } }, { formatKwh(it) }, { c.primary }, stringResource(R.string.analytics_nothing_recorded))
 
     SectionTitle(stringResource(R.string.analytics_insights))
     val peak = day?.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
@@ -389,6 +443,8 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     var reading by rememberSaveable { mutableStateOf("pm25") }
     var history by remember { mutableStateOf<List<AirPoint>?>(null) }
     LaunchedEffect(range, pm?.roundToInt()) { if (range != "live") history = repository.request { it.airHistory(range) } ?: history ?: emptyList() }
+    var hours by remember { mutableStateOf<List<AirPoint>?>(null) }
+    LaunchedEffect(pm?.roundToInt()) { hours = repository.request { it.airHistory("hours") } ?: hours ?: emptyList() }
 
     val level = pm?.let(::airLevel)
     val (tone, onTone) = when (level) {
@@ -435,7 +491,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) }
 
     SectionTitle(stringResource(R.string.analytics_trend))
-    RangePicker(range, Ranges.filter { it.first != "hour" }) { range = it }
+    RangePicker(range, Ranges) { range = it }
     val live = rememberLive { AirPoint(it, pm?.toDouble(), temperature, humidity) }
     val points = if (range == "live") live else history
     // Offer only the readings the home's devices report.
@@ -450,7 +506,8 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
             val selected = (picked ?: points.indexOfLast { it.reading(shown) != null }).coerceIn(0, points.lastIndex)
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(formatBucket(points[selected].t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                RollingText(readingText(shown, points[selected].reading(shown)), MaterialTheme.typography.titleMedium)
+                val text = readingText(shown, points[selected].reading(shown))
+                RollingText(points[selected].pm25Max?.takeIf { shown == "pm25" }?.let { stringResource(R.string.analytics_value_with_peak, text, readingText(shown, it)) } ?: text, MaterialTheme.typography.titleMedium)
             }
             val measured = points.mapNotNull { it.reading(shown) }
             LineChart(
@@ -458,6 +515,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
                 stringResource(R.string.analytics_air_chart_summary, stringResource(Readings.first { it.first == shown }.second), bucketOf(range), readingText(shown, measured.average())),
                 Modifier.fillMaxWidth().height(160.dp),
                 marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
+                peaks = if (shown == "pm25") points.map { it.pm25Max } else emptyList(),
             )
             ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
             if (shown == "pm25") Text(stringResource(R.string.analytics_pm25_dashed_caption), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
@@ -468,16 +526,43 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     if (measuredPm.isNotEmpty()) {
         SectionTitle(stringResource(R.string.analytics_insights))
         val average = measuredPm.map { it.pm25!! }.average()
-        val peak = measuredPm.maxBy { it.pm25!! }
-        val good = measuredPm.count { it.pm25!! <= 35 } * 100 / measuredPm.size
-        val period = stringResource(when (range) { "live" -> R.string.analytics_period_5m; "day" -> R.string.analytics_period_24h; "week" -> R.string.analytics_period_7d; else -> R.string.analytics_period_30d })
+        // The highest single reading, not the highest average: a short spike counts.
+        val peak = measuredPm.maxBy { it.pm25Max ?: it.pm25!! }
+        // Samples per level over the period. A live sample is one reading at its own level.
+        val levels = IntArray(AirLevel.entries.size)
+        measuredPm.forEach { p -> if (p.levels.size == levels.size) p.levels.forEachIndexed { i, n -> levels[i] += n } else levels[airLevel(p.pm25!!.toFloat()).ordinal]++ }
+        val samples = levels.sum().coerceAtLeast(1)
+        val good = (levels[0] + levels[1]) * 100 / samples
+        val period = stringResource(when (range) { "live" -> R.string.analytics_period_5m; "hour" -> R.string.analytics_period_60m; "day" -> R.string.analytics_period_24h; "week" -> R.string.analytics_period_7d; else -> R.string.analytics_period_30d })
         FactRow(
             Triple(stringResource(R.string.analytics_average), "${average.roundToInt()} µg/m³", stringResource(R.string.analytics_air_level_over_period, airLevel(average.toFloat()).text(), period)),
-            Triple(stringResource(R.string.analytics_peak), "${peak.pm25!!.roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
+            Triple(stringResource(R.string.analytics_peak), "${(peak.pm25Max ?: peak.pm25!!).roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
             index = 3,
         )
         FactRow(Triple(stringResource(R.string.analytics_time_good_air), "$good%", stringResource(R.string.analytics_pm25_good_over_period, period)), index = 4)
+
+        SectionTitle(stringResource(R.string.analytics_time_at_each_level))
+        ChartCard {
+            // The same colors as the scale above; each share is also written out below.
+            val colors = listOf(c.primary, c.primary.copy(alpha = 0.6f), c.tertiary, c.error)
+            Row(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                levels.forEachIndexed { i, n -> if (n > 0) Box(Modifier.weight(n.toFloat()).fillMaxHeight().background(colors[i])) }
+            }
+            AirLevel.entries.forEachIndexed { i, level ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.size(8.dp).background(colors[i], CircleShape))
+                    Text(level.text(), Modifier.weight(1f))
+                    Text("${levels[i] * 100 / samples}%", color = c.onSurfaceVariant)
+                }
+            }
+        }
     }
+
+    HourGridCard(
+        stringResource(R.string.analytics_peak_pm25_by_hour), hours, { it.t }, { it.pm25Max ?: it.pm25 }, { readingText("pm25", it) },
+        { when (airLevel(it.toFloat())) { AirLevel.POOR -> c.error; AirLevel.MODERATE -> c.tertiary; else -> c.primary } },
+        stringResource(R.string.analytics_no_air_history),
+    )
 
     if (purifiers.isNotEmpty()) {
         SectionTitle(stringResource(R.string.analytics_purifiers))

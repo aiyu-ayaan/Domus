@@ -2,6 +2,7 @@ package com.aiyu.domus.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -70,14 +72,16 @@ fun BarChart(values: List<Double>, selected: Int, onSelect: (Int) -> Unit, summa
 
 /**
  * Line through the measured buckets; null breaks the line. [marks] are dashed reference levels.
+ * [peaks] is the highest reading of each bucket, drawn as a fainter line above the average.
  * Draws in from the start when the data changes.
  */
 @Composable
-fun LineChart(values: List<Double?>, selected: Int, onSelect: (Int) -> Unit, summary: String, modifier: Modifier = Modifier, marks: List<Double> = emptyList()) {
+fun LineChart(values: List<Double?>, selected: Int, onSelect: (Int) -> Unit, summary: String, modifier: Modifier = Modifier, marks: List<Double> = emptyList(), peaks: List<Double?> = emptyList()) {
     val c = MaterialTheme.colorScheme
     val reveal = rememberReveal(values)
-    val top = ((values.filterNotNull() + marks).maxOrNull() ?: 1.0).coerceAtLeast(1.0) * 1.1
+    val top = ((values.filterNotNull() + peaks.filterNotNull() + marks).maxOrNull() ?: 1.0).coerceAtLeast(1.0) * 1.1
     val path = remember { Path() }
+    val peakPath = remember { Path() }
     Canvas(modifier.semantics { contentDescription = summary }.selectBucket(values.size, onSelect)) {
         if (values.isEmpty()) return@Canvas
         fun x(i: Int) = if (values.size == 1) size.width / 2 else size.width * i / (values.size - 1)
@@ -88,7 +92,13 @@ fun LineChart(values: List<Double?>, selected: Int, onSelect: (Int) -> Unit, sum
             if (v == null) return@forEachIndexed
             if (i > 0 && values[i - 1] != null) path.lineTo(x(i), y(v)) else path.moveTo(x(i), y(v))
         }
+        peakPath.rewind()
+        peaks.forEachIndexed { i, v ->
+            if (v == null) return@forEachIndexed
+            if (i > 0 && peaks[i - 1] != null) peakPath.lineTo(x(i), y(v)) else peakPath.moveTo(x(i), y(v))
+        }
         clipRect(right = size.width * reveal.value.coerceIn(0f, 1f)) {
+            drawPath(peakPath, c.primary.copy(alpha = 0.35f), style = Stroke(1.5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
             drawPath(path, c.primary, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
             // A reading with no neighbors has no line to show it.
             values.forEachIndexed { i, v ->
@@ -99,6 +109,40 @@ fun LineChart(values: List<Double?>, selected: Int, onSelect: (Int) -> Unit, sum
             drawLine(c.outline, Offset(x(selected), 0f), Offset(x(selected), size.height), 1.dp.toPx())
             drawCircle(c.surface, 7.dp.toPx(), Offset(x(selected), y(v)))
             drawCircle(c.primary, 5.dp.toPx(), Offset(x(selected), y(v)))
+        }
+    }
+}
+
+/**
+ * A week as a grid: a row per day, 24 columns of hours, a stronger cell for a higher value. It shows when
+ * in the day something happens, which a line over the same week hides. null is an hour nothing was
+ * measured in. Tap or drag selects a cell; [tone] picks a cell's color from its value.
+ */
+@Composable
+fun HourGrid(rows: List<List<Double?>>, selected: Pair<Int, Int>?, onSelect: (row: Int, hour: Int) -> Unit, summary: String, modifier: Modifier = Modifier, tone: (Double) -> Color) {
+    val c = MaterialTheme.colorScheme
+    val max = rows.flatten().filterNotNull().maxOrNull()?.takeIf { it > 0 } ?: 1.0
+    fun cell(at: Offset, width: Int, height: Int) {
+        if (rows.isNotEmpty()) onSelect((at.y / height * rows.size).toInt().coerceIn(0, rows.lastIndex), (at.x / width * 24).toInt().coerceIn(0, 23))
+    }
+    Canvas(
+        modifier.semantics { contentDescription = summary }
+            .pointerInput(rows.size) { detectTapGestures { cell(it, size.width, size.height) } }
+            .pointerInput(rows.size) { detectDragGestures { change, _ -> cell(change.position, size.width, size.height) } }
+    ) {
+        if (rows.isEmpty()) return@Canvas
+        val gap = 2.dp.toPx()
+        val w = size.width / 24
+        val h = size.height / rows.size
+        val radius = CornerRadius(3.dp.toPx())
+        rows.forEachIndexed { r, hours ->
+            hours.forEachIndexed { col, v ->
+                val at = Offset(w * col + gap / 2, h * r + gap / 2)
+                val cellSize = Size(w - gap, h - gap)
+                drawRoundRect(c.surfaceContainerHighest, at, cellSize, radius)
+                if (v != null) drawRoundRect(tone(v).copy(alpha = 0.15f + 0.85f * (v / max).toFloat().coerceIn(0f, 1f)), at, cellSize, radius)
+                if (selected == r to col) drawRoundRect(c.onSurface, at, cellSize, radius, style = Stroke(1.5.dp.toPx()))
+            }
         }
     }
 }
