@@ -145,6 +145,11 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
 - **Navigation** — `FloatingNavScaffold` is the Rewire bar: a floating pill on phones whose selected tab grows
   into icon + label and which tucks away while scrolling down; a floating rail from 600dp. Tabs switch with
   the M3 fade-through.
+- **Settings on tablets** — from 600dp of content width `SettingsTab` (`SettingsPanes.kt`) shows the list on the
+  left (the open row highlighted) and the page it stands for in a right pane. `PageHost` (`MainScreen.kt`) is
+  the router both the full-screen pages and the pane use; the pane hides the back arrow (`LocalHideBack`) except
+  on a page opened inside another (a person, Acknowledgements). Switching rows fades through, a nested page
+  slides (shared axis X). Narrower windows keep the single list.
 - **Expressive** — `MaterialExpressiveTheme` with `MotionScheme.expressive()` (springs for every component),
   increased corner scale, emphasized type, `MaterialShapes` badges, the morphing brand mark,
   `LoadingIndicator`, `LinearWavyProgressIndicator`, shape-morphing `ToggleButton`, tiles that change color
