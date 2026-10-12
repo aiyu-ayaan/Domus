@@ -214,6 +214,8 @@ database. The full set of diagrams, one per feature, is in
 <p>
   <img src="res/screenshots/android-tablet-home.png" width="49%" />
   <img src="res/screenshots/android-tablet-analytics.png" width="49%" />
+  <img src="res/screenshots/android-tablet-devices.png" width="49%" />
+  <img src="res/screenshots/android-tablet-scenes.png" width="49%" />
   <img src="res/screenshots/android-tablet-settings.png" width="49%" />
 </p>
 
