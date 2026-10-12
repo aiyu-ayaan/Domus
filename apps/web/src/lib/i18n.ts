@@ -20,11 +20,12 @@ import bn from '@/locales/bn.json'
 import ta from '@/locales/ta.json'
 import te from '@/locales/te.json'
 import mr from '@/locales/mr.json'
+import gu from '@/locales/gu.json'
 
 export type MessageKey = keyof typeof en
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.ts` with the same keys and register it here. */
-const catalogs: Record<string, Record<string, string>> = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, zh: zhCN, 'zh-CN': zhCN, 'zh-TW': zhTW, pl, bn, ta, te, mr }
+const catalogs: Record<string, Record<string, string>> = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, zh: zhCN, 'zh-CN': zhCN, 'zh-TW': zhTW, pl, bn, ta, te, mr, gu }
 
 const navLang = (typeof navigator !== 'undefined' && navigator.language) || 'en'
 const language = catalogs[navLang] ? navLang : navLang.split('-')[0] || 'en'

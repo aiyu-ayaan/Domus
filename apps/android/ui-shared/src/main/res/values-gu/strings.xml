@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">રંગ ચક્ર</string>
+    <string name="ui_expanded">વિસ્તૃત</string>
+    <string name="ui_collapsed">સંકુચિત</string>
+    <string name="ui_collapse">સંકુચિત કરો</string>
+    <string name="ui_expand">વિસ્તૃત કરો</string>
+</resources>
