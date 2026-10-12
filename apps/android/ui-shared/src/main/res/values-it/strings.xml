@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Ruota dei colori</string>
+    <string name="ui_expanded">Espanso</string>
+    <string name="ui_collapsed">Compresso</string>
+    <string name="ui_collapse">Comprimi</string>
+    <string name="ui_expand">Espandi</string>
+</resources>
