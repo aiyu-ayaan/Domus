@@ -116,6 +116,7 @@ import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
+import com.aiyu.domus.ui.components.LocalWideScreen
 import com.aiyu.domus.ui.components.enterStaggered
 import com.aiyu.domus.ui.components.pressScale
 import kotlin.math.roundToInt
@@ -191,13 +192,14 @@ fun DeviceTile(device: Device, canControl: Boolean, onOpen: () -> Unit, modifier
     }
 }
 
-/** Two tiles per row. */
+/** Two tiles per row, four across a wide screen. */
 @Composable
 fun DeviceGrid(devices: List<Device>, canControl: Boolean, onOpenDevice: (String) -> Unit, firstIndex: Int = 0) {
-    devices.chunked(2).forEachIndexed { row, pair ->
+    val columns = if (LocalWideScreen.current) 4 else 2
+    devices.chunked(columns).forEachIndexed { row, tiles ->
         Row(Modifier.fillMaxWidth().enterStaggered(firstIndex + row), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            pair.forEach { device -> DeviceTile(device, canControl, { onOpenDevice(device.id) }, Modifier.weight(1f)) }
-            if (pair.size == 1) Spacer(Modifier.weight(1f))
+            tiles.forEach { device -> DeviceTile(device, canControl, { onOpenDevice(device.id) }, Modifier.weight(1f)) }
+            repeat(columns - tiles.size) { Spacer(Modifier.weight(1f)) }
         }
     }
 }

@@ -230,25 +230,42 @@ private fun FloatingNavRail(tabs: List<NavTab>, selected: Int, onSelect: (Int) -
     }
 }
 
+/** True where a screen has room for more than a phone's layout: a tab from 840dp wide. False again inside one of its [SideBySide] columns. */
+val LocalWideScreen = compositionLocalOf { false }
+
 /**
- * Scrolling body of a tab: clear of the status bar and the floating pill, 16dp gutters, and capped at a readable
- * 840dp on wide windows.
+ * Scrolling body of a tab: clear of the status bar and the floating pill, 16dp gutters. Capped at a readable
+ * 840dp, or 1240dp on a wide window, where it sets [LocalWideScreen] so screens spread into columns.
  */
 @Composable
 fun ScreenColumn(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val bottom: Dp = LocalBottomBarInset.current
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        Column(
-            Modifier
-                .widthIn(max = 840.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = bottom + 24.dp)
-                .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            content = content,
-        )
+    BoxWithConstraints(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        val wide = maxWidth >= 840.dp
+        CompositionLocalProvider(LocalWideScreen provides wide) {
+            Column(
+                Modifier
+                    .widthIn(max = if (wide) 1240.dp else 840.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = bottom + 24.dp)
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                content = content,
+            )
+        }
+    }
+}
+
+/** Two columns of a wide screen, each laid out like a phone's (so [LocalWideScreen] is false inside). */
+@Composable
+fun SideBySide(start: @Composable ColumnScope.() -> Unit, end: @Composable ColumnScope.() -> Unit) {
+    CompositionLocalProvider(LocalWideScreen provides false) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp), content = start)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp), content = end)
+        }
     }
 }
