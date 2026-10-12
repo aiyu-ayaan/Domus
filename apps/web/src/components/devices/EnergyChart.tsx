@@ -34,7 +34,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
     return (
       <div>
         <div className="mb-2 flex">{toggle}</div>
-        <TrendChart points={points.map((p) => ({ t: p.t, value: p.watts }))} range={range} unit="W" empty={t('chart.noPower')} height={height} />
+        <TrendChart points={points.map((p) => ({ t: p.t, value: p.watts, peak: p.peak_watts }))} range={range} unit="W" empty={t('chart.noPower')} height={height} />
       </div>
     )
   }

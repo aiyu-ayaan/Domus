@@ -1,22 +1,24 @@
 import { useMemo, useState } from 'react'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarBlank, CalendarDot, CalendarDots, Pulse, Wind, ShieldCheck } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarDot, CalendarDots, Clock, Pulse, Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
 import { TrendChart } from '@/components/devices/TrendChart'
+import { HourGrid } from '@/components/devices/HourGrid'
 import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
 import { t } from '@/lib/i18n'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
-import { airQuality, formatBucket, formatNumber } from '@/lib/format'
+import { airQuality, formatBucket, formatNumber, type Range } from '@/lib/format'
+import type { AirPoint } from '@/lib/types'
 import { cn } from '@/lib/cn'
 
-type Range = 'live' | 'day' | 'week' | 'month'
 const RANGES = [
   { value: 'live' as const, label: 'common.live', icon: Pulse },
+  { value: 'hour' as const, label: 'energy.range.hour', icon: Clock },
   { value: 'day' as const, label: 'energy.range.day', icon: CalendarDot },
   { value: 'week' as const, label: 'energy.range.week', icon: CalendarDots },
   { value: 'month' as const, label: 'energy.range.month', icon: CalendarBlank },
@@ -27,6 +29,15 @@ const READINGS: Record<Reading, { label: string; unit: string; digits: number }>
   temperature: { label: 'reading.temperature', unit: '°C', digits: 1 },
   humidity: { label: 'reading.humidity', unit: '%', digits: 0 },
 }
+
+/** The WHO levels of the scale card, in the order of `AirPoint.levels`. */
+const LEVELS = [
+  { label: 'air.excellent', bar: 'bg-on/60' },
+  { label: 'air.good', bar: 'bg-on' },
+  { label: 'air.moderate', bar: 'bg-warn' },
+  { label: 'air.poor', bar: 'bg-danger' },
+]
+const levelOf = (pm: number) => (pm <= 12 ? 0 : pm <= 35 ? 1 : pm <= 55 ? 2 : 3)
 
 /** Recorded history: the chart, and what it says about the period. */
 function Trend() {
@@ -46,7 +57,8 @@ function Trend() {
     temperature: mean(online.map((d) => d.state.temperature)),
     humidity: mean(online.map((d) => d.state.humidity)),
   }))
-  const data = range === 'live' ? live : history.data ?? []
+  const hours = useQuery({ queryKey: keys.airHistory('hours'), queryFn: () => api.airHistory('hours'), refetchInterval: 300_000 })
+  const data: AirPoint[] = range === 'live' ? live : history.data ?? []
   const isLoading = range !== 'live' && history.isLoading
   // Offer only the readings the home's devices actually report.
   const available = (Object.keys(READINGS) as Reading[]).filter((r) => r === 'pm25' || data.some((p) => p[r] != null))
@@ -55,10 +67,17 @@ function Trend() {
 
   const pm = data.flatMap((p) => (p.pm25 == null ? [] : [p]))
   const average = pm.length ? pm.reduce((s, p) => s + p.pm25!, 0) / pm.length : null
-  const peak = pm.reduce<(typeof pm)[number] | null>((best, p) => (p.pm25! > (best?.pm25 ?? -1) ? p : best), null)
-  const clean = pm.length ? (pm.filter((p) => p.pm25! <= 35).length / pm.length) * 100 : null
+  // The highest single reading, not the highest average: a short spike counts.
+  const top = (p: AirPoint) => p.pm25_max ?? p.pm25!
+  const peak = pm.reduce<AirPoint | null>((best, p) => (best == null || top(p) > top(best) ? p : best), null)
+  // Samples per level over the period. A live sample is one reading at its own level.
+  const levels = [0, 0, 0, 0]
+  pm.forEach((p) => (p.levels ? p.levels.forEach((n, i) => (levels[i] += n)) : levels[levelOf(p.pm25!)]++))
+  const samples = levels.reduce((a, b) => a + b, 0)
+  const share = (n: number) => (samples ? (n / samples) * 100 : 0)
+  const clean = samples ? share(levels[0] + levels[1]) : null
   const when = (ts: string) => formatBucket(ts, range)
-  const lastTitle = range === 'live' ? t('air.last.live') : range === 'day' ? t('air.last.day') : range === 'week' ? t('air.last.week') : t('air.last.month')
+  const lastTitle = range === 'live' ? t('air.last.live') : range === 'hour' ? t('air.last.hour') : range === 'day' ? t('air.last.day') : range === 'week' ? t('air.last.week') : t('air.last.month')
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -79,7 +98,7 @@ function Trend() {
             <Skeleton className="h-[240px]" />
           ) : (
             <TrendChart
-              points={data.map((p) => ({ t: p.t, value: p[shown] }))}
+              points={data.map((p) => ({ t: p.t, value: p[shown], peak: shown === 'pm25' ? p.pm25_max : undefined }))}
               range={range}
               unit={meta.unit}
               digits={meta.digits}
@@ -95,9 +114,48 @@ function Trend() {
         <CardHeader title={lastTitle} />
         <dl className="divide-y divide-border">
           <TrendFact label={t('air.averagePm25')} value={average != null ? `${formatNumber(average, 0)} µg/m³` : '—'} sub={airQuality(average ?? undefined)?.label ?? t('air.noReadingsYet')} />
-          <TrendFact label={t('air.peak')} value={peak ? `${formatNumber(peak.pm25!, 0)} µg/m³` : '—'} sub={peak ? when(peak.t) : t('air.noReadingsYet')} />
+          <TrendFact label={t('air.peak')} value={peak ? `${formatNumber(top(peak), 0)} µg/m³` : '—'} sub={peak ? when(peak.t) : t('air.noReadingsYet')} />
           <TrendFact label={t('air.timeWithGoodAir')} value={clean != null ? `${formatNumber(clean, 0)}%` : '—'} sub={t('air.pm25Below35')} />
         </dl>
+      </Card>
+
+      <Card className="lg:col-span-2">
+        <CardHeader title={t('air.byHour')} />
+        <div className="p-4">
+          {hours.isLoading ? (
+            <Skeleton className="h-40" />
+          ) : (
+            <HourGrid
+              points={(hours.data ?? []).map((p) => ({ t: p.t, value: p.pm25_max ?? p.pm25 }))}
+              format={(v) => `${formatNumber(v, 0)} µg/m³`}
+              tone={(v) => ['bg-fg', 'bg-fg', 'bg-warn', 'bg-danger'][levelOf(v)]}
+              label={t('air.byHour')}
+              empty={t('air.noHistory')}
+            />
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title={t('air.levels')} />
+        <div className="space-y-3 p-4">
+          {/* The same share is written out below, so the bar is decoration for assistive tech. */}
+          <div className="flex h-2 gap-px overflow-hidden rounded-full bg-raised" aria-hidden>
+            {LEVELS.map((l, i) => levels[i] > 0 && <span key={l.label} className={l.bar} style={{ width: `${share(levels[i])}%` }} />)}
+          </div>
+          <dl className="space-y-2 text-label">
+            {LEVELS.map((l, i) => (
+              <div key={l.label} className="flex items-center justify-between">
+                <dt className="flex items-center gap-2">
+                  <span className={cn('h-2 w-2 rounded-full', l.bar)} aria-hidden />
+                  {t(l.label)}
+                </dt>
+                <dd className="tabular text-muted">{samples ? `${formatNumber(share(levels[i]), 0)}%` : '—'}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="border-t border-border pt-3 text-caption text-muted">{lastTitle}</p>
+        </div>
       </Card>
     </div>
   )

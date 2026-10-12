@@ -286,14 +286,19 @@ export interface EnergyPoint {
   cost: number
   /** Average measured power; null where nothing was measured. */
   watts: number | null
+  /** The highest power read in the bucket. Live samples have none. */
+  peak_watts?: number | null
 }
 
-/** Averages of one hour / day; null where nothing was measured. */
+/** Averages of one bucket; null where nothing was measured. */
 export interface AirPoint {
   t: string
   pm25: number | null
   temperature: number | null
   humidity: number | null
+  /** The highest PM2.5 read in the bucket, and its samples per WHO level (excellent, good, moderate, poor). Live samples have neither. */
+  pm25_max?: number | null
+  levels?: number[]
 }
 
 export interface Notification {

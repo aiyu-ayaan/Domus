@@ -6,6 +6,7 @@ import { Segmented } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
+import { HourGrid } from '@/components/devices/HourGrid'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
 import { useIsAdmin } from '@/lib/auth'
@@ -37,6 +38,7 @@ export function EnergyView() {
   // The insights always compare against today's hours and the last 7 days, whatever range the chart shows.
   const day = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
   const week = useQuery({ queryKey: keys.energyHistory('week'), queryFn: () => api.energyHistory('week'), refetchInterval: 60_000 })
+  const hours = useQuery({ queryKey: keys.energyHistory('hours'), queryFn: () => api.energyHistory('hours'), refetchInterval: 300_000 })
 
   if (isLoading || !o) return <Skeleton className="h-64" />
   const currency = o.settings.currency
@@ -70,6 +72,18 @@ export function EnergyView() {
       </Card>
 
       <Insights o={o} day={day.data ?? []} week={week.data ?? []} />
+
+      <Card className="mt-6">
+        <CardHeader title={t('energy.byHour')} />
+        <div className="p-4">
+          {hours.isLoading ? (
+            <Skeleton className="h-40" />
+          ) : (
+            // An hour without a sample was not measured, which is not the same as using nothing.
+            <HourGrid points={(hours.data ?? []).map((p) => ({ t: p.t, value: p.kwh > 0 || p.watts != null ? p.kwh : null }))} format={formatKwh} label={t('energy.byHour')} empty={t('chart.noConsumption')} />
+          )}
+        </div>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader title={t('energy.byDevice')} />

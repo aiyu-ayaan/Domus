@@ -5,6 +5,8 @@ import { bucketOf, formatBucket, formatNumber, type Range } from '@/lib/format'
 export interface TrendPoint {
   t: string
   value: number | null
+  /** The highest reading in the bucket, when the history has it: drawn as a fainter line above the average. */
+  peak?: number | null
 }
 
 /**
@@ -39,11 +41,12 @@ export function TrendChart({
       </div>
     )
   }
-  const max = Math.max(...measured.map((m) => m.value), ...marks.map((m) => m.value)) * 1.1 || 1
+  const peaks = points.flatMap((p, i) => (p.peak == null ? [] : [{ i, value: p.peak }]))
+  const max = Math.max(...measured.map((m) => m.value), ...peaks.map((m) => m.value), ...marks.map((m) => m.value)) * 1.1 || 1
   const x = (i: number) => (points.length === 1 ? 50 : (i / (points.length - 1)) * 100)
   const y = (v: number) => 100 - (v / max) * 100
   // One path segment per run of consecutive measured buckets.
-  const d = measured.map((m, k) => `${k > 0 && measured[k - 1].i === m.i - 1 ? 'L' : 'M'}${x(m.i)},${y(m.value)}`).join(' ')
+  const path = (line: typeof measured) => line.map((m, k) => `${k > 0 && line[k - 1].i === m.i - 1 ? 'L' : 'M'}${x(m.i)},${y(m.value)}`).join(' ')
   const shown = active ?? measured[measured.length - 1].i
   const sel = points[shown]
   const value = (v: number | null) => (v == null ? t('chart.noReading') : `${formatNumber(v, digits)} ${unit}`)
@@ -52,7 +55,10 @@ export function TrendChart({
     <div>
       <div className="mb-3 flex items-baseline justify-between gap-3 text-label" aria-live="polite">
         <span className="text-muted">{label(sel.t)}</span>
-        <span className="font-medium tabular">{value(sel.value)}</span>
+        <span className="font-medium tabular">
+          {value(sel.value)}
+          {sel.peak != null && <span className="font-normal text-muted"> · {t('chart.peak', { value: value(sel.peak) })}</span>}
+        </span>
       </div>
       <div className="relative" style={{ height }}>
         {marks.map((m) => (
@@ -61,7 +67,8 @@ export function TrendChart({
           </div>
         ))}
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-          <path d={d} fill="none" className="stroke-fg/70" strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          {peaks.length > 0 && <path d={path(peaks)} fill="none" className="stroke-fg/25" strokeWidth={1} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />}
+          <path d={path(measured)} fill="none" className="stroke-fg/70" strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
         </svg>
         {sel.value != null && (
           <span className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on" style={{ left: `${x(shown)}%`, top: `${y(sel.value)}%` }} aria-hidden />
