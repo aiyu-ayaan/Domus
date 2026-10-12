@@ -61,11 +61,11 @@ hooks and the brand name show up as false positives. A file is done when only th
 
 | Area | State |
 |---|---|
-| Web catalog + `t()` / `tOr()` | done (1,145 keys in `apps/web/src/locales/en.json`) |
+| Web catalog + `t()` / `tOr()` | done (1,151 keys in `apps/web/src/locales/en.json`) |
 | Web: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview, device drawer / row / charts / light controls, settings | done |
 | Web: Automations, RuleEditor, Energy, Integrations, Air quality, About, Updates, Avatar picker, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` group names, `lib/devices.tsx` | done |
 | Desktop (`apps/desktop/src/main.js`, `updates.js`, `connect.html`, `i18n.js`, `locales/en.json`) | done (24 keys) |
-| Android (`apps/android/app/src/main/res/values/strings.xml`, `I18n.kt`, `core` message codes) | done (868 strings + 8 plurals; `core` stays free of Android resources in signatures via message codes resolved in `:app`) |
+| Android (`apps/android/app/src/main/res/values/strings.xml`, `I18n.kt`, `core` message codes) | done (876 strings + 8 plurals; `core` stays free of Android resources in signatures via message codes resolved in `:app`) |
 | Server message codes (`backend/src/api/error.rs`, `modules/notifications/mod.rs`) | done (`code` + `params` sent alongside `message`; translated in web and Android with fallback to `message`) |
 
 ## 4. Gotchas found while doing it
