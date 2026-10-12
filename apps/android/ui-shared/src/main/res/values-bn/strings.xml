@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">রঙের চাকা</string>
+    <string name="ui_expanded">প্রসারিত</string>
+    <string name="ui_collapsed">সংকুচিত</string>
+    <string name="ui_collapse">সংকুচিত করুন</string>
+    <string name="ui_expand">প্রসারিত করুন</string>
+</resources>
