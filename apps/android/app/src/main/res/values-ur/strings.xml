@@ -1,0 +1,943 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">بہترین</string>
+    <string name="air_good">اچھا</string>
+    <string name="air_moderate">معتدل</string>
+    <string name="air_poor">خراب</string>
+    <string name="channel_stable">مستحکم</string>
+    <string name="channel_beta">بیٹا</string>
+    <string name="channel_alpha">الفا</string>
+    <string name="connect_this_computer">یہ کمپیوٹر</string>
+    <string name="api_untrusted">سرور کا سرٹیفکیٹ قابل اعتماد نہیں ہے۔</string>
+    <string name="api_offline">Domus سرور تک رسائی ممکن نہیں۔ چیک کریں کہ یہ چل رہا ہے۔</string>
+    <string name="api_bad_response">سرور نے ایک ایسا جواب بھیجا ہے جسے ایپ کا یہ ورژن نہیں سمجھتا۔</string>
+    <string name="api_request_failed">درخواست ناکام ہو گئی ({status})</string>
+    <string name="error_no_server">کوئی سرور نہیں</string>
+    <string name="connect_cert_changed">آپ کی منظوری کے بعد سے سرور کا سرٹیفکیٹ تبدیل ہو گیا ہے۔ نئے سرٹیفکیٹ کا جائزہ لینے کے لیے دوبارہ جڑیں۔</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 یا home.example.com جیسا پتہ درج کریں۔ صرف https معاون ہے۔</string>
+    <string name="connect_cert_unreadable">سرور کا سرٹیفکیٹ پڑھا نہیں جا سکا۔</string>
+    <string name="automation_ran">“{name}” چلایا گیا</string>
+    <string name="handover_reset_until">%1$s کے لیے Domus پاس ورڈ ری سیٹ\nکوڈ: %2$s\n\nسائن ان اسکرین پر \"پاس ورڈ بھول گئے؟\" منتخب کریں، اپنا صارف نام اور پھر یہ کوڈ درج کریں۔ یہ %3$s تک، ایک بار کام کرتا ہے۔</string>
+    <string name="handover_reset">%1$s کے لیے Domus پاس ورڈ ری سیٹ\nکوڈ: %2$s\n\nسائن ان اسکرین پر \"پاس ورڈ بھول گئے؟\" منتخب کریں، اپنا صارف نام اور پھر یہ کوڈ درج کریں۔ یہ ایک بار کام کرتا ہے۔</string>
+    <string name="handover_signin_kid">Domus سائن ان\nپتہ: %1$s\nصارف نام: %2$s\nپاس ورڈ: %3$s</string>
+    <string name="handover_signin">Domus سائن ان\nپتہ: %1$s\nصارف نام: %2$s\nپاس ورڈ: %3$s\n\nپہلی بار سائن ان کرنے پر آپ سے اپنا پاس ورڈ منتخب کرنے کو کہا جائے گا۔</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ہوم</string>
+    <string name="nav_devices">آلات</string>
+    <string name="nav_scenes">سینز</string>
+    <string name="nav_analytics">تجزیات</string>
+    <string name="nav_settings">ترتیبات</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">آپ کا پورا گھر، ایک ایپ</string>
+    <string name="connect_intro_1_body">Tuya، Tapo، Xiaomi، Philips Hue اور MQTT سے لائٹس، پلگز، پیوریفائرز اور سینسرز، ایک ہی جگہ پر۔</string>
+    <string name="connect_intro_2_title">ڈیزائن کے لحاظ سے نجی</string>
+    <string name="connect_intro_2_body">Domus انکرپٹڈ کنکشن کے ذریعے صرف آپ کے گھر کے سرور سے بات کرتا ہے۔ کوئی کلاؤڈ اکاؤنٹ نہیں۔</string>
+    <string name="connect_intro_3_title">یہ آپ کا سرور تلاش کر لیتا ہے</string>
+    <string name="connect_intro_3_body">آپ کے Wi‑Fi پر ایپ خود ہی سرور تلاش کر لیتی ہے۔ گھر سے دور ہونے پر، اس کا پتہ درج کریں۔</string>
+    <string name="connect_page_of">صفحہ %2$d میں سے %1$d</string>
+    <string name="connect_skip">چھوڑیں</string>
+    <string name="connect_get_started">شروع کریں</string>
+    <string name="connect_next">آگے</string>
+    <string name="connect_welcome_title">Domus میں خوش آمدید</string>
+    <string name="connect_welcome_subtitle">اس سرور سے جڑیں جو آپ کا گھر چلاتا ہے۔</string>
+    <string name="connect_on_this_network">اس نیٹ ورک پر</string>
+    <string name="connect_looking_for_servers">سرورز تلاش کیے جا رہے ہیں…</string>
+    <string name="connect_no_server_found">کسی سرور نے جواب نہیں دیا۔ چیک کریں کہ یہ فون اسی Wi‑Fi پر ہے جس پر سرور ہے، یا نیچے اس کا پتہ درج کریں۔</string>
+    <string name="connect_scan_again">دوبارہ اسکین کریں</string>
+    <string name="connect_or_enter_address">یا پتہ درج کریں</string>
+    <string name="connect_server_address">سرور کا پتہ</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 یا home.example.com</string>
+    <string name="connect_action">جڑیں</string>
+    <string name="connect_trust_title">کیا اس سرور پر بھروسہ کریں؟</string>
+    <string name="connect_trust_body">%1$s ایک ایسا سرٹیفکیٹ استعمال کرتا ہے جو اس نے خود بنایا ہے، جو کہ گھریلو سرور کے لیے عام بات ہے۔ اس پر صرف تب بھروسہ کریں جب فنگر پرنٹ اس سے مماثل ہو جو سرور شروع ہونے پر پرنٹ کرتا ہے۔</string>
+    <string name="connect_trust_action">بھروسہ کریں</string>
+    <string name="connect_cancel">منسوخ کریں</string>
+    <string name="connect_use_another_server">دوسرا سرور استعمال کریں</string>
+    <string name="connect_unreachable_title">آپ کے گھر تک رسائی ممکن نہیں</string>
+    <string name="connect_try_again">دوبارہ کوشش کریں</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">پاس ورڈ چھپائیں</string>
+    <string name="auth_show_password">پاس ورڈ دکھائیں</string>
+    <string name="auth_username">صارف نام</string>
+    <string name="auth_new_password">نیا پاس ورڈ</string>
+    <string name="auth_password_min_length">کم از کم 8 حروف</string>
+    <string name="auth_confirm_password">پاس ورڈ کی تصدیق کریں</string>
+    <string name="auth_passwords_mismatch">پاس ورڈز مماثل نہیں ہیں</string>
+    <string name="auth_create_admin_title">ایڈمن اکاؤنٹ بنائیں</string>
+    <string name="auth_welcome_back_title">واپسی پر خوش آمدید</string>
+    <string name="auth_create_admin_subtitle">یہ سرور نیا ہے۔ پہلا اکاؤنٹ ہر چیز کا انتظام کرتا ہے۔</string>
+    <string name="auth_welcome_back_subtitle">اپنے گھر میں سائن ان کریں۔</string>
+    <string name="auth_encrypted_connection">کے ساتھ انکرپٹڈ کنکشن</string>
+    <string name="auth_email">ای میل</string>
+    <string name="auth_password">پاس ورڈ</string>
+    <string name="auth_create_account">اکاؤنٹ بنائیں</string>
+    <string name="auth_sign_in">سائن ان کریں</string>
+    <string name="auth_forgot_password">پاس ورڈ بھول گئے؟</string>
+    <string name="auth_forgot_title">اپنا پاس ورڈ بھول گئے ہیں؟</string>
+    <string name="auth_forgot_subtitle">Domus کوئی ای میل نہیں بھیجتا۔ اس کے بجائے اس گھر کے ایڈمنسٹریٹر کو مطلع کیا جاتا ہے، اور وہ آپ کو ایک وقتی کوڈ دیتا ہے۔</string>
+    <string name="auth_ask_admin">ایڈمنسٹریٹر سے پوچھیں</string>
+    <string name="auth_back_to_sign_in">سائن ان پر واپس جائیں</string>
+    <string name="auth_reset_code_title">اپنا ری سیٹ کوڈ درج کریں</string>
+    <string name="auth_reset_code_subtitle">ایڈمنسٹریٹر کو مطلع کر دیا گیا ہے۔ ان سے %1$s کے لیے 8 ہندسوں کا کوڈ مانگیں؛ یہ ایک بار اور 30 منٹ کے لیے کام کرتا ہے۔</string>
+    <string name="auth_reset_code_label">ری سیٹ کوڈ</string>
+    <string name="auth_set_password_sign_in">پاس ورڈ سیٹ کریں اور سائن ان کریں</string>
+    <string name="auth_back">واپس</string>
+    <string name="auth_choose_password_title">اپنا پاس ورڈ منتخب کریں</string>
+    <string name="auth_choose_password_subtitle">خوش آمدید، %1$s۔ جس پاس ورڈ سے آپ نے سائن ان کیا ہے وہ آپ کے لیے بنایا گیا تھا اور کسی اور نے دیکھا ہے۔ جاری رکھنے کے لیے اپنا پاس ورڈ منتخب کریں۔</string>
+    <string name="auth_save_continue">محفوظ کریں اور جاری رکھیں</string>
+    <string name="auth_sign_out">سائن آؤٹ کریں</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">پس منظر کی سرگرمی</string>
+    <string name="service_channel_alerts">گھر کے الرٹس</string>
+    <string name="service_listening_alerts">Domus الرٹس سن رہا ہے</string>
+    <string name="service_screen_sync_title">اسکرین سنک آن ہے</string>
+    <string name="service_screen_sync_body">آپ کی لائٹس اس اسکرین کی پیروی کرتی ہیں</string>
+    <string name="service_stop">روکیں</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (اوتار آرٹ ورک)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (جگہ کی تلاش، آپ کے سرور کے ذریعے پوچھی گئی)</string>
+    <string name="about_lib_home_assistant">Home Assistant (Tuya QR فلو)</string>
+    <string name="about_license_inspiration">تحریک</string>
+    <string name="about_version_unknown">نامعلوم</string>
+    <string name="about_title">Domus کے بارے میں</string>
+    <string name="about_section_app">ایپ</string>
+    <string name="about_version_build">ورژن %1$s · بلڈ %2$d</string>
+    <string name="about_privacy_title">رازداری</string>
+    <string name="about_privacy_subtitle">آپ کے اپنے سرور پر چلتا ہے۔ اسناد وہاں انکرپٹڈ رہتی ہیں۔</string>
+    <string name="about_source_code">سورس کوڈ</string>
+    <string name="about_section_developer">ڈویلپر</string>
+    <string name="about_developer_tagline">ایک ڈویلپر کی طرف سے ڈیزائن اور تیار کردہ۔</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">پورٹ فولیو</string>
+    <string name="about_section_open_source">اوپن سورس</string>
+    <string name="about_acknowledgements">تشکرات</string>
+    <string name="about_acknowledgements_subtitle">وہ لائبریریاں اور پراجیکٹس جن پر Domus بنایا گیا ہے</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s دستیاب ہے</string>
+    <string name="update_download_failed_retry_prompt">ڈاؤن لوڈ ناکام ہو گیا۔ دوبارہ کوشش کریں؟</string>
+    <string name="update_prompt_body">آپ کے پاس %1$s ہے۔ ریلیز نوٹس اور اپ ڈیٹ چینل ترتیبات میں، اپ ڈیٹس کے تحت ہیں۔</string>
+    <string name="update_downloading_percent">%1$d%% ڈاؤن لوڈ ہو رہا ہے</string>
+    <string name="update_action">اپ ڈیٹ کریں</string>
+    <string name="update_later">بعد میں</string>
+    <string name="update_title">اپ ڈیٹس</string>
+    <string name="update_checking">اپ ڈیٹس چیک کیے جا رہے ہیں…</string>
+    <string name="update_check_failed">اپ ڈیٹس چیک نہیں ہو سکے</string>
+    <string name="update_dev_build">ڈویلپمنٹ بلڈ</string>
+    <string name="update_up_to_date">Domus اپ ٹو ڈیٹ ہے</string>
+    <string name="update_download_failed_retry">ڈاؤن لوڈ ناکام ہو گیا۔ دوبارہ کوشش کریں۔</string>
+    <string name="update_check_failed_body">آپ کے پاس %1$s ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="update_dev_build_body">آپ کے پاس %1$s ہے۔ ڈویلپمنٹ بلڈ کو دوبارہ بنا کر اپ ڈیٹ کیا جاتا ہے۔</string>
+    <string name="update_you_have">آپ کے پاس %1$s ہے۔</string>
+    <string name="update_download_install">ڈاؤن لوڈ اور انسٹال کریں</string>
+    <string name="update_check_again">دوبارہ چیک کریں</string>
+    <string name="update_channel">چینل</string>
+    <string name="update_channel_hint">بیٹا اور الفا کو نئے بلڈز پہلے ملتے ہیں، اور ہر مستحکم بلڈ بھی۔</string>
+    <string name="update_whats_new_in">%1$s میں نیا کیا ہے</string>
+    <string name="update_in_this_version">اس ورژن میں</string>
+    <string name="update_loading_notes">ریلیز نوٹس لوڈ ہو رہے ہیں…</string>
+    <string name="update_no_notes">اس ورژن کے لیے کوئی ریلیز نوٹس نہیں ہیں۔</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">روبوٹس</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">مہم جو</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">پکسل آرٹ</string>
+    <string name="avatar_style_fun_emoji">دلچسپ ایموجی</string>
+    <string name="avatar_style_thumbs">انگوٹھے</string>
+    <string name="avatar_style_shapes">شکلیں</string>
+    <string name="avatar_style_rings">حلقے</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">اوتار کو حسب ضرورت بنائیں</string>
+    <string name="avatar_save">محفوظ کریں</string>
+    <string name="avatar_seed_value">سیڈ: %1$s</string>
+    <string name="avatar_randomize">بے ترتیب بنائیں</string>
+    <string name="avatar_roll_seed">سیڈ رول کریں</string>
+    <string name="avatar_roll_seed_action">سیڈ رول کریں</string>
+    <string name="avatar_style_label">اوتار کا انداز</string>
+    <string name="avatar_seed_phrase_label">سیڈ فریز</string>
+    <string name="avatar_seed_phrase_hint">اس اوتار کے انداز کو بدلنے کے لیے کوئی بھی کلیدی لفظ، نام، یا کریکٹر اسٹرنگ درج کریں۔</string>
+    <string name="avatar_seed_label">سیڈ</string>
+    <string name="avatar_apply_avatar">اوتار لاگو کریں</string>
+    <string name="avatar_apply">لاگو کریں</string>
+    <string name="avatar_cancel">منسوخ کریں</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">شب بخیر</string>
+    <string name="home_greeting_morning">صبح بخیر</string>
+    <string name="home_greeting_afternoon">سہ پہر بخیر</string>
+    <string name="home_greeting_evening">شام بخیر</string>
+    <string name="home_got_it">سمجھ گیا</string>
+    <string name="home_about_stat">%1$s کے بارے میں</string>
+    <string name="home_scene_on_hint">آن · بند کرنے کے لیے ٹیپ کریں</string>
+    <string name="home_scene_off_hint">چلانے کے لیے ٹیپ کریں</string>
+    <string name="home_change_avatar">اوتار تبدیل کریں</string>
+    <string name="home_clear_notices_title">کیا تمام اطلاعات حذف کریں؟</string>
+    <string name="home_clear_notices_body">انہیں ہر آلے سے ہٹا دیا جاتا ہے۔</string>
+    <string name="home_delete_all">سب حذف کریں</string>
+    <string name="home_reconnecting">دوبارہ جڑ رہا ہے…</string>
+    <string name="home_devices_on_of_total">%2$d میں سے %1$d آن</string>
+    <string name="home_using_now">اس وقت زیر استعمال</string>
+    <string name="home_using_now_info">آپ کے تمام میٹر والے آلات کی مجموعی لائیو پاور کھپت۔</string>
+    <string name="home_today">آج</string>
+    <string name="home_today_info">آدھی رات سے استعمال ہونے والی توانائی۔ اس کے نیچے دی گئی رقم آپ کی بجلی کی شرح پر تخمینی لاگت ہے۔</string>
+    <string name="home_air_quality">ہوا کا معیار</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">سینز</string>
+    <string name="home_on_right_now">اس وقت آن</string>
+    <string name="home_all_devices">تمام آلات</string>
+    <string name="home_no_devices_title">ابھی کوئی آلات نہیں</string>
+    <string name="home_no_devices_admin">آلات کھولیں اور Tuya، Tapo، Xiaomi، Hue یا MQTT کو لنک کرنے کے لیے + پر ٹیپ کریں۔</string>
+    <string name="home_no_devices_member">ایڈمن سے آلات شامل کرنے یا آپ کو کسی کمرے تک رسائی دینے کے لیے کہیں۔</string>
+    <string name="home_everything_off">سب کچھ بند ہے۔</string>
+    <string name="home_rooms">کمرے</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d آلہ · سب بند</item>
+        <item quantity="other">%1$d آلات · سب بند</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d آلہ · %2$d آن</item>
+        <item quantity="other">%1$d آلات · %2$d آن</item>
+    </plurals>
+    <string name="home_recent_activity">حالیہ سرگرمی</string>
+    <string name="home_see_all">سب دیکھیں</string>
+
+    <!-- Devices -->
+    <string name="device_title">آلات</string>
+    <string name="device_online_of_total">%2$d میں سے %1$d آن لائن</string>
+    <string name="device_add_devices">آلات شامل کریں</string>
+    <string name="device_filter_all">سب</string>
+    <string name="device_category_lights">لائٹس</string>
+    <string name="device_category_power">پاور</string>
+    <string name="device_category_air">ہوا</string>
+    <string name="device_category_climate">آب و ہوا</string>
+    <string name="device_all_rooms">تمام کمرے</string>
+    <string name="device_no_room">کوئی کمرہ نہیں</string>
+    <string name="device_manage_rooms">کمروں کا انتظام کریں</string>
+    <string name="device_empty_filtered_title">یہاں کچھ نہیں ہے</string>
+    <string name="device_empty_filtered_body">کوئی آلہ اس کمرے اور زمرے سے مماثل نہیں ہے۔</string>
+    <string name="device_empty_admin">Tuya، Tapo، Xiaomi، Hue یا MQTT کو لنک کرنے کے لیے + پر ٹیپ کریں اور جو وہ تلاش کریں اسے شامل کریں۔</string>
+    <string name="device_online">آن لائن</string>
+    <string name="device_offline">آف لائن</string>
+    <string name="device_on">آن</string>
+    <string name="device_off">بند</string>
+    <string name="device_leak">رساؤ</string>
+    <string name="device_motion">حرکت</string>
+    <string name="device_motion_detected">پتہ چلا</string>
+    <string name="device_clear">صاف</string>
+    <string name="device_open">کھلا</string>
+    <string name="device_closed">بند</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s پاور</string>
+    <string name="device_refresh_a11y">%1$s کو ریفریش کریں</string>
+    <string name="device_view_only_member">آپ اس آلے کو دیکھ سکتے ہیں لیکن کنٹرول نہیں کر سکتے۔</string>
+    <string name="device_view_only_guest">مہمان آلات دیکھ سکتے ہیں لیکن انہیں کنٹرول نہیں کر سکتے۔</string>
+    <string name="device_brightness">چمک</string>
+    <string name="device_white">سفید</string>
+    <string name="device_white_warm">گرم</string>
+    <string name="device_white_neutral">معتدل</string>
+    <string name="device_white_cool">ٹھنڈا</string>
+    <string name="device_fan_speed">پنکھے کی رفتار</string>
+    <string name="device_mode">موڈ</string>
+    <string name="device_speed">رفتار</string>
+    <string name="device_coverage">کوریج %1$d–%2$d m²</string>
+    <string name="device_reading_power">پاور</string>
+    <string name="device_reading_voltage">وولٹیج</string>
+    <string name="device_reading_current">کرنٹ</string>
+    <string name="device_reading_temperature">درجہ حرارت</string>
+    <string name="device_reading_humidity">نمی</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">فلٹر</string>
+    <string name="device_filter_left">%1$d%% باقی</string>
+    <string name="device_reading_contact">دروازہ یا کھڑکی</string>
+    <string name="device_reading_water">پانی</string>
+    <string name="device_water_dry">خشک</string>
+    <string name="device_reading_alarm">الارم</string>
+    <string name="device_alarm_sounding">بج رہا ہے</string>
+    <string name="device_alarm_quiet">خاموش</string>
+    <string name="device_reading_battery">بیٹری</string>
+    <string name="device_battery_low">کم</string>
+    <string name="device_battery_ok">ٹھیک ہے</string>
+    <string name="device_ask_before_switching">سوئچ کرنے سے پہلے پوچھیں</string>
+    <string name="device_ask_before_switching_desc">کسی بھی ایپ، گروپ یا سین سے اسے آن یا بند کرنے سے پہلے خبردار کرتا ہے</string>
+    <string name="device_rename_or_move">نام بدلیں یا منتقل کریں</string>
+    <string name="device_rename">نام بدلیں</string>
+    <string name="device_remove">ہٹائیں</string>
+    <string name="device_edit_title">آلے میں ترمیم کریں</string>
+    <string name="device_field_name">نام</string>
+    <string name="device_field_room">کمرہ</string>
+    <string name="device_remove_confirm_title">کیا %1$s کو ہٹائیں؟</string>
+    <string name="device_remove_confirm_body">یہ آپ کے گھر اور اس کے سینز سے نکل جاتا ہے۔ آپ اسے آلات شامل کریں سے دوبارہ شامل کر سکتے ہیں۔</string>
+    <string name="device_white_candle">موم بتی</string>
+    <string name="device_white_soft">ہلکا سفید</string>
+    <string name="device_white_neutral_preset">معتدل سفید</string>
+    <string name="device_white_daylight">دن کی روشنی</string>
+    <string name="device_white_cool_preset">ٹھنڈا سفید</string>
+    <string name="device_light_off">لائٹ بند</string>
+    <string name="device_light_effect">اثر</string>
+    <string name="device_light_white">سفید لائٹ</string>
+    <string name="device_light_color">رنگین لائٹ</string>
+    <string name="device_light_playing">%1$s چل رہا ہے</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">رنگ</string>
+    <string name="device_effects">اثرات</string>
+    <string name="device_color_temp">رنگ کا درجہ حرارت</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K گرم</string>
+    <string name="device_kelvin_max">6500K ٹھنڈا</string>
+    <string name="device_moods">موڈز</string>
+    <string name="device_stop_effect">اثر روکیں</string>
+    <string name="device_color_swatch_a11y">رنگ %1$s</string>
+    <string name="device_selected">منتخب کردہ</string>
+    <string name="device_not_selected">منتخب نہیں کیا گیا</string>
+    <string name="device_confirm_switch_one_title">کیا %1$s کو سوئچ کریں؟</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">کیا %1$d آلے کو سوئچ کریں؟</item>
+        <item quantity="other">کیا %1$d آلات کو سوئچ کریں؟</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">اس میں %1$s شامل ہے، جو سوئچ کرنے سے پہلے پوچھتا ہے۔ اسے سوئچ کرنے سے منسلک کسی بھی چیز کی بجلی منقطع ہو سکتی ہے۔</string>
+    <string name="device_confirm_switch_many_body">اس میں %1$s شامل ہیں، جو سوئچ کرنے سے پہلے پوچھتے ہیں۔ انہیں سوئچ کرنے سے منسلک کسی بھی چیز کی بجلی منقطع ہو سکتی ہے۔</string>
+    <string name="device_confirm_switch_action">سوئچ کریں</string>
+    <string name="device_cancel">منسوخ کریں</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">ابھی ابھی</string>
+    <string name="scene_time_minutes_ago">%1$d منٹ پہلے</string>
+    <string name="scene_time_hours_ago">%1$d گھنٹے پہلے</string>
+    <string name="scene_time_days_ago">%1$d دن پہلے</string>
+    <string name="scene_edit_item">%1$s میں ترمیم کریں</string>
+    <string name="scene_title">سینز</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">%1$d فعال · %2$d آٹومیشن آن</item>
+        <item quantity="other">%1$d فعال · %2$d آٹومیشنز آن</item>
+    </plurals>
+    <string name="scene_empty_title">یہاں ابھی کچھ نہیں ہے</string>
+    <string name="scene_empty_subtitle">ایک سین بیک وقت کئی آلات کو سیٹ کرتا ہے۔ جب کچھ ہوتا ہے تو آٹومیشن آپ کے لیے یہ کام کرتی ہے۔</string>
+    <string name="scene_new_scene">نیا سین</string>
+    <string name="scene_new_automation">نئی آٹومیشن</string>
+    <string name="scene_new_screen_sync">نیا اسکرین سنک</string>
+    <string name="scene_sync_active_subtitle">اسکرین سنک · لائٹس اسکرین کی پیروی کرتی ہیں</string>
+    <string name="scene_sync_inactive_subtitle">اسکرین سنک · اس اسکرین کو لائٹس پر منعکس کرتا ہے</string>
+    <string name="scene_active">فعال</string>
+    <string name="scene_section_automations">آٹومیشنز</string>
+    <string name="scene_last_ran">آخری بار چلا %1$s</string>
+    <string name="scene_never_ran">کبھی نہیں چلا</string>
+    <string name="scene_run_now">%1$s کو ابھی چلائیں</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">پیر</string>
+    <string name="editor_day_tue">منگل</string>
+    <string name="editor_day_wed">بدھ</string>
+    <string name="editor_day_thu">جمعرات</string>
+    <string name="editor_day_fri">جمعہ</string>
+    <string name="editor_day_sat">ہفتہ</string>
+    <string name="editor_day_sun">اتوار</string>
+    <string name="editor_prop_temperature">درجہ حرارت</string>
+    <string name="editor_prop_humidity">نمی</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">چمک</string>
+    <string name="editor_prop_power_watts">پاور (W)</string>
+    <string name="editor_removed_device">ایک ہٹایا گیا آلہ</string>
+    <string name="editor_rule_device_is_off">%1$s بند ہے</string>
+    <string name="editor_rule_device_is_on">%1$s آن ہے</string>
+    <string name="editor_rule_device_prop_above">%1$s کا %2$s %3$s سے اوپر</string>
+    <string name="editor_rule_device_prop_below">%1$s کا %2$s %3$s سے نیچے</string>
+    <string name="editor_rule_device_prop_is">%1$s کا %2$s %3$s ہے</string>
+    <string name="editor_rule_time_every_day">ہر روز %1$s بجے</string>
+    <string name="editor_rule_time_on_days">%2$s کو %1$s بجے</string>
+    <string name="editor_sun_event_sunrise">طلوع آفتاب</string>
+    <string name="editor_sun_event_sunset">غروب آفتاب</string>
+    <string name="editor_rule_sun_at_every_day">ہر روز %1$s کے وقت</string>
+    <string name="editor_rule_sun_at_on_days">%2$s کو %1$s کے وقت</string>
+    <string name="editor_rule_sun_before_every_day">ہر روز %2$s سے %1$d منٹ پہلے</string>
+    <string name="editor_rule_sun_before_on_days">%3$s کو %2$s سے %1$d منٹ پہلے</string>
+    <string name="editor_rule_sun_after_every_day">ہر روز %2$s کے %1$d منٹ بعد</string>
+    <string name="editor_rule_sun_after_on_days">%3$s کو %2$s کے %1$d منٹ بعد</string>
+    <string name="editor_rule_power_above">%1$s %2$s W سے زیادہ استعمال کرتا ہے</string>
+    <string name="editor_rule_device_offline">%1$s آف لائن ہو جاتا ہے</string>
+    <string name="editor_rule_device_discovered">ایک نیا آلہ ملا ہے</string>
+    <string name="editor_rule_time_between">%1$s اور %2$s کے درمیان</string>
+    <string name="editor_cmd_on">آن</string>
+    <string name="editor_cmd_off">بند</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">سفید %1$s</string>
+    <string name="editor_device_group">آلات کا گروپ</string>
+    <string name="editor_cmd_custom">حسب ضرورت کمانڈ</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">اطلاع دیں: %1$s</string>
+    <string name="editor_removed_scene">(ہٹایا گیا)</string>
+    <string name="editor_rule_scene">سین %1$s چلائیں</string>
+    <string name="editor_rule_delay">%1$s سیکنڈ انتظار کریں</string>
+    <string name="editor_rule_unknown">نامعلوم</string>
+    <string name="editor_trigger_time">وقت</string>
+    <string name="editor_trigger_sun">طلوع آفتاب / غروب آفتاب</string>
+    <string name="editor_trigger_device_state">آلے کی حالت</string>
+    <string name="editor_trigger_power">پاور</string>
+    <string name="editor_trigger_offline">آف لائن ہو جاتا ہے</string>
+    <string name="editor_trigger_discovered">نیا آلہ</string>
+    <string name="editor_condition_device_state">آلے کی حالت</string>
+    <string name="editor_condition_time_between">ٹائم ونڈو</string>
+    <string name="editor_action_device">آلہ</string>
+    <string name="editor_action_scene">سین</string>
+    <string name="editor_action_notify">اطلاع دیں</string>
+    <string name="editor_action_delay">انتظار کریں</string>
+    <string name="editor_add">شامل کریں</string>
+    <string name="editor_field_device">آلہ</string>
+    <string name="editor_sun_sunrise">طلوع آفتاب</string>
+    <string name="editor_sun_sunset">غروب آفتاب</string>
+    <string name="editor_sun_after">بعد</string>
+    <string name="editor_sun_before">پہلے</string>
+    <string name="editor_field_minutes">منٹ</string>
+    <string name="editor_sun_supporting_sunrise">خالی چھوڑنے پر یہ طلوع آفتاب کے وقت چلتا ہے۔ ترتیبات میں گھر کے مقام کی ضرورت ہوتی ہے۔</string>
+    <string name="editor_sun_supporting_sunset">خالی چھوڑنے پر یہ غروب آفتاب کے وقت چلتا ہے۔ ترتیبات میں گھر کے مقام کی ضرورت ہوتی ہے۔</string>
+    <string name="editor_every_day">ہر روز</string>
+    <string name="editor_chosen_days">صرف منتخب دنوں میں</string>
+    <string name="editor_field_is">ہے</string>
+    <string name="editor_state_on">آن</string>
+    <string name="editor_state_off">بند</string>
+    <string name="editor_compare_above">سے اوپر</string>
+    <string name="editor_compare_below">سے نیچے</string>
+    <string name="editor_field_value">قدر</string>
+    <string name="editor_field_watts">واٹس</string>
+    <string name="editor_time_from">سے</string>
+    <string name="editor_time_until">تک</string>
+    <string name="editor_power_turn_on">آن کریں</string>
+    <string name="editor_power_turn_off">بند کریں</string>
+    <string name="editor_power_leave">پاور چھوڑ دیں</string>
+    <string name="editor_set_brightness">چمک سیٹ کریں</string>
+    <string name="editor_set_brightness_value">چمک %1$d%% سیٹ کریں</string>
+    <string name="editor_field_scene">سین</string>
+    <string name="editor_field_title">عنوان</string>
+    <string name="editor_field_message">پیغام</string>
+    <string name="editor_field_seconds">سیکنڈز</string>
+    <string name="editor_remove_rule">ہٹائیں: %1$s</string>
+    <string name="editor_style_vivid">شوخ</string>
+    <string name="editor_style_dominant">نمایاں</string>
+    <string name="editor_style_average">اوسط</string>
+    <string name="editor_new_screen_sync">نیا اسکرین سنک</string>
+    <string name="editor_new_scene">نیا سین</string>
+    <string name="editor_edit_scene">سین میں ترمیم کریں</string>
+    <string name="editor_delete">حذف کریں</string>
+    <string name="editor_field_name">نام</string>
+    <string name="editor_sync_lights_title">لائٹس جو اسکرین کی پیروی کرتی ہیں</string>
+    <string name="editor_sync_no_lights">آپ کے گھر میں ابھی کوئی لائٹس نہیں ہیں۔</string>
+    <string name="editor_sync_color_title">رنگ</string>
+    <string name="editor_style_vivid_desc">اسکرین پر سب سے گہرا رنگ۔</string>
+    <string name="editor_style_dominant_desc">سب سے عام رنگ۔</string>
+    <string name="editor_style_average_desc">پوری تصویر کا اوسط۔</string>
+    <string name="editor_region_full">پوری اسکرین</string>
+    <string name="editor_region_edges">صرف کنارے</string>
+    <string name="editor_sync_dim_dark">تاریک مناظر کے ساتھ مدہم کریں</string>
+    <string name="editor_sync_restore_lights">رکنے پر لائٹس بحال کریں</string>
+    <string name="editor_actions_title">افعال</string>
+    <string name="editor_add_action">عمل شامل کریں</string>
+    <string name="editor_save">محفوظ کریں</string>
+    <string name="editor_delete_confirm_title">کیا %1$s کو حذف کریں؟</string>
+    <string name="editor_delete_scene_body">وہ آٹومیشنز جو اس سین کو چلاتی ہیں اسے چھوڑ دیں گی۔</string>
+    <string name="editor_new_automation">نئی آٹومیشن</string>
+    <string name="editor_edit_automation">آٹومیشن میں ترمیم کریں</string>
+    <string name="editor_field_description_optional">تفصیل (اختیاری)</string>
+    <string name="editor_enabled">فعال</string>
+    <string name="editor_triggers_title">جب ان میں سے کوئی بھی ہو</string>
+    <string name="editor_add_trigger">ٹریگر شامل کریں</string>
+    <string name="editor_conditions_title">صرف تب جب یہ سب درست ہوں</string>
+    <string name="editor_add_condition">شرط شامل کریں</string>
+    <string name="editor_do_this_title">یہ کریں</string>
+    <string name="editor_delete_automation_body">یہ چلنا بند کر دیتی ہے۔</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">لائیو</string>
+    <string name="analytics_range_hour">1 منٹ</string>
+    <string name="analytics_range_day">دن</string>
+    <string name="analytics_range_week">ہفتہ</string>
+    <string name="analytics_range_month">مہینہ</string>
+    <string name="analytics_bucket_5s">5 سیکنڈ</string>
+    <string name="analytics_bucket_minute">منٹ</string>
+    <string name="analytics_bucket_hour">گھنٹہ</string>
+    <string name="analytics_bucket_day">دن</string>
+    <string name="analytics_title">تجزیات</string>
+    <string name="analytics_subtitle_power">بجلی کا استعمال اور لاگت</string>
+    <string name="analytics_subtitle_air">ہوا کی صحت اور پیوریفائرز</string>
+    <string name="analytics_electricity_tariff">بجلی کا ٹیرف</string>
+    <string name="analytics_tab_electricity">بجلی</string>
+    <string name="analytics_tab_air">ہوا کا معیار</string>
+    <string name="analytics_no_energy_title">ابھی تک توانائی کا کوئی ڈیٹا نہیں ہے</string>
+    <string name="analytics_no_energy_subtitle">میٹرنگ پلگ یا سوئچ کے آن لائن ہونے کے ایک منٹ بعد ریڈنگز ظاہر ہوتی ہیں۔</string>
+    <string name="analytics_using_now">اس وقت زیر استعمال</string>
+    <string name="analytics_projected_cost">اس بلنگ سائیکل میں %1$s ہونے کا امکان ہے</string>
+    <string name="analytics_today">آج</string>
+    <string name="analytics_today_info">آدھی رات سے استعمال ہونے والی توانائی۔ اس کے نیچے دی گئی رقم آپ کی بجلی کی شرح پر تخمینی لاگت ہے۔</string>
+    <string name="analytics_this_cycle">یہ سائیکل</string>
+    <string name="analytics_this_cycle_info">موجودہ بلنگ سائیکل میں اب تک استعمال ہونے والی توانائی اور تخمینی بل۔</string>
+    <string name="analytics_history">سرگزشت</string>
+    <string name="analytics_nothing_recorded">اس مدت میں ابھی تک کچھ ریکارڈ نہیں ہوا۔</string>
+    <string name="analytics_metric_energy">توانائی</string>
+    <string name="analytics_metric_power">پاور</string>
+    <string name="analytics_no_reading">کوئی ریڈنگ نہیں</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">فی %1$s اوسط پاور</string>
+    <string name="analytics_chart_energy_used">فی %1$s استعمال شدہ توانائی، کل %2$s</string>
+    <string name="analytics_live_caption">پچھلے 5 منٹ، جب تک یہ صفحہ کھلا ہے ہر 5 سیکنڈ میں ایک ریڈنگ۔</string>
+    <string name="analytics_total_caption">کل %1$s · %2$s</string>
+    <string name="analytics_insights">بصیرتیں</string>
+    <string name="analytics_peak_hour">مصروف ترین گھنٹہ</string>
+    <string name="analytics_peak_last_24h">پچھلے 24 گھنٹوں میں %1$s</string>
+    <string name="analytics_no_usage_yet">ابھی تک کوئی استعمال نہیں</string>
+    <string name="analytics_daily_average">روزانہ کی اوسط</string>
+    <string name="analytics_needs_full_day">ایک پورے دن کی ضرورت ہے</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">پچھلے %1$d دن میں</item>
+        <item quantity="other">پچھلے %1$d دنوں میں</item>
+    </plurals>
+    <string name="analytics_today_vs_average">آج بمقابلہ اوسط</string>
+    <string name="analytics_above_usual_day">آپ کے عام دن سے زیادہ</string>
+    <string name="analytics_below_usual_day">آپ کے عام دن سے کم</string>
+    <string name="analytics_about_usual_day">آپ کے عام دن کے برابر</string>
+    <string name="analytics_top_device">سرفہرست آلہ</string>
+    <string name="analytics_no_metered_device">کوئی میٹر والا آلہ نہیں</string>
+    <string name="analytics_billing_cycle">بلنگ سائیکل</string>
+    <string name="analytics_time_elapsed">گزرا ہوا وقت</string>
+    <string name="analytics_day_of_days">%2$d میں سے دن %1$d</string>
+    <string name="analytics_budget_used">استعمال شدہ بجٹ</string>
+    <string name="analytics_cost_of_budget">%2$s میں سے %1$s</string>
+    <string name="analytics_spending_ahead">اخراجات کیلنڈر سے آگے چل رہے ہیں۔</string>
+    <string name="analytics_budget_hint">اخراجات کو ٹریک کرنے کے لیے ٹیرف میں ماہانہ بجٹ سیٹ کریں۔</string>
+    <string name="analytics_by_device">آلے کے لحاظ سے</string>
+    <string name="analytics_device_cycle_summary">اس سائیکل میں %1$s · %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">درجہ حرارت</string>
+    <string name="analytics_reading_humidity">نمی</string>
+    <string name="analytics_pm25_now">اس وقت PM2.5</string>
+    <string name="analytics_air_no_sensor_online">کوئی سینسر آن لائن نہیں ہے</string>
+    <string name="analytics_air_status_excellent">بہترین · اندرونی صاف ہوا</string>
+    <string name="analytics_air_status_good">اچھا · صحت مند حد کے اندر</string>
+    <string name="analytics_air_status_moderate">معتدل · پیوریفائر چلائیں یا کمرے میں ہوا آنے دیں</string>
+    <string name="analytics_air_status_poor">خراب · پیوریفائرز کو تیز چلائیں اور کھڑکیاں بند رکھیں</string>
+    <string name="analytics_purifiers">پیوریفائرز</string>
+    <string name="analytics_running_of_total">%2$d میں سے %1$d</string>
+    <string name="analytics_all_on_standby">سب اسٹینڈ بائی پر</string>
+    <string name="analytics_running_now">اس وقت چل رہا ہے</string>
+    <string name="analytics_filter_life">فلٹر کی زندگی</string>
+    <string name="analytics_filter_replace_soon">جلد تبدیل کریں</string>
+    <string name="analytics_filter_healthy">صحت مند</string>
+    <string name="analytics_sensors_average">آپ کے سینسرز کی اوسط</string>
+    <string name="analytics_humidity_dry">خشک</string>
+    <string name="analytics_humidity_humid">نمی والا</string>
+    <string name="analytics_humidity_comfortable">آرام دہ</string>
+    <string name="analytics_trend">رجحان</string>
+    <string name="analytics_no_air_history">ابھی کوئی سرگزشت نہیں ہے۔ سینسر کے آن لائن ہونے پر ہر منٹ ریڈنگ ریکارڈ کی جاتی ہے۔</string>
+    <string name="analytics_air_chart_summary">فی %2$s %1$s، اوسط %3$s</string>
+    <string name="analytics_pm25_dashed_caption">ڈیش والی لائنیں: 15 µg/m³ صاف ہوا کا ہدف، 35 µg/m³ اچھی ہوا کی بالائی حد۔</string>
+    <string name="analytics_period_5m">5 منٹ</string>
+    <string name="analytics_period_60m">60 منٹ</string>
+    <string name="analytics_period_24h">24 گھنٹے</string>
+    <string name="analytics_period_7d">7 دن</string>
+    <string name="analytics_period_30d">30 دن</string>
+    <string name="analytics_average">اوسط</string>
+    <string name="analytics_air_level_over_period">%2$s کے دوران %1$s</string>
+    <string name="analytics_peak">بلند ترین</string>
+    <string name="analytics_value_with_peak">%1$s · بلند ترین %2$s</string>
+    <string name="analytics_day_hour">%1$s، %2$s</string>
+    <string name="analytics_usage_by_hour">گھنٹے کے لحاظ سے استعمال</string>
+    <string name="analytics_peak_pm25_by_hour">گھنٹے کے لحاظ سے بلند ترین PM2.5</string>
+    <string name="analytics_hour_grid_caption">پچھلے 7 دنوں کے ہر گھنٹے کے لیے ایک سیل۔ گہرا سیل زیادہ قدر کو ظاہر کرتا ہے۔</string>
+    <string name="analytics_hour_grid_summary">%1$s، پچھلے 7 دنوں کا ہر گھنٹہ</string>
+    <string name="analytics_time_at_each_level">ہر سطح پر وقت</string>
+    <string name="analytics_time_good_air">اچھی ہوا کے ساتھ وقت</string>
+    <string name="analytics_pm25_good_over_period">%1$s کے دوران PM2.5 35 µg/m³ یا اس سے کم</string>
+    <string name="analytics_sensors">سینسرز</string>
+    <string name="analytics_offline">آف لائن</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">ترتیبات</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">سسٹم</string>
+    <string name="settings_theme_light">لائٹ</string>
+    <string name="settings_theme_dark">ڈارک</string>
+    <string name="settings_role_admin">ایڈمن</string>
+    <string name="settings_role_member">ممبر</string>
+    <string name="settings_role_guest">مہمان</string>
+    <string name="settings_avatar">اوتار</string>
+    <string name="settings_section_home">گھر</string>
+    <string name="settings_add_devices">آلات شامل کریں</string>
+    <string name="settings_add_devices_subtitle">آپ کے اکاؤنٹس اور نیٹ ورک جو پیش کرتے ہیں اسے تلاش کریں اور شامل کریں</string>
+    <string name="settings_plugins">پلگ انز</string>
+    <string name="settings_plugins_subtitle">Tuya، Tapo، Xiaomi، Hue اور MQTT</string>
+    <string name="settings_rooms">کمرے</string>
+    <string name="settings_people">لوگ</string>
+    <string name="settings_people_subtitle">اکاؤنٹس، کردار اور کمرے تک رسائی</string>
+    <string name="settings_tariff">بجلی کا ٹیرف</string>
+    <string name="settings_tariff_subtitle">شرح، بلنگ سائیکل اور بجٹ</string>
+    <string name="settings_location">گھر کا مقام</string>
+    <string name="settings_location_subtitle">طلوع آفتاب اور غروب آفتاب کی آٹومیشنز کے لیے</string>
+    <string name="settings_notifications">اطلاعات</string>
+    <string name="settings_notifications_subtitle">آپ کے گھر نے کیا رپورٹ کیا</string>
+    <string name="settings_background_alerts">ایپ بند ہونے کے دوران الرٹس</string>
+    <string name="settings_background_alerts_subtitle">آپ کے سرور سے کنکشن کھلا رکھتا ہے۔ تھوڑی سی بیٹری استعمال کرتا ہے۔</string>
+    <string name="settings_section_server">سرور</string>
+    <string name="settings_server_live_pinned">لائیو · پن کردہ سرٹیفکیٹ</string>
+    <string name="settings_server_live_public">لائیو · عوامی سرٹیفکیٹ</string>
+    <string name="settings_server_reconnecting">دوبارہ جڑ رہا ہے…</string>
+    <string name="settings_server_live_badge">لائیو</string>
+    <string name="settings_server_cert_public">انکرپٹڈ · عوامی اتھارٹی سے تصدیق شدہ سرٹیفکیٹ</string>
+    <string name="settings_server_cert_pinned">انکرپٹڈ · آپ نے پہلی بار استعمال پر اس سرور کے اپنے سرٹیفکیٹ کو منظور کیا تھا:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 فنگر پرنٹ</string>
+    <string name="settings_fingerprint_clip_label">فنگر پرنٹ</string>
+    <string name="settings_copied">کاپی ہو گیا</string>
+    <string name="settings_copy">کاپی کریں</string>
+    <string name="settings_change_password">پاس ورڈ تبدیل کریں</string>
+    <string name="settings_change_password_subtitle">Domus میں سائن ان کرنے کے لیے</string>
+    <string name="settings_server_addresses">سرور کے پتے</string>
+    <string name="settings_server_addresses_subtitle">گھریلو نیٹ ورک اور ریموٹ رسائی</string>
+    <string name="settings_updates">اپ ڈیٹس</string>
+    <string name="settings_updates_subtitle">ورژن %1$s، ریلیز نوٹس اور چینل</string>
+    <string name="settings_about">Domus کے بارے میں</string>
+    <string name="settings_about_subtitle">ورژن %1$s، ڈویلپر اور تشکرات</string>
+    <string name="settings_appearance">ظاہری شکل</string>
+    <string name="settings_wallpaper_colors">وال پیپر کے رنگ</string>
+    <string name="settings_wallpaper_colors_subtitle">ایپ کو اپنے وال پیپر سے ملائیں</string>
+    <string name="settings_section_account">اکاؤنٹ</string>
+    <string name="settings_account_subtitle">سائن آؤٹ کریں یا دوسرا سرور استعمال کریں</string>
+    <string name="settings_sign_out">سائن آؤٹ کریں</string>
+    <string name="settings_use_another_server">دوسرا سرور استعمال کریں</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">واپس</string>
+    <string name="manage_hide_field">%1$s چھپائیں</string>
+    <string name="manage_show_field">%1$s دکھائیں</string>
+    <string name="manage_choose">منتخب کریں…</string>
+    <string name="manage_close">بند کریں</string>
+    <string name="manage_cancel">منسوخ کریں</string>
+    <string name="manage_save">محفوظ کریں</string>
+    <string name="manage_delete">حذف کریں</string>
+    <string name="manage_rooms_title">کمرے</string>
+    <string name="manage_add_room">کمرہ شامل کریں</string>
+    <string name="manage_no_rooms">ابھی کوئی کمرے نہیں</string>
+    <string name="manage_no_rooms_subtitle">کمرے آلات کا گروپ بناتے ہیں اور طے کرتے ہیں کہ کوئی ممبر یا مہمان کون سے آلات دیکھ سکتا ہے۔</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d آلہ</item>
+        <item quantity="other">%1$d آلات</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d کمرہ</item>
+        <item quantity="other">%1$d کمرے</item>
+    </plurals>
+    <string name="manage_room_subtitle">منزل %1$d · %2$s</string>
+    <string name="manage_new_room">نیا کمرہ</string>
+    <string name="manage_edit_room">کمرے میں ترمیم کریں</string>
+    <string name="manage_field_name">نام</string>
+    <string name="manage_field_floor">منزل</string>
+    <string name="manage_role_admin">ایڈمن</string>
+    <string name="manage_role_member">ممبر</string>
+    <string name="manage_role_guest">مہمان</string>
+    <string name="manage_level_none">کوئی نہیں</string>
+    <string name="manage_level_view">صرف دیکھیں</string>
+    <string name="manage_level_control">کنٹرول</string>
+    <string name="manage_level_edit">ترمیم کریں</string>
+    <string name="manage_access_to">%1$s تک رسائی</string>
+    <string name="manage_whole_room_level">پورا کمرہ · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d میں سے %1$d آلات</string>
+    <string name="manage_no_access">کوئی رسائی نہیں</string>
+    <string name="manage_close_item">%1$s بند کریں</string>
+    <string name="manage_open_item">%1$s کھولیں</string>
+    <string name="manage_whole_room">پورا کمرہ</string>
+    <string name="manage_whole_room_hint">بعد میں شامل کیے جانے والے آلات کو بھی شامل کرتا ہے</string>
+    <string name="manage_no_devices_in_room">اس کمرے میں ابھی کوئی آلہ نہیں ہے۔</string>
+    <string name="manage_people_title">لوگ</string>
+    <string name="manage_add_person">شخص شامل کریں</string>
+    <string name="manage_access_whole_home">پورا گھر</string>
+    <string name="manage_access_none">کوئی رسائی نہیں</string>
+    <string name="manage_user_tag_kid">بچہ</string>
+    <string name="manage_user_tag_reset_requested">پاس ورڈ ری سیٹ کی درخواست کی</string>
+    <string name="manage_person_title">شخص</string>
+    <string name="manage_handover_reset_title">%1$s کے لیے ری سیٹ کوڈ</string>
+    <string name="manage_handover_signin_title">%1$s کے لیے سائن ان کی تفصیلات</string>
+    <string name="manage_handover_shown_once">صرف ایک بار دکھایا گیا۔ اسے ابھی انہیں بھیجیں۔</string>
+    <string name="manage_copy">کاپی کریں</string>
+    <string name="manage_share">شیئر کریں</string>
+    <string name="manage_done">ہو گیا</string>
+    <string name="manage_new_person">نیا شخص</string>
+    <string name="manage_avatar">اوتار</string>
+    <string name="manage_roll">رول کریں</string>
+    <string name="manage_field_username">صارف نام</string>
+    <string name="manage_username_supporting">کم از کم 3 حروف</string>
+    <string name="manage_field_email">ای میل</string>
+    <string name="manage_email_taken">پہلے ہی کسی دوسرے اکاؤنٹ کے زیر استعمال ہے</string>
+    <string name="manage_email_available">دستیاب</string>
+    <string name="manage_email_hint">کوئی ٹائپ کریں، یا اسے صارف نام سے بنائیں</string>
+    <string name="manage_generate_email">@domus.home ای میل بنائیں</string>
+    <string name="manage_section_password">پاس ورڈ</string>
+    <string name="manage_kid_account">بچے کا اکاؤنٹ</string>
+    <string name="manage_kid_account_on">آپ پاس ورڈ سیٹ کرتے ہیں اور وہ ویسا ہی رہتا ہے۔</string>
+    <string name="manage_kid_account_off">بند: Domus ایک پاس ورڈ بناتا ہے، اور وہ پہلی بار سائن ان کرنے پر اپنا پاس ورڈ منتخب کرتے ہیں۔</string>
+    <string name="manage_field_new_password">نیا پاس ورڈ</string>
+    <string name="manage_field_password">پاس ورڈ</string>
+    <string name="manage_password_keep_current">موجودہ پاس ورڈ برقرار رکھنے کے لیے خالی چھوڑ دیں</string>
+    <string name="manage_password_min_length">کم از کم 8 حروف</string>
+    <string name="manage_password_after_saving">محفوظ کرنے کے بعد آپ کو کاپی یا شیئر کرنے کے لیے پاس ورڈ ملتا ہے۔</string>
+    <string name="manage_reset_requested_notice">%1$s اپنا پاس ورڈ بھول گیا اور ری سیٹ کی درخواست کی۔</string>
+    <string name="manage_reset_code">ری سیٹ کوڈ</string>
+    <string name="manage_reset_code_active">ایک کوڈ %1$s تک فعال ہے۔ اسے واپس لینے کے لیے بند کریں۔</string>
+    <string name="manage_reset_code_help">ایک وقتی کوڈ جو وہ نیا پاس ورڈ منتخب کرنے کے لیے \"پاس ورڈ بھول گئے؟\" کے تحت درج کرتے ہیں۔ 30 منٹ کے لیے کارآمد۔</string>
+    <string name="manage_generate_new_password">نیا پاس ورڈ بنائیں</string>
+    <string name="manage_section_role">کردار</string>
+    <string name="manage_role_admin_desc">ہر چیز کا انتظام کرتا ہے۔</string>
+    <string name="manage_role_member_desc">جو انہیں دیا گیا ہے وہ دیکھتا ہے۔ کنٹرول، یا آلے کا نام بدلنے کے لیے ترمیم، فی کمرہ اور آلہ سیٹ کی جاتی ہے۔</string>
+    <string name="manage_role_guest_desc">جو انہیں دیا گیا ہے وہ دیکھتا ہے، اسے کنٹرول نہیں کر سکتا۔</string>
+    <string name="manage_section_access">رسائی</string>
+    <string name="manage_custom_access">حسب ضرورت رسائی</string>
+    <string name="manage_custom_access_off">بند: وہ پورے گھر تک رسائی رکھتے ہیں۔</string>
+    <string name="manage_custom_access_on">ہر کمرے کے لیے، یا اس میں موجود انفرادی آلات کے لیے ایک سطح مقرر کریں।</string>
+    <string name="manage_create_rooms_first">پہلے کمرے بنائیں۔</string>
+    <string name="manage_no_room">کوئی کمرہ نہیں</string>
+    <string name="manage_remove_user_title">کیا %1$s کو ہٹائیں؟</string>
+    <string name="manage_remove_user_text">وہ فوری طور پر رسائی کھو دیتے ہیں۔</string>
+    <string name="manage_remove">ہٹائیں</string>
+    <string name="manage_tariff_title">بجلی کا ٹیرف</string>
+    <string name="manage_rate_per_kwh">فی kWh شرح</string>
+    <string name="manage_currency">کرنسی</string>
+    <string name="manage_currency_supporting">ISO کوڈ، مثلاً INR</string>
+    <string name="manage_fixed_monthly_charge">مقررہ ماہانہ چارج</string>
+    <string name="manage_billing_day">بلنگ کا دن</string>
+    <string name="manage_billing_day_supporting">1 سے 28</string>
+    <string name="manage_monthly_budget">ماہانہ بجٹ (اختیاری)</string>
+    <string name="manage_usage_slabs">استعمال کے سلیبز</string>
+    <string name="manage_slabs_empty">یکساں شرح (فلیٹ ریٹ)۔ اگر آپ کی قیمت بلنگ سائیکل میں آپ کے استعمال کے حساب سے بدلتی ہے تو سلیبز شامل کریں۔</string>
+    <string name="manage_slabs_help">ہر سلیب کی شرح اس کی حد تک لاگو ہوتی ہے۔ اوپر کی ہر چیز کے لیے آخری حد کو خالی چھوڑ دیں۔</string>
+    <string name="manage_up_to_kwh">kWh تک</string>
+    <string name="manage_slab_rate">شرح</string>
+    <string name="manage_remove_slab">سلیب %1$d ہٹائیں</string>
+    <string name="manage_add_slab">سلیب شامل کریں</string>
+    <string name="manage_time_of_day">دن کا وقت</string>
+    <string name="manage_time_of_day_help">گھر کی گھڑی کے مطابق وہ گھنٹے جب ایک یونٹ کی قیمت اوپر دی گئی شرح سے کم یا زیادہ ہوتی ہے۔ فی kWh فرق درج کریں: پیک سرچارج کے لیے 1.1، رات کی رعایت کے لیے -1.5۔</string>
+    <string name="manage_window_from">سے</string>
+    <string name="manage_window_until">تک</string>
+    <string name="manage_window_per_kwh">فی kWh</string>
+    <string name="manage_remove_time_window">ٹائم ونڈو %1$d ہٹائیں</string>
+    <string name="manage_add_time_window">ٹائم ونڈو شامل کریں</string>
+    <string name="manage_server_addresses_title">سرور کے پتے</string>
+    <string name="manage_server_addresses_help">Domus آپ کے نیٹ ورک پر گھر کا پتہ اور باقی ہر جگہ ریموٹ پتہ استعمال کرتا ہے۔ آپ دونوں پر سائن ان رہتے ہیں۔</string>
+    <string name="manage_home_network">گھریلو نیٹ ورک</string>
+    <string name="manage_home_network_supporting">مثال کے طور پر https://192.168.1.10:8443</string>
+    <string name="manage_remote">ریموٹ</string>
+    <string name="manage_remote_supporting">مثال کے طور پر Cloudflare Tunnel ہوسٹ نیم</string>
+    <string name="manage_not_set">سیٹ نہیں ہے</string>
+    <string name="manage_location_disabled">اس فون پر لوکیشن بند ہے۔ اس کے بجائے جگہ تلاش کریں۔</string>
+    <string name="manage_location_not_found">یہ فون اپنا مقام تلاش نہیں کر سکا۔ اس کے بجائے جگہ تلاش کریں۔</string>
+    <string name="manage_location_permission_denied">لوکیشن تک رسائی کے بغیر، جگہ تلاش کریں یا کوآرڈینیٹس ٹائپ کریں۔</string>
+    <string name="manage_location_title">گھر کا مقام</string>
+    <string name="manage_location_sun_times">آج سورج %1$s بجے طلوع ہوتا ہے اور %2$s بجے غروب ہوتا ہے۔</string>
+    <string name="manage_location_help">جب Domus کو اندازہ ہو جائے کہ گھر کہاں ہے تو آٹومیشنز طلوع آفتاب اور غروب آفتاب پر چل سکتی ہیں۔ یہ آپ کے سرور پر رہتا ہے۔</string>
+    <string name="manage_use_phone_location">اس فون کی لوکیشن استعمال کریں</string>
+    <string name="manage_find_place">کوئی جگہ تلاش کریں</string>
+    <string name="manage_find_place_supporting">قصبہ یا شہر</string>
+    <string name="manage_search_place">جگہ تلاش کریں</string>
+    <string name="manage_no_place_found">اس نام کی کوئی جگہ نہیں۔ قریبی شہر آزمائیں۔</string>
+    <string name="manage_latitude">عرض البلد (Latitude)</string>
+    <string name="manage_latitude_supporting">مثال کے طور پر 18.52</string>
+    <string name="manage_longitude">طول البلد (Longitude)</string>
+    <string name="manage_longitude_supporting">مثال کے طور پر 73.86</string>
+    <string name="manage_change_password_title">پاس ورڈ تبدیل کریں</string>
+    <string name="manage_change_password_help">آپ اس اور دیگر تمام آلات پر سائن ان رہتے ہیں۔</string>
+    <string name="manage_current_password">موجودہ پاس ورڈ</string>
+    <string name="manage_repeat_new_password">نیا پاس ورڈ دہرائیں</string>
+    <string name="manage_passwords_mismatch">پاس ورڈز مماثل نہیں ہیں</string>
+    <string name="manage_delete_all_notices_title">کیا تمام اطلاعات حذف کریں؟</string>
+    <string name="manage_delete_all_notices_text">انہیں ہر آلے سے ہٹا دیا جاتا ہے۔</string>
+    <string name="manage_delete_all">سب حذف کریں</string>
+    <string name="manage_notifications_title">اطلاعات</string>
+    <string name="manage_mark_all_read">سب کو پڑھا ہوا نشان زد کریں</string>
+    <string name="manage_no_notices">ابھی کچھ نہیں</string>
+    <string name="manage_no_notices_subtitle">آٹومیشنز، نئے آلات اور آف لائن آلات کے الرٹس یہاں ظاہر ہوتے ہیں۔</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life ایپ سے اسکین کرنے کے لیے QR کوڈ</string>
+    <string name="onboard_region_india">بھارت</string>
+    <string name="onboard_region_china">چین</string>
+    <string name="onboard_region_europe">یورپ</string>
+    <string name="onboard_region_us">ریاستہائے متحدہ</string>
+    <string name="onboard_region_singapore">سنگاپور</string>
+    <string name="onboard_region_russia">روس</string>
+    <string name="onboard_region_taiwan">تائیوان</string>
+    <string name="onboard_region_india_old">بھارت (پرانا)</string>
+    <string name="onboard_plugins_title">پلگ انز</string>
+    <string name="onboard_local_control">مقامی کنٹرول</string>
+    <string name="onboard_cloud">کلاؤڈ</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d آلہ</item>
+        <item quantity="other">%1$d آلات</item>
+    </plurals>
+    <string name="onboard_account_linked">لنک شدہ</string>
+    <string name="onboard_account_needs_attention">توجہ درکار ہے</string>
+    <string name="onboard_unlink_account">%1$s کو ان لنک کریں</string>
+    <string name="onboard_integration_disabled">سرور کنفیگریشن میں بند ہے۔</string>
+    <string name="onboard_link_account">اکاؤنٹ لنک کریں</string>
+    <string name="onboard_link_another_account">دوسرا اکاؤنٹ لنک کریں</string>
+    <string name="onboard_find_devices">آلات تلاش کریں</string>
+    <string name="onboard_unlink_title">کیا %1$s کو ان لنک کریں؟</string>
+    <string name="onboard_unlink_text">اس اکاؤنٹ سے آنے والے آلات Domus سے ہٹا دیے جاتے ہیں۔</string>
+    <string name="onboard_unlink">ان لنک کریں</string>
+    <string name="onboard_link_integration">%1$s لنک کریں</string>
+    <string name="onboard_tuya_qr_instructions">اسے Smart Life یا Tuya Smart ایپ سے اسکین کریں (اس کی ہوم اسکرین پر موجود اسکین بٹن)، پھر وہاں تصدیق کریں۔ اسی فون پر، اس کوڈ کو کسی دوسری اسکرین پر دکھائیں۔</string>
+    <string name="onboard_waiting_for_scan">اسکین کا انتظار ہے…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life ایپ میں Me → Settings → Account and Security → User Code کھولیں، اور وہ کوڈ یہاں ٹائپ کریں۔</string>
+    <string name="onboard_user_code">یوزر کوڈ</string>
+    <string name="onboard_qr_expired">اس QR کوڈ کی میعاد ختم ہو گئی۔ دوبارہ کوشش کریں۔</string>
+    <string name="onboard_verify_title">تصدیق کریں کہ یہ آپ ہیں</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi نے آپ کے فون پر تصدیقی کوڈ بھیجا ہے۔ اسے یہاں ٹائپ کریں۔ یہ چند منٹوں بعد ختم ہو جاتا ہے۔</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi نے آپ کی ای میل پر تصدیقی کوڈ بھیجا ہے۔ اسے یہاں ٹائپ کریں۔ یہ چند منٹوں بعد ختم ہو جاتا ہے۔</string>
+    <string name="onboard_verification_code">تصدیقی کوڈ</string>
+    <string name="onboard_send_new_code">نیا کوڈ بھیجیں</string>
+    <string name="onboard_use_another_account">دوسرا اکاؤنٹ استعمال کریں</string>
+    <string name="onboard_tapo_instructions">اپنے TP-Link اکاؤنٹ سے سائن ان کریں۔ یہ آپ کے نیٹ ورک پر موجود آپ کے Tapo آلات سے بات کرنے کے لیے استعمال ہوتا ہے۔</string>
+    <string name="onboard_xiaomi_instructions">اپنے Xiaomi اکاؤنٹ سے سائن ان کریں۔ ڈیوائس ٹوکن ایک بار حاصل کیے جاتے ہیں؛ کنٹرول مقامی رہتا ہے۔ اس کے بعد Xiaomi آپ کو ایک کوڈ بھیج سکتا ہے۔</string>
+    <string name="onboard_xiaomi_username">ای میل، فون یا Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">فون نمبر کے لیے اس کا کنٹری کوڈ درکار ہوتا ہے، جیسے +91…</string>
+    <string name="onboard_email_or_username">ای میل یا صارف نام</string>
+    <string name="onboard_password">پاس ورڈ</string>
+    <string name="onboard_server_region">سرور کا علاقہ</string>
+    <string name="onboard_show_qr_code">QR کوڈ دکھائیں</string>
+    <string name="onboard_verify">تصدیق کریں</string>
+    <string name="onboard_continue">جاری رکھیں</string>
+    <string name="onboard_link">لنک کریں</string>
+    <string name="onboard_add_devices_title">آلات شامل کریں</string>
+    <string name="onboard_scanning">اسکین ہو رہا ہے…</string>
+    <string name="onboard_scan_again">دوبارہ اسکین کریں</string>
+    <string name="onboard_add_by_address">پتے کے ذریعے شامل کریں</string>
+    <string name="onboard_no_new_devices">کوئی نئے آلات نہیں</string>
+    <string name="onboard_no_new_devices_subtitle">ملنے والی ہر چیز پہلے ہی آپ کے گھر میں موجود ہے۔ مزید تلاش کرنے کے لیے پلگ انز کے تحت اکاؤنٹ لنک کریں۔</string>
+    <string name="onboard_open_plugins">پلگ انز کھولیں</string>
+    <string name="onboard_found_count">%1$d ملے</string>
+    <string name="onboard_add">شامل کریں</string>
+    <string name="onboard_ignore">نظر انداز کریں</string>
+    <string name="onboard_add_device_title">%1$s شامل کریں</string>
+    <string name="onboard_field_name">نام</string>
+    <string name="onboard_field_room">کمرہ</string>
+    <string name="onboard_no_room">کوئی کمرہ نہیں</string>
+    <string name="onboard_device_token_optional">ڈیوائس ٹوکن (اختیاری)</string>
+    <string name="onboard_device_token_supporting">صرف لنک کردہ Xiaomi اکاؤنٹ کے بغیر درکار ہے</string>
+    <string name="onboard_ip_address">IP پتہ</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">پہلے سے موجود ہے</string>
+    <string name="code_error_reference_missing" formatted="false">حوالہ کردہ آئٹم موجود نہیں ہے</string>
+    <string name="code_error_internal" formatted="false">اندرونی سرور کی خرابی</string>
+    <string name="code_error_session_expired" formatted="false">غلط یا میعاد ختم شدہ سیشن</string>
+    <string name="code_error_admin_required" formatted="false">ایڈمنسٹریٹر کی رسائی درکار ہے</string>
+    <string name="code_error_guest_no_control" formatted="false">مہمان آلات کو کنٹرول نہیں کر سکتے</string>
+    <string name="code_error_not_signed_in" formatted="false">سائن ان نہیں ہے</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization ہیڈر غائب ہے</string>
+    <string name="code_error_account_gone" formatted="false">اکاؤنٹ اب موجود نہیں ہے</string>
+    <string name="code_error_must_change_password" formatted="false">پہلے اپنا پاس ورڈ تبدیل کریں</string>
+    <string name="code_error_device_not_found" formatted="false">آلہ نہیں ملا</string>
+    <string name="code_error_empty_command" formatted="false">خالی کمانڈ</string>
+    <string name="code_error_scan_running" formatted="false">ایک اسکین پہلے ہی چل رہا ہے</string>
+    <string name="code_error_discovered_not_found" formatted="false">دریافت شدہ آلہ نہیں ملا</string>
+    <string name="code_error_device_already_added" formatted="false">یہ آلہ پہلے ہی شامل کیا جا چکا ہے</string>
+    <string name="code_error_username_too_short" formatted="false">صارف نام کم از کم 3 حروف کا ہونا چاہیے</string>
+    <string name="code_error_password_too_short" formatted="false">پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے</string>
+    <string name="code_error_setup_already_done" formatted="false">سیٹ اپ پہلے ہی مکمل ہو چکا ہے</string>
+    <string name="code_error_invalid_credentials" formatted="false">غلط صارف نام یا پاس ورڈ</string>
+    <string name="code_error_invalid_reset_code" formatted="false">وہ کوڈ غلط ہے یا اب کارآمد نہیں رہا۔ ایڈمنسٹریٹر سے نیا کوڈ مانگیں۔</string>
+    <string name="code_error_wrong_current_password" formatted="false">موجودہ پاس ورڈ غلط ہے</string>
+    <string name="code_error_same_password" formatted="false">موجودہ پاس ورڈ سے مختلف پاس ورڈ منتخب کریں</string>
+    <string name="code_error_avatar_too_long" formatted="false">اوتار اسٹرنگ بہت لمبی ہے</string>
+    <string name="code_error_name_required" formatted="false">نام درکار ہے</string>
+    <string name="code_error_trigger_required" formatted="false">کم از کم ایک ٹریگر شامل کریں</string>
+    <string name="code_error_action_required" formatted="false">کم از کم ایک عمل شامل کریں</string>
+    <string name="code_error_sun_offset_range" formatted="false">طلوع آفتاب اور غروب آفتاب کے وقت کو زیادہ سے زیادہ 6 گھنٹے آگے پیچھے کیا جا سکتا ہے</string>
+    <string name="code_error_automation_not_found" formatted="false">آٹومیشن نہیں ملی</string>
+    <string name="code_error_cannot_edit_device" formatted="false">آپ اس آلے میں ترمیم نہیں کر سکتے</string>
+    <string name="code_error_admin_only_move_room" formatted="false">صرف ایڈمنسٹریٹر ہی آلے کو دوسرے کمرے میں منتقل کر سکتا ہے</string>
+    <string name="code_error_name_empty" formatted="false">نام خالی نہیں ہو سکتا</string>
+    <string name="code_error_view_only_device" formatted="false">آپ اس آلے کو دیکھ سکتے ہیں لیکن کنٹرول نہیں کر سکتے</string>
+    <string name="code_error_view_only_devices" formatted="false">آپ ان آلات کو دیکھ سکتے ہیں لیکن کنٹرول نہیں کر سکتے</string>
+    <string name="code_error_negative_rate" formatted="false">شرحیں منفی نہیں ہو سکتیں</string>
+    <string name="code_error_invalid_billing_day" formatted="false">بلنگ کا دن 1 اور 28 کے درمیان ہونا چاہیے</string>
+    <string name="code_error_invalid_currency" formatted="false">کرنسی 3 حروف کا ISO کوڈ ہونا چاہیے</string>
+    <string name="code_error_slab_order" formatted="false">ہر سلیب پچھلے سلیب سے اوپر ختم ہونا چاہیے</string>
+    <string name="code_error_slab_open_ended" formatted="false">صرف آخری سلیب ہی کھلا (open-ended) ہو سکتا ہے</string>
+    <string name="code_error_tou_format" formatted="false">وقت کے استعمال (Time-of-use) والی ونڈوز کو HH:MM کے بطور آغاز اور اختتام کی ضرورت ہوتی ہے</string>
+    <string name="code_error_tou_zero_length" formatted="false">وقت کے استعمال والی ونڈو ایک ہی وقت پر شروع اور ختم نہیں ہو سکتی</string>
+    <string name="code_error_tou_overlap" formatted="false">وقت کے استعمال والی ونڈوز ایک دوسرے سے متصادم (overlap) نہیں ہو سکتیں</string>
+    <string name="code_error_group_not_found" formatted="false">گروپ نہیں ملا</string>
+    <string name="code_error_account_not_found" formatted="false">اکاؤنٹ نہیں ملا</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya انٹیگریشن غیر فعال ہے</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life ایپ سے یوزر کوڈ درج کریں</string>
+    <string name="code_error_credentials_required" formatted="false">ای میل اور پاس ورڈ درکار ہیں</string>
+    <string name="code_error_verification_expired" formatted="false">تصدیق کی میعاد ختم ہو گئی؛ دوبارہ سائن ان کریں</string>
+    <string name="code_error_invalid_port" formatted="false">پورٹ ایک نمبر ہونا چاہیے</string>
+    <string name="code_error_broker_required" formatted="false">بروکر کا پتہ درج کریں</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue انٹیگریشن غیر فعال ہے</string>
+    <string name="code_error_room_name_required" formatted="false">کمرے کا نام درکار ہے</string>
+    <string name="code_error_room_not_found" formatted="false">کمرہ نہیں ملا</string>
+    <string name="code_error_sync_lights_required" formatted="false">سنک کرنے کے لیے کم از کم ایک لائٹ منتخب کریں</string>
+    <string name="code_error_scene_not_found" formatted="false">سین نہیں ملا</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">اسکرین سنک کو شیئر کرنے کے لیے اسکرین کی ضرورت ہے۔ اسے مواد دکھانے والے آلے پر Domus ایپ سے شروع کریں۔</string>
+    <string name="code_error_place_search_unreachable" formatted="false">جگہ کی تلاش تک رسائی ممکن نہیں۔ اس کے بجائے عرض البلد اور طول البلد درج کریں۔</string>
+    <string name="code_error_invalid_coordinates" formatted="false">عرض البلد (Latitude) -90 اور 90 کے درمیان ہے، طول البلد (longitude) -180 اور 180 کے درمیان ہے</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">اس صارف نام کے لیے تجویز کردہ ہر پتہ پہلے سے زیر استعمال ہے</string>
+    <string name="code_error_invalid_role" formatted="false">کردار admin، member یا guest ہونا چاہیے</string>
+    <string name="code_error_kid_password_required" formatted="false">بچے کے اکاؤنٹ کے لیے پاس ورڈ کی ضرورت ہوتی ہے</string>
+    <string name="code_error_email_taken" formatted="false">یہ ای میل پہلے ہی کسی دوسرے اکاؤنٹ کے زیر استعمال ہے</string>
+    <string name="code_error_user_not_found" formatted="false">صارف نہیں ملا</string>
+    <string name="code_error_last_admin" formatted="false">کم از کم ایک ایڈمنسٹریٹر ہونا ضروری ہے</string>
+    <string name="code_error_cannot_delete_self" formatted="false">آپ اپنا اکاؤنٹ خود حذف نہیں کر سکتے</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue برج پر گول بٹن دبائیں، پھر 30 سیکنڈ کے اندر دوبارہ لنک کریں</string>
+    <string name="code_error_hue_not_found" formatted="false">کوئی Hue برج نہیں ملا؛ اس کا IP پتہ درج کریں</string>
+    <string name="code_error_tuya_device_gone" formatted="false">آلہ اب Smart Life میں نہیں ہے</string>
+    <string name="code_error_device_token_required" formatted="false">ڈیوائس ٹوکن درکار ہے</string>
+    <string name="code_error_hue_link_expired" formatted="false">تصدیق ناکام ہو گئی: Hue برج اب اس لنک کو قبول نہیں کرتا؛ اسے دوبارہ لنک کریں</string>
+    <string name="code_error_hue_removed" formatted="false">تصدیق ناکام ہو گئی: Hue برج ہٹا دیا گیا تھا</string>
+    <string name="code_error_mqtt_removed" formatted="false">تصدیق ناکام ہو گئی: MQTT بروکر ہٹا دیا گیا تھا</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">تصدیق ناکام ہو گئی: آلے نے آپ کے TP-Link اکاؤنٹ کی ای میل/پاس ورڈ کو مسترد کر دیا</string>
+    <string name="code_error_tapo_account_required" formatted="false">تصدیق ناکام ہو گئی: Tapo آلات کو کنٹرول کرنے کے لیے اپنا TP-Link اکاؤنٹ شامل کریں</string>
+    <string name="code_error_tapo_removed" formatted="false">تصدیق ناکام ہو گئی: TP-Link اکاؤنٹ ہٹا دیا گیا تھا</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">تصدیق ناکام ہو گئی: Xiaomi نے کیپچا مانگا ہے۔ Mi Home ایپ یا براؤزر میں ایک بار سائن ان کریں، پھر دوبارہ کوشش کریں</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">تصدیق ناکام ہو گئی: غلط Xiaomi صارف نام یا پاس ورڈ</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">تصدیق ناکام ہو گئی: غلط یا میعاد ختم شدہ تصدیقی کوڈ</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">تصدیق ناکام ہو گئی: Xiaomi نے کوڈ قبول نہیں کیا</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">تصدیق ناکام ہو گئی: Xiaomi سیشن کی میعاد ختم ہو گئی</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">تصدیق ناکام ہو گئی: Xiaomi کو تصدیقی کوڈ درکار ہے؛ انٹیگریشنز کے تحت اکاؤنٹ کو دوبارہ لنک کریں</string>
+    <string name="code_error_unsupported_command" formatted="false">معاون نہیں ہے: یہ آلہ اس کمانڈ کو سپورٹ نہیں کرتا</string>
+    <string name="code_error_unsupported_effect" formatted="false">معاون نہیں ہے: یہ لائٹ وہ اثر نہیں چلا سکتی</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">معاون نہیں ہے: اس Xiaomi ماڈل میں کوئی MIoT اسپیک نہیں ہے</string>
+    <string name="code_error_rate_limited_one" formatted="false">بہت زیادہ غلط پاس ورڈز۔ {count} منٹ میں دوبارہ کوشش کریں۔</string>
+    <string name="code_error_rate_limited_other" formatted="false">بہت زیادہ غلط پاس ورڈز۔ {count} منٹوں میں دوبارہ کوشش کریں۔</string>
+    <string name="code_error_integration_disabled" formatted="false">انٹیگریشن \'{integration}\' فعال نہیں ہے</string>
+    <string name="code_error_invalid_time" formatted="false">غلط وقت \'{time}\'، HH:MM استعمال کریں</string>
+    <string name="code_error_invalid_actions" formatted="false">غلط افعال: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">علاقہ {regions} میں سے ایک ہونا چاہیے</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">اسکرین سنک کی غلط ترتیبات: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">سین کی نامعلوم قسم \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" سرور کا پتہ نہیں ہے</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">تصدیق ناکام ہو گئی: Xiaomi تصدیقی کوڈ نہیں بھیج سکا: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">تصدیق ناکام ہو گئی: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">معاون نہیں ہے: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} کو سوئچ کرنے کی تصدیق کریں</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">نیا آلہ شامل کیا گیا</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) ملا اور خودکار طور پر شامل کر دیا گیا</string>
+    <string name="code_notification_device_found_title" formatted="false">نیا آلہ ملا</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) شامل کرنے کے لیے تیار ہے</string>
+    <string name="code_notification_password_reset_title" formatted="false">پاس ورڈ ری سیٹ کی درخواست کی گئی</string>
+    <string name="code_notification_password_reset" formatted="false">{username} اپنا پاس ورڈ بھول گیا ہے۔ ایڈمنسٹریٹر انہیں ترتیبات میں، لوگ اور رسائی کے تحت ری سیٹ کوڈ دے سکتا ہے۔</string>
+    <string name="code_notification_automation_failed_title" formatted="false">آٹومیشن \"{name}\" میں مسائل پیش آئے</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

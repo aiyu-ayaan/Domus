@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">کلر وہیل</string>
+    <string name="ui_expanded">پھیلایا گیا</string>
+    <string name="ui_collapsed">سمیٹا گیا</string>
+    <string name="ui_collapse">سمیٹیں</string>
+    <string name="ui_expand">پھیلائیں</string>
+</resources>
