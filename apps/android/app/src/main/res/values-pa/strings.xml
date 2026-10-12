@@ -1,0 +1,943 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">ਸ਼ਾਨਦਾਰ</string>
+    <string name="air_good">ਚੰਗਾ</string>
+    <string name="air_moderate">ਦਰਮਿਆਨਾ</string>
+    <string name="air_poor">ਖ਼ਰਾਬ</string>
+    <string name="channel_stable">ਸਥਿਰ</string>
+    <string name="channel_beta">ਬੀਟਾ</string>
+    <string name="channel_alpha">ਅਲਫਾ</string>
+    <string name="connect_this_computer">ਇਹ ਕੰਪਿਊਟਰ</string>
+    <string name="api_untrusted">ਸਰਵਰ ਦੇ ਸਰਟੀਫਿਕੇਟ \'ਤੇ ਭਰੋਸਾ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ।</string>
+    <string name="api_offline">Domus ਸਰਵਰ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਜਾਂਚ ਕਰੋ ਕਿ ਇਹ ਚੱਲ ਰਿਹਾ ਹੈ।</string>
+    <string name="api_bad_response">ਸਰਵਰ ਨੇ ਇੱਕ ਅਜਿਹਾ ਜਵਾਬ ਭੇਜਿਆ ਹੈ ਜਿਸਨੂੰ ਇਹ ਐਪ ਸੰਸਕਰਣ ਨਹੀਂ ਸਮਝਦਾ।</string>
+    <string name="api_request_failed">ਬੇਨਤੀ ਅਸਫਲ ਰਹੀ ({status})</string>
+    <string name="error_no_server">ਕੋਈ ਸਰਵਰ ਨਹੀਂ</string>
+    <string name="connect_cert_changed">ਤੁਹਾਡੇ ਵੱਲੋਂ ਮਨਜ਼ੂਰ ਕੀਤੇ ਜਾਣ ਤੋਂ ਬਾਅਦ ਸਰਵਰ ਦਾ ਸਰਟੀਫਿਕੇਟ ਬਦਲ ਗਿਆ ਹੈ। ਨਵੇਂ ਸਰਟੀਫਿਕੇਟ ਦੀ ਸਮੀਖਿਆ ਕਰਨ ਲਈ ਦੁਬਾਰਾ ਕਨੈਕਟ ਕਰੋ।</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 ਜਾਂ home.example.com ਵਰਗਾ ਪਤਾ ਦਰਜ ਕਰੋ। ਸਿਰਫ਼ https ਸਮਰਥਿਤ ਹੈ।</string>
+    <string name="connect_cert_unreadable">ਸਰਵਰ ਦਾ ਸਰਟੀਫਿਕੇਟ ਪੜ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।</string>
+    <string name="automation_ran">“{name}” ਚਲਾਇਆ ਗਿਆ</string>
+    <string name="handover_reset_until">%1$s ਲਈ Domus ਪਾਸਵਰਡ ਰੀਸੈਟ\nਕੋਡ: %2$s\n\nਸਾਈਨ-ਇਨ ਸਕ੍ਰੀਨ \'ਤੇ \"ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?\" ਚੁਣੋ, ਆਪਣਾ ਵਰਤੋਂਕਾਰ ਨਾਮ ਅਤੇ ਫਿਰ ਇਹ ਕੋਡ ਦਰਜ ਕਰੋ। ਇਹ %3$s ਤੱਕ, ਇੱਕ ਵਾਰ ਕੰਮ ਕਰਦਾ ਹੈ।</string>
+    <string name="handover_reset">%1$s ਲਈ Domus ਪਾਸਵਰਡ ਰੀਸੈਟ\nਕੋਡ: %2$s\n\nਸਾਈਨ-ਇਨ ਸਕ੍ਰੀਨ \'ਤੇ \"ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?\" ਚੁਣੋ, ਆਪਣਾ ਵਰਤੋਂਕਾਰ ਨਾਮ ਅਤੇ ਫਿਰ ਇਹ ਕੋਡ ਦਰਜ ਕਰੋ। ਇਹ ਇੱਕ ਵਾਰ ਕੰਮ ਕਰਦਾ ਹੈ।</string>
+    <string name="handover_signin_kid">Domus ਸਾਈਨ-ਇਨ\nਪਤਾ: %1$s\nਵਰਤੋਂਕਾਰ ਨਾਮ: %2$s\nਪਾਸਵਰਡ: %3$s</string>
+    <string name="handover_signin">Domus ਸਾਈਨ-ਇਨ\nਪਤਾ: %1$s\nਵਰਤੋਂਕਾਰ ਨਾਮ: %2$s\nਪਾਸਵਰਡ: %3$s\n\nਪਹਿਲੀ ਵਾਰ ਸਾਈਨ ਇਨ ਕਰਨ \'ਤੇ ਤੁਹਾਨੂੰ ਆਪਣਾ ਪਾਸਵਰਡ ਚੁਣਨ ਲਈ ਕਿਹਾ ਜਾਵੇਗਾ।</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ਹੋਮ</string>
+    <string name="nav_devices">ਡਿਵਾਈਸਾਂ</string>
+    <string name="nav_scenes">ਸੀਨ</string>
+    <string name="nav_analytics">ਵਿਸ਼ਲੇਸ਼ਣ</string>
+    <string name="nav_settings">ਸੈਟਿੰਗਾਂ</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">ਤੁਹਾਡਾ ਪੂਰਾ ਘਰ, ਇੱਕ ਐਪ</string>
+    <string name="connect_intro_1_body">Tuya, Tapo, Xiaomi, Philips Hue ਅਤੇ MQTT ਤੋਂ ਲਾਈਟਾਂ, ਪਲੱਗ, ਪਿਊਰੀਫਾਇਰ ਅਤੇ ਸੈਂਸਰ, ਇੱਕੋ ਥਾਂ \'ਤੇ।</string>
+    <string name="connect_intro_2_title">ਡਿਜ਼ਾਈਨ ਤੋਂ ਹੀ ਨਿੱਜੀ</string>
+    <string name="connect_intro_2_body">Domus ਇੱਕ ਇਨਕ੍ਰਿਪਟਡ ਕਨੈਕਸ਼ਨ ਰਾਹੀਂ ਸਿਰਫ਼ ਤੁਹਾਡੇ ਘਰ ਦੇ ਸਰਵਰ ਨਾਲ ਗੱਲ ਕਰਦਾ ਹੈ। ਕੋਈ ਕਲਾਊਡ ਖਾਤਾ ਨਹੀਂ।</string>
+    <string name="connect_intro_3_title">ਇਹ ਤੁਹਾਡਾ ਸਰਵਰ ਲੱਭ ਲੈਂਦਾ ਹੈ</string>
+    <string name="connect_intro_3_body">ਤੁਹਾਡੇ Wi‑Fi \'ਤੇ ਐਪ ਆਪਣੇ ਆਪ ਸਰਵਰ ਲੱਭ ਲੈਂਦੀ ਹੈ। ਘਰ ਤੋਂ ਬਾਹਰ ਹੋਣ \'ਤੇ, ਇਸਦਾ ਪਤਾ ਦਰਜ ਕਰੋ।</string>
+    <string name="connect_page_of">ਪੰਨਾ %2$d ਵਿੱਚੋਂ %1$d</string>
+    <string name="connect_skip">ਛੱਡੋ</string>
+    <string name="connect_get_started">ਸ਼ੁਰੂ ਕਰੋ</string>
+    <string name="connect_next">ਅੱਗੇ</string>
+    <string name="connect_welcome_title">Domus ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ</string>
+    <string name="connect_welcome_subtitle">ਉਸ ਸਰਵਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ ਜੋ ਤੁਹਾਡਾ ਘਰ ਚਲਾਉਂਦਾ ਹੈ।</string>
+    <string name="connect_on_this_network">ਇਸ ਨੈੱਟਵਰਕ \'ਤੇ</string>
+    <string name="connect_looking_for_servers">ਸਰਵਰਾਂ ਦੀ ਭਾਲ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…</string>
+    <string name="connect_no_server_found">ਕਿਸੇ ਸਰਵਰ ਨੇ ਜਵਾਬ ਨਹੀਂ ਦਿੱਤਾ। ਜਾਂਚ ਕਰੋ ਕਿ ਇਹ ਫ਼ੋਨ ਸਰਵਰ ਵਾਲੇ Wi‑Fi \'ਤੇ ਹੀ ਹੈ, ਜਾਂ ਹੇਠਾਂ ਇਸਦਾ ਪਤਾ ਦਰਜ ਕਰੋ।</string>
+    <string name="connect_scan_again">ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ</string>
+    <string name="connect_or_enter_address">ਜਾਂ ਪਤਾ ਦਰਜ ਕਰੋ</string>
+    <string name="connect_server_address">ਸਰਵਰ ਦਾ ਪਤਾ</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 ਜਾਂ home.example.com</string>
+    <string name="connect_action">ਕਨੈਕਟ ਕਰੋ</string>
+    <string name="connect_trust_title">ਕੀ ਇਸ ਸਰਵਰ \'ਤੇ ਭਰੋਸਾ ਕਰਨਾ ਹੈ?</string>
+    <string name="connect_trust_body">%1$s ਇੱਕ ਅਜਿਹਾ ਸਰਟੀਫਿਕੇਟ ਵਰਤਦਾ ਹੈ ਜੋ ਇਸਨੇ ਖੁਦ ਬਣਾਇਆ ਹੈ, ਜੋ ਕਿ ਘਰੇਲੂ ਸਰਵਰ ਲਈ ਆਮ ਗੱਲ ਹੈ। ਇਸ \'ਤੇ ਸਿਰਫ਼ ਤਾਂ ਹੀ ਭਰੋਸਾ ਕਰੋ ਜੇਕਰ ਫਿੰਗਰਪ੍ਰਿੰਟ ਉਸ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ ਜੋ ਸਰਵਰ ਸ਼ੁਰੂ ਹੋਣ ਵੇਲੇ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ।</string>
+    <string name="connect_trust_action">ਭਰੋਸਾ ਕਰੋ</string>
+    <string name="connect_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="connect_use_another_server">ਕੋਈ ਹੋਰ ਸਰਵਰ ਵਰਤੋ</string>
+    <string name="connect_unreachable_title">ਤੁਹਾਡੇ ਘਰ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ</string>
+    <string name="connect_try_again">ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">ਪਾਸਵਰਡ ਲੁਕਾਓ</string>
+    <string name="auth_show_password">ਪਾਸਵਰਡ ਦਿਖਾਓ</string>
+    <string name="auth_username">ਵਰਤੋਂਕਾਰ ਨਾਮ</string>
+    <string name="auth_new_password">ਨਵਾਂ ਪਾਸਵਰਡ</string>
+    <string name="auth_password_min_length">ਘੱਟੋ-ਘੱਟ 8 ਅੱਖਰ</string>
+    <string name="auth_confirm_password">ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</string>
+    <string name="auth_passwords_mismatch">ਪਾਸਵਰਡ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ</string>
+    <string name="auth_create_admin_title">ਐਡਮਿਨ ਖਾਤਾ ਬਣਾਓ</string>
+    <string name="auth_welcome_back_title">ਵਾਪਸੀ \'ਤੇ ਜੀ ਆਇਆਂ ਨੂੰ</string>
+    <string name="auth_create_admin_subtitle">ਇਹ ਸਰਵਰ ਨਵਾਂ ਹੈ। ਪਹਿਲਾ ਖਾਤਾ ਹਰ ਚੀਜ਼ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ।</string>
+    <string name="auth_welcome_back_subtitle">ਆਪਣੇ ਘਰ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ।</string>
+    <string name="auth_encrypted_connection">ਇਸ ਨਾਲ ਇਨਕ੍ਰਿਪਟਡ ਕਨੈਕਸ਼ਨ</string>
+    <string name="auth_email">ਈਮੇਲ</string>
+    <string name="auth_password">ਪਾਸਵਰਡ</string>
+    <string name="auth_create_account">ਖਾਤਾ ਬਣਾਓ</string>
+    <string name="auth_sign_in">ਸਾਈਨ ਇਨ ਕਰੋ</string>
+    <string name="auth_forgot_password">ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?</string>
+    <string name="auth_forgot_title">ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ ਹੋ?</string>
+    <string name="auth_forgot_subtitle">Domus ਕੋਈ ਈਮੇਲ ਨਹੀਂ ਭੇਜਦਾ। ਇਸਦੀ ਬਜਾਏ ਇਸ ਘਰ ਦੇ ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਦੱਸਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਉਹ ਤੁਹਾਨੂੰ ਇੱਕ ਵਾਰ ਵਰਤਣ ਵਾਲਾ ਕੋਡ ਦਿੰਦਾ ਹੈ।</string>
+    <string name="auth_ask_admin">ਕਿਸੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਪੁੱਛੋ</string>
+    <string name="auth_back_to_sign_in">ਸਾਈਨ ਇਨ \'ਤੇ ਵਾਪਸ ਜਾਓ</string>
+    <string name="auth_reset_code_title">ਆਪਣਾ ਰੀਸੈਟ ਕੋਡ ਦਰਜ ਕਰੋ</string>
+    <string name="auth_reset_code_subtitle">ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਦੱਸ ਦਿੱਤਾ ਗਿਆ ਹੈ। ਉਹਨਾਂ ਤੋਂ %1$s ਲਈ 8-ਅੰਕਾਂ ਦਾ ਕੋਡ ਮੰਗੋ; ਇਹ ਇੱਕ ਵਾਰ ਅਤੇ 30 ਮਿੰਟਾਂ ਲਈ ਕੰਮ ਕਰਦਾ ਹੈ।</string>
+    <string name="auth_reset_code_label">ਰੀਸੈਟ ਕੋਡ</string>
+    <string name="auth_set_password_sign_in">ਪਾਸਵਰਡ ਸੈੱਟ ਕਰੋ ਅਤੇ ਸਾਈਨ ਇਨ ਕਰੋ</string>
+    <string name="auth_back">ਪਿੱਛੇ</string>
+    <string name="auth_choose_password_title">ਆਪਣਾ ਪਾਸਵਰਡ ਚੁਣੋ</string>
+    <string name="auth_choose_password_subtitle">ਜੀ ਆਇਆਂ ਨੂੰ, %1$s। ਜਿਸ ਪਾਸਵਰਡ ਨਾਲ ਤੁਸੀਂ ਸਾਈਨ ਇਨ ਕੀਤਾ ਹੈ ਉਹ ਤੁਹਾਡੇ ਲਈ ਬਣਾਇਆ ਗਿਆ ਸੀ ਅਤੇ ਕਿਸੇ ਹੋਰ ਦੁਆਰਾ ਦੇਖਿਆ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਪਾਸਵਰਡ ਚੁਣੋ।</string>
+    <string name="auth_save_continue">ਸੇਵ ਕਰੋ ਅਤੇ ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="auth_sign_out">ਸਾਈਨ ਆਊਟ ਕਰੋ</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">ਬੈਕਗ੍ਰਾਊਂਡ ਗਤੀਵਿਧੀ</string>
+    <string name="service_channel_alerts">ਘਰ ਦੀਆਂ ਚੇਤਾਵਨੀਆਂ</string>
+    <string name="service_listening_alerts">Domus ਚੇਤਾਵਨੀਆਂ ਲਈ ਸੁਣ ਰਿਹਾ ਹੈ</string>
+    <string name="service_screen_sync_title">ਸਕ੍ਰੀਨ ਸਿੰਕ ਚਾਲੂ ਹੈ</string>
+    <string name="service_screen_sync_body">ਤੁਹਾਡੀਆਂ ਲਾਈਟਾਂ ਇਸ ਸਕ੍ਰੀਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ</string>
+    <string name="service_stop">ਰੋਕੋ</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (ਅਵਤਾਰ ਕਲਾਕਾਰੀ)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (ਸਥਾਨ ਖੋਜ, ਤੁਹਾਡੇ ਸਰਵਰ ਦੁਆਰਾ ਪੁੱਛਿਆ ਗਿਆ)</string>
+    <string name="about_lib_home_assistant">Home Assistant (Tuya QR ਫਲੋ)</string>
+    <string name="about_license_inspiration">ਪ੍ਰੇਰਨਾ</string>
+    <string name="about_version_unknown">ਅਣਜਾਣ</string>
+    <string name="about_title">Domus ਬਾਰੇ</string>
+    <string name="about_section_app">ਐਪ</string>
+    <string name="about_version_build">ਸੰਸਕਰਣ %1$s · ਬਿਲਡ %2$d</string>
+    <string name="about_privacy_title">ਪਰਦੇਦਾਰੀ</string>
+    <string name="about_privacy_subtitle">ਤੁਹਾਡੇ ਆਪਣੇ ਸਰਵਰ \'ਤੇ ਚੱਲਦਾ ਹੈ। ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਉੱਥੇ ਇਨਕ੍ਰਿਪਟਡ ਰਹਿੰਦੇ ਹਨ।</string>
+    <string name="about_source_code">ਸੋਰਸ ਕੋਡ</string>
+    <string name="about_section_developer">ਡਿਵੈਲਪਰ</string>
+    <string name="about_developer_tagline">ਇੱਕ ਡਿਵੈਲਪਰ ਦੁਆਰਾ ਡਿਜ਼ਾਈਨ ਅਤੇ ਬਣਾਇਆ ਗਿਆ।</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">ਪੋਰਟਫੋਲੀਓ</string>
+    <string name="about_section_open_source">ਓਪਨ ਸੋਰਸ</string>
+    <string name="about_acknowledgements">ਧੰਨਵਾਦ</string>
+    <string name="about_acknowledgements_subtitle">ਉਹ ਲਾਇਬ੍ਰੇਰੀਆਂ ਅਤੇ ਪ੍ਰੋਜੈਕਟ ਜਿਨ੍ਹਾਂ \'ਤੇ Domus ਬਣਿਆ ਹੈ</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s ਉਪਲਬਧ ਹੈ</string>
+    <string name="update_download_failed_retry_prompt">ਡਾਊਨਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਕੀ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨੀ ਹੈ?</string>
+    <string name="update_prompt_body">ਤੁਹਾਡੇ ਕੋਲ %1$s ਹੈ। ਰੀਲੀਜ਼ ਨੋਟਸ ਅਤੇ ਅੱਪਡੇਟ ਚੈਨਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ, ਅੱਪਡੇਟ ਦੇ ਅਧੀਨ ਹਨ।</string>
+    <string name="update_downloading_percent">%1$d%% ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ</string>
+    <string name="update_action">ਅੱਪਡੇਟ ਕਰੋ</string>
+    <string name="update_later">ਬਾਅਦ ਵਿੱਚ</string>
+    <string name="update_title">ਅੱਪਡੇਟ</string>
+    <string name="update_checking">ਅੱਪਡੇਟਾਂ ਲਈ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…</string>
+    <string name="update_check_failed">ਅੱਪਡੇਟਾਂ ਲਈ ਜਾਂਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ</string>
+    <string name="update_dev_build">ਡਿਵੈਲਪਮੈਂਟ ਬਿਲਡ</string>
+    <string name="update_up_to_date">Domus ਅੱਪ ਟੂ ਡੇਟ ਹੈ</string>
+    <string name="update_download_failed_retry">ਡਾਊਨਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="update_check_failed_body">ਤੁਹਾਡੇ ਕੋਲ %1$s ਹੈ। ਆਪਣੇ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="update_dev_build_body">ਤੁਹਾਡੇ ਕੋਲ %1$s ਹੈ। ਇੱਕ ਡਿਵੈਲਪਮੈਂਟ ਬਿਲਡ ਨੂੰ ਦੁਬਾਰਾ ਬਣਾ ਕੇ ਅੱਪਡੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="update_you_have">ਤੁਹਾਡੇ ਕੋਲ %1$s ਹੈ।</string>
+    <string name="update_download_install">ਡਾਊਨਲੋਡ ਅਤੇ ਇੰਸਟੌਲ ਕਰੋ</string>
+    <string name="update_check_again">ਦੁਬਾਰਾ ਜਾਂਚ ਕਰੋ</string>
+    <string name="update_channel">ਚੈਨਲ</string>
+    <string name="update_channel_hint">ਬੀਟਾ ਅਤੇ ਅਲਫਾ ਨੂੰ ਨਵੇਂ ਬਿਲਡ ਪਹਿਲਾਂ ਮਿਲਦੇ ਹਨ, ਅਤੇ ਹਰ ਸਥਿਰ ਬਿਲਡ ਵੀ।</string>
+    <string name="update_whats_new_in">%1$s ਵਿੱਚ ਨਵਾਂ ਕੀ ਹੈ</string>
+    <string name="update_in_this_version">ਇਸ ਸੰਸਕਰਣ ਵਿੱਚ</string>
+    <string name="update_loading_notes">ਰੀਲੀਜ਼ ਨੋਟਸ ਲੋਡ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ…</string>
+    <string name="update_no_notes">ਇਸ ਸੰਸਕਰਣ ਲਈ ਕੋਈ ਰੀਲੀਜ਼ ਨੋਟਸ ਨਹੀਂ ਹਨ।</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">ਰੋਬੋਟ</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">ਸਾਹਸੀ</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">ਪਿਕਸਲ ਆਰਟ</string>
+    <string name="avatar_style_fun_emoji">ਮਜ਼ੇਦਾਰ ਇਮੋਜੀ</string>
+    <string name="avatar_style_thumbs">ਅੰਗੂਠੇ</string>
+    <string name="avatar_style_shapes">ਆਕਾਰ</string>
+    <string name="avatar_style_rings">ਰਿੰਗਸ</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">ਅਵਤਾਰ ਨੂੰ ਕਸਟਮਾਈਜ਼ ਕਰੋ</string>
+    <string name="avatar_save">ਸੇਵ ਕਰੋ</string>
+    <string name="avatar_seed_value">ਸੀਡ: %1$s</string>
+    <string name="avatar_randomize">ਬੇਤਰਤੀਬ ਕਰੋ</string>
+    <string name="avatar_roll_seed">ਸੀਡ ਰੋਲ ਕਰੋ</string>
+    <string name="avatar_roll_seed_action">ਸੀਡ ਰੋਲ ਕਰੋ</string>
+    <string name="avatar_style_label">ਅਵਤਾਰ ਸਟਾਈਲ</string>
+    <string name="avatar_seed_phrase_label">ਸੀਡ ਵਾਕੰਸ਼</string>
+    <string name="avatar_seed_phrase_hint">ਇਸ ਅਵਤਾਰ ਸਟਾਈਲ ਨੂੰ ਬਦਲਣ ਲਈ ਕੋਈ ਵੀ ਕੀਵਰਡ, ਨਾਮ ਜਾਂ ਅੱਖਰ ਸਟ੍ਰਿੰਗ ਦਰਜ ਕਰੋ।</string>
+    <string name="avatar_seed_label">ਸੀਡ</string>
+    <string name="avatar_apply_avatar">ਅਵਤਾਰ ਲਾਗੂ ਕਰੋ</string>
+    <string name="avatar_apply">ਲਾਗੂ ਕਰੋ</string>
+    <string name="avatar_cancel">ਰੱਦ ਕਰੋ</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">ਸ਼ੁਭ ਰਾਤਰੀ</string>
+    <string name="home_greeting_morning">ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ (ਸਵੇਰ)</string>
+    <string name="home_greeting_afternoon">ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ (ਦੁਪਹਿਰ)</string>
+    <string name="home_greeting_evening">ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ (ਸ਼ਾਮ)</string>
+    <string name="home_got_it">ਸਮਝ ਗਿਆ</string>
+    <string name="home_about_stat">%1$s ਬਾਰੇ</string>
+    <string name="home_scene_on_hint">ਚਾਲੂ · ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ</string>
+    <string name="home_scene_off_hint">ਚਲਾਉਣ ਲਈ ਟੈਪ ਕਰੋ</string>
+    <string name="home_change_avatar">ਅਵਤਾਰ ਬਦਲੋ</string>
+    <string name="home_clear_notices_title">ਕੀ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਮਿਟਾਉਣੀਆਂ ਹਨ?</string>
+    <string name="home_clear_notices_body">ਉਹਨਾਂ ਨੂੰ ਹਰ ਡਿਵਾਈਸ ਤੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="home_delete_all">ਸਭ ਮਿਟਾਓ</string>
+    <string name="home_reconnecting">ਮੁੜ-ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…</string>
+    <string name="home_devices_on_of_total">%2$d ਵਿੱਚੋਂ %1$d ਚਾਲੂ</string>
+    <string name="home_using_now">ਹੁਣੇ ਵਰਤ ਰਹੇ</string>
+    <string name="home_using_now_info">ਤੁਹਾਡੇ ਸਾਰੇ ਮੀਟਰ ਵਾਲੇ ਡਿਵਾਈਸਾਂ ਦੀ ਸੰਯੁਕਤ ਲਾਈਵ ਪਾਵਰ ਖਪਤ।</string>
+    <string name="home_today">ਅੱਜ</string>
+    <string name="home_today_info">ਅੱਧੀ ਰਾਤ ਤੋਂ ਵਰਤੀ ਗਈ ਊਰਜਾ। ਇਸਦੇ ਹੇਠਾਂ ਦਿੱਤੀ ਰਕਮ ਤੁਹਾਡੀ ਬਿਜਲੀ ਦੀ ਦਰ \'ਤੇ ਅਨੁਮਾਨਿਤ ਲਾਗਤ ਹੈ।</string>
+    <string name="home_air_quality">ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">ਸੀਨ</string>
+    <string name="home_on_right_now">ਇਸ ਵੇਲੇ ਚਾਲੂ</string>
+    <string name="home_all_devices">ਸਾਰੀਆਂ ਡਿਵਾਈਸਾਂ</string>
+    <string name="home_no_devices_title">ਅਜੇ ਕੋਈ ਡਿਵਾਈਸ ਨਹੀਂ</string>
+    <string name="home_no_devices_admin">ਡਿਵਾਈਸਾਂ ਖੋਲ੍ਹੋ ਅਤੇ Tuya, Tapo, Xiaomi, Hue ਜਾਂ MQTT ਨੂੰ ਲਿੰਕ ਕਰਨ ਲਈ + \'ਤੇ ਟੈਪ ਕਰੋ।</string>
+    <string name="home_no_devices_member">ਕਿਸੇ ਐਡਮਿਨ ਨੂੰ ਡਿਵਾਈਸਾਂ ਸ਼ਾਮਲ ਕਰਨ ਜਾਂ ਤੁਹਾਨੂੰ ਕਿਸੇ ਕਮਰੇ ਤੱਕ ਪਹੁੰਚ ਦੇਣ ਲਈ ਕਹੋ।</string>
+    <string name="home_everything_off">ਸਭ ਕੁਝ ਬੰਦ ਹੈ।</string>
+    <string name="home_rooms">ਕਮਰੇ</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d ਡਿਵਾਈਸ · ਸਭ ਬੰਦ</item>
+        <item quantity="other">%1$d ਡਿਵਾਈਸਾਂ · ਸਭ ਬੰਦ</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d ਡਿਵਾਈਸ · %2$d ਚਾਲੂ</item>
+        <item quantity="other">%1$d ਡਿਵਾਈਸਾਂ · %2$d ਚਾਲੂ</item>
+    </plurals>
+    <string name="home_recent_activity">ਹਾਲੀਆ ਗਤੀਵਿਧੀ</string>
+    <string name="home_see_all">ਸਭ ਦੇਖੋ</string>
+
+    <!-- Devices -->
+    <string name="device_title">ਡਿਵਾਈਸਾਂ</string>
+    <string name="device_online_of_total">%2$d ਵਿੱਚੋਂ %1$d ਔਨਲਾਈਨ</string>
+    <string name="device_add_devices">ਡਿਵਾਈਸਾਂ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="device_filter_all">ਸਭ</string>
+    <string name="device_category_lights">ਲਾਈਟਾਂ</string>
+    <string name="device_category_power">ਪਾਵਰ</string>
+    <string name="device_category_air">ਹਵਾ</string>
+    <string name="device_category_climate">ਜਲਵਾਯੂ</string>
+    <string name="device_all_rooms">ਸਾਰੇ ਕਮਰੇ</string>
+    <string name="device_no_room">ਕੋਈ ਕਮਰਾ ਨਹੀਂ</string>
+    <string name="device_manage_rooms">ਕਮਰਿਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ</string>
+    <string name="device_empty_filtered_title">ਇੱਥੇ ਕੁਝ ਨਹੀਂ ਹੈ</string>
+    <string name="device_empty_filtered_body">ਕੋਈ ਡਿਵਾਈਸ ਇਸ ਕਮਰੇ ਅਤੇ ਸ਼੍ਰੇਣੀ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।</string>
+    <string name="device_empty_admin">Tuya, Tapo, Xiaomi, Hue ਜਾਂ MQTT ਨੂੰ ਲਿੰਕ ਕਰਨ ਲਈ + \'ਤੇ ਟੈਪ ਕਰੋ ਅਤੇ ਜੋ ਉਹ ਲੱਭਦੇ ਹਨ ਉਸਨੂੰ ਸ਼ਾਮਲ ਕਰੋ।</string>
+    <string name="device_online">ਔਨਲਾਈਨ</string>
+    <string name="device_offline">ਔਫਲਾਈਨ</string>
+    <string name="device_on">ਚਾਲੂ</string>
+    <string name="device_off">ਬੰਦ</string>
+    <string name="device_leak">ਲੀਕ</string>
+    <string name="device_motion">ਹਲਚਲ</string>
+    <string name="device_motion_detected">ਪਤਾ ਲੱਗਿਆ</string>
+    <string name="device_clear">ਸਾਫ਼</string>
+    <string name="device_open">ਖੁੱਲ੍ਹਾ</string>
+    <string name="device_closed">ਬੰਦ</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s ਪਾਵਰ</string>
+    <string name="device_refresh_a11y">%1$s ਨੂੰ ਰੀਫ੍ਰੈਸ਼ ਕਰੋ</string>
+    <string name="device_view_only_member">ਤੁਸੀਂ ਇਸ ਡਿਵਾਈਸ ਨੂੰ ਦੇਖ ਸਕਦੇ ਹੋ ਪਰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦੇ।</string>
+    <string name="device_view_only_guest">ਮਹਿਮਾਨ ਡਿਵਾਈਸਾਂ ਨੂੰ ਦੇਖ ਸਕਦੇ ਹਨ ਪਰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦੇ।</string>
+    <string name="device_brightness">ਚਮਕ</string>
+    <string name="device_white">ਚਿੱਟਾ</string>
+    <string name="device_white_warm">ਨਿੱਘਾ</string>
+    <string name="device_white_neutral">ਨਿਰਪੱਖ</string>
+    <string name="device_white_cool">ਠੰਢਾ</string>
+    <string name="device_fan_speed">ਪੱਖੇ ਦੀ ਗਤੀ</string>
+    <string name="device_mode">ਮੋਡ</string>
+    <string name="device_speed">ਗਤੀ</string>
+    <string name="device_coverage">ਕਵਰੇਜ %1$d–%2$d m²</string>
+    <string name="device_reading_power">ਪਾਵਰ</string>
+    <string name="device_reading_voltage">ਵੋਲਟੇਜ</string>
+    <string name="device_reading_current">ਕਰੰਟ</string>
+    <string name="device_reading_temperature">ਤਾਪਮਾਨ</string>
+    <string name="device_reading_humidity">ਨਮੀ</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">ਫਿਲਟਰ</string>
+    <string name="device_filter_left">%1$d%% ਬਾਕੀ</string>
+    <string name="device_reading_contact">ਦਰਵਾਜ਼ਾ ਜਾਂ ਖਿੜਕੀ</string>
+    <string name="device_reading_water">ਪਾਣੀ</string>
+    <string name="device_water_dry">ਸੁੱਕਾ</string>
+    <string name="device_reading_alarm">ਅਲਾਰਮ</string>
+    <string name="device_alarm_sounding">ਵੱਜ ਰਿਹਾ ਹੈ</string>
+    <string name="device_alarm_quiet">ਸ਼ਾਂਤ</string>
+    <string name="device_reading_battery">ਬੈਟਰੀ</string>
+    <string name="device_battery_low">ਘੱਟ</string>
+    <string name="device_battery_ok">ਠੀਕ ਹੈ</string>
+    <string name="device_ask_before_switching">ਸਵਿੱਚ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛੋ</string>
+    <string name="device_ask_before_switching_desc">ਕਿਸੇ ਵੀ ਐਪ, ਗਰੁੱਪ ਜਾਂ ਸੀਨ ਤੋਂ ਇਸਨੂੰ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਚੇਤਾਵਨੀ ਦਿੰਦਾ ਹੈ</string>
+    <string name="device_rename_or_move">ਨਾਮ ਬਦਲੋ ਜਾਂ ਥਾਂ ਬਦਲੋ</string>
+    <string name="device_rename">ਨਾਮ ਬਦਲੋ</string>
+    <string name="device_remove">ਹਟਾਓ</string>
+    <string name="device_edit_title">ਡਿਵਾਈਸ ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="device_field_name">ਨਾਮ</string>
+    <string name="device_field_room">ਕਮਰਾ</string>
+    <string name="device_remove_confirm_title">ਕੀ %1$s ਨੂੰ ਹਟਾਉਣਾ ਹੈ?</string>
+    <string name="device_remove_confirm_body">ਇਹ ਤੁਹਾਡੇ ਘਰ ਅਤੇ ਇਸਦੇ ਸੀਨਾਂ ਤੋਂ ਬਾਹਰ ਹੋ ਜਾਂਦਾ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਡਿਵਾਈਸਾਂ ਸ਼ਾਮਲ ਕਰੋ ਤੋਂ ਦੁਬਾਰਾ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="device_white_candle">ਮੋਮਬੱਤੀ</string>
+    <string name="device_white_soft">ਹਲਕਾ ਚਿੱਟਾ</string>
+    <string name="device_white_neutral_preset">ਨਿਰਪੱਖ ਚਿੱਟਾ</string>
+    <string name="device_white_daylight">ਦਿਨ ਦੀ ਰੋਸ਼ਨੀ</string>
+    <string name="device_white_cool_preset">ਠੰਢਾ ਚਿੱਟਾ</string>
+    <string name="device_light_off">ਲਾਈਟ ਬੰਦ</string>
+    <string name="device_light_effect">ਪ੍ਰਭਾਵ</string>
+    <string name="device_light_white">ਚਿੱਟੀ ਲਾਈਟ</string>
+    <string name="device_light_color">ਰੰਗੀਨ ਲਾਈਟ</string>
+    <string name="device_light_playing">%1$s ਚੱਲ ਰਿਹਾ ਹੈ</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">ਰੰਗ</string>
+    <string name="device_effects">ਪ੍ਰਭਾਵ</string>
+    <string name="device_color_temp">ਰੰਗ ਦਾ ਤਾਪਮਾਨ</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K ਨਿੱਘਾ</string>
+    <string name="device_kelvin_max">6500K ਠੰਢਾ</string>
+    <string name="device_moods">ਮੂਡ</string>
+    <string name="device_stop_effect">ਪ੍ਰਭਾਵ ਰੋਕੋ</string>
+    <string name="device_color_swatch_a11y">ਰੰਗ %1$s</string>
+    <string name="device_selected">ਚੁਣਿਆ ਗਿਆ</string>
+    <string name="device_not_selected">ਨਹੀਂ ਚੁਣਿਆ ਗਿਆ</string>
+    <string name="device_confirm_switch_one_title">ਕੀ %1$s ਨੂੰ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">ਕੀ %1$d ਡਿਵਾਈਸ ਨੂੰ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?</item>
+        <item quantity="other">ਕੀ %1$d ਡਿਵਾਈਸਾਂ ਨੂੰ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">ਇਸ ਵਿੱਚ %1$s ਸ਼ਾਮਲ ਹੈ, ਜੋ ਸਵਿੱਚ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛਦਾ ਹੈ। ਇਸਨੂੰ ਸਵਿੱਚ ਕਰਨ ਨਾਲ ਜੋ ਵੀ ਕਨੈਕਟ ਹੈ ਉਸਦੀ ਪਾਵਰ ਕੱਟੀ ਜਾ ਸਕਦੀ ਹੈ।</string>
+    <string name="device_confirm_switch_many_body">ਇਸ ਵਿੱਚ %1$s ਸ਼ਾਮਲ ਹਨ, ਜੋ ਸਵਿੱਚ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛਦੇ ਹਨ। ਉਹਨਾਂ ਨੂੰ ਸਵਿੱਚ ਕਰਨ ਨਾਲ ਜੋ ਵੀ ਕਨੈਕਟ ਹੈ ਉਸਦੀ ਪਾਵਰ ਕੱਟੀ ਜਾ ਸਕਦੀ ਹੈ।</string>
+    <string name="device_confirm_switch_action">ਸਵਿੱਚ ਕਰੋ</string>
+    <string name="device_cancel">ਰੱਦ ਕਰੋ</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">ਹੁਣੇ-ਹੁਣੇ</string>
+    <string name="scene_time_minutes_ago">%1$d ਮਿੰਟ ਪਹਿਲਾਂ</string>
+    <string name="scene_time_hours_ago">%1$d ਘੰਟੇ ਪਹਿਲਾਂ</string>
+    <string name="scene_time_days_ago">%1$d ਦਿਨ ਪਹਿਲਾਂ</string>
+    <string name="scene_edit_item">%1$s ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="scene_title">ਸੀਨ</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">%1$d ਸਰਗਰਮ · %2$d ਆਟੋਮੇਸ਼ਨ ਚਾਲੂ</item>
+        <item quantity="other">%1$d ਸਰਗਰਮ · %2$d ਆਟੋਮੇਸ਼ਨਾਂ ਚਾਲੂ</item>
+    </plurals>
+    <string name="scene_empty_title">ਇੱਥੇ ਅਜੇ ਕੁਝ ਨਹੀਂ ਹੈ</string>
+    <string name="scene_empty_subtitle">ਇੱਕ ਸੀਨ ਇੱਕੋ ਸਮੇਂ ਕਈ ਡਿਵਾਈਸਾਂ ਨੂੰ ਸੈੱਟ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਕੁਝ ਵਾਪਰਦਾ ਹੈ ਤਾਂ ਇੱਕ ਆਟੋਮੇਸ਼ਨ ਤੁਹਾਡੇ ਲਈ ਇਹ ਕਰਦੀ ਹੈ।</string>
+    <string name="scene_new_scene">ਨਵਾਂ ਸੀਨ</string>
+    <string name="scene_new_automation">ਨਵੀਂ ਆਟੋਮੇਸ਼ਨ</string>
+    <string name="scene_new_screen_sync">ਨਵਾਂ ਸਕ੍ਰੀਨ ਸਿੰਕ</string>
+    <string name="scene_sync_active_subtitle">ਸਕ੍ਰੀਨ ਸਿੰਕ · ਲਾਈਟਾਂ ਇੱਕ ਸਕ੍ਰੀਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ</string>
+    <string name="scene_sync_inactive_subtitle">ਸਕ੍ਰੀਨ ਸਿੰਕ · ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਲਾਈਟਾਂ \'ਤੇ ਦਿਖਾਉਂਦਾ ਹੈ</string>
+    <string name="scene_active">ਸਰਗਰਮ</string>
+    <string name="scene_section_automations">ਆਟੋਮੇਸ਼ਨਾਂ</string>
+    <string name="scene_last_ran">ਆਖਰੀ ਵਾਰ ਚੱਲਿਆ %1$s</string>
+    <string name="scene_never_ran">ਕਦੇ ਨਹੀਂ ਚੱਲਿਆ</string>
+    <string name="scene_run_now">%1$s ਨੂੰ ਹੁਣੇ ਚਲਾਓ</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">ਸੋਮ</string>
+    <string name="editor_day_tue">ਮੰਗਲ</string>
+    <string name="editor_day_wed">ਬੁੱਧ</string>
+    <string name="editor_day_thu">ਵੀਰ</string>
+    <string name="editor_day_fri">ਸ਼ੁੱਕਰ</string>
+    <string name="editor_day_sat">ਸ਼ਨੀ</string>
+    <string name="editor_day_sun">ਐਤ</string>
+    <string name="editor_prop_temperature">ਤਾਪਮਾਨ</string>
+    <string name="editor_prop_humidity">ਨਮੀ</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">ਚਮਕ</string>
+    <string name="editor_prop_power_watts">ਪਾਵਰ (W)</string>
+    <string name="editor_removed_device">ਇੱਕ ਹਟਾਇਆ ਗਿਆ ਡਿਵਾਈਸ</string>
+    <string name="editor_rule_device_is_off">%1$s ਬੰਦ ਹੈ</string>
+    <string name="editor_rule_device_is_on">%1$s ਚਾਲੂ ਹੈ</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s %3$s ਤੋਂ ਉੱਪਰ</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s %3$s ਤੋਂ ਹੇਠਾਂ</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s %3$s ਹੈ</string>
+    <string name="editor_rule_time_every_day">ਹਰ ਰੋਜ਼ %1$s ਵਜੇ</string>
+    <string name="editor_rule_time_on_days">%2$s ਨੂੰ %1$s ਵਜੇ</string>
+    <string name="editor_sun_event_sunrise">ਸੂਰਜ ਚੜ੍ਹਨ</string>
+    <string name="editor_sun_event_sunset">ਸੂਰਜ ਡੁੱਬਣ</string>
+    <string name="editor_rule_sun_at_every_day">ਹਰ ਰੋਜ਼ %1$s ਵੇਲੇ</string>
+    <string name="editor_rule_sun_at_on_days">%2$s ਨੂੰ %1$s ਵੇਲੇ</string>
+    <string name="editor_rule_sun_before_every_day">ਹਰ ਰੋਜ਼ %2$s ਤੋਂ %1$d ਮਿੰਟ ਪਹਿਲਾਂ</string>
+    <string name="editor_rule_sun_before_on_days">%3$s ਨੂੰ %2$s ਤੋਂ %1$d ਮਿੰਟ ਪਹਿਲਾਂ</string>
+    <string name="editor_rule_sun_after_every_day">ਹਰ ਰੋਜ਼ %2$s ਤੋਂ %1$d ਮਿੰਟ ਬਾਅਦ</string>
+    <string name="editor_rule_sun_after_on_days">%3$s ਨੂੰ %2$s ਤੋਂ %1$d ਮਿੰਟ ਬਾਅਦ</string>
+    <string name="editor_rule_power_above">%1$s %2$s W ਤੋਂ ਵੱਧ ਵਰਤਦਾ ਹੈ</string>
+    <string name="editor_rule_device_offline">%1$s ਔਫਲਾਈਨ ਹੋ ਜਾਂਦਾ ਹੈ</string>
+    <string name="editor_rule_device_discovered">ਇੱਕ ਨਵਾਂ ਡਿਵਾਈਸ ਮਿਲਿਆ ਹੈ</string>
+    <string name="editor_rule_time_between">%1$s ਅਤੇ %2$s ਦੇ ਵਿਚਕਾਰ</string>
+    <string name="editor_cmd_on">ਚਾਲੂ</string>
+    <string name="editor_cmd_off">ਬੰਦ</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">ਚਿੱਟਾ %1$s</string>
+    <string name="editor_device_group">ਡਿਵਾਈਸ ਗਰੁੱਪ</string>
+    <string name="editor_cmd_custom">ਕਸਟਮ ਕਮਾਂਡ</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">ਸੂਚਿਤ ਕਰੋ: %1$s</string>
+    <string name="editor_removed_scene">(ਹਟਾਇਆ ਗਿਆ)</string>
+    <string name="editor_rule_scene">ਸੀਨ %1$s ਚਲਾਓ</string>
+    <string name="editor_rule_delay">%1$s ਸਕਿੰਟ ਉਡੀਕ ਕਰੋ</string>
+    <string name="editor_rule_unknown">ਅਣਜਾਣ</string>
+    <string name="editor_trigger_time">ਸਮਾਂ</string>
+    <string name="editor_trigger_sun">ਸੂਰਜ ਚੜ੍ਹਨਾ / ਸੂਰਜ ਡੁੱਬਣਾ</string>
+    <string name="editor_trigger_device_state">ਡਿਵਾਈਸ ਦੀ ਸਥਿਤੀ</string>
+    <string name="editor_trigger_power">ਪਾਵਰ</string>
+    <string name="editor_trigger_offline">ਔਫਲਾਈਨ ਹੋ ਜਾਂਦਾ ਹੈ</string>
+    <string name="editor_trigger_discovered">ਨਵਾਂ ਡਿਵਾਈਸ</string>
+    <string name="editor_condition_device_state">ਡਿਵਾਈਸ ਦੀ ਸਥਿਤੀ</string>
+    <string name="editor_condition_time_between">ਸਮਾਂ ਵਿੰਡੋ</string>
+    <string name="editor_action_device">ਡਿਵਾਈਸ</string>
+    <string name="editor_action_scene">ਸੀਨ</string>
+    <string name="editor_action_notify">ਸੂਚਿਤ ਕਰੋ</string>
+    <string name="editor_action_delay">ਉਡੀਕ ਕਰੋ</string>
+    <string name="editor_add">ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="editor_field_device">ਡਿਵਾਈਸ</string>
+    <string name="editor_sun_sunrise">ਸੂਰਜ ਚੜ੍ਹਨਾ</string>
+    <string name="editor_sun_sunset">ਸੂਰਜ ਡੁੱਬਣਾ</string>
+    <string name="editor_sun_after">ਬਾਅਦ</string>
+    <string name="editor_sun_before">ਪਹਿਲਾਂ</string>
+    <string name="editor_field_minutes">ਮਿੰਟ</string>
+    <string name="editor_sun_supporting_sunrise">ਖਾਲੀ ਛੱਡਣ \'ਤੇ ਇਹ ਸੂਰਜ ਚੜ੍ਹਨ ਵੇਲੇ ਚੱਲਦਾ ਹੈ। ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਘਰ ਦੇ ਸਥਾਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।</string>
+    <string name="editor_sun_supporting_sunset">ਖਾਲੀ ਛੱਡਣ \'ਤੇ ਇਹ ਸੂਰਜ ਡੁੱਬਣ ਵੇਲੇ ਚੱਲਦਾ ਹੈ। ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਘਰ ਦੇ ਸਥਾਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।</string>
+    <string name="editor_every_day">ਹਰ ਰੋਜ਼</string>
+    <string name="editor_chosen_days">ਸਿਰਫ਼ ਚੁਣੇ ਗਏ ਦਿਨਾਂ \'ਤੇ</string>
+    <string name="editor_field_is">ਹੈ</string>
+    <string name="editor_state_on">ਚਾਲੂ</string>
+    <string name="editor_state_off">ਬੰਦ</string>
+    <string name="editor_compare_above">ਤੋਂ ਉੱਪਰ</string>
+    <string name="editor_compare_below">ਤੋਂ ਹੇਠਾਂ</string>
+    <string name="editor_field_value">ਮੁੱਲ</string>
+    <string name="editor_field_watts">ਵਾਟਸ</string>
+    <string name="editor_time_from">ਤੋਂ</string>
+    <string name="editor_time_until">ਤੱਕ</string>
+    <string name="editor_power_turn_on">ਚਾਲੂ ਕਰੋ</string>
+    <string name="editor_power_turn_off">ਬੰਦ ਕਰੋ</string>
+    <string name="editor_power_leave">ਪਾਵਰ ਛੱਡੋ</string>
+    <string name="editor_set_brightness">ਚਮਕ ਸੈੱਟ ਕਰੋ</string>
+    <string name="editor_set_brightness_value">ਚਮਕ %1$d%% ਸੈੱਟ ਕਰੋ</string>
+    <string name="editor_field_scene">ਸੀਨ</string>
+    <string name="editor_field_title">ਸਿਰਲੇਖ</string>
+    <string name="editor_field_message">ਸੁਨੇਹਾ</string>
+    <string name="editor_field_seconds">ਸਕਿੰਟ</string>
+    <string name="editor_remove_rule">ਹਟਾਓ: %1$s</string>
+    <string name="editor_style_vivid">ਚਮਕਦਾਰ</string>
+    <string name="editor_style_dominant">ਪ੍ਰਮੁੱਖ</string>
+    <string name="editor_style_average">ਔਸਤ</string>
+    <string name="editor_new_screen_sync">ਨਵਾਂ ਸਕ੍ਰੀਨ ਸਿੰਕ</string>
+    <string name="editor_new_scene">ਨਵਾਂ ਸੀਨ</string>
+    <string name="editor_edit_scene">ਸੀਨ ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="editor_delete">ਮਿਟਾਓ</string>
+    <string name="editor_field_name">ਨਾਮ</string>
+    <string name="editor_sync_lights_title">ਲਾਈਟਾਂ ਜੋ ਸਕ੍ਰੀਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ</string>
+    <string name="editor_sync_no_lights">ਤੁਹਾਡੇ ਘਰ ਵਿੱਚ ਅਜੇ ਕੋਈ ਲਾਈਟ ਨਹੀਂ ਹੈ।</string>
+    <string name="editor_sync_color_title">ਰੰਗ</string>
+    <string name="editor_style_vivid_desc">ਸਕ੍ਰੀਨ \'ਤੇ ਸਭ ਤੋਂ ਗੂੜ੍ਹਾ ਰੰਗ।</string>
+    <string name="editor_style_dominant_desc">ਸਭ ਤੋਂ ਆਮ ਰੰਗ।</string>
+    <string name="editor_style_average_desc">ਪੂਰੀ ਤਸਵੀਰ ਦੀ ਔਸਤ।</string>
+    <string name="editor_region_full">ਪੂਰੀ ਸਕ੍ਰੀਨ</string>
+    <string name="editor_region_edges">ਸਿਰਫ਼ ਕਿਨਾਰੇ</string>
+    <string name="editor_sync_dim_dark">ਹਨੇਰੇ ਦ੍ਰਿਸ਼ਾਂ ਨਾਲ ਮੱਧਮ ਕਰੋ</string>
+    <string name="editor_sync_restore_lights">ਰੁਕਣ \'ਤੇ ਲਾਈਟਾਂ ਬਹਾਲ ਕਰੋ</string>
+    <string name="editor_actions_title">ਕਾਰਵਾਈਆਂ</string>
+    <string name="editor_add_action">ਕਾਰਵਾਈ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="editor_save">ਸੇਵ ਕਰੋ</string>
+    <string name="editor_delete_confirm_title">ਕੀ %1$s ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?</string>
+    <string name="editor_delete_scene_body">ਉਹ ਆਟੋਮੇਸ਼ਨਾਂ ਜੋ ਇਸ ਸੀਨ ਨੂੰ ਚਲਾਉਂਦੀਆਂ ਹਨ, ਇਸਨੂੰ ਛੱਡ ਦੇਣਗੀਆਂ।</string>
+    <string name="editor_new_automation">ਨਵੀਂ ਆਟੋਮੇਸ਼ਨ</string>
+    <string name="editor_edit_automation">ਆਟੋਮੇਸ਼ਨ ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="editor_field_description_optional">ਵੇਰਵਾ (ਵਿਕਲਪਿਕ)</string>
+    <string name="editor_enabled">ਸਮਰੱਥ ਬਣਾਇਆ ਗਿਆ</string>
+    <string name="editor_triggers_title">ਜਦੋਂ ਇਹਨਾਂ ਵਿੱਚੋਂ ਕੋਈ ਵੀ ਵਾਪਰਦਾ ਹੈ</string>
+    <string name="editor_add_trigger">ਟ੍ਰਿਗਰ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="editor_conditions_title">ਸਿਰਫ਼ ਤਾਂ ਜੇਕਰ ਇਹ ਸਾਰੀਆਂ ਸੱਚ ਹੋਣ</string>
+    <string name="editor_add_condition">ਸ਼ਰਤ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="editor_do_this_title">ਇਹ ਕਰੋ</string>
+    <string name="editor_delete_automation_body">ਇਹ ਚੱਲਣਾ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">ਲਾਈਵ</string>
+    <string name="analytics_range_hour">1 ਮਿੰਟ</string>
+    <string name="analytics_range_day">ਦਿਨ</string>
+    <string name="analytics_range_week">ਹਫ਼ਤਾ</string>
+    <string name="analytics_range_month">ਮਹੀਨਾ</string>
+    <string name="analytics_bucket_5s">5 ਸਕਿੰਟ</string>
+    <string name="analytics_bucket_minute">ਮਿੰਟ</string>
+    <string name="analytics_bucket_hour">ਘੰਟਾ</string>
+    <string name="analytics_bucket_day">ਦਿਨ</string>
+    <string name="analytics_title">ਵਿਸ਼ਲੇਸ਼ਣ</string>
+    <string name="analytics_subtitle_power">ਪਾਵਰ ਦੀ ਵਰਤੋਂ ਅਤੇ ਲਾਗਤ</string>
+    <string name="analytics_subtitle_air">ਹਵਾ ਦੀ ਸਿਹਤ ਅਤੇ ਪਿਊਰੀਫਾਇਰ</string>
+    <string name="analytics_electricity_tariff">ਬਿਜਲੀ ਟੈਰਿਫ</string>
+    <string name="analytics_tab_electricity">ਬਿਜਲੀ</string>
+    <string name="analytics_tab_air">ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ</string>
+    <string name="analytics_no_energy_title">ਅਜੇ ਕੋਈ ਊਰਜਾ ਡੇਟਾ ਨਹੀਂ ਹੈ</string>
+    <string name="analytics_no_energy_subtitle">ਮੀਟਰਿੰਗ ਪਲੱਗ ਜਾਂ ਸਵਿੱਚ ਦੇ ਔਨਲਾਈਨ ਹੋਣ ਤੋਂ ਇੱਕ ਮਿੰਟ ਬਾਅਦ ਰੀਡਿੰਗਾਂ ਦਿਖਾਈ ਦਿੰਦੀਆਂ ਹਨ।</string>
+    <string name="analytics_using_now">ਹੁਣੇ ਵਰਤ ਰਹੇ</string>
+    <string name="analytics_projected_cost">ਇਸ ਬਿੱਲ ਚੱਕਰ ਵਿੱਚ %1$s ਹੋਣ ਦਾ ਅਨੁਮਾਨ ਹੈ</string>
+    <string name="analytics_today">ਅੱਜ</string>
+    <string name="analytics_today_info">ਅੱਧੀ ਰਾਤ ਤੋਂ ਵਰਤੀ ਗਈ ਊਰਜਾ। ਇਸਦੇ ਹੇਠਾਂ ਦਿੱਤੀ ਰਕਮ ਤੁਹਾਡੀ ਬਿਜਲੀ ਦੀ ਦਰ \'ਤੇ ਅਨੁਮਾਨਿਤ ਲਾਗਤ ਹੈ।</string>
+    <string name="analytics_this_cycle">ਇਹ ਚੱਕਰ</string>
+    <string name="analytics_this_cycle_info">ਮੌਜੂਦਾ ਬਿੱਲ ਚੱਕਰ ਵਿੱਚ ਹੁਣ ਤੱਕ ਵਰਤੀ ਗਈ ਊਰਜਾ ਅਤੇ ਅਨੁਮਾਨਿਤ ਬਿੱਲ।</string>
+    <string name="analytics_history">ਇਤਿਹਾਸ</string>
+    <string name="analytics_nothing_recorded">ਇਸ ਮਿਆਦ ਵਿੱਚ ਅਜੇ ਕੁਝ ਵੀ ਰਿਕਾਰਡ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।</string>
+    <string name="analytics_metric_energy">ਊਰਜਾ</string>
+    <string name="analytics_metric_power">ਪਾਵਰ</string>
+    <string name="analytics_no_reading">ਕੋਈ ਰੀਡਿੰਗ ਨਹੀਂ</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">ਪ੍ਰਤੀ %1$s ਔਸਤ ਪਾਵਰ</string>
+    <string name="analytics_chart_energy_used">ਪ੍ਰਤੀ %1$s ਵਰਤੀ ਗਈ ਊਰਜਾ, ਕੁੱਲ %2$s</string>
+    <string name="analytics_live_caption">ਪਿਛਲੇ 5 ਮਿੰਟ, ਜਦੋਂ ਤੱਕ ਇਹ ਪੰਨਾ ਖੁੱਲ੍ਹਾ ਹੈ ਹਰ 5 ਸਕਿੰਟਾਂ ਵਿੱਚ ਇੱਕ ਰੀਡਿੰਗ।</string>
+    <string name="analytics_total_caption">ਕੁੱਲ %1$s · %2$s</string>
+    <string name="analytics_insights">ਝਲਕੀਆਂ</string>
+    <string name="analytics_peak_hour">ਸਿਖਰ ਦਾ ਘੰਟਾ</string>
+    <string name="analytics_peak_last_24h">ਪਿਛਲੇ 24 ਘੰਟਿਆਂ ਵਿੱਚ %1$s</string>
+    <string name="analytics_no_usage_yet">ਅਜੇ ਕੋਈ ਵਰਤੋਂ ਨਹੀਂ</string>
+    <string name="analytics_daily_average">ਰੋਜ਼ਾਨਾ ਔਸਤ</string>
+    <string name="analytics_needs_full_day">ਇੱਕ ਪੂਰੇ ਦਿਨ ਦੀ ਲੋੜ ਹੈ</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">ਪਿਛਲੇ %1$d ਦਿਨ ਵਿੱਚ</item>
+        <item quantity="other">ਪਿਛਲੇ %1$d ਦਿਨਾਂ ਵਿੱਚ</item>
+    </plurals>
+    <string name="analytics_today_vs_average">ਅੱਜ ਬਨਾਮ ਔਸਤ</string>
+    <string name="analytics_above_usual_day">ਤੁਹਾਡੇ ਆਮ ਦਿਨ ਤੋਂ ਵੱਧ</string>
+    <string name="analytics_below_usual_day">ਤੁਹਾਡੇ ਆਮ ਦਿਨ ਤੋਂ ਘੱਟ</string>
+    <string name="analytics_about_usual_day">ਤੁਹਾਡੇ ਆਮ ਦਿਨ ਦੇ ਬਰਾਬਰ</string>
+    <string name="analytics_top_device">ਸਿਖਰਲਾ ਡਿਵਾਈਸ</string>
+    <string name="analytics_no_metered_device">ਕੋਈ ਮੀਟਰ ਵਾਲਾ ਡਿਵਾਈਸ ਨਹੀਂ</string>
+    <string name="analytics_billing_cycle">ਬਿੱਲ ਚੱਕਰ</string>
+    <string name="analytics_time_elapsed">ਬੀਤਿਆ ਸਮਾਂ</string>
+    <string name="analytics_day_of_days">%2$d ਵਿੱਚੋਂ ਦਿਨ %1$d</string>
+    <string name="analytics_budget_used">ਵਰਤਿਆ ਗਿਆ ਬਜਟ</string>
+    <string name="analytics_cost_of_budget">%2$s ਵਿੱਚੋਂ %1$s</string>
+    <string name="analytics_spending_ahead">ਖਰਚਾ ਕੈਲੰਡਰ ਤੋਂ ਅੱਗੇ ਚੱਲ ਰਿਹਾ ਹੈ।</string>
+    <string name="analytics_budget_hint">ਖਰਚੇ ਨੂੰ ਟਰੈਕ ਕਰਨ ਲਈ ਟੈਰਿਫ ਵਿੱਚ ਮਹੀਨਾਵਾਰ ਬਜਟ ਸੈੱਟ ਕਰੋ।</string>
+    <string name="analytics_by_device">ਡਿਵਾਈਸ ਅਨੁਸਾਰ</string>
+    <string name="analytics_device_cycle_summary">ਇਸ ਚੱਕਰ ਵਿੱਚ %1$s · %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">ਤਾਪਮਾਨ</string>
+    <string name="analytics_reading_humidity">ਨਮੀ</string>
+    <string name="analytics_pm25_now">ਹੁਣੇ PM2.5</string>
+    <string name="analytics_air_no_sensor_online">ਕੋਈ ਸੈਂਸਰ ਔਨਲਾਈਨ ਨਹੀਂ ਹੈ</string>
+    <string name="analytics_air_status_excellent">ਸ਼ਾਨਦਾਰ · ਅੰਦਰੂਨੀ ਸਾਫ਼ ਹਵਾ</string>
+    <string name="analytics_air_status_good">ਚੰਗਾ · ਸਿਹਤਮੰਦ ਰੇਂਜ ਦੇ ਅੰਦਰ</string>
+    <string name="analytics_air_status_moderate">ਦਰਮਿਆਨਾ · ਪਿਊਰੀਫਾਇਰ ਚਲਾਓ ਜਾਂ ਕਮਰੇ ਵਿੱਚ ਹਵਾ ਆਉਣ ਦਿਓ</string>
+    <string name="analytics_air_status_poor">ਖ਼ਰਾਬ · ਪਿਊਰੀਫਾਇਰ ਨੂੰ ਤੇਜ਼ ਚਲਾਓ ਅਤੇ ਖਿੜਕੀਆਂ ਬੰਦ ਰੱਖੋ</string>
+    <string name="analytics_purifiers">ਪਿਊਰੀਫਾਇਰ</string>
+    <string name="analytics_running_of_total">%2$d ਵਿੱਚੋਂ %1$d</string>
+    <string name="analytics_all_on_standby">ਸਭ ਸਟੈਂਡਬਾਏ \'ਤੇ</string>
+    <string name="analytics_running_now">ਹੁਣੇ ਚੱਲ ਰਿਹਾ ਹੈ</string>
+    <string name="analytics_filter_life">ਫਿਲਟਰ ਦੀ ਉਮਰ</string>
+    <string name="analytics_filter_replace_soon">ਜਲਦੀ ਬਦਲੋ</string>
+    <string name="analytics_filter_healthy">ਸਿਹਤਮੰਦ</string>
+    <string name="analytics_sensors_average">ਤੁਹਾਡੇ ਸੈਂਸਰਾਂ ਦੀ ਔਸਤ</string>
+    <string name="analytics_humidity_dry">ਸੁੱਕਾ</string>
+    <string name="analytics_humidity_humid">ਨਮੀ ਵਾਲਾ</string>
+    <string name="analytics_humidity_comfortable">ਆਰਾਮਦਾਇਕ</string>
+    <string name="analytics_trend">ਰੁਝਾਨ</string>
+    <string name="analytics_no_air_history">ਅਜੇ ਕੋਈ ਇਤਿਹਾਸ ਨਹੀਂ ਹੈ। ਜਦੋਂ ਸੈਂਸਰ ਔਨਲਾਈਨ ਹੁੰਦਾ ਹੈ ਤਾਂ ਹਰ ਮਿੰਟ ਰੀਡਿੰਗ ਰਿਕਾਰਡ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।</string>
+    <string name="analytics_air_chart_summary">ਪ੍ਰਤੀ %2$s %1$s, ਔਸਤ %3$s</string>
+    <string name="analytics_pm25_dashed_caption">ਡੈਸ਼ ਵਾਲੀਆਂ ਲਾਈਨਾਂ: 15 µg/m³ ਸਾਫ਼-ਹਵਾ ਦਾ ਟੀਚਾ, 35 µg/m³ ਚੰਗੀ ਹਵਾ ਦੀ ਉਪਰਲੀ ਸੀਮਾ।</string>
+    <string name="analytics_period_5m">5 ਮਿੰਟ</string>
+    <string name="analytics_period_60m">60 ਮਿੰਟ</string>
+    <string name="analytics_period_24h">24 ਘੰਟੇ</string>
+    <string name="analytics_period_7d">7 ਦਿਨ</string>
+    <string name="analytics_period_30d">30 ਦਿਨ</string>
+    <string name="analytics_average">ਔਸਤ</string>
+    <string name="analytics_air_level_over_period">%2$s ਦੌਰਾਨ %1$s</string>
+    <string name="analytics_peak">ਸਿਖਰ</string>
+    <string name="analytics_value_with_peak">%1$s · ਸਿਖਰ %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">ਘੰਟੇ ਅਨੁਸਾਰ ਵਰਤੋਂ</string>
+    <string name="analytics_peak_pm25_by_hour">ਘੰਟੇ ਅਨੁਸਾਰ ਸਿਖਰ PM2.5</string>
+    <string name="analytics_hour_grid_caption">ਪਿਛਲੇ 7 ਦਿਨਾਂ ਦੇ ਹਰ ਘੰਟੇ ਲਈ ਇੱਕ ਸੈੱਲ। ਗੂੜ੍ਹਾ ਸੈੱਲ ਵੱਧ ਮੁੱਲ ਦਰਸਾਉਂਦਾ ਹੈ।</string>
+    <string name="analytics_hour_grid_summary">%1$s, ਪਿਛਲੇ 7 ਦਿਨਾਂ ਦਾ ਹਰ ਘੰਟਾ</string>
+    <string name="analytics_time_at_each_level">ਹਰੇਕ ਪੱਧਰ \'ਤੇ ਸਮਾਂ</string>
+    <string name="analytics_time_good_air">ਚੰਗੀ ਹਵਾ ਵਾਲਾ ਸਮਾਂ</string>
+    <string name="analytics_pm25_good_over_period">%1$s ਦੌਰਾਨ PM2.5 35 µg/m³ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ</string>
+    <string name="analytics_sensors">ਸੈਂਸਰ</string>
+    <string name="analytics_offline">ਔਫਲਾਈਨ</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">ਸੈਟਿੰਗਾਂ</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">ਸਿਸਟਮ</string>
+    <string name="settings_theme_light">ਹਲਕਾ</string>
+    <string name="settings_theme_dark">ਗੂੜ੍ਹਾ</string>
+    <string name="settings_role_admin">ਐਡਮਿਨ</string>
+    <string name="settings_role_member">ਮੈਂਬਰ</string>
+    <string name="settings_role_guest">ਮਹਿਮਾਨ</string>
+    <string name="settings_avatar">ਅਵਤਾਰ</string>
+    <string name="settings_section_home">ਘਰ</string>
+    <string name="settings_add_devices">ਡਿਵਾਈਸਾਂ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="settings_add_devices_subtitle">ਤੁਹਾਡੇ ਖਾਤੇ ਅਤੇ ਨੈੱਟਵਰਕ ਜੋ ਪੇਸ਼ ਕਰਦੇ ਹਨ ਉਸਨੂੰ ਲੱਭੋ ਅਤੇ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="settings_plugins">ਪਲੱਗਇਨ</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue ਅਤੇ MQTT</string>
+    <string name="settings_rooms">ਕਮਰੇ</string>
+    <string name="settings_people">ਲੋਕ</string>
+    <string name="settings_people_subtitle">ਖਾਤੇ, ਭੂਮਿਕਾਵਾਂ ਅਤੇ ਕਮਰੇ ਦੀ ਪਹੁੰਚ</string>
+    <string name="settings_tariff">ਬਿਜਲੀ ਟੈਰਿਫ</string>
+    <string name="settings_tariff_subtitle">ਦਰ, ਬਿੱਲ ਚੱਕਰ ਅਤੇ ਬਜਟ</string>
+    <string name="settings_location">ਘਰ ਦਾ ਸਥਾਨ</string>
+    <string name="settings_location_subtitle">ਸੂਰਜ ਚੜ੍ਹਨ ਅਤੇ ਸੂਰਜ ਡੁੱਬਣ ਵਾਲੀਆਂ ਆਟੋਮੇਸ਼ਨਾਂ ਲਈ</string>
+    <string name="settings_notifications">ਸੂਚਨਾਵਾਂ</string>
+    <string name="settings_notifications_subtitle">ਤੁਹਾਡੇ ਘਰ ਨੇ ਕੀ ਰਿਪੋਰਟ ਕੀਤਾ</string>
+    <string name="settings_background_alerts">ਐਪ ਬੰਦ ਹੋਣ \'ਤੇ ਚੇਤਾਵਨੀਆਂ</string>
+    <string name="settings_background_alerts_subtitle">ਤੁਹਾਡੇ ਸਰਵਰ ਨਾਲ ਕਨੈਕਸ਼ਨ ਖੁੱਲ੍ਹਾ ਰੱਖਦਾ ਹੈ। ਥੋੜ੍ਹੀ ਜਿਹੀ ਬੈਟਰੀ ਵਰਤਦਾ ਹੈ।</string>
+    <string name="settings_section_server">ਸਰਵਰ</string>
+    <string name="settings_server_live_pinned">ਲਾਈਵ · ਪਿੰਨ ਕੀਤਾ ਸਰਟੀਫਿਕੇਟ</string>
+    <string name="settings_server_live_public">ਲਾਈਵ · ਜਨਤਕ ਸਰਟੀਫਿਕੇਟ</string>
+    <string name="settings_server_reconnecting">ਮੁੜ-ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…</string>
+    <string name="settings_server_live_badge">ਲਾਈਵ</string>
+    <string name="settings_server_cert_public">ਇਨਕ੍ਰਿਪਟਡ · ਜਨਤਕ ਅਥਾਰਟੀ ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਸਰਟੀਫਿਕੇਟ</string>
+    <string name="settings_server_cert_pinned">ਇਨਕ੍ਰਿਪਟਡ · ਤੁਸੀਂ ਪਹਿਲੀ ਵਰਤੋਂ \'ਤੇ ਇਸ ਸਰਵਰ ਦੇ ਆਪਣੇ ਸਰਟੀਫਿਕੇਟ ਨੂੰ ਮਨਜ਼ੂਰੀ ਦਿੱਤੀ ਸੀ:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 ਫਿੰਗਰਪ੍ਰਿੰਟ</string>
+    <string name="settings_fingerprint_clip_label">ਫਿੰਗਰਪ੍ਰਿੰਟ</string>
+    <string name="settings_copied">ਕਾਪੀ ਕੀਤਾ ਗਿਆ</string>
+    <string name="settings_copy">ਕਾਪੀ ਕਰੋ</string>
+    <string name="settings_change_password">ਪਾਸਵਰਡ ਬਦਲੋ</string>
+    <string name="settings_change_password_subtitle">Domus ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰਨ ਲਈ</string>
+    <string name="settings_server_addresses">ਸਰਵਰ ਪਤੇ</string>
+    <string name="settings_server_addresses_subtitle">ਘਰ ਦਾ ਨੈੱਟਵਰਕ ਅਤੇ ਰਿਮੋਟ ਪਹੁੰਚ</string>
+    <string name="settings_updates">ਅੱਪਡੇਟ</string>
+    <string name="settings_updates_subtitle">ਸੰਸਕਰਣ %1$s, ਰੀਲੀਜ਼ ਨੋਟਸ ਅਤੇ ਚੈਨਲ</string>
+    <string name="settings_about">Domus ਬਾਰੇ</string>
+    <string name="settings_about_subtitle">ਸੰਸਕਰਣ %1$s, ਡਿਵੈਲਪਰ ਅਤੇ ਧੰਨਵਾਦ</string>
+    <string name="settings_appearance">ਦਿੱਖ</string>
+    <string name="settings_wallpaper_colors">ਵਾਲਪੇਪਰ ਦੇ ਰੰਗ</string>
+    <string name="settings_wallpaper_colors_subtitle">ਐਪ ਨੂੰ ਆਪਣੇ ਵਾਲਪੇਪਰ ਨਾਲ ਮਿਲਾਓ</string>
+    <string name="settings_section_account">ਖਾਤਾ</string>
+    <string name="settings_account_subtitle">ਸਾਈਨ ਆਊਟ ਕਰੋ ਜਾਂ ਕੋਈ ਹੋਰ ਸਰਵਰ ਵਰਤੋ</string>
+    <string name="settings_sign_out">ਸਾਈਨ ਆਊਟ ਕਰੋ</string>
+    <string name="settings_use_another_server">ਕੋਈ ਹੋਰ ਸਰਵਰ ਵਰਤੋ</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">ਪਿੱਛੇ</string>
+    <string name="manage_hide_field">%1$s ਲੁਕਾਓ</string>
+    <string name="manage_show_field">%1$s ਦਿਖਾਓ</string>
+    <string name="manage_choose">ਚੁਣੋ…</string>
+    <string name="manage_close">ਬੰਦ ਕਰੋ</string>
+    <string name="manage_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="manage_save">ਸੇਵ ਕਰੋ</string>
+    <string name="manage_delete">ਮਿਟਾਓ</string>
+    <string name="manage_rooms_title">ਕਮਰੇ</string>
+    <string name="manage_add_room">ਕਮਰਾ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="manage_no_rooms">ਅਜੇ ਕੋਈ ਕਮਰਾ ਨਹੀਂ</string>
+    <string name="manage_no_rooms_subtitle">ਕਮਰੇ ਡਿਵਾਈਸਾਂ ਦਾ ਗਰੁੱਪ ਬਣਾਉਂਦੇ ਹਨ ਅਤੇ ਇਹ ਤੈਅ ਕਰਦੇ ਹਨ ਕਿ ਕੋਈ ਮੈਂਬਰ ਜਾਂ ਮਹਿਮਾਨ ਕਿਹੜੀਆਂ ਡਿਵਾਈਸਾਂ ਦੇਖ ਸਕਦਾ ਹੈ।</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d ਡਿਵਾਈਸ</item>
+        <item quantity="other">%1$d ਡਿਵਾਈਸਾਂ</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d ਕਮਰਾ</item>
+        <item quantity="other">%1$d ਕਮਰੇ</item>
+    </plurals>
+    <string name="manage_room_subtitle">ਮੰਜ਼ਿਲ %1$d · %2$s</string>
+    <string name="manage_new_room">ਨਵਾਂ ਕਮਰਾ</string>
+    <string name="manage_edit_room">ਕਮਰਾ ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="manage_field_name">ਨਾਮ</string>
+    <string name="manage_field_floor">ਮੰਜ਼ਿਲ</string>
+    <string name="manage_role_admin">ਐਡਮਿਨ</string>
+    <string name="manage_role_member">ਮੈਂਬਰ</string>
+    <string name="manage_role_guest">ਮਹਿਮਾਨ</string>
+    <string name="manage_level_none">ਕੋਈ ਨਹੀਂ</string>
+    <string name="manage_level_view">ਸਿਰਫ਼ ਦੇਖੋ</string>
+    <string name="manage_level_control">ਕੰਟਰੋਲ</string>
+    <string name="manage_level_edit">ਸੰਪਾਦਿਤ ਕਰੋ</string>
+    <string name="manage_access_to">%1$s ਤੱਕ ਪਹੁੰਚ</string>
+    <string name="manage_whole_room_level">ਪੂਰਾ ਕਮਰਾ · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d ਵਿੱਚੋਂ %1$d ਡਿਵਾਈਸਾਂ</string>
+    <string name="manage_no_access">ਕੋਈ ਪਹੁੰਚ ਨਹੀਂ</string>
+    <string name="manage_close_item">%1$s ਬੰਦ ਕਰੋ</string>
+    <string name="manage_open_item">%1$s ਖੋਲ੍ਹੋ</string>
+    <string name="manage_whole_room">ਪੂਰਾ ਕਮਰਾ</string>
+    <string name="manage_whole_room_hint">ਬਾਅਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ ਡਿਵਾਈਸਾਂ ਨੂੰ ਵੀ ਕਵਰ ਕਰਦਾ ਹੈ</string>
+    <string name="manage_no_devices_in_room">ਇਸ ਕਮਰੇ ਵਿੱਚ ਅਜੇ ਕੋਈ ਡਿਵਾਈਸ ਨਹੀਂ ਹੈ।</string>
+    <string name="manage_people_title">ਲੋਕ</string>
+    <string name="manage_add_person">ਵਿਅਕਤੀ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="manage_access_whole_home">ਪੂਰਾ ਘਰ</string>
+    <string name="manage_access_none">ਕੋਈ ਪਹੁੰਚ ਨਹੀਂ</string>
+    <string name="manage_user_tag_kid">ਬੱਚਾ</string>
+    <string name="manage_user_tag_reset_requested">ਪਾਸਵਰਡ ਰੀਸੈਟ ਦੀ ਮੰਗ ਕੀਤੀ</string>
+    <string name="manage_person_title">ਵਿਅਕਤੀ</string>
+    <string name="manage_handover_reset_title">%1$s ਲਈ ਰੀਸੈਟ ਕੋਡ</string>
+    <string name="manage_handover_signin_title">%1$s ਲਈ ਸਾਈਨ-ਇਨ ਵੇਰਵੇ</string>
+    <string name="manage_handover_shown_once">ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਦਿਖਾਇਆ ਗਿਆ। ਇਸਨੂੰ ਹੁਣੇ ਉਹਨਾਂ ਨੂੰ ਭੇਜੋ।</string>
+    <string name="manage_copy">ਕਾਪੀ ਕਰੋ</string>
+    <string name="manage_share">ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="manage_done">ਹੋ ਗਿਆ</string>
+    <string name="manage_new_person">ਨਵਾਂ ਵਿਅਕਤੀ</string>
+    <string name="manage_avatar">ਅਵਤਾਰ</string>
+    <string name="manage_roll">ਰੋਲ ਕਰੋ</string>
+    <string name="manage_field_username">ਵਰਤੋਂਕਾਰ ਨਾਮ</string>
+    <string name="manage_username_supporting">ਘੱਟੋ-ਘੱਟ 3 ਅੱਖਰ</string>
+    <string name="manage_field_email">ਈਮੇਲ</string>
+    <string name="manage_email_taken">ਪਹਿਲਾਂ ਹੀ ਕਿਸੇ ਹੋਰ ਖਾਤੇ ਦੁਆਰਾ ਵਰਤੀ ਜਾ ਰਹੀ ਹੈ</string>
+    <string name="manage_email_available">ਉਪਲਬਧ</string>
+    <string name="manage_email_hint">ਇੱਕ ਟਾਈਪ ਕਰੋ, ਜਾਂ ਇਸਨੂੰ ਵਰਤੋਂਕਾਰ ਨਾਮ ਤੋਂ ਬਣਾਓ</string>
+    <string name="manage_generate_email">@domus.home ਈਮੇਲ ਬਣਾਓ</string>
+    <string name="manage_section_password">ਪਾਸਵਰਡ</string>
+    <string name="manage_kid_account">ਬੱਚੇ ਦਾ ਖਾਤਾ</string>
+    <string name="manage_kid_account_on">ਤੁਸੀਂ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਦੇ ਹੋ ਅਤੇ ਇਹ ਉਵੇਂ ਹੀ ਰਹਿੰਦਾ ਹੈ।</string>
+    <string name="manage_kid_account_off">ਬੰਦ: Domus ਇੱਕ ਪਾਸਵਰਡ ਬਣਾਉਂਦਾ ਹੈ, ਅਤੇ ਉਹ ਪਹਿਲੀ ਵਾਰ ਸਾਈਨ-ਇਨ ਕਰਨ \'ਤੇ ਆਪਣਾ ਚੁਣਦੇ ਹਨ।</string>
+    <string name="manage_field_new_password">ਨਵਾਂ ਪਾਸਵਰਡ</string>
+    <string name="manage_field_password">ਪਾਸਵਰਡ</string>
+    <string name="manage_password_keep_current">ਮੌਜੂਦਾ ਪਾਸਵਰਡ ਰੱਖਣ ਲਈ ਖਾਲੀ ਛੱਡੋ</string>
+    <string name="manage_password_min_length">ਘੱਟੋ-ਘੱਟ 8 ਅੱਖਰ</string>
+    <string name="manage_password_after_saving">ਸੇਵ ਕਰਨ ਤੋਂ ਬਾਅਦ ਤੁਹਾਨੂੰ ਕਾਪੀ ਜਾਂ ਸਾਂਝਾ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਮਿਲਦਾ ਹੈ।</string>
+    <string name="manage_reset_requested_notice">%1$s ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਿਆ ਅਤੇ ਰੀਸੈਟ ਦੀ ਮੰਗ ਕੀਤੀ।</string>
+    <string name="manage_reset_code">ਰੀਸੈਟ ਕੋਡ</string>
+    <string name="manage_reset_code_active">ਇੱਕ ਕੋਡ %1$s ਤੱਕ ਸਰਗਰਮ ਹੈ। ਇਸਨੂੰ ਵਾਪਸ ਲੈਣ ਲਈ ਬੰਦ ਕਰੋ।</string>
+    <string name="manage_reset_code_help">ਇੱਕ ਵਾਰ ਵਰਤਣ ਵਾਲਾ ਕੋਡ ਜੋ ਉਹ ਨਵਾਂ ਪਾਸਵਰਡ ਚੁਣਨ ਲਈ \"ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?\" ਦੇ ਅਧੀਨ ਦਰਜ ਕਰਦੇ ਹਨ। 30 ਮਿੰਟਾਂ ਲਈ ਵੈਧ।</string>
+    <string name="manage_generate_new_password">ਇੱਕ ਨਵਾਂ ਪਾਸਵਰਡ ਬਣਾਓ</string>
+    <string name="manage_section_role">ਭੂਮਿਕਾ</string>
+    <string name="manage_role_admin_desc">ਹਰ ਚੀਜ਼ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ।</string>
+    <string name="manage_role_member_desc">ਜੋ ਉਹਨਾਂ ਨੂੰ ਦਿੱਤਾ ਗਿਆ ਹੈ ਉਹ ਦੇਖਦਾ ਹੈ। ਕੰਟਰੋਲ, ਜਾਂ ਡਿਵਾਈਸ ਦਾ ਨਾਮ ਬਦਲਣ ਲਈ ਸੰਪਾਦਨ, ਪ੍ਰਤੀ ਕਮਰੇ ਅਤੇ ਡਿਵਾਈਸ ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="manage_role_guest_desc">ਜੋ ਉਹਨਾਂ ਨੂੰ ਦਿੱਤਾ ਗਿਆ ਹੈ ਉਹ ਦੇਖਦਾ ਹੈ, ਇਸਨੂੰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦਾ।</string>
+    <string name="manage_section_access">ਪਹੁੰਚ</string>
+    <string name="manage_custom_access">ਕਸਟਮ ਪਹੁੰਚ</string>
+    <string name="manage_custom_access_off">ਬੰਦ: ਉਹ ਪੂਰੇ ਘਰ ਤੱਕ ਪਹੁੰਚ ਕਰਦੇ ਹਨ।</string>
+    <string name="manage_custom_access_on">ਹਰ ਕਮਰੇ ਲਈ, ਜਾਂ ਉਸ ਵਿੱਚ ਮੌਜੂਦ ਇਕੱਲੇ ਡਿਵਾਈਸਾਂ ਲਈ ਇੱਕ ਪੱਧਰ ਸੈੱਟ ਕਰੋ।</string>
+    <string name="manage_create_rooms_first">ਪਹਿਲਾਂ ਕਮਰੇ ਬਣਾਓ।</string>
+    <string name="manage_no_room">ਕੋਈ ਕਮਰਾ ਨਹੀਂ</string>
+    <string name="manage_remove_user_title">ਕੀ %1$s ਨੂੰ ਹਟਾਉਣਾ ਹੈ?</string>
+    <string name="manage_remove_user_text">ਉਹ ਤੁਰੰਤ ਪਹੁੰਚ ਗੁਆ ਦਿੰਦੇ ਹਨ।</string>
+    <string name="manage_remove">ਹਟਾਓ</string>
+    <string name="manage_tariff_title">ਬਿਜਲੀ ਟੈਰਿਫ</string>
+    <string name="manage_rate_per_kwh">ਪ੍ਰਤੀ kWh ਦਰ</string>
+    <string name="manage_currency">ਮੁਦਰਾ</string>
+    <string name="manage_currency_supporting">ISO ਕੋਡ, ਜਿਵੇਂ INR</string>
+    <string name="manage_fixed_monthly_charge">ਸਥਿਰ ਮਹੀਨਾਵਾਰ ਚਾਰਜ</string>
+    <string name="manage_billing_day">ਬਿੱਲ ਦਾ ਦਿਨ</string>
+    <string name="manage_billing_day_supporting">1 ਤੋਂ 28</string>
+    <string name="manage_monthly_budget">ਮਹੀਨਾਵਾਰ ਬਜਟ (ਵਿਕਲਪਿਕ)</string>
+    <string name="manage_usage_slabs">ਵਰਤੋਂ ਦੀਆਂ ਸਲੈਬਾਂ</string>
+    <string name="manage_slabs_empty">ਫਲੈਟ ਰੇਟ। ਜੇਕਰ ਤੁਹਾਡੀ ਕੀਮਤ ਬਿੱਲ ਚੱਕਰ ਵਿੱਚ ਤੁਹਾਡੀ ਵਰਤੋਂ ਅਨੁਸਾਰ ਬਦਲਦੀ ਹੈ ਤਾਂ ਸਲੈਬਾਂ ਸ਼ਾਮਲ ਕਰੋ।</string>
+    <string name="manage_slabs_help">ਹਰ ਸਲੈਬ ਦੀ ਦਰ ਉਸਦੀ ਸੀਮਾ ਤੱਕ ਲਾਗੂ ਹੁੰਦੀ ਹੈ। ਉੱਪਰਲੀ ਹਰ ਚੀਜ਼ ਲਈ ਆਖਰੀ ਸੀਮਾ ਨੂੰ ਖਾਲੀ ਛੱਡੋ।</string>
+    <string name="manage_up_to_kwh">kWh ਤੱਕ</string>
+    <string name="manage_slab_rate">ਦਰ</string>
+    <string name="manage_remove_slab">ਸਲੈਬ %1$d ਹਟਾਓ</string>
+    <string name="manage_add_slab">ਸਲੈਬ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="manage_time_of_day">ਦਿਨ ਦਾ ਸਮਾਂ</string>
+    <string name="manage_time_of_day_help">ਘਰ ਦੀ ਘੜੀ ਅਨੁਸਾਰ ਉਹ ਘੰਟੇ ਜਦੋਂ ਇੱਕ ਯੂਨਿਟ ਦੀ ਕੀਮਤ ਉੱਪਰ ਦਿੱਤੀ ਦਰ ਤੋਂ ਵੱਧ ਜਾਂ ਘੱਟ ਹੁੰਦੀ ਹੈ। ਪ੍ਰਤੀ kWh ਅੰਤਰ ਦਰਜ ਕਰੋ: ਪੀਕ ਸਰਚਾਰਜ ਲਈ 1.1, ਰਾਤ ਦੀ ਛੋਟ ਲਈ -1.5।</string>
+    <string name="manage_window_from">ਤੋਂ</string>
+    <string name="manage_window_until">ਤੱਕ</string>
+    <string name="manage_window_per_kwh">ਪ੍ਰਤੀ kWh</string>
+    <string name="manage_remove_time_window">ਸਮਾਂ ਵਿੰਡੋ %1$d ਹਟਾਓ</string>
+    <string name="manage_add_time_window">ਸਮਾਂ ਵਿੰਡੋ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="manage_server_addresses_title">ਸਰਵਰ ਪਤੇ</string>
+    <string name="manage_server_addresses_help">Domus ਤੁਹਾਡੇ ਨੈੱਟਵਰਕ \'ਤੇ ਘਰ ਦੇ ਪਤੇ ਅਤੇ ਬਾਕੀ ਹਰ ਥਾਂ ਰਿਮੋਟ ਪਤੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਦੋਵਾਂ \'ਤੇ ਸਾਈਨ ਇਨ ਰਹਿੰਦੇ ਹੋ।</string>
+    <string name="manage_home_network">ਘਰ ਦਾ ਨੈੱਟਵਰਕ</string>
+    <string name="manage_home_network_supporting">ਉਦਾਹਰਨ ਲਈ https://192.168.1.10:8443</string>
+    <string name="manage_remote">ਰਿਮੋਟ</string>
+    <string name="manage_remote_supporting">ਉਦਾਹਰਨ ਲਈ ਇੱਕ Cloudflare Tunnel ਹੋਸਟਨਾਮ</string>
+    <string name="manage_not_set">ਸੈੱਟ ਨਹੀਂ ਹੈ</string>
+    <string name="manage_location_disabled">ਇਸ ਫ਼ੋਨ \'ਤੇ ਲੋਕੇਸ਼ਨ ਬੰਦ ਹੈ। ਇਸਦੀ ਬਜਾਏ ਸਥਾਨ ਦੀ ਖੋਜ ਕਰੋ।</string>
+    <string name="manage_location_not_found">ਇਹ ਫ਼ੋਨ ਇਹ ਨਹੀਂ ਲੱਭ ਸਕਿਆ ਕਿ ਇਹ ਕਿੱਥੇ ਹੈ। ਇਸਦੀ ਬਜਾਏ ਸਥਾਨ ਦੀ ਖੋਜ ਕਰੋ।</string>
+    <string name="manage_location_permission_denied">ਲੋਕੇਸ਼ਨ ਪਹੁੰਚ ਤੋਂ ਬਿਨਾਂ, ਸਥਾਨ ਦੀ ਖੋਜ ਕਰੋ ਜਾਂ ਕੋਆਰਡੀਨੇਟ ਟਾਈਪ ਕਰੋ।</string>
+    <string name="manage_location_title">ਘਰ ਦਾ ਸਥਾਨ</string>
+    <string name="manage_location_sun_times">ਅੱਜ ਸੂਰਜ %1$s ਵਜੇ ਚੜ੍ਹਦਾ ਹੈ ਅਤੇ %2$s ਵਜੇ ਡੁੱਬਦਾ ਹੈ।</string>
+    <string name="manage_location_help">ਇੱਕ ਵਾਰ ਜਦੋਂ Domus ਨੂੰ ਅੰਦਾਜ਼ਾ ਹੋ ਜਾਂਦਾ ਹੈ ਕਿ ਘਰ ਕਿੱਥੇ ਹੈ, ਤਾਂ ਆਟੋਮੇਸ਼ਨਾਂ ਸੂਰਜ ਚੜ੍ਹਨ ਅਤੇ ਸੂਰਜ ਡੁੱਬਣ ਵੇਲੇ ਚੱਲ ਸਕਦੀਆਂ ਹਨ। ਇਹ ਤੁਹਾਡੇ ਸਰਵਰ \'ਤੇ ਰਹਿੰਦਾ ਹੈ।</string>
+    <string name="manage_use_phone_location">ਇਸ ਫ਼ੋਨ ਦੀ ਲੋਕੇਸ਼ਨ ਵਰਤੋ</string>
+    <string name="manage_find_place">ਕੋਈ ਸਥਾਨ ਲੱਭੋ</string>
+    <string name="manage_find_place_supporting">ਕਸਬਾ ਜਾਂ ਸ਼ਹਿਰ</string>
+    <string name="manage_search_place">ਸਥਾਨ ਲਈ ਖੋਜ ਕਰੋ</string>
+    <string name="manage_no_place_found">ਉਸ ਨਾਮ ਨਾਲ ਕੋਈ ਸਥਾਨ ਨਹੀਂ ਹੈ। ਨੇੜਲੇ ਸ਼ਹਿਰ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="manage_latitude">ਅਕਸ਼ਾਂਸ਼ (Latitude)</string>
+    <string name="manage_latitude_supporting">ਉਦਾਹਰਨ ਲਈ 18.52</string>
+    <string name="manage_longitude">ਦੇਸ਼ਾਂਤਰ (Longitude)</string>
+    <string name="manage_longitude_supporting">ਉਦਾਹਰਨ ਲਈ 73.86</string>
+    <string name="manage_change_password_title">ਪਾਸਵਰਡ ਬਦਲੋ</string>
+    <string name="manage_change_password_help">ਤੁਸੀਂ ਇਸ ਅਤੇ ਹੋਰ ਹਰੇਕ ਡਿਵਾਈਸ \'ਤੇ ਸਾਈਨ ਇਨ ਰਹਿੰਦੇ ਹੋ।</string>
+    <string name="manage_current_password">ਮੌਜੂਦਾ ਪਾਸਵਰਡ</string>
+    <string name="manage_repeat_new_password">ਨਵਾਂ ਪਾਸਵਰਡ ਦੁਹਰਾਓ</string>
+    <string name="manage_passwords_mismatch">ਪਾਸਵਰਡ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ</string>
+    <string name="manage_delete_all_notices_title">ਕੀ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਮਿਟਾਉਣੀਆਂ ਹਨ?</string>
+    <string name="manage_delete_all_notices_text">ਉਹਨਾਂ ਨੂੰ ਹਰ ਡਿਵਾਈਸ ਤੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="manage_delete_all">ਸਭ ਮਿਟਾਓ</string>
+    <string name="manage_notifications_title">ਸੂਚਨਾਵਾਂ</string>
+    <string name="manage_mark_all_read">ਸਭ ਨੂੰ ਪੜ੍ਹਿਆ ਹੋਇਆ ਮਾਰਕ ਕਰੋ</string>
+    <string name="manage_no_notices">ਅਜੇ ਕੁਝ ਨਹੀਂ</string>
+    <string name="manage_no_notices_subtitle">ਆਟੋਮੇਸ਼ਨਾਂ, ਨਵੇਂ ਡਿਵਾਈਸਾਂ ਅਤੇ ਔਫਲਾਈਨ ਡਿਵਾਈਸਾਂ ਦੀਆਂ ਚੇਤਾਵਨੀਆਂ ਇੱਥੇ ਦਿਖਾਈ ਦਿੰਦੀਆਂ ਹਨ।</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life ਐਪ ਨਾਲ ਸਕੈਨ ਕਰਨ ਲਈ QR ਕੋਡ</string>
+    <string name="onboard_region_india">ਭਾਰਤ</string>
+    <string name="onboard_region_china">ਚੀਨ</string>
+    <string name="onboard_region_europe">ਯੂਰਪ</string>
+    <string name="onboard_region_us">ਸੰਯੁਕਤ ਰਾਜ</string>
+    <string name="onboard_region_singapore">ਸਿੰਗਾਪੁਰ</string>
+    <string name="onboard_region_russia">ਰੂਸ</string>
+    <string name="onboard_region_taiwan">ਤਾਈਵਾਨ</string>
+    <string name="onboard_region_india_old">ਭਾਰਤ (ਪੁਰਾਣਾ)</string>
+    <string name="onboard_plugins_title">ਪਲੱਗਇਨ</string>
+    <string name="onboard_local_control">ਸਥਾਨਕ ਕੰਟਰੋਲ</string>
+    <string name="onboard_cloud">ਕਲਾਊਡ</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d ਡਿਵਾਈਸ</item>
+        <item quantity="other">%1$d ਡਿਵਾਈਸਾਂ</item>
+    </plurals>
+    <string name="onboard_account_linked">ਲਿੰਕ ਕੀਤਾ ਗਿਆ</string>
+    <string name="onboard_account_needs_attention">ਧਿਆਨ ਦੇਣ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="onboard_unlink_account">%1$s ਨੂੰ ਅਨਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_integration_disabled">ਸਰਵਰ ਕੌਂਫਿਗਰੇਸ਼ਨ ਵਿੱਚ ਬੰਦ ਕੀਤਾ ਗਿਆ ਹੈ।</string>
+    <string name="onboard_link_account">ਖਾਤਾ ਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_link_another_account">ਕੋਈ ਹੋਰ ਖਾਤਾ ਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_find_devices">ਡਿਵਾਈਸਾਂ ਲੱਭੋ</string>
+    <string name="onboard_unlink_title">ਕੀ %1$s ਨੂੰ ਅਨਲਿੰਕ ਕਰਨਾ ਹੈ?</string>
+    <string name="onboard_unlink_text">ਇਸ ਖਾਤੇ ਤੋਂ ਆਏ ਡਿਵਾਈਸਾਂ ਨੂੰ Domus ਤੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="onboard_unlink">ਅਨਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_link_integration">%1$s ਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_tuya_qr_instructions">ਇਸਨੂੰ Smart Life ਜਾਂ Tuya Smart ਐਪ ਨਾਲ ਸਕੈਨ ਕਰੋ (ਇਸਦੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸਕੈਨ ਬਟਨ), ਫਿਰ ਉੱਥੇ ਪੁਸ਼ਟੀ ਕਰੋ। ਉਸੇ ਫ਼ੋਨ \'ਤੇ, ਇਸ ਕੋਡ ਨੂੰ ਕਿਸੇ ਹੋਰ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਓ।</string>
+    <string name="onboard_waiting_for_scan">ਸਕੈਨ ਦੀ ਉਡੀਕ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life ਐਪ ਵਿੱਚ Me → Settings → Account and Security → User Code ਖੋਲ੍ਹੋ, ਅਤੇ ਉਹ ਕੋਡ ਇੱਥੇ ਟਾਈਪ ਕਰੋ।</string>
+    <string name="onboard_user_code">ਯੂਜ਼ਰ ਕੋਡ</string>
+    <string name="onboard_qr_expired">ਉਸ QR ਕੋਡ ਦੀ ਮਿਆਦ ਪੁੱਗ ਗਈ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="onboard_verify_title">ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਇਹ ਤੁਸੀਂ ਹੋ</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi ਨੇ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਇੱਕ ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ ਭੇਜਿਆ ਹੈ। ਇਸਨੂੰ ਇੱਥੇ ਟਾਈਪ ਕਰੋ। ਇਹ ਕੁਝ ਮਿੰਟਾਂ ਬਾਅਦ ਸਮਾਪਤ ਹੋ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi ਨੇ ਤੁਹਾਡੀ ਈਮੇਲ \'ਤੇ ਇੱਕ ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ ਭੇਜਿਆ ਹੈ। ਇਸਨੂੰ ਇੱਥੇ ਟਾਈਪ ਕਰੋ। ਇਹ ਕੁਝ ਮਿੰਟਾਂ ਬਾਅਦ ਸਮਾਪਤ ਹੋ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="onboard_verification_code">ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ</string>
+    <string name="onboard_send_new_code">ਇੱਕ ਨਵਾਂ ਕੋਡ ਭੇਜੋ</string>
+    <string name="onboard_use_another_account">ਕੋਈ ਹੋਰ ਖਾਤਾ ਵਰਤੋ</string>
+    <string name="onboard_tapo_instructions">ਆਪਣੇ TP-Link ਖਾਤੇ ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ। ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਨੈੱਟਵਰਕ \'ਤੇ ਤੁਹਾਡੇ Tapo ਡਿਵਾਈਸਾਂ ਨਾਲ ਗੱਲ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।</string>
+    <string name="onboard_xiaomi_instructions">ਆਪਣੇ Xiaomi ਖਾਤੇ ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ। ਡਿਵਾਈਸ ਟੋਕਨ ਇੱਕ ਵਾਰ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ; ਕੰਟਰੋਲ ਸਥਾਨਕ ਰਹਿੰਦਾ ਹੈ। Xiaomi ਫਿਰ ਤੁਹਾਨੂੰ ਇੱਕ ਕੋਡ ਭੇਜ ਸਕਦਾ ਹੈ।</string>
+    <string name="onboard_xiaomi_username">ਈਮੇਲ, ਫ਼ੋਨ ਜਾਂ Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">ਫ਼ੋਨ ਨੰਬਰ ਨੂੰ ਇਸਦੇ ਦੇਸ਼ ਦੇ ਕੋਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ, ਜਿਵੇਂ +91…</string>
+    <string name="onboard_email_or_username">ਈਮੇਲ ਜਾਂ ਵਰਤੋਂਕਾਰ ਨਾਮ</string>
+    <string name="onboard_password">ਪਾਸਵਰਡ</string>
+    <string name="onboard_server_region">ਸਰਵਰ ਖੇਤਰ</string>
+    <string name="onboard_show_qr_code">QR ਕੋਡ ਦਿਖਾਓ</string>
+    <string name="onboard_verify">ਪੁਸ਼ਟੀ ਕਰੋ</string>
+    <string name="onboard_continue">ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="onboard_link">ਲਿੰਕ ਕਰੋ</string>
+    <string name="onboard_add_devices_title">ਡਿਵਾਈਸਾਂ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="onboard_scanning">ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…</string>
+    <string name="onboard_scan_again">ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ</string>
+    <string name="onboard_add_by_address">ਪਤੇ ਰਾਹੀਂ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="onboard_no_new_devices">ਕੋਈ ਨਵਾਂ ਡਿਵਾਈਸ ਨਹੀਂ</string>
+    <string name="onboard_no_new_devices_subtitle">ਲੱਭੀ ਗਈ ਹਰ ਚੀਜ਼ ਪਹਿਲਾਂ ਹੀ ਤੁਹਾਡੇ ਘਰ ਵਿੱਚ ਹੈ। ਹੋਰ ਲੱਭਣ ਲਈ ਪਲੱਗਇਨ ਦੇ ਅਧੀਨ ਇੱਕ ਖਾਤਾ ਲਿੰਕ ਕਰੋ।</string>
+    <string name="onboard_open_plugins">ਪਲੱਗਇਨ ਖੋਲ੍ਹੋ</string>
+    <string name="onboard_found_count">%1$d ਮਿਲੇ</string>
+    <string name="onboard_add">ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="onboard_ignore">ਅਣਡਿੱਠ ਕਰੋ</string>
+    <string name="onboard_add_device_title">%1$s ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="onboard_field_name">ਨਾਮ</string>
+    <string name="onboard_field_room">ਕਮਰਾ</string>
+    <string name="onboard_no_room">ਕੋਈ ਕਮਰਾ ਨਹੀਂ</string>
+    <string name="onboard_device_token_optional">ਡਿਵਾਈਸ ਟੋਕਨ (ਵਿਕਲਪਿਕ)</string>
+    <string name="onboard_device_token_supporting">ਸਿਰਫ਼ ਲਿੰਕ ਕੀਤੇ Xiaomi ਖਾਤੇ ਤੋਂ ਬਿਨਾਂ ਲੋੜੀਂਦਾ ਹੈ</string>
+    <string name="onboard_ip_address">IP ਪਤਾ</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">ਪਹਿਲਾਂ ਹੀ ਮੌਜੂਦ ਹੈ</string>
+    <string name="code_error_reference_missing" formatted="false">ਹਵਾਲਾ ਦਿੱਤੀ ਗਈ ਆਈਟਮ ਮੌਜੂਦ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_internal" formatted="false">ਅੰਦਰੂਨੀ ਸਰਵਰ ਤਰੁੱਟੀ</string>
+    <string name="code_error_session_expired" formatted="false">ਅਵੈਧ ਜਾਂ ਸਮਾਪਤ ਹੋਇਆ ਸੈਸ਼ਨ</string>
+    <string name="code_error_admin_required" formatted="false">ਪ੍ਰਸ਼ਾਸਕ ਪਹੁੰਚ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="code_error_guest_no_control" formatted="false">ਮਹਿਮਾਨ ਡਿਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+    <string name="code_error_not_signed_in" formatted="false">ਸਾਈਨ ਇਨ ਨਹੀਂ ਕੀਤਾ</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization ਹੈਡਰ ਗਾਇਬ ਹੈ</string>
+    <string name="code_error_account_gone" formatted="false">ਖਾਤਾ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_must_change_password" formatted="false">ਪਹਿਲਾਂ ਆਪਣਾ ਪਾਸਵਰਡ ਬਦਲੋ</string>
+    <string name="code_error_device_not_found" formatted="false">ਡਿਵਾਈਸ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_empty_command" formatted="false">ਖਾਲੀ ਕਮਾਂਡ</string>
+    <string name="code_error_scan_running" formatted="false">ਇੱਕ ਸਕੈਨ ਪਹਿਲਾਂ ਹੀ ਚੱਲ ਰਿਹਾ ਹੈ</string>
+    <string name="code_error_discovered_not_found" formatted="false">ਲੱਭਿਆ ਗਿਆ ਡਿਵਾਈਸ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_device_already_added" formatted="false">ਇਹ ਡਿਵਾਈਸ ਪਹਿਲਾਂ ਹੀ ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਚੁੱਕਾ ਹੈ</string>
+    <string name="code_error_username_too_short" formatted="false">ਵਰਤੋਂਕਾਰ ਨਾਮ ਘੱਟੋ-ਘੱਟ 3 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_password_too_short" formatted="false">ਪਾਸਵਰਡ ਘੱਟੋ-ਘੱਟ 8 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_setup_already_done" formatted="false">ਸੈੱਟਅੱਪ ਪਹਿਲਾਂ ਹੀ ਪੂਰਾ ਹੋ ਚੁੱਕਾ ਹੈ</string>
+    <string name="code_error_invalid_credentials" formatted="false">ਅਵੈਧ ਵਰਤੋਂਕਾਰ ਨਾਮ ਜਾਂ ਪਾਸਵਰਡ</string>
+    <string name="code_error_invalid_reset_code" formatted="false">ਉਹ ਕੋਡ ਗਲਤ ਹੈ ਜਾਂ ਹੁਣ ਵੈਧ ਨਹੀਂ ਹੈ। ਕਿਸੇ ਪ੍ਰਸ਼ਾਸਕ ਤੋਂ ਨਵਾਂ ਕੋਡ ਮੰਗੋ।</string>
+    <string name="code_error_wrong_current_password" formatted="false">ਮੌਜੂਦਾ ਪਾਸਵਰਡ ਗਲਤ ਹੈ</string>
+    <string name="code_error_same_password" formatted="false">ਮੌਜੂਦਾ ਪਾਸਵਰਡ ਤੋਂ ਵੱਖਰਾ ਪਾਸਵਰਡ ਚੁਣੋ</string>
+    <string name="code_error_avatar_too_long" formatted="false">ਅਵਤਾਰ ਸਟ੍ਰਿੰਗ ਬਹੁਤ ਲੰਬੀ ਹੈ</string>
+    <string name="code_error_name_required" formatted="false">ਨਾਮ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="code_error_trigger_required" formatted="false">ਘੱਟੋ-ਘੱਟ ਇੱਕ ਟ੍ਰਿਗਰ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="code_error_action_required" formatted="false">ਘੱਟੋ-ਘੱਟ ਇੱਕ ਕਾਰਵਾਈ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="code_error_sun_offset_range" formatted="false">ਸੂਰਜ ਚੜ੍ਹਨ ਅਤੇ ਸੂਰਜ ਡੁੱਬਣ ਦੇ ਸਮੇਂ ਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ 6 ਘੰਟੇ ਅੱਗੇ-ਪਿੱਛੇ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ</string>
+    <string name="code_error_automation_not_found" formatted="false">ਆਟੋਮੇਸ਼ਨ ਨਹੀਂ ਮਿਲੀ</string>
+    <string name="code_error_cannot_edit_device" formatted="false">ਤੁਸੀਂ ਇਸ ਡਿਵਾਈਸ ਨੂੰ ਸੰਪਾਦਿਤ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+    <string name="code_error_admin_only_move_room" formatted="false">ਸਿਰਫ਼ ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਹੀ ਡਿਵਾਈਸ ਨੂੰ ਦੂਜੇ ਕਮਰੇ ਵਿੱਚ ਲਿਜਾ ਸਕਦਾ ਹੈ</string>
+    <string name="code_error_name_empty" formatted="false">ਨਾਮ ਖਾਲੀ ਨਹੀਂ ਹੋ ਸਕਦਾ</string>
+    <string name="code_error_view_only_device" formatted="false">ਤੁਸੀਂ ਇਸ ਡਿਵਾਈਸ ਨੂੰ ਦੇਖ ਸਕਦੇ ਹੋ ਪਰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+    <string name="code_error_view_only_devices" formatted="false">ਤੁਸੀਂ ਇਹਨਾਂ ਡਿਵਾਈਸਾਂ ਨੂੰ ਦੇਖ ਸਕਦੇ ਹੋ ਪਰ ਕੰਟਰੋਲ ਨਹੀਂ ਕਰ ਸਕਦੇ</string>
+    <string name="code_error_negative_rate" formatted="false">ਦਰਾਂ ਨਕਾਰਾਤਮਕ ਨਹੀਂ ਹੋ ਸਕਦੀਆਂ</string>
+    <string name="code_error_invalid_billing_day" formatted="false">ਬਿੱਲ ਦਾ ਦਿਨ 1 ਅਤੇ 28 ਦੇ ਵਿਚਕਾਰ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_invalid_currency" formatted="false">ਮੁਦਰਾ 3-ਅੱਖਰਾਂ ਦਾ ISO ਕੋਡ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_slab_order" formatted="false">ਹਰ ਸਲੈਬ ਪਿਛਲੀ ਸਲੈਬ ਤੋਂ ਉੱਪਰ ਖਤਮ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ</string>
+    <string name="code_error_slab_open_ended" formatted="false">ਸਿਰਫ਼ ਆਖਰੀ ਸਲੈਬ ਹੀ ਖੁੱਲ੍ਹੀ (open-ended) ਹੋ ਸਕਦੀ ਹੈ</string>
+    <string name="code_error_tou_format" formatted="false">ਵਰਤੋਂ ਦੇ ਸਮੇਂ (Time-of-use) ਵਾਲੀਆਂ ਵਿੰਡੋਜ਼ ਨੂੰ HH:MM ਵਜੋਂ ਸ਼ੁਰੂਆਤ ਅਤੇ ਅੰਤ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ</string>
+    <string name="code_error_tou_zero_length" formatted="false">ਵਰਤੋਂ ਦੇ ਸਮੇਂ ਵਾਲੀ ਵਿੰਡੋ ਇੱਕੋ ਸਮੇਂ ਸ਼ੁਰੂ ਅਤੇ ਖਤਮ ਨਹੀਂ ਹੋ ਸਕਦੀ</string>
+    <string name="code_error_tou_overlap" formatted="false">ਵਰਤੋਂ ਦੇ ਸਮੇਂ ਵਾਲੀਆਂ ਵਿੰਡੋਜ਼ ਇੱਕ ਦੂਜੇ ਉੱਤੇ ਓਵਰਲੈਪ ਨਹੀਂ ਹੋ ਸਕਦੀਆਂ</string>
+    <string name="code_error_group_not_found" formatted="false">ਗਰੁੱਪ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_account_not_found" formatted="false">ਖਾਤਾ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਅਸਮਰੱਥ ਹੈ</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life ਐਪ ਤੋਂ ਯੂਜ਼ਰ ਕੋਡ ਦਰਜ ਕਰੋ</string>
+    <string name="code_error_credentials_required" formatted="false">ਈਮੇਲ ਅਤੇ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="code_error_verification_expired" formatted="false">ਪੁਸ਼ਟੀਕਰਨ ਦੀ ਮਿਆਦ ਪੁੱਗ ਗਈ; ਦੁਬਾਰਾ ਸਾਈਨ ਇਨ ਕਰੋ</string>
+    <string name="code_error_invalid_port" formatted="false">ਪੋਰਟ ਇੱਕ ਨੰਬਰ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_broker_required" formatted="false">ਬ੍ਰੋਕਰ ਦਾ ਪਤਾ ਦਰਜ ਕਰੋ</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਅਸਮਰੱਥ ਹੈ</string>
+    <string name="code_error_room_name_required" formatted="false">ਕਮਰੇ ਦੇ ਨਾਮ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="code_error_room_not_found" formatted="false">ਕਮਰਾ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_sync_lights_required" formatted="false">ਸਿੰਕ ਕਰਨ ਲਈ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਾਈਟ ਚੁਣੋ</string>
+    <string name="code_error_scene_not_found" formatted="false">ਸੀਨ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">ਸਕ੍ਰੀਨ ਸਿੰਕ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਲਈ ਇੱਕ ਸਕ੍ਰੀਨ ਦੀ ਲੋੜ ਹੈ। ਇਸਨੂੰ ਸਮੱਗਰੀ ਦਿਖਾਉਣ ਵਾਲੇ ਡਿਵਾਈਸ \'ਤੇ Domus ਐਪ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ।</string>
+    <string name="code_error_place_search_unreachable" formatted="false">ਸਥਾਨ ਖੋਜ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੋ ਰਹੀ। ਇਸਦੀ ਬਜਾਏ ਅਕਸ਼ਾਂਸ਼ ਅਤੇ ਦੇਸ਼ਾਂਤਰ ਦਰਜ ਕਰੋ।</string>
+    <string name="code_error_invalid_coordinates" formatted="false">ਅਕਸ਼ਾਂਸ਼ (Latitude) -90 ਅਤੇ 90 ਦੇ ਵਿਚਕਾਰ ਹੈ, ਦੇਸ਼ਾਂਤਰ (longitude) -180 ਅਤੇ 180 ਦੇ ਵਿਚਕਾਰ ਹੈ</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">ਉਸ ਵਰਤੋਂਕਾਰ ਨਾਮ ਲਈ ਸੁਝਾਇਆ ਗਿਆ ਹਰ ਪਤਾ ਪਹਿਲਾਂ ਹੀ ਲਿਆ ਜਾ ਚੁੱਕਾ ਹੈ</string>
+    <string name="code_error_invalid_role" formatted="false">ਭੂਮਿਕਾ admin, member ਜਾਂ guest ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ</string>
+    <string name="code_error_kid_password_required" formatted="false">ਬੱਚੇ ਦੇ ਖਾਤੇ ਲਈ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ</string>
+    <string name="code_error_email_taken" formatted="false">ਉਹ ਈਮੇਲ ਪਹਿਲਾਂ ਹੀ ਕਿਸੇ ਹੋਰ ਖਾਤੇ ਦੁਆਰਾ ਵਰਤੀ ਜਾ ਰਹੀ ਹੈ</string>
+    <string name="code_error_user_not_found" formatted="false">ਵਰਤੋਂਕਾਰ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="code_error_last_admin" formatted="false">ਘੱਟੋ-ਘੱਟ ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ</string>
+    <string name="code_error_cannot_delete_self" formatted="false">ਤੁਸੀਂ ਆਪਣਾ ਖਾਤਾ ਖੁਦ ਨਹੀਂ ਮਿਟਾ ਸਕਦੇ</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue ਬ੍ਰਿਜ \'ਤੇ ਗੋਲ ਬਟਨ ਦਬਾਓ, ਫਿਰ 30 ਸਕਿੰਟਾਂ ਦੇ ਅੰਦਰ ਦੁਬਾਰਾ ਲਿੰਕ ਕਰੋ</string>
+    <string name="code_error_hue_not_found" formatted="false">ਕੋਈ Hue ਬ੍ਰਿਜ ਨਹੀਂ ਮਿਲਿਆ; ਇਸਦਾ IP ਪਤਾ ਦਰਜ ਕਰੋ</string>
+    <string name="code_error_tuya_device_gone" formatted="false">ਡਿਵਾਈਸ ਹੁਣ Smart Life ਵਿੱਚ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_device_token_required" formatted="false">ਡਿਵਾਈਸ ਟੋਕਨ ਦੀ ਲੋੜ ਹੈ</string>
+    <string name="code_error_hue_link_expired" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Hue ਬ੍ਰਿਜ ਹੁਣ ਇਸ ਲਿੰਕ ਨੂੰ ਸਵੀਕਾਰ ਨਹੀਂ ਕਰਦਾ; ਇਸਨੂੰ ਦੁਬਾਰਾ ਲਿੰਕ ਕਰੋ</string>
+    <string name="code_error_hue_removed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Hue ਬ੍ਰਿਜ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ</string>
+    <string name="code_error_mqtt_removed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: MQTT ਬ੍ਰੋਕਰ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: ਡਿਵਾਈਸ ਨੇ ਤੁਹਾਡੇ TP-Link ਖਾਤੇ ਦੀ ਈਮੇਲ/ਪਾਸਵਰਡ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰ ਦਿੱਤਾ</string>
+    <string name="code_error_tapo_account_required" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Tapo ਡਿਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਲਈ ਆਪਣਾ TP-Link ਖਾਤਾ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="code_error_tapo_removed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: TP-Link ਖਾਤਾ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Xiaomi ਨੇ ਕੈਪਚਾ ਮੰਗਿਆ ਹੈ। Mi Home ਐਪ ਜਾਂ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇੱਕ ਵਾਰ ਸਾਈਨ ਇਨ ਕਰੋ, ਫਿਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: ਅਵੈਧ Xiaomi ਵਰਤੋਂਕਾਰ ਨਾਮ ਜਾਂ ਪਾਸਵਰਡ</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: ਗਲਤ ਜਾਂ ਮਿਆਦ ਪੁੱਗ ਚੁੱਕਾ ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Xiaomi ਨੇ ਕੋਡ ਸਵੀਕਾਰ ਨਹੀਂ ਕੀਤਾ</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Xiaomi ਸੈਸ਼ਨ ਦੀ ਮਿਆਦ ਪੁੱਗ ਗਈ</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Xiaomi ਨੂੰ ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ ਚਾਹੀਦਾ ਹੈ; ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਦੇ ਅਧੀਨ ਖਾਤੇ ਨੂੰ ਦੁਬਾਰਾ ਲਿੰਕ ਕਰੋ</string>
+    <string name="code_error_unsupported_command" formatted="false">ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ: ਇਹ ਡਿਵਾਈਸ ਉਸ ਕਮਾਂਡ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ</string>
+    <string name="code_error_unsupported_effect" formatted="false">ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ: ਇਹ ਲਾਈਟ ਉਹ ਪ੍ਰਭਾਵ ਨਹੀਂ ਚਲਾ ਸਕਦੀ</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ: ਇਸ Xiaomi ਮਾਡਲ ਕੋਲ ਕੋਈ MIoT ਸਪੈੱਕ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_rate_limited_one" formatted="false">ਬਹੁਤ ਸਾਰੇ ਗਲਤ ਪਾਸਵਰਡ। {count} ਮਿੰਟ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="code_error_rate_limited_other" formatted="false">ਬਹੁਤ ਸਾਰੇ ਗਲਤ ਪਾਸਵਰਡ। {count} ਮਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="code_error_integration_disabled" formatted="false">ਇੰਟੀਗ੍ਰੇਸ਼ਨ \'{integration}\' ਸਮਰੱਥ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_invalid_time" formatted="false">ਅਵੈਧ ਸਮਾਂ \'{time}\', HH:MM ਵਰਤੋ</string>
+    <string name="code_error_invalid_actions" formatted="false">ਅਵੈਧ ਕਾਰਵਾਈਆਂ: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">ਖੇਤਰ {regions} ਵਿੱਚੋਂ ਇੱਕ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">ਅਵੈਧ ਸਕ੍ਰੀਨ ਸਿੰਕ ਸੈਟਿੰਗਾਂ: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">ਅਣਜਾਣ ਸੀਨ ਕਿਸਮ \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" ਕੋਈ ਸਰਵਰ ਪਤਾ ਨਹੀਂ ਹੈ</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: Xiaomi ਪੁਸ਼ਟੀਕਰਨ ਕੋਡ ਨਹੀਂ ਭੇਜ ਸਕਿਆ: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} ਨੂੰ ਸਵਿੱਚ ਕਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">ਨਵਾਂ ਡਿਵਾਈਸ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) ਲੱਭਿਆ ਗਿਆ ਅਤੇ ਆਪਣੇ ਆਪ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ</string>
+    <string name="code_notification_device_found_title" formatted="false">ਨਵਾਂ ਡਿਵਾਈਸ ਮਿਲਿਆ</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਤਿਆਰ ਹੈ</string>
+    <string name="code_notification_password_reset_title" formatted="false">ਪਾਸਵਰਡ ਰੀਸੈਟ ਕਰਨ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਗਈ</string>
+    <string name="code_notification_password_reset" formatted="false">{username} ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਿਆ ਹੈ। ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਉਹਨਾਂ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ, ਲੋਕ ਅਤੇ ਪਹੁੰਚ ਦੇ ਅਧੀਨ ਇੱਕ ਰੀਸੈਟ ਕੋਡ ਦੇ ਸਕਦਾ ਹੈ।</string>
+    <string name="code_notification_automation_failed_title" formatted="false">ਆਟੋਮੇਸ਼ਨ \"{name}\" ਵਿੱਚ ਸਮੱਸਿਆਵਾਂ ਸਨ</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

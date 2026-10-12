@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">ਰੰਗ ਚੱਕਰ</string>
+    <string name="ui_expanded">ਵਿਸਤ੍ਰਿਤ</string>
+    <string name="ui_collapsed">ਸਮੇਟਿਆ ਹੋਇਆ</string>
+    <string name="ui_collapse">ਸਮੇਟੋ</string>
+    <string name="ui_expand">ਫੈਲਾਓ</string>
+</resources>
