@@ -64,6 +64,8 @@ import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
 import com.aiyu.domus.ui.components.SectionTitle
+import com.aiyu.domus.ui.components.LocalWideScreen
+import com.aiyu.domus.ui.components.SideBySide
 import com.aiyu.domus.ui.components.enterStaggered
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -295,92 +297,101 @@ private fun ColumnScope.ElectricitySection() {
     val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
     val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
 
-    Surface(color = c.primaryContainer, contentColor = c.onPrimaryContainer, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.analytics_using_now), style = MaterialTheme.typography.labelLarge)
-            RollingText(formatWatts(wattsToDisplay), MaterialTheme.typography.displayMedium)
-            Text(stringResource(R.string.analytics_projected_cost, formatMoney(overview.projectedCost, currency)), style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(1), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard(stringResource(R.string.analytics_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_today_info))
-        StatCard(stringResource(R.string.analytics_this_cycle), formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_this_cycle_info))
-    }
-
-    val live = rememberLive { EnergyPoint(it, watts = wattsToDisplay) }
-    SectionTitle(stringResource(R.string.analytics_history))
-    RangePicker(range, Ranges) { range = it }
-    ChartCard {
-        val isLive = range == "live"
-        val points = when (range) { "live" -> live; "hour" -> hour; "day" -> day; "week" -> week; else -> month }
-        if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        else if (!isLive && points.sumOf { it.kwh } <= 0) Text(stringResource(R.string.analytics_nothing_recorded), color = c.onSurfaceVariant)
-        else {
-            // Starts on the latest bucket; a tap or drag picks another.
-            var picked by remember(range) { mutableStateOf<Int?>(null) }
-            var metric by remember { mutableStateOf(false) }
-            // Live has no energy yet, only the power being drawn.
-            val watts = metric || isLive
-            if (!isLive) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!metric, { metric = false }, { Text(stringResource(R.string.analytics_metric_energy)) })
-                FilterChip(metric, { metric = true }, { Text(stringResource(R.string.analytics_metric_power)) })
+    val summary: @Composable ColumnScope.() -> Unit = {
+        Surface(color = c.primaryContainer, contentColor = c.onPrimaryContainer, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
+            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.analytics_using_now), style = MaterialTheme.typography.labelLarge)
+                RollingText(formatWatts(wattsToDisplay), MaterialTheme.typography.displayMedium)
+                Text(stringResource(R.string.analytics_projected_cost, formatMoney(overview.projectedCost, currency)), style = MaterialTheme.typography.bodyMedium)
             }
-            // Power starts on the latest measured bucket.
-            val selected = (picked ?: if (watts) points.indexOfLast { it.watts != null } else points.lastIndex).coerceIn(0, points.lastIndex)
-            val point = points[selected]
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                val power = point.watts?.let { w -> point.peakWatts?.let { stringResource(R.string.analytics_value_with_peak, formatWatts(w), formatWatts(it)) } ?: formatWatts(w) }
-                RollingText(if (watts) power ?: stringResource(R.string.analytics_no_reading) else stringResource(R.string.analytics_kwh_and_cost, formatKwh(point.kwh), formatMoney(point.cost, currency)), MaterialTheme.typography.titleMedium)
+        }
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(1), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(stringResource(R.string.analytics_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, currency), Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_today_info))
+            StatCard(stringResource(R.string.analytics_this_cycle), formatKwh(overview.cycleKwh), formatMoney(overview.cycleCost, currency), Icons.Rounded.CalendarMonth, MaterialShapes.Cookie9Sided, c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.analytics_this_cycle_info))
+        }
+    }
+
+    val history: @Composable ColumnScope.() -> Unit = {
+        val live = rememberLive { EnergyPoint(it, watts = wattsToDisplay) }
+        SectionTitle(stringResource(R.string.analytics_history))
+        RangePicker(range, Ranges) { range = it }
+        ChartCard {
+            val isLive = range == "live"
+            val points = when (range) { "live" -> live; "hour" -> hour; "day" -> day; "week" -> week; else -> month }
+            if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
+            else if (!isLive && points.sumOf { it.kwh } <= 0) Text(stringResource(R.string.analytics_nothing_recorded), color = c.onSurfaceVariant)
+            else {
+                // Starts on the latest bucket; a tap or drag picks another.
+                var picked by remember(range) { mutableStateOf<Int?>(null) }
+                var metric by remember { mutableStateOf(false) }
+                // Live has no energy yet, only the power being drawn.
+                val watts = metric || isLive
+                if (!isLive) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(!metric, { metric = false }, { Text(stringResource(R.string.analytics_metric_energy)) })
+                    FilterChip(metric, { metric = true }, { Text(stringResource(R.string.analytics_metric_power)) })
+                }
+                // Power starts on the latest measured bucket.
+                val selected = (picked ?: if (watts) points.indexOfLast { it.watts != null } else points.lastIndex).coerceIn(0, points.lastIndex)
+                val point = points[selected]
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(formatBucket(point.t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                    val power = point.watts?.let { w -> point.peakWatts?.let { stringResource(R.string.analytics_value_with_peak, formatWatts(w), formatWatts(it)) } ?: formatWatts(w) }
+                    RollingText(if (watts) power ?: stringResource(R.string.analytics_no_reading) else stringResource(R.string.analytics_kwh_and_cost, formatKwh(point.kwh), formatMoney(point.cost, currency)), MaterialTheme.typography.titleMedium)
+                }
+                val per = bucketOf(range)
+                if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, stringResource(R.string.analytics_chart_avg_power, per), Modifier.fillMaxWidth().height(160.dp), peaks = points.map { it.peakWatts })
+                else BarChart(points.map { it.kwh }, selected, { picked = it }, stringResource(R.string.analytics_chart_energy_used, per, formatKwh(points.sumOf { it.kwh })), Modifier.fillMaxWidth().height(160.dp))
+                ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
+                Text(if (isLive) stringResource(R.string.analytics_live_caption) else stringResource(R.string.analytics_total_caption, formatKwh(points.sumOf { it.kwh }), formatMoney(points.sumOf { it.cost }, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
             }
-            val per = bucketOf(range)
-            if (watts) LineChart(points.map { it.watts }, selected, { picked = it }, stringResource(R.string.analytics_chart_avg_power, per), Modifier.fillMaxWidth().height(160.dp), peaks = points.map { it.peakWatts })
-            else BarChart(points.map { it.kwh }, selected, { picked = it }, stringResource(R.string.analytics_chart_energy_used, per, formatKwh(points.sumOf { it.kwh })), Modifier.fillMaxWidth().height(160.dp))
-            ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
-            Text(if (isLive) stringResource(R.string.analytics_live_caption) else stringResource(R.string.analytics_total_caption, formatKwh(points.sumOf { it.kwh }), formatMoney(points.sumOf { it.cost }, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+        }
+
+        // An hour without a sample was not measured, which is not the same as using nothing.
+        HourGridCard(stringResource(R.string.analytics_usage_by_hour), hours, { it.t }, { p -> p.kwh.takeIf { it > 0 || p.watts != null } }, { formatKwh(it) }, { c.primary }, stringResource(R.string.analytics_nothing_recorded))
+    }
+
+    val insights: @Composable ColumnScope.() -> Unit = {
+        SectionTitle(stringResource(R.string.analytics_insights))
+        val peak = day?.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
+        // Days before today that recorded anything: an empty day means "not measured yet", not "used nothing".
+        val earlier = week.orEmpty().dropLast(1).filter { it.kwh > 0 }
+        val average = if (earlier.isEmpty()) null else earlier.sumOf { it.kwh } / earlier.size
+        val change = average?.let { (overview.todayKwh - it) / it * 100 }
+        val top = overview.devices.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
+        FactRow(
+            Triple(stringResource(R.string.analytics_peak_hour), peak?.let { formatBucket(it.t, "hour", is24Hour) } ?: "—", peak?.let { stringResource(R.string.analytics_peak_last_24h, formatKwh(it.kwh)) } ?: stringResource(R.string.analytics_no_usage_yet)),
+            Triple(stringResource(R.string.analytics_daily_average), average?.let(::formatKwh) ?: "—", if (average == null) stringResource(R.string.analytics_needs_full_day) else pluralStringResource(R.plurals.analytics_over_last_days, earlier.size, earlier.size)),
+            index = 2,
+        )
+        FactRow(
+            Triple(
+                stringResource(R.string.analytics_today_vs_average), change?.let { "${if (it > 0) "+" else ""}${it.roundToInt()}%" } ?: "—",
+                stringResource(when { change == null -> R.string.analytics_needs_full_day; change > 10 -> R.string.analytics_above_usual_day; change < -10 -> R.string.analytics_below_usual_day; else -> R.string.analytics_about_usual_day }),
+            ),
+            Triple(stringResource(R.string.analytics_top_device), top?.let { "${(it.kwh / overview.cycleKwh.coerceAtLeast(0.0001) * 100).roundToInt()}%" } ?: "—", top?.name ?: stringResource(R.string.analytics_no_metered_device)),
+            index = 3,
+        )
+
+        SectionTitle(stringResource(R.string.analytics_billing_cycle))
+        ChartCard {
+            val elapsed = overview.cycleDay.toFloat() / overview.cycleDays.coerceAtLeast(1)
+            Row { Text(stringResource(R.string.analytics_time_elapsed), Modifier.weight(1f)); Text(stringResource(R.string.analytics_day_of_days, overview.cycleDay, overview.cycleDays), color = c.onSurfaceVariant) }
+            LinearProgressIndicator(progress = { elapsed.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+            val budget = overview.settings.monthlyBudget
+            val used = overview.budgetUsedPercent
+            if (budget != null && used != null) {
+                val ahead = used / 100 > elapsed + 0.1
+                Row { Text(stringResource(R.string.analytics_budget_used), Modifier.weight(1f)); Text(stringResource(R.string.analytics_cost_of_budget, formatMoney(overview.cycleCost, currency), formatMoney(budget, currency)), color = c.onSurfaceVariant) }
+                LinearWavyProgressIndicator(progress = { (used / 100).toFloat().coerceIn(0f, 1f) }, color = if (ahead) c.error else c.primary, modifier = Modifier.fillMaxWidth())
+                if (ahead) Text(stringResource(R.string.analytics_spending_ahead), color = c.error, style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text(stringResource(R.string.analytics_budget_hint), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+            }
         }
     }
 
-    // An hour without a sample was not measured, which is not the same as using nothing.
-    HourGridCard(stringResource(R.string.analytics_usage_by_hour), hours, { it.t }, { p -> p.kwh.takeIf { it > 0 || p.watts != null } }, { formatKwh(it) }, { c.primary }, stringResource(R.string.analytics_nothing_recorded))
-
-    SectionTitle(stringResource(R.string.analytics_insights))
-    val peak = day?.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
-    // Days before today that recorded anything: an empty day means "not measured yet", not "used nothing".
-    val earlier = week.orEmpty().dropLast(1).filter { it.kwh > 0 }
-    val average = if (earlier.isEmpty()) null else earlier.sumOf { it.kwh } / earlier.size
-    val change = average?.let { (overview.todayKwh - it) / it * 100 }
-    val top = overview.devices.maxByOrNull { it.kwh }?.takeIf { it.kwh > 0 }
-    FactRow(
-        Triple(stringResource(R.string.analytics_peak_hour), peak?.let { formatBucket(it.t, "hour", is24Hour) } ?: "—", peak?.let { stringResource(R.string.analytics_peak_last_24h, formatKwh(it.kwh)) } ?: stringResource(R.string.analytics_no_usage_yet)),
-        Triple(stringResource(R.string.analytics_daily_average), average?.let(::formatKwh) ?: "—", if (average == null) stringResource(R.string.analytics_needs_full_day) else pluralStringResource(R.plurals.analytics_over_last_days, earlier.size, earlier.size)),
-        index = 2,
-    )
-    FactRow(
-        Triple(
-            stringResource(R.string.analytics_today_vs_average), change?.let { "${if (it > 0) "+" else ""}${it.roundToInt()}%" } ?: "—",
-            stringResource(when { change == null -> R.string.analytics_needs_full_day; change > 10 -> R.string.analytics_above_usual_day; change < -10 -> R.string.analytics_below_usual_day; else -> R.string.analytics_about_usual_day }),
-        ),
-        Triple(stringResource(R.string.analytics_top_device), top?.let { "${(it.kwh / overview.cycleKwh.coerceAtLeast(0.0001) * 100).roundToInt()}%" } ?: "—", top?.name ?: stringResource(R.string.analytics_no_metered_device)),
-        index = 3,
-    )
-
-    SectionTitle(stringResource(R.string.analytics_billing_cycle))
-    ChartCard {
-        val elapsed = overview.cycleDay.toFloat() / overview.cycleDays.coerceAtLeast(1)
-        Row { Text(stringResource(R.string.analytics_time_elapsed), Modifier.weight(1f)); Text(stringResource(R.string.analytics_day_of_days, overview.cycleDay, overview.cycleDays), color = c.onSurfaceVariant) }
-        LinearProgressIndicator(progress = { elapsed.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-        val budget = overview.settings.monthlyBudget
-        val used = overview.budgetUsedPercent
-        if (budget != null && used != null) {
-            val ahead = used / 100 > elapsed + 0.1
-            Row { Text(stringResource(R.string.analytics_budget_used), Modifier.weight(1f)); Text(stringResource(R.string.analytics_cost_of_budget, formatMoney(overview.cycleCost, currency), formatMoney(budget, currency)), color = c.onSurfaceVariant) }
-            LinearWavyProgressIndicator(progress = { (used / 100).toFloat().coerceIn(0f, 1f) }, color = if (ahead) c.error else c.primary, modifier = Modifier.fillMaxWidth())
-            if (ahead) Text(stringResource(R.string.analytics_spending_ahead), color = c.error, style = MaterialTheme.typography.bodyMedium)
-        } else {
-            Text(stringResource(R.string.analytics_budget_hint), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
-        }
-    }
+    // A wide screen reads the figures on the start side and keeps the charts beside them.
+    if (LocalWideScreen.current) SideBySide({ summary(); insights() }, history) else { summary(); history(); insights() }
 
     if (overview.devices.isNotEmpty()) SectionTitle(stringResource(R.string.analytics_by_device))
     val most = overview.devices.maxOfOrNull { it.kwh }?.takeIf { it > 0 } ?: 1.0
@@ -452,28 +463,30 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
         AirLevel.MODERATE -> c.tertiaryContainer to c.onTertiaryContainer
         else -> c.primaryContainer to c.onPrimaryContainer
     }
-    Surface(color = tone, contentColor = onTone, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.analytics_pm25_now), style = MaterialTheme.typography.labelLarge)
-            Row(verticalAlignment = Alignment.Bottom) {
-                RollingText(pm?.roundToInt()?.toString() ?: "—", MaterialTheme.typography.displayMedium)
-                Text(" µg/m³", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
-            }
-            Text(
-                stringResource(
-                    when (level) {
-                        null -> R.string.analytics_air_no_sensor_online
-                        AirLevel.EXCELLENT -> R.string.analytics_air_status_excellent
-                        AirLevel.GOOD -> R.string.analytics_air_status_good
-                        AirLevel.MODERATE -> R.string.analytics_air_status_moderate
-                        AirLevel.POOR -> R.string.analytics_air_status_poor
-                    }
-                ),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            if (pm != null) {
-                AirScale(pm, Modifier.fillMaxWidth().padding(top = 12.dp))
-                Row { AirLevel.entries.forEach { Text(it.text(), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall) } }
+    val airNow: @Composable ColumnScope.() -> Unit = {
+        Surface(color = tone, contentColor = onTone, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().enterStaggered(0)) {
+            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.analytics_pm25_now), style = MaterialTheme.typography.labelLarge)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    RollingText(pm?.roundToInt()?.toString() ?: "—", MaterialTheme.typography.displayMedium)
+                    Text(" µg/m³", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                }
+                Text(
+                    stringResource(
+                        when (level) {
+                            null -> R.string.analytics_air_no_sensor_online
+                            AirLevel.EXCELLENT -> R.string.analytics_air_status_excellent
+                            AirLevel.GOOD -> R.string.analytics_air_status_good
+                            AirLevel.MODERATE -> R.string.analytics_air_status_moderate
+                            AirLevel.POOR -> R.string.analytics_air_status_poor
+                        }
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                if (pm != null) {
+                    AirScale(pm, Modifier.fillMaxWidth().padding(top = 12.dp))
+                    Row { AirLevel.entries.forEach { Text(it.text(), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall) } }
+                }
             }
         }
     }
@@ -488,81 +501,90 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
         temperature?.let { Triple(stringResource(R.string.analytics_reading_temperature), "${"%.1f".format(it)} °C", stringResource(R.string.analytics_sensors_average)) },
         humidity?.let { Triple(stringResource(R.string.analytics_reading_humidity), "${it.roundToInt()}%", stringResource(if (it < 30) R.string.analytics_humidity_dry else if (it > 60) R.string.analytics_humidity_humid else R.string.analytics_humidity_comfortable)) },
     )
-    facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) }
+    val factRows: @Composable ColumnScope.() -> Unit = { facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) } }
 
-    SectionTitle(stringResource(R.string.analytics_trend))
-    RangePicker(range, Ranges) { range = it }
     val live = rememberLive { AirPoint(it, pm?.toDouble(), temperature, humidity) }
     val points = if (range == "live") live else history
     // Offer only the readings the home's devices report.
     val available = Readings.filter { (key, _) -> key == "pm25" || points.orEmpty().any { it.reading(key) != null } }
     val shown = if (available.any { it.first == reading }) reading else "pm25"
-    if (available.size > 1) Choice(available.map { it.first to stringResource(it.second) }, shown, { reading = it })
-    ChartCard {
-        if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-        else if (points.none { it.reading(shown) != null }) Text(stringResource(R.string.analytics_no_air_history), color = c.onSurfaceVariant)
-        else {
-            var picked by remember(range, shown) { mutableStateOf<Int?>(null) }
-            val selected = (picked ?: points.indexOfLast { it.reading(shown) != null }).coerceIn(0, points.lastIndex)
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(formatBucket(points[selected].t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
-                val text = readingText(shown, points[selected].reading(shown))
-                RollingText(points[selected].pm25Max?.takeIf { shown == "pm25" }?.let { stringResource(R.string.analytics_value_with_peak, text, readingText(shown, it)) } ?: text, MaterialTheme.typography.titleMedium)
+    val trend: @Composable ColumnScope.() -> Unit = {
+        SectionTitle(stringResource(R.string.analytics_trend))
+        RangePicker(range, Ranges) { range = it }
+        if (available.size > 1) Choice(available.map { it.first to stringResource(it.second) }, shown, { reading = it })
+        ChartCard {
+            if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
+            else if (points.none { it.reading(shown) != null }) Text(stringResource(R.string.analytics_no_air_history), color = c.onSurfaceVariant)
+            else {
+                var picked by remember(range, shown) { mutableStateOf<Int?>(null) }
+                val selected = (picked ?: points.indexOfLast { it.reading(shown) != null }).coerceIn(0, points.lastIndex)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(formatBucket(points[selected].t, range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant, modifier = Modifier.weight(1f))
+                    val text = readingText(shown, points[selected].reading(shown))
+                    RollingText(points[selected].pm25Max?.takeIf { shown == "pm25" }?.let { stringResource(R.string.analytics_value_with_peak, text, readingText(shown, it)) } ?: text, MaterialTheme.typography.titleMedium)
+                }
+                val measured = points.mapNotNull { it.reading(shown) }
+                LineChart(
+                    points.map { it.reading(shown) }, selected, { picked = it },
+                    stringResource(R.string.analytics_air_chart_summary, stringResource(Readings.first { it.first == shown }.second), bucketOf(range), readingText(shown, measured.average())),
+                    Modifier.fillMaxWidth().height(160.dp),
+                    marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
+                    peaks = if (shown == "pm25") points.map { it.pm25Max } else emptyList(),
+                )
+                ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
+                if (shown == "pm25") Text(stringResource(R.string.analytics_pm25_dashed_caption), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
             }
-            val measured = points.mapNotNull { it.reading(shown) }
-            LineChart(
-                points.map { it.reading(shown) }, selected, { picked = it },
-                stringResource(R.string.analytics_air_chart_summary, stringResource(Readings.first { it.first == shown }.second), bucketOf(range), readingText(shown, measured.average())),
-                Modifier.fillMaxWidth().height(160.dp),
-                marks = if (shown == "pm25") listOf(15.0, 35.0) else emptyList(),
-                peaks = if (shown == "pm25") points.map { it.pm25Max } else emptyList(),
-            )
-            ChartAxis(formatBucket(points.first().t, range, is24Hour), formatBucket(points.last().t, range, is24Hour))
-            if (shown == "pm25") Text(stringResource(R.string.analytics_pm25_dashed_caption), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
         }
     }
 
     val measuredPm = points.orEmpty().filter { it.pm25 != null }
-    if (measuredPm.isNotEmpty()) {
-        SectionTitle(stringResource(R.string.analytics_insights))
-        val average = measuredPm.map { it.pm25!! }.average()
-        // The highest single reading, not the highest average: a short spike counts.
-        val peak = measuredPm.maxBy { it.pm25Max ?: it.pm25!! }
-        // Samples per level over the period. A live sample is one reading at its own level.
-        val levels = IntArray(AirLevel.entries.size)
-        measuredPm.forEach { p -> if (p.levels.size == levels.size) p.levels.forEachIndexed { i, n -> levels[i] += n } else levels[airLevel(p.pm25!!.toFloat()).ordinal]++ }
-        val samples = levels.sum().coerceAtLeast(1)
-        val good = (levels[0] + levels[1]) * 100 / samples
-        val period = stringResource(when (range) { "live" -> R.string.analytics_period_5m; "hour" -> R.string.analytics_period_60m; "day" -> R.string.analytics_period_24h; "week" -> R.string.analytics_period_7d; else -> R.string.analytics_period_30d })
-        FactRow(
-            Triple(stringResource(R.string.analytics_average), "${average.roundToInt()} µg/m³", stringResource(R.string.analytics_air_level_over_period, airLevel(average.toFloat()).text(), period)),
-            Triple(stringResource(R.string.analytics_peak), "${(peak.pm25Max ?: peak.pm25!!).roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
-            index = 3,
-        )
-        FactRow(Triple(stringResource(R.string.analytics_time_good_air), "$good%", stringResource(R.string.analytics_pm25_good_over_period, period)), index = 4)
+    val airInsights: @Composable ColumnScope.() -> Unit = {
+        if (measuredPm.isNotEmpty()) {
+            SectionTitle(stringResource(R.string.analytics_insights))
+            val average = measuredPm.map { it.pm25!! }.average()
+            // The highest single reading, not the highest average: a short spike counts.
+            val peak = measuredPm.maxBy { it.pm25Max ?: it.pm25!! }
+            // Samples per level over the period. A live sample is one reading at its own level.
+            val levels = IntArray(AirLevel.entries.size)
+            measuredPm.forEach { p -> if (p.levels.size == levels.size) p.levels.forEachIndexed { i, n -> levels[i] += n } else levels[airLevel(p.pm25!!.toFloat()).ordinal]++ }
+            val samples = levels.sum().coerceAtLeast(1)
+            val good = (levels[0] + levels[1]) * 100 / samples
+            val period = stringResource(when (range) { "live" -> R.string.analytics_period_5m; "hour" -> R.string.analytics_period_60m; "day" -> R.string.analytics_period_24h; "week" -> R.string.analytics_period_7d; else -> R.string.analytics_period_30d })
+            FactRow(
+                Triple(stringResource(R.string.analytics_average), "${average.roundToInt()} µg/m³", stringResource(R.string.analytics_air_level_over_period, airLevel(average.toFloat()).text(), period)),
+                Triple(stringResource(R.string.analytics_peak), "${(peak.pm25Max ?: peak.pm25!!).roundToInt()} µg/m³", formatBucket(peak.t, range, is24Hour)),
+                index = 3,
+            )
+            FactRow(Triple(stringResource(R.string.analytics_time_good_air), "$good%", stringResource(R.string.analytics_pm25_good_over_period, period)), index = 4)
 
-        SectionTitle(stringResource(R.string.analytics_time_at_each_level))
-        ChartCard {
-            // The same colors as the scale above; each share is also written out below.
-            val colors = listOf(c.primary, c.primary.copy(alpha = 0.6f), c.tertiary, c.error)
-            Row(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                levels.forEachIndexed { i, n -> if (n > 0) Box(Modifier.weight(n.toFloat()).fillMaxHeight().background(colors[i])) }
-            }
-            AirLevel.entries.forEachIndexed { i, level ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.size(8.dp).background(colors[i], CircleShape))
-                    Text(level.text(), Modifier.weight(1f))
-                    Text("${levels[i] * 100 / samples}%", color = c.onSurfaceVariant)
+            SectionTitle(stringResource(R.string.analytics_time_at_each_level))
+            ChartCard {
+                // The same colors as the scale above; each share is also written out below.
+                val colors = listOf(c.primary, c.primary.copy(alpha = 0.6f), c.tertiary, c.error)
+                Row(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    levels.forEachIndexed { i, n -> if (n > 0) Box(Modifier.weight(n.toFloat()).fillMaxHeight().background(colors[i])) }
+                }
+                AirLevel.entries.forEachIndexed { i, level ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(Modifier.size(8.dp).background(colors[i], CircleShape))
+                        Text(level.text(), Modifier.weight(1f))
+                        Text("${levels[i] * 100 / samples}%", color = c.onSurfaceVariant)
+                    }
                 }
             }
         }
     }
 
-    HourGridCard(
-        stringResource(R.string.analytics_peak_pm25_by_hour), hours, { it.t }, { it.pm25Max ?: it.pm25 }, { readingText("pm25", it) },
-        { when (airLevel(it.toFloat())) { AirLevel.POOR -> c.error; AirLevel.MODERATE -> c.tertiary; else -> c.primary } },
-        stringResource(R.string.analytics_no_air_history),
-    )
+    val byHour: @Composable ColumnScope.() -> Unit = {
+        HourGridCard(
+            stringResource(R.string.analytics_peak_pm25_by_hour), hours, { it.t }, { it.pm25Max ?: it.pm25 }, { readingText("pm25", it) },
+            { when (airLevel(it.toFloat())) { AirLevel.POOR -> c.error; AirLevel.MODERATE -> c.tertiary; else -> c.primary } },
+            stringResource(R.string.analytics_no_air_history),
+        )
+    }
+
+    if (LocalWideScreen.current) SideBySide({ airNow(); factRows(); airInsights() }, { trend(); byHour() })
+    else { airNow(); factRows(); trend(); airInsights(); byHour() }
 
     if (purifiers.isNotEmpty()) {
         SectionTitle(stringResource(R.string.analytics_purifiers))
