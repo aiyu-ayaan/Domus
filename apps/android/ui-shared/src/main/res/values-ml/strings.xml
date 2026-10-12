@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">നിറങ്ങളുടെ ചക്രം</string>
+    <string name="ui_expanded">വിപുലീകരിച്ചു</string>
+    <string name="ui_collapsed">ചുരുക്കി</string>
+    <string name="ui_collapse">ചുരുക്കുക</string>
+    <string name="ui_expand">വിപുലീകരിക്കുക</string>
+</resources>

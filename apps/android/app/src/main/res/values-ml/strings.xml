@@ -1,0 +1,943 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">മികച്ചത്</string>
+    <string name="air_good">നല്ലത്</string>
+    <string name="air_moderate">മിതമായത്</string>
+    <string name="air_poor">മോശം</string>
+    <string name="channel_stable">സ്ഥിരതയുള്ളത് (Stable)</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">ഈ കമ്പ്യൂട്ടർ</string>
+    <string name="api_untrusted">സെർവറിന്റെ സർട്ടിഫിക്കറ്റ് വിശ്വസനീയമല്ല.</string>
+    <string name="api_offline">Domus സെർവറിൽ എത്തിച്ചേരാനാകുന്നില്ല. അത് പ്രവർത്തിക്കുന്നുണ്ടോയെന്ന് പരിശോധിക്കുക.</string>
+    <string name="api_bad_response">ഈ ആപ്പ് പതിപ്പിന് മനസ്സിലാകാത്ത ഒരു മറുപടിയാണ് സെർവർ അയച്ചത്.</string>
+    <string name="api_request_failed">അഭ്യർത്ഥന പരാജയപ്പെട്ടു ({status})</string>
+    <string name="error_no_server">സെർവർ ഇല്ല</string>
+    <string name="connect_cert_changed">നിങ്ങൾ അംഗീകരിച്ചതിന് ശേഷം സെർവറിന്റെ സർട്ടിഫിക്കറ്റ് മാറിയിരിക്കുന്നു. പുതിയത് പരിശോധിക്കാൻ വീണ്ടും കണക്റ്റ് ചെയ്യുക.</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 അല്ലെങ്കിൽ home.example.com പോലുള്ള ഒരു വിലാസം നൽകുക. https മാത്രമേ പിന്തുണയ്ക്കൂ.</string>
+    <string name="connect_cert_unreadable">സെർവറിന്റെ സർട്ടിഫിക്കറ്റ് വായിക്കാനായില്ല.</string>
+    <string name="automation_ran">“{name}” പ്രവർത്തിപ്പിച്ചു</string>
+    <string name="handover_reset_until">%1$s-നുള്ള Domus പാസ്‌വേഡ് റീസെറ്റ്\nകോഡ്: %2$s\n\nസൈൻ-ഇൻ സ്ക്രീനിൽ \"പാസ്‌വേഡ് മറന്നോ?\" തിരഞ്ഞെടുത്ത് നിങ്ങളുടെ ഉപയോക്തൃനാമവും തുടർന്ന് ഈ കോഡും നൽകുക. ഇത് %3$s വരെ ഒരു തവണ പ്രവർത്തിക്കും.</string>
+    <string name="handover_reset">%1$s-നുള്ള Domus പാസ്‌വേഡ് റീസെറ്റ്\nകോഡ്: %2$s\n\nസൈൻ-ഇൻ സ്ക്രീനിൽ \"പാസ്‌വേഡ് മറന്നോ?\" തിരഞ്ഞെടുത്ത് നിങ്ങളുടെ ഉപയോക്തൃനാമവും തുടർന്ന് ഈ കോഡും നൽകുക. ഇത് ഒരു തവണ പ്രവർത്തിക്കും.</string>
+    <string name="handover_signin_kid">Domus സൈൻ-ഇൻ\nവിലാസം: %1$s\nഉപയോക്തൃനാമം: %2$s\nപാസ്‌വേഡ്: %3$s</string>
+    <string name="handover_signin">Domus സൈൻ-ഇൻ\nവിലാസം: %1$s\nഉപയോക്തൃനാമം: %2$s\nപാസ്‌വേഡ്: %3$s\n\nനിങ്ങൾ ആദ്യമായി സൈൻ ഇൻ ചെയ്യുമ്പോൾ സ്വന്തമായി ഒരു പാസ്‌വേഡ് തിരഞ്ഞെടുക്കാൻ ആവശ്യപ്പെടും.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ഹോം</string>
+    <string name="nav_devices">ഉപകരണങ്ങൾ</string>
+    <string name="nav_scenes">സീനുകൾ</string>
+    <string name="nav_analytics">അനലിറ്റിക്സ്</string>
+    <string name="nav_settings">ക്രമീകരണങ്ങൾ</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">നിങ്ങളുടെ വീട് മുഴുവൻ, ഒരൊറ്റ ആപ്പിൽ</string>
+    <string name="connect_intro_1_body">Tuya, Tapo, Xiaomi, Philips Hue, MQTT എന്നിവയിൽ നിന്നുള്ള ലൈറ്റുകൾ, പ്ലഗുകൾ, പ്യൂരിഫയറുകൾ, സെൻസറുകൾ എന്നിവ ഒരിടത്ത്.</string>
+    <string name="connect_intro_2_title">സ്വകാര്യതയ്ക്ക് മുൻഗണന</string>
+    <string name="connect_intro_2_body">എൻക്രിപ്റ്റ് ചെയ്ത കണക്ഷനിലൂടെ നിങ്ങളുടെ വീട്ടിലെ സെർവറുമായി മാത്രമാണ് Domus ആശയവിനിമയം നടത്തുന്നത്. ക്ലൗഡ് അക്കൗണ്ട് ആവശ്യമില്ല.</string>
+    <string name="connect_intro_3_title">ഇത് നിങ്ങളുടെ സെർവർ കണ്ടെത്തുന്നു</string>
+    <string name="connect_intro_3_body">നിങ്ങളുടെ Wi‑Fi-ൽ ആപ്പ് സ്വയം സെർവർ കണ്ടെത്തുന്നു. വീട്ടിൽ നിന്ന് പുറത്തായിരിക്കുമ്പോൾ അതിന്റെ വിലാസം നൽകുക.</string>
+    <string name="connect_page_of">പേജ് %2$d-ൽ %1$d</string>
+    <string name="connect_skip">ഒഴിവാക്കുക</string>
+    <string name="connect_get_started">ആരംഭിക്കുക</string>
+    <string name="connect_next">അടുത്തത്</string>
+    <string name="connect_welcome_title">Domus-ലേക്ക് സ്വാഗതം</string>
+    <string name="connect_welcome_subtitle">നിങ്ങളുടെ വീട് നിയന്ത്രിക്കുന്ന സെർവറിലേക്ക് കണക്റ്റ് ചെയ്യുക.</string>
+    <string name="connect_on_this_network">ഈ നെറ്റ്‌വർക്കിൽ</string>
+    <string name="connect_looking_for_servers">സെർവറുകൾക്കായി തിരയുന്നു…</string>
+    <string name="connect_no_server_found">സെർവറുകളൊന്നും പ്രതികരിച്ചില്ല. ഈ ഫോൺ സെർവർ ഉള്ള അതേ Wi‑Fi-ൽ തന്നെയാണോ എന്ന് പരിശോധിക്കുക, അല്ലെങ്കിൽ താഴെ അതിന്റെ വിലാസം നൽകുക.</string>
+    <string name="connect_scan_again">വീണ്ടും സ്കാൻ ചെയ്യുക</string>
+    <string name="connect_or_enter_address">അല്ലെങ്കിൽ വിലാസം നൽകുക</string>
+    <string name="connect_server_address">സെർവർ വിലാസം</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 അല്ലെങ്കിൽ home.example.com</string>
+    <string name="connect_action">കണക്റ്റ് ചെയ്യുക</string>
+    <string name="connect_trust_title">ഈ സെർവറിനെ വിശ്വസിക്കണോ?</string>
+    <string name="connect_trust_body">%1$s സ്വയം നിർമ്മിച്ച ഒരു സർട്ടിഫിക്കറ്റാണ് ഉപയോഗിക്കുന്നത്, ഇത് ഒരു ഹോം സെർവറിന് സാധാരണമാണ്. സെർവർ ആരംഭിക്കുമ്പോൾ കാണിക്കുന്ന ഫിംഗർപ്രിന്റുമായി ഇത് പൊരുത്തപ്പെടുന്നുണ്ടെങ്കിൽ മാത്രം ഇതിനെ വിശ്വസിക്കുക.</string>
+    <string name="connect_trust_action">വിശ്വസിക്കുക</string>
+    <string name="connect_cancel">റദ്ദാക്കുക</string>
+    <string name="connect_use_another_server">മറ്റൊരു സെർവർ ഉപയോഗിക്കുക</string>
+    <string name="connect_unreachable_title">നിങ്ങളുടെ വീട്ടിലേക്ക് കണക്റ്റ് ചെയ്യാനാകുന്നില്ല</string>
+    <string name="connect_try_again">വീണ്ടും ശ്രമിക്കുക</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">പാസ്‌വേഡ് മറയ്ക്കുക</string>
+    <string name="auth_show_password">പാസ്‌വേഡ് കാണിക്കുക</string>
+    <string name="auth_username">ഉപയോക്തൃനാമം</string>
+    <string name="auth_new_password">പുതിയ പാസ്‌വേഡ്</string>
+    <string name="auth_password_min_length">കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ</string>
+    <string name="auth_confirm_password">പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക</string>
+    <string name="auth_passwords_mismatch">പാസ്‌വേഡുകൾ തമ്മിൽ പൊരുത്തപ്പെടുന്നില്ല</string>
+    <string name="auth_create_admin_title">അഡ്മിൻ അക്കൗണ്ട് നിർമ്മിക്കുക</string>
+    <string name="auth_welcome_back_title">വീണ്ടും സ്വാഗതം</string>
+    <string name="auth_create_admin_subtitle">ഈ സെർവർ പുതിയതാണ്. ആദ്യത്തെ അക്കൗണ്ട് എല്ലാം നിയന്ത്രിക്കുന്നു.</string>
+    <string name="auth_welcome_back_subtitle">നിങ്ങളുടെ വീട്ടിലേക്ക് സൈൻ ഇൻ ചെയ്യുക.</string>
+    <string name="auth_encrypted_connection">ഇതിലേക്കുള്ള എൻക്രിപ്റ്റ് ചെയ്ത കണക്ഷൻ:</string>
+    <string name="auth_email">ഇമെയിൽ</string>
+    <string name="auth_password">പാസ്‌വേഡ്</string>
+    <string name="auth_create_account">അക്കൗണ്ട് നിർമ്മിക്കുക</string>
+    <string name="auth_sign_in">സൈൻ ഇൻ ചെയ്യുക</string>
+    <string name="auth_forgot_password">പാസ്‌വേഡ് മറന്നോ?</string>
+    <string name="auth_forgot_title">പാസ്‌വേഡ് മറന്നോ?</string>
+    <string name="auth_forgot_subtitle">Domus ഇമെയിലുകളൊന്നും അയയ്ക്കുന്നില്ല. പകരം ഈ വീടിന്റെ അഡ്മിനിസ്ട്രേറ്ററെ അറിയിക്കുകയും അവർ നിങ്ങൾക്ക് ഒറ്റത്തവണ ഉപയോഗിക്കാവുന്ന ഒരു കോഡ് നൽകുകയും ചെയ്യുന്നു.</string>
+    <string name="auth_ask_admin">അഡ്മിനിസ്ട്രേറ്ററോട് ചോദിക്കുക</string>
+    <string name="auth_back_to_sign_in">സൈൻ ഇൻ പേജിലേക്ക് മടങ്ങുക</string>
+    <string name="auth_reset_code_title">നിങ്ങളുടെ റീസെറ്റ് കോഡ് നൽകുക</string>
+    <string name="auth_reset_code_subtitle">അഡ്മിനിസ്ട്രേറ്ററെ അറിയിച്ചിട്ടുണ്ട്. %1$s-നുള്ള 8 അക്ക കോഡ് അവരോട് ചോദിക്കുക; ഇത് ഒരു തവണയും 30 മിനിറ്റും മാത്രമേ പ്രവർത്തിക്കൂ.</string>
+    <string name="auth_reset_code_label">റീസെറ്റ് കോഡ്</string>
+    <string name="auth_set_password_sign_in">പാസ്‌വേഡ് സജ്ജമാക്കി സൈൻ ഇൻ ചെയ്യുക</string>
+    <string name="auth_back">മടങ്ങുക</string>
+    <string name="auth_choose_password_title">നിങ്ങളുടെ പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക</string>
+    <string name="auth_choose_password_subtitle">സ്വാഗതം, %1$s. നിങ്ങൾ സൈൻ ഇൻ ചെയ്യാൻ ഉപയോഗിച്ച പാസ്‌വേഡ് നിങ്ങൾക്കായി നിർമ്മിച്ചതാണ്, അത് മറ്റൊരാൾ കണ്ടിട്ടുണ്ട്. തുടരാൻ നിങ്ങളുടെ സ്വന്തം പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക.</string>
+    <string name="auth_save_continue">സേവ് ചെയ്ത് തുടരുക</string>
+    <string name="auth_sign_out">സൈൻ ഔട്ട് ചെയ്യുക</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">പശ്ചാത്തല പ്രവർത്തനം</string>
+    <string name="service_channel_alerts">ഹോം അലേർട്ടുകൾ</string>
+    <string name="service_listening_alerts">Domus അലേർട്ടുകൾക്കായി കാത്തിരിക്കുന്നു</string>
+    <string name="service_screen_sync_title">സ്ക്രീൻ സിങ്ക് ഓണാണ്</string>
+    <string name="service_screen_sync_body">നിങ്ങളുടെ ലൈറ്റുകൾ ഈ സ്ക്രീൻ പിന്തുടരുന്നു</string>
+    <string name="service_stop">നിർത്തുക</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (അവതാർ കലാസൃഷ്ടി)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (സ്ഥലം തിരയൽ, നിങ്ങളുടെ സെർവർ വഴി)</string>
+    <string name="about_lib_home_assistant">Home Assistant (Tuya QR രീതി)</string>
+    <string name="about_license_inspiration">പ്രചോദനം</string>
+    <string name="about_version_unknown">അജ്ഞാതം</string>
+    <string name="about_title">Domus-നെ കുറിച്ച്</string>
+    <string name="about_section_app">ആപ്പ്</string>
+    <string name="about_version_build">പതിപ്പ് %1$s · ബിൽഡ് %2$d</string>
+    <string name="about_privacy_title">സ്വകാര്യത</string>
+    <string name="about_privacy_subtitle">നിങ്ങളുടെ സ്വന്തം സെർവറിൽ പ്രവർത്തിക്കുന്നു. വിവരങ്ങൾ അവിടെ എൻക്രിപ്റ്റ് ചെയ്യപ്പെട്ടിരിക്കുന്നു.</string>
+    <string name="about_source_code">സോഴ്സ് കോഡ്</string>
+    <string name="about_section_developer">ഡെവലപ്പർ</string>
+    <string name="about_developer_tagline">ഒരു ഡെവലപ്പർ രൂപകൽപ്പന ചെയ്ത് നിർമ്മിച്ചത്.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">പോർട്ട്‌ഫോളിയോ</string>
+    <string name="about_section_open_source">ഓപ്പൺ സോഴ്സ്</string>
+    <string name="about_acknowledgements">കൃതജ്ഞത</string>
+    <string name="about_acknowledgements_subtitle">Domus നിർമ്മിച്ചിരിക്കുന്ന ലൈബ്രറികളും പ്രോജക്ടുകളും</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s ലഭ്യമാണ്</string>
+    <string name="update_download_failed_retry_prompt">ഡൗൺലോഡ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കണോ?</string>
+    <string name="update_prompt_body">നിങ്ങളുടെ പക്കൽ %1$s ഉണ്ട്. റിലീസ് നോട്ടുകളും അപ്ഡേറ്റ് ചാനലും ക്രമീകരണങ്ങളിലെ അപ്ഡേറ്റുകൾക്ക് കീഴിലുണ്ട്.</string>
+    <string name="update_downloading_percent">%1$d%% ഡൗൺലോഡ് ചെയ്യുന്നു</string>
+    <string name="update_action">അപ്ഡേറ്റ് ചെയ്യുക</string>
+    <string name="update_later">പിന്നീട്</string>
+    <string name="update_title">അപ്ഡേറ്റുകൾ</string>
+    <string name="update_checking">അപ്ഡേറ്റുകൾക്കായി പരിശോധിക്കുന്നു…</string>
+    <string name="update_check_failed">അപ്ഡേറ്റുകൾക്കായി പരിശോധിക്കാനായില്ല</string>
+    <string name="update_dev_build">ഡെവലപ്മെന്റ് ബിൽഡ്</string>
+    <string name="update_up_to_date">Domus ഏറ്റവും പുതിയ പതിപ്പാണ്</string>
+    <string name="update_download_failed_retry">ഡൗൺലോഡ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="update_check_failed_body">നിങ്ങളുടെ പക്കൽ %1$s ഉണ്ട്. കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="update_dev_build_body">നിങ്ങളുടെ പക്കൽ %1$s ഉണ്ട്. ഒരു ഡെവലപ്മെന്റ് ബിൽഡ് വീണ്ടും നിർമ്മിച്ചാണ് അപ്ഡേറ്റ് ചെയ്യുന്നത്.</string>
+    <string name="update_you_have">നിങ്ങളുടെ പക്കൽ %1$s ഉണ്ട്.</string>
+    <string name="update_download_install">ഡൗൺലോഡ് ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യുക</string>
+    <string name="update_check_again">വീണ്ടും പരിശോധിക്കുക</string>
+    <string name="update_channel">ചാനൽ</string>
+    <string name="update_channel_hint">Beta, Alpha എന്നിവയ്ക്ക് പുതിയ ബിൽഡുകൾ നേരത്തെയും ഒപ്പം എല്ലാ സ്ഥിരതയുള്ള പതിപ്പുകളും ലഭിക്കുന്നു.</string>
+    <string name="update_whats_new_in">%1$s-ൽ എന്താണ് പുതിയത്</string>
+    <string name="update_in_this_version">ഈ പതിപ്പിൽ</string>
+    <string name="update_loading_notes">റിലീസ് നോട്ടുകൾ ലോഡ് ചെയ്യുന്നു…</string>
+    <string name="update_no_notes">ഈ പതിപ്പിന് റിലീസ് നോട്ടുകളൊന്നുമില്ല.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">റോബോട്ടുകൾ</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Adventurer</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Pixel Art</string>
+    <string name="avatar_style_fun_emoji">Fun Emoji</string>
+    <string name="avatar_style_thumbs">Thumbs</string>
+    <string name="avatar_style_shapes">Shapes</string>
+    <string name="avatar_style_rings">Rings</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">അവതാർ കസ്റ്റമൈസ് ചെയ്യുക</string>
+    <string name="avatar_save">സേവ് ചെയ്യുക</string>
+    <string name="avatar_seed_value">സീഡ്: %1$s</string>
+    <string name="avatar_randomize">ക്രമരഹിതമാക്കുക</string>
+    <string name="avatar_roll_seed">സീഡ് റോൾ ചെയ്യുക</string>
+    <string name="avatar_roll_seed_action">സീഡ് റോൾ ചെയ്യുക</string>
+    <string name="avatar_style_label">അവതാർ ശൈലി</string>
+    <string name="avatar_seed_phrase_label">സീഡ് വാചകം</string>
+    <string name="avatar_seed_phrase_hint">ഈ അവതാർ ശൈലി മാറ്റാൻ ഏതെങ്കിലും കീവേഡ്, പേര് അല്ലെങ്കിൽ അക്ഷരങ്ങൾ നൽകുക.</string>
+    <string name="avatar_seed_label">സീഡ്</string>
+    <string name="avatar_apply_avatar">അവതാർ പ്രയോഗിക്കുക</string>
+    <string name="avatar_apply">പ്രയോഗിക്കുക</string>
+    <string name="avatar_cancel">റദ്ദാക്കുക</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">ശുഭരാത്രി</string>
+    <string name="home_greeting_morning">സുപ്രഭാതം</string>
+    <string name="home_greeting_afternoon">ശുഭ മധ്യാഹ്നം</string>
+    <string name="home_greeting_evening">ശുഭ സായാഹ്നം</string>
+    <string name="home_got_it">മനസ്സിലായി</string>
+    <string name="home_about_stat">%1$s സംബന്ധിച്ച്</string>
+    <string name="home_scene_on_hint">ഓൺ · ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക</string>
+    <string name="home_scene_off_hint">പ്രവർത്തിപ്പിക്കാൻ ടാപ്പ് ചെയ്യുക</string>
+    <string name="home_change_avatar">അവതാർ മാറ്റുക</string>
+    <string name="home_clear_notices_title">എല്ലാ അറിയിപ്പുകളും ഇല്ലാതാക്കണോ?</string>
+    <string name="home_clear_notices_body">എല്ലാ ഉപകരണങ്ങളിൽ നിന്നും അവ നീക്കം ചെയ്യപ്പെടും.</string>
+    <string name="home_delete_all">എല്ലാം ഇല്ലാതാക്കുക</string>
+    <string name="home_reconnecting">വീണ്ടും കണക്റ്റ് ചെയ്യുന്നു…</string>
+    <string name="home_devices_on_of_total">%2$d-ൽ %1$d ഓൺ</string>
+    <string name="home_using_now">ഇപ്പോൾ ഉപയോഗിക്കുന്നത്</string>
+    <string name="home_using_now_info">നിങ്ങളുടെ മീറ്ററുള്ള എല്ലാ ഉപകരണങ്ങളുടെയും സംയോജിത തത്സമയ വൈദ്യുതി ഉപഭോഗം.</string>
+    <string name="home_today">ഇന്ന്</string>
+    <string name="home_today_info">അർദ്ധരാത്രി മുതൽ ഉപയോഗിച്ച ഊർജ്ജം. താഴെയുള്ള തുക നിങ്ങളുടെ വൈദ്യുതി നിരക്കിലുള്ള ഏകദേശ ചെലവാണ്.</string>
+    <string name="home_air_quality">വായു ഗുണനിലവാരം</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">സീനുകൾ</string>
+    <string name="home_on_right_now">ഇപ്പോൾ ഓണായിരിക്കുന്നവ</string>
+    <string name="home_all_devices">എല്ലാ ഉപകരണങ്ങളും</string>
+    <string name="home_no_devices_title">ഇതുവരെ ഉപകരണങ്ങളൊന്നുമില്ല</string>
+    <string name="home_no_devices_admin">ഉപകരണങ്ങൾ തുറന്ന് Tuya, Tapo, Xiaomi, Hue അല്ലെങ്കിൽ MQTT ലിങ്ക് ചെയ്യാൻ + ടാപ്പ് ചെയ്യുക.</string>
+    <string name="home_no_devices_member">ഉപകരണങ്ങൾ ചേർക്കാനോ ഒരു മുറിയിലേക്ക് ആക്സസ് നൽകാനോ അഡ്മിനോട് ആവശ്യപ്പെടുക.</string>
+    <string name="home_everything_off">എല്ലാം ഓഫാണ്.</string>
+    <string name="home_rooms">മുറികൾ</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d ഉപകരണം · എല്ലാം ഓഫ്</item>
+        <item quantity="other">%1$d ഉപകരണങ്ങൾ · എല്ലാം ഓഫ്</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d ഉപകരണം · %2$d ഓൺ</item>
+        <item quantity="other">%1$d ഉപകരണങ്ങൾ · %2$d ഓൺ</item>
+    </plurals>
+    <string name="home_recent_activity">സമീപകാല പ്രവർത്തനങ്ങൾ</string>
+    <string name="home_see_all">എല്ലാം കാണുക</string>
+
+    <!-- Devices -->
+    <string name="device_title">ഉപകരണങ്ങൾ</string>
+    <string name="device_online_of_total">%2$d-ൽ %1$d ഓൺലൈൻ</string>
+    <string name="device_add_devices">ഉപകരണങ്ങൾ ചേർക്കുക</string>
+    <string name="device_filter_all">എല്ലാം</string>
+    <string name="device_category_lights">ലൈറ്റുകൾ</string>
+    <string name="device_category_power">പവർ</string>
+    <string name="device_category_air">വായു</string>
+    <string name="device_category_climate">കാലാവസ്ഥ</string>
+    <string name="device_all_rooms">എല്ലാ മുറികളും</string>
+    <string name="device_no_room">മുറിയില്ല</string>
+    <string name="device_manage_rooms">മുറികൾ നിയന്ത്രിക്കുക</string>
+    <string name="device_empty_filtered_title">ഇവിടെ ഒന്നുമില്ല</string>
+    <string name="device_empty_filtered_body">ഈ മുറിയുമായും വിഭാഗവുമായും പൊരുത്തപ്പെടുന്ന ഉപകരണങ്ങളൊന്നുമില്ല.</string>
+    <string name="device_empty_admin">Tuya, Tapo, Xiaomi, Hue അല്ലെങ്കിൽ MQTT ലിങ്ക് ചെയ്യാനും അവ കണ്ടെത്തുന്നവ ചേർക്കാനും + ടാപ്പ് ചെയ്യുക.</string>
+    <string name="device_online">ഓൺലൈൻ</string>
+    <string name="device_offline">ഓഫ്‌ലൈൻ</string>
+    <string name="device_on">ഓൺ</string>
+    <string name="device_off">ഓഫ്</string>
+    <string name="device_leak">ചോർച്ച</string>
+    <string name="device_motion">ചലനം</string>
+    <string name="device_motion_detected">കണ്ടെത്തി</string>
+    <string name="device_clear">വ്യക്തം</string>
+    <string name="device_open">തുറന്നു</string>
+    <string name="device_closed">അടഞ്ഞു</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s പവർ</string>
+    <string name="device_refresh_a11y">%1$s പുതുക്കുക</string>
+    <string name="device_view_only_member">നിങ്ങൾക്ക് ഈ ഉപകരണം കാണാനാകും എന്നാൽ നിയന്ത്രിക്കാനാകില്ല.</string>
+    <string name="device_view_only_guest">അതിഥികൾക്ക് ഉപകരണങ്ങൾ കാണാനാകും എന്നാൽ നിയന്ത്രിക്കാനാകില്ല.</string>
+    <string name="device_brightness">തെളിച്ചം</string>
+    <string name="device_white">വെള്ള</string>
+    <string name="device_white_warm">വാം</string>
+    <string name="device_white_neutral">ന്യൂട്രൽ</string>
+    <string name="device_white_cool">കൂൾ</string>
+    <string name="device_fan_speed">ഫാൻ വേഗത</string>
+    <string name="device_mode">മോഡ്</string>
+    <string name="device_speed">വേഗത</string>
+    <string name="device_coverage">പരിധി %1$d–%2$d m²</string>
+    <string name="device_reading_power">പവർ</string>
+    <string name="device_reading_voltage">വോൾട്ടേജ്</string>
+    <string name="device_reading_current">കറന്റ്</string>
+    <string name="device_reading_temperature">താപനില</string>
+    <string name="device_reading_humidity">ആർദ്രത</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">ഫിൽട്ടർ</string>
+    <string name="device_filter_left">%1$d%% ബാക്കിയുണ്ട്</string>
+    <string name="device_reading_contact">വാതിൽ അല്ലെങ്കിൽ ജനൽ</string>
+    <string name="device_reading_water">വെള്ളം</string>
+    <string name="device_water_dry">വരണ്ടത്</string>
+    <string name="device_reading_alarm">അലാറം</string>
+    <string name="device_alarm_sounding">ശബ്ദിക്കുന്നു</string>
+    <string name="device_alarm_quiet">നിശബ്ദം</string>
+    <string name="device_reading_battery">ബാറ്ററി</string>
+    <string name="device_battery_low">കുറവ്</string>
+    <string name="device_battery_ok">ശരി</string>
+    <string name="device_ask_before_switching">സ്വിച്ച് ചെയ്യുന്നതിന് മുമ്പ് ചോദിക്കുക</string>
+    <string name="device_ask_before_switching_desc">ഏതെങ്കിലും ആപ്പ്, ഗ്രൂപ്പ് അല്ലെങ്കിൽ സീനിൽ നിന്ന് ഇത് ഓണാക്കുന്നതിനോ ഓഫാക്കുന്നതിനോ മുമ്പ് മുന്നറിയിപ്പ് നൽകുന്നു</string>
+    <string name="device_rename_or_move">പേര് മാറ്റുക അല്ലെങ്കിൽ മാറ്റുക</string>
+    <string name="device_rename">പേര് മാറ്റുക</string>
+    <string name="device_remove">നീക്കം ചെയ്യുക</string>
+    <string name="device_edit_title">ഉപകരണം എഡിറ്റ് ചെയ്യുക</string>
+    <string name="device_field_name">പേര്</string>
+    <string name="device_field_room">മുറി</string>
+    <string name="device_remove_confirm_title">%1$s നീക്കം ചെയ്യണോ?</string>
+    <string name="device_remove_confirm_body">ഇത് നിങ്ങളുടെ വീട്ടിൽ നിന്നും സീനുകളിൽ നിന്നും ഒഴിവാക്കപ്പെടും. ഉപകരണങ്ങൾ ചേർക്കുക എന്നതിൽ നിന്ന് നിങ്ങൾക്ക് ഇത് വീണ്ടും ചേർക്കാം.</string>
+    <string name="device_white_candle">മെഴുകുതിരി</string>
+    <string name="device_white_soft">സോഫ്റ്റ് വൈറ്റ്</string>
+    <string name="device_white_neutral_preset">ന്യൂട്രൽ വൈറ്റ്</string>
+    <string name="device_white_daylight">ഡേലൈറ്റ്</string>
+    <string name="device_white_cool_preset">കൂൾ വൈറ്റ്</string>
+    <string name="device_light_off">ലൈറ്റ് ഓഫ്</string>
+    <string name="device_light_effect">ഇഫക്റ്റ്</string>
+    <string name="device_light_white">വെള്ള വെളിച്ചം</string>
+    <string name="device_light_color">കളർ ലൈറ്റ്</string>
+    <string name="device_light_playing">%1$s പ്ലേ ചെയ്യുന്നു</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">നിറം</string>
+    <string name="device_effects">ഇഫക്റ്റുകൾ</string>
+    <string name="device_color_temp">കളർ ടെമ്പറേച്ചർ</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K വാം</string>
+    <string name="device_kelvin_max">6500K കൂൾ</string>
+    <string name="device_moods">മൂഡുകൾ</string>
+    <string name="device_stop_effect">ഇഫക്റ്റ് നിർത്തുക</string>
+    <string name="device_color_swatch_a11y">നിറം %1$s</string>
+    <string name="device_selected">തിരഞ്ഞെടുത്തു</string>
+    <string name="device_not_selected">തിരഞ്ഞെടുത്തിട്ടില്ല</string>
+    <string name="device_confirm_switch_one_title">%1$s സ്വിച്ച് ചെയ്യണോ?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">%1$d ഉപകരണം സ്വിച്ച് ചെയ്യണോ?</item>
+        <item quantity="other">%1$d ഉപകരണങ്ങൾ സ്വിച്ച് ചെയ്യണോ?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">ഇതിൽ %1$s ഉൾപ്പെടുന്നു, ഇത് സ്വിച്ച് ചെയ്യുന്നതിന് മുമ്പ് അനുമതി ചോദിക്കുന്നു. ഇത് സ്വിച്ച് ചെയ്യുന്നത് കണക്റ്റ് ചെയ്തിരിക്കുന്ന ഉപകരണങ്ങളുടെ വൈദ്യുതി വിച്ഛേദിക്കാൻ കാരണമാകാം.</string>
+    <string name="device_confirm_switch_many_body">ഇതിൽ %1$s ഉൾപ്പെടുന്നു, ഇവ സ്വിച്ച് ചെയ്യുന്നതിന് മുമ്പ് അനുമതി ചോദിക്കുന്നു. ഇവ സ്വിച്ച് ചെയ്യുന്നത് കണക്റ്റ് ചെയ്തിരിക്കുന്ന ഉപകരണങ്ങളുടെ വൈദ്യുതി വിച്ഛേദിക്കാൻ കാരണമാകാം.</string>
+    <string name="device_confirm_switch_action">സ്വിച്ച് ചെയ്യുക</string>
+    <string name="device_cancel">റദ്ദാക്കുക</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">ഇപ്പോൾ</string>
+    <string name="scene_time_minutes_ago">%1$d മിനിറ്റ് മുമ്പ്</string>
+    <string name="scene_time_hours_ago">%1$d മണിക്കൂർ മുമ്പ്</string>
+    <string name="scene_time_days_ago">%1$d ദിവസം മുമ്പ്</string>
+    <string name="scene_edit_item">%1$s എഡിറ്റ് ചെയ്യുക</string>
+    <string name="scene_title">സീനുകൾ</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">%1$d സജീവം · %2$d ഓട്ടോമേഷൻ ഓൺ</item>
+        <item quantity="other">%1$d സജീവം · %2$d ഓട്ടോമേഷനുകൾ ഓൺ</item>
+    </plurals>
+    <string name="scene_empty_title">ഇവിടെ ഇതുവരെ ഒന്നുമില്ല</string>
+    <string name="scene_empty_subtitle">ഒരു സീൻ ഒരേസമയം നിരവധി ഉപകരണങ്ങൾ ക്രമീകരിക്കുന്നു. എന്തെങ്കിലും സംഭവിക്കുമ്പോൾ ഒരു ഓട്ടോമേഷൻ അത് നിങ്ങൾക്കായി സ്വയം ചെയ്യുന്നു.</string>
+    <string name="scene_new_scene">പുതിയ സീൻ</string>
+    <string name="scene_new_automation">പുതിയ ഓട്ടോമേഷൻ</string>
+    <string name="scene_new_screen_sync">പുതിയ സ്ക്രീൻ സിങ്ക്</string>
+    <string name="scene_sync_active_subtitle">സ്ക്രീൻ സിങ്ക് · ലൈറ്റുകൾ ഒരു സ്ക്രീൻ പിന്തുടരുന്നു</string>
+    <string name="scene_sync_inactive_subtitle">സ്ക്രീൻ സിങ്ക് · ഈ സ്ക്രീൻ ലൈറ്റുകളിലേക്ക് പ്രതിഫലിപ്പിക്കുന്നു</string>
+    <string name="scene_active">സജീവം</string>
+    <string name="scene_section_automations">ഓട്ടോമേഷനുകൾ</string>
+    <string name="scene_last_ran">അവസാനം പ്രവർത്തിച്ചത് %1$s</string>
+    <string name="scene_never_ran">ഒരിക്കലും പ്രവർത്തിച്ചിട്ടില്ല</string>
+    <string name="scene_run_now">%1$s ഇപ്പോൾ പ്രവർത്തിപ്പിക്കുക</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">തിങ്കൾ</string>
+    <string name="editor_day_tue">ചൊവ്വ</string>
+    <string name="editor_day_wed">ബുധൻ</string>
+    <string name="editor_day_thu">വ്യാഴം</string>
+    <string name="editor_day_fri">വെള്ളി</string>
+    <string name="editor_day_sat">ശനി</string>
+    <string name="editor_day_sun">ഞായർ</string>
+    <string name="editor_prop_temperature">താപനില</string>
+    <string name="editor_prop_humidity">ആർദ്രത</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">തെളിച്ചം</string>
+    <string name="editor_prop_power_watts">പവർ (W)</string>
+    <string name="editor_removed_device">നീക്കം ചെയ്ത ഉപകരണം</string>
+    <string name="editor_rule_device_is_off">%1$s ഓഫാണ്</string>
+    <string name="editor_rule_device_is_on">%1$s ഓണാണ്</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s %3$s-ന് മുകളിൽ</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s %3$s-ന് താഴെ</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s %3$s ആകുന്നു</string>
+    <string name="editor_rule_time_every_day">എല്ലാ ദിവസവും %1$s-ന്</string>
+    <string name="editor_rule_time_on_days">%2$s ദിവസങ്ങളിൽ %1$s-ന്</string>
+    <string name="editor_sun_event_sunrise">സൂര്യോദയം</string>
+    <string name="editor_sun_event_sunset">സൂര്യാസ്തമയം</string>
+    <string name="editor_rule_sun_at_every_day">എല്ലാ ദിവസവും %1$s സമയത്ത്</string>
+    <string name="editor_rule_sun_at_on_days">%2$s ദിവസങ്ങളിൽ %1$s സമയത്ത്</string>
+    <string name="editor_rule_sun_before_every_day">എല്ലാ ദിവസവും %2$s-ന് %1$d മിനിറ്റ് മുമ്പ്</string>
+    <string name="editor_rule_sun_before_on_days">%3$s ദിവസങ്ങളിൽ %2$s-ന് %1$d മിനിറ്റ് മുമ്പ്</string>
+    <string name="editor_rule_sun_after_every_day">എല്ലാ ദിവസവും %2$s കഴിഞ്ഞ് %1$d മിനിറ്റിന് ശേഷം</string>
+    <string name="editor_rule_sun_after_on_days">%3$s ദിവസങ്ങളിൽ %2$s കഴിഞ്ഞ് %1$d മിനിറ്റിന് ശേഷം</string>
+    <string name="editor_rule_power_above">%1$s %2$s W-ൽ കൂടുതൽ ഉപയോഗിക്കുന്നു</string>
+    <string name="editor_rule_device_offline">%1$s ഓഫ്‌ലൈനാകുന്നു</string>
+    <string name="editor_rule_device_discovered">ഒരു പുതിയ ഉപകരണം കണ്ടെത്തുമ്പോൾ</string>
+    <string name="editor_rule_time_between">%1$s-നും %2$s-നും ഇടയിൽ</string>
+    <string name="editor_cmd_on">ഓൺ</string>
+    <string name="editor_cmd_off">ഓഫ്</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">വെള്ള %1$s</string>
+    <string name="editor_device_group">ഉപകരണ ഗ്രൂപ്പ്</string>
+    <string name="editor_cmd_custom">കസ്റ്റം കമാൻഡ്</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">അറിയിപ്പ്: %1$s</string>
+    <string name="editor_removed_scene">(നീക്കം ചെയ്തു)</string>
+    <string name="editor_rule_scene">%1$s സീൻ പ്രവർത്തിപ്പിക്കുക</string>
+    <string name="editor_rule_delay">%1$s സെക്കൻഡ് കാത്തിരിക്കുക</string>
+    <string name="editor_rule_unknown">അജ്ഞാതം</string>
+    <string name="editor_trigger_time">സമയം</string>
+    <string name="editor_trigger_sun">സൂര്യോദയം / സൂര്യാസ്തമയം</string>
+    <string name="editor_trigger_device_state">ഉപകരണത്തിന്റെ അവസ്ഥ</string>
+    <string name="editor_trigger_power">പവർ</string>
+    <string name="editor_trigger_offline">ഓഫ്‌ലൈനാകുന്നു</string>
+    <string name="editor_trigger_discovered">പുതിയ ഉപകരണം</string>
+    <string name="editor_condition_device_state">ഉപകരണത്തിന്റെ അവസ്ഥ</string>
+    <string name="editor_condition_time_between">സമയ വിൻഡോ</string>
+    <string name="editor_action_device">ഉപകരണം</string>
+    <string name="editor_action_scene">സീൻ</string>
+    <string name="editor_action_notify">അറിയിക്കുക</string>
+    <string name="editor_action_delay">കാത്തിരിക്കുക</string>
+    <string name="editor_add">ചേർക്കുക</string>
+    <string name="editor_field_device">ഉപകരണം</string>
+    <string name="editor_sun_sunrise">സൂര്യോദയം</string>
+    <string name="editor_sun_sunset">സൂര്യാസ്തമയം</string>
+    <string name="editor_sun_after">ശേഷം</string>
+    <string name="editor_sun_before">മുമ്പ്</string>
+    <string name="editor_field_minutes">മിനിറ്റ്</string>
+    <string name="editor_sun_supporting_sunrise">ശൂന്യമായി വിട്ടാൽ സൂര്യോദയത്തിൽ പ്രവർത്തിക്കും. ക്രമീകരണങ്ങളിൽ വീടിന്റെ സ്ഥാനം ആവശ്യമാണ്.</string>
+    <string name="editor_sun_supporting_sunset">ശൂന്യമായി വിട്ടാൽ സൂര്യാസ്തമയത്തിൽ പ്രവർത്തിക്കും. ക്രമീകരണങ്ങളിൽ വീടിന്റെ സ്ഥാനം ആവശ്യമാണ്.</string>
+    <string name="editor_every_day">എല്ലാ ദിവസവും</string>
+    <string name="editor_chosen_days">തിരഞ്ഞെടുത്ത ദിവസങ്ങളിൽ മാത്രം</string>
+    <string name="editor_field_is">അവസ്ഥ</string>
+    <string name="editor_state_on">ഓൺ</string>
+    <string name="editor_state_off">ഓഫ്</string>
+    <string name="editor_compare_above">മുകളിൽ</string>
+    <string name="editor_compare_below">താഴെ</string>
+    <string name="editor_field_value">മൂല്യം</string>
+    <string name="editor_field_watts">വാട്ട്സ്</string>
+    <string name="editor_time_from">മുതൽ</string>
+    <string name="editor_time_until">വരെ</string>
+    <string name="editor_power_turn_on">ഓണാക്കുക</string>
+    <string name="editor_power_turn_off">ഓഫാക്കുക</string>
+    <string name="editor_power_leave">പവർ മാറ്റാതെ വിടുക</string>
+    <string name="editor_set_brightness">തെളിച്ചം ക്രമീകരിക്കുക</string>
+    <string name="editor_set_brightness_value">തെളിച്ചം %1$d%% ആയി ക്രമീകരിക്കുക</string>
+    <string name="editor_field_scene">സീൻ</string>
+    <string name="editor_field_title">ശീർഷകം</string>
+    <string name="editor_field_message">സന്ദേശം</string>
+    <string name="editor_field_seconds">സെക്കൻഡ്</string>
+    <string name="editor_remove_rule">നീക്കം ചെയ്യുക: %1$s</string>
+    <string name="editor_style_vivid">വിവിഡ്</string>
+    <string name="editor_style_dominant">പ്രധാന നിറം</string>
+    <string name="editor_style_average">ശരാശരി</string>
+    <string name="editor_new_screen_sync">പുതിയ സ്ക്രീൻ സിങ്ക്</string>
+    <string name="editor_new_scene">പുതിയ സീൻ</string>
+    <string name="editor_edit_scene">സീൻ എഡിറ്റ് ചെയ്യുക</string>
+    <string name="editor_delete">ഇല്ലാതാക്കുക</string>
+    <string name="editor_field_name">പേര്</string>
+    <string name="editor_sync_lights_title">സ്ക്രീൻ പിന്തുടരുന്ന ലൈറ്റുകൾ</string>
+    <string name="editor_sync_no_lights">നിങ്ങളുടെ വീട്ടിൽ ഇതുവരെ ലൈറ്റുകളൊന്നുമില്ല.</string>
+    <string name="editor_sync_color_title">നിറം</string>
+    <string name="editor_style_vivid_desc">സ്ക്രീനിലെ ഏറ്റവും കടുത്ത നിറം.</string>
+    <string name="editor_style_dominant_desc">ഏറ്റവും കൂടുതൽ കാണപ്പെടുന്ന നിറം.</string>
+    <string name="editor_style_average_desc">മുഴുവൻ ചിത്രത്തിന്റെയും ശരാശരി നിറം.</string>
+    <string name="editor_region_full">സ്ക്രീൻ മുഴുവൻ</string>
+    <string name="editor_region_edges">അരികുകൾ മാത്രം</string>
+    <string name="editor_sync_dim_dark">ഇരുണ്ട ദൃശ്യങ്ങളിൽ വെളിച്ചം കുറയ്ക്കുക</string>
+    <string name="editor_sync_restore_lights">നിർത്തുമ്പോൾ ലൈറ്റുകൾ പഴയപടിയാക്കുക</string>
+    <string name="editor_actions_title">പ്രവർത്തികൾ</string>
+    <string name="editor_add_action">പ്രവർത്തി ചേർക്കുക</string>
+    <string name="editor_save">സേവ് ചെയ്യുക</string>
+    <string name="editor_delete_confirm_title">%1$s ഇല്ലാതാക്കണോ?</string>
+    <string name="editor_delete_scene_body">ഈ സീൻ പ്രവർത്തിപ്പിക്കുന്ന ഓട്ടോമേഷനുകൾ ഇത് ഒഴിവാക്കും.</string>
+    <string name="editor_new_automation">പുതിയ ഓട്ടോമേഷൻ</string>
+    <string name="editor_edit_automation">ഓട്ടോമേഷൻ എഡിറ്റ് ചെയ്യുക</string>
+    <string name="editor_field_description_optional">വിവരണം (ഓപ്ഷണൽ)</string>
+    <string name="editor_enabled">പ്രവർത്തനക്ഷമമാക്കി</string>
+    <string name="editor_triggers_title">ഇവയിലേതെങ്കിലും സംഭവിക്കുമ്പോൾ</string>
+    <string name="editor_add_trigger">ട്രിഗർ ചേർക്കുക</string>
+    <string name="editor_conditions_title">ഇവയെല്ലാം ശരിയാണെങ്കിൽ മാത്രം</string>
+    <string name="editor_add_condition">നിബന്ധന ചേർക്കുക</string>
+    <string name="editor_do_this_title">ഇത് ചെയ്യുക</string>
+    <string name="editor_delete_automation_body">ഇത് പ്രവർത്തിക്കുന്നത് നിർത്തും.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">ലൈവ്</string>
+    <string name="analytics_range_hour">1 മിനിറ്റ്</string>
+    <string name="analytics_range_day">ദിവസം</string>
+    <string name="analytics_range_week">ആഴ്ച</string>
+    <string name="analytics_range_month">മാസം</string>
+    <string name="analytics_bucket_5s">5 സെക്കൻഡ്</string>
+    <string name="analytics_bucket_minute">മിനിറ്റ്</string>
+    <string name="analytics_bucket_hour">മണിക്കൂർ</string>
+    <string name="analytics_bucket_day">ദിവസം</string>
+    <string name="analytics_title">അനലിറ്റിക്സ്</string>
+    <string name="analytics_subtitle_power">വൈദ്യുതി ഉപയോഗവും ചെലവും</string>
+    <string name="analytics_subtitle_air">വായു ഗുണനിലവാരവും പ്യൂരിഫയറുകളും</string>
+    <string name="analytics_electricity_tariff">വൈദ്യുതി താരിഫ്</string>
+    <string name="analytics_tab_electricity">വൈദ്യുതി</string>
+    <string name="analytics_tab_air">വായു ഗുണനിലവാരം</string>
+    <string name="analytics_no_energy_title">ഇതുവരെ ഊർജ്ജ ഡാറ്റയൊന്നുമില്ല</string>
+    <string name="analytics_no_energy_subtitle">മീറ്ററിംഗ് പ്ലഗ് അല്ലെങ്കിൽ സ്വിച്ച് ഓൺലൈനിൽ വന്ന് ഒരു മിനിറ്റിന് ശേഷം റീഡിംഗുകൾ ദൃശ്യമാകും.</string>
+    <string name="analytics_using_now">ഇപ്പോൾ ഉപയോഗിക്കുന്നത്</string>
+    <string name="analytics_projected_cost">ഈ ബില്ലിംഗ് സൈക്കിളിൽ %1$s ആകാൻ സാധ്യതയുണ്ട്</string>
+    <string name="analytics_today">ഇന്ന്</string>
+    <string name="analytics_today_info">അർദ്ധരാത്രി മുതൽ ഉപയോഗിച്ച ഊർജ്ജം. താഴെയുള്ള തുക നിങ്ങളുടെ വൈദ്യുതി നിരക്കിലുള്ള ഏകദേശ ചെലവാണ്.</string>
+    <string name="analytics_this_cycle">ഈ സൈക്കിൾ</string>
+    <string name="analytics_this_cycle_info">നിലവിലെ ബില്ലിംഗ് സൈക്കിളിൽ ഇതുവരെ ഉപയോഗിച്ച ഊർജ്ജവും ഏകദേശ ബില്ലും.</string>
+    <string name="analytics_history">ചരിത്രം</string>
+    <string name="analytics_nothing_recorded">ഈ കാലയളവിൽ ഇതുവരെ ഒന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.</string>
+    <string name="analytics_metric_energy">ഊർജ്ജം</string>
+    <string name="analytics_metric_power">പവർ</string>
+    <string name="analytics_no_reading">റീഡിംഗ് ഇല്ല</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">ഓരോ %1$s-ലെയും ശരാശരി പവർ</string>
+    <string name="analytics_chart_energy_used">ഓരോ %1$s-ലും ഉപയോഗിച്ച ഊർജ്ജം, ആകെ %2$s</string>
+    <string name="analytics_live_caption">കഴിഞ്ഞ 5 മിനിറ്റ്, ഈ പേജ് തുറന്നിരിക്കുമ്പോൾ ഓരോ 5 സെക്കൻഡിലും ഒരു റീഡിംഗ്.</string>
+    <string name="analytics_total_caption">ആകെ %1$s · %2$s</string>
+    <string name="analytics_insights">ഉൾക്കാഴ്ചകൾ</string>
+    <string name="analytics_peak_hour">പീക്ക് സമയം</string>
+    <string name="analytics_peak_last_24h">കഴിഞ്ഞ 24 മണിക്കൂറിൽ %1$s</string>
+    <string name="analytics_no_usage_yet">ഇതുവരെ ഉപയോഗമില്ല</string>
+    <string name="analytics_daily_average">പ്രതിദിന ശരാശരി</string>
+    <string name="analytics_needs_full_day">ഒരു മുഴുവൻ ദിവസത്തെ ഡാറ്റ ആവശ്യമാണ്</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">കഴിഞ്ഞ %1$d ദിവസത്തിൽ</item>
+        <item quantity="other">കഴിഞ്ഞ %1$d ദിവസങ്ങളിൽ</item>
+    </plurals>
+    <string name="analytics_today_vs_average">ഇന്ന് ശരാശരിയുമായി താരതമ്യം ചെയ്യുമ്പോൾ</string>
+    <string name="analytics_above_usual_day">നിങ്ങളുടെ സാധാരണ ദിവസത്തേക്കാൾ കൂടുതൽ</string>
+    <string name="analytics_below_usual_day">നിങ്ങളുടെ സാധാരണ ദിവസത്തേക്കാൾ കുറവ്</string>
+    <string name="analytics_about_usual_day">നിങ്ങളുടെ സാധാരണ ദിവസത്തിന് തുല്യം</string>
+    <string name="analytics_top_device">ഏറ്റവും കൂടുതൽ ഉപയോഗിച്ച ഉപകരണം</string>
+    <string name="analytics_no_metered_device">മീറ്ററുള്ള ഉപകരണങ്ങളില്ല</string>
+    <string name="analytics_billing_cycle">ബില്ലിംഗ് സൈക്കിൾ</string>
+    <string name="analytics_time_elapsed">പിന്നിട്ട സമയം</string>
+    <string name="analytics_day_of_days">%2$d-ൽ %1$d-ാം ദിവസം</string>
+    <string name="analytics_budget_used">ഉപയോഗിച്ച ബജറ്റ്</string>
+    <string name="analytics_cost_of_budget">%2$s-ൽ %1$s</string>
+    <string name="analytics_spending_ahead">ചെലവ് കലണ്ടറിനേക്കാൾ മുന്നിലാണ്.</string>
+    <string name="analytics_budget_hint">ചെലവ് ട്രാക്ക് ചെയ്യാൻ താരിഫിൽ പ്രതിമാസ ബജറ്റ് സജ്ജമാക്കുക.</string>
+    <string name="analytics_by_device">ഉപകരണം തിരിച്ച്</string>
+    <string name="analytics_device_cycle_summary">%1$s · ഈ സൈക്കിളിൽ %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">താപനില</string>
+    <string name="analytics_reading_humidity">ആർദ്രത</string>
+    <string name="analytics_pm25_now">ഇപ്പോഴത്തെ PM2.5</string>
+    <string name="analytics_air_no_sensor_online">സെൻസറുകളൊന്നും ഓൺലൈനിലില്ല</string>
+    <string name="analytics_air_status_excellent">മികച്ചത് · വീടിനുള്ളിൽ ശുദ്ധവായു</string>
+    <string name="analytics_air_status_good">നല്ലത് · ആരോഗ്യകരമായ പരിധിക്കുള്ളിൽ</string>
+    <string name="analytics_air_status_moderate">മിതമായത് · പ്യൂരിഫയർ പ്രവർത്തിപ്പിക്കുക അല്ലെങ്കിൽ മുറിയിൽ വായുസഞ്ചാരം അനുവദിക്കുക</string>
+    <string name="analytics_air_status_poor">മോശം · പ്യൂരിഫയറുകൾ ഹൈ മോഡിൽ പ്രവർത്തിപ്പിച്ച് ജനലുകൾ അടച്ചിടുക</string>
+    <string name="analytics_purifiers">പ്യൂരിഫയറുകൾ</string>
+    <string name="analytics_running_of_total">%2$d-ൽ %1$d</string>
+    <string name="analytics_all_on_standby">എല്ലാം സ്റ്റാൻഡ്‌ബൈയിൽ</string>
+    <string name="analytics_running_now">ഇപ്പോൾ പ്രവർത്തിക്കുന്നു</string>
+    <string name="analytics_filter_life">ഫിൽട്ടർ ആയുസ്സ്</string>
+    <string name="analytics_filter_replace_soon">ഉടൻ മാറ്റുക</string>
+    <string name="analytics_filter_healthy">മികച്ച നിലയിൽ</string>
+    <string name="analytics_sensors_average">നിങ്ങളുടെ സെൻസറുകളുടെ ശരാശരി</string>
+    <string name="analytics_humidity_dry">വരണ്ടത്</string>
+    <string name="analytics_humidity_humid">ഈർപ്പമുള്ളത്</string>
+    <string name="analytics_humidity_comfortable">സുഖകരം</string>
+    <string name="analytics_trend">പ്രവണത</string>
+    <string name="analytics_no_air_history">ഇതുവരെ ചരിത്രമില്ല. സെൻസർ ഓൺലൈനിലായിരിക്കുമ്പോൾ ഓരോ മിനിറ്റിലും റീഡിംഗുകൾ രേഖപ്പെടുത്തുന്നു.</string>
+    <string name="analytics_air_chart_summary">ഓരോ %2$s-ലും %1$s, ശരാശരി %3$s</string>
+    <string name="analytics_pm25_dashed_caption">ഡാഷ് ചെയ്ത വരകൾ: 15 µg/m³ ശുദ്ധവായു ലക്ഷ്യം, 35 µg/m³ നല്ല വായുവിന്റെ ഉയർന്ന പരിധി.</string>
+    <string name="analytics_period_5m">5 മിനിറ്റ്</string>
+    <string name="analytics_period_60m">60 മിനിറ്റ്</string>
+    <string name="analytics_period_24h">24 മണിക്കൂർ</string>
+    <string name="analytics_period_7d">7 ദിവസം</string>
+    <string name="analytics_period_30d">30 ദിവസം</string>
+    <string name="analytics_average">ശരാശരി</string>
+    <string name="analytics_air_level_over_period">%2$s കാലയളവിൽ %1$s</string>
+    <string name="analytics_peak">പരമാവധി</string>
+    <string name="analytics_value_with_peak">%1$s · പരമാവധി %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">മണിക്കൂർ തിരിച്ചുള്ള ഉപയോഗം</string>
+    <string name="analytics_peak_pm25_by_hour">മണിക്കൂർ അടിസ്ഥാനത്തിൽ ഉയർന്ന PM2.5</string>
+    <string name="analytics_hour_grid_caption">കഴിഞ്ഞ 7 ദിവസത്തെ ഓരോ മണിക്കൂറിനും ഒരു സെൽ. കടുപ്പമുള്ള സെൽ ഉയർന്ന മൂല്യത്തെ സൂചിപ്പിക്കുന്നു.</string>
+    <string name="analytics_hour_grid_summary">%1$s, കഴിഞ്ഞ 7 ദിവസത്തെ ഓരോ മണിക്കൂറിലും</string>
+    <string name="analytics_time_at_each_level">ഓരോ നിലയിലുമുള്ള സമയം</string>
+    <string name="analytics_time_good_air">നല്ല വായു ലഭിച്ച സമയം</string>
+    <string name="analytics_pm25_good_over_period">%1$s കാലയളവിൽ PM2.5 35 µg/m³ അല്ലെങ്കിൽ അതിൽ താഴെ</string>
+    <string name="analytics_sensors">സെൻസറുകൾ</string>
+    <string name="analytics_offline">ഓഫ്‌ലൈൻ</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">ക്രമീകരണങ്ങൾ</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">സിസ്റ്റം</string>
+    <string name="settings_theme_light">ലൈറ്റ്</string>
+    <string name="settings_theme_dark">ഡാർക്ക്</string>
+    <string name="settings_role_admin">അഡ്മിൻ</string>
+    <string name="settings_role_member">അംഗം</string>
+    <string name="settings_role_guest">അതിഥി</string>
+    <string name="settings_avatar">അവതാർ</string>
+    <string name="settings_section_home">വീട്</string>
+    <string name="settings_add_devices">ഉപകരണങ്ങൾ ചേർക്കുക</string>
+    <string name="settings_add_devices_subtitle">നിങ്ങളുടെ അക്കൗണ്ടുകളും നെറ്റ്‌വർക്കും നൽകുന്നവ കണ്ടെത്തി ചേർക്കുക</string>
+    <string name="settings_plugins">പ്ലഗിനുകൾ</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue, MQTT</string>
+    <string name="settings_rooms">മുറികൾ</string>
+    <string name="settings_people">ആളുകൾ</string>
+    <string name="settings_people_subtitle">അക്കൗണ്ടുകൾ, റോളുകൾ, റൂം ആക്സസ്</string>
+    <string name="settings_tariff">വൈദ്യുതി താരിഫ്</string>
+    <string name="settings_tariff_subtitle">നിരക്ക്, ബില്ലിംഗ് സൈക്കിൾ, ബജറ്റ്</string>
+    <string name="settings_location">വീടിന്റെ സ്ഥാനം</string>
+    <string name="settings_location_subtitle">സൂര്യോദയ, സൂര്യാസ്തമയ ഓട്ടോമേഷനുകൾക്കായി</string>
+    <string name="settings_notifications">അറിയിപ്പുകൾ</string>
+    <string name="settings_notifications_subtitle">നിങ്ങളുടെ വീട് റിപ്പോർട്ട് ചെയ്ത വിവരങ്ങൾ</string>
+    <string name="settings_background_alerts">ആപ്പ് അടച്ചിരിക്കുമ്പോഴുള്ള അലേർട്ടുകൾ</string>
+    <string name="settings_background_alerts_subtitle">നിങ്ങളുടെ സെർവറിലേക്കുള്ള കണക്ഷൻ തുറന്നുതന്നെ സൂക്ഷിക്കുന്നു. അല്പം ബാറ്ററി ഉപയോഗിക്കുന്നു.</string>
+    <string name="settings_section_server">സെർവർ</string>
+    <string name="settings_server_live_pinned">ലൈവ് · പിൻ ചെയ്ത സർട്ടിഫിക്കറ്റ്</string>
+    <string name="settings_server_live_public">ലൈവ് · പൊതു സർട്ടിഫിക്കറ്റ്</string>
+    <string name="settings_server_reconnecting">വീണ്ടും കണക്റ്റ് ചെയ്യുന്നു…</string>
+    <string name="settings_server_live_badge">ലൈവ്</string>
+    <string name="settings_server_cert_public">എൻക്രിപ്റ്റ് ചെയ്തത് · പൊതു അതോറിറ്റി സാക്ഷ്യപ്പെടുത്തിയ സർട്ടിഫിക്കറ്റ്</string>
+    <string name="settings_server_cert_pinned">എൻക്രിപ്റ്റ് ചെയ്തത് · ആദ്യ ഉപയോഗത്തിൽ ഈ സെർവറിന്റെ സ്വന്തം സർട്ടിഫിക്കറ്റ് നിങ്ങൾ അംഗീകരിച്ചു:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 ഫിംഗർപ്രിന്റ്</string>
+    <string name="settings_fingerprint_clip_label">ഫിംഗർപ്രിന്റ്</string>
+    <string name="settings_copied">പകർത്തി</string>
+    <string name="settings_copy">പകർത്തുക</string>
+    <string name="settings_change_password">പാസ്‌വേഡ് മാറ്റുക</string>
+    <string name="settings_change_password_subtitle">Domus-ലേക്ക് സൈൻ ഇൻ ചെയ്യുന്നതിന്</string>
+    <string name="settings_server_addresses">സെർവർ വിലാസങ്ങൾ</string>
+    <string name="settings_server_addresses_subtitle">ഹോം നെറ്റ്‌വർക്കും റിമോട്ട് ആക്സസും</string>
+    <string name="settings_updates">അപ്ഡേറ്റുകൾ</string>
+    <string name="settings_updates_subtitle">പതിപ്പ് %1$s, റിലീസ് നോട്ടുകളും ചാനലും</string>
+    <string name="settings_about">Domus-നെ കുറിച്ച്</string>
+    <string name="settings_about_subtitle">പതിപ്പ് %1$s, ഡെവലപ്പറും കൃതജ്ഞതയും</string>
+    <string name="settings_appearance">രൂപം</string>
+    <string name="settings_wallpaper_colors">വാൾപേപ്പർ നിറങ്ങൾ</string>
+    <string name="settings_wallpaper_colors_subtitle">നിങ്ങളുടെ വാൾപേപ്പറിന് അനുയോജ്യമായി ആപ്പ് മാറ്റുക</string>
+    <string name="settings_section_account">അക്കൗണ്ട്</string>
+    <string name="settings_account_subtitle">സൈൻ ഔട്ട് ചെയ്യുക അല്ലെങ്കിൽ മറ്റൊരു സെർവർ ഉപയോഗിക്കുക</string>
+    <string name="settings_sign_out">സൈൻ ഔട്ട് ചെയ്യുക</string>
+    <string name="settings_use_another_server">മറ്റൊരു സെർവർ ഉപയോഗിക്കുക</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">മടങ്ങുക</string>
+    <string name="manage_hide_field">%1$s മറയ്ക്കുക</string>
+    <string name="manage_show_field">%1$s കാണിക്കുക</string>
+    <string name="manage_choose">തിരഞ്ഞെടുക്കുക…</string>
+    <string name="manage_close">അടയ്ക്കുക</string>
+    <string name="manage_cancel">റദ്ദാക്കുക</string>
+    <string name="manage_save">സേവ് ചെയ്യുക</string>
+    <string name="manage_delete">ഇല്ലാതാക്കുക</string>
+    <string name="manage_rooms_title">മുറികൾ</string>
+    <string name="manage_add_room">മുറി ചേർക്കുക</string>
+    <string name="manage_no_rooms">ഇതുവരെ മുറികളൊന്നുമില്ല</string>
+    <string name="manage_no_rooms_subtitle">മുറികൾ ഉപകരണങ്ങളെ ഗ്രൂപ്പാക്കുകയും ഒരു അംഗത്തിനോ അതിഥിക്കോ ഏതൊക്കെ കാണാനാകുമെന്ന് തീരുമാനിക്കുകയും ചെയ്യുന്നു.</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d ഉപകരണം</item>
+        <item quantity="other">%1$d ഉപകരണങ്ങൾ</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d മുറി</item>
+        <item quantity="other">%1$d മുറികൾ</item>
+    </plurals>
+    <string name="manage_room_subtitle">നില %1$d · %2$s</string>
+    <string name="manage_new_room">പുതിയ മുറി</string>
+    <string name="manage_edit_room">മുറി എഡിറ്റ് ചെയ്യുക</string>
+    <string name="manage_field_name">പേര്</string>
+    <string name="manage_field_floor">നില</string>
+    <string name="manage_role_admin">അഡ്മിൻ</string>
+    <string name="manage_role_member">അംഗം</string>
+    <string name="manage_role_guest">അതിഥി</string>
+    <string name="manage_level_none">ഒന്നുമില്ല</string>
+    <string name="manage_level_view">കാണാൻ മാത്രം</string>
+    <string name="manage_level_control">നിയന്ത്രണം</string>
+    <string name="manage_level_edit">എഡിറ്റ് ചെയ്യുക</string>
+    <string name="manage_access_to">%1$s-ലേക്കുള്ള ആക്സസ്</string>
+    <string name="manage_whole_room_level">മുറി മുഴുവൻ · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d-ൽ %1$d ഉപകരണങ്ങൾ</string>
+    <string name="manage_no_access">ആക്സസ് ഇല്ല</string>
+    <string name="manage_close_item">%1$s അടയ്ക്കുക</string>
+    <string name="manage_open_item">%1$s തുറക്കുക</string>
+    <string name="manage_whole_room">മുറി മുഴുവൻ</string>
+    <string name="manage_whole_room_hint">പിന്നീട് ചേർക്കുന്ന ഉപകരണങ്ങൾക്കും ഇത് ബാധകമാണ്</string>
+    <string name="manage_no_devices_in_room">ഈ മുറിയിൽ ഇതുവരെ ഉപകരണങ്ങളൊന്നുമില്ല.</string>
+    <string name="manage_people_title">ആളുകൾ</string>
+    <string name="manage_add_person">വ്യക്തിയെ ചേർക്കുക</string>
+    <string name="manage_access_whole_home">വീട് മുഴുവൻ</string>
+    <string name="manage_access_none">ആക്സസ് ഇല്ല</string>
+    <string name="manage_user_tag_kid">കുട്ടി</string>
+    <string name="manage_user_tag_reset_requested">പാസ്‌വേഡ് റീസെറ്റ് ആവശ്യപ്പെട്ടു</string>
+    <string name="manage_person_title">വ്യക്തി</string>
+    <string name="manage_handover_reset_title">%1$s-നുള്ള റീസെറ്റ് കോഡ്</string>
+    <string name="manage_handover_signin_title">%1$s-നുള്ള സൈൻ-ഇൻ വിവരങ്ങൾ</string>
+    <string name="manage_handover_shown_once">ഒരിക്കൽ മാത്രം കാണിക്കുന്നു. ഇത് ഇപ്പോൾ തന്നെ അവർക്ക് അയയ്ക്കുക.</string>
+    <string name="manage_copy">പകർത്തുക</string>
+    <string name="manage_share">പങ്കിടുക</string>
+    <string name="manage_done">പൂർത്തിയായി</string>
+    <string name="manage_new_person">പുതിയ വ്യക്തി</string>
+    <string name="manage_avatar">അവതാർ</string>
+    <string name="manage_roll">റോൾ ചെയ്യുക</string>
+    <string name="manage_field_username">ഉപയോക്തൃനാമം</string>
+    <string name="manage_username_supporting">കുറഞ്ഞത് 3 അക്ഷരങ്ങൾ</string>
+    <string name="manage_field_email">ഇമെയിൽ</string>
+    <string name="manage_email_taken">ഇതിനകം മറ്റൊരു അക്കൗണ്ട് ഉപയോഗിക്കുന്നുണ്ട്</string>
+    <string name="manage_email_available">ലഭ്യമാണ്</string>
+    <string name="manage_email_hint">ഒരെണ്ണം ടൈപ്പ് ചെയ്യുക, അല്ലെങ്കിൽ ഉപയോക്തൃനാമത്തിൽ നിന്ന് നിർമ്മിക്കുക</string>
+    <string name="manage_generate_email">@domus.home ഇമെയിൽ നിർമ്മിക്കുക</string>
+    <string name="manage_section_password">പാസ്‌വേഡ്</string>
+    <string name="manage_kid_account">കുട്ടികളുടെ അക്കൗണ്ട്</string>
+    <string name="manage_kid_account_on">നിങ്ങൾ പാസ്‌വേഡ് സജ്ജമാക്കുന്നു, അത് അങ്ങനെ തന്നെ തുടരുന്നു.</string>
+    <string name="manage_kid_account_off">ഓഫ്: Domus ഒരു പാസ്‌വേഡ് നിർമ്മിക്കുന്നു, ആദ്യ തവണ സൈൻ ഇൻ ചെയ്യുമ്പോൾ അവർ സ്വന്തം പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുന്നു.</string>
+    <string name="manage_field_new_password">പുതിയ പാസ്‌വേഡ്</string>
+    <string name="manage_field_password">പാസ്‌വേഡ്</string>
+    <string name="manage_password_keep_current">നിലവിലുള്ളത് നിലനിർത്താൻ ശൂന്യമായി വിടുക</string>
+    <string name="manage_password_min_length">കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ</string>
+    <string name="manage_password_after_saving">സേവ് ചെയ്ത ശേഷം പകർത്താനോ പങ്കിടാനോ ഉള്ള പാസ്‌വേഡ് നിങ്ങൾക്ക് ലഭിക്കും.</string>
+    <string name="manage_reset_requested_notice">%1$s പാസ്‌വേഡ് മറന്നുപോയി, റീസെറ്റ് ചെയ്യാൻ ആവശ്യപ്പെട്ടിട്ടുണ്ട്.</string>
+    <string name="manage_reset_code">റീസെറ്റ് കോഡ്</string>
+    <string name="manage_reset_code_active">%1$s വരെ ഒരു കോഡ് സജീവമാണ്. അത് പിൻവലിക്കാൻ ഓഫാക്കുക.</string>
+    <string name="manage_reset_code_help">പുതിയ പാസ്‌വേഡ് തിരഞ്ഞെടുക്കാൻ \"പാസ്‌വേഡ് മറന്നോ?\" എന്നതിന് കീഴിൽ നൽകേണ്ട ഒറ്റത്തവണ കോഡ്. 30 മിനിറ്റ് നേരത്തേക്ക് സാധുവാണ്.</string>
+    <string name="manage_generate_new_password">പുതിയ പാസ്‌വേഡ് നിർമ്മിക്കുക</string>
+    <string name="manage_section_role">റോൾ</string>
+    <string name="manage_role_admin_desc">എല്ലാം നിയന്ത്രിക്കുന്നു.</string>
+    <string name="manage_role_member_desc">അവർക്ക് നൽകിയിട്ടുള്ളവ കാണുന്നു. നിയന്ത്രണം അല്ലെങ്കിൽ ഉപകരണത്തിന്റെ പേര് മാറ്റാനുള്ള എഡിറ്റ് അനുമതി ഓരോ മുറിക്കും ഉപകരണത്തിനും അനുസരിച്ച് സജ്ജമാക്കുന്നു.</string>
+    <string name="manage_role_guest_desc">അവർക്ക് നൽകിയിട്ടുള്ളവ കാണുന്നു, നിയന്ത്രിക്കാൻ കഴിയില്ല.</string>
+    <string name="manage_section_access">ആക്സസ്</string>
+    <string name="manage_custom_access">കസ്റ്റം ആക്സസ്</string>
+    <string name="manage_custom_access_off">ഓഫ്: അവർക്ക് വീട് മുഴുവൻ ആക്സസ് ചെയ്യാം.</string>
+    <string name="manage_custom_access_on">ഓരോ മുറിക്കും അല്ലെങ്കിൽ അതിലെ ഉപകരണങ്ങൾക്കും ആക്സസ് തലം സജ്ജമാക്കുക.</string>
+    <string name="manage_create_rooms_first">ആദ്യം മുറികൾ നിർമ്മിക്കുക.</string>
+    <string name="manage_no_room">മുറിയില്ല</string>
+    <string name="manage_remove_user_title">%1$s-നെ നീക്കം ചെയ്യണോ?</string>
+    <string name="manage_remove_user_text">അവർക്ക് ഉടനടി ആക്സസ് നഷ്ടപ്പെടും.</string>
+    <string name="manage_remove">നീക്കം ചെയ്യുക</string>
+    <string name="manage_tariff_title">വൈദ്യുതി താരിഫ്</string>
+    <string name="manage_rate_per_kwh">kWh ഒന്നിന് നിരക്ക്</string>
+    <string name="manage_currency">കറൻസി</string>
+    <string name="manage_currency_supporting">ISO കോഡ്, ഉദാ. INR</string>
+    <string name="manage_fixed_monthly_charge">നിശ്ചിത പ്രതിമാസ ചാർജ്</string>
+    <string name="manage_billing_day">ബില്ലിംഗ് ദിവസം</string>
+    <string name="manage_billing_day_supporting">1 മുതൽ 28 വരെ</string>
+    <string name="manage_monthly_budget">പ്രതിമാസ ബജറ്റ് (ഓപ്ഷണൽ)</string>
+    <string name="manage_usage_slabs">ഉപയോഗ സ്ലാബുകൾ</string>
+    <string name="manage_slabs_empty">ഫ്ലാറ്റ് നിരക്ക്. ഒരു ബില്ലിംഗ് സൈക്കിളിലെ ഉപയോഗത്തിനനുസരിച്ച് നിരക്ക് മാറുകയാണെങ്കിൽ സ്ലാബുകൾ ചേർക്കുക.</string>
+    <string name="manage_slabs_help">ഓരോ സ്ലാബിന്റെയും നിരക്ക് അതിന്റെ പരിധി വരെ ബാധകമാണ്. അതിനുമുകളിലുള്ള എല്ലാത്തിനും അവസാന പരിധി ശൂന്യമായി വിടുക.</string>
+    <string name="manage_up_to_kwh">ഇത്ര kWh വരെ</string>
+    <string name="manage_slab_rate">നിരക്ക്</string>
+    <string name="manage_remove_slab">സ്ലാബ് %1$d നീക്കം ചെയ്യുക</string>
+    <string name="manage_add_slab">സ്ലാബ് ചേർക്കുക</string>
+    <string name="manage_time_of_day">ദിവസത്തെ സമയം</string>
+    <string name="manage_time_of_day_help">വീട്ടിലെ സമയം അനുസരിച്ച് ഒരു യൂണിറ്റിന് മുകളിലെ നിരക്കിനേക്കാൾ കൂടുതലോ കുറവോ വില വരുന്ന മണിക്കൂറുകൾ. kWh ഒന്നിനുള്ള വ്യത്യാസം നൽകുക: പീക്ക് സർചാർജിന് 1.1, രാത്രി ഇളവിന് -1.5.</string>
+    <string name="manage_window_from">മുതൽ</string>
+    <string name="manage_window_until">വരെ</string>
+    <string name="manage_window_per_kwh">kWh ഒന്നിന്</string>
+    <string name="manage_remove_time_window">സമയ വിൻഡോ %1$d നീക്കം ചെയ്യുക</string>
+    <string name="manage_add_time_window">സമയ വിൻഡോ ചേർക്കുക</string>
+    <string name="manage_server_addresses_title">സെർവർ വിലാസങ്ങൾ</string>
+    <string name="manage_server_addresses_help">Domus നിങ്ങളുടെ നെറ്റ്‌വർക്കിൽ ഹോം വിലാസവും മറ്റിടങ്ങളിൽ റിമോട്ട് വിലാസവും ഉപയോഗിക്കുന്നു. നിങ്ങൾ രണ്ടിലും സൈൻ ഇൻ ചെയ്ത നിലയിൽ തുടരും.</string>
+    <string name="manage_home_network">ഹോം നെറ്റ്‌വർക്ക്</string>
+    <string name="manage_home_network_supporting">ഉദാഹരണത്തിന് https://192.168.1.10:8443</string>
+    <string name="manage_remote">റിമോട്ട്</string>
+    <string name="manage_remote_supporting">ഉദാഹരണത്തിന് ഒരു Cloudflare Tunnel ഹോസ്റ്റ്നെയിം</string>
+    <string name="manage_not_set">സജ്ജമാക്കിയിട്ടില്ല</string>
+    <string name="manage_location_disabled">ഈ ഫോണിൽ ലൊക്കേഷൻ ഓഫാണ്. പകരം സ്ഥലം തിരയുക.</string>
+    <string name="manage_location_not_found">ഈ ഫോണിന് അതിന്റെ സ്ഥാനം കണ്ടെത്താനായില്ല. പകരം സ്ഥലം തിരയുക.</string>
+    <string name="manage_location_permission_denied">ലൊക്കേഷൻ അനുമതിയില്ലാതെ, സ്ഥലം തിരയുകയോ കോഓർഡിനേറ്റുകൾ ടൈപ്പ് ചെയ്യുകയോ ചെയ്യുക.</string>
+    <string name="manage_location_title">വീടിന്റെ സ്ഥാനം</string>
+    <string name="manage_location_sun_times">ഇന്ന് സൂര്യൻ %1$s-ന് ഉദിക്കുകയും %2$s-ന് അസ്തമിക്കുകയും ചെയ്യുന്നു.</string>
+    <string name="manage_location_help">വീട് ഏകദേശം എവിടെയാണെന്ന് Domus-ന് മനസ്സിലായാൽ സൂര്യോദയത്തിലും സൂര്യാസ്തമയത്തിലും ഓട്ടോമേഷനുകൾക്ക് പ്രവർത്തിക്കാം. വിവരങ്ങൾ നിങ്ങളുടെ സെർവറിൽ തന്നെ തുടരുന്നു.</string>
+    <string name="manage_use_phone_location">ഈ ഫോണിന്റെ ലൊക്കേഷൻ ഉപയോഗിക്കുക</string>
+    <string name="manage_find_place">ഒരു സ്ഥലം കണ്ടെത്തുക</string>
+    <string name="manage_find_place_supporting">പട്ടണം അല്ലെങ്കിൽ നഗരം</string>
+    <string name="manage_search_place">സ്ഥലത്തിനായി തിരയുക</string>
+    <string name="manage_no_place_found">ആ പേരിൽ സ്ഥലമൊന്നുമില്ല. അടുത്തുള്ള പട്ടണം പരീക്ഷിക്കുക.</string>
+    <string name="manage_latitude">അക്ഷാംശം</string>
+    <string name="manage_latitude_supporting">ഉദാഹരണത്തിന് 18.52</string>
+    <string name="manage_longitude">രേഖാംശം</string>
+    <string name="manage_longitude_supporting">ഉദാഹരണത്തിന് 73.86</string>
+    <string name="manage_change_password_title">പാസ്‌വേഡ് മാറ്റുക</string>
+    <string name="manage_change_password_help">നിങ്ങൾ ഇതിലും മറ്റ് എല്ലാ ഉപകരണങ്ങളിലും സൈൻ ഇൻ ചെയ്ത നിലയിൽ തുടരും.</string>
+    <string name="manage_current_password">നിലവിലെ പാസ്‌വേഡ്</string>
+    <string name="manage_repeat_new_password">പുതിയ പാസ്‌വേഡ് വീണ്ടും നൽകുക</string>
+    <string name="manage_passwords_mismatch">പാസ്‌വേഡുകൾ തമ്മിൽ പൊരുത്തപ്പെടുന്നില്ല</string>
+    <string name="manage_delete_all_notices_title">എല്ലാ അറിയിപ്പുകളും ഇല്ലാതാക്കണോ?</string>
+    <string name="manage_delete_all_notices_text">എല്ലാ ഉപകരണങ്ങളിൽ നിന്നും അവ നീക്കം ചെയ്യപ്പെടും.</string>
+    <string name="manage_delete_all">എല്ലാം ഇല്ലാതാക്കുക</string>
+    <string name="manage_notifications_title">അറിയിപ്പുകൾ</string>
+    <string name="manage_mark_all_read">എല്ലാം വായിച്ചതായി അടയാളപ്പെടുത്തുക</string>
+    <string name="manage_no_notices">ഇതുവരെ ഒന്നുമില്ല</string>
+    <string name="manage_no_notices_subtitle">ഓട്ടോമേഷനുകൾ, പുതിയ ഉപകരണങ്ങൾ, ഓഫ്‌ലൈൻ ഉപകരണങ്ങൾ എന്നിവയിൽ നിന്നുള്ള അലേർട്ടുകൾ ഇവിടെ ദൃശ്യമാകും.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life ആപ്പ് ഉപയോഗിച്ച് സ്കാൻ ചെയ്യാനുള്ള QR കോഡ്</string>
+    <string name="onboard_region_india">ഇന്ത്യ</string>
+    <string name="onboard_region_china">ചൈന</string>
+    <string name="onboard_region_europe">യൂറോപ്പ്</string>
+    <string name="onboard_region_us">യുണൈറ്റഡ് സ്റ്റേറ്റ്സ്</string>
+    <string name="onboard_region_singapore">സിംഗപ്പൂർ</string>
+    <string name="onboard_region_russia">റഷ്യ</string>
+    <string name="onboard_region_taiwan">തായ്‌വാൻ</string>
+    <string name="onboard_region_india_old">ഇന്ത്യ (പഴയത്)</string>
+    <string name="onboard_plugins_title">പ്ലഗിനുകൾ</string>
+    <string name="onboard_local_control">ലോക്കൽ നിയന്ത്രണം</string>
+    <string name="onboard_cloud">ക്ലൗഡ്</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d ഉപകരണം</item>
+        <item quantity="other">%1$d ഉപകരണങ്ങൾ</item>
+    </plurals>
+    <string name="onboard_account_linked">ലിങ്ക് ചെയ്തു</string>
+    <string name="onboard_account_needs_attention">ശ്രദ്ധ ആവശ്യമാണ്</string>
+    <string name="onboard_unlink_account">%1$s അൺലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_integration_disabled">സെർവർ കോൺഫിഗറേഷനിൽ ഓഫാക്കിയിരിക്കുന്നു.</string>
+    <string name="onboard_link_account">അക്കൗണ്ട് ലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_link_another_account">മറ്റൊരു അക്കൗണ്ട് ലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_find_devices">ഉപകരണങ്ങൾ കണ്ടെത്തുക</string>
+    <string name="onboard_unlink_title">%1$s അൺലിങ്ക് ചെയ്യണോ?</string>
+    <string name="onboard_unlink_text">ഈ അക്കൗണ്ടിൽ നിന്ന് വന്ന ഉപകരണങ്ങൾ Domus-ൽ നിന്ന് നീക്കം ചെയ്യപ്പെടും.</string>
+    <string name="onboard_unlink">അൺലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_link_integration">%1$s ലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_tuya_qr_instructions">ഇത് Smart Life അല്ലെങ്കിൽ Tuya Smart ആപ്പ് ഉപയോഗിച്ച് സ്കാൻ ചെയ്യുക (അതിന്റെ ഹോം സ്ക്രീനിലെ സ്കാൻ ബട്ടൺ), തുടർന്ന് അവിടെ സ്ഥിരീകരിക്കുക. ഒരേ ഫോണിലാണെങ്കിൽ, ഈ കോഡ് മറ്റൊരു സ്ക്രീനിൽ കാണിക്കുക.</string>
+    <string name="onboard_waiting_for_scan">സ്കാനിനായി കാത്തിരിക്കുന്നു…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life ആപ്പിൽ Me → Settings → Account and Security → User Code തുറന്ന് ആ കോഡ് ഇവിടെ ടൈപ്പ് ചെയ്യുക.</string>
+    <string name="onboard_user_code">യൂസർ കോഡ്</string>
+    <string name="onboard_qr_expired">ആ QR കോഡ് കാലഹരണപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="onboard_verify_title">അത് നിങ്ങളാണെന്ന് ഉറപ്പാക്കുക</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi നിങ്ങളുടെ ഫോണിലേക്ക് ഒരു വെരിഫിക്കേഷൻ കോഡ് അയച്ചു. അത് ഇവിടെ ടൈപ്പ് ചെയ്യുക. ഏതാനും മിനിറ്റുകൾക്കുള്ളിൽ ഇത് കാലഹരണപ്പെടും.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi നിങ്ങളുടെ ഇമെയിലിലേക്ക് ഒരു വെരിഫിക്കേഷൻ കോഡ് അയച്ചു. അത് ഇവിടെ ടൈപ്പ് ചെയ്യുക. ഏതാനും മിനിറ്റുകൾക്കുള്ളിൽ ഇത് കാലഹരണപ്പെടും.</string>
+    <string name="onboard_verification_code">വെരിഫിക്കേഷൻ കോഡ്</string>
+    <string name="onboard_send_new_code">പുതിയൊരു കോഡ് അയയ്ക്കുക</string>
+    <string name="onboard_use_another_account">മറ്റൊരു അക്കൗണ്ട് ഉപയോഗിക്കുക</string>
+    <string name="onboard_tapo_instructions">നിങ്ങളുടെ TP-Link അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക. നിങ്ങളുടെ നെറ്റ്‌വർക്കിലെ Tapo ഉപകരണങ്ങളുമായി ആശയവിനിമയം നടത്താൻ ഇത് ഉപയോഗിക്കുന്നു.</string>
+    <string name="onboard_xiaomi_instructions">നിങ്ങളുടെ Xiaomi അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക. ഉപകരണ ടോക്കണുകൾ ഒരിക്കൽ മാത്രമാണ് എടുക്കുന്നത്; നിയന്ത്രണം ലോക്കലായി തുടരുന്നു. Xiaomi നിങ്ങൾക്ക് ഒരു കോഡ് അയച്ചേക്കാം.</string>
+    <string name="onboard_xiaomi_username">ഇമെയിൽ, ഫോൺ അല്ലെങ്കിൽ Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">ഫോൺ നമ്പറിന് കൺട്രി കോഡ് ആവശ്യമാണ്, ഉദാ. +91…</string>
+    <string name="onboard_email_or_username">ഇമെയിൽ അല്ലെങ്കിൽ ഉപയോക്തൃനാമം</string>
+    <string name="onboard_password">പാസ്‌വേഡ്</string>
+    <string name="onboard_server_region">സെർവർ മേഖല</string>
+    <string name="onboard_show_qr_code">QR കോഡ് കാണിക്കുക</string>
+    <string name="onboard_verify">പരിശോധിച്ചുറപ്പിക്കുക</string>
+    <string name="onboard_continue">തുടരുക</string>
+    <string name="onboard_link">ലിങ്ക് ചെയ്യുക</string>
+    <string name="onboard_add_devices_title">ഉപകരണങ്ങൾ ചേർക്കുക</string>
+    <string name="onboard_scanning">സ്കാൻ ചെയ്യുന്നു…</string>
+    <string name="onboard_scan_again">വീണ്ടും സ്കാൻ ചെയ്യുക</string>
+    <string name="onboard_add_by_address">വിലാസം വഴി ചേർക്കുക</string>
+    <string name="onboard_no_new_devices">പുതിയ ഉപകരണങ്ങളൊന്നുമില്ല</string>
+    <string name="onboard_no_new_devices_subtitle">കണ്ടെത്തിയവയെല്ലാം ഇതിനകം നിങ്ങളുടെ വീട്ടിലുണ്ട്. കൂടുതൽ കണ്ടെത്താൻ പ്ലഗിനുകൾക്ക് കീഴിൽ ഒരു അക്കൗണ്ട് ലിങ്ക് ചെയ്യുക.</string>
+    <string name="onboard_open_plugins">പ്ലഗിനുകൾ തുറക്കുക</string>
+    <string name="onboard_found_count">%1$d കണ്ടെത്തി</string>
+    <string name="onboard_add">ചേർക്കുക</string>
+    <string name="onboard_ignore">അവഗണിക്കുക</string>
+    <string name="onboard_add_device_title">%1$s ചേർക്കുക</string>
+    <string name="onboard_field_name">പേര്</string>
+    <string name="onboard_field_room">മുറി</string>
+    <string name="onboard_no_room">മുറിയില്ല</string>
+    <string name="onboard_device_token_optional">ഉപകരണ ടോക്കൺ (ഓപ്ഷണൽ)</string>
+    <string name="onboard_device_token_supporting">ലിങ്ക് ചെയ്ത Xiaomi അക്കൗണ്ട് ഇല്ലാത്തപ്പോൾ മാത്രം ആവശ്യമാണ്</string>
+    <string name="onboard_ip_address">IP വിലാസം</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">ഇതിനകം നിലവിലുണ്ട്</string>
+    <string name="code_error_reference_missing" formatted="false">പരാമർശിച്ച ഇനം നിലവിലില്ല</string>
+    <string name="code_error_internal" formatted="false">ആന്തരിക സെർവർ പിശക്</string>
+    <string name="code_error_session_expired" formatted="false">അസാധുവായ അല്ലെങ്കിൽ കാലഹരണപ്പെട്ട സെഷൻ</string>
+    <string name="code_error_admin_required" formatted="false">അഡ്മിനിസ്ട്രേറ്റർ ആക്സസ് ആവശ്യമാണ്</string>
+    <string name="code_error_guest_no_control" formatted="false">അതിഥികൾക്ക് ഉപകരണങ്ങൾ നിയന്ത്രിക്കാൻ കഴിയില്ല</string>
+    <string name="code_error_not_signed_in" formatted="false">സൈൻ ഇൻ ചെയ്തിട്ടില്ല</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization ഹെഡർ കാണാനില്ല</string>
+    <string name="code_error_account_gone" formatted="false">അക്കൗണ്ട് ഇപ്പോൾ നിലവിലില്ല</string>
+    <string name="code_error_must_change_password" formatted="false">ആദ്യം നിങ്ങളുടെ പാസ്‌വേഡ് മാറ്റുക</string>
+    <string name="code_error_device_not_found" formatted="false">ഉപകരണം കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_empty_command" formatted="false">ശൂന്യമായ കമാൻഡ്</string>
+    <string name="code_error_scan_running" formatted="false">ഒരു സ്കാൻ ഇതിനകം പ്രവർത്തിക്കുന്നുണ്ട്</string>
+    <string name="code_error_discovered_not_found" formatted="false">കണ്ടെത്തിയ ഉപകരണം ലഭ്യമല്ല</string>
+    <string name="code_error_device_already_added" formatted="false">ഈ ഉപകരണം ഇതിനകം ചേർത്തിട്ടുണ്ട്</string>
+    <string name="code_error_username_too_short" formatted="false">ഉപയോക്തൃനാമത്തിൽ കുറഞ്ഞത് 3 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം</string>
+    <string name="code_error_password_too_short" formatted="false">പാസ്‌വേഡിൽ കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം</string>
+    <string name="code_error_setup_already_done" formatted="false">സജ്ജീകരണം ഇതിനകം പൂർത്തിയായി</string>
+    <string name="code_error_invalid_credentials" formatted="false">അസാധുവായ ഉപയോക്തൃനാമം അല്ലെങ്കിൽ പാസ്‌വേഡ്</string>
+    <string name="code_error_invalid_reset_code" formatted="false">ആ കോഡ് തെറ്റാണ് അല്ലെങ്കിൽ കാലഹരണപ്പെട്ടു. പുതിയൊരെണ്ണത്തിനായി അഡ്മിനിസ്ട്രേറ്ററോട് ചോദിക്കുക.</string>
+    <string name="code_error_wrong_current_password" formatted="false">നിലവിലെ പാസ്‌വേഡ് തെറ്റാണ്</string>
+    <string name="code_error_same_password" formatted="false">നിലവിലുള്ളതിൽ നിന്ന് വ്യത്യസ്തമായ ഒരു പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക</string>
+    <string name="code_error_avatar_too_long" formatted="false">അവതാർ സ്ട്രിംഗ് വളരെ വലുതാണ്</string>
+    <string name="code_error_name_required" formatted="false">പേര് ആവശ്യമാണ്</string>
+    <string name="code_error_trigger_required" formatted="false">കുറഞ്ഞത് ഒരു ട്രിഗറെങ്കിലും ചേർക്കുക</string>
+    <string name="code_error_action_required" formatted="false">കുറഞ്ഞത് ഒരു പ്രവർത്തിയെങ്കിലും ചേർക്കുക</string>
+    <string name="code_error_sun_offset_range" formatted="false">സൂര്യോദയവും സൂര്യാസ്തമയവും പരമാവധി 6 മണിക്കൂർ വരെ മാറ്റാം</string>
+    <string name="code_error_automation_not_found" formatted="false">ഓട്ടോമേഷൻ കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_cannot_edit_device" formatted="false">നിങ്ങൾക്ക് ഈ ഉപകരണം എഡിറ്റ് ചെയ്യാൻ കഴിയില്ല</string>
+    <string name="code_error_admin_only_move_room" formatted="false">ഒരു അഡ്മിനിസ്ട്രേറ്റർക്ക് മാത്രമേ ഉപകരണം മറ്റൊരു മുറിയിലേക്ക് മാറ്റാൻ കഴിയൂ</string>
+    <string name="code_error_name_empty" formatted="false">പേര് ശൂന്യമായിരിക്കാൻ പാടില്ല</string>
+    <string name="code_error_view_only_device" formatted="false">നിങ്ങൾക്ക് ഈ ഉപകരണം കാണാനാകും എന്നാൽ നിയന്ത്രിക്കാനാകില്ല</string>
+    <string name="code_error_view_only_devices" formatted="false">നിങ്ങൾക്ക് ഈ ഉപകരണങ്ങൾ കാണാനാകും എന്നാൽ നിയന്ത്രിക്കാനാകില്ല</string>
+    <string name="code_error_negative_rate" formatted="false">നിരക്കുകൾ നെഗറ്റീവ് ആകാൻ പാടില്ല</string>
+    <string name="code_error_invalid_billing_day" formatted="false">ബില്ലിംഗ് ദിവസം 1-നും 28-നും ഇടയിലായിരിക്കണം</string>
+    <string name="code_error_invalid_currency" formatted="false">കറൻസി 3 അക്ഷരങ്ങളുള്ള ISO കോഡ് ആയിരിക്കണം</string>
+    <string name="code_error_slab_order" formatted="false">ഓരോ സ്ലാബും മുമ്പത്തേതിനേക്കാൾ ഉയർന്ന മൂല്യത്തിൽ അവസാനിക്കണം</string>
+    <string name="code_error_slab_open_ended" formatted="false">അവസാനത്തെ സ്ലാബ് മാത്രമേ പരിധിയില്ലാത്തതായി തുടരാനാകൂ</string>
+    <string name="code_error_tou_format" formatted="false">ഉപയോഗ-സമയ വിൻഡോകൾക്ക് HH:MM ഫോർമാറ്റിൽ ആരംഭവും അവസാനവും ആവശ്യമാണ്</string>
+    <string name="code_error_tou_zero_length" formatted="false">ഒരു ഉപയോഗ-സമയ വിൻഡോ ഒരേ സമയം ആരംഭിക്കാനും അവസാനിക്കാനും പാടില്ല</string>
+    <string name="code_error_tou_overlap" formatted="false">ഉപയോഗ-സമയ വിൻഡോകൾ തമ്മിൽ കലരാൻ പാടില്ല</string>
+    <string name="code_error_group_not_found" formatted="false">ഗ്രൂപ്പ് കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_account_not_found" formatted="false">അക്കൗണ്ട് കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya ഇന്റഗ്രേഷൻ പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life ആപ്പിൽ നിന്നുള്ള യൂസർ കോഡ് നൽകുക</string>
+    <string name="code_error_credentials_required" formatted="false">ഇമെയിലും പാസ്‌വേഡും ആവശ്യമാണ്</string>
+    <string name="code_error_verification_expired" formatted="false">പരിശോധന കാലഹരണപ്പെട്ടു; വീണ്ടും സൈൻ ഇൻ ചെയ്യുക</string>
+    <string name="code_error_invalid_port" formatted="false">പോർട്ട് ഒരു സംഖ്യയായിരിക്കണം</string>
+    <string name="code_error_broker_required" formatted="false">ബ്രോക്കർ വിലാസം നൽകുക</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue ഇന്റഗ്രേഷൻ പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു</string>
+    <string name="code_error_room_name_required" formatted="false">മുറിയുടെ പേര് ആവശ്യമാണ്</string>
+    <string name="code_error_room_not_found" formatted="false">മുറി കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_sync_lights_required" formatted="false">സിങ്ക് ചെയ്യാൻ കുറഞ്ഞത് ഒരു ലൈറ്റെങ്കിലും തിരഞ്ഞെടുക്കുക</string>
+    <string name="code_error_scene_not_found" formatted="false">സീൻ കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">സ്ക്രീൻ സിങ്കിന് പങ്കിടാൻ ഒരു സ്ക്രീൻ ആവശ്യമാണ്. ഉള്ളടക്കം കാണിക്കുന്ന ഉപകരണത്തിലെ Domus ആപ്പിൽ നിന്ന് ഇത് ആരംഭിക്കുക.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">സ്ഥലം തിരയൽ ലഭ്യമല്ല. പകരം അക്ഷാംശവും രേഖാംശവും നൽകുക.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">അക്ഷാംശം -90-നും 90-നും ഇടയിലും രേഖാംശം -180-നും 180-നും ഇടയിലുമായിരിക്കണം</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">ആ ഉപയോക്തൃനാമത്തിനായി നിർദ്ദേശിച്ച എല്ലാ വിലാസങ്ങളും ഉപയോഗത്തിലാണ്</string>
+    <string name="code_error_invalid_role" formatted="false">റോൾ admin, member അല്ലെങ്കിൽ guest ആയിരിക്കണം</string>
+    <string name="code_error_kid_password_required" formatted="false">കുട്ടികളുടെ അക്കൗണ്ടിന് പാസ്‌വേഡ് ആവശ്യമാണ്</string>
+    <string name="code_error_email_taken" formatted="false">ആ ഇമെയിൽ ഇതിനകം മറ്റൊരു അക്കൗണ്ട് ഉപയോഗിക്കുന്നുണ്ട്</string>
+    <string name="code_error_user_not_found" formatted="false">ഉപയോക്താവിനെ കണ്ടെത്തിയില്ല</string>
+    <string name="code_error_last_admin" formatted="false">കുറഞ്ഞത് ഒരു അഡ്മിനിസ്ട്രേറ്ററെങ്കിലും ഉണ്ടായിരിക്കണം</string>
+    <string name="code_error_cannot_delete_self" formatted="false">നിങ്ങളുടെ സ്വന്തം അക്കൗണ്ട് ഇല്ലാതാക്കാൻ കഴിയില്ല</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue ബ്രിഡ്ജിലെ വട്ടത്തിലുള്ള ബട്ടൺ അമർത്തുക, തുടർന്ന് 30 സെക്കൻഡിനുള്ളിൽ വീണ്ടും ലിങ്ക് ചെയ്യുക</string>
+    <string name="code_error_hue_not_found" formatted="false">Hue ബ്രിഡ്ജ് കണ്ടെത്തിയില്ല; അതിന്റെ IP വിലാസം നൽകുക</string>
+    <string name="code_error_tuya_device_gone" formatted="false">ഉപകരണം ഇപ്പോൾ Smart Life-ൽ ഇല്ല</string>
+    <string name="code_error_device_token_required" formatted="false">ഉപകരണ ടോക്കൺ ആവശ്യമാണ്</string>
+    <string name="code_error_hue_link_expired" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Hue ബ്രിഡ്ജ് ഇനി ഈ ലിങ്ക് സ്വീകരിക്കില്ല; വീണ്ടും ലിങ്ക് ചെയ്യുക</string>
+    <string name="code_error_hue_removed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Hue ബ്രിഡ്ജ് നീക്കം ചെയ്യപ്പെട്ടു</string>
+    <string name="code_error_mqtt_removed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: MQTT ബ്രോക്കർ നീക്കം ചെയ്യപ്പെട്ടു</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: ഉപകരണം നിങ്ങളുടെ TP-Link അക്കൗണ്ട് ഇമെയിൽ/പാസ്‌വേഡ് നിരസിച്ചു</string>
+    <string name="code_error_tapo_account_required" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Tapo ഉപകരണങ്ങൾ നിയന്ത്രിക്കാൻ നിങ്ങളുടെ TP-Link അക്കൗണ്ട് ചേർക്കുക</string>
+    <string name="code_error_tapo_removed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: TP-Link അക്കൗണ്ട് നീക്കം ചെയ്യപ്പെട്ടു</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Xiaomi ഒരു ക്യാപ്‌ച ആവശ്യപ്പെട്ടു. Mi Home ആപ്പിലോ ബ്രൗസറിലോ ഒരിക്കൽ സൈൻ ഇൻ ചെയ്ത ശേഷം വീണ്ടും ശ്രമിക്കുക</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: അസാധുവായ Xiaomi ഉപയോക്തൃനാമം അല്ലെങ്കിൽ പാസ്‌വേഡ്</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: തെറ്റായ അല്ലെങ്കിൽ കാലഹരണപ്പെട്ട വെരിഫിക്കേഷൻ കോഡ്</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Xiaomi കോഡ് സ്വീകരിച്ചില്ല</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Xiaomi സെഷൻ കാലഹരണപ്പെട്ടു</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Xiaomi ഒരു വെരിഫിക്കേഷൻ കോഡ് ആവശ്യപ്പെടുന്നു; ഇന്റഗ്രേഷനുകൾക്ക് കീഴിൽ അക്കൗണ്ട് വീണ്ടും ലിങ്ക് ചെയ്യുക</string>
+    <string name="code_error_unsupported_command" formatted="false">പിന്തുണയ്ക്കുന്നില്ല: ഈ ഉപകരണം ആ കമാൻഡ് പിന്തുണയ്ക്കുന്നില്ല</string>
+    <string name="code_error_unsupported_effect" formatted="false">പിന്തുണയ്ക്കുന്നില്ല: ഈ ലൈറ്റിന് ആ ഇഫക്റ്റ് പ്ലേ ചെയ്യാൻ കഴിയില്ല</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">പിന്തുണയ്ക്കുന്നില്ല: ഈ Xiaomi മോഡലിന് MIoT സ്പെസിഫിക്കേഷൻ ഇല്ല</string>
+    <string name="code_error_rate_limited_one" formatted="false">നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ. {count} മിനിറ്റിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="code_error_rate_limited_other" formatted="false">നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ. {count} മിനിറ്റുകൾക്കുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="code_error_integration_disabled" formatted="false">\'{integration}\' ഇന്റഗ്രേഷൻ പ്രവർത്തനക്ഷമമാക്കിയിട്ടില്ല</string>
+    <string name="code_error_invalid_time" formatted="false">അസാധുവായ സമയം \'{time}\', HH:MM ഉപയോഗിക്കുക</string>
+    <string name="code_error_invalid_actions" formatted="false">അസാധുവായ പ്രവർത്തികൾ: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">മേഖല {regions} എന്നിവയിൽ ഒന്നായിരിക്കണം</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">അസാധുവായ സ്ക്രീൻ സിങ്ക് ക്രമീകരണങ്ങൾ: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">അറിയപ്പെടാത്ത സീൻ തരം \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" ഒരു സെർവർ വിലാസമല്ല</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: Xiaomi-ക്ക് വെരിഫിക്കേഷൻ കോഡ് അയയ്ക്കാൻ കഴിഞ്ഞില്ല: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">ആധികാരികത ഉറപ്പാക്കൽ പരാജയപ്പെട്ടു: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">പിന്തുണയ്ക്കുന്നില്ല: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} സ്വിച്ച് ചെയ്യുന്നത് സ്ഥിരീകരിക്കുക</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">പുതിയ ഉപകരണം ചേർത്തു</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) കണ്ടെത്തി സ്വയമേവ ചേർത്തു</string>
+    <string name="code_notification_device_found_title" formatted="false">പുതിയ ഉപകരണം കണ്ടെത്തി</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) ചേർക്കാൻ തയ്യാറാണ്</string>
+    <string name="code_notification_password_reset_title" formatted="false">പാസ്‌വേഡ് റീസെറ്റ് ആവശ്യപ്പെട്ടു</string>
+    <string name="code_notification_password_reset" formatted="false">{username} അവരുടെ പാസ്‌വേഡ് മറന്നു. ഒരു അഡ്മിനിസ്ട്രേറ്റർക്ക് ക്രമീകരണങ്ങളിലെ ആളുകളും ആക്സസും എന്ന വിഭാഗത്തിൽ നിന്ന് അവർക്ക് ഒരു റീസെറ്റ് കോഡ് നൽകാം.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">\"{name}\" ഓട്ടോമേഷനിൽ പ്രശ്നങ്ങളുണ്ടായിരുന്നു</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>
