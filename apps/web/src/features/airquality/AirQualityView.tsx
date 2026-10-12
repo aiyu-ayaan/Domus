@@ -333,7 +333,7 @@ export function AirQualityView() {
                         <span className="text-caption text-muted">{t('reading.pm25')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
                           {devPm != null ? `${formatNumber(devPm, 0)} µg/m³` : '—'}
-                          {devAq?.label && <span className="ml-1 text-caption text-muted">({devAq.label})</span>}
+                          {devAq?.label && <span className="ms-1 text-caption text-muted">({devAq.label})</span>}
                         </p>
                       </div>
                       <div>
@@ -345,7 +345,7 @@ export function AirQualityView() {
                       <div>
                         <span className="text-caption text-muted">{t('reading.humidity')}</span>
                         <p className="mt-0.5 text-body font-semibold tabular">
-                          {s.humidity != null ? `${formatNumber(s.humidity, 0)} %` : '—'}
+                          {s.humidity != null ? `${formatNumber(s.humidity, 0)}%` : '—'}
                         </p>
                       </div>
                       <div>
@@ -436,28 +436,28 @@ export function AirQualityView() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-on/60" />
-                    <span>0 – 12 µg/m³</span>
+                    <span dir="ltr">0 – 12 µg/m³</span>
                   </span>
                   <span className="text-on font-medium">{t('air.excellent')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-on" />
-                    <span>13 – 35 µg/m³</span>
+                    <span dir="ltr">13 – 35 µg/m³</span>
                   </span>
                   <span className="text-on font-medium">{t('air.good')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-warn" />
-                    <span>36 – 55 µg/m³</span>
+                    <span dir="ltr">36 – 55 µg/m³</span>
                   </span>
                   <span className="text-warn font-medium">{t('air.moderate')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-danger" />
-                    <span>&gt; 55 µg/m³</span>
+                    <span dir="ltr">&gt; 55 µg/m³</span>
                   </span>
                   <span className="text-danger font-medium">{t('air.poor')}</span>
                 </div>
@@ -484,7 +484,7 @@ export function AirQualityView() {
                       <p className="font-medium text-fg">{d.name}</p>
                       <p className="text-caption text-muted">{room ? room.name : t('devices.unassigned')}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-end">
                       <p className="font-semibold tabular text-fg">
                         {pm != null ? `${formatNumber(pm, 0)} µg/m³` : '—'}
                       </p>

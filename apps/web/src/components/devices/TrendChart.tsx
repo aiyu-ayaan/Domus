@@ -60,10 +60,11 @@ export function TrendChart({
           {sel.peak != null && <span className="font-normal text-muted"> · {t('chart.peak', { value: value(sel.peak) })}</span>}
         </span>
       </div>
-      <div className="relative" style={{ height }}>
+      {/* Time runs left to right in every language. */}
+      <div dir="ltr" className="relative" style={{ height }}>
         {marks.map((m) => (
           <div key={m.label} className="absolute inset-x-0 border-t border-dashed border-border" style={{ top: `${y(m.value)}%` }} aria-hidden>
-            <span className="absolute right-0 -translate-y-full text-caption text-subtle">{m.label}</span>
+            <span className="absolute end-0 -translate-y-full text-caption text-subtle">{m.label}</span>
           </div>
         ))}
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
@@ -87,7 +88,7 @@ export function TrendChart({
           ))}
         </div>
       </div>
-      <div className="mt-2 flex justify-between text-caption text-subtle tabular" aria-hidden>
+      <div dir="ltr" className="mt-2 flex justify-between text-caption text-subtle tabular" aria-hidden>
         <span>{label(points[0].t)}</span>
         <span>{label(points[points.length - 1].t)}</span>
       </div>

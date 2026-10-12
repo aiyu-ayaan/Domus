@@ -64,7 +64,7 @@ function Count({ n, label, active, tone = 'default' }: { n: number; label: strin
   return (
     <span
       className={cn(
-        'ml-auto rounded-full px-2 py-0.5 text-caption font-semibold tabular',
+        'ms-auto rounded-full px-2 py-0.5 text-caption font-semibold tabular',
         tone === 'danger'
           ? 'bg-danger/20 text-danger'
           : active
@@ -108,7 +108,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'fixed left-3.5 top-1/2 -translate-y-1/2 z-nav hidden flex-col lg:flex',
+        'fixed start-3.5 top-1/2 -translate-y-1/2 z-nav hidden flex-col lg:flex',
         'h-auto max-h-[calc(100dvh-32px)] rounded-[32px] border border-border/80 bg-panel shadow-xl select-none',
         'transition-[width,box-shadow] duration-200 ease-std overflow-hidden p-2',
         hovered ? 'w-[240px] shadow-2xl' : 'w-[72px]',
@@ -139,9 +139,9 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center">
                     <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                   </span>
-                  <span className="ml-3 truncate whitespace-nowrap">{item.label}</span>
+                  <span className="ms-3 truncate whitespace-nowrap">{item.label}</span>
                   {item.to === '/devices' && <Count n={pending} label={t('nav.newDevicesFound', { count: pending })} active={isActive} />}
-                  {item.admin && <span className="ml-auto text-caption uppercase tracking-wider text-muted font-bold text-[10px]">{t('nav.admin')}</span>}
+                  {item.admin && <span className="ms-auto text-caption uppercase tracking-wider text-muted font-bold text-[10px]">{t('nav.admin')}</span>}
                 </>
               )}
             </NavLink>
@@ -164,7 +164,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
                 <>
                   <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                   {item.to === '/devices' && pending > 0 && (
-                    <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={t('nav.newDevices', { count: pending })} />
+                    <span className="absolute top-1 end-2.5 h-2 w-2 rounded-full bg-on ring-2 ring-panel" aria-label={t('nav.newDevices', { count: pending })} />
                   )}
                 </>
               )}
@@ -182,7 +182,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
             <span className="flex h-5 w-5 shrink-0 items-center justify-center">
               <Bell size={20} aria-hidden />
             </span>
-            <span className="ml-3 truncate whitespace-nowrap">{t('nav.notifications')}</span>
+            <span className="ms-3 truncate whitespace-nowrap">{t('nav.notifications')}</span>
             <Count n={unread} label={t('nav.unreadCount', { count: unread })} tone="danger" />
           </button>
         ) : (
@@ -193,7 +193,7 @@ function Sidebar({ items, pending, unread, onNotifications }: { items: NavItem[]
           >
             <Bell size={20} aria-hidden />
             {unread > 0 && (
-              <span className="absolute top-1 right-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={t('nav.unreadNotifications', { count: unread })} />
+              <span className="absolute top-1 end-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-panel" aria-label={t('nav.unreadNotifications', { count: unread })} />
             )}
           </button>
         )}
@@ -261,13 +261,13 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
                   <item.icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
                   {item.to === '/devices' && pending > 0 && (
                     <span
-                      className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-on ring-2 ring-panel"
+                      className="absolute -top-1 -end-1 h-2 w-2 rounded-full bg-on ring-2 ring-panel"
                       aria-label={t('nav.newDevices', { count: pending })}
                     />
                   )}
                 </span>
                 {isActive && (
-                  <span className="ml-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
+                  <span className="ms-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
                     {item.label}
                   </span>
                 )}
@@ -291,7 +291,7 @@ function TabBar({ items, onMore, pending }: { items: NavItem[]; onMore: () => vo
             <DotsThree size={20} weight="bold" aria-hidden />
           </span>
           {moreActive && (
-            <span className="ml-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
+            <span className="ms-2 whitespace-nowrap text-label leading-none font-semibold anim-fade">
               {t('nav.moreLabel')}
             </span>
           )}
@@ -344,7 +344,7 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
                       onClose()
                     }
                   }}
-                  className="flex min-w-0 flex-1 cursor-pointer gap-3 py-3 pl-5 text-left"
+                  className="flex min-w-0 flex-1 cursor-pointer gap-3 py-3 ps-5 text-start"
                 >
                   <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', n.is_read ? 'bg-transparent' : tone[n.level])} aria-hidden />
                   <span className="min-w-0 flex-1">
@@ -353,7 +353,7 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
                     <span className="mt-0.5 block text-caption text-subtle">{timeAgo(n.created_at)}</span>
                   </span>
                 </button>
-                <Button variant="ghost" size="sm" className="mr-3 mt-2 shrink-0" aria-label={t('notifications.delete', { title })} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
+                <Button variant="ghost" size="sm" className="me-3 mt-2 shrink-0" aria-label={t('notifications.delete', { title })} icon={<Trash size={16} />} onClick={() => remove.mutate(n.id)} />
               </li>
             )
           })}
@@ -401,7 +401,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-dvh">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-toast focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-toast focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary">
         {t('nav.skip')}
       </a>
       <Sidebar items={items} pending={pending.length} unread={unread} onNotifications={() => setNotifOpen(true)} />
@@ -411,7 +411,7 @@ export function AppShell() {
         <div className="flex items-center gap-2">
           <ThemeToggle size="sm" />
           <Button variant="ghost" size="sm" aria-label={unread ? t('nav.notificationsUnreadLabel', { count: unread }) : t('nav.notifications')} onClick={() => setNotifOpen(true)} className="relative" icon={<Bell size={18} />}>
-            {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
+            {unread > 0 && <span className="absolute end-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" aria-hidden />}
           </Button>
           <Avatar
             avatar={user?.avatar}
@@ -424,7 +424,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:pl-[96px]">
+      <main id="main" tabIndex={-1} className="pb-24 focus:outline-none lg:pb-12 lg:ps-[96px]">
         <div key={location.pathname.split('/')[1]} className="anim-enter mx-auto max-w-[1360px] px-4 py-6 md:px-8 md:py-8">
           <Outlet />
         </div>

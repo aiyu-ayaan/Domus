@@ -98,13 +98,13 @@ export function describeAction(a: Action, devices: Device[], groups: { id: strin
 
 function Row({ children, onRemove }: { children: ReactNode; onRemove: () => void }) {
   return (
-    <div className="relative rounded-lg border border-border bg-raised/40 p-4 pr-12">
+    <div className="relative rounded-lg border border-border bg-raised/40 p-4 pe-12">
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
       <button
         type="button"
         onClick={onRemove}
         aria-label={t('drawer.removeConfirm')}
-        className="absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger"
+        className="absolute end-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger"
       >
         <Trash size={16} />
       </button>

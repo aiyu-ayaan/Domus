@@ -12,7 +12,7 @@ const icons: Record<ToastTone, JSX.Element> = {
 export function Toaster() {
   const { toasts, dismiss } = useToast()
   return (
-    <div aria-live="polite" className="pointer-events-none fixed bottom-20 left-0 right-0 z-toast flex flex-col items-center gap-2 px-4 md:bottom-4 md:left-auto md:right-4 md:items-end">
+    <div aria-live="polite" className="pointer-events-none fixed bottom-20 start-0 end-0 z-toast flex flex-col items-center gap-2 px-4 md:bottom-4 md:start-auto md:end-4 md:items-end">
       {toasts.map((t) => (
         <div
           key={t.id}

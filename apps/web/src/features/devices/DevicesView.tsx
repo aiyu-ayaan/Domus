@@ -67,8 +67,8 @@ function AllDevices() {
   return (
     <>
       <div className="relative mb-4 max-w-sm">
-        <MagnifyingGlass size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
-        <input type="search" aria-label={t('devices.search')} placeholder={t('devices.search')} value={q} onChange={(e) => setQ(e.target.value)} className={cn(inputCls, 'pl-9')} />
+        <MagnifyingGlass size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
+        <input type="search" aria-label={t('devices.search')} placeholder={t('devices.search')} value={q} onChange={(e) => setQ(e.target.value)} className={cn(inputCls, 'ps-9')} />
       </div>
       {sections.length === 0 && <p className="py-10 text-center text-muted">{t('devices.noMatch', { query: q })}</p>}
       <div className="flex flex-col gap-6">
@@ -502,7 +502,7 @@ function GroupSheet({ group, onClose }: { group: Group | 'new' | null; onClose: 
             {devices.map((d) => (
               <Checkbox key={d.id} checked={ids.includes(d.id)} onChange={() => toggle(d.id)}>
                 <span className="text-body">{d.name}</span>
-                <span className="ml-auto text-label text-subtle">{deviceTypeLabel[d.device_type]}</span>
+                <span className="ms-auto text-label text-subtle">{deviceTypeLabel[d.device_type]}</span>
               </Checkbox>
             ))}
           </div>

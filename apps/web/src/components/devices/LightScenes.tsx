@@ -27,7 +27,7 @@ function Tiles({ presets, active, disabled, onPick }: { presets: LightPreset[]; 
             title={p.name}
             onClick={() => onPick(p.id)}
             className={cn(
-              'flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-label transition-colors duration-base ease-std disabled:cursor-not-allowed disabled:opacity-40',
+              'flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-start text-label transition-colors duration-base ease-std disabled:cursor-not-allowed disabled:opacity-40',
               on ? 'border-border-strong bg-raised text-fg shadow-sm' : 'border-border bg-panel text-muted hover:bg-raised hover:text-fg',
             )}
           >

@@ -48,10 +48,10 @@ export function HourGrid({
         <span className="text-muted">{when(sel.t)}</span>
         <span className="font-medium tabular">{text(sel.value)}</span>
       </div>
-      <div role="list" aria-label={label} className="grid grid-cols-[auto_repeat(24,minmax(0,1fr))] items-center gap-0.5" onMouseLeave={() => setActive(null)}>
+      <div dir="ltr" role="list" aria-label={label} className="grid grid-cols-[auto_repeat(24,minmax(0,1fr))] items-center gap-0.5" onMouseLeave={() => setActive(null)}>
         {days.map((day) => (
           <div key={day.key} className="contents">
-            <span className="pr-2 text-caption text-subtle tabular" aria-hidden>{formatBucket(day.t, 'week')}</span>
+            <span className="pe-2 text-caption text-subtle tabular" aria-hidden>{formatBucket(day.t, 'week')}</span>
             {day.cells.map((i, h) => {
               const v = i == null ? null : points[i].value
               if (i == null) return <span key={h} className="h-5" aria-hidden />

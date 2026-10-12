@@ -74,8 +74,8 @@ export function Skeleton({ className }: { className?: string }) {
 export function Notice({ tone = 'info', children, action }: { tone?: 'info' | 'warn' | 'danger'; children: ReactNode; action?: ReactNode }) {
   const bar = { info: 'bg-info', warn: 'bg-warn', danger: 'bg-danger' }[tone]
   return (
-    <div className="relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-panel py-3 pl-4 pr-3" role={tone === 'danger' ? 'alert' : 'status'}>
-      <span className={cn('absolute inset-y-0 left-0 w-0.5', bar)} aria-hidden />
+    <div className="relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-panel py-3 ps-4 pe-3" role={tone === 'danger' ? 'alert' : 'status'}>
+      <span className={cn('absolute inset-y-0 start-0 w-0.5', bar)} aria-hidden />
       <div className="min-w-0 flex-1 text-body">{children}</div>
       {action}
     </div>

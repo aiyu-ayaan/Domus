@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n'
+import { t, formatLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -86,7 +86,7 @@ export function OverviewView() {
   const watts = list.reduce((sum, d) => sum + (d.is_online ? d.state.current_power_watts ?? 0 : 0), 0)
   const offline = list.filter((d) => !d.is_online).length
   const aq = airQuality(climate.pm25)
-  const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+  const date = new Date().toLocaleDateString(formatLocale, { weekday: 'long', day: 'numeric', month: 'long' })
 
   // Device categories detection
   const powerDevices = useMemo(
@@ -302,7 +302,7 @@ export function OverviewView() {
             title={
               <span className="flex items-center gap-2">
                 <span>{t('overview.devices')}</span>
-                {offline > 0 && <span className="text-caption text-danger">({offline} offline)</span>}
+                {offline > 0 && <span className="text-caption text-danger">({t('rooms.offline', { count: offline })})</span>}
               </span>
             }
             action={
@@ -434,7 +434,7 @@ export function OverviewView() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <p className="truncate text-body font-medium">
-                                {isScreenSync && <Monitor size={14} className="text-primary inline mr-1.5" />}
+                                {isScreenSync && <Monitor size={14} className="text-primary inline me-1.5" />}
                                 {s.name}
                               </p>
                               {isScreenSync && <Badge tone="info">{t('overview.screenSync')}</Badge>}

@@ -102,7 +102,7 @@ export function OverviewInsights({
                     <span className="text-metric font-semibold tabular">
                       {formatNumber(climate.pm25, 0)}
                     </span>
-                    <span className="ml-1.5 text-body text-muted">µg/m³</span>
+                    <span className="ms-1.5 text-body text-muted">µg/m³</span>
                   </div>
                   {aq && (
                     <Badge tone={aq.tone === 'text-danger' ? 'danger' : aq.tone === 'text-warn' ? 'warn' : 'on'}>
@@ -112,7 +112,7 @@ export function OverviewInsights({
                 </div>
 
                 {/* 4-segment WHO scale bar */}
-                <div className="mt-3">
+                <div dir="ltr" className="mt-3">
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-raised flex">
                     <div className="h-full w-1/4 bg-on/40" title={t('insights.band.excellent')} />
                     <div className="h-full w-1/4 bg-on" title={t('insights.band.good')} />
@@ -121,12 +121,12 @@ export function OverviewInsights({
                   </div>
                   <div className="relative mt-1 h-3">
                     <div
-                      className="absolute -top-3.5 -ml-1 h-4 w-2 rounded-full border border-bg bg-fg shadow-sm transition-[left] duration-base"
+                      className="absolute -top-3.5 -ms-1 h-4 w-2 rounded-full border border-bg bg-fg shadow-sm transition-[left] duration-base"
                       style={{
                         left: `${Math.min(Math.max(((climate.pm25) / 70) * 100, 2), 98)}%`,
                       }}
                     />
-                    <div className="flex justify-between text-[11px] text-subtle tabular">
+                    <div dir="ltr" className="flex justify-between text-[11px] text-subtle tabular">
                       <span>0</span>
                       <span>12</span>
                       <span>35</span>
@@ -304,7 +304,7 @@ export function OverviewInsights({
                         >
                           <span className="truncate">
                             {d.name}
-                            {roomName && <span className="ml-1.5 text-caption text-muted">· {roomName}</span>}
+                            {roomName && <span className="ms-1.5 text-caption text-muted">· {roomName}</span>}
                           </span>
                           <span className="tabular text-muted">
                             {formatWatts(d.state.current_power_watts)}
@@ -345,7 +345,7 @@ export function OverviewInsights({
                   <DropHalf size={14} /> {t('insights.humidity')}
                 </span>
                 <p className="mt-1 text-title font-semibold tabular">
-                  {climate.humidity != null ? `${formatNumber(climate.humidity, 0)} %` : '—'}
+                  {climate.humidity != null ? `${formatNumber(climate.humidity, 0)}%` : '—'}
                 </p>
               </div>
             </div>

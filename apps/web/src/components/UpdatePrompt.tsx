@@ -30,7 +30,7 @@ export function UpdateProgress({ value }: { value: number }) {
       <div className="h-1.5 flex-1 rounded-full bg-raised" role="progressbar" aria-label={t('update.downloading')} aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div className="h-full rounded-full bg-fg/70 transition-[width] duration-fast" style={{ width: `${percent}%` }} />
       </div>
-      <span className="w-9 text-right text-label tabular text-muted">{percent}%</span>
+      <span className="w-9 text-end text-label tabular text-muted">{percent}%</span>
     </div>
   )
 }

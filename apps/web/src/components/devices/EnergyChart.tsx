@@ -49,7 +49,8 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
           {formatKwh(sel.kwh)} <span className="text-muted">· {formatMoney(sel.cost, currency)}</span>
         </span>
       </div>
-      <div className="relative" style={{ height }}>
+      {/* Time runs left to right in every language. */}
+      <div dir="ltr" className="relative" style={{ height }}>
         {/* grid lines */}
         {[0.25, 0.5, 0.75].map((f) => (
           <div key={f} className="absolute inset-x-0 border-t border-border/70" style={{ bottom: `${f * 100}%` }} aria-hidden />
@@ -73,7 +74,7 @@ export function EnergyChart({ points, range, currency, height = 160 }: { points:
           ))}
         </div>
       </div>
-      <div className="mt-2 flex justify-between text-caption text-subtle tabular" aria-hidden>
+      <div dir="ltr" className="mt-2 flex justify-between text-caption text-subtle tabular" aria-hidden>
         <span>{label(points[0].t)}</span>
         <span>{label(points[points.length - 1].t)}</span>
       </div>

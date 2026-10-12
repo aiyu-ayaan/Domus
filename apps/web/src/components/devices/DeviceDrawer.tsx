@@ -112,18 +112,18 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   const readings: [string, string][] = []
   if (s.air_quality_pm25 != null) readings.push([t('reading.pm25'), `${formatNumber(s.air_quality_pm25, 0)} µg/m³ · ${airQuality(s.air_quality_pm25)?.label}`])
   if (s.temperature != null) readings.push([t('reading.temperature'), `${formatNumber(s.temperature)} °C`])
-  if (s.humidity != null) readings.push([t('reading.humidity'), `${formatNumber(s.humidity, 0)} %`])
+  if (s.humidity != null) readings.push([t('reading.humidity'), `${formatNumber(s.humidity, 0)}%`])
   if (s.current_power_watts != null) readings.push([t('reading.power'), formatWatts(s.current_power_watts)])
   if (s.voltage != null) readings.push([t('reading.voltage'), `${formatNumber(s.voltage)} V`])
   if (s.current_amps != null) readings.push([t('reading.current'), `${formatNumber(s.current_amps, 2)} A`])
   if (s.today_energy_kwh != null) readings.push([t('reading.energyToday'), formatKwh(s.today_energy_kwh)])
-  if (s.filter_life != null) readings.push([t('reading.filterLife'), `${formatNumber(s.filter_life, 0)} %`])
+  if (s.filter_life != null) readings.push([t('reading.filterLife'), `${formatNumber(s.filter_life, 0)}%`])
   // What a sensor last saw, and how its battery is doing.
   if (typeof s.motion === 'boolean') readings.push([t('reading.motion'), t(s.motion ? 'reading.detected' : 'reading.clear')])
   if (typeof s.contact === 'boolean') readings.push([t('reading.doorWindow'), t(s.contact ? 'reading.open' : 'reading.closed')])
   if (typeof s.water_leak === 'boolean') readings.push([t('reading.water'), t(s.water_leak ? 'reading.leak' : 'reading.dry')])
   if (typeof s.alarm === 'boolean') readings.push([t('reading.alarm'), t(s.alarm ? 'reading.sounding' : 'reading.quiet')])
-  if (typeof s.battery === 'number') readings.push([t('reading.battery'), `${formatNumber(s.battery, 0)} %`])
+  if (typeof s.battery === 'number') readings.push([t('reading.battery'), `${formatNumber(s.battery, 0)}%`])
   else if (typeof s.battery_low === 'boolean') readings.push([t('reading.battery'), t(s.battery_low ? 'reading.low' : 'reading.ok')])
   const fan = s.options?.fan_speed
   const modes = s.options?.mode

@@ -134,7 +134,7 @@ export function AutomationsView() {
                     <>
                       <Button variant="ghost" size="sm" aria-label={t('groups.edit', { name: a.name })} icon={<PencilSimple size={16} />} onClick={() => setEditing(a)} />
                       <Button variant="ghost" size="sm" aria-label={t('groups.delete', { name: a.name })} icon={<Trash size={16} />} onClick={() => setDeleting({ kind: 'automation', id: a.id, name: a.name })} />
-                      <span className="ml-2">
+                      <span className="ms-2">
                         <Switch checked={a.is_enabled} onChange={() => toggle.mutate(a.id)} label={t('automations.enabled', { name: a.name })} />
                       </span>
                     </>
@@ -169,7 +169,7 @@ export function AutomationsView() {
                     <div className="flex items-center gap-2">
                       {isLocal ? (
                         <div className="flex items-center gap-2">
-                          <span className="relative flex h-2.5 w-2.5 items-center justify-center mr-1" aria-hidden>
+                          <span className="relative flex h-2.5 w-2.5 items-center justify-center me-1" aria-hidden>
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-info opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-info shadow-[0_0_8px_rgb(var(--info))]" />
                           </span>
@@ -185,7 +185,7 @@ export function AutomationsView() {
                         </div>
                       ) : isRemote ? (
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1.5 text-caption font-medium text-info mr-1">
+                          <span className="inline-flex items-center gap-1.5 text-caption font-medium text-info me-1">
                             <span className="h-2 w-2 rounded-full bg-info animate-pulse shadow-[0_0_8px_rgb(var(--info))]" />
                             {t('common.live')}
                           </span>

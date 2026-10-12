@@ -322,7 +322,7 @@ export function LightColorControls({
       <div className="relative overflow-hidden rounded-xl border border-border/80 bg-gradient-to-b from-panel/90 via-panel/60 to-raised/50 p-4 shadow-sm backdrop-blur-xl">
         {/* Ambient radiance background bloom */}
         <div
-          className="pointer-events-none absolute -left-8 -top-8 h-36 w-36 rounded-full blur-3xl transition-all duration-300 ease-std"
+          className="pointer-events-none absolute -start-8 -top-8 h-36 w-36 rounded-full blur-3xl transition-all duration-300 ease-std"
           style={{
             backgroundColor: activeRadiantHex,
             opacity: isOn ? Math.max(0.12, (brightness / 100) * 0.45) : 0.02,
@@ -354,9 +354,9 @@ export function LightColorControls({
                 }}
               >
                 {/* Liquid glass highlight arc (reflection) */}
-                <div className="pointer-events-none absolute left-1.5 right-1.5 top-1 h-3.5 rounded-full bg-gradient-to-b from-white/80 via-white/25 to-transparent blur-[0.4px]" />
+                <div className="pointer-events-none absolute start-1.5 end-1.5 top-1 h-3.5 rounded-full bg-gradient-to-b from-white/80 via-white/25 to-transparent blur-[0.4px]" />
                 {/* Specular point glint */}
-                <div className="pointer-events-none absolute left-2.5 top-1.5 h-1.5 w-1.5 rounded-full bg-white/95" />
+                <div className="pointer-events-none absolute start-2.5 top-1.5 h-1.5 w-1.5 rounded-full bg-white/95" />
                 {/* Subtle base shadow */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4 rounded-b-full bg-gradient-to-t from-black/25 to-transparent" />
               </div>
@@ -458,7 +458,7 @@ export function LightColorControls({
               </span>
             </div>
 
-            <div className="relative flex h-8 items-center">
+            <div dir="ltr" className="relative flex h-8 items-center">
               {/* Gradient track */}
               <div
                 className="pointer-events-none absolute inset-x-0 h-3 rounded-full border border-border-strong/40 shadow-inner"
@@ -489,7 +489,7 @@ export function LightColorControls({
               />
             </div>
 
-            <div className="flex justify-between text-[11px] text-subtle">
+            <div dir="ltr" className="flex justify-between text-[11px] text-subtle">
               <span>{t('light.warmAmber')}</span>
               <span>4000K</span>
               <span>{t('light.coolIce')}</span>
@@ -509,7 +509,7 @@ export function LightColorControls({
                     disabled={disabled}
                     onClick={() => handleSelectWhitePreset(p.pct)}
                     className={cn(
-                      'flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors duration-base ease-std',
+                      'flex items-center gap-2 rounded-lg border px-2.5 py-2 text-start transition-colors duration-base ease-std',
                       active
                         ? 'border-border-strong bg-raised text-fg shadow-sm'
                         : 'border-border bg-panel hover:bg-raised text-muted hover:text-fg',
@@ -573,7 +573,7 @@ export function LightColorControls({
                 <span className="text-muted">{t('light.hueSlider')}</span>
                 <span className="text-subtle tabular">{hue}°</span>
               </div>
-              <div className="relative flex h-8 items-center">
+              <div dir="ltr" className="relative flex h-8 items-center">
                 <div
                   className="pointer-events-none absolute inset-x-0 h-3 rounded-full border border-border-strong/40 shadow-inner"
                   style={{

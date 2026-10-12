@@ -26,7 +26,7 @@ function Ext({ href, icon, title, subtitle }: { href: string; icon?: JSX.Element
 export function BackLink({ to, label }: { to: string; label: string }) {
   return (
     <Link to={to} className="mb-4 inline-flex items-center gap-1.5 text-label text-muted hover:text-fg">
-      <ArrowLeft size={14} aria-hidden /> {label}
+      <ArrowLeft size={14} className="rtl:-scale-x-100" aria-hidden /> {label}
     </Link>
   )
 }
@@ -49,7 +49,7 @@ export function AboutView() {
             ].map(([k, v]) => (
               <div key={k} className="flex min-h-12 items-center justify-between gap-4 px-4 py-2">
                 <span className="text-muted">{k}</span>
-                <span className="text-right">{v}</span>
+                <span className="text-end">{v}</span>
               </div>
             ))}
             <Ext href={REPO_URL} icon={<GithubLogo size={18} aria-hidden />} title={t('about.sourceCode')} subtitle="github.com/aiyu-ayaan/Domus-Rust" />
@@ -76,7 +76,7 @@ export function AboutView() {
               <span className="block">{t('about.acknowledgements')}</span>
               <span className="block text-label text-muted">{t('about.acknowledgementsHint')}</span>
             </span>
-            <CaretRight size={16} className="text-subtle" aria-hidden />
+            <CaretRight size={16} className="text-subtle rtl:-scale-x-100" aria-hidden />
           </Link>
         </Card>
       </div>

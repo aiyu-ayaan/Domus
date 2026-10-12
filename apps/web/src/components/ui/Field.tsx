@@ -29,7 +29,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({ l
           type={isPassword && reveal ? 'text' : type}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? `${id}-err` : hint ? `${id}-hint` : undefined}
-          className={cn(inputCls, isPassword && 'pr-10', error && 'border-danger/60')}
+          className={cn(inputCls, isPassword && 'pe-10', error && 'border-danger/60')}
           {...rest}
         />
         {isPassword && (
@@ -37,7 +37,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({ l
             type="button"
             onClick={() => setReveal((r) => !r)}
             aria-label={t(reveal ? 'field.hidePassword' : 'field.showPassword')}
-            className="absolute inset-y-0 right-0 flex w-9 cursor-pointer items-center justify-center text-subtle hover:text-fg"
+            className="absolute inset-y-0 end-0 flex w-9 cursor-pointer items-center justify-center text-subtle hover:text-fg"
           >
             {reveal ? <EyeSlash size={16} /> : <Eye size={16} />}
           </button>
@@ -64,10 +64,10 @@ export function SelectField({ label, hint, children, className, ...rest }: Selec
         {label}
       </label>
       <div className="relative">
-        <select id={id} className={cn(inputCls, 'cursor-pointer appearance-none pr-8')} {...rest}>
+        <select id={id} className={cn(inputCls, 'cursor-pointer appearance-none pe-8')} {...rest}>
           {children}
         </select>
-        <CaretDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
+        <CaretDown size={14} className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden />
       </div>
       {hint && <p className="text-caption text-subtle">{hint}</p>}
     </div>

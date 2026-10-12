@@ -38,7 +38,7 @@ export function Switch({
         <span
           className={cn(
             'h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-base ease-std',
-            checked && 'translate-x-3.5',
+            checked && 'translate-x-3.5 rtl:-translate-x-3.5',
           )}
         />
       </span>

@@ -185,6 +185,11 @@
 .anim-enter { animation: enter 200ms cubic-bezier(0.2, 0, 0, 1) both; }
 .anim-enter-right { animation: enter-right 200ms cubic-bezier(0.2, 0, 0, 1) both; }
 .anim-fade { animation: fade 150ms ease-out both; }
+/* Right to left: the sheet sits at the left edge, so it comes in from there. */
+@keyframes enter-left {
+  from { opacity: 0; transform: translateX(-16px); }
+}
+[dir='rtl'] .anim-enter-right { animation-name: enter-left; }
 @media (prefers-reduced-motion: reduce) {
   .anim-enter, .anim-enter-right { animation: fade 1ms both; }
   *, *::before, *::after { transition-duration: 1ms !important; }
@@ -203,6 +208,9 @@ input[type='range'].range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
   background: linear-gradient(to right, rgb(var(--fg)) var(--fill, 50%), rgb(var(--border-strong)) var(--fill, 50%));
+}
+[dir='rtl'] input[type='range'].range::-webkit-slider-runnable-track {
+  background: linear-gradient(to left, rgb(var(--fg)) var(--fill, 50%), rgb(var(--border-strong)) var(--fill, 50%));
 }
 input[type='range'].range::-moz-range-track { height: 4px; border-radius: 2px; background: rgb(var(--border-strong)); }
 input[type='range'].range::-moz-range-progress { height: 4px; border-radius: 2px; background: rgb(var(--fg)); }

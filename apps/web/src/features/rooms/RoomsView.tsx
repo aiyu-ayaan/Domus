@@ -54,7 +54,7 @@ export function RoomsView() {
                     {offline > 0 && <span className="text-danger"> · {t('rooms.offline', { count: offline })}</span>}
                   </p>
                 </div>
-                <CaretRight size={16} className="text-subtle transition-transform duration-fast group-hover:translate-x-0.5" aria-hidden />
+                <CaretRight size={16} className="text-subtle transition-transform duration-fast rtl:-scale-x-100 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" aria-hidden />
               </Link>
             )
           })}
@@ -108,7 +108,7 @@ export function RoomDetailView() {
   return (
     <>
       <Link to="/rooms" className="mb-3 inline-flex h-8 items-center gap-1.5 text-label text-muted hover:text-fg">
-        <ArrowLeft size={14} aria-hidden /> {t('rooms.title')}
+        <ArrowLeft size={14} className="rtl:-scale-x-100" aria-hidden /> {t('rooms.title')}
       </Link>
       <PageHeader
         title={room.name}

@@ -159,7 +159,7 @@ export function AvatarPickerModal({
                 type="button"
                 onClick={handleRollSeed}
                 title={t('avatar.rollSeedHint')}
-                className="absolute -bottom-1 -right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-on-primary shadow-lg ring-2 ring-panel transition-transform hover:scale-110 active:scale-95"
+                className="absolute -bottom-1 -end-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-on-primary shadow-lg ring-2 ring-panel transition-transform hover:scale-110 active:scale-95"
               >
                 <DiceFive size={20} weight="fill" className={rolling ? 'animate-spin' : ''} />
               </button>

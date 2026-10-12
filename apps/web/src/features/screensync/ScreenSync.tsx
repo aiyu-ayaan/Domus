@@ -298,7 +298,7 @@ function ScreenSyncPill() {
     <div
       role="status"
       aria-live="polite"
-      className="anim-enter fixed bottom-[calc(72px+env(safe-area-inset-bottom))] right-4 z-toast flex items-center gap-3 rounded-full border border-border bg-panel/75 py-1.5 pl-1.5 pr-2 shadow-lg backdrop-blur-xl backdrop-saturate-150 lg:bottom-6 lg:right-6"
+      className="anim-enter fixed bottom-[calc(72px+env(safe-area-inset-bottom))] end-4 z-toast flex items-center gap-3 rounded-full border border-border bg-panel/75 py-1.5 ps-1.5 pe-2 shadow-lg backdrop-blur-xl backdrop-saturate-150 lg:bottom-6 lg:end-6"
     >
       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden>
         <span
@@ -319,7 +319,7 @@ function ScreenSyncPill() {
       <button
         type="button"
         onClick={stop}
-        className="ml-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-raised px-3 text-label font-medium transition-colors hover:bg-danger hover:text-white"
+        className="ms-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-raised px-3 text-label font-medium transition-colors hover:bg-danger hover:text-white"
       >
         <StopCircle size={16} weight="fill" />
         {t('overview.stop')}

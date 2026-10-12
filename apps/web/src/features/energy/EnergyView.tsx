@@ -10,9 +10,9 @@ import { HourGrid } from '@/components/devices/HourGrid'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
 import { useIsAdmin } from '@/lib/auth'
-import { t } from '@/lib/i18n'
+import { t, formatLocale } from '@/lib/i18n'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
-import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, type Range } from '@/lib/format'
+import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, ltr, type Range } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
@@ -44,7 +44,7 @@ export function EnergyView() {
   const currency = o.settings.currency
   const end = new Date(o.cycle_start)
   end.setDate(end.getDate() + o.cycle_days - 1)
-  const fmt = (d: Date) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+  const fmt = (d: Date) => d.toLocaleDateString(formatLocale, { day: 'numeric', month: 'short' })
   const maxKwh = Math.max(...o.devices.map((d) => d.kwh), 0.0001)
 
   return (
@@ -57,7 +57,7 @@ export function EnergyView() {
         <Metric
           label={t('energy.projectedBill')}
           value={formatMoney(o.projected_cost, currency)}
-          sub={o.budget_used_percent != null ? t('energy.percentOfBudget', { percent: formatNumber(o.budget_used_percent, 0) }) : `≈ ${formatKwh(o.projected_kwh)}`}
+          sub={o.budget_used_percent != null ? t('energy.percentOfBudget', { percent: formatNumber(o.budget_used_percent, 0) }) : ltr(`≈ ${formatKwh(o.projected_kwh)}`)}
         />
       </div>
 
@@ -92,12 +92,12 @@ export function EnergyView() {
         ) : (
           <table className="w-full text-body">
             <thead>
-              <tr className="border-b border-border text-left text-label text-muted">
+              <tr className="border-b border-border text-start text-label text-muted">
                 <th className="px-4 py-2 font-medium">{t('device.type.other')}</th>
                 <th className="hidden px-4 py-2 font-medium sm:table-cell">{t('energy.col.share')}</th>
-                <th className="px-4 py-2 text-right font-medium">{t('energy.col.now')}</th>
-                <th className="px-4 py-2 text-right font-medium">{t('nav.energy')}</th>
-                <th className="px-4 py-2 text-right font-medium">{t('energy.col.cost')}</th>
+                <th className="px-4 py-2 text-end font-medium">{t('energy.col.now')}</th>
+                <th className="px-4 py-2 text-end font-medium">{t('nav.energy')}</th>
+                <th className="px-4 py-2 text-end font-medium">{t('energy.col.cost')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border tabular">
@@ -109,9 +109,9 @@ export function EnergyView() {
                       <div className="h-full rounded-full bg-fg/70" style={{ width: `${(d.kwh / maxKwh) * 100}%` }} />
                     </div>
                   </td>
-                  <td className="px-4 text-right text-muted">{formatWatts(watts(d.device_id, d.current_watts))}</td>
-                  <td className="px-4 text-right">{formatKwh(d.kwh)}</td>
-                  <td className="px-4 text-right">{formatMoney(d.cost, currency)}</td>
+                  <td className="px-4 text-end text-muted">{formatWatts(watts(d.device_id, d.current_watts))}</td>
+                  <td className="px-4 text-end">{formatKwh(d.kwh)}</td>
+                  <td className="px-4 text-end">{formatMoney(d.cost, currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -150,7 +150,7 @@ function Insights({ o, day, week }: { o: EnergyOverview; day: EnergyPoint[]; wee
           <Insight label={t('energy.dailyAverage')} value={average != null ? formatKwh(average) : '—'} sub={average != null ? t('energy.overLastDays', { count: earlier.length }) : t('energy.needsFullDay')} />
           <Insight
             label={t('energy.todayVsAverage')}
-            value={change != null ? `${change > 0 ? '+' : ''}${formatNumber(change, 0)}%` : '—'}
+            value={change != null ? ltr(`${change > 0 ? '+' : ''}${formatNumber(change, 0)}%`) : '—'}
             sub={change == null ? t('energy.needsFullDay') : change > 10 ? t('energy.aboveUsual') : change < -10 ? t('energy.belowUsual') : t('energy.aboutUsual')}
           />
           <Insight label={t('energy.topDevice')} value={top ? `${formatNumber((top.kwh / Math.max(o.cycle_kwh, 0.0001)) * 100, 0)}%` : '—'} sub={top?.name ?? t('energy.noMeteredDevice')} />
