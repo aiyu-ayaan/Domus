@@ -1,0 +1,935 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">优</string>
+    <string name="air_good">良</string>
+    <string name="air_moderate">中</string>
+    <string name="air_poor">差</string>
+    <string name="channel_stable">稳定版</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">此电脑</string>
+    <string name="api_untrusted">服务器的证书不受信任。</string>
+    <string name="api_offline">无法连接到 Domus 服务器。请检查服务器是否正在运行。</string>
+    <string name="api_bad_response">服务器发送了此应用版本无法识别的响应。</string>
+    <string name="api_request_failed">请求失败 ({status})</string>
+    <string name="error_no_server">无服务器</string>
+    <string name="connect_cert_changed">自您上次批准以来，服务器的证书已发生更改。请重新连接以核对新证书。</string>
+    <string name="connect_address_invalid">请输入如 192.168.1.10:8443 或 home.example.com 的地址。仅支持 https。</string>
+    <string name="connect_cert_unreadable">无法读取服务器的证书。</string>
+    <string name="automation_ran">已运行“{name}”</string>
+    <string name="handover_reset_until">%1$s 的 Domus 密码重置\n重置码：%2$s\n\n在登录界面选择 \"忘记密码？\"，输入您的用户名，然后输入此重置码。该码仅可使用一次，有效期至 %3$s。</string>
+    <string name="handover_reset">%1$s 的 Domus 密码重置\n重置码：%2$s\n\n在登录界面选择 \"忘记密码？\"，输入您的用户名，然后输入此重置码。该码仅可使用一次。</string>
+    <string name="handover_signin_kid">Domus 登录信息\n地址：%1$s\n用户名：%2$s\n密码：%3$s</string>
+    <string name="handover_signin">Domus 登录信息\n地址：%1$s\n用户名：%2$s\n密码：%3$s\n\n首次登录时，系统会要求您设置自己的密码。</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_devices">设备</string>
+    <string name="nav_scenes">场景</string>
+    <string name="nav_analytics">分析</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">全屋智能，尽在一处</string>
+    <string name="connect_intro_1_body">将来自 Tuya、Tapo、Xiaomi、Philips Hue 和 MQTT 的灯具、插座、净化器和传感器汇聚一堂。</string>
+    <string name="connect_intro_2_title">原生隐私保护</string>
+    <string name="connect_intro_2_body">Domus 仅通过加密连接与您家中的服务器通信。无需云端账户。</string>
+    <string name="connect_intro_3_title">自动发现服务器</string>
+    <string name="connect_intro_3_body">连接到家庭 Wi‑Fi 时，应用会自动查找服务器。外出时，只需输入服务器地址即可。</string>
+    <string name="connect_page_of">第 %1$d 页，共 %2$d 页</string>
+    <string name="connect_skip">跳过</string>
+    <string name="connect_get_started">开始使用</string>
+    <string name="connect_next">下一步</string>
+    <string name="connect_welcome_title">欢迎使用 Domus</string>
+    <string name="connect_welcome_subtitle">连接到运行您智能家居的服务器。</string>
+    <string name="connect_on_this_network">在此网络上</string>
+    <string name="connect_looking_for_servers">正在查找服务器…</string>
+    <string name="connect_no_server_found">没有服务器响应。请检查此手机是否与服务器处于同一 Wi‑Fi 下，或在下方输入其地址。</string>
+    <string name="connect_scan_again">重新扫描</string>
+    <string name="connect_or_enter_address">或输入地址</string>
+    <string name="connect_server_address">服务器地址</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 或 home.example.com</string>
+    <string name="connect_action">连接</string>
+    <string name="connect_trust_title">信任此服务器？</string>
+    <string name="connect_trust_body">%1$s 使用的是自签名证书，这对于家庭服务器来说是正常的。仅当指纹与服务器启动时打印的指纹一致时才信任它。</string>
+    <string name="connect_trust_action">信任</string>
+    <string name="connect_cancel">取消</string>
+    <string name="connect_use_another_server">使用其他服务器</string>
+    <string name="connect_unreachable_title">无法连接到您的家庭</string>
+    <string name="connect_try_again">重试</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">隐藏密码</string>
+    <string name="auth_show_password">显示密码</string>
+    <string name="auth_username">用户名</string>
+    <string name="auth_new_password">新密码</string>
+    <string name="auth_password_min_length">至少 8 个字符</string>
+    <string name="auth_confirm_password">确认密码</string>
+    <string name="auth_passwords_mismatch">两次输入的密码不一致</string>
+    <string name="auth_create_admin_title">创建管理员账户</string>
+    <string name="auth_welcome_back_title">欢迎回来</string>
+    <string name="auth_create_admin_subtitle">这是一台新服务器。第一个账户将管理所有内容。</string>
+    <string name="auth_welcome_back_subtitle">登录到您的家庭。</string>
+    <string name="auth_encrypted_connection">加密连接至</string>
+    <string name="auth_email">电子邮箱</string>
+    <string name="auth_password">密码</string>
+    <string name="auth_create_account">创建账户</string>
+    <string name="auth_sign_in">登录</string>
+    <string name="auth_forgot_password">忘记密码？</string>
+    <string name="auth_forgot_title">忘记密码？</string>
+    <string name="auth_forgot_subtitle">Domus 不会发送电子邮件。系统会通知此家庭的管理员，由管理员向您提供一次性重置码。</string>
+    <string name="auth_ask_admin">联系管理员</string>
+    <string name="auth_back_to_sign_in">返回登录</string>
+    <string name="auth_reset_code_title">输入您的重置码</string>
+    <string name="auth_reset_code_subtitle">已通知管理员。请向管理员索取 %1$s 的 8 位重置码；该重置码在 30 分钟内单次有效。</string>
+    <string name="auth_reset_code_label">重置码</string>
+    <string name="auth_set_password_sign_in">设置密码并登录</string>
+    <string name="auth_back">返回</string>
+    <string name="auth_choose_password_title">设置您的密码</string>
+    <string name="auth_choose_password_subtitle">欢迎，%1$s。您登录所用的密码是为您生成的，且已被他人查看。请设置您自己的密码以继续。</string>
+    <string name="auth_save_continue">保存并继续</string>
+    <string name="auth_sign_out">退出登录</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">后台活动</string>
+    <string name="service_channel_alerts">家庭警报</string>
+    <string name="service_listening_alerts">Domus 正在监听警报</string>
+    <string name="service_screen_sync_title">屏幕同步已开启</string>
+    <string name="service_screen_sync_body">您的灯光正在跟随此屏幕</string>
+    <string name="service_stop">停止</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear（头像插画）</string>
+    <string name="about_lib_open_meteo">Open-Meteo（由服务器发起的地点搜索）</string>
+    <string name="about_lib_home_assistant">Home Assistant（Tuya QR 登录流程）</string>
+    <string name="about_license_inspiration">灵感来源</string>
+    <string name="about_version_unknown">未知</string>
+    <string name="about_title">关于 Domus</string>
+    <string name="about_section_app">应用</string>
+    <string name="about_version_build">版本 %1$s · 构建版本 %2$d</string>
+    <string name="about_privacy_title">隐私</string>
+    <string name="about_privacy_subtitle">在您自己的服务器上运行。凭据在本地加密保存。</string>
+    <string name="about_source_code">源代码</string>
+    <string name="about_section_developer">开发者</string>
+    <string name="about_developer_tagline">由独立开发者设计与构建。</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">作品集</string>
+    <string name="about_section_open_source">开源</string>
+    <string name="about_acknowledgements">致谢</string>
+    <string name="about_acknowledgements_subtitle">Domus 所基于的库和项目</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s 现已可用</string>
+    <string name="update_download_failed_retry_prompt">下载失败。是否重试？</string>
+    <string name="update_prompt_body">当前版本为 %1$s。更新日志和更新通道位于“设置 → 更新”中。</string>
+    <string name="update_downloading_percent">正在下载 %1$d%%</string>
+    <string name="update_action">更新</string>
+    <string name="update_later">稍后</string>
+    <string name="update_title">更新</string>
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_check_failed">无法检查更新</string>
+    <string name="update_dev_build">开发版本</string>
+    <string name="update_up_to_date">Domus 已是最新版本</string>
+    <string name="update_download_failed_retry">下载失败。请重试。</string>
+    <string name="update_check_failed_body">当前版本为 %1$s。请检查您的网络连接并重试。</string>
+    <string name="update_dev_build_body">当前版本为 %1$s。开发版本需通过重新构建进行更新。</string>
+    <string name="update_you_have">当前版本为 %1$s。</string>
+    <string name="update_download_install">下载并安装</string>
+    <string name="update_check_again">重新检查</string>
+    <string name="update_channel">更新通道</string>
+    <string name="update_channel_hint">Beta 和 Alpha 通道可提前获取新版本，同时也会收到所有稳定版更新。</string>
+    <string name="update_whats_new_in">%1$s 的新增功能</string>
+    <string name="update_in_this_version">在此版本中</string>
+    <string name="update_loading_notes">正在加载更新日志…</string>
+    <string name="update_no_notes">此版本没有更新日志。</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">机器人</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">冒险家</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">像素艺术</string>
+    <string name="avatar_style_fun_emoji">趣味表情</string>
+    <string name="avatar_style_thumbs">大拇指</string>
+    <string name="avatar_style_shapes">几何图形</string>
+    <string name="avatar_style_rings">光环</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">自定义头像</string>
+    <string name="avatar_save">保存</string>
+    <string name="avatar_seed_value">种子：%1$s</string>
+    <string name="avatar_randomize">随机生成</string>
+    <string name="avatar_roll_seed">随机种子</string>
+    <string name="avatar_roll_seed_action">随机生成种子</string>
+    <string name="avatar_style_label">头像风格</string>
+    <string name="avatar_seed_phrase_label">种子短语</string>
+    <string name="avatar_seed_phrase_hint">输入任意关键词、名称或字符串来改变此头像风格的造型。</string>
+    <string name="avatar_seed_label">种子</string>
+    <string name="avatar_apply_avatar">应用头像</string>
+    <string name="avatar_apply">应用</string>
+    <string name="avatar_cancel">取消</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">晚安</string>
+    <string name="home_greeting_morning">早上好</string>
+    <string name="home_greeting_afternoon">下午好</string>
+    <string name="home_greeting_evening">晚上好</string>
+    <string name="home_got_it">知道了</string>
+    <string name="home_about_stat">关于 %1$s</string>
+    <string name="home_scene_on_hint">已开启 · 点击关闭</string>
+    <string name="home_scene_off_hint">点击运行</string>
+    <string name="home_change_avatar">更改头像</string>
+    <string name="home_clear_notices_title">删除所有通知？</string>
+    <string name="home_clear_notices_body">通知将从所有设备上移除。</string>
+    <string name="home_delete_all">全部删除</string>
+    <string name="home_reconnecting">正在重新连接…</string>
+    <string name="home_devices_on_of_total">%2$d 个中有 %1$d 个已开启</string>
+    <string name="home_using_now">当前功率</string>
+    <string name="home_using_now_info">所有计量设备的实时总耗电功率。</string>
+    <string name="home_today">今日</string>
+    <string name="home_today_info">自午夜以来的用电量。下方金额为按您的电价费率估算的费用。</string>
+    <string name="home_air_quality">空气质量</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">场景</string>
+    <string name="home_on_right_now">当前开启</string>
+    <string name="home_all_devices">所有设备</string>
+    <string name="home_no_devices_title">暂无设备</string>
+    <string name="home_no_devices_admin">打开“设备”并点击 + 以关联 Tuya、Tapo、Xiaomi、Hue 或 MQTT。</string>
+    <string name="home_no_devices_member">请联系管理员添加设备或为您授予房间访问权限。</string>
+    <string name="home_everything_off">所有设备均已关闭。</string>
+    <string name="home_rooms">房间</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="other">%1$d 个设备 · 全部关闭</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="other">%1$d 个设备 · %2$d 个已开启</item>
+    </plurals>
+    <string name="home_recent_activity">最近动态</string>
+    <string name="home_see_all">查看全部</string>
+
+    <!-- Devices -->
+    <string name="device_title">设备</string>
+    <string name="device_online_of_total">%2$d 个中有 %1$d 个在线</string>
+    <string name="device_add_devices">添加设备</string>
+    <string name="device_filter_all">全部</string>
+    <string name="device_category_lights">照明</string>
+    <string name="device_category_power">电源</string>
+    <string name="device_category_air">空气</string>
+    <string name="device_category_climate">温控</string>
+    <string name="device_all_rooms">所有房间</string>
+    <string name="device_no_room">无房间</string>
+    <string name="device_manage_rooms">管理房间</string>
+    <string name="device_empty_filtered_title">此处为空</string>
+    <string name="device_empty_filtered_body">没有符合此房间和分类的设备。</string>
+    <string name="device_empty_admin">点击 + 关联 Tuya、Tapo、Xiaomi、Hue 或 MQTT 并添加发现的设备。</string>
+    <string name="device_online">在线</string>
+    <string name="device_offline">离线</string>
+    <string name="device_on">开启</string>
+    <string name="device_off">关闭</string>
+    <string name="device_leak">漏水</string>
+    <string name="device_motion">移动</string>
+    <string name="device_motion_detected">已检测到</string>
+    <string name="device_clear">正常</string>
+    <string name="device_open">已打开</string>
+    <string name="device_closed">已关闭</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s 电源</string>
+    <string name="device_refresh_a11y">刷新 %1$s</string>
+    <string name="device_view_only_member">您只能查看此设备，无法进行控制。</string>
+    <string name="device_view_only_guest">访客只能查看设备，无法进行控制。</string>
+    <string name="device_brightness">亮度</string>
+    <string name="device_white">白光</string>
+    <string name="device_white_warm">暖光</string>
+    <string name="device_white_neutral">自然光</string>
+    <string name="device_white_cool">冷光</string>
+    <string name="device_fan_speed">风速</string>
+    <string name="device_mode">模式</string>
+    <string name="device_speed">速度</string>
+    <string name="device_coverage">适用面积 %1$d–%2$d m²</string>
+    <string name="device_reading_power">功率</string>
+    <string name="device_reading_voltage">电压</string>
+    <string name="device_reading_current">电流</string>
+    <string name="device_reading_temperature">温度</string>
+    <string name="device_reading_humidity">湿度</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">滤芯</string>
+    <string name="device_filter_left">剩余 %1$d%%</string>
+    <string name="device_reading_contact">门窗</string>
+    <string name="device_reading_water">水浸</string>
+    <string name="device_water_dry">干燥</string>
+    <string name="device_reading_alarm">警报</string>
+    <string name="device_alarm_sounding">鸣响中</string>
+    <string name="device_alarm_quiet">安静</string>
+    <string name="device_reading_battery">电池</string>
+    <string name="device_battery_low">电量低</string>
+    <string name="device_battery_ok">正常</string>
+    <string name="device_ask_before_switching">切换前询问</string>
+    <string name="device_ask_before_switching_desc">在通过任何应用、群组或场景开启或关闭此设备前发出提醒</string>
+    <string name="device_rename_or_move">重命名或移动</string>
+    <string name="device_rename">重命名</string>
+    <string name="device_remove">移除</string>
+    <string name="device_edit_title">编辑设备</string>
+    <string name="device_field_name">名称</string>
+    <string name="device_field_room">房间</string>
+    <string name="device_remove_confirm_title">移除 %1$s？</string>
+    <string name="device_remove_confirm_body">该设备将从您的家庭及场景中移除。您可以从“添加设备”中再次添加它。</string>
+    <string name="device_white_candle">烛光</string>
+    <string name="device_white_soft">柔和白</string>
+    <string name="device_white_neutral_preset">自然白</string>
+    <string name="device_white_daylight">日光</string>
+    <string name="device_white_cool_preset">冷白光</string>
+    <string name="device_light_off">灯光已关闭</string>
+    <string name="device_light_effect">灯效</string>
+    <string name="device_light_white">白光</string>
+    <string name="device_light_color">彩光</string>
+    <string name="device_light_playing">正在播放 %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">颜色</string>
+    <string name="device_effects">灯效</string>
+    <string name="device_color_temp">色温</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K 暖光</string>
+    <string name="device_kelvin_max">6500K 冷光</string>
+    <string name="device_moods">氛围</string>
+    <string name="device_stop_effect">停止灯效</string>
+    <string name="device_color_swatch_a11y">颜色 %1$s</string>
+    <string name="device_selected">已选中</string>
+    <string name="device_not_selected">未选中</string>
+    <string name="device_confirm_switch_one_title">切换 %1$s？</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="other">切换 %1$d 个设备？</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">其中包含要求在切换前确认的 %1$s。切换它可能会切断所连接设备的电源。</string>
+    <string name="device_confirm_switch_many_body">其中包含要求在切换前确认的 %1$s。切换它们可能会切断所连接设备的电源。</string>
+    <string name="device_confirm_switch_action">切换</string>
+    <string name="device_cancel">取消</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">刚刚</string>
+    <string name="scene_time_minutes_ago">%1$d 分钟前</string>
+    <string name="scene_time_hours_ago">%1$d 小时前</string>
+    <string name="scene_time_days_ago">%1$d 天前</string>
+    <string name="scene_edit_item">编辑 %1$s</string>
+    <string name="scene_title">场景</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="other">%1$d 个活跃 · %2$d 个自动化已启用</item>
+    </plurals>
+    <string name="scene_empty_title">此处暂无内容</string>
+    <string name="scene_empty_subtitle">场景可一次设置多个设备。自动化则会在特定条件发生时自动为您执行。</string>
+    <string name="scene_new_scene">新建场景</string>
+    <string name="scene_new_automation">新建自动化</string>
+    <string name="scene_new_screen_sync">新建屏幕同步</string>
+    <string name="scene_sync_active_subtitle">屏幕同步 · 灯光正在跟随屏幕</string>
+    <string name="scene_sync_inactive_subtitle">屏幕同步 · 将此屏幕色彩镜像到灯光上</string>
+    <string name="scene_active">活跃</string>
+    <string name="scene_section_automations">自动化</string>
+    <string name="scene_last_ran">上次运行于 %1$s</string>
+    <string name="scene_never_ran">从未运行</string>
+    <string name="scene_run_now">立即运行 %1$s</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">周一</string>
+    <string name="editor_day_tue">周二</string>
+    <string name="editor_day_wed">周三</string>
+    <string name="editor_day_thu">周四</string>
+    <string name="editor_day_fri">周五</string>
+    <string name="editor_day_sat">周六</string>
+    <string name="editor_day_sun">周日</string>
+    <string name="editor_prop_temperature">温度</string>
+    <string name="editor_prop_humidity">湿度</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">亮度</string>
+    <string name="editor_prop_power_watts">功率 (W)</string>
+    <string name="editor_removed_device">已移除的设备</string>
+    <string name="editor_rule_device_is_off">%1$s 已关闭</string>
+    <string name="editor_rule_device_is_on">%1$s 已开启</string>
+    <string name="editor_rule_device_prop_above">%1$s 的 %2$s 高于 %3$s</string>
+    <string name="editor_rule_device_prop_below">%1$s 的 %2$s 低于 %3$s</string>
+    <string name="editor_rule_device_prop_is">%1$s 的 %2$s 为 %3$s</string>
+    <string name="editor_rule_time_every_day">每天 %1$s</string>
+    <string name="editor_rule_time_on_days">%2$s %1$s</string>
+    <string name="editor_sun_event_sunrise">日出</string>
+    <string name="editor_sun_event_sunset">日落</string>
+    <string name="editor_rule_sun_at_every_day">每天%1$s时</string>
+    <string name="editor_rule_sun_at_on_days">%2$s%1$s时</string>
+    <string name="editor_rule_sun_before_every_day">每天%2$s前 %1$d 分钟</string>
+    <string name="editor_rule_sun_before_on_days">%3$s%2$s前 %1$d 分钟</string>
+    <string name="editor_rule_sun_after_every_day">每天%2$s后 %1$d 分钟</string>
+    <string name="editor_rule_sun_after_on_days">%3$s%2$s后 %1$d 分钟</string>
+    <string name="editor_rule_power_above">%1$s 功率超过 %2$s W</string>
+    <string name="editor_rule_device_offline">%1$s 离线</string>
+    <string name="editor_rule_device_discovered">发现新设备</string>
+    <string name="editor_rule_time_between">介于 %1$s 和 %2$s 之间</string>
+    <string name="editor_cmd_on">开启</string>
+    <string name="editor_cmd_off">关闭</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">白光 %1$s</string>
+    <string name="editor_device_group">设备群组</string>
+    <string name="editor_cmd_custom">自定义指令</string>
+    <string name="editor_rule_command">%1$s：%2$s</string>
+    <string name="editor_rule_notify">通知：%1$s</string>
+    <string name="editor_removed_scene">（已移除）</string>
+    <string name="editor_rule_scene">运行场景 %1$s</string>
+    <string name="editor_rule_delay">等待 %1$s 秒</string>
+    <string name="editor_rule_unknown">未知</string>
+    <string name="editor_trigger_time">时间</string>
+    <string name="editor_trigger_sun">日出 / 日落</string>
+    <string name="editor_trigger_device_state">设备状态</string>
+    <string name="editor_trigger_power">功率</string>
+    <string name="editor_trigger_offline">离线</string>
+    <string name="editor_trigger_discovered">新设备</string>
+    <string name="editor_condition_device_state">设备状态</string>
+    <string name="editor_condition_time_between">时间段</string>
+    <string name="editor_action_device">设备</string>
+    <string name="editor_action_scene">场景</string>
+    <string name="editor_action_notify">通知</string>
+    <string name="editor_action_delay">等待</string>
+    <string name="editor_add">添加</string>
+    <string name="editor_field_device">设备</string>
+    <string name="editor_sun_sunrise">日出</string>
+    <string name="editor_sun_sunset">日落</string>
+    <string name="editor_sun_after">之后</string>
+    <string name="editor_sun_before">之前</string>
+    <string name="editor_field_minutes">分钟</string>
+    <string name="editor_sun_supporting_sunrise">留空则在日出时运行。需要在“设置”中配置家庭位置。</string>
+    <string name="editor_sun_supporting_sunset">留空则在日落时运行。需要在“设置”中配置家庭位置。</string>
+    <string name="editor_every_day">每天</string>
+    <string name="editor_chosen_days">仅在所选日期</string>
+    <string name="editor_field_is">为</string>
+    <string name="editor_state_on">开启</string>
+    <string name="editor_state_off">关闭</string>
+    <string name="editor_compare_above">高于</string>
+    <string name="editor_compare_below">低于</string>
+    <string name="editor_field_value">数值</string>
+    <string name="editor_field_watts">瓦特 (W)</string>
+    <string name="editor_time_from">从</string>
+    <string name="editor_time_until">至</string>
+    <string name="editor_power_turn_on">开启</string>
+    <string name="editor_power_turn_off">关闭</string>
+    <string name="editor_power_leave">保持电源状态</string>
+    <string name="editor_set_brightness">设置亮度</string>
+    <string name="editor_set_brightness_value">设置亮度 %1$d%%</string>
+    <string name="editor_field_scene">场景</string>
+    <string name="editor_field_title">标题</string>
+    <string name="editor_field_message">消息内容</string>
+    <string name="editor_field_seconds">秒</string>
+    <string name="editor_remove_rule">移除：%1$s</string>
+    <string name="editor_style_vivid">鲜艳</string>
+    <string name="editor_style_dominant">主色调</string>
+    <string name="editor_style_average">平均</string>
+    <string name="editor_new_screen_sync">新建屏幕同步</string>
+    <string name="editor_new_scene">新建场景</string>
+    <string name="editor_edit_scene">编辑场景</string>
+    <string name="editor_delete">删除</string>
+    <string name="editor_field_name">名称</string>
+    <string name="editor_sync_lights_title">跟随屏幕的灯具</string>
+    <string name="editor_sync_no_lights">您家中暂无灯具。</string>
+    <string name="editor_sync_color_title">颜色</string>
+    <string name="editor_style_vivid_desc">屏幕上最强烈的颜色。</string>
+    <string name="editor_style_dominant_desc">最常见的颜色。</string>
+    <string name="editor_style_average_desc">整个画面的平均色。</string>
+    <string name="editor_region_full">整个屏幕</string>
+    <string name="editor_region_edges">仅边缘</string>
+    <string name="editor_sync_dim_dark">随暗色画面调暗</string>
+    <string name="editor_sync_restore_lights">停止时恢复灯光</string>
+    <string name="editor_actions_title">操作</string>
+    <string name="editor_add_action">添加操作</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_delete_confirm_title">删除 %1$s？</string>
+    <string name="editor_delete_scene_body">运行此场景的自动化将跳过它。</string>
+    <string name="editor_new_automation">新建自动化</string>
+    <string name="editor_edit_automation">编辑自动化</string>
+    <string name="editor_field_description_optional">描述（可选）</string>
+    <string name="editor_enabled">已启用</string>
+    <string name="editor_triggers_title">当发生以下任一情况时</string>
+    <string name="editor_add_trigger">添加触发条件</string>
+    <string name="editor_conditions_title">仅当满足以下所有条件时</string>
+    <string name="editor_add_condition">添加条件</string>
+    <string name="editor_do_this_title">执行以下操作</string>
+    <string name="editor_delete_automation_body">它将停止运行。</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">实时</string>
+    <string name="analytics_range_hour">1 分钟</string>
+    <string name="analytics_range_day">日</string>
+    <string name="analytics_range_week">周</string>
+    <string name="analytics_range_month">月</string>
+    <string name="analytics_bucket_5s">5 秒</string>
+    <string name="analytics_bucket_minute">分钟</string>
+    <string name="analytics_bucket_hour">小时</string>
+    <string name="analytics_bucket_day">天</string>
+    <string name="analytics_title">分析</string>
+    <string name="analytics_subtitle_power">用电量与费用</string>
+    <string name="analytics_subtitle_air">空气健康与净化器</string>
+    <string name="analytics_electricity_tariff">电价费率</string>
+    <string name="analytics_tab_electricity">电量</string>
+    <string name="analytics_tab_air">空气质量</string>
+    <string name="analytics_no_energy_title">暂无能耗数据</string>
+    <string name="analytics_no_energy_subtitle">计量插座或开关上线一分钟后即可看到读数。</string>
+    <string name="analytics_using_now">当前功率</string>
+    <string name="analytics_projected_cost">本计费周期预计为 %1$s</string>
+    <string name="analytics_today">今日</string>
+    <string name="analytics_today_info">自午夜以来的用电量。下方金额为按您的电价费率估算的费用。</string>
+    <string name="analytics_this_cycle">本周期</string>
+    <string name="analytics_this_cycle_info">当前计费周期内截至目前的用电量和预估账单。</string>
+    <string name="analytics_history">历史记录</string>
+    <string name="analytics_nothing_recorded">此期间暂无记录。</string>
+    <string name="analytics_metric_energy">能耗</string>
+    <string name="analytics_metric_power">功率</string>
+    <string name="analytics_no_reading">无读数</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">每%1$s平均功率</string>
+    <string name="analytics_chart_energy_used">每%1$s能耗，总计 %2$s</string>
+    <string name="analytics_live_caption">过去 5 分钟的数据，此页面打开时每 5 秒记录一次读数。</string>
+    <string name="analytics_total_caption">总计 %1$s · %2$s</string>
+    <string name="analytics_insights">洞察</string>
+    <string name="analytics_peak_hour">高峰时段</string>
+    <string name="analytics_peak_last_24h">过去 24 小时内 %1$s</string>
+    <string name="analytics_no_usage_yet">暂无用电数据</string>
+    <string name="analytics_daily_average">日均用电</string>
+    <string name="analytics_needs_full_day">需要完整一天的数据</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="other">过去 %1$d 天内</item>
+    </plurals>
+    <string name="analytics_today_vs_average">今日与平均对比</string>
+    <string name="analytics_above_usual_day">高于平时</string>
+    <string name="analytics_below_usual_day">低于平时</string>
+    <string name="analytics_about_usual_day">与平时相近</string>
+    <string name="analytics_top_device">最高耗电设备</string>
+    <string name="analytics_no_metered_device">无计量设备</string>
+    <string name="analytics_billing_cycle">计费周期</string>
+    <string name="analytics_time_elapsed">已过时间</string>
+    <string name="analytics_day_of_days">第 %1$d / %2$d 天</string>
+    <string name="analytics_budget_used">已用预算</string>
+    <string name="analytics_cost_of_budget">%1$s / %2$s</string>
+    <string name="analytics_spending_ahead">支出进度快于时间进度。</string>
+    <string name="analytics_budget_hint">在电价费率中设置月度预算，以便跟踪电费支出。</string>
+    <string name="analytics_by_device">按设备</string>
+    <string name="analytics_device_cycle_summary">%1$s · 本周期 %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">温度</string>
+    <string name="analytics_reading_humidity">湿度</string>
+    <string name="analytics_pm25_now">当前 PM2.5</string>
+    <string name="analytics_air_no_sensor_online">没有在线的传感器</string>
+    <string name="analytics_air_status_excellent">优 · 室内空气洁净</string>
+    <string name="analytics_air_status_good">良 · 处于健康范围内</string>
+    <string name="analytics_air_status_moderate">中 · 建议开启净化器或通风换气</string>
+    <string name="analytics_air_status_poor">差 · 请将净化器调至高档并关闭窗户</string>
+    <string name="analytics_purifiers">净化器</string>
+    <string name="analytics_running_of_total">%1$d / %2$d</string>
+    <string name="analytics_all_on_standby">全部待机</string>
+    <string name="analytics_running_now">正在运行</string>
+    <string name="analytics_filter_life">滤芯寿命</string>
+    <string name="analytics_filter_replace_soon">尽快更换</string>
+    <string name="analytics_filter_healthy">健康</string>
+    <string name="analytics_sensors_average">传感器平均值</string>
+    <string name="analytics_humidity_dry">干燥</string>
+    <string name="analytics_humidity_humid">潮湿</string>
+    <string name="analytics_humidity_comfortable">舒适</string>
+    <string name="analytics_trend">趋势</string>
+    <string name="analytics_no_air_history">暂无历史记录。传感器在线时每分钟记录一次读数。</string>
+    <string name="analytics_air_chart_summary">每%2$s %1$s，平均值 %3$s</string>
+    <string name="analytics_pm25_dashed_caption">虚线：15 µg/m³ 为洁净空气目标，35 µg/m³ 为良好空气上限。</string>
+    <string name="analytics_period_5m">5 分钟</string>
+    <string name="analytics_period_60m">60 分钟</string>
+    <string name="analytics_period_24h">24 小时</string>
+    <string name="analytics_period_7d">7 天</string>
+    <string name="analytics_period_30d">30 天</string>
+    <string name="analytics_average">平均</string>
+    <string name="analytics_air_level_over_period">%2$s内为 %1$s</string>
+    <string name="analytics_peak">峰值</string>
+    <string name="analytics_value_with_peak">%1$s · 峰值 %2$s</string>
+    <string name="analytics_day_hour">%1$s，%2$s</string>
+    <string name="analytics_usage_by_hour">每小时用电量</string>
+    <string name="analytics_peak_pm25_by_hour">每小时 PM2.5 峰值</string>
+    <string name="analytics_hour_grid_caption">每个单元格代表过去 7 天中的一小时。颜色越深表示数值越高。</string>
+    <string name="analytics_hour_grid_summary">%1$s，过去 7 天每小时</string>
+    <string name="analytics_time_at_each_level">各等级时长</string>
+    <string name="analytics_time_good_air">空气良好时长</string>
+    <string name="analytics_pm25_good_over_period">%1$s内 PM2.5 不高于 35 µg/m³</string>
+    <string name="analytics_sensors">传感器</string>
+    <string name="analytics_offline">离线</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">设置</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">跟随系统</string>
+    <string name="settings_theme_light">浅色</string>
+    <string name="settings_theme_dark">深色</string>
+    <string name="settings_role_admin">管理员</string>
+    <string name="settings_role_member">成员</string>
+    <string name="settings_role_guest">访客</string>
+    <string name="settings_avatar">头像</string>
+    <string name="settings_section_home">家庭</string>
+    <string name="settings_add_devices">添加设备</string>
+    <string name="settings_add_devices_subtitle">查找并添加您账户和网络中的设备</string>
+    <string name="settings_plugins">插件</string>
+    <string name="settings_plugins_subtitle">Tuya、Tapo、Xiaomi、Hue 和 MQTT</string>
+    <string name="settings_rooms">房间</string>
+    <string name="settings_people">成员</string>
+    <string name="settings_people_subtitle">账户、角色与房间访问权限</string>
+    <string name="settings_tariff">电价费率</string>
+    <string name="settings_tariff_subtitle">单价、计费周期与预算</string>
+    <string name="settings_location">家庭位置</string>
+    <string name="settings_location_subtitle">用于日出和日落自动化</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_notifications_subtitle">您的家庭报告的动态</string>
+    <string name="settings_background_alerts">应用关闭时接收警报</string>
+    <string name="settings_background_alerts_subtitle">保持与服务器的连接开启。会消耗少量电量。</string>
+    <string name="settings_section_server">服务器</string>
+    <string name="settings_server_live_pinned">实时 · 已固定证书</string>
+    <string name="settings_server_live_public">实时 · 公共证书</string>
+    <string name="settings_server_reconnecting">正在重新连接…</string>
+    <string name="settings_server_live_badge">实时</string>
+    <string name="settings_server_cert_public">已加密 · 证书已由公共权威机构验证</string>
+    <string name="settings_server_cert_pinned">已加密 · 您在首次使用时批准了此服务器的自签名证书：</string>
+    <string name="settings_sha256_fingerprint">SHA-256 指纹</string>
+    <string name="settings_fingerprint_clip_label">指纹</string>
+    <string name="settings_copied">已复制</string>
+    <string name="settings_copy">复制</string>
+    <string name="settings_change_password">修改密码</string>
+    <string name="settings_change_password_subtitle">用于登录 Domus</string>
+    <string name="settings_server_addresses">服务器地址</string>
+    <string name="settings_server_addresses_subtitle">家庭网络与远程访问</string>
+    <string name="settings_updates">更新</string>
+    <string name="settings_updates_subtitle">版本 %1$s、更新日志与更新通道</string>
+    <string name="settings_about">关于 Domus</string>
+    <string name="settings_about_subtitle">版本 %1$s、开发者与致谢</string>
+    <string name="settings_appearance">外观</string>
+    <string name="settings_wallpaper_colors">壁纸颜色</string>
+    <string name="settings_wallpaper_colors_subtitle">使应用配色与您的壁纸相匹配</string>
+    <string name="settings_section_account">账户</string>
+    <string name="settings_account_subtitle">退出登录或使用其他服务器</string>
+    <string name="settings_sign_out">退出登录</string>
+    <string name="settings_use_another_server">使用其他服务器</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">返回</string>
+    <string name="manage_hide_field">隐藏 %1$s</string>
+    <string name="manage_show_field">显示 %1$s</string>
+    <string name="manage_choose">选择…</string>
+    <string name="manage_close">关闭</string>
+    <string name="manage_cancel">取消</string>
+    <string name="manage_save">保存</string>
+    <string name="manage_delete">删除</string>
+    <string name="manage_rooms_title">房间</string>
+    <string name="manage_add_room">添加房间</string>
+    <string name="manage_no_rooms">暂无房间</string>
+    <string name="manage_no_rooms_subtitle">房间用于对设备进行分组，并决定成员或访客可以查看哪些设备。</string>
+    <plurals name="manage_device_count">
+        <item quantity="other">%1$d 个设备</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="other">%1$d 个房间</item>
+    </plurals>
+    <string name="manage_room_subtitle">%1$d 楼 · %2$s</string>
+    <string name="manage_new_room">新建房间</string>
+    <string name="manage_edit_room">编辑房间</string>
+    <string name="manage_field_name">名称</string>
+    <string name="manage_field_floor">楼层</string>
+    <string name="manage_role_admin">管理员</string>
+    <string name="manage_role_member">成员</string>
+    <string name="manage_role_guest">访客</string>
+    <string name="manage_level_none">无</string>
+    <string name="manage_level_view">仅查看</string>
+    <string name="manage_level_control">控制</string>
+    <string name="manage_level_edit">编辑</string>
+    <string name="manage_access_to">%1$s 的访问权限</string>
+    <string name="manage_whole_room_level">整个房间 · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d 个设备中的 %1$d 个</string>
+    <string name="manage_no_access">无权限</string>
+    <string name="manage_close_item">关闭 %1$s</string>
+    <string name="manage_open_item">打开 %1$s</string>
+    <string name="manage_whole_room">整个房间</string>
+    <string name="manage_whole_room_hint">也包含之后添加的设备</string>
+    <string name="manage_no_devices_in_room">此房间暂无设备。</string>
+    <string name="manage_people_title">成员</string>
+    <string name="manage_add_person">添加成员</string>
+    <string name="manage_access_whole_home">整个家庭</string>
+    <string name="manage_access_none">无权限</string>
+    <string name="manage_user_tag_kid">儿童</string>
+    <string name="manage_user_tag_reset_requested">已请求密码重置</string>
+    <string name="manage_person_title">成员</string>
+    <string name="manage_handover_reset_title">%1$s 的重置码</string>
+    <string name="manage_handover_signin_title">%1$s 的登录详情</string>
+    <string name="manage_handover_shown_once">仅显示一次。请立即发送给对方。</string>
+    <string name="manage_copy">复制</string>
+    <string name="manage_share">分享</string>
+    <string name="manage_done">完成</string>
+    <string name="manage_new_person">新成员</string>
+    <string name="manage_avatar">头像</string>
+    <string name="manage_roll">随机</string>
+    <string name="manage_field_username">用户名</string>
+    <string name="manage_username_supporting">至少 3 个字符</string>
+    <string name="manage_field_email">电子邮箱</string>
+    <string name="manage_email_taken">已被其他账户使用</string>
+    <string name="manage_email_available">可用</string>
+    <string name="manage_email_hint">手动输入，或根据用户名生成</string>
+    <string name="manage_generate_email">生成 @domus.home 邮箱</string>
+    <string name="manage_section_password">密码</string>
+    <string name="manage_kid_account">儿童账户</string>
+    <string name="manage_kid_account_on">由您设置密码并保持不变。</string>
+    <string name="manage_kid_account_off">关闭：由 Domus 生成密码，对方在首次登录时自行设置密码。</string>
+    <string name="manage_field_new_password">新密码</string>
+    <string name="manage_field_password">密码</string>
+    <string name="manage_password_keep_current">留空以保持当前密码不变</string>
+    <string name="manage_password_min_length">至少 8 个字符</string>
+    <string name="manage_password_after_saving">保存后您将获得密码以供复制或分享。</string>
+    <string name="manage_reset_requested_notice">%1$s 忘记了密码并请求重置。</string>
+    <string name="manage_reset_code">重置码</string>
+    <string name="manage_reset_code_active">重置码在 %1$s 前有效。关闭开关即可撤回。</string>
+    <string name="manage_reset_code_help">对方在 \"忘记密码？\" 下输入的一次性重置码，用于设置新密码。有效期为 30 分钟。</string>
+    <string name="manage_generate_new_password">生成新密码</string>
+    <string name="manage_section_role">角色</string>
+    <string name="manage_role_admin_desc">管理所有内容。</string>
+    <string name="manage_role_member_desc">查看分配给他们的内容。控制权限或编辑权限（也可重命名设备）按房间和设备单独设置。</string>
+    <string name="manage_role_guest_desc">查看分配给他们的内容，不能进行控制。</string>
+    <string name="manage_section_access">访问权限</string>
+    <string name="manage_custom_access">自定义访问权限</string>
+    <string name="manage_custom_access_off">关闭：可访问整个家庭。</string>
+    <string name="manage_custom_access_on">为每个房间或其中的单个设备设置权限级别。</string>
+    <string name="manage_create_rooms_first">请先创建房间。</string>
+    <string name="manage_no_room">无房间</string>
+    <string name="manage_remove_user_title">移除 %1$s？</string>
+    <string name="manage_remove_user_text">对方将立即失去访问权限。</string>
+    <string name="manage_remove">移除</string>
+    <string name="manage_tariff_title">电价费率</string>
+    <string name="manage_rate_per_kwh">每 kWh 费率</string>
+    <string name="manage_currency">货币</string>
+    <string name="manage_currency_supporting">ISO 代码，例如 CNY</string>
+    <string name="manage_fixed_monthly_charge">每月固定费用</string>
+    <string name="manage_billing_day">计费日</string>
+    <string name="manage_billing_day_supporting">1 到 28</string>
+    <string name="manage_monthly_budget">月度预算（可选）</string>
+    <string name="manage_usage_slabs">用电量阶梯</string>
+    <string name="manage_slabs_empty">固定费率。如果电价随计费周期内的用电量而变化，请添加阶梯。</string>
+    <string name="manage_slabs_help">每个阶梯的费率适用于其上限以内的电量。将最后一个阶梯的上限留空以表示超出部分。</string>
+    <string name="manage_up_to_kwh">上限 (kWh)</string>
+    <string name="manage_slab_rate">费率</string>
+    <string name="manage_remove_slab">移除阶梯 %1$d</string>
+    <string name="manage_add_slab">添加阶梯</string>
+    <string name="manage_time_of_day">分时电价</string>
+    <string name="manage_time_of_day_help">按家庭时钟计算，每度电高于或低于上述费率的时段。输入每 kWh 的差价：例如高峰附加费输入 1.1，夜间优惠输入 -1.5。</string>
+    <string name="manage_window_from">从</string>
+    <string name="manage_window_until">至</string>
+    <string name="manage_window_per_kwh">每 kWh</string>
+    <string name="manage_remove_time_window">移除时段 %1$d</string>
+    <string name="manage_add_time_window">添加时段</string>
+    <string name="manage_server_addresses_title">服务器地址</string>
+    <string name="manage_server_addresses_help">Domus 在您的家庭网络上使用家庭地址，在其他地方使用远程地址。您在两边都会保持登录状态。</string>
+    <string name="manage_home_network">家庭网络</string>
+    <string name="manage_home_network_supporting">例如 https://192.168.1.10:8443</string>
+    <string name="manage_remote">远程地址</string>
+    <string name="manage_remote_supporting">例如 Cloudflare Tunnel 主机名</string>
+    <string name="manage_not_set">未设置</string>
+    <string name="manage_location_disabled">此手机已关闭定位服务。请改为搜索地点。</string>
+    <string name="manage_location_not_found">此手机无法获取当前位置。请改为搜索地点。</string>
+    <string name="manage_location_permission_denied">未授予位置权限时，请搜索地点或手动输入坐标。</string>
+    <string name="manage_location_title">家庭位置</string>
+    <string name="manage_location_sun_times">今天日出时间为 %1$s，日落时间为 %2$s。</string>
+    <string name="manage_location_help">一旦 Domus 知道家庭的大致位置，自动化就可以在日出和日落时运行。位置信息保留在您的服务器上。</string>
+    <string name="manage_use_phone_location">使用此手机的位置</string>
+    <string name="manage_find_place">查找地点</string>
+    <string name="manage_find_place_supporting">城镇或城市</string>
+    <string name="manage_search_place">搜索地点</string>
+    <string name="manage_no_place_found">未找到该名称的地点。请尝试搜索最近的城镇。</string>
+    <string name="manage_latitude">纬度</string>
+    <string name="manage_latitude_supporting">例如 39.90</string>
+    <string name="manage_longitude">经度</string>
+    <string name="manage_longitude_supporting">例如 116.40</string>
+    <string name="manage_change_password_title">修改密码</string>
+    <string name="manage_change_password_help">您在此设备及所有其他设备上都将保持登录状态。</string>
+    <string name="manage_current_password">当前密码</string>
+    <string name="manage_repeat_new_password">重复新密码</string>
+    <string name="manage_passwords_mismatch">两次输入的密码不一致</string>
+    <string name="manage_delete_all_notices_title">删除所有通知？</string>
+    <string name="manage_delete_all_notices_text">通知将从所有设备上移除。</string>
+    <string name="manage_delete_all">全部删除</string>
+    <string name="manage_notifications_title">通知</string>
+    <string name="manage_mark_all_read">全部标为已读</string>
+    <string name="manage_no_notices">暂无通知</string>
+    <string name="manage_no_notices_subtitle">来自自动化、新设备和离线设备的警报会显示在这里。</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">使用 Smart Life 应用扫描的 QR 码</string>
+    <string name="onboard_region_india">印度</string>
+    <string name="onboard_region_china">中国大陆</string>
+    <string name="onboard_region_europe">欧洲</string>
+    <string name="onboard_region_us">美国</string>
+    <string name="onboard_region_singapore">新加坡</string>
+    <string name="onboard_region_russia">俄罗斯</string>
+    <string name="onboard_region_taiwan">台湾</string>
+    <string name="onboard_region_india_old">印度（旧版）</string>
+    <string name="onboard_plugins_title">插件</string>
+    <string name="onboard_local_control">本地控制</string>
+    <string name="onboard_cloud">云端</string>
+    <plurals name="onboard_device_count">
+        <item quantity="other">%1$d 个设备</item>
+    </plurals>
+    <string name="onboard_account_linked">已关联</string>
+    <string name="onboard_account_needs_attention">需要处理</string>
+    <string name="onboard_unlink_account">取消关联 %1$s</string>
+    <string name="onboard_integration_disabled">已在服务器配置中关闭。</string>
+    <string name="onboard_link_account">关联账户</string>
+    <string name="onboard_link_another_account">关联另一个账户</string>
+    <string name="onboard_find_devices">查找设备</string>
+    <string name="onboard_unlink_title">取消关联 %1$s？</string>
+    <string name="onboard_unlink_text">来自此账户的设备也将从 Domus 中移除。</string>
+    <string name="onboard_unlink">取消关联</string>
+    <string name="onboard_link_integration">关联 %1$s</string>
+    <string name="onboard_tuya_qr_instructions">使用 Smart Life 或 Tuya Smart 应用（首页上的扫描按钮）扫描此二维码，然后在应用中确认。如果使用同一部手机，请在另一块屏幕上显示此二维码。</string>
+    <string name="onboard_waiting_for_scan">正在等待扫描…</string>
+    <string name="onboard_tuya_user_code_instructions">在 Smart Life 应用中打开“我的 → 设置 → 账号与安全 → 用户代码 (User Code)”，然后将该代码输入到此处。</string>
+    <string name="onboard_user_code">用户代码 (User Code)</string>
+    <string name="onboard_qr_expired">该 QR 码已过期。请重试。</string>
+    <string name="onboard_verify_title">验证您的身份</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi 已向您的手机发送了验证码。请在此处输入。验证码将在几分钟后过期。</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi 已向您的电子邮箱发送了验证码。请在此处输入。验证码将在几分钟后过期。</string>
+    <string name="onboard_verification_code">验证码</string>
+    <string name="onboard_send_new_code">发送新验证码</string>
+    <string name="onboard_use_another_account">使用其他账户</string>
+    <string name="onboard_tapo_instructions">使用您的 TP-Link 账户登录。该账户仅用于与您本地网络上的 Tapo 设备通信。</string>
+    <string name="onboard_xiaomi_instructions">使用您的 Xiaomi 账户登录。仅获取一次设备令牌；控制保持在本地进行。Xiaomi 可能会向您发送验证码。</string>
+    <string name="onboard_xiaomi_username">电子邮箱、手机号或 Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">手机号码需要包含国家/地区代码，例如 +86…</string>
+    <string name="onboard_email_or_username">电子邮箱或用户名</string>
+    <string name="onboard_password">密码</string>
+    <string name="onboard_server_region">服务器地区</string>
+    <string name="onboard_show_qr_code">显示 QR 码</string>
+    <string name="onboard_verify">验证</string>
+    <string name="onboard_continue">继续</string>
+    <string name="onboard_link">关联</string>
+    <string name="onboard_add_devices_title">添加设备</string>
+    <string name="onboard_scanning">正在扫描…</string>
+    <string name="onboard_scan_again">重新扫描</string>
+    <string name="onboard_add_by_address">通过地址添加</string>
+    <string name="onboard_no_new_devices">没有新设备</string>
+    <string name="onboard_no_new_devices_subtitle">发现的所有设备都已在您的家庭中。在“插件”下关联账户以查找更多设备。</string>
+    <string name="onboard_open_plugins">打开插件</string>
+    <string name="onboard_found_count">发现 %1$d 个</string>
+    <string name="onboard_add">添加</string>
+    <string name="onboard_ignore">忽略</string>
+    <string name="onboard_add_device_title">添加 %1$s</string>
+    <string name="onboard_field_name">名称</string>
+    <string name="onboard_field_room">房间</string>
+    <string name="onboard_no_room">无房间</string>
+    <string name="onboard_device_token_optional">设备令牌（可选）</string>
+    <string name="onboard_device_token_supporting">仅在未关联 Xiaomi 账户时需要</string>
+    <string name="onboard_ip_address">IP 地址</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">已存在</string>
+    <string name="code_error_reference_missing" formatted="false">引用的项目不存在</string>
+    <string name="code_error_internal" formatted="false">服务器内部错误</string>
+    <string name="code_error_session_expired" formatted="false">会话无效或已过期</string>
+    <string name="code_error_admin_required" formatted="false">需要管理员权限</string>
+    <string name="code_error_guest_no_control" formatted="false">访客无法控制设备</string>
+    <string name="code_error_not_signed_in" formatted="false">未登录</string>
+    <string name="code_error_missing_auth" formatted="false">缺少 Authorization 请求头</string>
+    <string name="code_error_account_gone" formatted="false">账户已不存在</string>
+    <string name="code_error_must_change_password" formatted="false">请先修改您的密码</string>
+    <string name="code_error_device_not_found" formatted="false">未找到设备</string>
+    <string name="code_error_empty_command" formatted="false">空指令</string>
+    <string name="code_error_scan_running" formatted="false">扫描已在运行中</string>
+    <string name="code_error_discovered_not_found" formatted="false">未找到已发现的设备</string>
+    <string name="code_error_device_already_added" formatted="false">此设备已添加</string>
+    <string name="code_error_username_too_short" formatted="false">用户名长度必须至少为 3 个字符</string>
+    <string name="code_error_password_too_short" formatted="false">密码长度必须至少为 8 个字符</string>
+    <string name="code_error_setup_already_done" formatted="false">初始设置已完成</string>
+    <string name="code_error_invalid_credentials" formatted="false">用户名或密码无效</string>
+    <string name="code_error_invalid_reset_code" formatted="false">重置码错误或已失效。请向管理员索取新的重置码。</string>
+    <string name="code_error_wrong_current_password" formatted="false">当前密码不正确</string>
+    <string name="code_error_same_password" formatted="false">请选择与当前密码不同的新密码</string>
+    <string name="code_error_avatar_too_long" formatted="false">头像字符串过长</string>
+    <string name="code_error_name_required" formatted="false">名称为必填项</string>
+    <string name="code_error_trigger_required" formatted="false">请至少添加一个触发条件</string>
+    <string name="code_error_action_required" formatted="false">请至少添加一个操作</string>
+    <string name="code_error_sun_offset_range" formatted="false">日出和日落偏移量最多为 6 小时</string>
+    <string name="code_error_automation_not_found" formatted="false">未找到自动化</string>
+    <string name="code_error_cannot_edit_device" formatted="false">您无法编辑此设备</string>
+    <string name="code_error_admin_only_move_room" formatted="false">只有管理员可以将设备移至其他房间</string>
+    <string name="code_error_name_empty" formatted="false">名称不能为空</string>
+    <string name="code_error_view_only_device" formatted="false">您只能查看此设备，无法进行控制</string>
+    <string name="code_error_view_only_devices" formatted="false">您只能查看这些设备，无法进行控制</string>
+    <string name="code_error_negative_rate" formatted="false">费率不能为负数</string>
+    <string name="code_error_invalid_billing_day" formatted="false">计费日必须在 1 到 28 之间</string>
+    <string name="code_error_invalid_currency" formatted="false">货币必须是 3 个字母的 ISO 代码</string>
+    <string name="code_error_slab_order" formatted="false">每个阶梯的上限必须高于前一个阶梯</string>
+    <string name="code_error_slab_open_ended" formatted="false">只有最后一个阶梯可以不设上限</string>
+    <string name="code_error_tou_format" formatted="false">分时电价时段需要以 HH:MM 格式填写开始和结束时间</string>
+    <string name="code_error_tou_zero_length" formatted="false">分时电价时段的开始时间和结束时间不能相同</string>
+    <string name="code_error_tou_overlap" formatted="false">分时电价时段不能重叠</string>
+    <string name="code_error_group_not_found" formatted="false">未找到群组</string>
+    <string name="code_error_account_not_found" formatted="false">未找到账户</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya 集成已禁用</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">请输入来自 Smart Life 应用的用户代码 (User Code)</string>
+    <string name="code_error_credentials_required" formatted="false">需要提供电子邮箱和密码</string>
+    <string name="code_error_verification_expired" formatted="false">验证已过期；请重新登录</string>
+    <string name="code_error_invalid_port" formatted="false">端口必须是数字</string>
+    <string name="code_error_broker_required" formatted="false">请输入代理服务器 (Broker) 地址</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue 集成已禁用</string>
+    <string name="code_error_room_name_required" formatted="false">房间名称为必填项</string>
+    <string name="code_error_room_not_found" formatted="false">未找到房间</string>
+    <string name="code_error_sync_lights_required" formatted="false">请至少选择一盏要同步的灯具</string>
+    <string name="code_error_scene_not_found" formatted="false">未找到场景</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">屏幕同步需要共享屏幕。请在显示内容的设备上从 Domus 应用启动。</string>
+    <string name="code_error_place_search_unreachable" formatted="false">无法访问地点搜索服务。请直接输入纬度和经度。</string>
+    <string name="code_error_invalid_coordinates" formatted="false">纬度必须在 -90 到 90 之间，经度必须在 -180 到 180 之间</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">该用户名的所有推荐邮箱地址均已被占用</string>
+    <string name="code_error_invalid_role" formatted="false">角色必须是管理员、成员或访客</string>
+    <string name="code_error_kid_password_required" formatted="false">儿童账户需要设置密码</string>
+    <string name="code_error_email_taken" formatted="false">该电子邮箱已被其他账户使用</string>
+    <string name="code_error_user_not_found" formatted="false">未找到用户</string>
+    <string name="code_error_last_admin" formatted="false">必须至少有一名管理员</string>
+    <string name="code_error_cannot_delete_self" formatted="false">您不能删除自己的账户</string>
+    <string name="code_error_hue_press_button" formatted="false">请按下 Hue 桥接器上的圆形按钮，然后在 30 秒内重新关联</string>
+    <string name="code_error_hue_not_found" formatted="false">未找到 Hue 桥接器；请输入其 IP 地址</string>
+    <string name="code_error_tuya_device_gone" formatted="false">设备已不在 Smart Life 中</string>
+    <string name="code_error_device_token_required" formatted="false">需要设备令牌 (Token)</string>
+    <string name="code_error_hue_link_expired" formatted="false">身份验证失败：Hue 桥接器不再接受此关联；请重新关联</string>
+    <string name="code_error_hue_removed" formatted="false">身份验证失败：Hue 桥接器已被移除</string>
+    <string name="code_error_mqtt_removed" formatted="false">身份验证失败：MQTT 代理服务器已被移除</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">身份验证失败：设备拒绝了您的 TP-Link 账户邮箱/密码</string>
+    <string name="code_error_tapo_account_required" formatted="false">身份验证失败：请添加您的 TP-Link 账户以控制 Tapo 设备</string>
+    <string name="code_error_tapo_removed" formatted="false">身份验证失败：TP-Link 账户已被移除</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">身份验证失败：Xiaomi 要求输入验证码。请先在 Mi Home 应用或浏览器中登录一次，然后重试</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">身份验证失败：Xiaomi 用户名或密码无效</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">身份验证失败：验证码错误或已过期</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">身份验证失败：Xiaomi 未接受该验证码</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">身份验证失败：Xiaomi 会话已过期</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">身份验证失败：Xiaomi 需要验证码；请在“集成”下重新关联账户</string>
+    <string name="code_error_unsupported_command" formatted="false">不支持：此设备不支持该指令</string>
+    <string name="code_error_unsupported_effect" formatted="false">不支持：此灯具无法播放该灯效</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">不支持：此 Xiaomi 型号没有 MIoT 规范</string>
+    <string name="code_error_rate_limited_one" formatted="false">密码错误次数过多。请在 {count} 分钟后重试。</string>
+    <string name="code_error_rate_limited_other" formatted="false">密码错误次数过多。请在 {count} 分钟后重试。</string>
+    <string name="code_error_integration_disabled" formatted="false">集成 \'{integration}\' 未启用</string>
+    <string name="code_error_invalid_time" formatted="false">无效的时间 \'{time}\'，请使用 HH:MM 格式</string>
+    <string name="code_error_invalid_actions" formatted="false">无效的操作：{reason}</string>
+    <string name="code_error_invalid_region" formatted="false">区域必须是 {regions} 之一</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">无效的屏幕同步设置：{reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">未知的场景类型 \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" 不是有效的服务器地址</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">身份验证失败：Xiaomi 无法发送验证码：{reason}</string>
+    <string name="code_error_auth_failed" formatted="false">身份验证失败：{reason}</string>
+    <string name="code_error_not_supported" formatted="false">不支持：{reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">确认切换 {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">已添加新设备</string>
+    <string name="code_notification_device_added" formatted="false">已发现并自动添加 {name} ({integration})</string>
+    <string name="code_notification_device_found_title" formatted="false">发现新设备</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) 已准备好添加</string>
+    <string name="code_notification_password_reset_title" formatted="false">密码重置请求</string>
+    <string name="code_notification_password_reset" formatted="false">{username} 忘记了密码。管理员可以在“设置 → 成员与权限”中为其生成重置码。</string>
+    <string name="code_notification_automation_failed_title" formatted="false">自动化 \"{name}\" 出现问题</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">色轮</string>
+    <string name="ui_expanded">已展开</string>
+    <string name="ui_collapsed">已收起</string>
+    <string name="ui_collapse">收起</string>
+    <string name="ui_expand">展开</string>
+</resources>
