@@ -1,0 +1,935 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">Tuyệt vời</string>
+    <string name="air_good">Tốt</string>
+    <string name="air_moderate">Trung bình</string>
+    <string name="air_poor">Kém</string>
+    <string name="channel_stable">Ổn định</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">Máy tính này</string>
+    <string name="api_untrusted">Chứng chỉ của máy chủ không được tin cậy.</string>
+    <string name="api_offline">Không thể kết nối tới máy chủ Domus. Hãy kiểm tra xem máy chủ có đang chạy không.</string>
+    <string name="api_bad_response">Máy chủ đã gửi phản hồi mà phiên bản ứng dụng này không hiểu được.</string>
+    <string name="api_request_failed">Yêu cầu thất bại ({status})</string>
+    <string name="error_no_server">Không có máy chủ</string>
+    <string name="connect_cert_changed">Chứng chỉ của máy chủ đã thay đổi kể từ khi bạn phê duyệt. Hãy kết nối lại để xem xét chứng chỉ mới.</string>
+    <string name="connect_address_invalid">Nhập địa chỉ như 192.168.1.10:8443 hoặc home.example.com. Chỉ hỗ trợ https.</string>
+    <string name="connect_cert_unreadable">Không thể đọc chứng chỉ của máy chủ.</string>
+    <string name="automation_ran">Đã chạy “{name}”</string>
+    <string name="handover_reset_until">Đặt lại mật khẩu Domus cho %1$s\nMã: %2$s\n\nTrên màn hình đăng nhập, chọn \"Quên mật khẩu?\", nhập tên người dùng của bạn rồi nhập mã này. Mã có hiệu lực một lần, đến %3$s.</string>
+    <string name="handover_reset">Đặt lại mật khẩu Domus cho %1$s\nMã: %2$s\n\nTrên màn hình đăng nhập, chọn \"Quên mật khẩu?\", nhập tên người dùng của bạn rồi nhập mã này. Mã có hiệu lực một lần.</string>
+    <string name="handover_signin_kid">Thông tin đăng nhập Domus\nĐịa chỉ: %1$s\nTên người dùng: %2$s\nMật khẩu: %3$s</string>
+    <string name="handover_signin">Thông tin đăng nhập Domus\nĐịa chỉ: %1$s\nTên người dùng: %2$s\nMật khẩu: %3$s\n\nBạn sẽ được yêu cầu chọn mật khẩu của riêng mình trong lần đăng nhập đầu tiên.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_devices">Thiết bị</string>
+    <string name="nav_scenes">Ngữ cảnh</string>
+    <string name="nav_analytics">Phân tích</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">Toàn bộ ngôi nhà, trong một ứng dụng</string>
+    <string name="connect_intro_1_body">Đèn, ổ cắm, máy lọc không khí và cảm biến từ Tuya, Tapo, Xiaomi, Philips Hue và MQTT cùng hoạt động song song.</string>
+    <string name="connect_intro_2_title">Thiết kế vì quyền riêng tư</string>
+    <string name="connect_intro_2_body">Domus chỉ giao tiếp với máy chủ trong nhà bạn qua kết nối được mã hóa. Không cần tài khoản đám mây.</string>
+    <string name="connect_intro_3_title">Tự động tìm thấy máy chủ của bạn</string>
+    <string name="connect_intro_3_body">Trên mạng Wi‑Fi nhà bạn, ứng dụng tự tìm thấy máy chủ. Khi ở xa nhà, hãy nhập địa chỉ máy chủ.</string>
+    <string name="connect_page_of">Trang %1$d / %2$d</string>
+    <string name="connect_skip">Bỏ qua</string>
+    <string name="connect_get_started">Bắt đầu</string>
+    <string name="connect_next">Tiếp theo</string>
+    <string name="connect_welcome_title">Chào mừng đến với Domus</string>
+    <string name="connect_welcome_subtitle">Kết nối với máy chủ điều hành ngôi nhà của bạn.</string>
+    <string name="connect_on_this_network">Trên mạng này</string>
+    <string name="connect_looking_for_servers">Đang tìm máy chủ…</string>
+    <string name="connect_no_server_found">Không có máy chủ nào phản hồi. Hãy kiểm tra xem điện thoại này có cùng mạng Wi‑Fi với máy chủ không, hoặc nhập địa chỉ máy chủ bên dưới.</string>
+    <string name="connect_scan_again">Quét lại</string>
+    <string name="connect_or_enter_address">Hoặc nhập địa chỉ</string>
+    <string name="connect_server_address">Địa chỉ máy chủ</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 hoặc home.example.com</string>
+    <string name="connect_action">Kết nối</string>
+    <string name="connect_trust_title">Tin cậy máy chủ này?</string>
+    <string name="connect_trust_body">%1$s sử dụng chứng chỉ tự tạo, điều này là bình thường đối với máy chủ gia đình. Chỉ tin cậy nếu dấu vân tay khớp với dấu vân tay mà máy chủ in ra khi khởi động.</string>
+    <string name="connect_trust_action">Tin cậy</string>
+    <string name="connect_cancel">Hủy</string>
+    <string name="connect_use_another_server">Sử dụng máy chủ khác</string>
+    <string name="connect_unreachable_title">Không thể kết nối với ngôi nhà của bạn</string>
+    <string name="connect_try_again">Thử lại</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">Ẩn mật khẩu</string>
+    <string name="auth_show_password">Hiện mật khẩu</string>
+    <string name="auth_username">Tên người dùng</string>
+    <string name="auth_new_password">Mật khẩu mới</string>
+    <string name="auth_password_min_length">Ít nhất 8 ký tự</string>
+    <string name="auth_confirm_password">Xác nhận mật khẩu</string>
+    <string name="auth_passwords_mismatch">Mật khẩu không khớp</string>
+    <string name="auth_create_admin_title">Tạo tài khoản quản trị viên</string>
+    <string name="auth_welcome_back_title">Chào mừng trở lại</string>
+    <string name="auth_create_admin_subtitle">Máy chủ này mới. Tài khoản đầu tiên sẽ quản lý mọi thứ.</string>
+    <string name="auth_welcome_back_subtitle">Đăng nhập vào ngôi nhà của bạn.</string>
+    <string name="auth_encrypted_connection">Kết nối được mã hóa tới</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_create_account">Tạo tài khoản</string>
+    <string name="auth_sign_in">Đăng nhập</string>
+    <string name="auth_forgot_password">Quên mật khẩu?</string>
+    <string name="auth_forgot_title">Quên mật khẩu?</string>
+    <string name="auth_forgot_subtitle">Domus không gửi email. Thay vào đó, quản trị viên của ngôi nhà này sẽ nhận được thông báo và cung cấp cho bạn mã dùng một lần.</string>
+    <string name="auth_ask_admin">Nhờ quản trị viên</string>
+    <string name="auth_back_to_sign_in">Quay lại đăng nhập</string>
+    <string name="auth_reset_code_title">Nhập mã đặt lại của bạn</string>
+    <string name="auth_reset_code_subtitle">Đã thông báo cho quản trị viên. Hãy hỏi họ mã 8 chữ số cho %1$s; mã có hiệu lực một lần trong vòng 30 phút.</string>
+    <string name="auth_reset_code_label">Mã đặt lại</string>
+    <string name="auth_set_password_sign_in">Đặt mật khẩu và đăng nhập</string>
+    <string name="auth_back">Quay lại</string>
+    <string name="auth_choose_password_title">Chọn mật khẩu của bạn</string>
+    <string name="auth_choose_password_subtitle">Chào mừng, %1$s. Mật khẩu bạn vừa dùng để đăng nhập được tạo sẵn cho bạn và đã có người khác nhìn thấy. Hãy chọn mật khẩu của riêng bạn để tiếp tục.</string>
+    <string name="auth_save_continue">Lưu và tiếp tục</string>
+    <string name="auth_sign_out">Đăng xuất</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">Hoạt động trong nền</string>
+    <string name="service_channel_alerts">Cảnh báo trong nhà</string>
+    <string name="service_listening_alerts">Domus đang lắng nghe cảnh báo</string>
+    <string name="service_screen_sync_title">Đồng bộ màn hình đang bật</string>
+    <string name="service_screen_sync_body">Đèn của bạn đang theo sát màn hình này</string>
+    <string name="service_stop">Dừng</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (đồ họa ảnh đại diện)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (tìm kiếm địa điểm, do máy chủ của bạn truy vấn)</string>
+    <string name="about_lib_home_assistant">Home Assistant (quy trình quét QR Tuya)</string>
+    <string name="about_license_inspiration">Cảm hứng</string>
+    <string name="about_version_unknown">không rõ</string>
+    <string name="about_title">Giới thiệu về Domus</string>
+    <string name="about_section_app">Ứng dụng</string>
+    <string name="about_version_build">Phiên bản %1$s · bản dựng %2$d</string>
+    <string name="about_privacy_title">Quyền riêng tư</string>
+    <string name="about_privacy_subtitle">Chạy trên máy chủ của riêng bạn. Thông tin đăng nhập được mã hóa tại đó.</string>
+    <string name="about_source_code">Mã nguồn</string>
+    <string name="about_section_developer">Nhà phát triển</string>
+    <string name="about_developer_tagline">Được thiết kế và phát triển bởi một nhà phát triển duy nhất.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">Hồ sơ năng lực</string>
+    <string name="about_section_open_source">Mã nguồn mở</string>
+    <string name="about_acknowledgements">Lời cảm ơn</string>
+    <string name="about_acknowledgements_subtitle">Các thư viện và dự án nền tảng của Domus</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Đã có Domus %1$s</string>
+    <string name="update_download_failed_retry_prompt">Tải xuống thất bại. Thử lại?</string>
+    <string name="update_prompt_body">Bạn đang dùng %1$s. Ghi chú phát hành và kênh cập nhật nằm trong Cài đặt, dưới mục Cập nhật.</string>
+    <string name="update_downloading_percent">Đang tải xuống %1$d%%</string>
+    <string name="update_action">Cập nhật</string>
+    <string name="update_later">Để sau</string>
+    <string name="update_title">Cập nhật</string>
+    <string name="update_checking">Đang kiểm tra cập nhật…</string>
+    <string name="update_check_failed">Không thể kiểm tra cập nhật</string>
+    <string name="update_dev_build">Bản dựng phát triển</string>
+    <string name="update_up_to_date">Domus đã là bản mới nhất</string>
+    <string name="update_download_failed_retry">Tải xuống thất bại. Hãy thử lại.</string>
+    <string name="update_check_failed_body">Bạn đang dùng %1$s. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="update_dev_build_body">Bạn đang dùng %1$s. Bản dựng phát triển được cập nhật bằng cách biên dịch lại.</string>
+    <string name="update_you_have">Bạn đang dùng %1$s.</string>
+    <string name="update_download_install">Tải xuống và cài đặt</string>
+    <string name="update_check_again">Kiểm tra lại</string>
+    <string name="update_channel">Kênh</string>
+    <string name="update_channel_hint">Beta và Alpha nhận các bản dựng mới sớm hơn, cùng với mọi bản ổn định.</string>
+    <string name="update_whats_new_in">Có gì mới trong %1$s</string>
+    <string name="update_in_this_version">Trong phiên bản này</string>
+    <string name="update_loading_notes">Đang tải ghi chú phát hành…</string>
+    <string name="update_no_notes">Không có ghi chú phát hành nào cho phiên bản này.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">Robot</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Nhà thám hiểm</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Nghệ thuật Pixel</string>
+    <string name="avatar_style_fun_emoji">Emoji vui nhộn</string>
+    <string name="avatar_style_thumbs">Ngón cái</string>
+    <string name="avatar_style_shapes">Hình khối</string>
+    <string name="avatar_style_rings">Vòng tròn</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">Tùy chỉnh ảnh đại diện</string>
+    <string name="avatar_save">Lưu</string>
+    <string name="avatar_seed_value">Hạt giống: %1$s</string>
+    <string name="avatar_randomize">Ngẫu nhiên</string>
+    <string name="avatar_roll_seed">Đổi hạt giống</string>
+    <string name="avatar_roll_seed_action">Đổi hạt giống</string>
+    <string name="avatar_style_label">Phong cách ảnh đại diện</string>
+    <string name="avatar_seed_phrase_label">Cụm từ hạt giống</string>
+    <string name="avatar_seed_phrase_hint">Nhập bất kỳ từ khóa, tên hoặc chuỗi ký tự nào để biến đổi phong cách ảnh đại diện này.</string>
+    <string name="avatar_seed_label">Hạt giống</string>
+    <string name="avatar_apply_avatar">Áp dụng ảnh đại diện</string>
+    <string name="avatar_apply">Áp dụng</string>
+    <string name="avatar_cancel">Hủy</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">Chúc ngủ ngon</string>
+    <string name="home_greeting_morning">Chào buổi sáng</string>
+    <string name="home_greeting_afternoon">Chào buổi chiều</string>
+    <string name="home_greeting_evening">Chào buổi tối</string>
+    <string name="home_got_it">Đã hiểu</string>
+    <string name="home_about_stat">Giới thiệu về %1$s</string>
+    <string name="home_scene_on_hint">Đang bật · chạm để tắt</string>
+    <string name="home_scene_off_hint">Chạm để chạy</string>
+    <string name="home_change_avatar">Đổi ảnh đại diện</string>
+    <string name="home_clear_notices_title">Xóa tất cả thông báo?</string>
+    <string name="home_clear_notices_body">Chúng sẽ bị xóa trên mọi thiết bị.</string>
+    <string name="home_delete_all">Xóa tất cả</string>
+    <string name="home_reconnecting">Đang kết nối lại…</string>
+    <string name="home_devices_on_of_total">%1$d / %2$d đang bật</string>
+    <string name="home_using_now">Đang dùng hiện tại</string>
+    <string name="home_using_now_info">Tổng công suất tiêu thụ trực tiếp của tất cả các thiết bị có đo điện.</string>
+    <string name="home_today">Hôm nay</string>
+    <string name="home_today_info">Điện năng đã sử dụng từ nửa đêm. Số tiền bên dưới là chi phí ước tính theo biểu giá điện của bạn.</string>
+    <string name="home_air_quality">Chất lượng không khí</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">Ngữ cảnh</string>
+    <string name="home_on_right_now">Đang bật ngay lúc này</string>
+    <string name="home_all_devices">Tất cả thiết bị</string>
+    <string name="home_no_devices_title">Chưa có thiết bị nào</string>
+    <string name="home_no_devices_admin">Mở Thiết bị và chạm + để liên kết Tuya, Tapo, Xiaomi, Hue hoặc MQTT.</string>
+    <string name="home_no_devices_member">Nhờ quản trị viên thêm thiết bị hoặc cấp quyền truy cập phòng cho bạn.</string>
+    <string name="home_everything_off">Mọi thiết bị đều đang tắt.</string>
+    <string name="home_rooms">Phòng</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="other">%1$d thiết bị · tất cả tắt</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="other">%1$d thiết bị · %2$d đang bật</item>
+    </plurals>
+    <string name="home_recent_activity">Hoạt động gần đây</string>
+    <string name="home_see_all">Xem tất cả</string>
+
+    <!-- Devices -->
+    <string name="device_title">Thiết bị</string>
+    <string name="device_online_of_total">%1$d / %2$d trực tuyến</string>
+    <string name="device_add_devices">Thêm thiết bị</string>
+    <string name="device_filter_all">Tất cả</string>
+    <string name="device_category_lights">Đèn</string>
+    <string name="device_category_power">Nguồn điện</string>
+    <string name="device_category_air">Không khí</string>
+    <string name="device_category_climate">Khí hậu</string>
+    <string name="device_all_rooms">Tất cả phòng</string>
+    <string name="device_no_room">Chưa có phòng</string>
+    <string name="device_manage_rooms">Quản lý phòng</string>
+    <string name="device_empty_filtered_title">Không có gì ở đây</string>
+    <string name="device_empty_filtered_body">Không có thiết bị nào khớp với phòng và danh mục này.</string>
+    <string name="device_empty_admin">Chạm + để liên kết Tuya, Tapo, Xiaomi, Hue hoặc MQTT và thêm các thiết bị tìm thấy.</string>
+    <string name="device_online">Trực tuyến</string>
+    <string name="device_offline">Ngoại tuyến</string>
+    <string name="device_on">Bật</string>
+    <string name="device_off">Tắt</string>
+    <string name="device_leak">Rò rỉ</string>
+    <string name="device_motion">Chuyển động</string>
+    <string name="device_motion_detected">Phát hiện</string>
+    <string name="device_clear">Bình thường</string>
+    <string name="device_open">Đang mở</string>
+    <string name="device_closed">Đã đóng</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">Nguồn %1$s</string>
+    <string name="device_refresh_a11y">Làm mới %1$s</string>
+    <string name="device_view_only_member">Bạn có thể xem thiết bị này nhưng không thể điều khiển.</string>
+    <string name="device_view_only_guest">Khách có thể xem thiết bị nhưng không thể điều khiển.</string>
+    <string name="device_brightness">Độ sáng</string>
+    <string name="device_white">Trắng</string>
+    <string name="device_white_warm">Ấm</string>
+    <string name="device_white_neutral">Trung tính</string>
+    <string name="device_white_cool">Lạnh</string>
+    <string name="device_fan_speed">Tốc độ quạt</string>
+    <string name="device_mode">Chế độ</string>
+    <string name="device_speed">Tốc độ</string>
+    <string name="device_coverage">Diện tích %1$d–%2$d m²</string>
+    <string name="device_reading_power">Công suất</string>
+    <string name="device_reading_voltage">Điện áp</string>
+    <string name="device_reading_current">Dòng điện</string>
+    <string name="device_reading_temperature">Nhiệt độ</string>
+    <string name="device_reading_humidity">Độ ẩm</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">Bộ lọc</string>
+    <string name="device_filter_left">còn %1$d%%</string>
+    <string name="device_reading_contact">Cửa ra vào hoặc cửa sổ</string>
+    <string name="device_reading_water">Nước</string>
+    <string name="device_water_dry">Khô ráo</string>
+    <string name="device_reading_alarm">Báo động</string>
+    <string name="device_alarm_sounding">Đang kêu</string>
+    <string name="device_alarm_quiet">Yên tĩnh</string>
+    <string name="device_reading_battery">Pin</string>
+    <string name="device_battery_low">Thấp</string>
+    <string name="device_battery_ok">OK</string>
+    <string name="device_ask_before_switching">Hỏi trước khi chuyển mạch</string>
+    <string name="device_ask_before_switching_desc">Cảnh báo trước khi bật hoặc tắt thiết bị này từ bất kỳ ứng dụng, nhóm hoặc ngữ cảnh nào</string>
+    <string name="device_rename_or_move">Đổi tên hoặc di chuyển</string>
+    <string name="device_rename">Đổi tên</string>
+    <string name="device_remove">Xóa</string>
+    <string name="device_edit_title">Chỉnh sửa thiết bị</string>
+    <string name="device_field_name">Tên</string>
+    <string name="device_field_room">Phòng</string>
+    <string name="device_remove_confirm_title">Xóa %1$s?</string>
+    <string name="device_remove_confirm_body">Thiết bị sẽ rời khỏi ngôi nhà và các ngữ cảnh của bạn. Bạn có thể thêm lại từ mục Thêm thiết bị.</string>
+    <string name="device_white_candle">Ánh nến</string>
+    <string name="device_white_soft">Trắng dịu</string>
+    <string name="device_white_neutral_preset">Trắng trung tính</string>
+    <string name="device_white_daylight">Ban ngày</string>
+    <string name="device_white_cool_preset">Trắng lạnh</string>
+    <string name="device_light_off">Đèn tắt</string>
+    <string name="device_light_effect">Hiệu ứng</string>
+    <string name="device_light_white">Ánh sáng trắng</string>
+    <string name="device_light_color">Ánh sáng màu</string>
+    <string name="device_light_playing">Đang phát %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">Màu sắc</string>
+    <string name="device_effects">Hiệu ứng</string>
+    <string name="device_color_temp">Nhiệt độ màu</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K ấm</string>
+    <string name="device_kelvin_max">6500K lạnh</string>
+    <string name="device_moods">Tâm trạng</string>
+    <string name="device_stop_effect">Dừng hiệu ứng</string>
+    <string name="device_color_swatch_a11y">Màu %1$s</string>
+    <string name="device_selected">Đã chọn</string>
+    <string name="device_not_selected">Chưa chọn</string>
+    <string name="device_confirm_switch_one_title">Chuyển mạch %1$s?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="other">Chuyển mạch %1$d thiết bị?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">Bao gồm %1$s, thiết bị yêu cầu xác nhận trước khi chuyển mạch. Việc chuyển mạch có thể ngắt nguồn điện của bất kỳ thiết bị nào đang kết nối.</string>
+    <string name="device_confirm_switch_many_body">Bao gồm %1$s, các thiết bị yêu cầu xác nhận trước khi chuyển mạch. Việc chuyển mạch có thể ngắt nguồn điện của bất kỳ thiết bị nào đang kết nối.</string>
+    <string name="device_confirm_switch_action">Chuyển mạch</string>
+    <string name="device_cancel">Hủy</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">vừa xong</string>
+    <string name="scene_time_minutes_ago">%1$d phút trước</string>
+    <string name="scene_time_hours_ago">%1$d giờ trước</string>
+    <string name="scene_time_days_ago">%1$d ngày trước</string>
+    <string name="scene_edit_item">Chỉnh sửa %1$s</string>
+    <string name="scene_title">Ngữ cảnh</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="other">%1$d đang hoạt động · %2$d tự động hóa đang bật</item>
+    </plurals>
+    <string name="scene_empty_title">Chưa có gì ở đây</string>
+    <string name="scene_empty_subtitle">Một ngữ cảnh thiết lập nhiều thiết bị cùng lúc. Một tự động hóa sẽ tự thực hiện điều đó khi có sự kiện xảy ra.</string>
+    <string name="scene_new_scene">Ngữ cảnh mới</string>
+    <string name="scene_new_automation">Tự động hóa mới</string>
+    <string name="scene_new_screen_sync">Đồng bộ màn hình mới</string>
+    <string name="scene_sync_active_subtitle">Đồng bộ màn hình · đèn theo sát màn hình</string>
+    <string name="scene_sync_inactive_subtitle">Đồng bộ màn hình · phản chiếu màn hình này lên đèn</string>
+    <string name="scene_active">Đang hoạt động</string>
+    <string name="scene_section_automations">Tự động hóa</string>
+    <string name="scene_last_ran">Chạy lần cuối %1$s</string>
+    <string name="scene_never_ran">Chưa từng chạy</string>
+    <string name="scene_run_now">Chạy %1$s ngay</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">T2</string>
+    <string name="editor_day_tue">T3</string>
+    <string name="editor_day_wed">T4</string>
+    <string name="editor_day_thu">T5</string>
+    <string name="editor_day_fri">T6</string>
+    <string name="editor_day_sat">T7</string>
+    <string name="editor_day_sun">CN</string>
+    <string name="editor_prop_temperature">Nhiệt độ</string>
+    <string name="editor_prop_humidity">Độ ẩm</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">Độ sáng</string>
+    <string name="editor_prop_power_watts">Công suất (W)</string>
+    <string name="editor_removed_device">một thiết bị đã xóa</string>
+    <string name="editor_rule_device_is_off">%1$s đang tắt</string>
+    <string name="editor_rule_device_is_on">%1$s đang bật</string>
+    <string name="editor_rule_device_prop_above">%2$s của %1$s trên %3$s</string>
+    <string name="editor_rule_device_prop_below">%2$s của %1$s dưới %3$s</string>
+    <string name="editor_rule_device_prop_is">%2$s của %1$s là %3$s</string>
+    <string name="editor_rule_time_every_day">Lúc %1$s mỗi ngày</string>
+    <string name="editor_rule_time_on_days">Lúc %1$s vào %2$s</string>
+    <string name="editor_sun_event_sunrise">bình minh</string>
+    <string name="editor_sun_event_sunset">hoàng hôn</string>
+    <string name="editor_rule_sun_at_every_day">Vào lúc %1$s mỗi ngày</string>
+    <string name="editor_rule_sun_at_on_days">Vào lúc %1$s các ngày %2$s</string>
+    <string name="editor_rule_sun_before_every_day">%1$d phút trước %2$s mỗi ngày</string>
+    <string name="editor_rule_sun_before_on_days">%1$d phút trước %2$s vào %3$s</string>
+    <string name="editor_rule_sun_after_every_day">%1$d phút sau %2$s mỗi ngày</string>
+    <string name="editor_rule_sun_after_on_days">%1$d phút sau %2$s vào %3$s</string>
+    <string name="editor_rule_power_above">%1$s tiêu thụ hơn %2$s W</string>
+    <string name="editor_rule_device_offline">%1$s mất kết nối</string>
+    <string name="editor_rule_device_discovered">Tìm thấy thiết bị mới</string>
+    <string name="editor_rule_time_between">Trong khoảng từ %1$s đến %2$s</string>
+    <string name="editor_cmd_on">bật</string>
+    <string name="editor_cmd_off">tắt</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">trắng %1$s</string>
+    <string name="editor_device_group">Nhóm thiết bị</string>
+    <string name="editor_cmd_custom">lệnh tùy chỉnh</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">Thông báo: %1$s</string>
+    <string name="editor_removed_scene">(đã xóa)</string>
+    <string name="editor_rule_scene">Chạy ngữ cảnh %1$s</string>
+    <string name="editor_rule_delay">Chờ %1$s giây</string>
+    <string name="editor_rule_unknown">Không xác định</string>
+    <string name="editor_trigger_time">Thời gian</string>
+    <string name="editor_trigger_sun">Bình minh / hoàng hôn</string>
+    <string name="editor_trigger_device_state">Trạng thái thiết bị</string>
+    <string name="editor_trigger_power">Công suất</string>
+    <string name="editor_trigger_offline">Mất kết nối</string>
+    <string name="editor_trigger_discovered">Thiết bị mới</string>
+    <string name="editor_condition_device_state">Trạng thái thiết bị</string>
+    <string name="editor_condition_time_between">Khung giờ</string>
+    <string name="editor_action_device">Thiết bị</string>
+    <string name="editor_action_scene">Ngữ cảnh</string>
+    <string name="editor_action_notify">Thông báo</string>
+    <string name="editor_action_delay">Chờ</string>
+    <string name="editor_add">Thêm</string>
+    <string name="editor_field_device">Thiết bị</string>
+    <string name="editor_sun_sunrise">Bình minh</string>
+    <string name="editor_sun_sunset">Hoàng hôn</string>
+    <string name="editor_sun_after">Sau</string>
+    <string name="editor_sun_before">Trước</string>
+    <string name="editor_field_minutes">Phút</string>
+    <string name="editor_sun_supporting_sunrise">Để trống sẽ chạy đúng lúc bình minh. Cần đặt vị trí nhà trong Cài đặt.</string>
+    <string name="editor_sun_supporting_sunset">Để trống sẽ chạy đúng lúc hoàng hôn. Cần đặt vị trí nhà trong Cài đặt.</string>
+    <string name="editor_every_day">Mỗi ngày</string>
+    <string name="editor_chosen_days">Chỉ vào các ngày đã chọn</string>
+    <string name="editor_field_is">Là</string>
+    <string name="editor_state_on">Bật</string>
+    <string name="editor_state_off">Tắt</string>
+    <string name="editor_compare_above">Cao hơn</string>
+    <string name="editor_compare_below">Thấp hơn</string>
+    <string name="editor_field_value">Giá trị</string>
+    <string name="editor_field_watts">Watt</string>
+    <string name="editor_time_from">Từ</string>
+    <string name="editor_time_until">Đến</string>
+    <string name="editor_power_turn_on">Bật</string>
+    <string name="editor_power_turn_off">Tắt</string>
+    <string name="editor_power_leave">Giữ nguyên nguồn</string>
+    <string name="editor_set_brightness">Đặt độ sáng</string>
+    <string name="editor_set_brightness_value">Đặt độ sáng %1$d%%</string>
+    <string name="editor_field_scene">Ngữ cảnh</string>
+    <string name="editor_field_title">Tiêu đề</string>
+    <string name="editor_field_message">Nội dung</string>
+    <string name="editor_field_seconds">Giây</string>
+    <string name="editor_remove_rule">Xóa: %1$s</string>
+    <string name="editor_style_vivid">Sống động</string>
+    <string name="editor_style_dominant">Chủ đạo</string>
+    <string name="editor_style_average">Trung bình</string>
+    <string name="editor_new_screen_sync">Đồng bộ màn hình mới</string>
+    <string name="editor_new_scene">Ngữ cảnh mới</string>
+    <string name="editor_edit_scene">Chỉnh sửa ngữ cảnh</string>
+    <string name="editor_delete">Xóa</string>
+    <string name="editor_field_name">Tên</string>
+    <string name="editor_sync_lights_title">Đèn theo sát màn hình</string>
+    <string name="editor_sync_no_lights">Chưa có đèn nào trong nhà của bạn.</string>
+    <string name="editor_sync_color_title">Màu sắc</string>
+    <string name="editor_style_vivid_desc">Màu sắc rực rỡ nhất trên màn hình.</string>
+    <string name="editor_style_dominant_desc">Màu sắc phổ biến nhất.</string>
+    <string name="editor_style_average_desc">Màu trung bình của toàn bộ hình ảnh.</string>
+    <string name="editor_region_full">Toàn màn hình</string>
+    <string name="editor_region_edges">Chỉ phần viền</string>
+    <string name="editor_sync_dim_dark">Làm mờ theo cảnh tối</string>
+    <string name="editor_sync_restore_lights">Khôi phục đèn khi dừng</string>
+    <string name="editor_actions_title">Hành động</string>
+    <string name="editor_add_action">Thêm hành động</string>
+    <string name="editor_save">Lưu</string>
+    <string name="editor_delete_confirm_title">Xóa %1$s?</string>
+    <string name="editor_delete_scene_body">Các tự động hóa chạy ngữ cảnh này sẽ bỏ qua nó.</string>
+    <string name="editor_new_automation">Tự động hóa mới</string>
+    <string name="editor_edit_automation">Chỉnh sửa tự động hóa</string>
+    <string name="editor_field_description_optional">Mô tả (tùy chọn)</string>
+    <string name="editor_enabled">Đã bật</string>
+    <string name="editor_triggers_title">Khi bất kỳ điều kiện nào sau đây xảy ra</string>
+    <string name="editor_add_trigger">Thêm điều kiện kích hoạt</string>
+    <string name="editor_conditions_title">Chỉ khi tất cả các điều kiện sau đều đúng</string>
+    <string name="editor_add_condition">Thêm điều kiện</string>
+    <string name="editor_do_this_title">Thực hiện việc này</string>
+    <string name="editor_delete_automation_body">Tự động hóa sẽ ngừng chạy.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">Trực tiếp</string>
+    <string name="analytics_range_hour">1 phút</string>
+    <string name="analytics_range_day">Ngày</string>
+    <string name="analytics_range_week">Tuần</string>
+    <string name="analytics_range_month">Tháng</string>
+    <string name="analytics_bucket_5s">5 giây</string>
+    <string name="analytics_bucket_minute">phút</string>
+    <string name="analytics_bucket_hour">giờ</string>
+    <string name="analytics_bucket_day">ngày</string>
+    <string name="analytics_title">Phân tích</string>
+    <string name="analytics_subtitle_power">Mức tiêu thụ điện và chi phí</string>
+    <string name="analytics_subtitle_air">Chất lượng không khí và máy lọc</string>
+    <string name="analytics_electricity_tariff">Biểu giá điện</string>
+    <string name="analytics_tab_electricity">Điện năng</string>
+    <string name="analytics_tab_air">Chất lượng không khí</string>
+    <string name="analytics_no_energy_title">Chưa có dữ liệu điện năng</string>
+    <string name="analytics_no_energy_subtitle">Số đo sẽ xuất hiện một phút sau khi ổ cắm hoặc công tắc đo điện trực tuyến.</string>
+    <string name="analytics_using_now">Đang dùng hiện tại</string>
+    <string name="analytics_projected_cost">Dự kiến đạt %1$s trong chu kỳ thanh toán này</string>
+    <string name="analytics_today">Hôm nay</string>
+    <string name="analytics_today_info">Điện năng đã sử dụng từ nửa đêm. Số tiền bên dưới là chi phí ước tính theo biểu giá điện của bạn.</string>
+    <string name="analytics_this_cycle">Chu kỳ này</string>
+    <string name="analytics_this_cycle_info">Điện năng đã sử dụng và hóa đơn ước tính tính đến thời điểm hiện tại trong chu kỳ thanh toán này.</string>
+    <string name="analytics_history">Lịch sử</string>
+    <string name="analytics_nothing_recorded">Chưa có dữ liệu nào được ghi nhận trong khoảng thời gian này.</string>
+    <string name="analytics_metric_energy">Điện năng</string>
+    <string name="analytics_metric_power">Công suất</string>
+    <string name="analytics_no_reading">Không có số đo</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">Công suất trung bình mỗi %1$s</string>
+    <string name="analytics_chart_energy_used">Điện năng đã dùng mỗi %1$s, tổng cộng %2$s</string>
+    <string name="analytics_live_caption">5 phút qua, cập nhật mỗi 5 giây khi trang này đang mở.</string>
+    <string name="analytics_total_caption">Tổng cộng %1$s · %2$s</string>
+    <string name="analytics_insights">Thông tin chi tiết</string>
+    <string name="analytics_peak_hour">Giờ cao điểm</string>
+    <string name="analytics_peak_last_24h">%1$s trong 24 giờ qua</string>
+    <string name="analytics_no_usage_yet">Chưa có dữ liệu sử dụng</string>
+    <string name="analytics_daily_average">Trung bình ngày</string>
+    <string name="analytics_needs_full_day">Cần đủ một ngày dữ liệu</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="other">Trong %1$d ngày qua</item>
+    </plurals>
+    <string name="analytics_today_vs_average">Hôm nay so với trung bình</string>
+    <string name="analytics_above_usual_day">Cao hơn mức thông thường</string>
+    <string name="analytics_below_usual_day">Thấp hơn mức thông thường</string>
+    <string name="analytics_about_usual_day">Tương đương mức thông thường</string>
+    <string name="analytics_top_device">Thiết bị tiêu thụ nhiều nhất</string>
+    <string name="analytics_no_metered_device">Không có thiết bị đo điện</string>
+    <string name="analytics_billing_cycle">Chu kỳ thanh toán</string>
+    <string name="analytics_time_elapsed">Thời gian đã qua</string>
+    <string name="analytics_day_of_days">Ngày %1$d / %2$d</string>
+    <string name="analytics_budget_used">Ngân sách đã dùng</string>
+    <string name="analytics_cost_of_budget">%1$s / %2$s</string>
+    <string name="analytics_spending_ahead">Chi tiêu đang vượt nhanh hơn tiến độ thời gian.</string>
+    <string name="analytics_budget_hint">Đặt ngân sách hàng tháng trong biểu giá điện để theo dõi chi tiêu.</string>
+    <string name="analytics_by_device">Theo thiết bị</string>
+    <string name="analytics_device_cycle_summary">%1$s · %2$s chu kỳ này</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">Nhiệt độ</string>
+    <string name="analytics_reading_humidity">Độ ẩm</string>
+    <string name="analytics_pm25_now">PM2.5 hiện tại</string>
+    <string name="analytics_air_no_sensor_online">Không có cảm biến nào trực tuyến</string>
+    <string name="analytics_air_status_excellent">Tuyệt vời · không khí trong nhà sạch</string>
+    <string name="analytics_air_status_good">Tốt · trong ngưỡng lành mạnh</string>
+    <string name="analytics_air_status_moderate">Trung bình · nên bật máy lọc không khí hoặc thông gió phòng</string>
+    <string name="analytics_air_status_poor">Kém · hãy bật máy lọc ở mức cao và đóng kín cửa sổ</string>
+    <string name="analytics_purifiers">Máy lọc</string>
+    <string name="analytics_running_of_total">%1$d / %2$d</string>
+    <string name="analytics_all_on_standby">Tất cả ở chế độ chờ</string>
+    <string name="analytics_running_now">Đang chạy</string>
+    <string name="analytics_filter_life">Tuổi thọ bộ lọc</string>
+    <string name="analytics_filter_replace_soon">Sắp phải thay</string>
+    <string name="analytics_filter_healthy">Tốt</string>
+    <string name="analytics_sensors_average">Trung bình các cảm biến của bạn</string>
+    <string name="analytics_humidity_dry">Khô</string>
+    <string name="analytics_humidity_humid">Ẩm</string>
+    <string name="analytics_humidity_comfortable">Dễ chịu</string>
+    <string name="analytics_trend">Xu hướng</string>
+    <string name="analytics_no_air_history">Chưa có lịch sử. Dữ liệu được ghi lại mỗi phút khi cảm biến trực tuyến.</string>
+    <string name="analytics_air_chart_summary">%1$s mỗi %2$s, trung bình %3$s</string>
+    <string name="analytics_pm25_dashed_caption">Đường nét đứt: mục tiêu không khí sạch 15 µg/m³, giới hạn trên của mức tốt 35 µg/m³.</string>
+    <string name="analytics_period_5m">5 phút</string>
+    <string name="analytics_period_60m">60 phút</string>
+    <string name="analytics_period_24h">24 giờ</string>
+    <string name="analytics_period_7d">7 ngày</string>
+    <string name="analytics_period_30d">30 ngày</string>
+    <string name="analytics_average">Trung bình</string>
+    <string name="analytics_air_level_over_period">%1$s trong %2$s</string>
+    <string name="analytics_peak">Đỉnh</string>
+    <string name="analytics_value_with_peak">%1$s · đỉnh %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">Mức sử dụng theo giờ</string>
+    <string name="analytics_peak_pm25_by_hour">Đỉnh PM2.5 theo giờ</string>
+    <string name="analytics_hour_grid_caption">Mỗi ô tương ứng một giờ trong 7 ngày qua. Ô đậm hơn thể hiện giá trị cao hơn.</string>
+    <string name="analytics_hour_grid_summary">%1$s, mỗi giờ trong 7 ngày qua</string>
+    <string name="analytics_time_at_each_level">Thời gian ở mỗi mức</string>
+    <string name="analytics_time_good_air">Thời gian có không khí tốt</string>
+    <string name="analytics_pm25_good_over_period">PM2.5 ở mức hoặc dưới 35 µg/m³ trong %1$s</string>
+    <string name="analytics_sensors">Cảm biến</string>
+    <string name="analytics_offline">Ngoại tuyến</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">Hệ thống</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+    <string name="settings_role_admin">Quản trị viên</string>
+    <string name="settings_role_member">Thành viên</string>
+    <string name="settings_role_guest">Khách</string>
+    <string name="settings_avatar">Ảnh đại diện</string>
+    <string name="settings_section_home">Ngôi nhà</string>
+    <string name="settings_add_devices">Thêm thiết bị</string>
+    <string name="settings_add_devices_subtitle">Tìm và thêm các thiết bị từ tài khoản và mạng của bạn</string>
+    <string name="settings_plugins">Tiện ích mở rộng</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue và MQTT</string>
+    <string name="settings_rooms">Phòng</string>
+    <string name="settings_people">Người dùng</string>
+    <string name="settings_people_subtitle">Tài khoản, vai trò và quyền truy cập phòng</string>
+    <string name="settings_tariff">Biểu giá điện</string>
+    <string name="settings_tariff_subtitle">Đơn giá, chu kỳ thanh toán và ngân sách</string>
+    <string name="settings_location">Vị trí ngôi nhà</string>
+    <string name="settings_location_subtitle">Dành cho tự động hóa theo bình minh và hoàng hôn</string>
+    <string name="settings_notifications">Thông báo</string>
+    <string name="settings_notifications_subtitle">Những gì ngôi nhà của bạn đã báo cáo</string>
+    <string name="settings_background_alerts">Cảnh báo khi đóng ứng dụng</string>
+    <string name="settings_background_alerts_subtitle">Giữ kết nối mở tới máy chủ của bạn. Tiêu tốn một chút pin.</string>
+    <string name="settings_section_server">Máy chủ</string>
+    <string name="settings_server_live_pinned">Trực tiếp · Chứng chỉ đã ghim</string>
+    <string name="settings_server_live_public">Trực tiếp · Chứng chỉ công khai</string>
+    <string name="settings_server_reconnecting">Đang kết nối lại…</string>
+    <string name="settings_server_live_badge">TRỰC TIẾP</string>
+    <string name="settings_server_cert_public">Đã mã hóa · chứng chỉ được xác minh bởi tổ chức chứng thực công khai</string>
+    <string name="settings_server_cert_pinned">Đã mã hóa · bạn đã phê duyệt chứng chỉ riêng của máy chủ này trong lần sử dụng đầu tiên:</string>
+    <string name="settings_sha256_fingerprint">Dấu vân tay SHA-256</string>
+    <string name="settings_fingerprint_clip_label">Dấu vân tay</string>
+    <string name="settings_copied">Đã sao chép</string>
+    <string name="settings_copy">Sao chép</string>
+    <string name="settings_change_password">Đổi mật khẩu</string>
+    <string name="settings_change_password_subtitle">Để đăng nhập vào Domus</string>
+    <string name="settings_server_addresses">Địa chỉ máy chủ</string>
+    <string name="settings_server_addresses_subtitle">Mạng nhà và truy cập từ xa</string>
+    <string name="settings_updates">Cập nhật</string>
+    <string name="settings_updates_subtitle">Phiên bản %1$s, ghi chú phát hành và kênh cập nhật</string>
+    <string name="settings_about">Giới thiệu về Domus</string>
+    <string name="settings_about_subtitle">Phiên bản %1$s, nhà phát triển và lời cảm ơn</string>
+    <string name="settings_appearance">Giao diện</string>
+    <string name="settings_wallpaper_colors">Màu hình nền</string>
+    <string name="settings_wallpaper_colors_subtitle">Đồng bộ màu ứng dụng với hình nền của bạn</string>
+    <string name="settings_section_account">Tài khoản</string>
+    <string name="settings_account_subtitle">Đăng xuất hoặc sử dụng máy chủ khác</string>
+    <string name="settings_sign_out">Đăng xuất</string>
+    <string name="settings_use_another_server">Sử dụng máy chủ khác</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">Quay lại</string>
+    <string name="manage_hide_field">Ẩn %1$s</string>
+    <string name="manage_show_field">Hiện %1$s</string>
+    <string name="manage_choose">Chọn…</string>
+    <string name="manage_close">Đóng</string>
+    <string name="manage_cancel">Hủy</string>
+    <string name="manage_save">Lưu</string>
+    <string name="manage_delete">Xóa</string>
+    <string name="manage_rooms_title">Phòng</string>
+    <string name="manage_add_room">Thêm phòng</string>
+    <string name="manage_no_rooms">Chưa có phòng nào</string>
+    <string name="manage_no_rooms_subtitle">Phòng giúp nhóm các thiết bị và quyết định thiết bị nào mà thành viên hoặc khách có thể nhìn thấy.</string>
+    <plurals name="manage_device_count">
+        <item quantity="other">%1$d thiết bị</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="other">%1$d phòng</item>
+    </plurals>
+    <string name="manage_room_subtitle">Tầng %1$d · %2$s</string>
+    <string name="manage_new_room">Phòng mới</string>
+    <string name="manage_edit_room">Chỉnh sửa phòng</string>
+    <string name="manage_field_name">Tên</string>
+    <string name="manage_field_floor">Tầng</string>
+    <string name="manage_role_admin">Quản trị viên</string>
+    <string name="manage_role_member">Thành viên</string>
+    <string name="manage_role_guest">Khách</string>
+    <string name="manage_level_none">Không có</string>
+    <string name="manage_level_view">Chỉ xem</string>
+    <string name="manage_level_control">Điều khiển</string>
+    <string name="manage_level_edit">Chỉnh sửa</string>
+    <string name="manage_access_to">Quyền truy cập vào %1$s</string>
+    <string name="manage_whole_room_level">Toàn bộ phòng · %1$s</string>
+    <string name="manage_room_devices_of_total">%1$d / %2$d thiết bị</string>
+    <string name="manage_no_access">Không có quyền truy cập</string>
+    <string name="manage_close_item">Đóng %1$s</string>
+    <string name="manage_open_item">Mở %1$s</string>
+    <string name="manage_whole_room">Toàn bộ phòng</string>
+    <string name="manage_whole_room_hint">Áp dụng cả cho các thiết bị được thêm sau này</string>
+    <string name="manage_no_devices_in_room">Chưa có thiết bị nào trong phòng này.</string>
+    <string name="manage_people_title">Người dùng</string>
+    <string name="manage_add_person">Thêm người</string>
+    <string name="manage_access_whole_home">toàn bộ ngôi nhà</string>
+    <string name="manage_access_none">không có quyền truy cập</string>
+    <string name="manage_user_tag_kid">trẻ em</string>
+    <string name="manage_user_tag_reset_requested">đã yêu cầu đặt lại mật khẩu</string>
+    <string name="manage_person_title">Người dùng</string>
+    <string name="manage_handover_reset_title">Mã đặt lại cho %1$s</string>
+    <string name="manage_handover_signin_title">Chi tiết đăng nhập cho %1$s</string>
+    <string name="manage_handover_shown_once">Chỉ hiển thị một lần. Hãy gửi cho họ ngay bây giờ.</string>
+    <string name="manage_copy">Sao chép</string>
+    <string name="manage_share">Chia sẻ</string>
+    <string name="manage_done">Xong</string>
+    <string name="manage_new_person">Người dùng mới</string>
+    <string name="manage_avatar">Ảnh đại diện</string>
+    <string name="manage_roll">Đổi ngẫu nhiên</string>
+    <string name="manage_field_username">Tên người dùng</string>
+    <string name="manage_username_supporting">Ít nhất 3 ký tự</string>
+    <string name="manage_field_email">Email</string>
+    <string name="manage_email_taken">Đã được sử dụng bởi tài khoản khác</string>
+    <string name="manage_email_available">Khả dụng</string>
+    <string name="manage_email_hint">Nhập email, hoặc tạo tự động từ tên người dùng</string>
+    <string name="manage_generate_email">Tạo email @domus.home</string>
+    <string name="manage_section_password">Mật khẩu</string>
+    <string name="manage_kid_account">Tài khoản trẻ em</string>
+    <string name="manage_kid_account_on">Bạn đặt mật khẩu và mật khẩu đó được giữ nguyên.</string>
+    <string name="manage_kid_account_off">Tắt: Domus tạo mật khẩu và họ tự chọn mật khẩu riêng trong lần đăng nhập đầu tiên.</string>
+    <string name="manage_field_new_password">Mật khẩu mới</string>
+    <string name="manage_field_password">Mật khẩu</string>
+    <string name="manage_password_keep_current">Để trống nếu muốn giữ mật khẩu hiện tại</string>
+    <string name="manage_password_min_length">Ít nhất 8 ký tự</string>
+    <string name="manage_password_after_saving">Bạn sẽ nhận được mật khẩu để sao chép hoặc chia sẻ sau khi lưu.</string>
+    <string name="manage_reset_requested_notice">%1$s đã quên mật khẩu và yêu cầu đặt lại.</string>
+    <string name="manage_reset_code">Mã đặt lại</string>
+    <string name="manage_reset_code_active">Một mã đang hoạt động đến %1$s. Tắt để thu hồi mã.</string>
+    <string name="manage_reset_code_help">Mã dùng một lần mà họ nhập vào mục \"Quên mật khẩu?\" để chọn mật khẩu mới. Có hiệu lực trong 30 phút.</string>
+    <string name="manage_generate_new_password">Tạo mật khẩu mới</string>
+    <string name="manage_section_role">Vai trò</string>
+    <string name="manage_role_admin_desc">Quản lý mọi thứ.</string>
+    <string name="manage_role_member_desc">Xem những gì được cấp quyền. Quyền điều khiển, hoặc chỉnh sửa để đổi tên thiết bị, được đặt theo từng phòng và thiết bị.</string>
+    <string name="manage_role_guest_desc">Xem những gì được cấp quyền, không thể điều khiển.</string>
+    <string name="manage_section_access">Quyền truy cập</string>
+    <string name="manage_custom_access">Quyền truy cập tùy chỉnh</string>
+    <string name="manage_custom_access_off">Tắt: họ có thể truy cập toàn bộ ngôi nhà.</string>
+    <string name="manage_custom_access_on">Đặt mức quyền cho từng phòng hoặc cho từng thiết bị riêng lẻ trong phòng.</string>
+    <string name="manage_create_rooms_first">Hãy tạo phòng trước.</string>
+    <string name="manage_no_room">Chưa có phòng</string>
+    <string name="manage_remove_user_title">Xóa %1$s?</string>
+    <string name="manage_remove_user_text">Họ sẽ mất quyền truy cập ngay lập tức.</string>
+    <string name="manage_remove">Xóa</string>
+    <string name="manage_tariff_title">Biểu giá điện</string>
+    <string name="manage_rate_per_kwh">Đơn giá mỗi kWh</string>
+    <string name="manage_currency">Tiền tệ</string>
+    <string name="manage_currency_supporting">Mã ISO, VD: VND</string>
+    <string name="manage_fixed_monthly_charge">Phí cố định hàng tháng</string>
+    <string name="manage_billing_day">Ngày thanh toán</string>
+    <string name="manage_billing_day_supporting">1 đến 28</string>
+    <string name="manage_monthly_budget">Ngân sách hàng tháng (tùy chọn)</string>
+    <string name="manage_usage_slabs">Bậc thang sử dụng</string>
+    <string name="manage_slabs_empty">Giá đồng hạng. Thêm các bậc thang nếu giá điện thay đổi theo mức tiêu thụ trong một chu kỳ thanh toán.</string>
+    <string name="manage_slabs_help">Đơn giá của mỗi bậc áp dụng cho đến giới hạn của bậc đó. Để trống giới hạn cuối cùng cho mọi mức tiêu thụ vượt trên đó.</string>
+    <string name="manage_up_to_kwh">Đến mức kWh</string>
+    <string name="manage_slab_rate">Đơn giá</string>
+    <string name="manage_remove_slab">Xóa bậc thang %1$d</string>
+    <string name="manage_add_slab">Thêm bậc thang</string>
+    <string name="manage_time_of_day">Khung giờ trong ngày</string>
+    <string name="manage_time_of_day_help">Các khung giờ mà một số điện có giá cao hơn hoặc thấp hơn mức giá trên, theo đồng hồ của ngôi nhà. Nhập mức chênh lệch mỗi kWh: 1.1 cho phụ phí giờ cao điểm, -1.5 cho ưu đãi ban đêm.</string>
+    <string name="manage_window_from">Từ</string>
+    <string name="manage_window_until">Đến</string>
+    <string name="manage_window_per_kwh">Mỗi kWh</string>
+    <string name="manage_remove_time_window">Xóa khung giờ %1$d</string>
+    <string name="manage_add_time_window">Thêm khung giờ</string>
+    <string name="manage_server_addresses_title">Địa chỉ máy chủ</string>
+    <string name="manage_server_addresses_help">Domus sử dụng địa chỉ mạng nhà khi ở trong mạng nội bộ và địa chỉ từ xa ở mọi nơi khác. Bạn vẫn duy trì đăng nhập trên cả hai.</string>
+    <string name="manage_home_network">Mạng nhà</string>
+    <string name="manage_home_network_supporting">Ví dụ: https://192.168.1.10:8443</string>
+    <string name="manage_remote">Từ xa</string>
+    <string name="manage_remote_supporting">Ví dụ: tên máy chủ Cloudflare Tunnel</string>
+    <string name="manage_not_set">Chưa đặt</string>
+    <string name="manage_location_disabled">Định vị đang tắt trên điện thoại này. Hãy tìm kiếm địa điểm thay thế.</string>
+    <string name="manage_location_not_found">Điện thoại này không thể tìm thấy vị trí hiện tại. Hãy tìm kiếm địa điểm thay thế.</string>
+    <string name="manage_location_permission_denied">Nếu không cấp quyền truy cập vị trí, hãy tìm kiếm địa điểm hoặc nhập tọa độ.</string>
+    <string name="manage_location_title">Vị trí ngôi nhà</string>
+    <string name="manage_location_sun_times">Hôm nay mặt trời mọc lúc %1$s và lặn lúc %2$s.</string>
+    <string name="manage_location_help">Tự động hóa có thể chạy vào lúc bình minh và hoàng hôn khi Domus biết vị trí tương đối của ngôi nhà. Dữ liệu này được lưu trên máy chủ của bạn.</string>
+    <string name="manage_use_phone_location">Sử dụng vị trí của điện thoại này</string>
+    <string name="manage_find_place">Tìm địa điểm</string>
+    <string name="manage_find_place_supporting">Thị trấn hoặc thành phố</string>
+    <string name="manage_search_place">Tìm kiếm địa điểm</string>
+    <string name="manage_no_place_found">Không có địa điểm nào mang tên đó. Hãy thử thị trấn hoặc thành phố gần nhất.</string>
+    <string name="manage_latitude">Vĩ độ</string>
+    <string name="manage_latitude_supporting">Ví dụ: 18.52</string>
+    <string name="manage_longitude">Kinh độ</string>
+    <string name="manage_longitude_supporting">Ví dụ: 73.86</string>
+    <string name="manage_change_password_title">Đổi mật khẩu</string>
+    <string name="manage_change_password_help">Bạn vẫn duy trì đăng nhập trên thiết bị này và mọi thiết bị khác.</string>
+    <string name="manage_current_password">Mật khẩu hiện tại</string>
+    <string name="manage_repeat_new_password">Nhập lại mật khẩu mới</string>
+    <string name="manage_passwords_mismatch">Mật khẩu không khớp</string>
+    <string name="manage_delete_all_notices_title">Xóa tất cả thông báo?</string>
+    <string name="manage_delete_all_notices_text">Chúng sẽ bị xóa trên mọi thiết bị.</string>
+    <string name="manage_delete_all">Xóa tất cả</string>
+    <string name="manage_notifications_title">Thông báo</string>
+    <string name="manage_mark_all_read">Đánh dấu tất cả đã đọc</string>
+    <string name="manage_no_notices">Chưa có gì</string>
+    <string name="manage_no_notices_subtitle">Cảnh báo từ tự động hóa, thiết bị mới và thiết bị mất kết nối sẽ xuất hiện tại đây.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Mã QR để quét bằng ứng dụng Smart Life</string>
+    <string name="onboard_region_india">Ấn Độ</string>
+    <string name="onboard_region_china">Trung Quốc</string>
+    <string name="onboard_region_europe">Châu Âu</string>
+    <string name="onboard_region_us">Hoa Kỳ</string>
+    <string name="onboard_region_singapore">Singapore</string>
+    <string name="onboard_region_russia">Nga</string>
+    <string name="onboard_region_taiwan">Đài Loan</string>
+    <string name="onboard_region_india_old">Ấn Độ (cũ)</string>
+    <string name="onboard_plugins_title">Tiện ích mở rộng</string>
+    <string name="onboard_local_control">Điều khiển cục bộ</string>
+    <string name="onboard_cloud">Đám mây</string>
+    <plurals name="onboard_device_count">
+        <item quantity="other">%1$d thiết bị</item>
+    </plurals>
+    <string name="onboard_account_linked">Đã liên kết</string>
+    <string name="onboard_account_needs_attention">Cần chú ý</string>
+    <string name="onboard_unlink_account">Hủy liên kết %1$s</string>
+    <string name="onboard_integration_disabled">Đã tắt trong cấu hình máy chủ.</string>
+    <string name="onboard_link_account">Liên kết tài khoản</string>
+    <string name="onboard_link_another_account">Liên kết tài khoản khác</string>
+    <string name="onboard_find_devices">Tìm thiết bị</string>
+    <string name="onboard_unlink_title">Hủy liên kết %1$s?</string>
+    <string name="onboard_unlink_text">Các thiết bị từ tài khoản này sẽ bị xóa khỏi Domus.</string>
+    <string name="onboard_unlink">Hủy liên kết</string>
+    <string name="onboard_link_integration">Liên kết %1$s</string>
+    <string name="onboard_tuya_qr_instructions">Quét mã này bằng ứng dụng Smart Life hoặc Tuya Smart (nút quét trên màn hình chính của ứng dụng), sau đó xác nhận tại đó. Nếu dùng cùng một điện thoại, hãy hiển thị mã này trên một màn hình khác.</string>
+    <string name="onboard_waiting_for_scan">Đang chờ quét…</string>
+    <string name="onboard_tuya_user_code_instructions">Trong ứng dụng Smart Life, mở Tôi → Cài đặt → Tài khoản và Bảo mật → Mã người dùng, và nhập mã đó vào đây.</string>
+    <string name="onboard_user_code">Mã người dùng</string>
+    <string name="onboard_qr_expired">Mã QR đó đã hết hạn. Hãy thử lại.</string>
+    <string name="onboard_verify_title">Xác minh đó là bạn</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi đã gửi mã xác minh đến điện thoại của bạn. Hãy nhập mã vào đây. Mã sẽ hết hạn sau vài phút.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi đã gửi mã xác minh đến email của bạn. Hãy nhập mã vào đây. Mã sẽ hết hạn sau vài phút.</string>
+    <string name="onboard_verification_code">Mã xác minh</string>
+    <string name="onboard_send_new_code">Gửi mã mới</string>
+    <string name="onboard_use_another_account">Sử dụng tài khoản khác</string>
+    <string name="onboard_tapo_instructions">Đăng nhập bằng tài khoản TP-Link của bạn. Tài khoản này được dùng để giao tiếp với các thiết bị Tapo trên mạng nội bộ của bạn.</string>
+    <string name="onboard_xiaomi_instructions">Đăng nhập bằng tài khoản Xiaomi của bạn. Token thiết bị chỉ được lấy một lần; việc điều khiển diễn ra cục bộ. Xiaomi có thể sẽ gửi cho bạn một mã xác minh.</string>
+    <string name="onboard_xiaomi_username">Email, điện thoại hoặc ID Xiaomi</string>
+    <string name="onboard_xiaomi_username_supporting">Số điện thoại cần có mã quốc gia, như +84…</string>
+    <string name="onboard_email_or_username">Email hoặc tên người dùng</string>
+    <string name="onboard_password">Mật khẩu</string>
+    <string name="onboard_server_region">Khu vực máy chủ</string>
+    <string name="onboard_show_qr_code">Hiển thị mã QR</string>
+    <string name="onboard_verify">Xác minh</string>
+    <string name="onboard_continue">Tiếp tục</string>
+    <string name="onboard_link">Liên kết</string>
+    <string name="onboard_add_devices_title">Thêm thiết bị</string>
+    <string name="onboard_scanning">Đang quét…</string>
+    <string name="onboard_scan_again">Quét lại</string>
+    <string name="onboard_add_by_address">Thêm bằng địa chỉ</string>
+    <string name="onboard_no_new_devices">Không có thiết bị mới</string>
+    <string name="onboard_no_new_devices_subtitle">Mọi thiết bị tìm thấy đều đã có trong ngôi nhà của bạn. Hãy liên kết tài khoản trong mục Tiện ích mở rộng để tìm thêm.</string>
+    <string name="onboard_open_plugins">Mở Tiện ích mở rộng</string>
+    <string name="onboard_found_count">Tìm thấy %1$d</string>
+    <string name="onboard_add">Thêm</string>
+    <string name="onboard_ignore">Bỏ qua</string>
+    <string name="onboard_add_device_title">Thêm %1$s</string>
+    <string name="onboard_field_name">Tên</string>
+    <string name="onboard_field_room">Phòng</string>
+    <string name="onboard_no_room">Chưa có phòng</string>
+    <string name="onboard_device_token_optional">Token thiết bị (tùy chọn)</string>
+    <string name="onboard_device_token_supporting">Chỉ cần thiết khi chưa liên kết tài khoản Xiaomi</string>
+    <string name="onboard_ip_address">Địa chỉ IP</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">Đã tồn tại</string>
+    <string name="code_error_reference_missing" formatted="false">Mục được tham chiếu không tồn tại</string>
+    <string name="code_error_internal" formatted="false">Lỗi máy chủ nội bộ</string>
+    <string name="code_error_session_expired" formatted="false">Phiên không hợp lệ hoặc đã hết hạn</string>
+    <string name="code_error_admin_required" formatted="false">Yêu cầu quyền quản trị viên</string>
+    <string name="code_error_guest_no_control" formatted="false">Khách không thể điều khiển thiết bị</string>
+    <string name="code_error_not_signed_in" formatted="false">Chưa đăng nhập</string>
+    <string name="code_error_missing_auth" formatted="false">Thiếu tiêu đề Authorization</string>
+    <string name="code_error_account_gone" formatted="false">Tài khoản không còn tồn tại</string>
+    <string name="code_error_must_change_password" formatted="false">Hãy đổi mật khẩu của bạn trước</string>
+    <string name="code_error_device_not_found" formatted="false">Không tìm thấy thiết bị</string>
+    <string name="code_error_empty_command" formatted="false">lệnh trống</string>
+    <string name="code_error_scan_running" formatted="false">Đang có một tiến trình quét chạy</string>
+    <string name="code_error_discovered_not_found" formatted="false">Không tìm thấy thiết bị đã phát hiện</string>
+    <string name="code_error_device_already_added" formatted="false">Thiết bị này đã được thêm</string>
+    <string name="code_error_username_too_short" formatted="false">Tên người dùng phải có ít nhất 3 ký tự</string>
+    <string name="code_error_password_too_short" formatted="false">Mật khẩu phải có ít nhất 8 ký tự</string>
+    <string name="code_error_setup_already_done" formatted="false">Thiết lập đã được hoàn tất trước đó</string>
+    <string name="code_error_invalid_credentials" formatted="false">Tên người dùng hoặc mật khẩu không hợp lệ</string>
+    <string name="code_error_invalid_reset_code" formatted="false">Mã đó không đúng hoặc không còn hiệu lực. Hãy nhờ quản trị viên cấp mã mới.</string>
+    <string name="code_error_wrong_current_password" formatted="false">Mật khẩu hiện tại không đúng</string>
+    <string name="code_error_same_password" formatted="false">Hãy chọn mật khẩu khác với mật khẩu hiện tại</string>
+    <string name="code_error_avatar_too_long" formatted="false">Chuỗi ảnh đại diện quá dài</string>
+    <string name="code_error_name_required" formatted="false">Yêu cầu nhập tên</string>
+    <string name="code_error_trigger_required" formatted="false">Thêm ít nhất một điều kiện kích hoạt</string>
+    <string name="code_error_action_required" formatted="false">Thêm ít nhất một hành động</string>
+    <string name="code_error_sun_offset_range" formatted="false">Giờ bình minh và hoàng hôn chỉ có thể dịch chuyển tối đa 6 giờ</string>
+    <string name="code_error_automation_not_found" formatted="false">Không tìm thấy tự động hóa</string>
+    <string name="code_error_cannot_edit_device" formatted="false">Bạn không thể chỉnh sửa thiết bị này</string>
+    <string name="code_error_admin_only_move_room" formatted="false">Chỉ quản trị viên mới có thể chuyển thiết bị sang phòng khác</string>
+    <string name="code_error_name_empty" formatted="false">Tên không được để trống</string>
+    <string name="code_error_view_only_device" formatted="false">Bạn có thể xem thiết bị này nhưng không thể điều khiển</string>
+    <string name="code_error_view_only_devices" formatted="false">Bạn có thể xem các thiết bị này nhưng không thể điều khiển</string>
+    <string name="code_error_negative_rate" formatted="false">Biểu giá không được âm</string>
+    <string name="code_error_invalid_billing_day" formatted="false">Ngày thanh toán phải từ 1 đến 28</string>
+    <string name="code_error_invalid_currency" formatted="false">Tiền tệ phải là mã ISO gồm 3 chữ cái</string>
+    <string name="code_error_slab_order" formatted="false">Mỗi bậc thang phải kết thúc ở mức cao hơn bậc trước đó</string>
+    <string name="code_error_slab_open_ended" formatted="false">Chỉ bậc thang cuối cùng mới được để giới hạn mở</string>
+    <string name="code_error_tou_format" formatted="false">Khung giờ theo thời gian sử dụng cần giờ bắt đầu và kết thúc theo định dạng HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">Khung giờ theo thời gian sử dụng không thể bắt đầu và kết thúc cùng một lúc</string>
+    <string name="code_error_tou_overlap" formatted="false">Các khung giờ theo thời gian sử dụng không được chồng lấn nhau</string>
+    <string name="code_error_group_not_found" formatted="false">Không tìm thấy nhóm</string>
+    <string name="code_error_account_not_found" formatted="false">Không tìm thấy tài khoản</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tích hợp Tuya đã bị tắt</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Nhập Mã người dùng từ ứng dụng Smart Life</string>
+    <string name="code_error_credentials_required" formatted="false">Yêu cầu email và mật khẩu</string>
+    <string name="code_error_verification_expired" formatted="false">Xác minh đã hết hạn; hãy đăng nhập lại</string>
+    <string name="code_error_invalid_port" formatted="false">Cổng phải là một số</string>
+    <string name="code_error_broker_required" formatted="false">Nhập địa chỉ broker</string>
+    <string name="code_error_hue_disabled" formatted="false">Tích hợp Philips Hue đã bị tắt</string>
+    <string name="code_error_room_name_required" formatted="false">Yêu cầu nhập tên phòng</string>
+    <string name="code_error_room_not_found" formatted="false">Không tìm thấy phòng</string>
+    <string name="code_error_sync_lights_required" formatted="false">Chọn ít nhất một đèn để đồng bộ</string>
+    <string name="code_error_scene_not_found" formatted="false">Không tìm thấy ngữ cảnh</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">Đồng bộ màn hình cần một màn hình để chia sẻ. Hãy bắt đầu từ ứng dụng Domus trên thiết bị đang hiển thị nội dung.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">Không thể kết nối dịch vụ tìm kiếm địa điểm. Hãy nhập vĩ độ và kinh độ thay thế.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">Vĩ độ phải từ -90 đến 90, kinh độ từ -180 đến 180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">Mọi địa chỉ gợi ý cho tên người dùng đó đều đã được sử dụng</string>
+    <string name="code_error_invalid_role" formatted="false">vai trò phải là admin, member hoặc guest</string>
+    <string name="code_error_kid_password_required" formatted="false">Tài khoản trẻ em cần có mật khẩu</string>
+    <string name="code_error_email_taken" formatted="false">Email đó đã được sử dụng bởi một tài khoản khác</string>
+    <string name="code_error_user_not_found" formatted="false">Không tìm thấy người dùng</string>
+    <string name="code_error_last_admin" formatted="false">Phải có ít nhất một quản trị viên</string>
+    <string name="code_error_cannot_delete_self" formatted="false">Bạn không thể tự xóa tài khoản của chính mình</string>
+    <string name="code_error_hue_press_button" formatted="false">Nhấn nút tròn trên bộ điều khiển trung tâm Hue, sau đó liên kết lại trong vòng 30 giây</string>
+    <string name="code_error_hue_not_found" formatted="false">Không tìm thấy bộ điều khiển trung tâm Hue; hãy nhập địa chỉ IP của nó</string>
+    <string name="code_error_tuya_device_gone" formatted="false">thiết bị không còn trong Smart Life</string>
+    <string name="code_error_device_token_required" formatted="false">yêu cầu token thiết bị</string>
+    <string name="code_error_hue_link_expired" formatted="false">Xác thực thất bại: bộ điều khiển trung tâm Hue không còn chấp nhận liên kết này; hãy liên kết lại</string>
+    <string name="code_error_hue_removed" formatted="false">Xác thực thất bại: bộ điều khiển trung tâm Hue đã bị xóa</string>
+    <string name="code_error_mqtt_removed" formatted="false">Xác thực thất bại: MQTT broker đã bị xóa</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">Xác thực thất bại: thiết bị đã từ chối email/mật khẩu tài khoản TP-Link của bạn</string>
+    <string name="code_error_tapo_account_required" formatted="false">Xác thực thất bại: hãy thêm tài khoản TP-Link của bạn để điều khiển thiết bị Tapo</string>
+    <string name="code_error_tapo_removed" formatted="false">Xác thực thất bại: tài khoản TP-Link đã bị xóa</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">Xác thực thất bại: Xiaomi yêu cầu mã captcha. Hãy đăng nhập một lần trong ứng dụng Mi Home hoặc trình duyệt, sau đó thử lại</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">Xác thực thất bại: tên người dùng hoặc mật khẩu Xiaomi không hợp lệ</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">Xác thực thất bại: mã xác minh sai hoặc đã hết hạn</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">Xác thực thất bại: Xiaomi không chấp nhận mã xác minh</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">Xác thực thất bại: phiên Xiaomi đã hết hạn</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">Xác thực thất bại: Xiaomi yêu cầu mã xác minh; hãy liên kết lại tài khoản trong mục Tích hợp</string>
+    <string name="code_error_unsupported_command" formatted="false">Không được hỗ trợ: thiết bị này không hỗ trợ lệnh đó</string>
+    <string name="code_error_unsupported_effect" formatted="false">Không được hỗ trợ: đèn này không thể phát hiệu ứng đó</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">Không được hỗ trợ: mẫu thiết bị Xiaomi này không có thông số MIoT</string>
+    <string name="code_error_rate_limited_one" formatted="false">Nhập sai mật khẩu quá nhiều lần. Hãy thử lại sau {count} phút.</string>
+    <string name="code_error_rate_limited_other" formatted="false">Nhập sai mật khẩu quá nhiều lần. Hãy thử lại sau {count} phút.</string>
+    <string name="code_error_integration_disabled" formatted="false">tích hợp \'{integration}\' chưa được bật</string>
+    <string name="code_error_invalid_time" formatted="false">Thời gian \'{time}\' không hợp lệ, hãy dùng định dạng HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">hành động không hợp lệ: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">khu vực phải là một trong {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">Cài đặt Đồng bộ màn hình không hợp lệ: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">Loại ngữ cảnh không xác định \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" không phải là địa chỉ máy chủ</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">Xác thực thất bại: Xiaomi không thể gửi mã xác minh: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">Xác thực thất bại: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">Không được hỗ trợ: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">Xác nhận chuyển mạch {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">Đã thêm thiết bị mới</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) đã được tìm thấy và thêm tự động</string>
+    <string name="code_notification_device_found_title" formatted="false">Tìm thấy thiết bị mới</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) đã sẵn sàng để thêm</string>
+    <string name="code_notification_password_reset_title" formatted="false">Yêu cầu đặt lại mật khẩu</string>
+    <string name="code_notification_password_reset" formatted="false">{username} đã quên mật khẩu. Quản trị viên có thể cấp mã đặt lại cho họ trong Cài đặt, dưới mục Người dùng và quyền truy cập.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">Tự động hóa \"{name}\" gặp sự cố</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

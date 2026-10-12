@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Vòng tròn màu</string>
+    <string name="ui_expanded">Đã mở rộng</string>
+    <string name="ui_collapsed">Đã thu gọn</string>
+    <string name="ui_collapse">Thu gọn</string>
+    <string name="ui_expand">Mở rộng</string>
+</resources>
