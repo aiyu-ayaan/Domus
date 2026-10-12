@@ -209,9 +209,13 @@ database. The full set of diagrams, one per feature, is in
   <img src="res/screenshots/android-settings.png" width="19%" />
 </p>
 
-**Android tablet** (Settings as list and detail)
+**Android tablet** (two columns from 840dp, Settings as list and detail)
 
-<p align="center"><img src="res/screenshots/android-tablet-settings.png" width="80%" /></p>
+<p>
+  <img src="res/screenshots/android-tablet-home.png" width="49%" />
+  <img src="res/screenshots/android-tablet-analytics.png" width="49%" />
+  <img src="res/screenshots/android-tablet-settings.png" width="49%" />
+</p>
 
 **Mobile web**
 

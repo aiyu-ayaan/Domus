@@ -145,6 +145,21 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
 - **Navigation** — `FloatingNavScaffold` is the Rewire bar: a floating pill on phones whose selected tab grows
   into icon + label and which tucks away while scrolling down; a floating rail from 600dp. Tabs switch with
   the M3 fade-through.
+- **Wide screens** — `ScreenColumn` caps a tab at 840dp, or at 1240dp once the tab is 840dp wide, where it sets
+  `LocalWideScreen`. A screen then spreads out with `SideBySide(start, end)` (two columns, each laid out like a
+  phone's): Home keeps the stat cards, scenes and rooms beside "On right now" and recent activity; Scenes puts
+  scenes beside automations (or one list over both columns); Analytics keeps the figures and insights beside the
+  charts. `DeviceGrid` shows four tiles across instead of two. Phones keep their order: build each block as a
+  `@Composable ColumnScope.() -> Unit` and branch on `LocalWideScreen.current` only where they are placed.
+
+  ```mermaid
+  flowchart LR
+      SC[ScreenColumn] -- "width >= 840dp" --> W[LocalWideScreen = true, cap 1240dp]
+      SC -- narrower --> N[one column, cap 840dp]
+      W --> SBS[SideBySide: start | end]
+      W --> DG[DeviceGrid: 4 across]
+      SBS --> P[each column: LocalWideScreen = false]
+  ```
 - **Settings on tablets** — from 600dp of content width `SettingsTab` (`SettingsPanes.kt`) shows the list on the
   left (the open row highlighted) and the page it stands for in a right pane. `PageHost` (`MainScreen.kt`) is
   the router both the full-screen pages and the pane use; the pane hides the back arrow (`LocalHideBack`) except
@@ -208,7 +223,7 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
 - **Language** — follows the phone; Settings > Language (`LanguagePage` in `AppLocale.kt`, page key `language`) picks one of the 27, each by its own name with the name in the current language under it. How it is applied: `LOCALIZATION.md` section 3.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
-  and swatches carry descriptions; content is capped at 840dp on wide windows.
+  and swatches carry descriptions; content is capped at 840dp, or 1240dp where a tab spreads into columns.
 
 ### Navigation and back
 
