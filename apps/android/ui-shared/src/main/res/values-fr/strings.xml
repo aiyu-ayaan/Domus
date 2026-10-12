@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Roue chromatique</string>
+    <string name="ui_expanded">Développé</string>
+    <string name="ui_collapsed">Réduit</string>
+    <string name="ui_collapse">Réduire</string>
+    <string name="ui_expand">Développer</string>
+</resources>
