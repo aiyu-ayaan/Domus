@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">วงล้อสี</string>
+    <string name="ui_expanded">ขยายแล้ว</string>
+    <string name="ui_collapsed">ยุบแล้ว</string>
+    <string name="ui_collapse">ยุบ</string>
+    <string name="ui_expand">ขยาย</string>
+</resources>

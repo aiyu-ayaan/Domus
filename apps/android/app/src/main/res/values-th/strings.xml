@@ -1,0 +1,935 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">ดีเยี่ยม</string>
+    <string name="air_good">ดี</string>
+    <string name="air_moderate">ปานกลาง</string>
+    <string name="air_poor">แย่</string>
+    <string name="channel_stable">เสถียร (Stable)</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">คอมพิวเตอร์เครื่องนี้</string>
+    <string name="api_untrusted">ใบรับรองของเซิร์ฟเวอร์ไม่ได้รับความเชื่อถือ</string>
+    <string name="api_offline">ไม่สามารถติดต่อเซิร์ฟเวอร์ Domus ได้ โปรดตรวจสอบว่าเซิร์ฟเวอร์กำลังทำงานอยู่</string>
+    <string name="api_bad_response">เซิร์ฟเวอร์ส่งคำตอบที่แอปเวอร์ชันนี้ไม่เข้าใจ</string>
+    <string name="api_request_failed">คำขอล้มเหลว ({status})</string>
+    <string name="error_no_server">ไม่มีเซิร์ฟเวอร์</string>
+    <string name="connect_cert_changed">ใบรับรองของเซิร์ฟเวอร์มีการเปลี่ยนแปลงหลังจากที่คุณอนุมัติไว้ โปรดเชื่อมต่ออีกครั้งเพื่อตรวจสอบใบรับรองใหม่</string>
+    <string name="connect_address_invalid">ป้อนที่อยู่เช่น 192.168.1.10:8443 หรือ home.example.com รองรับเฉพาะ https เท่านั้น</string>
+    <string name="connect_cert_unreadable">ไม่สามารถอ่านใบรับรองของเซิร์ฟเวอร์ได้</string>
+    <string name="automation_ran">เรียกใช้ “{name}” แล้ว</string>
+    <string name="handover_reset_until">รีเซ็ตรหัสผ่าน Domus สำหรับ %1$s\nรหัส: %2$s\n\nในหน้าลงชื่อเข้าใช้ เลือก \"ลืมรหัสผ่าน?\" ป้อนชื่อผู้ใช้ของคุณแล้วตามด้วยรหัสนี้ รหัสใช้ได้ครั้งเดียว จนถึง %3$s</string>
+    <string name="handover_reset">รีเซ็ตรหัสผ่าน Domus สำหรับ %1$s\nรหัส: %2$s\n\nในหน้าลงชื่อเข้าใช้ เลือก \"ลืมรหัสผ่าน?\" ป้อนชื่อผู้ใช้ของคุณแล้วตามด้วยรหัสนี้ รหัสใช้ได้ครั้งเดียว</string>
+    <string name="handover_signin_kid">ข้อมูลลงชื่อเข้าใช้ Domus\nที่อยู่: %1$s\nชื่อผู้ใช้: %2$s\nรหัสผ่าน: %3$s</string>
+    <string name="handover_signin">ข้อมูลลงชื่อเข้าใช้ Domus\nที่อยู่: %1$s\nชื่อผู้ใช้: %2$s\nรหัสผ่าน: %3$s\n\nระบบจะขอให้คุณเลือกรหัสผ่านของคุณเองเมื่อลงชื่อเข้าใช้ครั้งแรก</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">หน้าแรก</string>
+    <string name="nav_devices">อุปกรณ์</string>
+    <string name="nav_scenes">ซีน</string>
+    <string name="nav_analytics">การวิเคราะห์</string>
+    <string name="nav_settings">การตั้งค่า</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">บ้านทั้งหลัง ในแอปเดียว</string>
+    <string name="connect_intro_1_body">หลอดไฟ ปลั๊กไฟ เครื่องฟอกอากาศ และเซนเซอร์จาก Tuya, Tapo, Xiaomi, Philips Hue และ MQTT ทำงานร่วมกันในที่เดียว</string>
+    <string name="connect_intro_2_title">ออกแบบมาเพื่อความเป็นส่วนตัว</string>
+    <string name="connect_intro_2_body">Domus สื่อสารกับเซิร์ฟเวอร์ในบ้านของคุณเท่านั้น ผ่านการเชื่อมต่อที่เข้ารหัส ไม่ต้องใช้บัญชีคลาวด์</string>
+    <string name="connect_intro_3_title">ค้นหาเซิร์ฟเวอร์ให้อัตโนมัติ</string>
+    <string name="connect_intro_3_body">เมื่อเชื่อมต่อ Wi‑Fi ในบ้าน แอปจะค้นหาเซิร์ฟเวอร์เอง เมื่ออยู่นอกบ้าน เพียงป้อนที่อยู่เซิร์ฟเวอร์</string>
+    <string name="connect_page_of">หน้า %1$d จาก %2$d</string>
+    <string name="connect_skip">ข้าม</string>
+    <string name="connect_get_started">เริ่มต้นใช้งาน</string>
+    <string name="connect_next">ถัดไป</string>
+    <string name="connect_welcome_title">ยินดีต้อนรับสู่ Domus</string>
+    <string name="connect_welcome_subtitle">เชื่อมต่อกับเซิร์ฟเวอร์ที่ดูแลบ้านของคุณ</string>
+    <string name="connect_on_this_network">บนเครือข่ายนี้</string>
+    <string name="connect_looking_for_servers">กำลังค้นหาเซิร์ฟเวอร์…</string>
+    <string name="connect_no_server_found">ไม่มีเซิร์ฟเวอร์ตอบกลับ โปรดตรวจสอบว่าโทรศัพท์เครื่องนี้อยู่บน Wi‑Fi เดียวกับเซิร์ฟเวอร์ หรือป้อนที่อยู่ด้านล่าง</string>
+    <string name="connect_scan_again">สแกนอีกครั้ง</string>
+    <string name="connect_or_enter_address">หรือป้อนที่อยู่</string>
+    <string name="connect_server_address">ที่อยู่เซิร์ฟเวอร์</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 หรือ home.example.com</string>
+    <string name="connect_action">เชื่อมต่อ</string>
+    <string name="connect_trust_title">เชื่อถือเซิร์ฟเวอร์นี้หรือไม่?</string>
+    <string name="connect_trust_body">%1$s ใช้ใบรับรองที่สร้างขึ้นเอง ซึ่งเป็นเรื่องปกติสำหรับโฮมเซิร์ฟเวอร์ โปรดเชื่อถือเฉพาะเมื่อลายนิ้วมือตรงกับที่เซิร์ฟเวอร์แสดงเมื่อเริ่มทำงานเท่านั้น</string>
+    <string name="connect_trust_action">เชื่อถือ</string>
+    <string name="connect_cancel">ยกเลิก</string>
+    <string name="connect_use_another_server">ใช้เซิร์ฟเวอร์อื่น</string>
+    <string name="connect_unreachable_title">ไม่สามารถเข้าถึงบ้านของคุณได้</string>
+    <string name="connect_try_again">ลองอีกครั้ง</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">ซ่อนรหัสผ่าน</string>
+    <string name="auth_show_password">แสดงรหัสผ่าน</string>
+    <string name="auth_username">ชื่อผู้ใช้</string>
+    <string name="auth_new_password">รหัสผ่านใหม่</string>
+    <string name="auth_password_min_length">อย่างน้อย 8 ตัวอักษร</string>
+    <string name="auth_confirm_password">ยืนยันรหัสผ่าน</string>
+    <string name="auth_passwords_mismatch">รหัสผ่านไม่ตรงกัน</string>
+    <string name="auth_create_admin_title">สร้างบัญชีผู้ดูแลระบบ</string>
+    <string name="auth_welcome_back_title">ยินดีต้อนรับกลับมา</string>
+    <string name="auth_create_admin_subtitle">เซิร์ฟเวอร์นี้เพิ่งเริ่มต้น บัญชีแรกจะจัดการทุกอย่าง</string>
+    <string name="auth_welcome_back_subtitle">ลงชื่อเข้าใช้บ้านของคุณ</string>
+    <string name="auth_encrypted_connection">การเชื่อมต่อแบบเข้ารหัสไปยัง</string>
+    <string name="auth_email">อีเมล</string>
+    <string name="auth_password">รหัสผ่าน</string>
+    <string name="auth_create_account">สร้างบัญชี</string>
+    <string name="auth_sign_in">ลงชื่อเข้าใช้</string>
+    <string name="auth_forgot_password">ลืมรหัสผ่าน?</string>
+    <string name="auth_forgot_title">ลืมรหัสผ่านใช่ไหม?</string>
+    <string name="auth_forgot_subtitle">Domus จะไม่ส่งอีเมล แต่จะแจ้งเตือนผู้ดูแลระบบของบ้านหลังนี้แทน เพื่อมอบรหัสใช้ครั้งเดียวให้คุณ</string>
+    <string name="auth_ask_admin">ติดต่อผู้ดูแลระบบ</string>
+    <string name="auth_back_to_sign_in">กลับไปหน้าลงชื่อเข้าใช้</string>
+    <string name="auth_reset_code_title">ป้อนรหัสรีเซ็ตของคุณ</string>
+    <string name="auth_reset_code_subtitle">แจ้งผู้ดูแลระบบแล้ว โปรดขอรหัส 8 หลักสำหรับ %1$s จากผู้ดูแลระบบ รหัสสามารถใช้ได้ครั้งเดียวภายในเวลา 30 นาที</string>
+    <string name="auth_reset_code_label">รหัสรีเซ็ต</string>
+    <string name="auth_set_password_sign_in">ตั้งรหัสผ่านและลงชื่อเข้าใช้</string>
+    <string name="auth_back">ย้อนกลับ</string>
+    <string name="auth_choose_password_title">เลือกรหัสผ่านของคุณ</string>
+    <string name="auth_choose_password_subtitle">ยินดีต้อนรับ %1$s รหัสผ่านที่คุณใช้ลงชื่อเข้าใช้ถูกสร้างขึ้นให้คุณและมีผู้อื่นเห็นแล้ว โปรดเลือกรหัสผ่านของคุณเองเพื่อดำเนินการต่อ</string>
+    <string name="auth_save_continue">บันทึกและดำเนินการต่อ</string>
+    <string name="auth_sign_out">ออกจากระบบ</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">การทำงานในเบื้องหลัง</string>
+    <string name="service_channel_alerts">การแจ้งเตือนในบ้าน</string>
+    <string name="service_listening_alerts">Domus กำลังรอรับการแจ้งเตือน</string>
+    <string name="service_screen_sync_title">ซิงค์หน้าจอเปิดอยู่</string>
+    <string name="service_screen_sync_body">ไฟของคุณกำลังเปลี่ยนสีตามหน้าจอนี้</string>
+    <string name="service_stop">หยุด</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (ภาพอวตาร)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (การค้นหาสถานที่ เรียกใช้โดยเซิร์ฟเวอร์ของคุณ)</string>
+    <string name="about_lib_home_assistant">Home Assistant (ระบบสแกน QR ของ Tuya)</string>
+    <string name="about_license_inspiration">แรงบันดาลใจ</string>
+    <string name="about_version_unknown">ไม่ทราบ</string>
+    <string name="about_title">เกี่ยวกับ Domus</string>
+    <string name="about_section_app">แอป</string>
+    <string name="about_version_build">เวอร์ชัน %1$s · บิลด์ %2$d</string>
+    <string name="about_privacy_title">ความเป็นส่วนตัว</string>
+    <string name="about_privacy_subtitle">ทำงานบนเซิร์ฟเวอร์ของคุณเอง ข้อมูลรับรองจะถูกเข้ารหัสเก็บไว้ที่นั่น</string>
+    <string name="about_source_code">ซอร์สโค้ด</string>
+    <string name="about_section_developer">นักพัฒนา</string>
+    <string name="about_developer_tagline">ออกแบบและสร้างโดยนักพัฒนาเพียงคนเดียว</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">ผลงาน</string>
+    <string name="about_section_open_source">โอเพนซอร์ส</string>
+    <string name="about_acknowledgements">กิตติกรรมประกาศ</string>
+    <string name="about_acknowledgements_subtitle">ไลบรารีและโปรเจกต์ที่ Domus ใช้สร้าง</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s พร้อมให้อัปเดตแล้ว</string>
+    <string name="update_download_failed_retry_prompt">ดาวน์โหลดไม่สำเร็จ ลองอีกครั้งหรือไม่?</string>
+    <string name="update_prompt_body">คุณกำลังใช้ %1$s บันทึกการอัปเดตและช่องทางการอัปเดตอยู่ในเมนูการตั้งค่า ภายใต้การอัปเดต</string>
+    <string name="update_downloading_percent">กำลังดาวน์โหลด %1$d%%</string>
+    <string name="update_action">อัปเดต</string>
+    <string name="update_later">ภายหลัง</string>
+    <string name="update_title">การอัปเดต</string>
+    <string name="update_checking">กำลังตรวจสอบการอัปเดต…</string>
+    <string name="update_check_failed">ไม่สามารถตรวจสอบการอัปเดตได้</string>
+    <string name="update_dev_build">บิลด์สำหรับการพัฒนา</string>
+    <string name="update_up_to_date">Domus เป็นเวอร์ชันล่าสุดแล้ว</string>
+    <string name="update_download_failed_retry">ดาวน์โหลดไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="update_check_failed_body">คุณกำลังใช้ %1$s โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+    <string name="update_dev_build_body">คุณกำลังใช้ %1$s บิลด์สำหรับการพัฒนาจะอัปเดตได้โดยการบิลด์ใหม่</string>
+    <string name="update_you_have">คุณกำลังใช้ %1$s</string>
+    <string name="update_download_install">ดาวน์โหลดและติดตั้ง</string>
+    <string name="update_check_again">ตรวจสอบอีกครั้ง</string>
+    <string name="update_channel">ช่องทาง</string>
+    <string name="update_channel_hint">Beta และ Alpha จะได้รับบิลด์ใหม่เร็วกว่า รวมถึงได้รับทุกรุ่นที่เสถียรด้วย</string>
+    <string name="update_whats_new_in">มีอะไรใหม่ใน %1$s</string>
+    <string name="update_in_this_version">ในเวอร์ชันนี้</string>
+    <string name="update_loading_notes">กำลังโหลดบันทึกการอัปเดต…</string>
+    <string name="update_no_notes">ไม่มีบันทึกการอัปเดตสำหรับเวอร์ชันนี้</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">หุ่นยนต์</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">นักผจญภัย</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">พิกเซลอาร์ต</string>
+    <string name="avatar_style_fun_emoji">อิโมจิแสนสนุก</string>
+    <string name="avatar_style_thumbs">นิ้วโป้ง</string>
+    <string name="avatar_style_shapes">รูปทรง</string>
+    <string name="avatar_style_rings">วงแหวน</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">ปรับแต่งอวตาร</string>
+    <string name="avatar_save">บันทึก</string>
+    <string name="avatar_seed_value">ซีด: %1$s</string>
+    <string name="avatar_randomize">สุ่มทั้งหมด</string>
+    <string name="avatar_roll_seed">สุ่มซีด</string>
+    <string name="avatar_roll_seed_action">สุ่มซีด</string>
+    <string name="avatar_style_label">สไตล์อวตาร</string>
+    <string name="avatar_seed_phrase_label">วลีซีด</string>
+    <string name="avatar_seed_phrase_hint">ป้อนคำสำคัญ ชื่อ หรือข้อความใดก็ได้เพื่อเปลี่ยนรูปลักษณ์ของสไตล์อวตารนี้</string>
+    <string name="avatar_seed_label">ซีด</string>
+    <string name="avatar_apply_avatar">ใช้อวตาร</string>
+    <string name="avatar_apply">ใช้</string>
+    <string name="avatar_cancel">ยกเลิก</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">ราตรีสวัสดิ์</string>
+    <string name="home_greeting_morning">สวัสดีตอนเช้า</string>
+    <string name="home_greeting_afternoon">สวัสดีตอนบ่าย</string>
+    <string name="home_greeting_evening">สวัสดีตอนเย็น</string>
+    <string name="home_got_it">เข้าใจแล้ว</string>
+    <string name="home_about_stat">เกี่ยวกับ %1$s</string>
+    <string name="home_scene_on_hint">เปิดอยู่ · แตะเพื่อปิด</string>
+    <string name="home_scene_off_hint">แตะเพื่อเรียกใช้</string>
+    <string name="home_change_avatar">เปลี่ยนอวตาร</string>
+    <string name="home_clear_notices_title">ลบการแจ้งเตือนทั้งหมดหรือไม่?</string>
+    <string name="home_clear_notices_body">การแจ้งเตือนจะถูกลบออกในทุกอุปกรณ์</string>
+    <string name="home_delete_all">ลบทั้งหมด</string>
+    <string name="home_reconnecting">กำลังเชื่อมต่อใหม่…</string>
+    <string name="home_devices_on_of_total">เปิดอยู่ %1$d จาก %2$d</string>
+    <string name="home_using_now">กำลังใช้ตอนนี้</string>
+    <string name="home_using_now_info">การใช้พลังงานสดรวมกันของอุปกรณ์ที่วัดไฟได้ทั้งหมดของคุณ</string>
+    <string name="home_today">วันนี้</string>
+    <string name="home_today_info">พลังงานที่ใช้ไปตั้งแต่เที่ยงคืน จำนวนเงินด้านล่างคือค่าใช้จ่ายโดยประมาณตามอัตราค่าไฟของคุณ</string>
+    <string name="home_air_quality">คุณภาพอากาศ</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">ซีน</string>
+    <string name="home_on_right_now">เปิดอยู่ขณะนี้</string>
+    <string name="home_all_devices">อุปกรณ์ทั้งหมด</string>
+    <string name="home_no_devices_title">ยังไม่มีอุปกรณ์</string>
+    <string name="home_no_devices_admin">เปิดหน้าอุปกรณ์แล้วแตะ + เพื่อเชื่อมต่อ Tuya, Tapo, Xiaomi, Hue หรือ MQTT</string>
+    <string name="home_no_devices_member">ขอให้ผู้ดูแลระบบเพิ่มอุปกรณ์หรือให้สิทธิ์คุณเข้าถึงห้อง</string>
+    <string name="home_everything_off">อุปกรณ์ทั้งหมดปิดอยู่</string>
+    <string name="home_rooms">ห้อง</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="other">%1$d อุปกรณ์ · ปิดทั้งหมด</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="other">%1$d อุปกรณ์ · เปิดอยู่ %2$d</item>
+    </plurals>
+    <string name="home_recent_activity">กิจกรรมล่าสุด</string>
+    <string name="home_see_all">ดูทั้งหมด</string>
+
+    <!-- Devices -->
+    <string name="device_title">อุปกรณ์</string>
+    <string name="device_online_of_total">ออนไลน์ %1$d จาก %2$d</string>
+    <string name="device_add_devices">เพิ่มอุปกรณ์</string>
+    <string name="device_filter_all">ทั้งหมด</string>
+    <string name="device_category_lights">ไฟ</string>
+    <string name="device_category_power">พลังงาน</string>
+    <string name="device_category_air">อากาศ</string>
+    <string name="device_category_climate">สภาพอากาศ</string>
+    <string name="device_all_rooms">ทุกห้อง</string>
+    <string name="device_no_room">ไม่มีห้อง</string>
+    <string name="device_manage_rooms">จัดการห้อง</string>
+    <string name="device_empty_filtered_title">ไม่มีอุปกรณ์ที่นี่</string>
+    <string name="device_empty_filtered_body">ไม่มีอุปกรณ์ที่ตรงกับห้องและหมวดหมู่นี้</string>
+    <string name="device_empty_admin">แตะ + เพื่อเชื่อมต่อ Tuya, Tapo, Xiaomi, Hue หรือ MQTT และเพิ่มอุปกรณ์ที่ตรวจพบ</string>
+    <string name="device_online">ออนไลน์</string>
+    <string name="device_offline">ออฟไลน์</string>
+    <string name="device_on">เปิด</string>
+    <string name="device_off">ปิด</string>
+    <string name="device_leak">น้ำรั่ว</string>
+    <string name="device_motion">การเคลื่อนไหว</string>
+    <string name="device_motion_detected">ตรวจพบ</string>
+    <string name="device_clear">ปกติ</string>
+    <string name="device_open">เปิดอยู่</string>
+    <string name="device_closed">ปิดอยู่</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">สวิตช์ไฟ %1$s</string>
+    <string name="device_refresh_a11y">รีเฟรช %1$s</string>
+    <string name="device_view_only_member">คุณสามารถดูอุปกรณ์นี้ได้แต่ไม่สามารถควบคุมได้</string>
+    <string name="device_view_only_guest">ผู้เยี่ยมชมสามารถดูอุปกรณ์ได้แต่ไม่สามารถควบคุมได้</string>
+    <string name="device_brightness">ความสว่าง</string>
+    <string name="device_white">ขาว</string>
+    <string name="device_white_warm">โทนอุ่น</string>
+    <string name="device_white_neutral">โทนธรรมชาติ</string>
+    <string name="device_white_cool">โทนเย็น</string>
+    <string name="device_fan_speed">ความเร็วพัดลม</string>
+    <string name="device_mode">โหมด</string>
+    <string name="device_speed">ความเร็ว</string>
+    <string name="device_coverage">พื้นที่ครอบคลุม %1$d–%2$d ตร.ม.</string>
+    <string name="device_reading_power">กำลังไฟ</string>
+    <string name="device_reading_voltage">แรงดันไฟ</string>
+    <string name="device_reading_current">กระแสไฟ</string>
+    <string name="device_reading_temperature">อุณหภูมิ</string>
+    <string name="device_reading_humidity">ความชื้น</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">ไส้กรอง</string>
+    <string name="device_filter_left">เหลือ %1$d%%</string>
+    <string name="device_reading_contact">ประตูหรือหน้าต่าง</string>
+    <string name="device_reading_water">น้ำ</string>
+    <string name="device_water_dry">แห้ง</string>
+    <string name="device_reading_alarm">สัญญาณเตือน</string>
+    <string name="device_alarm_sounding">กำลังส่งเสียงเตือน</string>
+    <string name="device_alarm_quiet">เงียบ</string>
+    <string name="device_reading_battery">แบตเตอรี่</string>
+    <string name="device_battery_low">ต่ำ</string>
+    <string name="device_battery_ok">ปกติ</string>
+    <string name="device_ask_before_switching">ถามก่อนสลับสถานะ</string>
+    <string name="device_ask_before_switching_desc">แจ้งเตือนก่อนเปิดหรือปิดอุปกรณ์นี้จากแอป กลุ่ม หรือซีนใดๆ</string>
+    <string name="device_rename_or_move">เปลี่ยนชื่อหรือย้าย</string>
+    <string name="device_rename">เปลี่ยนชื่อ</string>
+    <string name="device_remove">ลบ</string>
+    <string name="device_edit_title">แก้ไขอุปกรณ์</string>
+    <string name="device_field_name">ชื่อ</string>
+    <string name="device_field_room">ห้อง</string>
+    <string name="device_remove_confirm_title">ลบ %1$s หรือไม่?</string>
+    <string name="device_remove_confirm_body">อุปกรณ์จะถูกนำออกจากบ้านและซีนต่างๆ คุณสามารถเพิ่มกลับมาใหม่ได้จากเมนูเพิ่มอุปกรณ์</string>
+    <string name="device_white_candle">แสงเทียน</string>
+    <string name="device_white_soft">ขาวนวล</string>
+    <string name="device_white_neutral_preset">ขาวธรรมชาติ</string>
+    <string name="device_white_daylight">แสงธรรมชาติ</string>
+    <string name="device_white_cool_preset">ขาวโทนเย็น</string>
+    <string name="device_light_off">ไฟปิดอยู่</string>
+    <string name="device_light_effect">เอฟเฟกต์</string>
+    <string name="device_light_white">แสงสีขาว</string>
+    <string name="device_light_color">แสงสี</string>
+    <string name="device_light_playing">กำลังเล่น %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">สี</string>
+    <string name="device_effects">เอฟเฟกต์</string>
+    <string name="device_color_temp">อุณหภูมิสี</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K โทนอุ่น</string>
+    <string name="device_kelvin_max">6500K โทนเย็น</string>
+    <string name="device_moods">บรรยากาศ</string>
+    <string name="device_stop_effect">หยุดเอฟเฟกต์</string>
+    <string name="device_color_swatch_a11y">สี %1$s</string>
+    <string name="device_selected">เลือกแล้ว</string>
+    <string name="device_not_selected">ไม่ได้เลือก</string>
+    <string name="device_confirm_switch_one_title">สลับสถานะ %1$s หรือไม่?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="other">สลับสถานะ %1$d อุปกรณ์หรือไม่?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">รวมถึง %1$s ซึ่งต้องถามก่อนสลับสถานะ การสลับสถานะอาจตัดกระแสไฟของอุปกรณ์ที่เชื่อมต่ออยู่</string>
+    <string name="device_confirm_switch_many_body">รวมถึง %1$s ซึ่งต้องถามก่อนสลับสถานะ การสลับสถานะอาจตัดกระแสไฟของอุปกรณ์ที่เชื่อมต่ออยู่</string>
+    <string name="device_confirm_switch_action">สลับสถานะ</string>
+    <string name="device_cancel">ยกเลิก</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">เมื่อสักครู่</string>
+    <string name="scene_time_minutes_ago">%1$d นาทีที่แล้ว</string>
+    <string name="scene_time_hours_ago">%1$d ชม. ที่แล้ว</string>
+    <string name="scene_time_days_ago">%1$d วันที่แล้ว</string>
+    <string name="scene_edit_item">แก้ไข %1$s</string>
+    <string name="scene_title">ซีน</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="other">ทำงานอยู่ %1$d · เปิดการทำงานอัตโนมัติ %2$d รายการ</item>
+    </plurals>
+    <string name="scene_empty_title">ยังไม่มีอะไรที่นี่</string>
+    <string name="scene_empty_subtitle">ซีนช่วยตั้งค่าอุปกรณ์หลายชิ้นพร้อมกัน ส่วนการทำงานอัตโนมัติจะทำงานให้คุณเองเมื่อมีเหตุการณ์เกิดขึ้น</string>
+    <string name="scene_new_scene">ซีนใหม่</string>
+    <string name="scene_new_automation">การทำงานอัตโนมัติใหม่</string>
+    <string name="scene_new_screen_sync">ซิงค์หน้าจอใหม่</string>
+    <string name="scene_sync_active_subtitle">ซิงค์หน้าจอ · ไฟกำลังเปลี่ยนสีตามหน้าจอ</string>
+    <string name="scene_sync_inactive_subtitle">ซิงค์หน้าจอ · สะท้อนสีหน้าจอนี้ไปยังหลอดไฟ</string>
+    <string name="scene_active">ทำงานอยู่</string>
+    <string name="scene_section_automations">การทำงานอัตโนมัติ</string>
+    <string name="scene_last_ran">ทำงานล่าสุดเมื่อ %1$s</string>
+    <string name="scene_never_ran">ยังไม่เคยทำงาน</string>
+    <string name="scene_run_now">เรียกใช้ %1$s ตอนนี้</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">จ.</string>
+    <string name="editor_day_tue">อ.</string>
+    <string name="editor_day_wed">พ.</string>
+    <string name="editor_day_thu">พฤ.</string>
+    <string name="editor_day_fri">ศ.</string>
+    <string name="editor_day_sat">ส.</string>
+    <string name="editor_day_sun">อา.</string>
+    <string name="editor_prop_temperature">อุณหภูมิ</string>
+    <string name="editor_prop_humidity">ความชื้น</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">ความสว่าง</string>
+    <string name="editor_prop_power_watts">กำลังไฟ (W)</string>
+    <string name="editor_removed_device">อุปกรณ์ที่ถูกลบ</string>
+    <string name="editor_rule_device_is_off">%1$s ปิดอยู่</string>
+    <string name="editor_rule_device_is_on">%1$s เปิดอยู่</string>
+    <string name="editor_rule_device_prop_above">%2$s ของ %1$s มากกว่า %3$s</string>
+    <string name="editor_rule_device_prop_below">%2$s ของ %1$s น้อยกว่า %3$s</string>
+    <string name="editor_rule_device_prop_is">%2$s ของ %1$s คือ %3$s</string>
+    <string name="editor_rule_time_every_day">เวลา %1$s ของทุกวัน</string>
+    <string name="editor_rule_time_on_days">เวลา %1$s ในวัน%2$s</string>
+    <string name="editor_sun_event_sunrise">พระอาทิตย์ขึ้น</string>
+    <string name="editor_sun_event_sunset">พระอาทิตย์ตก</string>
+    <string name="editor_rule_sun_at_every_day">เมื่อ%1$sของทุกวัน</string>
+    <string name="editor_rule_sun_at_on_days">เมื่อ%1$sในวัน%2$s</string>
+    <string name="editor_rule_sun_before_every_day">%1$d นาทีก่อน%2$sของทุกวัน</string>
+    <string name="editor_rule_sun_before_on_days">%1$d นาทีก่อน%2$sในวัน%3$s</string>
+    <string name="editor_rule_sun_after_every_day">%1$d นาทีหลัง%2$sของทุกวัน</string>
+    <string name="editor_rule_sun_after_on_days">%1$d นาทีหลัง%2$sในวัน%3$s</string>
+    <string name="editor_rule_power_above">%1$s ใช้ไฟเกิน %2$s W</string>
+    <string name="editor_rule_device_offline">%1$s ออฟไลน์</string>
+    <string name="editor_rule_device_discovered">พบอุปกรณ์ใหม่</string>
+    <string name="editor_rule_time_between">ระหว่างเวลา %1$s ถึง %2$s</string>
+    <string name="editor_cmd_on">เปิด</string>
+    <string name="editor_cmd_off">ปิด</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">ขาว %1$s</string>
+    <string name="editor_device_group">กลุ่มอุปกรณ์</string>
+    <string name="editor_cmd_custom">คำสั่งกำหนดเอง</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">แจ้งเตือน: %1$s</string>
+    <string name="editor_removed_scene">(ลบแล้ว)</string>
+    <string name="editor_rule_scene">เรียกใช้ซีน %1$s</string>
+    <string name="editor_rule_delay">รอ %1$s วินาที</string>
+    <string name="editor_rule_unknown">ไม่ทราบ</string>
+    <string name="editor_trigger_time">เวลา</string>
+    <string name="editor_trigger_sun">พระอาทิตย์ขึ้น / ตก</string>
+    <string name="editor_trigger_device_state">สถานะอุปกรณ์</string>
+    <string name="editor_trigger_power">กำลังไฟ</string>
+    <string name="editor_trigger_offline">ออฟไลน์</string>
+    <string name="editor_trigger_discovered">อุปกรณ์ใหม่</string>
+    <string name="editor_condition_device_state">สถานะอุปกรณ์</string>
+    <string name="editor_condition_time_between">ช่วงเวลา</string>
+    <string name="editor_action_device">อุปกรณ์</string>
+    <string name="editor_action_scene">ซีน</string>
+    <string name="editor_action_notify">แจ้งเตือน</string>
+    <string name="editor_action_delay">รอ</string>
+    <string name="editor_add">เพิ่ม</string>
+    <string name="editor_field_device">อุปกรณ์</string>
+    <string name="editor_sun_sunrise">พระอาทิตย์ขึ้น</string>
+    <string name="editor_sun_sunset">พระอาทิตย์ตก</string>
+    <string name="editor_sun_after">หลัง</string>
+    <string name="editor_sun_before">ก่อน</string>
+    <string name="editor_field_minutes">นาที</string>
+    <string name="editor_sun_supporting_sunrise">เว้นว่างไว้เพื่อทำงานเมื่อพระอาทิตย์ขึ้น ต้องตั้งค่าตำแหน่งบ้านในการตั้งค่า</string>
+    <string name="editor_sun_supporting_sunset">เว้นว่างไว้เพื่อทำงานเมื่อพระอาทิตย์ตก ต้องตั้งค่าตำแหน่งบ้านในการตั้งค่า</string>
+    <string name="editor_every_day">ทุกวัน</string>
+    <string name="editor_chosen_days">เฉพาะวันที่เลือก</string>
+    <string name="editor_field_is">คือ</string>
+    <string name="editor_state_on">เปิด</string>
+    <string name="editor_state_off">ปิด</string>
+    <string name="editor_compare_above">มากกว่า</string>
+    <string name="editor_compare_below">น้อยกว่า</string>
+    <string name="editor_field_value">ค่า</string>
+    <string name="editor_field_watts">วัตต์</string>
+    <string name="editor_time_from">ตั้งแต่</string>
+    <string name="editor_time_until">ถึง</string>
+    <string name="editor_power_turn_on">เปิด</string>
+    <string name="editor_power_turn_off">ปิด</string>
+    <string name="editor_power_leave">คงสถานะไฟเดิม</string>
+    <string name="editor_set_brightness">ตั้งความสว่าง</string>
+    <string name="editor_set_brightness_value">ตั้งความสว่าง %1$d%%</string>
+    <string name="editor_field_scene">ซีน</string>
+    <string name="editor_field_title">หัวข้อ</string>
+    <string name="editor_field_message">ข้อความ</string>
+    <string name="editor_field_seconds">วินาที</string>
+    <string name="editor_remove_rule">ลบ: %1$s</string>
+    <string name="editor_style_vivid">สดใส</string>
+    <string name="editor_style_dominant">สีหลัก</string>
+    <string name="editor_style_average">ค่าเฉลี่ย</string>
+    <string name="editor_new_screen_sync">ซิงค์หน้าจอใหม่</string>
+    <string name="editor_new_scene">ซีนใหม่</string>
+    <string name="editor_edit_scene">แก้ไขซีน</string>
+    <string name="editor_delete">ลบ</string>
+    <string name="editor_field_name">ชื่อ</string>
+    <string name="editor_sync_lights_title">ไฟที่เปลี่ยนสีตามหน้าจอ</string>
+    <string name="editor_sync_no_lights">ยังไม่มีหลอดไฟในบ้านของคุณ</string>
+    <string name="editor_sync_color_title">สี</string>
+    <string name="editor_style_vivid_desc">สีที่จัดจ้านที่สุดบนหน้าจอ</string>
+    <string name="editor_style_dominant_desc">สีที่พบบ่อยที่สุด</string>
+    <string name="editor_style_average_desc">สีเฉลี่ยของทั้งภาพ</string>
+    <string name="editor_region_full">ทั้งหน้าจอ</string>
+    <string name="editor_region_edges">เฉพาะขอบจอ</string>
+    <string name="editor_sync_dim_dark">หรี่ไฟตามฉากที่มืด</string>
+    <string name="editor_sync_restore_lights">คืนค่าไฟเมื่อหยุดทำงาน</string>
+    <string name="editor_actions_title">การกระทำ</string>
+    <string name="editor_add_action">เพิ่มการกระทำ</string>
+    <string name="editor_save">บันทึก</string>
+    <string name="editor_delete_confirm_title">ลบ %1$s หรือไม่?</string>
+    <string name="editor_delete_scene_body">การทำงานอัตโนมัติที่เรียกใช้ซีนนี้จะข้ามซีนนี้ไป</string>
+    <string name="editor_new_automation">การทำงานอัตโนมัติใหม่</string>
+    <string name="editor_edit_automation">แก้ไขการทำงานอัตโนมัติ</string>
+    <string name="editor_field_description_optional">คำอธิบาย (ไม่บังคับ)</string>
+    <string name="editor_enabled">เปิดใช้งาน</string>
+    <string name="editor_triggers_title">เมื่อเกิดเหตุการณ์ใดเหตุการณ์หนึ่งต่อไปนี้</string>
+    <string name="editor_add_trigger">เพิ่มตัวกระตุ้น</string>
+    <string name="editor_conditions_title">เฉพาะเมื่อเงื่อนไขทั้งหมดนี้เป็นจริง</string>
+    <string name="editor_add_condition">เพิ่มเงื่อนไข</string>
+    <string name="editor_do_this_title">ทำสิ่งนี้</string>
+    <string name="editor_delete_automation_body">การทำงานอัตโนมัตินี้จะหยุดทำงาน</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">สด</string>
+    <string name="analytics_range_hour">1 นาที</string>
+    <string name="analytics_range_day">วัน</string>
+    <string name="analytics_range_week">สัปดาห์</string>
+    <string name="analytics_range_month">เดือน</string>
+    <string name="analytics_bucket_5s">5 วินาที</string>
+    <string name="analytics_bucket_minute">นาที</string>
+    <string name="analytics_bucket_hour">ชั่วโมง</string>
+    <string name="analytics_bucket_day">วัน</string>
+    <string name="analytics_title">การวิเคราะห์</string>
+    <string name="analytics_subtitle_power">การใช้พลังงานและค่าใช้จ่าย</string>
+    <string name="analytics_subtitle_air">สุขภาพอากาศและเครื่องฟอกอากาศ</string>
+    <string name="analytics_electricity_tariff">อัตราค่าไฟฟ้า</string>
+    <string name="analytics_tab_electricity">ไฟฟ้า</string>
+    <string name="analytics_tab_air">คุณภาพอากาศ</string>
+    <string name="analytics_no_energy_title">ยังไม่มีข้อมูลพลังงาน</string>
+    <string name="analytics_no_energy_subtitle">ค่าที่วัดได้จะปรากฏขึ้นหนึ่งนาทีหลังจากปลั๊กหรือสวิตช์วัดไฟออนไลน์</string>
+    <string name="analytics_using_now">กำลังใช้ตอนนี้</string>
+    <string name="analytics_projected_cost">คาดว่าจะอยู่ที่ %1$s ในรอบบิลนี้</string>
+    <string name="analytics_today">วันนี้</string>
+    <string name="analytics_today_info">พลังงานที่ใช้ไปตั้งแต่เที่ยงคืน จำนวนเงินด้านล่างคือค่าใช้จ่ายโดยประมาณตามอัตราค่าไฟของคุณ</string>
+    <string name="analytics_this_cycle">รอบบิลนี้</string>
+    <string name="analytics_this_cycle_info">พลังงานที่ใช้ไปและค่าไฟโดยประมาณสะสมในรอบบิลปัจจุบัน</string>
+    <string name="analytics_history">ประวัติ</string>
+    <string name="analytics_nothing_recorded">ยังไม่มีการบันทึกข้อมูลในช่วงเวลานี้</string>
+    <string name="analytics_metric_energy">พลังงาน</string>
+    <string name="analytics_metric_power">กำลังไฟ</string>
+    <string name="analytics_no_reading">ไม่มีค่าที่วัดได้</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">กำลังไฟเฉลี่ยต่อ%1$s</string>
+    <string name="analytics_chart_energy_used">พลังงานที่ใช้ต่อ%1$s รวมทั้งหมด %2$s</string>
+    <string name="analytics_live_caption">5 นาทีล่าสุด บันทึกค่าทุก 5 วินาทีขณะที่เปิดหน้านี้อยู่</string>
+    <string name="analytics_total_caption">รวม %1$s · %2$s</string>
+    <string name="analytics_insights">ข้อมูลเชิงลึก</string>
+    <string name="analytics_peak_hour">ชั่วโมงใช้ไฟสูงสุด</string>
+    <string name="analytics_peak_last_24h">%1$s ใน 24 ชม. ล่าสุด</string>
+    <string name="analytics_no_usage_yet">ยังไม่มีข้อมูลการใช้งาน</string>
+    <string name="analytics_daily_average">เฉลี่ยต่อวัน</string>
+    <string name="analytics_needs_full_day">ต้องใช้ข้อมูลเต็มวัน</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="other">ในช่วง %1$d วันที่ผ่านมา</item>
+    </plurals>
+    <string name="analytics_today_vs_average">วันนี้เทียบกับค่าเฉลี่ย</string>
+    <string name="analytics_above_usual_day">สูงกว่าวันปกติของคุณ</string>
+    <string name="analytics_below_usual_day">ต่ำกว่าวันปกติของคุณ</string>
+    <string name="analytics_about_usual_day">ใกล้เคียงกับวันปกติของคุณ</string>
+    <string name="analytics_top_device">อุปกรณ์ที่ใช้ไฟสูงสุด</string>
+    <string name="analytics_no_metered_device">ไม่มีอุปกรณ์วัดพลังงาน</string>
+    <string name="analytics_billing_cycle">รอบบิล</string>
+    <string name="analytics_time_elapsed">เวลาที่ผ่านไป</string>
+    <string name="analytics_day_of_days">วันที่ %1$d จาก %2$d</string>
+    <string name="analytics_budget_used">งบประมาณที่ใช้ไป</string>
+    <string name="analytics_cost_of_budget">%1$s จาก %2$s</string>
+    <string name="analytics_spending_ahead">การใช้จ่ายสูงกว่าเกณฑ์ตามเวลาของรอบบิล</string>
+    <string name="analytics_budget_hint">ตั้งงบประมาณรายเดือนในอัตราค่าไฟฟ้าเพื่อติดตามค่าใช้จ่ายเทียบกับงบ</string>
+    <string name="analytics_by_device">แยกตามอุปกรณ์</string>
+    <string name="analytics_device_cycle_summary">%1$s · %2$s ในรอบบิลนี้</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">อุณหภูมิ</string>
+    <string name="analytics_reading_humidity">ความชื้น</string>
+    <string name="analytics_pm25_now">PM2.5 ตอนนี้</string>
+    <string name="analytics_air_no_sensor_online">ไม่มีเซนเซอร์ออนไลน์</string>
+    <string name="analytics_air_status_excellent">ดีเยี่ยม · อากาศภายในอาคารสะอาด</string>
+    <string name="analytics_air_status_good">ดี · อยู่ในเกณฑ์ดีต่อสุขภาพ</string>
+    <string name="analytics_air_status_moderate">ปานกลาง · ควรเปิดเครื่องฟอกอากาศหรือระบายอากาศในห้อง</string>
+    <string name="analytics_air_status_poor">แย่ · เปิดเครื่องฟอกอากาศระดับสูงสุดและปิดหน้าต่างให้สนิท</string>
+    <string name="analytics_purifiers">เครื่องฟอกอากาศ</string>
+    <string name="analytics_running_of_total">%1$d จาก %2$d</string>
+    <string name="analytics_all_on_standby">สแตนด์บายทั้งหมด</string>
+    <string name="analytics_running_now">กำลังทำงาน</string>
+    <string name="analytics_filter_life">อายุไส้กรอง</string>
+    <string name="analytics_filter_replace_soon">ควรเปลี่ยนเร็วๆ นี้</string>
+    <string name="analytics_filter_healthy">ปกติ</string>
+    <string name="analytics_sensors_average">ค่าเฉลี่ยจากเซนเซอร์ของคุณ</string>
+    <string name="analytics_humidity_dry">แห้ง</string>
+    <string name="analytics_humidity_humid">ชื้น</string>
+    <string name="analytics_humidity_comfortable">สบาย</string>
+    <string name="analytics_trend">แนวโน้ม</string>
+    <string name="analytics_no_air_history">ยังไม่มีประวัติ ค่าที่วัดได้จะถูกบันทึกทุกนาทีขณะที่เซนเซอร์ออนไลน์</string>
+    <string name="analytics_air_chart_summary">%1$s ต่อ%2$s เฉลี่ย %3$s</string>
+    <string name="analytics_pm25_dashed_caption">เส้นประ: เป้าหมายอากาศสะอาด 15 µg/m³, ขีดจำกัดบนของเกณฑ์ดี 35 µg/m³</string>
+    <string name="analytics_period_5m">5 นาที</string>
+    <string name="analytics_period_60m">60 นาที</string>
+    <string name="analytics_period_24h">24 ชม.</string>
+    <string name="analytics_period_7d">7 วัน</string>
+    <string name="analytics_period_30d">30 วัน</string>
+    <string name="analytics_average">เฉลี่ย</string>
+    <string name="analytics_air_level_over_period">%1$s ในช่วง %2$s</string>
+    <string name="analytics_peak">สูงสุด</string>
+    <string name="analytics_value_with_peak">%1$s · สูงสุด %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">การใช้งานรายชั่วโมง</string>
+    <string name="analytics_peak_pm25_by_hour">ค่า PM2.5 สูงสุดรายชั่วโมง</string>
+    <string name="analytics_hour_grid_caption">หนึ่งช่องต่อหนึ่งชั่วโมงในช่วง 7 วันที่ผ่านมา ช่องที่เข้มกว่าหมายถึงค่าที่สูงกว่า</string>
+    <string name="analytics_hour_grid_summary">%1$s ในแต่ละชั่วโมงของ 7 วันที่ผ่านมา</string>
+    <string name="analytics_time_at_each_level">ระยะเวลาในแต่ละระดับ</string>
+    <string name="analytics_time_good_air">เวลาที่มีอากาศดี</string>
+    <string name="analytics_pm25_good_over_period">PM2.5 ไม่เกิน 35 µg/m³ ในช่วง %1$s</string>
+    <string name="analytics_sensors">เซนเซอร์</string>
+    <string name="analytics_offline">ออฟไลน์</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">การตั้งค่า</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">ระบบ</string>
+    <string name="settings_theme_light">สว่าง</string>
+    <string name="settings_theme_dark">มืด</string>
+    <string name="settings_role_admin">ผู้ดูแลระบบ</string>
+    <string name="settings_role_member">สมาชิก</string>
+    <string name="settings_role_guest">ผู้เยี่ยมชม</string>
+    <string name="settings_avatar">อวตาร</string>
+    <string name="settings_section_home">บ้าน</string>
+    <string name="settings_add_devices">เพิ่มอุปกรณ์</string>
+    <string name="settings_add_devices_subtitle">ค้นหาและเพิ่มอุปกรณ์จากบัญชีและเครือข่ายของคุณ</string>
+    <string name="settings_plugins">ปลั๊กอิน</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue และ MQTT</string>
+    <string name="settings_rooms">ห้อง</string>
+    <string name="settings_people">ผู้คน</string>
+    <string name="settings_people_subtitle">บัญชี บทบาท และสิทธิ์เข้าถึงห้อง</string>
+    <string name="settings_tariff">อัตราค่าไฟฟ้า</string>
+    <string name="settings_tariff_subtitle">อัตราค่าไฟ รอบบิล และงบประมาณ</string>
+    <string name="settings_location">ตำแหน่งที่ตั้งบ้าน</string>
+    <string name="settings_location_subtitle">สำหรับการทำงานอัตโนมัติเมื่อพระอาทิตย์ขึ้นและตก</string>
+    <string name="settings_notifications">การแจ้งเตือน</string>
+    <string name="settings_notifications_subtitle">สิ่งที่บ้านของคุณรายงาน</string>
+    <string name="settings_background_alerts">การแจ้งเตือนขณะปิดแอป</string>
+    <string name="settings_background_alerts_subtitle">เปิดการเชื่อมต่อกับเซิร์ฟเวอร์ของคุณไว้เสมอ ใช้แบตเตอรี่เล็กน้อย</string>
+    <string name="settings_section_server">เซิร์ฟเวอร์</string>
+    <string name="settings_server_live_pinned">สด · ใบรับรองที่ปักหมุดไว้</string>
+    <string name="settings_server_live_public">สด · ใบรับรองสาธารณะ</string>
+    <string name="settings_server_reconnecting">กำลังเชื่อมต่อใหม่…</string>
+    <string name="settings_server_live_badge">สด</string>
+    <string name="settings_server_cert_public">เข้ารหัสแล้ว · ใบรับรองได้รับการยืนยันโดยหน่วยงานออกใบรับรองสาธารณะ</string>
+    <string name="settings_server_cert_pinned">เข้ารหัสแล้ว · คุณได้อนุมัติใบรับรองของเซิร์ฟเวอร์นี้เมื่อใช้งานครั้งแรก:</string>
+    <string name="settings_sha256_fingerprint">ลายนิ้วมือ SHA-256</string>
+    <string name="settings_fingerprint_clip_label">ลายนิ้วมือ</string>
+    <string name="settings_copied">คัดลอกแล้ว</string>
+    <string name="settings_copy">คัดลอก</string>
+    <string name="settings_change_password">เปลี่ยนรหัสผ่าน</string>
+    <string name="settings_change_password_subtitle">สำหรับลงชื่อเข้าใช้ Domus</string>
+    <string name="settings_server_addresses">ที่อยู่เซิร์ฟเวอร์</string>
+    <string name="settings_server_addresses_subtitle">เครือข่ายในบ้านและการเข้าถึงระยะไกล</string>
+    <string name="settings_updates">การอัปเดต</string>
+    <string name="settings_updates_subtitle">เวอร์ชัน %1$s บันทึกการอัปเดต และช่องทาง</string>
+    <string name="settings_about">เกี่ยวกับ Domus</string>
+    <string name="settings_about_subtitle">เวอร์ชัน %1$s นักพัฒนา และกิตติกรรมประกาศ</string>
+    <string name="settings_appearance">รูปลักษณ์</string>
+    <string name="settings_wallpaper_colors">สีตามวอลเปเปอร์</string>
+    <string name="settings_wallpaper_colors_subtitle">ปรับสีของแอปให้เข้ากับวอลเปเปอร์ของคุณ</string>
+    <string name="settings_section_account">บัญชี</string>
+    <string name="settings_account_subtitle">ออกจากระบบหรือใช้เซิร์ฟเวอร์อื่น</string>
+    <string name="settings_sign_out">ออกจากระบบ</string>
+    <string name="settings_use_another_server">ใช้เซิร์ฟเวอร์อื่น</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">ย้อนกลับ</string>
+    <string name="manage_hide_field">ซ่อน %1$s</string>
+    <string name="manage_show_field">แสดง %1$s</string>
+    <string name="manage_choose">เลือก…</string>
+    <string name="manage_close">ปิด</string>
+    <string name="manage_cancel">ยกเลิก</string>
+    <string name="manage_save">บันทึก</string>
+    <string name="manage_delete">ลบ</string>
+    <string name="manage_rooms_title">ห้อง</string>
+    <string name="manage_add_room">เพิ่มห้อง</string>
+    <string name="manage_no_rooms">ยังไม่มีห้อง</string>
+    <string name="manage_no_rooms_subtitle">ห้องช่วยจัดกลุ่มอุปกรณ์และกำหนดว่าสมาชิกหรือผู้เยี่ยมชมสามารถเห็นอุปกรณ์ใดได้บ้าง</string>
+    <plurals name="manage_device_count">
+        <item quantity="other">%1$d อุปกรณ์</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="other">%1$d ห้อง</item>
+    </plurals>
+    <string name="manage_room_subtitle">ชั้น %1$d · %2$s</string>
+    <string name="manage_new_room">ห้องใหม่</string>
+    <string name="manage_edit_room">แก้ไขห้อง</string>
+    <string name="manage_field_name">ชื่อ</string>
+    <string name="manage_field_floor">ชั้น</string>
+    <string name="manage_role_admin">ผู้ดูแลระบบ</string>
+    <string name="manage_role_member">สมาชิก</string>
+    <string name="manage_role_guest">ผู้เยี่ยมชม</string>
+    <string name="manage_level_none">ไม่มี</string>
+    <string name="manage_level_view">ดูเท่านั้น</string>
+    <string name="manage_level_control">ควบคุม</string>
+    <string name="manage_level_edit">แก้ไข</string>
+    <string name="manage_access_to">สิทธิ์เข้าถึง %1$s</string>
+    <string name="manage_whole_room_level">ทั้งห้อง · %1$s</string>
+    <string name="manage_room_devices_of_total">%1$d จาก %2$d อุปกรณ์</string>
+    <string name="manage_no_access">ไม่มีสิทธิ์เข้าถึง</string>
+    <string name="manage_close_item">ปิด %1$s</string>
+    <string name="manage_open_item">เปิด %1$s</string>
+    <string name="manage_whole_room">ทั้งห้อง</string>
+    <string name="manage_whole_room_hint">รวมถึงอุปกรณ์ที่เพิ่มในภายหลังด้วย</string>
+    <string name="manage_no_devices_in_room">ยังไม่มีอุปกรณ์ในห้องนี้</string>
+    <string name="manage_people_title">ผู้คน</string>
+    <string name="manage_add_person">เพิ่มบุคคล</string>
+    <string name="manage_access_whole_home">ทั้งบ้าน</string>
+    <string name="manage_access_none">ไม่มีสิทธิ์เข้าถึง</string>
+    <string name="manage_user_tag_kid">เด็ก</string>
+    <string name="manage_user_tag_reset_requested">ขอรีเซ็ตรหัสผ่าน</string>
+    <string name="manage_person_title">บุคคล</string>
+    <string name="manage_handover_reset_title">รหัสรีเซ็ตสำหรับ %1$s</string>
+    <string name="manage_handover_signin_title">รายละเอียดการลงชื่อเข้าใช้สำหรับ %1$s</string>
+    <string name="manage_handover_shown_once">แสดงเพียงครั้งเดียวเท่านั้น ส่งให้เขาทันที</string>
+    <string name="manage_copy">คัดลอก</string>
+    <string name="manage_share">แชร์</string>
+    <string name="manage_done">เสร็จสิ้น</string>
+    <string name="manage_new_person">บุคคลใหม่</string>
+    <string name="manage_avatar">อวตาร</string>
+    <string name="manage_roll">สุ่ม</string>
+    <string name="manage_field_username">ชื่อผู้ใช้</string>
+    <string name="manage_username_supporting">อย่างน้อย 3 ตัวอักษร</string>
+    <string name="manage_field_email">อีเมล</string>
+    <string name="manage_email_taken">ถูกใช้โดยบัญชีอื่นแล้ว</string>
+    <string name="manage_email_available">ว่าง</string>
+    <string name="manage_email_hint">พิมพ์อีเมล หรือสร้างจากชื่อผู้ใช้</string>
+    <string name="manage_generate_email">สร้างอีเมล @domus.home</string>
+    <string name="manage_section_password">รหัสผ่าน</string>
+    <string name="manage_kid_account">บัญชีเด็ก</string>
+    <string name="manage_kid_account_on">คุณตั้งรหัสผ่านให้และใช้รหัสผ่านนั้นตลอดไป</string>
+    <string name="manage_kid_account_off">ปิด: Domus จะสร้างรหัสผ่านให้ และให้ผู้ใช้นี้ตั้งรหัสผ่านของตนเองเมื่อลงชื่อเข้าใช้ครั้งแรก</string>
+    <string name="manage_field_new_password">รหัสผ่านใหม่</string>
+    <string name="manage_field_password">รหัสผ่าน</string>
+    <string name="manage_password_keep_current">เว้นว่างไว้เพื่อใช้รหัสผ่านปัจจุบัน</string>
+    <string name="manage_password_min_length">อย่างน้อย 8 ตัวอักษร</string>
+    <string name="manage_password_after_saving">คุณจะได้รับรหัสผ่านเพื่อคัดลอกหรือแชร์หลังจากบันทึก</string>
+    <string name="manage_reset_requested_notice">%1$s ลืมรหัสผ่านและขอรีเซ็ตรหัสผ่าน</string>
+    <string name="manage_reset_code">รหัสรีเซ็ต</string>
+    <string name="manage_reset_code_active">รหัสใช้งานได้ถึง %1$s ปิดเพื่อยกเลิกรหัส</string>
+    <string name="manage_reset_code_help">รหัสใช้ครั้งเดียวสำหรับป้อนในหน้า \"ลืมรหัสผ่าน?\" เพื่อตั้งรหัสผ่านใหม่ ใช้ได้ภายใน 30 นาที</string>
+    <string name="manage_generate_new_password">สร้างรหัสผ่านใหม่</string>
+    <string name="manage_section_role">บทบาท</string>
+    <string name="manage_role_admin_desc">จัดการทุกอย่าง</string>
+    <string name="manage_role_member_desc">ดูสิ่งที่ได้รับอนุญาต การควบคุมหรือแก้ไขเพื่อเปลี่ยนชื่ออุปกรณ์จะตั้งค่าแยกตามแต่ละห้องและอุปกรณ์</string>
+    <string name="manage_role_guest_desc">ดูสิ่งที่ได้รับอนุญาต แต่ควบคุมไม่ได้</string>
+    <string name="manage_section_access">สิทธิ์การเข้าถึง</string>
+    <string name="manage_custom_access">สิทธิ์การเข้าถึงแบบกำหนดเอง</string>
+    <string name="manage_custom_access_off">ปิด: เข้าถึงได้ทั้งบ้าน</string>
+    <string name="manage_custom_access_on">กำหนดระดับสิทธิ์สำหรับแต่ละห้อง หรือสำหรับแต่ละอุปกรณ์ในห้องนั้น</string>
+    <string name="manage_create_rooms_first">สร้างห้องก่อน</string>
+    <string name="manage_no_room">ไม่มีห้อง</string>
+    <string name="manage_remove_user_title">ลบ %1$s หรือไม่?</string>
+    <string name="manage_remove_user_text">ผู้ใช้นี้จะเสียสิทธิ์การเข้าถึงทันที</string>
+    <string name="manage_remove">ลบ</string>
+    <string name="manage_tariff_title">อัตราค่าไฟฟ้า</string>
+    <string name="manage_rate_per_kwh">อัตราต่อ kWh</string>
+    <string name="manage_currency">สกุลเงิน</string>
+    <string name="manage_currency_supporting">รหัส ISO เช่น THB</string>
+    <string name="manage_fixed_monthly_charge">ค่าบริการรายเดือนคงที่</string>
+    <string name="manage_billing_day">วันสรุปรอบบิล</string>
+    <string name="manage_billing_day_supporting">1 ถึง 28</string>
+    <string name="manage_monthly_budget">งบประมาณรายเดือน (ไม่บังคับ)</string>
+    <string name="manage_usage_slabs">ขั้นบันไดการใช้งาน</string>
+    <string name="manage_slabs_empty">อัตราคงที่ เพิ่มขั้นบันไดหากราคาค่าไฟเปลี่ยนตามปริมาณที่ใช้ในรอบบิล</string>
+    <string name="manage_slabs_help">อัตราของแต่ละขั้นจะคิดจนถึงขีดจำกัดของขั้นนั้น เว้นขีดจำกัดสุดท้ายว่างไว้สำหรับปริมาณที่เกินทั้งหมด</string>
+    <string name="manage_up_to_kwh">ไม่เกิน kWh</string>
+    <string name="manage_slab_rate">อัตรา</string>
+    <string name="manage_remove_slab">ลบขั้นอัตรา %1$d</string>
+    <string name="manage_add_slab">เพิ่มขั้นอัตรา</string>
+    <string name="manage_time_of_day">ช่วงเวลาของวัน</string>
+    <string name="manage_time_of_day_help">ชั่วโมงที่ค่าไฟต่อหน่วยแพงกว่าหรือถูกกว่าอัตราด้านบน ตามเวลาของบ้าน ป้อนส่วนต่างต่อ kWh: 1.1 สำหรับค่าไฟช่วงพีค, -1.5 สำหรับส่วนลดช่วงกลางคืน</string>
+    <string name="manage_window_from">ตั้งแต่</string>
+    <string name="manage_window_until">ถึง</string>
+    <string name="manage_window_per_kwh">ต่อ kWh</string>
+    <string name="manage_remove_time_window">ลบช่วงเวลา %1$d</string>
+    <string name="manage_add_time_window">เพิ่มช่วงเวลา</string>
+    <string name="manage_server_addresses_title">ที่อยู่เซิร์ฟเวอร์</string>
+    <string name="manage_server_addresses_help">Domus จะใช้ที่อยู่เครือข่ายในบ้านเมื่อเชื่อมต่อเครือข่ายเดียวกัน และใช้ที่อยู่ระยะไกลเมื่ออยู่ที่อื่น คุณจะยังคงอยู่ในระบบทั้งสองที่</string>
+    <string name="manage_home_network">เครือข่ายในบ้าน</string>
+    <string name="manage_home_network_supporting">ตัวอย่างเช่น https://192.168.1.10:8443</string>
+    <string name="manage_remote">ระยะไกล</string>
+    <string name="manage_remote_supporting">ตัวอย่างเช่น โฮสต์เนมของ Cloudflare Tunnel</string>
+    <string name="manage_not_set">ยังไม่ได้ตั้งค่า</string>
+    <string name="manage_location_disabled">ตำแหน่งที่ตั้งถูกปิดอยู่บนโทรศัพท์เครื่องนี้ โปรดค้นหาสถานที่แทน</string>
+    <string name="manage_location_not_found">โทรศัพท์เครื่องนี้ไม่สามารถระบุตำแหน่งได้ โปรดค้นหาสถานที่แทน</string>
+    <string name="manage_location_permission_denied">หากไม่ให้สิทธิ์เข้าถึงตำแหน่งที่ตั้ง โปรดค้นหาสถานที่หรือพิมพ์พิกัดแทน</string>
+    <string name="manage_location_title">ตำแหน่งที่ตั้งบ้าน</string>
+    <string name="manage_location_sun_times">วันนี้พระอาทิตย์ขึ้นเวลา %1$s และตกเวลา %2$s</string>
+    <string name="manage_location_help">การทำงานอัตโนมัติสามารถทำงานเมื่อพระอาทิตย์ขึ้นและตกได้เมื่อ Domus ทราบตำแหน่งคร่าวๆ ของบ้าน ข้อมูลนี้จะอยู่บนเซิร์ฟเวอร์ของคุณเท่านั้น</string>
+    <string name="manage_use_phone_location">ใช้ตำแหน่งที่ตั้งของโทรศัพท์เครื่องนี้</string>
+    <string name="manage_find_place">ค้นหาสถานที่</string>
+    <string name="manage_find_place_supporting">เมืองหรืออำเภอ</string>
+    <string name="manage_search_place">ค้นหาสถานที่</string>
+    <string name="manage_no_place_found">ไม่พบสถานที่ชื่อนั้น โปรดลองชื่อเมืองใกล้เคียง</string>
+    <string name="manage_latitude">ละติจูด</string>
+    <string name="manage_latitude_supporting">ตัวอย่างเช่น 18.52</string>
+    <string name="manage_longitude">ลองจิจูด</string>
+    <string name="manage_longitude_supporting">ตัวอย่างเช่น 73.86</string>
+    <string name="manage_change_password_title">เปลี่ยนรหัสผ่าน</string>
+    <string name="manage_change_password_help">คุณจะยังคงอยู่ในระบบบนอุปกรณ์นี้และอุปกรณ์อื่นๆ ทั้งหมด</string>
+    <string name="manage_current_password">รหัสผ่านปัจจุบัน</string>
+    <string name="manage_repeat_new_password">ป้อนรหัสผ่านใหม่อีกครั้ง</string>
+    <string name="manage_passwords_mismatch">รหัสผ่านไม่ตรงกัน</string>
+    <string name="manage_delete_all_notices_title">ลบการแจ้งเตือนทั้งหมดหรือไม่?</string>
+    <string name="manage_delete_all_notices_text">การแจ้งเตือนจะถูกลบออกในทุกอุปกรณ์</string>
+    <string name="manage_delete_all">ลบทั้งหมด</string>
+    <string name="manage_notifications_title">การแจ้งเตือน</string>
+    <string name="manage_mark_all_read">ทำเครื่องหมายว่าอ่านทั้งหมดแล้ว</string>
+    <string name="manage_no_notices">ยังไม่มีการแจ้งเตือน</string>
+    <string name="manage_no_notices_subtitle">การแจ้งเตือนจากการทำงานอัตโนมัติ อุปกรณ์ใหม่ และอุปกรณ์ออฟไลน์จะปรากฏที่นี่</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">รหัส QR สำหรับสแกนด้วยแอป Smart Life</string>
+    <string name="onboard_region_india">อินเดีย</string>
+    <string name="onboard_region_china">จีน</string>
+    <string name="onboard_region_europe">ยุโรป</string>
+    <string name="onboard_region_us">สหรัฐอเมริกา</string>
+    <string name="onboard_region_singapore">สิงคโปร์</string>
+    <string name="onboard_region_russia">รัสเซีย</string>
+    <string name="onboard_region_taiwan">ไต้หวัน</string>
+    <string name="onboard_region_india_old">อินเดีย (เก่า)</string>
+    <string name="onboard_plugins_title">ปลั๊กอิน</string>
+    <string name="onboard_local_control">การควบคุมภายในเครือข่าย</string>
+    <string name="onboard_cloud">คลาวด์</string>
+    <plurals name="onboard_device_count">
+        <item quantity="other">%1$d อุปกรณ์</item>
+    </plurals>
+    <string name="onboard_account_linked">เชื่อมต่อแล้ว</string>
+    <string name="onboard_account_needs_attention">ต้องตรวจสอบ</string>
+    <string name="onboard_unlink_account">ยกเลิกการเชื่อมต่อ %1$s</string>
+    <string name="onboard_integration_disabled">ถูกปิดไว้ในการตั้งค่าเซิร์ฟเวอร์</string>
+    <string name="onboard_link_account">เชื่อมต่อบัญชี</string>
+    <string name="onboard_link_another_account">เชื่อมต่อบัญชีอื่น</string>
+    <string name="onboard_find_devices">ค้นหาอุปกรณ์</string>
+    <string name="onboard_unlink_title">ยกเลิกการเชื่อมต่อ %1$s หรือไม่?</string>
+    <string name="onboard_unlink_text">อุปกรณ์ที่มาจากบัญชีนี้จะถูกลบออกจาก Domus</string>
+    <string name="onboard_unlink">ยกเลิกการเชื่อมต่อ</string>
+    <string name="onboard_link_integration">เชื่อมต่อ %1$s</string>
+    <string name="onboard_tuya_qr_instructions">สแกนรหัสนี้ด้วยแอป Smart Life หรือ Tuya Smart (ปุ่มสแกนในหน้าแรกของแอป) แล้วกดยืนยัน หากใช้โทรศัพท์เครื่องเดียวกัน ให้แสดงรหัสนี้บนหน้าจออื่น</string>
+    <string name="onboard_waiting_for_scan">กำลังรอการสแกน…</string>
+    <string name="onboard_tuya_user_code_instructions">ในแอป Smart Life ให้เปิด ฉัน (Me) → การตั้งค่า (Settings) → บัญชีและความปลอดภัย (Account and Security) → รหัสผู้ใช้ (User Code) แล้วพิมพ์รหัสนั้นที่นี่</string>
+    <string name="onboard_user_code">รหัสผู้ใช้ (User Code)</string>
+    <string name="onboard_qr_expired">รหัส QR นั้นหมดอายุแล้ว โปรดลองอีกครั้ง</string>
+    <string name="onboard_verify_title">ยืนยันว่าเป็นคุณ</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi ได้ส่งรหัสยืนยันไปยังโทรศัพท์ของคุณแล้ว โปรดพิมพ์รหัสที่นี่ รหัสจะหมดอายุในไม่กี่นาที</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi ได้ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว โปรดพิมพ์รหัสที่นี่ รหัสจะหมดอายุในไม่กี่นาที</string>
+    <string name="onboard_verification_code">รหัสยืนยัน</string>
+    <string name="onboard_send_new_code">ส่งรหัสใหม่</string>
+    <string name="onboard_use_another_account">ใช้บัญชีอื่น</string>
+    <string name="onboard_tapo_instructions">ลงชื่อเข้าใช้ด้วยบัญชี TP-Link ของคุณ เพื่อใช้สื่อสารกับอุปกรณ์ Tapo ในเครือข่ายของคุณ</string>
+    <string name="onboard_xiaomi_instructions">ลงชื่อเข้าใช้ด้วยบัญชี Xiaomi ของคุณ ระบบจะดึงโทเค็นอุปกรณ์เพียงครั้งเดียว และการควบคุมจะทำภายในเครือข่าย Xiaomi อาจส่งรหัสยืนยันให้คุณ</string>
+    <string name="onboard_xiaomi_username">อีเมล โทรศัพท์ หรือ Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">หมายเลขโทรศัพท์ต้องมีรหัสประเทศ เช่น +66…</string>
+    <string name="onboard_email_or_username">อีเมลหรือชื่อผู้ใช้</string>
+    <string name="onboard_password">รหัสผ่าน</string>
+    <string name="onboard_server_region">ภูมิภาคของเซิร์ฟเวอร์</string>
+    <string name="onboard_show_qr_code">แสดงรหัส QR</string>
+    <string name="onboard_verify">ยืนยัน</string>
+    <string name="onboard_continue">ดำเนินการต่อ</string>
+    <string name="onboard_link">เชื่อมต่อ</string>
+    <string name="onboard_add_devices_title">เพิ่มอุปกรณ์</string>
+    <string name="onboard_scanning">กำลังสแกน…</string>
+    <string name="onboard_scan_again">สแกนอีกครั้ง</string>
+    <string name="onboard_add_by_address">เพิ่มด้วยที่อยู่ IP</string>
+    <string name="onboard_no_new_devices">ไม่มีอุปกรณ์ใหม่</string>
+    <string name="onboard_no_new_devices_subtitle">อุปกรณ์ที่พบทั้งหมดอยู่ในบ้านของคุณแล้ว เชื่อมต่อบัญชีในเมนูปลั๊กอินเพื่อค้นหาเพิ่มเติม</string>
+    <string name="onboard_open_plugins">เปิดปลั๊กอิน</string>
+    <string name="onboard_found_count">พบ %1$d รายการ</string>
+    <string name="onboard_add">เพิ่ม</string>
+    <string name="onboard_ignore">ละเว้น</string>
+    <string name="onboard_add_device_title">เพิ่ม %1$s</string>
+    <string name="onboard_field_name">ชื่อ</string>
+    <string name="onboard_field_room">ห้อง</string>
+    <string name="onboard_no_room">ไม่มีห้อง</string>
+    <string name="onboard_device_token_optional">โทเค็นอุปกรณ์ (ไม่บังคับ)</string>
+    <string name="onboard_device_token_supporting">จำเป็นเฉพาะเมื่อไม่ได้เชื่อมต่อบัญชี Xiaomi เท่านั้น</string>
+    <string name="onboard_ip_address">ที่อยู่ IP</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">มีอยู่แล้ว</string>
+    <string name="code_error_reference_missing" formatted="false">ไม่มีรายการที่อ้างอิงอยู่</string>
+    <string name="code_error_internal" formatted="false">ข้อผิดพลาดภายในเซิร์ฟเวอร์</string>
+    <string name="code_error_session_expired" formatted="false">เซสชันไม่ถูกต้องหรือหมดอายุแล้ว</string>
+    <string name="code_error_admin_required" formatted="false">ต้องใช้สิทธิ์ผู้ดูแลระบบ</string>
+    <string name="code_error_guest_no_control" formatted="false">ผู้เยี่ยมชมไม่สามารถควบคุมอุปกรณ์ได้</string>
+    <string name="code_error_not_signed_in" formatted="false">ยังไม่ได้ลงชื่อเข้าใช้</string>
+    <string name="code_error_missing_auth" formatted="false">ไม่มีส่วนหัว Authorization</string>
+    <string name="code_error_account_gone" formatted="false">บัญชีไม่มีอยู่อีกต่อไป</string>
+    <string name="code_error_must_change_password" formatted="false">โปรดเปลี่ยนรหัสผ่านของคุณก่อน</string>
+    <string name="code_error_device_not_found" formatted="false">ไม่พบอุปกรณ์</string>
+    <string name="code_error_empty_command" formatted="false">คำสั่งว่างเปล่า</string>
+    <string name="code_error_scan_running" formatted="false">กำลังสแกนอยู่แล้ว</string>
+    <string name="code_error_discovered_not_found" formatted="false">ไม่พบอุปกรณ์ที่ตรวจพบ</string>
+    <string name="code_error_device_already_added" formatted="false">เพิ่มอุปกรณ์นี้แล้ว</string>
+    <string name="code_error_username_too_short" formatted="false">ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร</string>
+    <string name="code_error_password_too_short" formatted="false">รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร</string>
+    <string name="code_error_setup_already_done" formatted="false">การตั้งค่าเสร็จสมบูรณ์แล้ว</string>
+    <string name="code_error_invalid_credentials" formatted="false">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</string>
+    <string name="code_error_invalid_reset_code" formatted="false">รหัสนั้นไม่ถูกต้องหรือหมดอายุแล้ว โปรดขอรหัสใหม่จากผู้ดูแลระบบ</string>
+    <string name="code_error_wrong_current_password" formatted="false">รหัสผ่านปัจจุบันไม่ถูกต้อง</string>
+    <string name="code_error_same_password" formatted="false">โปรดเลือกรหัสผ่านที่ต่างจากรหัสผ่านปัจจุบัน</string>
+    <string name="code_error_avatar_too_long" formatted="false">ข้อความอวตารยาวเกินไป</string>
+    <string name="code_error_name_required" formatted="false">จำเป็นต้องระบุชื่อ</string>
+    <string name="code_error_trigger_required" formatted="false">เพิ่มตัวกระตุ้นอย่างน้อยหนึ่งรายการ</string>
+    <string name="code_error_action_required" formatted="false">เพิ่มการกระทำอย่างน้อยหนึ่งรายการ</string>
+    <string name="code_error_sun_offset_range" formatted="false">เวลาพระอาทิตย์ขึ้นและตกสามารถเลื่อนได้ไม่เกิน 6 ชั่วโมง</string>
+    <string name="code_error_automation_not_found" formatted="false">ไม่พบการทำงานอัตโนมัติ</string>
+    <string name="code_error_cannot_edit_device" formatted="false">คุณไม่สามารถแก้ไขอุปกรณ์นี้ได้</string>
+    <string name="code_error_admin_only_move_room" formatted="false">เฉพาะผู้ดูแลระบบเท่านั้นที่ย้ายอุปกรณ์ไปห้องอื่นได้</string>
+    <string name="code_error_name_empty" formatted="false">ชื่อต้องไม่ว่างเปล่า</string>
+    <string name="code_error_view_only_device" formatted="false">คุณสามารถดูอุปกรณ์นี้ได้แต่ไม่สามารถควบคุมได้</string>
+    <string name="code_error_view_only_devices" formatted="false">คุณสามารถดูอุปกรณ์เหล่านี้ได้แต่ไม่สามารถควบคุมได้</string>
+    <string name="code_error_negative_rate" formatted="false">อัตราค่าไฟต้องไม่ติดลบ</string>
+    <string name="code_error_invalid_billing_day" formatted="false">วันสรุปรอบบิลต้องอยู่ระหว่าง 1 ถึง 28</string>
+    <string name="code_error_invalid_currency" formatted="false">สกุลเงินต้องเป็นรหัส ISO 3 ตัวอักษร</string>
+    <string name="code_error_slab_order" formatted="false">แต่ละขั้นอัตราต้องสิ้นสุดด้วยค่าที่มากกว่าขั้นก่อนหน้า</string>
+    <string name="code_error_slab_open_ended" formatted="false">เฉพาะขั้นอัตราสุดท้ายเท่านั้นที่เว้นค่าสูงสุดว่างไว้ได้</string>
+    <string name="code_error_tou_format" formatted="false">ช่วงเวลาตามการใช้งานต้องระบุเวลาเริ่มต้นและสิ้นสุดในรูปแบบ HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">ช่วงเวลาตามการใช้งานไม่สามารถเริ่มต้นและสิ้นสุดในเวลาเดียวกันได้</string>
+    <string name="code_error_tou_overlap" formatted="false">ช่วงเวลาตามการใช้งานต้องไม่ซ้อนทับกัน</string>
+    <string name="code_error_group_not_found" formatted="false">ไม่พบกลุ่ม</string>
+    <string name="code_error_account_not_found" formatted="false">ไม่พบบัญชี</string>
+    <string name="code_error_tuya_disabled" formatted="false">การเชื่อมต่อ Tuya ถูกปิดใช้งาน</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">ป้อนรหัสผู้ใช้ (User Code) จากแอป Smart Life</string>
+    <string name="code_error_credentials_required" formatted="false">จำเป็นต้องใช้อีเมลและรหัสผ่าน</string>
+    <string name="code_error_verification_expired" formatted="false">การยืนยันหมดอายุแล้ว โปรดลงชื่อเข้าใช้อีกครั้ง</string>
+    <string name="code_error_invalid_port" formatted="false">พอร์ตต้องเป็นตัวเลข</string>
+    <string name="code_error_broker_required" formatted="false">ป้อนที่อยู่โบรกเกอร์</string>
+    <string name="code_error_hue_disabled" formatted="false">การเชื่อมต่อ Philips Hue ถูกปิดใช้งาน</string>
+    <string name="code_error_room_name_required" formatted="false">จำเป็นต้องระบุชื่อห้อง</string>
+    <string name="code_error_room_not_found" formatted="false">ไม่พบห้อง</string>
+    <string name="code_error_sync_lights_required" formatted="false">เลือกหลอดไฟเพื่อซิงค์อย่างน้อยหนึ่งดวง</string>
+    <string name="code_error_scene_not_found" formatted="false">ไม่พบซีน</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">ซิงค์หน้าจอจำเป็นต้องมีหน้าจอที่จะแชร์ โปรดเริ่มใช้งานจากแอป Domus บนอุปกรณ์ที่แสดงเนื้อหา</string>
+    <string name="code_error_place_search_unreachable" formatted="false">ไม่สามารถเข้าถึงบริการค้นหาสถานที่ได้ โปรดป้อนละติจูดและลองจิจูดแทน</string>
+    <string name="code_error_invalid_coordinates" formatted="false">ละติจูดต้องอยู่ระหว่าง -90 ถึง 90 และลองจิจูดต้องอยู่ระหว่าง -180 ถึง 180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">ที่อยู่อีเมลที่แนะนำทั้งหมดสำหรับชื่อผู้ใช้นั้นถูกใช้ไปแล้ว</string>
+    <string name="code_error_invalid_role" formatted="false">บทบาทต้องเป็น admin, member หรือ guest</string>
+    <string name="code_error_kid_password_required" formatted="false">บัญชีเด็กจำเป็นต้องมีรหัสผ่าน</string>
+    <string name="code_error_email_taken" formatted="false">อีเมลนั้นถูกใช้โดยบัญชีอื่นแล้ว</string>
+    <string name="code_error_user_not_found" formatted="false">ไม่พบผู้ใช้</string>
+    <string name="code_error_last_admin" formatted="false">ต้องมีผู้ดูแลระบบอย่างน้อยหนึ่งคน</string>
+    <string name="code_error_cannot_delete_self" formatted="false">คุณไม่สามารถลบบัญชีของตัวเองได้</string>
+    <string name="code_error_hue_press_button" formatted="false">กดปุ่มกลมบน Hue Bridge แล้วเชื่อมต่อใหม่อีกครั้งภายใน 30 วินาที</string>
+    <string name="code_error_hue_not_found" formatted="false">ไม่พบ Hue Bridge โปรดป้อนที่อยู่ IP</string>
+    <string name="code_error_tuya_device_gone" formatted="false">ไม่มีอุปกรณ์ใน Smart Life อีกต่อไป</string>
+    <string name="code_error_device_token_required" formatted="false">จำเป็นต้องใช้โทเค็นอุปกรณ์</string>
+    <string name="code_error_hue_link_expired" formatted="false">การยืนยันตัวตนล้มเหลว: Hue Bridge ไม่ยอมรับการเชื่อมต่อนี้อีกต่อไป โปรดเชื่อมต่อใหม่</string>
+    <string name="code_error_hue_removed" formatted="false">การยืนยันตัวตนล้มเหลว: ลบ Hue Bridge ออกแล้ว</string>
+    <string name="code_error_mqtt_removed" formatted="false">การยืนยันตัวตนล้มเหลว: ลบโบรกเกอร์ MQTT ออกแล้ว</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">การยืนยันตัวตนล้มเหลว: อุปกรณ์ปฏิเสธอีเมล/รหัสผ่านบัญชี TP-Link ของคุณ</string>
+    <string name="code_error_tapo_account_required" formatted="false">การยืนยันตัวตนล้มเหลว: เพิ่มบัญชี TP-Link ของคุณเพื่อควบคุมอุปกรณ์ Tapo</string>
+    <string name="code_error_tapo_removed" formatted="false">การยืนยันตัวตนล้มเหลว: ลบบัญชี TP-Link ออกแล้ว</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">การยืนยันตัวตนล้มเหลว: Xiaomi ขอให้ยืนยัน Captcha โปรดลงชื่อเข้าใช้หนึ่งครั้งในแอป Mi Home หรือเบราว์เซอร์ แล้วลองอีกครั้ง</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">การยืนยันตัวตนล้มเหลว: ชื่อผู้ใช้หรือรหัสผ่าน Xiaomi ไม่ถูกต้อง</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">การยืนยันตัวตนล้มเหลว: รหัสยืนยันไม่ถูกต้องหรือหมดอายุ</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">การยืนยันตัวตนล้มเหลว: Xiaomi ไม่ยอมรับรหัส</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">การยืนยันตัวตนล้มเหลว: เซสชัน Xiaomi หมดอายุแล้ว</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">การยืนยันตัวตนล้มเหลว: Xiaomi ต้องการรหัสยืนยัน โปรดเชื่อมต่อบัญชีอีกครั้งในเมนูการเชื่อมต่อ</string>
+    <string name="code_error_unsupported_command" formatted="false">ไม่รองรับ: อุปกรณ์นี้ไม่รองรับคำสั่งดังกล่าว</string>
+    <string name="code_error_unsupported_effect" formatted="false">ไม่รองรับ: หลอดไฟนี้ไม่สามารถเล่นเอฟเฟกต์ดังกล่าวได้</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">ไม่รองรับ: อุปกรณ์ Xiaomi รุ่นนี้ไม่มีข้อมูลจำเพาะ MIoT</string>
+    <string name="code_error_rate_limited_one" formatted="false">ป้อนรหัสผ่านผิดเกินจำนวนครั้งที่กำหนด โปรดลองอีกครั้งใน {count} นาที</string>
+    <string name="code_error_rate_limited_other" formatted="false">ป้อนรหัสผ่านผิดเกินจำนวนครั้งที่กำหนด โปรดลองอีกครั้งใน {count} นาที</string>
+    <string name="code_error_integration_disabled" formatted="false">การเชื่อมต่อ \'{integration}\' ไม่ได้เปิดใช้งาน</string>
+    <string name="code_error_invalid_time" formatted="false">เวลา \'{time}\' ไม่ถูกต้อง โปรดใช้รูปแบบ HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">การกระทำไม่ถูกต้อง: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">ภูมิภาคต้องเป็นหนึ่งใน {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">การตั้งค่าซิงค์หน้าจอไม่ถูกต้อง: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">ไม่รู้จักประเภทซีน \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" ไม่ใช่ที่อยู่เซิร์ฟเวอร์</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">การยืนยันตัวตนล้มเหลว: Xiaomi ไม่สามารถส่งรหัสยืนยันได้: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">การยืนยันตัวตนล้มเหลว: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">ไม่รองรับ: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">ยืนยันการสลับสถานะ {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">เพิ่มอุปกรณ์ใหม่แล้ว</string>
+    <string name="code_notification_device_added" formatted="false">พบและเพิ่ม {name} ({integration}) โดยอัตโนมัติแล้ว</string>
+    <string name="code_notification_device_found_title" formatted="false">พบอุปกรณ์ใหม่</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) พร้อมให้เพิ่มแล้ว</string>
+    <string name="code_notification_password_reset_title" formatted="false">มีการขอรีเซ็ตรหัสผ่าน</string>
+    <string name="code_notification_password_reset" formatted="false">{username} ลืมรหัสผ่าน ผู้ดูแลระบบสามารถออกรหัสรีเซ็ตให้ได้ในการตั้งค่า ภายใต้เมนูผู้คนและสิทธิ์การเข้าถึง</string>
+    <string name="code_notification_automation_failed_title" formatted="false">การทำงานอัตโนมัติ \"{name}\" มีปัญหา</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>
