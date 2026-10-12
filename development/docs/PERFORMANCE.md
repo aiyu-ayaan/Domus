@@ -70,6 +70,8 @@ the run ends, which deletes its session on that device. `pnpm android:dev` after
 - The Markdown parser for release notes (`react-markdown`, `remark-gfm`, about 160 kB) is its own chunk,
   loaded the first time notes are drawn (`lib/releases.tsx`). `UpdatePrompt` sits in the shell, so it must
   keep importing the lazy wrapper and never `components/ReleaseNotes` directly.
+- Only the English catalog is in the entry. The other 26 are one chunk each, and `lib/i18n.ts` fetches the one in use
+  (`LOCALIZATION.md` section 2). Never import a `locales/*.json` other than `en.json` directly.
 - Before adding a dependency to something imported by `main.tsx`, `App.tsx` or `AppShell`, check the entry
   size in the `pnpm build` output.
 

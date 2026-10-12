@@ -200,6 +200,7 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
   the predictive gesture. An account on a generated password gets `ChangePasswordScreen` before `MainScreen`;
   the repository loads nothing until it is done. In the person editor an administrator switches "Kid's
   account" and "Reset code" and passes the secret on from the `Handover` dialog (Copy, Share). See `ACCOUNTS.md`.
+- **Language** — follows the phone; Settings > Language (`LanguagePage` in `AppLocale.kt`, page key `language`) picks one of the 27. How it is applied: `LOCALIZATION.md` section 3.
 - **Color** — wallpaper colors on Android 12+, a green fallback scheme otherwise; light/dark/system.
 - **Accessibility** — decorative motion stops when system animations are off; controls are 48dp+, switches
   and swatches carry descriptions; content is capped at 840dp on wide windows.
