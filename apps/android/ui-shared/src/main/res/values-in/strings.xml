@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Roda warna</string>
+    <string name="ui_expanded">Diperluas</string>
+    <string name="ui_collapsed">Diciutkan</string>
+    <string name="ui_collapse">Ciutkan</string>
+    <string name="ui_expand">Perluas</string>
+</resources>
