@@ -16,6 +16,7 @@ Home Assistant discovery).
 - Electricity billing with flat, slab and **time-of-day** tariffs in any currency
 - Multiple users with admin / member / guest roles and access per room or per device, each see-only, control or edit
 - Web, Electron desktop (Linux, Windows) and a native Android app, kept in sync live
+- **27 languages** in the web, desktop and Android apps, following your system's language with a picker in Settings; right to left for Arabic and Urdu
 - An Updates page with the release notes (Markdown, tables and images) in every app
 - HTTPS by default; credentials and device keys encrypted at rest; one-file backup and restore
 
@@ -353,6 +354,20 @@ Domus has no mail server, so nothing is sent by email. In order of effort:
 Five wrong passwords for a username lock that name for 15 minutes in production (the lock is lifted by
 restarting the server, and is off in development). Details and the rules for generated passwords and kid's
 accounts: [development/docs/ACCOUNTS.md](development/docs/ACCOUNTS.md).
+
+## Languages
+
+English, Hindi, Spanish, Portuguese (Brazil), Indonesian, Arabic, French, Russian, German, Turkish, Japanese, Korean,
+Italian, Vietnamese, Thai, Chinese (Simplified and Traditional), Polish, Bengali, Tamil, Telugu, Marathi, Gujarati,
+Kannada, Malayalam, Punjabi and Urdu. Arabic and Urdu are laid out right to left.
+
+Each app follows the language of your browser or system, and shows English when it has no translation for it. To choose
+another one, open Settings > Language (Appearance on web and desktop); *System default* goes back to following the system.
+On Android 13 and later it also appears under the phone's Settings > Apps > Domus > Language.
+
+The translations are machine-made and have not been reviewed by native speakers, so wording may be off. A fix is a one-line
+change in the language's catalog. How the languages work, how to add one and the rules for new text:
+[development/docs/LOCALIZATION.md](development/docs/LOCALIZATION.md).
 
 ## Connecting devices
 

@@ -1,16 +1,17 @@
 # Language entries
 
-Target set, same as Rewire (`../Rewire/development/docs/LOCALIZATION.md`): en, hi, es, pt-BR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, zh-CN, zh-TW, pl, bn, ta, te, mr, gu, kn, ml, pa, ur. English is the source and the fallback.
+The 27 languages Domus ships (English is the source and the fallback). How they are detected, picked and laid out, and how to
+add one: [`../docs/LOCALIZATION.md`](../docs/LOCALIZATION.md), section 3. Machine translation, no native review yet.
 
 Each language has one entry per platform:
 
-| Platform | Catalog to add | Register in |
+| Platform | Catalog | Registered in |
 |---|---|---|
-| Web | `apps/web/src/locales/<tag>.json` (copy `en.json`) | `catalogs` in `apps/web/src/lib/i18n.ts` |
-| Desktop | `apps/desktop/src/locales/<tag>.json` (copy `en.json`) | catalogs in `apps/desktop/src/i18n.js` |
-| Android | `apps/android/app/src/main/res/values-<xx>/strings.xml` (and `ui-shared` strings) | `localeFilters` / locale config in Gradle |
+| Web | `apps/web/src/locales/<tag>.json` | picked up by file name (`import.meta.glob` in `lib/i18n.ts`); add a right-to-left tag to `RTL` |
+| Desktop | `apps/desktop/src/locales/<tag>.json` | `catalogs` in `apps/desktop/src/i18n.js` |
+| Android | `apps/android/app/src/main/res/values-<xx>/strings.xml` in `app` and `ui-shared` | `AppLocale.tags` and `localeFilters` in `app/build.gradle.kts` |
 
-Status (tick when done):
+Status:
 - [x] `hi` — Hindi (`values-hi`)
 - [x] `es` — Spanish (`values-es`)
 - [x] `pt-BR` — Portuguese (Brazil) (`values-pt-rBR`)
@@ -38,4 +39,4 @@ Status (tick when done):
 - [x] `pa` — Punjabi (`values-pa`)
 - [x] `ur` — Urdu (`values-ur`)
 
-The prompt for the agent doing the work is in `PROMPT.md`.
+`PROMPT.md` is the prompt that was used to produce these catalogs. Reuse it to translate a new language or to fill keys added later.
