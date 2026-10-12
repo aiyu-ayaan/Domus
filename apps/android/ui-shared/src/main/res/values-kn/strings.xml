@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">ಬಣ್ಣದ ಚಕ್ರ</string>
+    <string name="ui_expanded">ವಿಸ್ತರಿಸಲಾಗಿದೆ</string>
+    <string name="ui_collapsed">ಕುಗ್ಗಿಸಲಾಗಿದೆ</string>
+    <string name="ui_collapse">ಕುಗ್ಗಿಸಿ</string>
+    <string name="ui_expand">ವಿಸ್ತರಿಸಿ</string>
+</resources>
