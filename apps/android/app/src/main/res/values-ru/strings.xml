@@ -1,0 +1,959 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">Отлично</string>
+    <string name="air_good">Хорошо</string>
+    <string name="air_moderate">Умеренно</string>
+    <string name="air_poor">Плохо</string>
+    <string name="channel_stable">Стабильный</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">Этот компьютер</string>
+    <string name="api_untrusted">Сертификат сервера не является доверенным.</string>
+    <string name="api_offline">Не удаётся подключиться к серверу Domus. Проверьте, запущен ли он.</string>
+    <string name="api_bad_response">Сервер прислал ответ, который эта версия приложения не распознаёт.</string>
+    <string name="api_request_failed">Ошибка запроса ({status})</string>
+    <string name="error_no_server">Нет сервера</string>
+    <string name="connect_cert_changed">Сертификат сервера изменился с момента вашего подтверждения. Подключитесь заново, чтобы проверить новый сертификат.</string>
+    <string name="connect_address_invalid">Введите адрес, например 192.168.1.10:8443 или home.example.com. Поддерживается только https.</string>
+    <string name="connect_cert_unreadable">Не удалось прочитать сертификат сервера.</string>
+    <string name="automation_ran">Запущено «{name}»</string>
+    <string name="handover_reset_until">Сброс пароля Domus для %1$s\nКод: %2$s\n\nНа экране входа выберите \"Забыли пароль?\", введите имя пользователя и затем этот код. Он действует один раз, до %3$s.</string>
+    <string name="handover_reset">Сброс пароля Domus для %1$s\nКод: %2$s\n\nНа экране входа выберите \"Забыли пароль?\", введите имя пользователя и затем этот код. Он действует один раз.</string>
+    <string name="handover_signin_kid">Вход в Domus\nАдрес: %1$s\nИмя пользователя: %2$s\nПароль: %3$s</string>
+    <string name="handover_signin">Вход в Domus\nАдрес: %1$s\nИмя пользователя: %2$s\nПароль: %3$s\n\nПри первом входе вам будет предложено задать собственный пароль.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Дом</string>
+    <string name="nav_devices">Устройства</string>
+    <string name="nav_scenes">Сценарии</string>
+    <string name="nav_analytics">Аналитика</string>
+    <string name="nav_settings">Настройки</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">Весь ваш дом в одном приложении</string>
+    <string name="connect_intro_1_body">Лампы, розетки, очистители воздуха и датчики Tuya, Tapo, Xiaomi, Philips Hue и MQTT — всё вместе.</string>
+    <string name="connect_intro_2_title">Приватность по умолчанию</string>
+    <string name="connect_intro_2_body">Domus общается только с сервером у вас дома по зашифрованному соединению. Без облачных аккаунтов.</string>
+    <string name="connect_intro_3_title">Сам находит ваш сервер</string>
+    <string name="connect_intro_3_body">В домашней сети Wi‑Fi приложение само находит сервер. Вне дома просто укажите его адрес.</string>
+    <string name="connect_page_of">Страница %1$d из %2$d</string>
+    <string name="connect_skip">Пропустить</string>
+    <string name="connect_get_started">Начать</string>
+    <string name="connect_next">Далее</string>
+    <string name="connect_welcome_title">Добро пожаловать в Domus</string>
+    <string name="connect_welcome_subtitle">Подключитесь к серверу, который управляет вашим домом.</string>
+    <string name="connect_on_this_network">В этой сети</string>
+    <string name="connect_looking_for_servers">Поиск серверов…</string>
+    <string name="connect_no_server_found">Ни один сервер не ответил. Убедитесь, что телефон подключён к той же сети Wi‑Fi, что и сервер, или введите его адрес ниже.</string>
+    <string name="connect_scan_again">Искать снова</string>
+    <string name="connect_or_enter_address">Или введите адрес</string>
+    <string name="connect_server_address">Адрес сервера</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 или home.example.com</string>
+    <string name="connect_action">Подключиться</string>
+    <string name="connect_trust_title">Доверять этому серверу?</string>
+    <string name="connect_trust_body">%1$s использует самоподписанный сертификат — это нормально для домашнего сервера. Доверяйте ему, только если отпечаток совпадает с тем, который сервер выводит при запуске.</string>
+    <string name="connect_trust_action">Доверять</string>
+    <string name="connect_cancel">Отмена</string>
+    <string name="connect_use_another_server">Использовать другой сервер</string>
+    <string name="connect_unreachable_title">Нет связи с домом</string>
+    <string name="connect_try_again">Повторить</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">Скрыть пароль</string>
+    <string name="auth_show_password">Показать пароль</string>
+    <string name="auth_username">Имя пользователя</string>
+    <string name="auth_new_password">Новый пароль</string>
+    <string name="auth_password_min_length">Не менее 8 символов</string>
+    <string name="auth_confirm_password">Подтвердите пароль</string>
+    <string name="auth_passwords_mismatch">Пароли не совпадают</string>
+    <string name="auth_create_admin_title">Создайте аккаунт администратора</string>
+    <string name="auth_welcome_back_title">С возвращением</string>
+    <string name="auth_create_admin_subtitle">Это новый сервер. Первая учётная запись управляет всем домом.</string>
+    <string name="auth_welcome_back_subtitle">Войдите в свой дом.</string>
+    <string name="auth_encrypted_connection">Зашифрованное соединение с</string>
+    <string name="auth_email">Эл. почта</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_forgot_password">Забыли пароль?</string>
+    <string name="auth_forgot_title">Забыли пароль?</string>
+    <string name="auth_forgot_subtitle">Domus не отправляет писем. Вместо этого уведомление получит администратор дома и передаст вам одноразовый код.</string>
+    <string name="auth_ask_admin">Запросить у администратора</string>
+    <string name="auth_back_to_sign_in">Назад ко входу</string>
+    <string name="auth_reset_code_title">Введите код сброса</string>
+    <string name="auth_reset_code_subtitle">Администратор уведомлён. Попросите у него 8-значный код для %1$s; он действует один раз в течение 30 минут.</string>
+    <string name="auth_reset_code_label">Код сброса</string>
+    <string name="auth_set_password_sign_in">Установить пароль и войти</string>
+    <string name="auth_back">Назад</string>
+    <string name="auth_choose_password_title">Придумайте свой пароль</string>
+    <string name="auth_choose_password_subtitle">Добро пожаловать, %1$s. Пароль, с которым вы вошли, был создан для вас и известен кому-то ещё. Выберите собственный пароль для продолжения.</string>
+    <string name="auth_save_continue">Сохранить и продолжить</string>
+    <string name="auth_sign_out">Выйти</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">Фоновая работа</string>
+    <string name="service_channel_alerts">Оповещения дома</string>
+    <string name="service_listening_alerts">Domus ожидает оповещения</string>
+    <string name="service_screen_sync_title">Синхронизация экрана включена</string>
+    <string name="service_screen_sync_body">Ваши лампы повторяют цвета этого экрана</string>
+    <string name="service_stop">Стоп</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (графика аватаров)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (поиск мест через ваш сервер)</string>
+    <string name="about_lib_home_assistant">Home Assistant (вход Tuya по QR-коду)</string>
+    <string name="about_license_inspiration">Вдохновение</string>
+    <string name="about_version_unknown">неизвестно</string>
+    <string name="about_title">О Domus</string>
+    <string name="about_section_app">Приложение</string>
+    <string name="about_version_build">Версия %1$s · сборка %2$d</string>
+    <string name="about_privacy_title">Конфиденциальность</string>
+    <string name="about_privacy_subtitle">Работает на вашем собственном сервере. Учётные данные хранятся там в зашифрованном виде.</string>
+    <string name="about_source_code">Исходный код</string>
+    <string name="about_section_developer">Разработчик</string>
+    <string name="about_developer_tagline">Спроектировано и создано одним разработчиком.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">Портфолио</string>
+    <string name="about_section_open_source">Открытый исходный код</string>
+    <string name="about_acknowledgements">Благодарности</string>
+    <string name="about_acknowledgements_subtitle">Библиотеки и проекты, на которых построен Domus</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Доступен Domus %1$s</string>
+    <string name="update_download_failed_retry_prompt">Не удалось скачать обновление. Повторить?</string>
+    <string name="update_prompt_body">У вас установлена версия %1$s. Примечания к выпуску и канал обновлений находятся в разделе «Настройки» → «Обновления».</string>
+    <string name="update_downloading_percent">Загрузка %1$d%%</string>
+    <string name="update_action">Обновить</string>
+    <string name="update_later">Позже</string>
+    <string name="update_title">Обновления</string>
+    <string name="update_checking">Проверка обновлений…</string>
+    <string name="update_check_failed">Не удалось проверить обновления</string>
+    <string name="update_dev_build">Сборка для разработки</string>
+    <string name="update_up_to_date">Установлена последняя версия Domus</string>
+    <string name="update_download_failed_retry">Не удалось скачать обновление. Повторите попытку.</string>
+    <string name="update_check_failed_body">У вас установлена версия %1$s. Проверьте подключение к сети и повторите попытку.</string>
+    <string name="update_dev_build_body">У вас установлена версия %1$s. Сборка для разработки обновляется путём повторной компиляции.</string>
+    <string name="update_you_have">У вас установлена версия %1$s.</string>
+    <string name="update_download_install">Скачать и установить</string>
+    <string name="update_check_again">Проверить снова</string>
+    <string name="update_channel">Канал</string>
+    <string name="update_channel_hint">Каналы Beta и Alpha получают новые сборки раньше, а также все стабильные выпуски.</string>
+    <string name="update_whats_new_in">Что нового в %1$s</string>
+    <string name="update_in_this_version">В этой версии</string>
+    <string name="update_loading_notes">Загрузка примечаний к выпуску…</string>
+    <string name="update_no_notes">Для этой версии нет примечаний к выпуску.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">Роботы</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Искатель приключений</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Пиксель-арт</string>
+    <string name="avatar_style_fun_emoji">Весёлые эмодзи</string>
+    <string name="avatar_style_thumbs">Пальчики</string>
+    <string name="avatar_style_shapes">Фигуры</string>
+    <string name="avatar_style_rings">Кольца</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">Настроить аватар</string>
+    <string name="avatar_save">Сохранить</string>
+    <string name="avatar_seed_value">Ключ: %1$s</string>
+    <string name="avatar_randomize">Случайно</string>
+    <string name="avatar_roll_seed">Случайный ключ</string>
+    <string name="avatar_roll_seed_action">Случайный ключ</string>
+    <string name="avatar_style_label">Стиль аватара</string>
+    <string name="avatar_seed_phrase_label">Ключевая фраза (seed)</string>
+    <string name="avatar_seed_phrase_hint">Введите любое слово, имя или набор символов, чтобы изменить внешний вид аватара.</string>
+    <string name="avatar_seed_label">Ключ</string>
+    <string name="avatar_apply_avatar">Применить аватар</string>
+    <string name="avatar_apply">Применить</string>
+    <string name="avatar_cancel">Отмена</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">Доброй ночи</string>
+    <string name="home_greeting_morning">Доброе утро</string>
+    <string name="home_greeting_afternoon">Добрый день</string>
+    <string name="home_greeting_evening">Добрый вечер</string>
+    <string name="home_got_it">Понятно</string>
+    <string name="home_about_stat">О показателе «%1$s»</string>
+    <string name="home_scene_on_hint">Вкл. · нажмите, чтобы выключить</string>
+    <string name="home_scene_off_hint">Нажмите для запуска</string>
+    <string name="home_change_avatar">Сменить аватар</string>
+    <string name="home_clear_notices_title">Удалить все уведомления?</string>
+    <string name="home_clear_notices_body">Они будут удалены на всех устройствах.</string>
+    <string name="home_delete_all">Удалить все</string>
+    <string name="home_reconnecting">Переподключение…</string>
+    <string name="home_devices_on_of_total">Включено %1$d из %2$d</string>
+    <string name="home_using_now">Сейчас</string>
+    <string name="home_using_now_info">Суммарное текущее энергопотребление всех устройств с измерением мощности.</string>
+    <string name="home_today">Сегодня</string>
+    <string name="home_today_info">Энергия, израсходованная с полуночи. Сумма ниже — расчётная стоимость по вашему тарифу.</string>
+    <string name="home_air_quality">Качество воздуха</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">Сценарии</string>
+    <string name="home_on_right_now">Сейчас включены</string>
+    <string name="home_all_devices">Все устройства</string>
+    <string name="home_no_devices_title">Устройств пока нет</string>
+    <string name="home_no_devices_admin">Откройте «Устройства» и нажмите +, чтобы привязать Tuya, Tapo, Xiaomi, Hue или MQTT.</string>
+    <string name="home_no_devices_member">Попросите администратора добавить устройства или предоставить вам доступ к комнате.</string>
+    <string name="home_everything_off">Всё выключено.</string>
+    <string name="home_rooms">Комнаты</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d устройство · всё выкл.</item>
+        <item quantity="few">%1$d устройства · всё выкл.</item>
+        <item quantity="many">%1$d устройств · всё выкл.</item>
+        <item quantity="other">%1$d устройств · всё выкл.</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d устройство · %2$d вкл.</item>
+        <item quantity="few">%1$d устройства · %2$d вкл.</item>
+        <item quantity="many">%1$d устройств · %2$d вкл.</item>
+        <item quantity="other">%1$d устройств · %2$d вкл.</item>
+    </plurals>
+    <string name="home_recent_activity">Недавние события</string>
+    <string name="home_see_all">Показать все</string>
+
+    <!-- Devices -->
+    <string name="device_title">Устройства</string>
+    <string name="device_online_of_total">%1$d из %2$d в сети</string>
+    <string name="device_add_devices">Добавить устройства</string>
+    <string name="device_filter_all">Все</string>
+    <string name="device_category_lights">Свет</string>
+    <string name="device_category_power">Питание</string>
+    <string name="device_category_air">Воздух</string>
+    <string name="device_category_climate">Климат</string>
+    <string name="device_all_rooms">Все комнаты</string>
+    <string name="device_no_room">Без комнаты</string>
+    <string name="device_manage_rooms">Управление комнатами</string>
+    <string name="device_empty_filtered_title">Здесь пусто</string>
+    <string name="device_empty_filtered_body">Нет устройств, подходящих под выбранную комнату и категорию.</string>
+    <string name="device_empty_admin">Нажмите +, чтобы привязать Tuya, Tapo, Xiaomi, Hue или MQTT и добавить найденные устройства.</string>
+    <string name="device_online">В сети</string>
+    <string name="device_offline">Не в сети</string>
+    <string name="device_on">Вкл.</string>
+    <string name="device_off">Выкл.</string>
+    <string name="device_leak">Протечка</string>
+    <string name="device_motion">Движение</string>
+    <string name="device_motion_detected">Обнаружено</string>
+    <string name="device_clear">Норма</string>
+    <string name="device_open">Открыто</string>
+    <string name="device_closed">Закрыто</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">Питание %1$s</string>
+    <string name="device_refresh_a11y">Обновить %1$s</string>
+    <string name="device_view_only_member">Вы можете просматривать это устройство, но не управлять им.</string>
+    <string name="device_view_only_guest">Гости могут просматривать устройства, но не управлять ими.</string>
+    <string name="device_brightness">Яркость</string>
+    <string name="device_white">Белый</string>
+    <string name="device_white_warm">Тёплый</string>
+    <string name="device_white_neutral">Нейтральный</string>
+    <string name="device_white_cool">Холодный</string>
+    <string name="device_fan_speed">Скорость вентилятора</string>
+    <string name="device_mode">Режим</string>
+    <string name="device_speed">Скорость</string>
+    <string name="device_coverage">Площадь %1$d–%2$d м²</string>
+    <string name="device_reading_power">Мощность</string>
+    <string name="device_reading_voltage">Напряжение</string>
+    <string name="device_reading_current">Сила тока</string>
+    <string name="device_reading_temperature">Температура</string>
+    <string name="device_reading_humidity">Влажность</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">Фильтр</string>
+    <string name="device_filter_left">осталось %1$d%%</string>
+    <string name="device_reading_contact">Дверь или окно</string>
+    <string name="device_reading_water">Вода</string>
+    <string name="device_water_dry">Сухо</string>
+    <string name="device_reading_alarm">Тревога</string>
+    <string name="device_alarm_sounding">Сработала</string>
+    <string name="device_alarm_quiet">Тихо</string>
+    <string name="device_reading_battery">Батарея</string>
+    <string name="device_battery_low">Низкий</string>
+    <string name="device_battery_ok">ОК</string>
+    <string name="device_ask_before_switching">Спрашивать перед переключением</string>
+    <string name="device_ask_before_switching_desc">Предупреждает перед включением или выключением из любого приложения, группы или сценария</string>
+    <string name="device_rename_or_move">Переименовать или переместить</string>
+    <string name="device_rename">Переименовать</string>
+    <string name="device_remove">Удалить</string>
+    <string name="device_edit_title">Редактировать устройство</string>
+    <string name="device_field_name">Название</string>
+    <string name="device_field_room">Комната</string>
+    <string name="device_remove_confirm_title">Удалить %1$s?</string>
+    <string name="device_remove_confirm_body">Устройство будет удалено из вашего дома и сценариев. Вы сможете добавить его снова в разделе «Добавить устройства».</string>
+    <string name="device_white_candle">Свеча</string>
+    <string name="device_white_soft">Мягкий белый</string>
+    <string name="device_white_neutral_preset">Нейтральный белый</string>
+    <string name="device_white_daylight">Дневной свет</string>
+    <string name="device_white_cool_preset">Холодный белый</string>
+    <string name="device_light_off">Свет выключен</string>
+    <string name="device_light_effect">Эффект</string>
+    <string name="device_light_white">Белый свет</string>
+    <string name="device_light_color">Цветной свет</string>
+    <string name="device_light_playing">Воспроизводится: %1$s</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">Цвет</string>
+    <string name="device_effects">Эффекты</string>
+    <string name="device_color_temp">Цветовая температура</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K тёплый</string>
+    <string name="device_kelvin_max">6500K холодный</string>
+    <string name="device_moods">Атмосфера</string>
+    <string name="device_stop_effect">Остановить эффект</string>
+    <string name="device_color_swatch_a11y">Цвет %1$s</string>
+    <string name="device_selected">Выбрано</string>
+    <string name="device_not_selected">Не выбрано</string>
+    <string name="device_confirm_switch_one_title">Переключить %1$s?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">Переключить %1$d устройство?</item>
+        <item quantity="few">Переключить %1$d устройства?</item>
+        <item quantity="many">Переключить %1$d устройств?</item>
+        <item quantity="other">Переключить %1$d устройств?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">Сюда входит %1$s, для которого требуется подтверждение перед переключением. Переключение может обесточить подключённые приборы.</string>
+    <string name="device_confirm_switch_many_body">Сюда входят %1$s, для которых требуется подтверждение перед переключением. Переключение может обесточить подключённые приборы.</string>
+    <string name="device_confirm_switch_action">Переключить</string>
+    <string name="device_cancel">Отмена</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">только что</string>
+    <string name="scene_time_minutes_ago">%1$d мин назад</string>
+    <string name="scene_time_hours_ago">%1$d ч назад</string>
+    <string name="scene_time_days_ago">%1$d дн. назад</string>
+    <string name="scene_edit_item">Редактировать %1$s</string>
+    <string name="scene_title">Сценарии</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">Активно: %1$d · включена %2$d автоматизация</item>
+        <item quantity="few">Активно: %1$d · включены %2$d автоматизации</item>
+        <item quantity="many">Активно: %1$d · включено %2$d автоматизаций</item>
+        <item quantity="other">Активно: %1$d · включено %2$d автоматизаций</item>
+    </plurals>
+    <string name="scene_empty_title">Здесь пока пусто</string>
+    <string name="scene_empty_subtitle">Сценарий настраивает сразу несколько устройств. Автоматизация делает это сама при наступлении заданного события.</string>
+    <string name="scene_new_scene">Новый сценарий</string>
+    <string name="scene_new_automation">Новая автоматизация</string>
+    <string name="scene_new_screen_sync">Новая синхронизация экрана</string>
+    <string name="scene_sync_active_subtitle">Синхронизация экрана · лампы повторяют цвета экрана</string>
+    <string name="scene_sync_inactive_subtitle">Синхронизация экрана · переносит цвета этого экрана на лампы</string>
+    <string name="scene_active">Активно</string>
+    <string name="scene_section_automations">Автоматизации</string>
+    <string name="scene_last_ran">Последний запуск: %1$s</string>
+    <string name="scene_never_ran">Ещё не запускалась</string>
+    <string name="scene_run_now">Запустить %1$s сейчас</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">Пн</string>
+    <string name="editor_day_tue">Вт</string>
+    <string name="editor_day_wed">Ср</string>
+    <string name="editor_day_thu">Чт</string>
+    <string name="editor_day_fri">Пт</string>
+    <string name="editor_day_sat">Сб</string>
+    <string name="editor_day_sun">Вс</string>
+    <string name="editor_prop_temperature">Температура</string>
+    <string name="editor_prop_humidity">Влажность</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">Яркость</string>
+    <string name="editor_prop_power_watts">Мощность (W)</string>
+    <string name="editor_removed_device">удалённое устройство</string>
+    <string name="editor_rule_device_is_off">%1$s выкл.</string>
+    <string name="editor_rule_device_is_on">%1$s вкл.</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s выше %3$s</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s ниже %3$s</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s равно %3$s</string>
+    <string name="editor_rule_time_every_day">В %1$s каждый день</string>
+    <string name="editor_rule_time_on_days">В %1$s по дням: %2$s</string>
+    <string name="editor_sun_event_sunrise">рассвет</string>
+    <string name="editor_sun_event_sunset">закат</string>
+    <string name="editor_rule_sun_at_every_day">Во время события «%1$s» каждый день</string>
+    <string name="editor_rule_sun_at_on_days">Во время события «%1$s» по дням: %2$s</string>
+    <string name="editor_rule_sun_before_every_day">За %1$d мин до события «%2$s» каждый день</string>
+    <string name="editor_rule_sun_before_on_days">За %1$d мин до события «%2$s» по дням: %3$s</string>
+    <string name="editor_rule_sun_after_every_day">Через %1$d мин после события «%2$s» каждый день</string>
+    <string name="editor_rule_sun_after_on_days">Через %1$d мин после события «%2$s» по дням: %3$s</string>
+    <string name="editor_rule_power_above">%1$s потребляет более %2$s W</string>
+    <string name="editor_rule_device_offline">%1$s теряет связь</string>
+    <string name="editor_rule_device_discovered">Обнаружено новое устройство</string>
+    <string name="editor_rule_time_between">С %1$s до %2$s</string>
+    <string name="editor_cmd_on">вкл.</string>
+    <string name="editor_cmd_off">выкл.</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">белый %1$s</string>
+    <string name="editor_device_group">Группа устройств</string>
+    <string name="editor_cmd_custom">пользовательская команда</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">Уведомление: %1$s</string>
+    <string name="editor_removed_scene">(удалён)</string>
+    <string name="editor_rule_scene">Запустить сценарий %1$s</string>
+    <string name="editor_rule_delay">Подождать %1$s с</string>
+    <string name="editor_rule_unknown">Неизвестно</string>
+    <string name="editor_trigger_time">Время</string>
+    <string name="editor_trigger_sun">Рассвет / закат</string>
+    <string name="editor_trigger_device_state">Состояние устройства</string>
+    <string name="editor_trigger_power">Мощность</string>
+    <string name="editor_trigger_offline">Потеря связи</string>
+    <string name="editor_trigger_discovered">Новое устройство</string>
+    <string name="editor_condition_device_state">Состояние устройства</string>
+    <string name="editor_condition_time_between">Временной интервал</string>
+    <string name="editor_action_device">Устройство</string>
+    <string name="editor_action_scene">Сценарий</string>
+    <string name="editor_action_notify">Уведомление</string>
+    <string name="editor_action_delay">Задержка</string>
+    <string name="editor_add">Добавить</string>
+    <string name="editor_field_device">Устройство</string>
+    <string name="editor_sun_sunrise">Рассвет</string>
+    <string name="editor_sun_sunset">Закат</string>
+    <string name="editor_sun_after">После</string>
+    <string name="editor_sun_before">До</string>
+    <string name="editor_field_minutes">Минуты</string>
+    <string name="editor_sun_supporting_sunrise">Оставьте пустым для запуска точно на рассвете. Требуется указать местоположение дома в Настройках.</string>
+    <string name="editor_sun_supporting_sunset">Оставьте пустым для запуска точно на закате. Требуется указать местоположение дома в Настройках.</string>
+    <string name="editor_every_day">Каждый день</string>
+    <string name="editor_chosen_days">Только в выбранные дни</string>
+    <string name="editor_field_is">Равно</string>
+    <string name="editor_state_on">Вкл.</string>
+    <string name="editor_state_off">Выкл.</string>
+    <string name="editor_compare_above">Выше</string>
+    <string name="editor_compare_below">Ниже</string>
+    <string name="editor_field_value">Значение</string>
+    <string name="editor_field_watts">Ватты</string>
+    <string name="editor_time_from">С</string>
+    <string name="editor_time_until">До</string>
+    <string name="editor_power_turn_on">Включить</string>
+    <string name="editor_power_turn_off">Выключить</string>
+    <string name="editor_power_leave">Не менять питание</string>
+    <string name="editor_set_brightness">Изменить яркость</string>
+    <string name="editor_set_brightness_value">Яркость %1$d%%</string>
+    <string name="editor_field_scene">Сценарий</string>
+    <string name="editor_field_title">Заголовок</string>
+    <string name="editor_field_message">Сообщение</string>
+    <string name="editor_field_seconds">Секунды</string>
+    <string name="editor_remove_rule">Удалить: %1$s</string>
+    <string name="editor_style_vivid">Насыщенный</string>
+    <string name="editor_style_dominant">Доминирующий</string>
+    <string name="editor_style_average">Средний</string>
+    <string name="editor_new_screen_sync">Новая синхронизация экрана</string>
+    <string name="editor_new_scene">Новый сценарий</string>
+    <string name="editor_edit_scene">Редактировать сценарий</string>
+    <string name="editor_delete">Удалить</string>
+    <string name="editor_field_name">Название</string>
+    <string name="editor_sync_lights_title">Лампы, повторяющие цвета экрана</string>
+    <string name="editor_sync_no_lights">В вашем доме пока нет ламп.</string>
+    <string name="editor_sync_color_title">Цвет</string>
+    <string name="editor_style_vivid_desc">Самый яркий и насыщенный цвет на экране.</string>
+    <string name="editor_style_dominant_desc">Самый распространённый цвет.</string>
+    <string name="editor_style_average_desc">Средний цвет всей картинки.</string>
+    <string name="editor_region_full">Весь экран</string>
+    <string name="editor_region_edges">Только края</string>
+    <string name="editor_sync_dim_dark">Приглушать в тёмных сценах</string>
+    <string name="editor_sync_restore_lights">Восстанавливать свет после остановки</string>
+    <string name="editor_actions_title">Действия</string>
+    <string name="editor_add_action">Добавить действие</string>
+    <string name="editor_save">Сохранить</string>
+    <string name="editor_delete_confirm_title">Удалить %1$s?</string>
+    <string name="editor_delete_scene_body">Автоматизации, запускающие этот сценарий, будут пропускать его.</string>
+    <string name="editor_new_automation">Новая автоматизация</string>
+    <string name="editor_edit_automation">Редактировать автоматизацию</string>
+    <string name="editor_field_description_optional">Описание (необязательно)</string>
+    <string name="editor_enabled">Включена</string>
+    <string name="editor_triggers_title">Когда происходит любое из событий</string>
+    <string name="editor_add_trigger">Добавить условие запуска</string>
+    <string name="editor_conditions_title">Только если выполняются все условия</string>
+    <string name="editor_add_condition">Добавить проверку</string>
+    <string name="editor_do_this_title">Выполнить действия</string>
+    <string name="editor_delete_automation_body">Она перестанет выполняться.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">Сейчас</string>
+    <string name="analytics_range_hour">1 мин</string>
+    <string name="analytics_range_day">День</string>
+    <string name="analytics_range_week">Неделя</string>
+    <string name="analytics_range_month">Месяц</string>
+    <string name="analytics_bucket_5s">5 секунд</string>
+    <string name="analytics_bucket_minute">минуту</string>
+    <string name="analytics_bucket_hour">час</string>
+    <string name="analytics_bucket_day">день</string>
+    <string name="analytics_title">Аналитика</string>
+    <string name="analytics_subtitle_power">Потребление энергии и стоимость</string>
+    <string name="analytics_subtitle_air">Качество воздуха и очистители</string>
+    <string name="analytics_electricity_tariff">Тариф на электроэнергию</string>
+    <string name="analytics_tab_electricity">Электричество</string>
+    <string name="analytics_tab_air">Воздух</string>
+    <string name="analytics_no_energy_title">Данных об энергии пока нет</string>
+    <string name="analytics_no_energy_subtitle">Показания появятся через минуту после выхода в сеть розетки или реле с энергомониторингом.</string>
+    <string name="analytics_using_now">Сейчас</string>
+    <string name="analytics_projected_cost">Прогноз за расчётный период: %1$s</string>
+    <string name="analytics_today">Сегодня</string>
+    <string name="analytics_today_info">Энергия, израсходованная с полуночи. Сумма ниже — расчётная стоимость по вашему тарифу.</string>
+    <string name="analytics_this_cycle">За период</string>
+    <string name="analytics_this_cycle_info">Израсходованная энергия и расчётная сумма с начала текущего расчётного периода.</string>
+    <string name="analytics_history">История</string>
+    <string name="analytics_nothing_recorded">За этот период пока ничего не записано.</string>
+    <string name="analytics_metric_energy">Энергия</string>
+    <string name="analytics_metric_power">Мощность</string>
+    <string name="analytics_no_reading">Нет данных</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">Средняя мощность за %1$s</string>
+    <string name="analytics_chart_energy_used">Расход энергии за %1$s, всего %2$s</string>
+    <string name="analytics_live_caption">Последние 5 минут, обновление каждые 5 секунд, пока открыт этот экран.</string>
+    <string name="analytics_total_caption">Всего %1$s · %2$s</string>
+    <string name="analytics_insights">Сводка</string>
+    <string name="analytics_peak_hour">Час пик</string>
+    <string name="analytics_peak_last_24h">%1$s за последние 24 ч</string>
+    <string name="analytics_no_usage_yet">Данных о потреблении пока нет</string>
+    <string name="analytics_daily_average">Среднесуточное</string>
+    <string name="analytics_needs_full_day">Нужны данные за полный день</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">За последний %1$d день</item>
+        <item quantity="few">За последние %1$d дня</item>
+        <item quantity="many">За последние %1$d дней</item>
+        <item quantity="other">За последние %1$d дней</item>
+    </plurals>
+    <string name="analytics_today_vs_average">Сегодня по сравнению со средним</string>
+    <string name="analytics_above_usual_day">Выше обычного дневного уровня</string>
+    <string name="analytics_below_usual_day">Ниже обычного дневного уровня</string>
+    <string name="analytics_about_usual_day">Около обычного дневного уровня</string>
+    <string name="analytics_top_device">Главный потребитель</string>
+    <string name="analytics_no_metered_device">Нет устройств с энергомониторингом</string>
+    <string name="analytics_billing_cycle">Расчётный период</string>
+    <string name="analytics_time_elapsed">Прошло времени</string>
+    <string name="analytics_day_of_days">День %1$d из %2$d</string>
+    <string name="analytics_budget_used">Израсходовано бюджета</string>
+    <string name="analytics_cost_of_budget">%1$s из %2$s</string>
+    <string name="analytics_spending_ahead">Расходы опережают график.</string>
+    <string name="analytics_budget_hint">Укажите месячный бюджет в настройках тарифа, чтобы отслеживать расходы.</string>
+    <string name="analytics_by_device">По устройствам</string>
+    <string name="analytics_device_cycle_summary">%1$s · %2$s за этот период</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">Температура</string>
+    <string name="analytics_reading_humidity">Влажность</string>
+    <string name="analytics_pm25_now">PM2.5 сейчас</string>
+    <string name="analytics_air_no_sensor_online">Нет датчиков в сети</string>
+    <string name="analytics_air_status_excellent">Отлично · чистый домашний воздух</string>
+    <string name="analytics_air_status_good">Хорошо · в пределах здоровой нормы</string>
+    <string name="analytics_air_status_moderate">Умеренно · включите очиститель или проветрите комнату</string>
+    <string name="analytics_air_status_poor">Плохо · включите очистители на максимум и закройте окна</string>
+    <string name="analytics_purifiers">Очистители</string>
+    <string name="analytics_running_of_total">%1$d из %2$d</string>
+    <string name="analytics_all_on_standby">Все в режиме ожидания</string>
+    <string name="analytics_running_now">Сейчас работают</string>
+    <string name="analytics_filter_life">Ресурс фильтра</string>
+    <string name="analytics_filter_replace_soon">Скоро замена</string>
+    <string name="analytics_filter_healthy">В норме</string>
+    <string name="analytics_sensors_average">Среднее по вашим датчикам</string>
+    <string name="analytics_humidity_dry">Сухо</string>
+    <string name="analytics_humidity_humid">Влажно</string>
+    <string name="analytics_humidity_comfortable">Комфортно</string>
+    <string name="analytics_trend">Динамика</string>
+    <string name="analytics_no_air_history">Истории пока нет. Показания записываются каждую минуту, пока датчик в сети.</string>
+    <string name="analytics_air_chart_summary">%1$s за %2$s, среднее %3$s</string>
+    <string name="analytics_pm25_dashed_caption">Пунктирные линии: 15 µg/m³ — цель чистого воздуха, 35 µg/m³ — верхняя граница хорошего воздуха.</string>
+    <string name="analytics_period_5m">5 мин</string>
+    <string name="analytics_period_60m">60 мин</string>
+    <string name="analytics_period_24h">24 ч</string>
+    <string name="analytics_period_7d">7 дней</string>
+    <string name="analytics_period_30d">30 дней</string>
+    <string name="analytics_average">Среднее</string>
+    <string name="analytics_air_level_over_period">%1$s за %2$s</string>
+    <string name="analytics_peak">Пик</string>
+    <string name="analytics_value_with_peak">%1$s · пик %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">Потребление по часам</string>
+    <string name="analytics_peak_pm25_by_hour">Пиковый PM2.5 по часам</string>
+    <string name="analytics_hour_grid_caption">Одна ячейка — один час за последние 7 дней. Чем насыщеннее цвет, тем выше значение.</string>
+    <string name="analytics_hour_grid_summary">%1$s по каждому часу за последние 7 дней</string>
+    <string name="analytics_time_at_each_level">Время на каждом уровне</string>
+    <string name="analytics_time_good_air">Время с хорошим воздухом</string>
+    <string name="analytics_pm25_good_over_period">PM2.5 не выше 35 µg/m³ за %1$s</string>
+    <string name="analytics_sensors">Датчики</string>
+    <string name="analytics_offline">Не в сети</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_role_admin">Администратор</string>
+    <string name="settings_role_member">Участник</string>
+    <string name="settings_role_guest">Гость</string>
+    <string name="settings_avatar">Аватар</string>
+    <string name="settings_section_home">Дом</string>
+    <string name="settings_add_devices">Добавить устройства</string>
+    <string name="settings_add_devices_subtitle">Поиск и добавление устройств из ваших аккаунтов и локальной сети</string>
+    <string name="settings_plugins">Плагины</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue и MQTT</string>
+    <string name="settings_rooms">Комнаты</string>
+    <string name="settings_people">Люди</string>
+    <string name="settings_people_subtitle">Аккаунты, роли и доступ к комнатам</string>
+    <string name="settings_tariff">Тариф на электроэнергию</string>
+    <string name="settings_tariff_subtitle">Цена, расчётный период и бюджет</string>
+    <string name="settings_location">Местоположение дома</string>
+    <string name="settings_location_subtitle">Для автоматизаций по рассвету и закату</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_notifications_subtitle">События и оповещения вашего дома</string>
+    <string name="settings_background_alerts">Оповещения при закрытом приложении</string>
+    <string name="settings_background_alerts_subtitle">Поддерживает постоянное соединение с вашим сервером. Немного расходует заряд батареи.</string>
+    <string name="settings_section_server">Сервер</string>
+    <string name="settings_server_live_pinned">На связи · Закреплённый сертификат</string>
+    <string name="settings_server_live_public">На связи · Публичный сертификат</string>
+    <string name="settings_server_reconnecting">Переподключение…</string>
+    <string name="settings_server_live_badge">LIVE</string>
+    <string name="settings_server_cert_public">Зашифровано · сертификат подтверждён публичным центром сертификации</string>
+    <string name="settings_server_cert_pinned">Зашифровано · вы подтвердили собственный сертификат этого сервера при первом подключении:</string>
+    <string name="settings_sha256_fingerprint">Отпечаток SHA-256</string>
+    <string name="settings_fingerprint_clip_label">Отпечаток</string>
+    <string name="settings_copied">Скопировано</string>
+    <string name="settings_copy">Копировать</string>
+    <string name="settings_change_password">Сменить пароль</string>
+    <string name="settings_change_password_subtitle">Для входа в Domus</string>
+    <string name="settings_server_addresses">Адреса сервера</string>
+    <string name="settings_server_addresses_subtitle">Домашняя сеть и удалённый доступ</string>
+    <string name="settings_updates">Обновления</string>
+    <string name="settings_updates_subtitle">Версия %1$s, примечания к выпуску и канал</string>
+    <string name="settings_about">О Domus</string>
+    <string name="settings_about_subtitle">Версия %1$s, разработчик и благодарности</string>
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_wallpaper_colors">Цвета обоев</string>
+    <string name="settings_wallpaper_colors_subtitle">Подстраивать палитру приложения под обои устройства</string>
+    <string name="settings_section_account">Аккаунт</string>
+    <string name="settings_account_subtitle">Выйти из аккаунта или сменить сервер</string>
+    <string name="settings_sign_out">Выйти</string>
+    <string name="settings_use_another_server">Использовать другой сервер</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">Назад</string>
+    <string name="manage_hide_field">Скрыть %1$s</string>
+    <string name="manage_show_field">Показать %1$s</string>
+    <string name="manage_choose">Выбрать…</string>
+    <string name="manage_close">Закрыть</string>
+    <string name="manage_cancel">Отмена</string>
+    <string name="manage_save">Сохранить</string>
+    <string name="manage_delete">Удалить</string>
+    <string name="manage_rooms_title">Комнаты</string>
+    <string name="manage_add_room">Добавить комнату</string>
+    <string name="manage_no_rooms">Комнат пока нет</string>
+    <string name="manage_no_rooms_subtitle">Комнаты группируют устройства и определяют, какие из них видны участникам и гостям.</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d устройство</item>
+        <item quantity="few">%1$d устройства</item>
+        <item quantity="many">%1$d устройств</item>
+        <item quantity="other">%1$d устройств</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d комната</item>
+        <item quantity="few">%1$d комнаты</item>
+        <item quantity="many">%1$d комнат</item>
+        <item quantity="other">%1$d комнат</item>
+    </plurals>
+    <string name="manage_room_subtitle">Этаж %1$d · %2$s</string>
+    <string name="manage_new_room">Новая комната</string>
+    <string name="manage_edit_room">Редактировать комнату</string>
+    <string name="manage_field_name">Название</string>
+    <string name="manage_field_floor">Этаж</string>
+    <string name="manage_role_admin">Администратор</string>
+    <string name="manage_role_member">Участник</string>
+    <string name="manage_role_guest">Гость</string>
+    <string name="manage_level_none">Нет</string>
+    <string name="manage_level_view">Только просмотр</string>
+    <string name="manage_level_control">Управление</string>
+    <string name="manage_level_edit">Изменение</string>
+    <string name="manage_access_to">Доступ к «%1$s»</string>
+    <string name="manage_whole_room_level">Вся комната · %1$s</string>
+    <string name="manage_room_devices_of_total">%1$d из %2$d устройств</string>
+    <string name="manage_no_access">Нет доступа</string>
+    <string name="manage_close_item">Закрыть %1$s</string>
+    <string name="manage_open_item">Открыть %1$s</string>
+    <string name="manage_whole_room">Вся комната</string>
+    <string name="manage_whole_room_hint">Также распространяется на устройства, добавленные позже</string>
+    <string name="manage_no_devices_in_room">В этой комнате пока нет устройств.</string>
+    <string name="manage_people_title">Люди</string>
+    <string name="manage_add_person">Добавить человека</string>
+    <string name="manage_access_whole_home">весь дом</string>
+    <string name="manage_access_none">нет доступа</string>
+    <string name="manage_user_tag_kid">ребёнок</string>
+    <string name="manage_user_tag_reset_requested">запросил(а) сброс пароля</string>
+    <string name="manage_person_title">Пользователь</string>
+    <string name="manage_handover_reset_title">Код сброса для %1$s</string>
+    <string name="manage_handover_signin_title">Данные для входа: %1$s</string>
+    <string name="manage_handover_shown_once">Показывается только один раз. Отправьте эти данные сейчас.</string>
+    <string name="manage_copy">Копировать</string>
+    <string name="manage_share">Поделиться</string>
+    <string name="manage_done">Готово</string>
+    <string name="manage_new_person">Новый пользователь</string>
+    <string name="manage_avatar">Аватар</string>
+    <string name="manage_roll">Случайно</string>
+    <string name="manage_field_username">Имя пользователя</string>
+    <string name="manage_username_supporting">Не менее 3 символов</string>
+    <string name="manage_field_email">Эл. почта</string>
+    <string name="manage_email_taken">Уже используется другим аккаунтом</string>
+    <string name="manage_email_available">Свободен</string>
+    <string name="manage_email_hint">Введите адрес или сгенерируйте его из имени пользователя</string>
+    <string name="manage_generate_email">Сгенерировать почту @domus.home</string>
+    <string name="manage_section_password">Пароль</string>
+    <string name="manage_kid_account">Детский аккаунт</string>
+    <string name="manage_kid_account_on">Вы задаёте постоянный пароль вручную.</string>
+    <string name="manage_kid_account_off">Выкл.: Domus создаёт временный пароль, а при первом входе пользователь выбирает собственный.</string>
+    <string name="manage_field_new_password">Новый пароль</string>
+    <string name="manage_field_password">Пароль</string>
+    <string name="manage_password_keep_current">Оставьте пустым, чтобы сохранить текущий пароль</string>
+    <string name="manage_password_min_length">Не менее 8 символов</string>
+    <string name="manage_password_after_saving">После сохранения вы получите пароль, чтобы скопировать или отправить его.</string>
+    <string name="manage_reset_requested_notice">%1$s забыл(а) пароль и запросил(а) сброс.</string>
+    <string name="manage_reset_code">Код сброса</string>
+    <string name="manage_reset_code_active">Код действует до %1$s. Выключите, чтобы отозвать его.</string>
+    <string name="manage_reset_code_help">Одноразовый код, который пользователь вводит в разделе \"Забыли пароль?\" для установки нового пароля. Действует 30 минут.</string>
+    <string name="manage_generate_new_password">Сгенерировать новый пароль</string>
+    <string name="manage_section_role">Роль</string>
+    <string name="manage_role_admin_desc">Управляет всем домом.</string>
+    <string name="manage_role_member_desc">Видит предоставленные комнаты и устройства. Права на управление или изменение (включая переименование) настраиваются для каждой комнаты и устройства.</string>
+    <string name="manage_role_guest_desc">Видит предоставленные комнаты и устройства, но не может ими управлять.</string>
+    <string name="manage_section_access">Доступ</string>
+    <string name="manage_custom_access">Индивидуальный доступ</string>
+    <string name="manage_custom_access_off">Выкл.: доступен весь дом.</string>
+    <string name="manage_custom_access_on">Укажите уровень доступа для каждой комнаты или отдельных устройств в ней.</string>
+    <string name="manage_create_rooms_first">Сначала создайте комнаты.</string>
+    <string name="manage_no_room">Без комнаты</string>
+    <string name="manage_remove_user_title">Удалить %1$s?</string>
+    <string name="manage_remove_user_text">Доступ будет прекращён немедленно.</string>
+    <string name="manage_remove">Удалить</string>
+    <string name="manage_tariff_title">Тариф на электроэнергию</string>
+    <string name="manage_rate_per_kwh">Тариф за kWh</string>
+    <string name="manage_currency">Валюта</string>
+    <string name="manage_currency_supporting">Код ISO, напр. RUB</string>
+    <string name="manage_fixed_monthly_charge">Фиксированная ежемесячная плата</string>
+    <string name="manage_billing_day">День начала расчётного периода</string>
+    <string name="manage_billing_day_supporting">От 1 до 28</string>
+    <string name="manage_monthly_budget">Месячный бюджет (необязательно)</string>
+    <string name="manage_usage_slabs">Ступени тарифа по объёму</string>
+    <string name="manage_slabs_empty">Единый тариф. Добавьте ступени, если цена зависит от объёма потребления за расчётный период.</string>
+    <string name="manage_slabs_help">Тариф каждой ступени действует до её лимита. Оставьте последний лимит пустым для всего объёма свыше.</string>
+    <string name="manage_up_to_kwh">До kWh</string>
+    <string name="manage_slab_rate">Тариф</string>
+    <string name="manage_remove_slab">Удалить ступень %1$d</string>
+    <string name="manage_add_slab">Добавить ступень</string>
+    <string name="manage_time_of_day">Время суток</string>
+    <string name="manage_time_of_day_help">Часы, когда киловатт-час стоит дороже или дешевле базового тарифа по часам дома. Укажите разницу за kWh: 1.1 для пиковой наценки, -1.5 для ночной скидки.</string>
+    <string name="manage_window_from">С</string>
+    <string name="manage_window_until">До</string>
+    <string name="manage_window_per_kwh">За kWh</string>
+    <string name="manage_remove_time_window">Удалить временной интервал %1$d</string>
+    <string name="manage_add_time_window">Добавить временной интервал</string>
+    <string name="manage_server_addresses_title">Адреса сервера</string>
+    <string name="manage_server_addresses_help">Domus использует домашний адрес в вашей сети и внешний адрес вне дома. Повторный вход не требуется.</string>
+    <string name="manage_home_network">Домашняя сеть</string>
+    <string name="manage_home_network_supporting">Например https://192.168.1.10:8443</string>
+    <string name="manage_remote">Внешний адрес</string>
+    <string name="manage_remote_supporting">Например, имя хоста Cloudflare Tunnel</string>
+    <string name="manage_not_set">Не задано</string>
+    <string name="manage_location_disabled">Геолокация на телефоне отключена. Воспользуйтесь поиском по названию населённого пункта.</string>
+    <string name="manage_location_not_found">Телефону не удалось определить текущее местоположение. Воспользуйтесь поиском по названию населённого пункта.</string>
+    <string name="manage_location_permission_denied">Без доступа к геопозиции вы можете найти населённый пункт через поиск или ввести координаты вручную.</string>
+    <string name="manage_location_title">Местоположение дома</string>
+    <string name="manage_location_sun_times">Сегодня восход солнца в %1$s, а закат в %2$s.</string>
+    <string name="manage_location_help">Автоматизации смогут срабатывать на рассвете и закате, когда Domus будет знать примерное расположение дома. Координаты хранятся только на вашем сервере.</string>
+    <string name="manage_use_phone_location">Использовать геопозицию этого телефона</string>
+    <string name="manage_find_place">Найти населённый пункт</string>
+    <string name="manage_find_place_supporting">Город или населённый пункт</string>
+    <string name="manage_search_place">Искать населённый пункт</string>
+    <string name="manage_no_place_found">Место с таким названием не найдено. Попробуйте указать ближайший город.</string>
+    <string name="manage_latitude">Широта</string>
+    <string name="manage_latitude_supporting">Например 55.75</string>
+    <string name="manage_longitude">Долгота</string>
+    <string name="manage_longitude_supporting">Например 37.62</string>
+    <string name="manage_change_password_title">Сменить пароль</string>
+    <string name="manage_change_password_help">Вы останетесь в системе на этом и всех остальных устройствах.</string>
+    <string name="manage_current_password">Текущий пароль</string>
+    <string name="manage_repeat_new_password">Повторите новый пароль</string>
+    <string name="manage_passwords_mismatch">Пароли не совпадают</string>
+    <string name="manage_delete_all_notices_title">Удалить все уведомления?</string>
+    <string name="manage_delete_all_notices_text">Они будут удалены на всех устройствах.</string>
+    <string name="manage_delete_all">Удалить все</string>
+    <string name="manage_notifications_title">Уведомления</string>
+    <string name="manage_mark_all_read">Отметить все прочитанными</string>
+    <string name="manage_no_notices">Пока ничего нет</string>
+    <string name="manage_no_notices_subtitle">Здесь появляются оповещения от автоматизаций, уведомления о новых и потерявших связь устройствах.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">QR-код для сканирования в приложении Smart Life</string>
+    <string name="onboard_region_india">Индия</string>
+    <string name="onboard_region_china">Китай</string>
+    <string name="onboard_region_europe">Европа</string>
+    <string name="onboard_region_us">США</string>
+    <string name="onboard_region_singapore">Сингапур</string>
+    <string name="onboard_region_russia">Россия</string>
+    <string name="onboard_region_taiwan">Тайвань</string>
+    <string name="onboard_region_india_old">Индия (старый)</string>
+    <string name="onboard_plugins_title">Плагины</string>
+    <string name="onboard_local_control">Локальное управление</string>
+    <string name="onboard_cloud">Облако</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d устройство</item>
+        <item quantity="few">%1$d устройства</item>
+        <item quantity="many">%1$d устройств</item>
+        <item quantity="other">%1$d устройств</item>
+    </plurals>
+    <string name="onboard_account_linked">Привязано</string>
+    <string name="onboard_account_needs_attention">Требует внимания</string>
+    <string name="onboard_unlink_account">Отвязать %1$s</string>
+    <string name="onboard_integration_disabled">Отключено в конфигурации сервера.</string>
+    <string name="onboard_link_account">Привязать аккаунт</string>
+    <string name="onboard_link_another_account">Привязать другой аккаунт</string>
+    <string name="onboard_find_devices">Найти устройства</string>
+    <string name="onboard_unlink_title">Отвязать %1$s?</string>
+    <string name="onboard_unlink_text">Устройства, добавленные из этого аккаунта, будут удалены из Domus.</string>
+    <string name="onboard_unlink">Отвязать</string>
+    <string name="onboard_link_integration">Привязать %1$s</string>
+    <string name="onboard_tuya_qr_instructions">Отсканируйте этот код приложением Smart Life или Tuya Smart (кнопка сканирования на главном экране) и подтвердите вход. Если приложение установлено на этом же телефоне, откройте QR-код на другом экране.</string>
+    <string name="onboard_waiting_for_scan">Ожидание сканирования…</string>
+    <string name="onboard_tuya_user_code_instructions">В приложении Smart Life откройте «Профиль» → «Настройки» → «Аккаунт и безопасность» → «Код пользователя» и введите этот код здесь.</string>
+    <string name="onboard_user_code">Код пользователя</string>
+    <string name="onboard_qr_expired">Срок действия этого QR-кода истёк. Попробуйте снова.</string>
+    <string name="onboard_verify_title">Подтверждение входа</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi отправила код подтверждения на ваш телефон. Введите его ниже — он действует несколько минут.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi отправила код подтверждения на вашу эл. почту. Введите его ниже — он действует несколько минут.</string>
+    <string name="onboard_verification_code">Код подтверждения</string>
+    <string name="onboard_send_new_code">Отправить новый код</string>
+    <string name="onboard_use_another_account">Использовать другой аккаунт</string>
+    <string name="onboard_tapo_instructions">Войдите с помощью аккаунта TP-Link. Он используется для локального взаимодействия с устройствами Tapo в вашей сети.</string>
+    <string name="onboard_xiaomi_instructions">Войдите с помощью аккаунта Xiaomi. Токены устройств запрашиваются один раз, а управление остаётся локальным. Xiaomi может отправить вам проверочный код.</string>
+    <string name="onboard_xiaomi_username">Эл. почта, телефон или Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">Номер телефона необходимо указывать с кодом страны, например +7…</string>
+    <string name="onboard_email_or_username">Эл. почта или имя пользователя</string>
+    <string name="onboard_password">Пароль</string>
+    <string name="onboard_server_region">Регион сервера</string>
+    <string name="onboard_show_qr_code">Показать QR-код</string>
+    <string name="onboard_verify">Подтвердить</string>
+    <string name="onboard_continue">Продолжить</string>
+    <string name="onboard_link">Привязать</string>
+    <string name="onboard_add_devices_title">Добавить устройства</string>
+    <string name="onboard_scanning">Сканирование…</string>
+    <string name="onboard_scan_again">Сканировать снова</string>
+    <string name="onboard_add_by_address">Добавить по адресу</string>
+    <string name="onboard_no_new_devices">Новых устройств нет</string>
+    <string name="onboard_no_new_devices_subtitle">Все найденные устройства уже добавлены в ваш дом. Привяжите аккаунт в разделе «Плагины», чтобы найти больше устройств.</string>
+    <string name="onboard_open_plugins">Открыть плагины</string>
+    <string name="onboard_found_count">Найдено: %1$d</string>
+    <string name="onboard_add">Добавить</string>
+    <string name="onboard_ignore">Игнорировать</string>
+    <string name="onboard_add_device_title">Добавить %1$s</string>
+    <string name="onboard_field_name">Название</string>
+    <string name="onboard_field_room">Комната</string>
+    <string name="onboard_no_room">Без комнаты</string>
+    <string name="onboard_device_token_optional">Токен устройства (необязательно)</string>
+    <string name="onboard_device_token_supporting">Нужен только при отсутствии привязанного аккаунта Xiaomi</string>
+    <string name="onboard_ip_address">IP-адрес</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">Уже существует</string>
+    <string name="code_error_reference_missing" formatted="false">Указанный объект не существует</string>
+    <string name="code_error_internal" formatted="false">Внутренняя ошибка сервера</string>
+    <string name="code_error_session_expired" formatted="false">Недействительная или истёкшая сессия</string>
+    <string name="code_error_admin_required" formatted="false">Требуются права администратора</string>
+    <string name="code_error_guest_no_control" formatted="false">Гости не могут управлять устройствами</string>
+    <string name="code_error_not_signed_in" formatted="false">Вы не вошли в систему</string>
+    <string name="code_error_missing_auth" formatted="false">Отсутствует заголовок Authorization</string>
+    <string name="code_error_account_gone" formatted="false">Учётная запись больше не существует</string>
+    <string name="code_error_must_change_password" formatted="false">Сначала смените пароль</string>
+    <string name="code_error_device_not_found" formatted="false">Устройство не найдено</string>
+    <string name="code_error_empty_command" formatted="false">пустая команда</string>
+    <string name="code_error_scan_running" formatted="false">Сканирование уже выполняется</string>
+    <string name="code_error_discovered_not_found" formatted="false">Обнаруженное устройство не найдено</string>
+    <string name="code_error_device_already_added" formatted="false">Это устройство уже добавлено</string>
+    <string name="code_error_username_too_short" formatted="false">Имя пользователя должно содержать не менее 3 символов</string>
+    <string name="code_error_password_too_short" formatted="false">Пароль должен содержать не менее 8 символов</string>
+    <string name="code_error_setup_already_done" formatted="false">Первоначальная настройка уже выполнена</string>
+    <string name="code_error_invalid_credentials" formatted="false">Неверное имя пользователя или пароль</string>
+    <string name="code_error_invalid_reset_code" formatted="false">Неверный или просроченный код. Попросите у администратора новый.</string>
+    <string name="code_error_wrong_current_password" formatted="false">Неверный текущий пароль</string>
+    <string name="code_error_same_password" formatted="false">Выберите пароль, отличный от текущего</string>
+    <string name="code_error_avatar_too_long" formatted="false">Строка аватара слишком длинная</string>
+    <string name="code_error_name_required" formatted="false">Требуется название</string>
+    <string name="code_error_trigger_required" formatted="false">Добавьте хотя бы одно условие запуска</string>
+    <string name="code_error_action_required" formatted="false">Добавьте хотя бы одно действие</string>
+    <string name="code_error_sun_offset_range" formatted="false">Смещение рассвета и заката не может превышать 6 часов</string>
+    <string name="code_error_automation_not_found" formatted="false">Автоматизация не найдена</string>
+    <string name="code_error_cannot_edit_device" formatted="false">Вы не можете редактировать это устройство</string>
+    <string name="code_error_admin_only_move_room" formatted="false">Только администратор может переместить устройство в другую комнату</string>
+    <string name="code_error_name_empty" formatted="false">Название не может быть пустым</string>
+    <string name="code_error_view_only_device" formatted="false">Вы можете просматривать это устройство, но не управлять им</string>
+    <string name="code_error_view_only_devices" formatted="false">Вы можете просматривать эти устройства, но не управлять ими</string>
+    <string name="code_error_negative_rate" formatted="false">Тарифы не могут быть отрицательными</string>
+    <string name="code_error_invalid_billing_day" formatted="false">День расчёта должен быть от 1 до 28</string>
+    <string name="code_error_invalid_currency" formatted="false">Валюта должна быть трёхбуквенным кодом ISO</string>
+    <string name="code_error_slab_order" formatted="false">Каждая ступень тарифа должна заканчиваться выше предыдущей</string>
+    <string name="code_error_slab_open_ended" formatted="false">Только последняя ступень тарифа может быть без верхней границы</string>
+    <string name="code_error_tou_format" formatted="false">Временные интервалы требуют времени начала и окончания в формате HH:MM</string>
+    <string name="code_error_tou_zero_length" formatted="false">Временной интервал не может начинаться и заканчиваться в одно и то же время</string>
+    <string name="code_error_tou_overlap" formatted="false">Временные интервалы не могут пересекаться</string>
+    <string name="code_error_group_not_found" formatted="false">Группа не найдена</string>
+    <string name="code_error_account_not_found" formatted="false">Учётная запись не найдена</string>
+    <string name="code_error_tuya_disabled" formatted="false">Интеграция Tuya отключена</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Введите код пользователя из приложения Smart Life</string>
+    <string name="code_error_credentials_required" formatted="false">Требуются эл. почта и пароль</string>
+    <string name="code_error_verification_expired" formatted="false">Время проверки истекло; войдите снова</string>
+    <string name="code_error_invalid_port" formatted="false">Порт должен быть числом</string>
+    <string name="code_error_broker_required" formatted="false">Введите адрес брокера</string>
+    <string name="code_error_hue_disabled" formatted="false">Интеграция Philips Hue отключена</string>
+    <string name="code_error_room_name_required" formatted="false">Требуется название комнаты</string>
+    <string name="code_error_room_not_found" formatted="false">Комната не найдена</string>
+    <string name="code_error_sync_lights_required" formatted="false">Выберите хотя бы одну лампу для синхронизации</string>
+    <string name="code_error_scene_not_found" formatted="false">Сценарий не найден</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">Для синхронизации экрана нужен доступ к экрану. Запустите её в приложении Domus на устройстве, где воспроизводится контент.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">Поиск мест недоступен. Введите широту и долготу вручную.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">Широта должна быть от -90 до 90, долгота — от -180 до 180</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">Все предложенные адреса для этого имени пользователя уже заняты</string>
+    <string name="code_error_invalid_role" formatted="false">роль должна быть admin, member или guest</string>
+    <string name="code_error_kid_password_required" formatted="false">Для детской учётной записи нужен пароль</string>
+    <string name="code_error_email_taken" formatted="false">Эта эл. почта уже используется другой учётной записью</string>
+    <string name="code_error_user_not_found" formatted="false">Пользователь не найден</string>
+    <string name="code_error_last_admin" formatted="false">Должен оставаться хотя бы один администратор</string>
+    <string name="code_error_cannot_delete_self" formatted="false">Вы не можете удалить собственную учётную запись</string>
+    <string name="code_error_hue_press_button" formatted="false">Нажмите круглую кнопку на мосту Hue, затем повторите привязку в течение 30 секунд</string>
+    <string name="code_error_hue_not_found" formatted="false">Мост Hue не найден; введите его IP-адрес</string>
+    <string name="code_error_tuya_device_gone" formatted="false">устройство больше не числится в Smart Life</string>
+    <string name="code_error_device_token_required" formatted="false">требуется токен устройства</string>
+    <string name="code_error_hue_link_expired" formatted="false">Ошибка аутентификации: мост Hue больше не принимает эту привязку; привяжите его заново</string>
+    <string name="code_error_hue_removed" formatted="false">Ошибка аутентификации: мост Hue был удалён</string>
+    <string name="code_error_mqtt_removed" formatted="false">Ошибка аутентификации: брокер MQTT был удалён</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">Ошибка аутентификации: устройство отклонило эл. почту или пароль аккаунта TP-Link</string>
+    <string name="code_error_tapo_account_required" formatted="false">Ошибка аутентификации: добавьте аккаунт TP-Link для управления устройствами Tapo</string>
+    <string name="code_error_tapo_removed" formatted="false">Ошибка аутентификации: аккаунт TP-Link был удалён</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">Ошибка аутентификации: Xiaomi запросила капчу. Войдите один раз в приложении Mi Home или браузере, затем повторите попытку</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">Ошибка аутентификации: неверное имя пользователя или пароль Xiaomi</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">Ошибка аутентификации: неверный или просроченный код подтверждения</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">Ошибка аутентификации: Xiaomi не приняла код</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">Ошибка аутентификации: сессия Xiaomi истекла</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">Ошибка аутентификации: Xiaomi запрашивает код подтверждения; привяжите аккаунт заново в разделе «Интеграции»</string>
+    <string name="code_error_unsupported_command" formatted="false">Не поддерживается: это устройство не поддерживает данную команду</string>
+    <string name="code_error_unsupported_effect" formatted="false">Не поддерживается: эта лампа не может воспроизвести данный эффект</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">Не поддерживается: для этой модели Xiaomi нет спецификации MIoT</string>
+    <string name="code_error_rate_limited_one" formatted="false">Слишком много неверных попыток ввода пароля. Повторите через {count} минуту.</string>
+    <string name="code_error_rate_limited_other" formatted="false">Слишком много неверных попыток ввода пароля. Повторите через {count} минут.</string>
+    <string name="code_error_integration_disabled" formatted="false">интеграция \'{integration}\' не включена</string>
+    <string name="code_error_invalid_time" formatted="false">Некорректное время \'{time}\', используйте формат HH:MM</string>
+    <string name="code_error_invalid_actions" formatted="false">некорректные действия: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">регион должен быть одним из: {regions}</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">Некорректные настройки синхронизации экрана: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">Неизвестный тип сценария \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" не является адресом сервера</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">Ошибка аутентификации: Xiaomi не смогла отправить код подтверждения: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">Ошибка аутентификации: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">Не поддерживается: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">Подтвердите переключение {names}</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">Добавлено новое устройство</string>
+    <string name="code_notification_device_added" formatted="false">Устройство {name} ({integration}) обнаружено и добавлено автоматически</string>
+    <string name="code_notification_device_found_title" formatted="false">Найдено новое устройство</string>
+    <string name="code_notification_device_found" formatted="false">Устройство {name} ({integration}) готово к добавлению</string>
+    <string name="code_notification_password_reset_title" formatted="false">Запрошен сброс пароля</string>
+    <string name="code_notification_password_reset" formatted="false">{username} забыл(а) пароль. Администратор может выдать код сброса в разделе «Настройки» → «Люди и доступ».</string>
+    <string name="code_notification_automation_failed_title" formatted="false">В автоматизации \"{name}\" возникли проблемы</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

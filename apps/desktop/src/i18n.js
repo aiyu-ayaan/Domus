@@ -5,9 +5,10 @@ const ptBR = require('./locales/pt-BR.json')
 const id = require('./locales/id.json')
 const ar = require('./locales/ar.json')
 const fr = require('./locales/fr.json')
+const ru = require('./locales/ru.json')
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.json` with the same keys and register it here. */
-const catalogs = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr }
+const catalogs = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru }
 
 let language = 'en'
 const setLanguage = (locale) => {

@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Цветовой круг</string>
+    <string name="ui_expanded">Развёрнуто</string>
+    <string name="ui_collapsed">Свёрнуто</string>
+    <string name="ui_collapse">Свернуть</string>
+    <string name="ui_expand">Развернуть</string>
+</resources>
