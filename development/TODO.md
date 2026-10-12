@@ -283,3 +283,44 @@ Design: `development/docs/ARCHITECTURE.md` (section 6 "Sampling", "Air quality h
 - [x] Android: peak line and readout, 1 min for air, time at each level, day-by-hour grid on both sections (opened on the emulator against a test server)
 - [ ] Android: re-record the baseline profile (`pnpm android:profile`) after the new charts
 - [ ] The home's `peak_watts` adds the devices' peaks per SQL group; store a per-minute home total if it must be exact
+
+
+## Milestone 23: Android tablets (2026-10-12)
+Design: `development/docs/ANDROID_APP.md` ("Wide screens", "Before sign-in on wide screens", "Settings on tablets").
+- [x] Settings: list and detail from 600dp (`SettingsTab`, `PageHost`, `LocalHideBack`), selected row highlighted, fade-through between rows, shared-axis X for a nested page
+- [x] Home, Devices, Scenes, Analytics: tab capped at 1240dp from 840dp, `SideBySide` columns, `DeviceGrid` four across (`LocalWideScreen`)
+- [x] Onboarding, connect, sign-in, forgot / reset, choose password, unreachable: split in two from 840dp (`EntryColumn`, `OnboardingScreen`)
+- [x] Tablet screenshots with demo data in the README (Home, Devices, Scenes, Analytics, Settings)
+- [ ] Check portrait tablets, a home with many rooms / devices, a Scenes tab with only automations, and the phone layouts for regressions
+- [ ] Check sign-in, forgot / reset password and onboarding pages 2 and 3 on a tablet, and the keyboard pushing the form up
+- [ ] Editor pages (scene, automation, person) and other full-screen pages are still one 840dp column; give them a wide layout
+- [ ] Settings pane: remember the open page across rotation and restore, decide what System back does at the pane's root
+- [ ] Add onboarding and sign-in tablet screenshots (demo server, nothing that names a real server)
+- [ ] Web and desktop: review the same screens at tablet widths
+- [ ] Re-record the baseline profile after the layout changes (`pnpm android:profile`)
+
+## Road to v1.0.0 (assessment 2026-10-12, to work through later)
+Order matters: each step unblocks the next. Suggested scope for 1.0: Android + web + Docker with Tuya, Tapo and Xiaomi; desktop, Hue, MQTT and Zigbee labelled beta.
+1. Release pipeline
+   - [ ] Add the repository secrets and run the first `!alpha` release; fix what the first real run shows
+   - [ ] Fix the update source: apps still ask `aiyu-ayaan/Domus-Rust`, the repository is `aiyu-ayaan/Domus`
+   - [ ] Release whose notes carry a table and an image; check both renderers
+2. Verify on real devices (phone and tablet), then ship a beta
+   - [ ] Android: sign-in pages, Handover dialog, Updates page and update dialog, predictive back on Android 14+, see-only member controls
+   - [ ] Android: real-phone LAN discovery, Tuya QR link from the phone, integration linking, device adoption, scene / automation editors, tariff, push notifications, alerts service, Screen Sync capture
+   - [ ] Real hardware: Tuya account, Tapo P110 + L900, Xiaomi device, Hue bridge, Zigbee2MQTT device, Tapo H100 with a sensor
+   - [ ] Real Cloudflare Tunnel, `.deb` install and launcher icon
+3. Close known gaps
+   - [ ] Grey out scenes and automations the user can see but not run (they answer 403 today), on web and Android
+   - [ ] Unattended automations skip the "ask before switching" guard: skip a guarded device and tell the administrators, or keep and document
+   - [ ] Web: check the forgot-password and change-password screens and the person sheet; phone layout at 375px on a real device
+   - [ ] Backup: download from Android, restore from the UI, scheduled backups
+4. Automated tests (today: ~54 Rust tests, a few Android `core` tests, nothing for UI or end to end)
+   - [ ] End to end: first-run setup, sign-in, link a device, control it, scene and automation run, backup and restore
+   - [ ] Web component tests for sign-in, devices and settings; Android UI tests for the connect and sign-in flow
+   - [ ] Run them in CI on every pull request
+5. Decide the platform claim
+   - [ ] Packaged Electron builds for macOS and Windows, arm64 Linux, or state that 1.0 is Linux desktop only
+   - [ ] Optional SQLCipher full-database encryption: decide for or against before 1.0 ("all requests encrypted" is met by TLS)
+6. Stability gate
+   - [ ] A beta in daily use for about two weeks with no new data-loss, security or crash bug before tagging `!major`
