@@ -1,0 +1,935 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">極めて良好</string>
+    <string name="air_good">良好</string>
+    <string name="air_moderate">やや汚染</string>
+    <string name="air_poor">不良</string>
+    <string name="channel_stable">安定版</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">このコンピューター</string>
+    <string name="api_untrusted">サーバーの証明書が信頼されていません。</string>
+    <string name="api_offline">Domus サーバーに接続できません。稼働しているか確認してください。</string>
+    <string name="api_bad_response">サーバーがこのアプリのバージョンでは理解できない応答を返しました。</string>
+    <string name="api_request_failed">リクエストに失敗しました ({status})</string>
+    <string name="error_no_server">サーバーなし</string>
+    <string name="connect_cert_changed">承認してからサーバーの証明書が変更されました。新しい証明書を確認するには再接続してください。</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 や home.example.com のようなアドレスを入力してください。https のみ対応しています。</string>
+    <string name="connect_cert_unreadable">サーバーの証明書を読み取れませんでした。</string>
+    <string name="automation_ran">“{name}” を実行しました</string>
+    <string name="handover_reset_until">%1$s の Domus パスワードリセット\nコード: %2$s\n\nサインイン画面で \"パスワードをお忘れですか？\" を選択し、ユーザー名に続けてこのコードを入力してください。%3$s まで1回のみ有効です。</string>
+    <string name="handover_reset">%1$s の Domus パスワードリセット\nコード: %2$s\n\nサインイン画面で \"パスワードをお忘れですか？\" を選択し、ユーザー名に続けてこのコードを入力してください。1回のみ有効です。</string>
+    <string name="handover_signin_kid">Domus サインイン情報\nアドレス: %1$s\nユーザー名: %2$s\nパスワード: %3$s</string>
+    <string name="handover_signin">Domus サインイン情報\nアドレス: %1$s\nユーザー名: %2$s\nパスワード: %3$s\n\n初回サインイン時にご自身のパスワードを設定するよう求められます。</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ホーム</string>
+    <string name="nav_devices">デバイス</string>
+    <string name="nav_scenes">シーン</string>
+    <string name="nav_analytics">分析</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">家全体を、ひとつのアプリで</string>
+    <string name="connect_intro_1_body">Tuya、Tapo、Xiaomi、Philips Hue、MQTT の照明、プラグ、空気清浄機、センサーを一括管理。</string>
+    <string name="connect_intro_2_title">プライバシー重視の設計</string>
+    <string name="connect_intro_2_body">Domus は暗号化された接続を介して自宅のサーバーとだけ通信します。クラウドアカウントは不要です。</string>
+    <string name="connect_intro_3_title">サーバーを自動検出</string>
+    <string name="connect_intro_3_body">自宅の Wi‑Fi ではアプリが自動的にサーバーを見つけます。外出先からはアドレスを入力してください。</string>
+    <string name="connect_page_of">%1$d / %2$d ページ</string>
+    <string name="connect_skip">スキップ</string>
+    <string name="connect_get_started">始める</string>
+    <string name="connect_next">次へ</string>
+    <string name="connect_welcome_title">Domus へようこそ</string>
+    <string name="connect_welcome_subtitle">ホームを動かしているサーバーに接続します。</string>
+    <string name="connect_on_this_network">このネットワーク上</string>
+    <string name="connect_looking_for_servers">サーバーを検索中…</string>
+    <string name="connect_no_server_found">応答するサーバーがありません。このスマートフォンがサーバーと同じ Wi‑Fi に接続されているか確認するか、下にアドレスを入力してください。</string>
+    <string name="connect_scan_again">再スキャン</string>
+    <string name="connect_or_enter_address">またはアドレスを入力</string>
+    <string name="connect_server_address">サーバーアドレス</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 または home.example.com</string>
+    <string name="connect_action">接続</string>
+    <string name="connect_trust_title">このサーバーを信頼しますか？</string>
+    <string name="connect_trust_body">%1$s は自己署名証明書を使用しています（ホームサーバーでは一般的です）。サーバー起動時に表示されるフィンガープリントと一致する場合のみ信頼してください。</string>
+    <string name="connect_trust_action">信頼する</string>
+    <string name="connect_cancel">キャンセル</string>
+    <string name="connect_use_another_server">別のサーバーを使用</string>
+    <string name="connect_unreachable_title">ホームに接続できません</string>
+    <string name="connect_try_again">再試行</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">パスワードを隠す</string>
+    <string name="auth_show_password">パスワードを表示</string>
+    <string name="auth_username">ユーザー名</string>
+    <string name="auth_new_password">新しいパスワード</string>
+    <string name="auth_password_min_length">8文字以上</string>
+    <string name="auth_confirm_password">パスワードの確認</string>
+    <string name="auth_passwords_mismatch">パスワードが一致しません</string>
+    <string name="auth_create_admin_title">管理者アカウントを作成</string>
+    <string name="auth_welcome_back_title">おかえりなさい</string>
+    <string name="auth_create_admin_subtitle">このサーバーは新規です。最初のアカウントがすべてを管理します。</string>
+    <string name="auth_welcome_back_subtitle">ホームにサインインしてください。</string>
+    <string name="auth_encrypted_connection">暗号化された接続先:</string>
+    <string name="auth_email">メールアドレス</string>
+    <string name="auth_password">パスワード</string>
+    <string name="auth_create_account">アカウントを作成</string>
+    <string name="auth_sign_in">サインイン</string>
+    <string name="auth_forgot_password">パスワードをお忘れですか？</string>
+    <string name="auth_forgot_title">パスワードをお忘れですか？</string>
+    <string name="auth_forgot_subtitle">Domus はメールを送信しません。代わりにこのホームの管理者に通知され、管理者からワンタイムコードが渡されます。</string>
+    <string name="auth_ask_admin">管理者に依頼する</string>
+    <string name="auth_back_to_sign_in">サインインに戻る</string>
+    <string name="auth_reset_code_title">リセットコードを入力</string>
+    <string name="auth_reset_code_subtitle">管理者に通知されました。%1$s 用の8桁のコードを管理者に確認してください（30分間、1回のみ有効）。</string>
+    <string name="auth_reset_code_label">リセットコード</string>
+    <string name="auth_set_password_sign_in">パスワードを設定してサインイン</string>
+    <string name="auth_back">戻る</string>
+    <string name="auth_choose_password_title">パスワードを設定</string>
+    <string name="auth_choose_password_subtitle">ようこそ、%1$s さん。サインインに使用したパスワードはあなた向けに発行されたもので、他の人にも見られています。続行するにはご自身のパスワードを設定してください。</string>
+    <string name="auth_save_continue">保存して続行</string>
+    <string name="auth_sign_out">サインアウト</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">バックグラウンド動作</string>
+    <string name="service_channel_alerts">ホームアラート</string>
+    <string name="service_listening_alerts">Domus はアラートを待機しています</string>
+    <string name="service_screen_sync_title">画面同期がオンです</string>
+    <string name="service_screen_sync_body">照明がこの画面に連動しています</string>
+    <string name="service_stop">停止</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear（アバターアートワーク）</string>
+    <string name="about_lib_open_meteo">Open-Meteo（場所検索、サーバーから照会）</string>
+    <string name="about_lib_home_assistant">Home Assistant（Tuya QR フロー）</string>
+    <string name="about_license_inspiration">インスピレーション</string>
+    <string name="about_version_unknown">不明</string>
+    <string name="about_title">Domus について</string>
+    <string name="about_section_app">アプリ</string>
+    <string name="about_version_build">バージョン %1$s · ビルド %2$d</string>
+    <string name="about_privacy_title">プライバシー</string>
+    <string name="about_privacy_subtitle">ご自身のサーバー上で動作します。認証情報はそこで暗号化されたまま保持されます。</string>
+    <string name="about_source_code">ソースコード</string>
+    <string name="about_section_developer">開発者</string>
+    <string name="about_developer_tagline">1人の開発者によって設計・構築されました。</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">ポートフォリオ</string>
+    <string name="about_section_open_source">オープンソース</string>
+    <string name="about_acknowledgements">謝辞</string>
+    <string name="about_acknowledgements_subtitle">Domus の基盤となっているライブラリとプロジェクト</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s が利用可能です</string>
+    <string name="update_download_failed_retry_prompt">ダウンロードに失敗しました。再試行しますか？</string>
+    <string name="update_prompt_body">現在のバージョンは %1$s です。リリースノートとアップデートチャンネルは「設定」の「アップデート」にあります。</string>
+    <string name="update_downloading_percent">ダウンロード中 %1$d%%</string>
+    <string name="update_action">アップデート</string>
+    <string name="update_later">後で</string>
+    <string name="update_title">アップデート</string>
+    <string name="update_checking">アップデートを確認中…</string>
+    <string name="update_check_failed">アップデートを確認できませんでした</string>
+    <string name="update_dev_build">開発ビルド</string>
+    <string name="update_up_to_date">Domus は最新です</string>
+    <string name="update_download_failed_retry">ダウンロードに失敗しました。もう一度お試しください。</string>
+    <string name="update_check_failed_body">現在のバージョンは %1$s です。接続を確認してもう一度お試しください。</string>
+    <string name="update_dev_build_body">現在のバージョンは %1$s です。開発ビルドは再ビルドすることで更新されます。</string>
+    <string name="update_you_have">現在のバージョンは %1$s です。</string>
+    <string name="update_download_install">ダウンロードしてインストール</string>
+    <string name="update_check_again">再確認</string>
+    <string name="update_channel">チャンネル</string>
+    <string name="update_channel_hint">Beta と Alpha では新しいビルドが早く提供され、すべての安定版も含まれます。</string>
+    <string name="update_whats_new_in">%1$s の新機能</string>
+    <string name="update_in_this_version">このバージョンの内容</string>
+    <string name="update_loading_notes">リリースノートを読み込み中…</string>
+    <string name="update_no_notes">このバージョンのリリースノートはありません。</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">Robots</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Adventurer</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Pixel Art</string>
+    <string name="avatar_style_fun_emoji">Fun Emoji</string>
+    <string name="avatar_style_thumbs">Thumbs</string>
+    <string name="avatar_style_shapes">Shapes</string>
+    <string name="avatar_style_rings">Rings</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">アバターをカスタマイズ</string>
+    <string name="avatar_save">保存</string>
+    <string name="avatar_seed_value">シード: %1$s</string>
+    <string name="avatar_randomize">ランダム生成</string>
+    <string name="avatar_roll_seed">シードを生成</string>
+    <string name="avatar_roll_seed_action">シードを生成</string>
+    <string name="avatar_style_label">アバタースタイル</string>
+    <string name="avatar_seed_phrase_label">シードフレーズ</string>
+    <string name="avatar_seed_phrase_hint">キーワード、名前、または文字列を入力すると、このアバタースタイルが変化します。</string>
+    <string name="avatar_seed_label">シード</string>
+    <string name="avatar_apply_avatar">アバターを適用</string>
+    <string name="avatar_apply">適用</string>
+    <string name="avatar_cancel">キャンセル</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">おやすみなさい</string>
+    <string name="home_greeting_morning">おはようございます</string>
+    <string name="home_greeting_afternoon">こんにちは</string>
+    <string name="home_greeting_evening">こんばんは</string>
+    <string name="home_got_it">了解</string>
+    <string name="home_about_stat">%1$s について</string>
+    <string name="home_scene_on_hint">オン · タップしてオフ</string>
+    <string name="home_scene_off_hint">タップして実行</string>
+    <string name="home_change_avatar">アバターを変更</string>
+    <string name="home_clear_notices_title">すべての通知を削除しますか？</string>
+    <string name="home_clear_notices_body">すべてのデバイスから削除されます。</string>
+    <string name="home_delete_all">すべて削除</string>
+    <string name="home_reconnecting">再接続中…</string>
+    <string name="home_devices_on_of_total">%2$d 台中 %1$d 台オン</string>
+    <string name="home_using_now">現在の電力</string>
+    <string name="home_using_now_info">電力測定に対応したすべてのデバイスの合計リアルタイム消費電力です。</string>
+    <string name="home_today">今日</string>
+    <string name="home_today_info">午前0時以降に使用された電力量です。下の金額は電気料金レートに基づく推定コストです。</string>
+    <string name="home_air_quality">空気質</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">シーン</string>
+    <string name="home_on_right_now">現在オンのデバイス</string>
+    <string name="home_all_devices">すべてのデバイス</string>
+    <string name="home_no_devices_title">まだデバイスがありません</string>
+    <string name="home_no_devices_admin">「デバイス」を開き、+ をタップして Tuya、Tapo、Xiaomi、Hue、または MQTT をリンクしてください。</string>
+    <string name="home_no_devices_member">管理者にデバイスの追加や部屋へのアクセス権の付与を依頼してください。</string>
+    <string name="home_everything_off">すべてオフです。</string>
+    <string name="home_rooms">部屋</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="other">%1$d 台のデバイス · すべてオフ</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="other">%1$d 台のデバイス · %2$d 台オン</item>
+    </plurals>
+    <string name="home_recent_activity">最近のアクティビティ</string>
+    <string name="home_see_all">すべて表示</string>
+
+    <!-- Devices -->
+    <string name="device_title">デバイス</string>
+    <string name="device_online_of_total">%2$d 台中 %1$d 台オンライン</string>
+    <string name="device_add_devices">デバイスを追加</string>
+    <string name="device_filter_all">すべて</string>
+    <string name="device_category_lights">照明</string>
+    <string name="device_category_power">電源</string>
+    <string name="device_category_air">空気</string>
+    <string name="device_category_climate">空調</string>
+    <string name="device_all_rooms">すべての部屋</string>
+    <string name="device_no_room">部屋なし</string>
+    <string name="device_manage_rooms">部屋を管理</string>
+    <string name="device_empty_filtered_title">該当なし</string>
+    <string name="device_empty_filtered_body">この部屋とカテゴリに一致するデバイスはありません。</string>
+    <string name="device_empty_admin">+ をタップして Tuya、Tapo、Xiaomi、Hue、または MQTT をリンクし、検出されたデバイスを追加してください。</string>
+    <string name="device_online">オンライン</string>
+    <string name="device_offline">オフライン</string>
+    <string name="device_on">オン</string>
+    <string name="device_off">オフ</string>
+    <string name="device_leak">水漏れ</string>
+    <string name="device_motion">モーション</string>
+    <string name="device_motion_detected">検知</string>
+    <string name="device_clear">異常なし</string>
+    <string name="device_open">開</string>
+    <string name="device_closed">閉</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s の電源</string>
+    <string name="device_refresh_a11y">%1$s を更新</string>
+    <string name="device_view_only_member">このデバイスは閲覧のみ可能で、操作はできません。</string>
+    <string name="device_view_only_guest">ゲストはデバイスを閲覧できますが、操作はできません。</string>
+    <string name="device_brightness">明るさ</string>
+    <string name="device_white">ホワイト</string>
+    <string name="device_white_warm">暖色</string>
+    <string name="device_white_neutral">中間色</string>
+    <string name="device_white_cool">寒色</string>
+    <string name="device_fan_speed">ファン速度</string>
+    <string name="device_mode">モード</string>
+    <string name="device_speed">速度</string>
+    <string name="device_coverage">適用床面積 %1$d–%2$d m²</string>
+    <string name="device_reading_power">電力</string>
+    <string name="device_reading_voltage">電圧</string>
+    <string name="device_reading_current">電流</string>
+    <string name="device_reading_temperature">温度</string>
+    <string name="device_reading_humidity">湿度</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">フィルター</string>
+    <string name="device_filter_left">残り %1$d%%</string>
+    <string name="device_reading_contact">ドア・窓</string>
+    <string name="device_reading_water">水</string>
+    <string name="device_water_dry">乾燥</string>
+    <string name="device_reading_alarm">アラーム</string>
+    <string name="device_alarm_sounding">鳴動中</string>
+    <string name="device_alarm_quiet">静穏</string>
+    <string name="device_reading_battery">バッテリー</string>
+    <string name="device_battery_low">低下</string>
+    <string name="device_battery_ok">正常</string>
+    <string name="device_ask_before_switching">切り替える前に確認する</string>
+    <string name="device_ask_before_switching_desc">アプリ、グループ、またはシーンからオン・オフを切り替える前に警告を表示します</string>
+    <string name="device_rename_or_move">名前変更または移動</string>
+    <string name="device_rename">名前を変更</string>
+    <string name="device_remove">削除</string>
+    <string name="device_edit_title">デバイスを編集</string>
+    <string name="device_field_name">名前</string>
+    <string name="device_field_room">部屋</string>
+    <string name="device_remove_confirm_title">%1$s を削除しますか？</string>
+    <string name="device_remove_confirm_body">ホームとシーンから削除されます。「デバイスを追加」からいつでも再追加できます。</string>
+    <string name="device_white_candle">キャンドル</string>
+    <string name="device_white_soft">電球色</string>
+    <string name="device_white_neutral_preset">白色</string>
+    <string name="device_white_daylight">昼白色</string>
+    <string name="device_white_cool_preset">昼光色</string>
+    <string name="device_light_off">ライトオフ</string>
+    <string name="device_light_effect">エフェクト</string>
+    <string name="device_light_white">ホワイトライト</string>
+    <string name="device_light_color">カラーライト</string>
+    <string name="device_light_playing">%1$s を再生中</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">カラー</string>
+    <string name="device_effects">エフェクト</string>
+    <string name="device_color_temp">色温度</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K 暖色</string>
+    <string name="device_kelvin_max">6500K 寒色</string>
+    <string name="device_moods">ムード</string>
+    <string name="device_stop_effect">エフェクトを停止</string>
+    <string name="device_color_swatch_a11y">カラー %1$s</string>
+    <string name="device_selected">選択済み</string>
+    <string name="device_not_selected">未選択</string>
+    <string name="device_confirm_switch_one_title">%1$s を切り替えますか？</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="other">%1$d 台のデバイスを切り替えますか？</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">これには切り替え前に確認が必要な %1$s が含まれています。切り替えると接続されている機器の電源が切れる可能性があります。</string>
+    <string name="device_confirm_switch_many_body">これには切り替え前に確認が必要な %1$s が含まれています。切り替えると接続されている機器の電源が切れる可能性があります。</string>
+    <string name="device_confirm_switch_action">切り替える</string>
+    <string name="device_cancel">キャンセル</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">たった今</string>
+    <string name="scene_time_minutes_ago">%1$d 分前</string>
+    <string name="scene_time_hours_ago">%1$d 時間前</string>
+    <string name="scene_time_days_ago">%1$d 日前</string>
+    <string name="scene_edit_item">%1$s を編集</string>
+    <string name="scene_title">シーン</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="other">%1$d 件アクティブ · %2$d 件のオートメーションがオン</item>
+    </plurals>
+    <string name="scene_empty_title">まだ何もありません</string>
+    <string name="scene_empty_subtitle">シーンは複数のデバイスを一度に設定します。オートメーションは条件に応じて自動的にそれを実行します。</string>
+    <string name="scene_new_scene">新規シーン</string>
+    <string name="scene_new_automation">新規オートメーション</string>
+    <string name="scene_new_screen_sync">新規の画面同期</string>
+    <string name="scene_sync_active_subtitle">画面同期 · 照明が画面に連動中</string>
+    <string name="scene_sync_inactive_subtitle">画面同期 · この画面の色を照明に反映します</string>
+    <string name="scene_active">稼働中</string>
+    <string name="scene_section_automations">オートメーション</string>
+    <string name="scene_last_ran">最終実行: %1$s</string>
+    <string name="scene_never_ran">未実行</string>
+    <string name="scene_run_now">%1$s を今すぐ実行</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">月</string>
+    <string name="editor_day_tue">火</string>
+    <string name="editor_day_wed">水</string>
+    <string name="editor_day_thu">木</string>
+    <string name="editor_day_fri">金</string>
+    <string name="editor_day_sat">土</string>
+    <string name="editor_day_sun">日</string>
+    <string name="editor_prop_temperature">温度</string>
+    <string name="editor_prop_humidity">湿度</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">明るさ</string>
+    <string name="editor_prop_power_watts">電力 (W)</string>
+    <string name="editor_removed_device">削除されたデバイス</string>
+    <string name="editor_rule_device_is_off">%1$s がオフ</string>
+    <string name="editor_rule_device_is_on">%1$s がオン</string>
+    <string name="editor_rule_device_prop_above">%1$s の %2$s が %3$s より上</string>
+    <string name="editor_rule_device_prop_below">%1$s の %2$s が %3$s より下</string>
+    <string name="editor_rule_device_prop_is">%1$s の %2$s が %3$s</string>
+    <string name="editor_rule_time_every_day">毎日 %1$s</string>
+    <string name="editor_rule_time_on_days">%2$sの %1$s</string>
+    <string name="editor_sun_event_sunrise">日の出</string>
+    <string name="editor_sun_event_sunset">日の入り</string>
+    <string name="editor_rule_sun_at_every_day">毎日%1$sに</string>
+    <string name="editor_rule_sun_at_on_days">%2$sの%1$sに</string>
+    <string name="editor_rule_sun_before_every_day">毎日%2$sの %1$d 分前</string>
+    <string name="editor_rule_sun_before_on_days">%3$sの%2$sの %1$d 分前</string>
+    <string name="editor_rule_sun_after_every_day">毎日%2$sの %1$d 分後</string>
+    <string name="editor_rule_sun_after_on_days">%3$sの%2$sの %1$d 分後</string>
+    <string name="editor_rule_power_above">%1$s の消費電力が %2$s W を超えたとき</string>
+    <string name="editor_rule_device_offline">%1$s がオフラインになったとき</string>
+    <string name="editor_rule_device_discovered">新しいデバイスが見つかったとき</string>
+    <string name="editor_rule_time_between">%1$s から %2$s の間</string>
+    <string name="editor_cmd_on">オン</string>
+    <string name="editor_cmd_off">オフ</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">ホワイト %1$s</string>
+    <string name="editor_device_group">デバイスグループ</string>
+    <string name="editor_cmd_custom">カスタムコマンド</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">通知: %1$s</string>
+    <string name="editor_removed_scene">（削除済み）</string>
+    <string name="editor_rule_scene">シーン %1$s を実行</string>
+    <string name="editor_rule_delay">%1$s 秒待機</string>
+    <string name="editor_rule_unknown">不明</string>
+    <string name="editor_trigger_time">時刻</string>
+    <string name="editor_trigger_sun">日の出 / 日の入り</string>
+    <string name="editor_trigger_device_state">デバイスの状態</string>
+    <string name="editor_trigger_power">電力</string>
+    <string name="editor_trigger_offline">オフライン化</string>
+    <string name="editor_trigger_discovered">新しいデバイス</string>
+    <string name="editor_condition_device_state">デバイスの状態</string>
+    <string name="editor_condition_time_between">時間帯</string>
+    <string name="editor_action_device">デバイス</string>
+    <string name="editor_action_scene">シーン</string>
+    <string name="editor_action_notify">通知</string>
+    <string name="editor_action_delay">待機</string>
+    <string name="editor_add">追加</string>
+    <string name="editor_field_device">デバイス</string>
+    <string name="editor_sun_sunrise">日の出</string>
+    <string name="editor_sun_sunset">日の入り</string>
+    <string name="editor_sun_after">後</string>
+    <string name="editor_sun_before">前</string>
+    <string name="editor_field_minutes">分</string>
+    <string name="editor_sun_supporting_sunrise">空欄にすると日の出ちょうどに実行されます。「設定」でホームの位置情報が必要です。</string>
+    <string name="editor_sun_supporting_sunset">空欄にすると日の入りちょうどに実行されます。「設定」でホームの位置情報が必要です。</string>
+    <string name="editor_every_day">毎日</string>
+    <string name="editor_chosen_days">選択した曜日のみ</string>
+    <string name="editor_field_is">状態</string>
+    <string name="editor_state_on">オン</string>
+    <string name="editor_state_off">オフ</string>
+    <string name="editor_compare_above">より上</string>
+    <string name="editor_compare_below">より下</string>
+    <string name="editor_field_value">値</string>
+    <string name="editor_field_watts">ワット</string>
+    <string name="editor_time_from">開始</string>
+    <string name="editor_time_until">終了</string>
+    <string name="editor_power_turn_on">オンにする</string>
+    <string name="editor_power_turn_off">オフにする</string>
+    <string name="editor_power_leave">電源はそのまま</string>
+    <string name="editor_set_brightness">明るさを設定</string>
+    <string name="editor_set_brightness_value">明るさを %1$d%% に設定</string>
+    <string name="editor_field_scene">シーン</string>
+    <string name="editor_field_title">タイトル</string>
+    <string name="editor_field_message">メッセージ</string>
+    <string name="editor_field_seconds">秒</string>
+    <string name="editor_remove_rule">削除: %1$s</string>
+    <string name="editor_style_vivid">ビビッド</string>
+    <string name="editor_style_dominant">ドミナント</string>
+    <string name="editor_style_average">平均</string>
+    <string name="editor_new_screen_sync">新規の画面同期</string>
+    <string name="editor_new_scene">新規シーン</string>
+    <string name="editor_edit_scene">シーンを編集</string>
+    <string name="editor_delete">削除</string>
+    <string name="editor_field_name">名前</string>
+    <string name="editor_sync_lights_title">画面に連動させる照明</string>
+    <string name="editor_sync_no_lights">ホームにまだ照明がありません。</string>
+    <string name="editor_sync_color_title">カラー</string>
+    <string name="editor_style_vivid_desc">画面上で最も強い色。</string>
+    <string name="editor_style_dominant_desc">最も多く使われている色。</string>
+    <string name="editor_style_average_desc">画面全体の平均色。</string>
+    <string name="editor_region_full">画面全体</string>
+    <string name="editor_region_edges">端のみ</string>
+    <string name="editor_sync_dim_dark">暗いシーンでは減光する</string>
+    <string name="editor_sync_restore_lights">停止時に照明を元の状態に戻す</string>
+    <string name="editor_actions_title">アクション</string>
+    <string name="editor_add_action">アクションを追加</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_delete_confirm_title">%1$s を削除しますか？</string>
+    <string name="editor_delete_scene_body">このシーンを実行するオートメーションは、このシーンをスキップします。</string>
+    <string name="editor_new_automation">新規オートメーション</string>
+    <string name="editor_edit_automation">オートメーションを編集</string>
+    <string name="editor_field_description_optional">説明（任意）</string>
+    <string name="editor_enabled">有効</string>
+    <string name="editor_triggers_title">次のいずれかが発生したとき</string>
+    <string name="editor_add_trigger">トリガーを追加</string>
+    <string name="editor_conditions_title">次の条件をすべて満たす場合のみ</string>
+    <string name="editor_add_condition">条件を追加</string>
+    <string name="editor_do_this_title">実行するアクション</string>
+    <string name="editor_delete_automation_body">自動実行が停止します。</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">ライブ</string>
+    <string name="analytics_range_hour">1 分</string>
+    <string name="analytics_range_day">日</string>
+    <string name="analytics_range_week">週</string>
+    <string name="analytics_range_month">月</string>
+    <string name="analytics_bucket_5s">5秒</string>
+    <string name="analytics_bucket_minute">分</string>
+    <string name="analytics_bucket_hour">時間</string>
+    <string name="analytics_bucket_day">日</string>
+    <string name="analytics_title">分析</string>
+    <string name="analytics_subtitle_power">電力使用量と料金</string>
+    <string name="analytics_subtitle_air">空気の状態と空気清浄機</string>
+    <string name="analytics_electricity_tariff">電気料金プラン</string>
+    <string name="analytics_tab_electricity">電力</string>
+    <string name="analytics_tab_air">空気質</string>
+    <string name="analytics_no_energy_title">まだ電力データがありません</string>
+    <string name="analytics_no_energy_subtitle">電力測定プラグやスイッチがオンラインになってから1分後に測定値が表示されます。</string>
+    <string name="analytics_using_now">現在の電力</string>
+    <string name="analytics_projected_cost">今サイクルは %1$s になる見込みです</string>
+    <string name="analytics_today">今日</string>
+    <string name="analytics_today_info">午前0時以降に使用された電力量です。下の金額は電気料金レートに基づく推定コストです。</string>
+    <string name="analytics_this_cycle">今サイクル</string>
+    <string name="analytics_this_cycle_info">現在の請求サイクルにおけるこれまでの使用電力量と推定電気代です。</string>
+    <string name="analytics_history">履歴</string>
+    <string name="analytics_nothing_recorded">この期間にはまだ記録がありません。</string>
+    <string name="analytics_metric_energy">電力量</string>
+    <string name="analytics_metric_power">電力</string>
+    <string name="analytics_no_reading">測定値なし</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">%1$sあたりの平均電力</string>
+    <string name="analytics_chart_energy_used">%1$sあたりの使用電力量、合計 %2$s</string>
+    <string name="analytics_live_caption">このページを開いている間、5秒ごとに測定される直近5分間のデータです。</string>
+    <string name="analytics_total_caption">合計 %1$s · %2$s</string>
+    <string name="analytics_insights">インサイト</string>
+    <string name="analytics_peak_hour">ピーク時間帯</string>
+    <string name="analytics_peak_last_24h">過去24時間で %1$s</string>
+    <string name="analytics_no_usage_yet">まだ使用データがありません</string>
+    <string name="analytics_daily_average">1日あたりの平均</string>
+    <string name="analytics_needs_full_day">丸1日分のデータが必要です</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="other">過去 %1$d 日間</item>
+    </plurals>
+    <string name="analytics_today_vs_average">今日と平均の比較</string>
+    <string name="analytics_above_usual_day">普段の1日より多い</string>
+    <string name="analytics_below_usual_day">普段の1日より少ない</string>
+    <string name="analytics_about_usual_day">普段の1日と同程度</string>
+    <string name="analytics_top_device">最大消費デバイス</string>
+    <string name="analytics_no_metered_device">電力測定デバイスなし</string>
+    <string name="analytics_billing_cycle">請求サイクル</string>
+    <string name="analytics_time_elapsed">経過日数</string>
+    <string name="analytics_day_of_days">%2$d 日中 %1$d 日目</string>
+    <string name="analytics_budget_used">使用済み予算</string>
+    <string name="analytics_cost_of_budget">%2$s 中 %1$s</string>
+    <string name="analytics_spending_ahead">カレンダーのペースより支出が上回っています。</string>
+    <string name="analytics_budget_hint">支出を追跡するには、電気料金プランで月間予算を設定してください。</string>
+    <string name="analytics_by_device">デバイス別</string>
+    <string name="analytics_device_cycle_summary">%1$s · 今サイクル %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">温度</string>
+    <string name="analytics_reading_humidity">湿度</string>
+    <string name="analytics_pm25_now">現在の PM2.5</string>
+    <string name="analytics_air_no_sensor_online">オンラインのセンサーがありません</string>
+    <string name="analytics_air_status_excellent">極めて良好 · 清浄な室内空気</string>
+    <string name="analytics_air_status_good">良好 · 健康的な範囲内</string>
+    <string name="analytics_air_status_moderate">やや汚染 · 空気清浄機を稼働させるか換気してください</string>
+    <string name="analytics_air_status_poor">不良 · 空気清浄機を強で稼働させ、窓を閉めてください</string>
+    <string name="analytics_purifiers">空気清浄機</string>
+    <string name="analytics_running_of_total">%2$d 台中 %1$d 台</string>
+    <string name="analytics_all_on_standby">すべて待機中</string>
+    <string name="analytics_running_now">現在稼働中</string>
+    <string name="analytics_filter_life">フィルター寿命</string>
+    <string name="analytics_filter_replace_soon">まもなく交換時期</string>
+    <string name="analytics_filter_healthy">良好</string>
+    <string name="analytics_sensors_average">センサーの平均値</string>
+    <string name="analytics_humidity_dry">乾燥</string>
+    <string name="analytics_humidity_humid">多湿</string>
+    <string name="analytics_humidity_comfortable">快適</string>
+    <string name="analytics_trend">推移</string>
+    <string name="analytics_no_air_history">まだ履歴がありません。センサーがオンラインの間、毎分測定値が記録されます。</string>
+    <string name="analytics_air_chart_summary">%2$sあたりの %1$s、平均 %3$s</string>
+    <string name="analytics_pm25_dashed_caption">破線: 15 µg/m³ は清浄空気の目標値、35 µg/m³ は良好レベルの上限。</string>
+    <string name="analytics_period_5m">5 分</string>
+    <string name="analytics_period_60m">60 分</string>
+    <string name="analytics_period_24h">24 時間</string>
+    <string name="analytics_period_7d">7 日間</string>
+    <string name="analytics_period_30d">30 日間</string>
+    <string name="analytics_average">平均</string>
+    <string name="analytics_air_level_over_period">%2$sの %1$s</string>
+    <string name="analytics_peak">ピーク</string>
+    <string name="analytics_value_with_peak">%1$s · ピーク %2$s</string>
+    <string name="analytics_day_hour">%1$s %2$s</string>
+    <string name="analytics_usage_by_hour">時間別の使用量</string>
+    <string name="analytics_peak_pm25_by_hour">時間別のピーク PM2.5</string>
+    <string name="analytics_hour_grid_caption">過去7日間の1時間ごとに1つのセルが表示されます。濃いセルほど値が高いことを示します。</string>
+    <string name="analytics_hour_grid_summary">%1$s（過去7日間の各時間）</string>
+    <string name="analytics_time_at_each_level">各レベルでの滞在時間</string>
+    <string name="analytics_time_good_air">空気が良好だった時間</string>
+    <string name="analytics_pm25_good_over_period">%1$sにおいて PM2.5 が 35 µg/m³ 以下</string>
+    <string name="analytics_sensors">センサー</string>
+    <string name="analytics_offline">オフライン</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">設定</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">システム</string>
+    <string name="settings_theme_light">ライト</string>
+    <string name="settings_theme_dark">ダーク</string>
+    <string name="settings_role_admin">管理者</string>
+    <string name="settings_role_member">メンバー</string>
+    <string name="settings_role_guest">ゲスト</string>
+    <string name="settings_avatar">アバター</string>
+    <string name="settings_section_home">ホーム</string>
+    <string name="settings_add_devices">デバイスを追加</string>
+    <string name="settings_add_devices_subtitle">アカウントとネットワーク上のデバイスを検出して追加します</string>
+    <string name="settings_plugins">プラグイン</string>
+    <string name="settings_plugins_subtitle">Tuya、Tapo、Xiaomi、Hue、MQTT</string>
+    <string name="settings_rooms">部屋</string>
+    <string name="settings_people">メンバー</string>
+    <string name="settings_people_subtitle">アカウント、ロール、部屋へのアクセス権</string>
+    <string name="settings_tariff">電気料金プラン</string>
+    <string name="settings_tariff_subtitle">料金レート、請求サイクル、予算</string>
+    <string name="settings_location">ホームの位置情報</string>
+    <string name="settings_location_subtitle">日の出・日の入りオートメーション用</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_notifications_subtitle">ホームからの通知履歴</string>
+    <string name="settings_background_alerts">アプリ終了時のアラート受信</string>
+    <string name="settings_background_alerts_subtitle">サーバーへの接続を維持します。バッテリーを少し消費します。</string>
+    <string name="settings_section_server">サーバー</string>
+    <string name="settings_server_live_pinned">ライブ · ピン留めされた証明書</string>
+    <string name="settings_server_live_public">ライブ · 公的証明書</string>
+    <string name="settings_server_reconnecting">再接続中…</string>
+    <string name="settings_server_live_badge">LIVE</string>
+    <string name="settings_server_cert_public">暗号化済み · 公的な認証局によって検証された証明書</string>
+    <string name="settings_server_cert_pinned">暗号化済み · 初回利用時にこのサーバー独自の証明書を承認しました:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 フィンガープリント</string>
+    <string name="settings_fingerprint_clip_label">フィンガープリント</string>
+    <string name="settings_copied">コピーしました</string>
+    <string name="settings_copy">コピー</string>
+    <string name="settings_change_password">パスワードを変更</string>
+    <string name="settings_change_password_subtitle">Domus へのサインイン用</string>
+    <string name="settings_server_addresses">サーバーアドレス</string>
+    <string name="settings_server_addresses_subtitle">ホームネットワークとリモートアクセス</string>
+    <string name="settings_updates">アップデート</string>
+    <string name="settings_updates_subtitle">バージョン %1$s、リリースノート、チャンネル</string>
+    <string name="settings_about">Domus について</string>
+    <string name="settings_about_subtitle">バージョン %1$s、開発者、謝辞</string>
+    <string name="settings_appearance">外観</string>
+    <string name="settings_wallpaper_colors">壁紙の色</string>
+    <string name="settings_wallpaper_colors_subtitle">アプリの配色を壁紙に合わせる</string>
+    <string name="settings_section_account">アカウント</string>
+    <string name="settings_account_subtitle">サインアウトまたは別のサーバーを使用</string>
+    <string name="settings_sign_out">サインアウト</string>
+    <string name="settings_use_another_server">別のサーバーを使用</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">戻る</string>
+    <string name="manage_hide_field">%1$s を隠す</string>
+    <string name="manage_show_field">%1$s を表示</string>
+    <string name="manage_choose">選択…</string>
+    <string name="manage_close">閉じる</string>
+    <string name="manage_cancel">キャンセル</string>
+    <string name="manage_save">保存</string>
+    <string name="manage_delete">削除</string>
+    <string name="manage_rooms_title">部屋</string>
+    <string name="manage_add_room">部屋を追加</string>
+    <string name="manage_no_rooms">まだ部屋がありません</string>
+    <string name="manage_no_rooms_subtitle">部屋はデバイスをグループ化し、メンバーやゲストが閲覧できるデバイスを決定します。</string>
+    <plurals name="manage_device_count">
+        <item quantity="other">%1$d 台のデバイス</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="other">%1$d 部屋</item>
+    </plurals>
+    <string name="manage_room_subtitle">%1$d 階 · %2$s</string>
+    <string name="manage_new_room">新規の部屋</string>
+    <string name="manage_edit_room">部屋を編集</string>
+    <string name="manage_field_name">名前</string>
+    <string name="manage_field_floor">階</string>
+    <string name="manage_role_admin">管理者</string>
+    <string name="manage_role_member">メンバー</string>
+    <string name="manage_role_guest">ゲスト</string>
+    <string name="manage_level_none">なし</string>
+    <string name="manage_level_view">閲覧のみ</string>
+    <string name="manage_level_control">操作</string>
+    <string name="manage_level_edit">編集</string>
+    <string name="manage_access_to">%1$s へのアクセス権</string>
+    <string name="manage_whole_room_level">部屋全体 · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d 台中 %1$d 台のデバイス</string>
+    <string name="manage_no_access">アクセス権なし</string>
+    <string name="manage_close_item">%1$s を閉じる</string>
+    <string name="manage_open_item">%1$s を開く</string>
+    <string name="manage_whole_room">部屋全体</string>
+    <string name="manage_whole_room_hint">後から追加されたデバイスも対象になります</string>
+    <string name="manage_no_devices_in_room">この部屋にはまだデバイスがありません。</string>
+    <string name="manage_people_title">メンバー</string>
+    <string name="manage_add_person">メンバーを追加</string>
+    <string name="manage_access_whole_home">家全体</string>
+    <string name="manage_access_none">アクセス権なし</string>
+    <string name="manage_user_tag_kid">子ども</string>
+    <string name="manage_user_tag_reset_requested">パスワードリセット要求中</string>
+    <string name="manage_person_title">メンバー</string>
+    <string name="manage_handover_reset_title">%1$s のリセットコード</string>
+    <string name="manage_handover_signin_title">%1$s のサインイン情報</string>
+    <string name="manage_handover_shown_once">1回のみ表示されます。今すぐ相手に送信してください。</string>
+    <string name="manage_copy">コピー</string>
+    <string name="manage_share">共有</string>
+    <string name="manage_done">完了</string>
+    <string name="manage_new_person">新規メンバー</string>
+    <string name="manage_avatar">アバター</string>
+    <string name="manage_roll">ランダム</string>
+    <string name="manage_field_username">ユーザー名</string>
+    <string name="manage_username_supporting">3文字以上</string>
+    <string name="manage_field_email">メールアドレス</string>
+    <string name="manage_email_taken">すでに別のアカウントで使用されています</string>
+    <string name="manage_email_available">利用可能</string>
+    <string name="manage_email_hint">直接入力するか、ユーザー名から自動生成します</string>
+    <string name="manage_generate_email">@domus.home メールアドレスを生成</string>
+    <string name="manage_section_password">パスワード</string>
+    <string name="manage_kid_account">子ども用アカウント</string>
+    <string name="manage_kid_account_on">管理者が設定したパスワードがそのまま維持されます。</string>
+    <string name="manage_kid_account_off">オフ: Domus が仮パスワードを作成し、初回サインイン時に本人が自分のパスワードを設定します。</string>
+    <string name="manage_field_new_password">新しいパスワード</string>
+    <string name="manage_field_password">パスワード</string>
+    <string name="manage_password_keep_current">現在のパスワードを維持する場合は空欄のままにしてください</string>
+    <string name="manage_password_min_length">8文字以上</string>
+    <string name="manage_password_after_saving">保存後にコピーまたは共有用のパスワードが表示されます。</string>
+    <string name="manage_reset_requested_notice">%1$s がパスワードを忘れ、リセットを要求しました。</string>
+    <string name="manage_reset_code">リセットコード</string>
+    <string name="manage_reset_code_active">コードは %1$s まで有効です。取り消すにはオフにしてください。</string>
+    <string name="manage_reset_code_help">\"パスワードをお忘れですか？\" で新しいパスワードを設定するために使用するワンタイムコードです。30分間有効です。</string>
+    <string name="manage_generate_new_password">新しいパスワードを生成</string>
+    <string name="manage_section_role">ロール</string>
+    <string name="manage_role_admin_desc">すべてを管理します。</string>
+    <string name="manage_role_member_desc">許可されたものを閲覧できます。操作権限やデバイスの名前変更を含む編集権限は、部屋やデバイスごとに設定します。</string>
+    <string name="manage_role_guest_desc">許可されたものを閲覧できますが、操作はできません。</string>
+    <string name="manage_section_access">アクセス権</string>
+    <string name="manage_custom_access">カスタムアクセス権</string>
+    <string name="manage_custom_access_off">オフ: 家全体にアクセスできます。</string>
+    <string name="manage_custom_access_on">部屋ごと、または部屋内の個別のデバイスごとに権限レベルを設定します。</string>
+    <string name="manage_create_rooms_first">先に部屋を作成してください。</string>
+    <string name="manage_no_room">部屋なし</string>
+    <string name="manage_remove_user_title">%1$s を削除しますか？</string>
+    <string name="manage_remove_user_text">ただちにアクセス権が失われます。</string>
+    <string name="manage_remove">削除</string>
+    <string name="manage_tariff_title">電気料金プラン</string>
+    <string name="manage_rate_per_kwh">1 kWh あたりの料金</string>
+    <string name="manage_currency">通貨</string>
+    <string name="manage_currency_supporting">ISO コード（例: JPY）</string>
+    <string name="manage_fixed_monthly_charge">月額基本料金</string>
+    <string name="manage_billing_day">請求日</string>
+    <string name="manage_billing_day_supporting">1 から 28</string>
+    <string name="manage_monthly_budget">月間予算（任意）</string>
+    <string name="manage_usage_slabs">段階料金</string>
+    <string name="manage_slabs_empty">定額レートです。請求サイクル内の使用量に応じて単価が変わる場合は段階を追加してください。</string>
+    <string name="manage_slabs_help">各段階の単価はその上限まで適用されます。それ以上のすべての使用量に適用するには、最後の上限を空欄にしてください。</string>
+    <string name="manage_up_to_kwh">上限 kWh</string>
+    <string name="manage_slab_rate">単価</string>
+    <string name="manage_remove_slab">段階 %1$d を削除</string>
+    <string name="manage_add_slab">段階を追加</string>
+    <string name="manage_time_of_day">時間帯別料金</string>
+    <string name="manage_time_of_day_help">ホームの時計で、1単位の料金が上の単価より高くなる、または安くなる時間帯。1 kWh あたりの差額を入力してください（例: ピーク割増なら 1.1、夜間割引なら -1.5）。</string>
+    <string name="manage_window_from">開始</string>
+    <string name="manage_window_until">終了</string>
+    <string name="manage_window_per_kwh">1 kWh あたり</string>
+    <string name="manage_remove_time_window">時間帯 %1$d を削除</string>
+    <string name="manage_add_time_window">時間帯を追加</string>
+    <string name="manage_server_addresses_title">サーバーアドレス</string>
+    <string name="manage_server_addresses_help">Domus は自宅のネットワークではホームアドレスを、それ以外の場所ではリモートアドレスを使用します。どちらでもサインイン状態が維持されます。</string>
+    <string name="manage_home_network">ホームネットワーク</string>
+    <string name="manage_home_network_supporting">例: https://192.168.1.10:8443</string>
+    <string name="manage_remote">リモート</string>
+    <string name="manage_remote_supporting">例: Cloudflare Tunnel のホスト名</string>
+    <string name="manage_not_set">未設定</string>
+    <string name="manage_location_disabled">このスマートフォンでは位置情報がオフになっています。代わりに場所を検索してください。</string>
+    <string name="manage_location_not_found">現在地を特定できませんでした。代わりに場所を検索してください。</string>
+    <string name="manage_location_permission_denied">位置情報へのアクセス権がない場合は、場所を検索するか座標を入力してください。</string>
+    <string name="manage_location_title">ホームの位置情報</string>
+    <string name="manage_location_sun_times">今日の日の出は %1$s、日の入りは %2$s です。</string>
+    <string name="manage_location_help">Domus がホームのおおよその位置を把握すると、日の出や日の入りにオートメーションを実行できるようになります。位置情報はサーバー内に留まります。</string>
+    <string name="manage_use_phone_location">このスマートフォンの位置情報を使用</string>
+    <string name="manage_find_place">場所を検索</string>
+    <string name="manage_find_place_supporting">市区町村</string>
+    <string name="manage_search_place">場所を検索</string>
+    <string name="manage_no_place_found">その名前の場所は見つかりませんでした。最寄りの都市名でお試しください。</string>
+    <string name="manage_latitude">緯度</string>
+    <string name="manage_latitude_supporting">例: 35.68</string>
+    <string name="manage_longitude">経度</string>
+    <string name="manage_longitude_supporting">例: 139.76</string>
+    <string name="manage_change_password_title">パスワードを変更</string>
+    <string name="manage_change_password_help">このデバイスおよび他のすべてのデバイスでサインイン状態が維持されます。</string>
+    <string name="manage_current_password">現在のパスワード</string>
+    <string name="manage_repeat_new_password">新しいパスワード（確認）</string>
+    <string name="manage_passwords_mismatch">パスワードが一致しません</string>
+    <string name="manage_delete_all_notices_title">すべての通知を削除しますか？</string>
+    <string name="manage_delete_all_notices_text">すべてのデバイスから削除されます。</string>
+    <string name="manage_delete_all">すべて削除</string>
+    <string name="manage_notifications_title">通知</string>
+    <string name="manage_mark_all_read">すべて既読にする</string>
+    <string name="manage_no_notices">まだ通知はありません</string>
+    <string name="manage_no_notices_subtitle">オートメーション、新しいデバイス、オフラインデバイスからのアラートがここに表示されます。</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life アプリでスキャンする QR コード</string>
+    <string name="onboard_region_india">インド</string>
+    <string name="onboard_region_china">中国</string>
+    <string name="onboard_region_europe">ヨーロッパ</string>
+    <string name="onboard_region_us">アメリカ合衆国</string>
+    <string name="onboard_region_singapore">シンガポール</string>
+    <string name="onboard_region_russia">ロシア</string>
+    <string name="onboard_region_taiwan">台湾</string>
+    <string name="onboard_region_india_old">インド（旧）</string>
+    <string name="onboard_plugins_title">プラグイン</string>
+    <string name="onboard_local_control">ローカル制御</string>
+    <string name="onboard_cloud">クラウド</string>
+    <plurals name="onboard_device_count">
+        <item quantity="other">%1$d 台のデバイス</item>
+    </plurals>
+    <string name="onboard_account_linked">リンク済み</string>
+    <string name="onboard_account_needs_attention">要確認</string>
+    <string name="onboard_unlink_account">%1$s のリンクを解除</string>
+    <string name="onboard_integration_disabled">サーバー設定で無効になっています。</string>
+    <string name="onboard_link_account">アカウントをリンク</string>
+    <string name="onboard_link_another_account">別のアカウントをリンク</string>
+    <string name="onboard_find_devices">デバイスを検出</string>
+    <string name="onboard_unlink_title">%1$s のリンクを解除しますか？</string>
+    <string name="onboard_unlink_text">このアカウントから追加されたデバイスは Domus から削除されます。</string>
+    <string name="onboard_unlink">リンク解除</string>
+    <string name="onboard_link_integration">%1$s をリンク</string>
+    <string name="onboard_tuya_qr_instructions">Smart Life または Tuya Smart アプリ（ホーム画面のスキャンボタン）でこのコードをスキャンし、アプリ側で確認してください。同じスマートフォンで操作している場合は、このコードを別の画面に表示してください。</string>
+    <string name="onboard_waiting_for_scan">スキャンを待っています…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life アプリで「マイページ」→「設定」→「アカウントとセキュリティ」→「ユーザーコード」を開き、そのコードをここに入力してください。</string>
+    <string name="onboard_user_code">ユーザーコード</string>
+    <string name="onboard_qr_expired">QR コードの有効期限が切れました。もう一度お試しください。</string>
+    <string name="onboard_verify_title">本人確認</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi が携帯電話に確認コードを送信しました。ここに入力してください（数分で有効期限が切れます）。</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi がメールアドレスに確認コードを送信しました。ここに入力してください（数分で有効期限が切れます）。</string>
+    <string name="onboard_verification_code">確認コード</string>
+    <string name="onboard_send_new_code">新しいコードを送信</string>
+    <string name="onboard_use_another_account">別のアカウントを使用</string>
+    <string name="onboard_tapo_instructions">TP-Link アカウントでサインインしてください。ネットワーク上の Tapo デバイスと通信するために使用されます。</string>
+    <string name="onboard_xiaomi_instructions">Xiaomi アカウントでサインインしてください。デバイストークンは1回だけ取得され、その後の操作はローカルで行われます。Xiaomi から確認コードが送信される場合があります。</string>
+    <string name="onboard_xiaomi_username">メールアドレス、電話番号、または Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">電話番号には +81… のような国番号が必要です</string>
+    <string name="onboard_email_or_username">メールアドレスまたはユーザー名</string>
+    <string name="onboard_password">パスワード</string>
+    <string name="onboard_server_region">サーバー地域</string>
+    <string name="onboard_show_qr_code">QR コードを表示</string>
+    <string name="onboard_verify">確認</string>
+    <string name="onboard_continue">続行</string>
+    <string name="onboard_link">リンク</string>
+    <string name="onboard_add_devices_title">デバイスを追加</string>
+    <string name="onboard_scanning">スキャン中…</string>
+    <string name="onboard_scan_again">再スキャン</string>
+    <string name="onboard_add_by_address">アドレスで追加</string>
+    <string name="onboard_no_new_devices">新しいデバイスはありません</string>
+    <string name="onboard_no_new_devices_subtitle">検出されたデバイスはすべてホームに追加済みです。さらに検出するには「プラグイン」からアカウントをリンクしてください。</string>
+    <string name="onboard_open_plugins">プラグインを開く</string>
+    <string name="onboard_found_count">%1$d 件検出</string>
+    <string name="onboard_add">追加</string>
+    <string name="onboard_ignore">無視</string>
+    <string name="onboard_add_device_title">%1$s を追加</string>
+    <string name="onboard_field_name">名前</string>
+    <string name="onboard_field_room">部屋</string>
+    <string name="onboard_no_room">部屋なし</string>
+    <string name="onboard_device_token_optional">デバイストークン（任意）</string>
+    <string name="onboard_device_token_supporting">Xiaomi アカウントをリンクしていない場合のみ必要です</string>
+    <string name="onboard_ip_address">IP アドレス</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">すでに存在します</string>
+    <string name="code_error_reference_missing" formatted="false">参照された項目が存在しません</string>
+    <string name="code_error_internal" formatted="false">内部サーバーエラー</string>
+    <string name="code_error_session_expired" formatted="false">セッションが無効または期限切れです</string>
+    <string name="code_error_admin_required" formatted="false">管理者権限が必要です</string>
+    <string name="code_error_guest_no_control" formatted="false">ゲストはデバイスを操作できません</string>
+    <string name="code_error_not_signed_in" formatted="false">サインインしていません</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization ヘッダーがありません</string>
+    <string name="code_error_account_gone" formatted="false">アカウントは存在しません</string>
+    <string name="code_error_must_change_password" formatted="false">先にパスワードを変更してください</string>
+    <string name="code_error_device_not_found" formatted="false">デバイスが見つかりません</string>
+    <string name="code_error_empty_command" formatted="false">空のコマンド</string>
+    <string name="code_error_scan_running" formatted="false">スキャンがすでに実行中です</string>
+    <string name="code_error_discovered_not_found" formatted="false">検出されたデバイスが見つかりません</string>
+    <string name="code_error_device_already_added" formatted="false">このデバイスはすでに追加されています</string>
+    <string name="code_error_username_too_short" formatted="false">ユーザー名は3文字以上である必要があります</string>
+    <string name="code_error_password_too_short" formatted="false">パスワードは8文字以上である必要があります</string>
+    <string name="code_error_setup_already_done" formatted="false">セットアップはすでに完了しています</string>
+    <string name="code_error_invalid_credentials" formatted="false">ユーザー名またはパスワードが無効です</string>
+    <string name="code_error_invalid_reset_code" formatted="false">そのコードは間違っているか、有効期限が切れています。管理者に新しいコードを依頼してください。</string>
+    <string name="code_error_wrong_current_password" formatted="false">現在のパスワードが正しくありません</string>
+    <string name="code_error_same_password" formatted="false">現在のものとは異なるパスワードを選択してください</string>
+    <string name="code_error_avatar_too_long" formatted="false">アバター文字列が長すぎます</string>
+    <string name="code_error_name_required" formatted="false">名前は必須です</string>
+    <string name="code_error_trigger_required" formatted="false">トリガーを少なくとも1つ追加してください</string>
+    <string name="code_error_action_required" formatted="false">アクションを少なくとも1つ追加してください</string>
+    <string name="code_error_sun_offset_range" formatted="false">日の出と日の入りは最大6時間までずらすことができます</string>
+    <string name="code_error_automation_not_found" formatted="false">オートメーションが見つかりません</string>
+    <string name="code_error_cannot_edit_device" formatted="false">このデバイスは編集できません</string>
+    <string name="code_error_admin_only_move_room" formatted="false">デバイスを別の部屋に移動できるのは管理者のみです</string>
+    <string name="code_error_name_empty" formatted="false">名前を空にすることはできません</string>
+    <string name="code_error_view_only_device" formatted="false">このデバイスは閲覧のみ可能で、操作はできません</string>
+    <string name="code_error_view_only_devices" formatted="false">これらのデバイスは閲覧のみ可能で、操作はできません</string>
+    <string name="code_error_negative_rate" formatted="false">料金レートを負の値にすることはできません</string>
+    <string name="code_error_invalid_billing_day" formatted="false">請求日は 1 から 28 の間である必要があります</string>
+    <string name="code_error_invalid_currency" formatted="false">通貨は3文字の ISO コードである必要があります</string>
+    <string name="code_error_slab_order" formatted="false">各段階の上限は前の段階より大きい値である必要があります</string>
+    <string name="code_error_slab_open_ended" formatted="false">上限なしにできるのは最後の段階のみです</string>
+    <string name="code_error_tou_format" formatted="false">時間帯別料金には HH:MM 形式の開始時刻と終了時刻が必要です</string>
+    <string name="code_error_tou_zero_length" formatted="false">時間帯別料金の開始時刻と終了時刻を同じにすることはできません</string>
+    <string name="code_error_tou_overlap" formatted="false">時間帯別料金の時間を重複させることはできません</string>
+    <string name="code_error_group_not_found" formatted="false">グループが見つかりません</string>
+    <string name="code_error_account_not_found" formatted="false">アカウントが見つかりません</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya 連携は無効になっています</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life アプリのユーザーコードを入力してください</string>
+    <string name="code_error_credentials_required" formatted="false">メールアドレスとパスワードが必要です</string>
+    <string name="code_error_verification_expired" formatted="false">確認の有効期限が切れました。もう一度サインインしてください</string>
+    <string name="code_error_invalid_port" formatted="false">ポートは数値である必要があります</string>
+    <string name="code_error_broker_required" formatted="false">ブローカーのアドレスを入力してください</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue 連携は無効になっています</string>
+    <string name="code_error_room_name_required" formatted="false">部屋の名前は必須です</string>
+    <string name="code_error_room_not_found" formatted="false">部屋が見つかりません</string>
+    <string name="code_error_sync_lights_required" formatted="false">同期する照明を少なくとも1つ選択してください</string>
+    <string name="code_error_scene_not_found" formatted="false">シーンが見つかりません</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">画面同期には共有する画面が必要です。コンテンツを表示しているデバイスの Domus アプリから開始してください。</string>
+    <string name="code_error_place_search_unreachable" formatted="false">場所検索に接続できません。代わりに緯度と経度を入力してください。</string>
+    <string name="code_error_invalid_coordinates" formatted="false">緯度は -90 から 90、経度は -180 から 180 の間である必要があります</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">そのユーザー名に対する候補アドレスはすべて使用されています</string>
+    <string name="code_error_invalid_role" formatted="false">ロールは admin、member、または guest である必要があります</string>
+    <string name="code_error_kid_password_required" formatted="false">子ども用アカウントにはパスワードが必要です</string>
+    <string name="code_error_email_taken" formatted="false">そのメールアドレスはすでに別のアカウントで使用されています</string>
+    <string name="code_error_user_not_found" formatted="false">ユーザーが見つかりません</string>
+    <string name="code_error_last_admin" formatted="false">少なくとも1人の管理者が必要です</string>
+    <string name="code_error_cannot_delete_self" formatted="false">自分自身のアカウントは削除できません</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue ブリッジの丸いボタンを押してから、30秒以内に再度リンクしてください</string>
+    <string name="code_error_hue_not_found" formatted="false">Hue ブリッジが見つかりません。IP アドレスを入力してください</string>
+    <string name="code_error_tuya_device_gone" formatted="false">デバイスが Smart Life に存在しません</string>
+    <string name="code_error_device_token_required" formatted="false">デバイストークンが必要です</string>
+    <string name="code_error_hue_link_expired" formatted="false">認証に失敗しました: Hue ブリッジがこのリンクを受け付けなくなりました。再度リンクしてください</string>
+    <string name="code_error_hue_removed" formatted="false">認証に失敗しました: Hue ブリッジが削除されました</string>
+    <string name="code_error_mqtt_removed" formatted="false">認証に失敗しました: MQTT ブローカーが削除されました</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">認証に失敗しました: デバイスが TP-Link アカウントのメールアドレスまたはパスワードを拒否しました</string>
+    <string name="code_error_tapo_account_required" formatted="false">認証に失敗しました: Tapo デバイスを操作するには TP-Link アカウントを追加してください</string>
+    <string name="code_error_tapo_removed" formatted="false">認証に失敗しました: TP-Link アカウントが削除されました</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">認証に失敗しました: Xiaomi から CAPTCHA が要求されました。Mi Home アプリまたはブラウザで一度サインインしてから再試行してください</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">認証に失敗しました: Xiaomi のユーザー名またはパスワードが無効です</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">認証に失敗しました: 確認コードが間違っているか期限切れです</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">認証に失敗しました: Xiaomi がコードを受け付けませんでした</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">認証に失敗しました: Xiaomi のセッション期限が切れました</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">認証に失敗しました: Xiaomi が確認コードを要求しています。「連携」からアカウントを再度リンクしてください</string>
+    <string name="code_error_unsupported_command" formatted="false">サポートされていません: このデバイスはそのコマンドに対応していません</string>
+    <string name="code_error_unsupported_effect" formatted="false">サポートされていません: この照明はそのエフェクトを再生できません</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">サポートされていません: この Xiaomi モデルには MIoT 仕様がありません</string>
+    <string name="code_error_rate_limited_one" formatted="false">パスワードの誤入力が多すぎます。{count} 分後にもう一度お試しください。</string>
+    <string name="code_error_rate_limited_other" formatted="false">パスワードの誤入力が多すぎます。{count} 分後にもう一度お試しください。</string>
+    <string name="code_error_integration_disabled" formatted="false">連携 \'{integration}\' は有効になっていません</string>
+    <string name="code_error_invalid_time" formatted="false">無効な時刻 \'{time}\' です。HH:MM 形式を使用してください</string>
+    <string name="code_error_invalid_actions" formatted="false">無効なアクション: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">リージョンは {regions} のいずれかである必要があります</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">無効な画面同期設定: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">不明なシーンの種類 \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" は有効なサーバーアドレスではありません</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">認証に失敗しました: Xiaomi が確認コードを送信できませんでした: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">認証に失敗しました: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">サポートされていません: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} の切り替えを確認してください</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">新しいデバイスが追加されました</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) が見つかり、自動的に追加されました</string>
+    <string name="code_notification_device_found_title" formatted="false">新しいデバイスが見つかりました</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) を追加できます</string>
+    <string name="code_notification_password_reset_title" formatted="false">パスワードのリセットが要求されました</string>
+    <string name="code_notification_password_reset" formatted="false">{username} がパスワードを忘れました。管理者は「設定」の「メンバーとアクセス権」からリセットコードを発行できます。</string>
+    <string name="code_notification_automation_failed_title" formatted="false">オートメーション \"{name}\" で問題が発生しました</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

@@ -8,11 +8,12 @@ import fr from '@/locales/fr.json'
 import ru from '@/locales/ru.json'
 import de from '@/locales/de.json'
 import tr from '@/locales/tr.json'
+import ja from '@/locales/ja.json'
 
 export type MessageKey = keyof typeof en
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.ts` with the same keys and register it here. */
-const catalogs: Record<string, Record<string, string>> = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr }
+const catalogs: Record<string, Record<string, string>> = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja }
 
 const navLang = (typeof navigator !== 'undefined' && navigator.language) || 'en'
 const language = catalogs[navLang] ? navLang : navLang.split('-')[0] || 'en'
