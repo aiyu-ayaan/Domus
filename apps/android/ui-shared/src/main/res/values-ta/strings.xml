@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">நிறச் சக்கரம்</string>
+    <string name="ui_expanded">விரிவாக்கப்பட்டது</string>
+    <string name="ui_collapsed">சுருக்கப்பட்டது</string>
+    <string name="ui_collapse">சுருக்கு</string>
+    <string name="ui_expand">விரிவாக்கு</string>
+</resources>
