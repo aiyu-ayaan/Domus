@@ -42,7 +42,7 @@ import com.aiyu.domus.ui.components.FloatingNavScaffold
 import com.aiyu.domus.ui.components.NavTab
 
 /** How deep a page sits: tabs 0, pages 1, About's Acknowledgements and a person under People 2. Decides which way a change slides. */
-private fun pageDepth(page: String?) = when {
+internal fun pageDepth(page: String?) = when {
     page == null -> 0
     page == "acknowledgements" || page.startsWith("person:") -> 2
     else -> 1
@@ -98,27 +98,11 @@ fun MainScreen(session: Session.SignedIn) {
                             "devices" -> DevicesScreen(user, onOpenDevice = { openDevice = it }, onAdd = { open("discover") }, onManageRooms = { open("rooms") })
                             "scenes" -> ScenesScreen(user, open)
                             "analytics" -> AnalyticsScreen(user, onOpenDevice = { openDevice = it }, onEditTariff = { open("tariff") })
-                            else -> SettingsScreen(session, open)
+                            else -> SettingsTab(session, open)
                         }
                     }
                 }
-                current == "discover" -> DiscoverPage(close, onOpenPlugins = { open("plugins") })
-                current == "plugins" -> IntegrationsPage(close, onFindDevices = { open("discover") })
-                current == "rooms" -> RoomsPage(close)
-                current == "people" -> UsersPage(open, close)
-                current.startsWith("person:") -> PersonEditorPage(current.removePrefix("person:"), user, close)
-                current == "tariff" -> TariffPage(close)
-                current == "notices" -> NoticesPage(close)
-                current == "location" -> LocationPage(close)
-                current == "password" -> ChangePasswordPage(close)
-                current == "links" -> ServerLinksPage(user.isAdmin, close)
-                current == "updates" -> UpdatesPage(close)
-                current == "language" -> LanguagePage(close)
-                current == "about" -> AboutPage(close, onOpenAcknowledgements = { open("acknowledgements") })
-                current == "acknowledgements" -> AcknowledgementsPage(close)
-                current == "avatar" -> AvatarCustomizationPage(user, close)
-                current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
-                current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
+                else -> PageHost(current, session, open, close)
             }
         } }
         // Above the floating pill.
@@ -127,5 +111,30 @@ fun MainScreen(session: Session.SignedIn) {
 
     devices.firstOrNull { it.id == openDevice }?.let { device ->
         DeviceSheet(device, user, onDismiss = { openDevice = null })
+    }
+}
+
+/** The page a key stands for ("rooms", "scene:<id>", ...). Shared by the full-screen host and the Settings right pane. */
+@Composable
+internal fun PageHost(current: String, session: Session.SignedIn, open: (String) -> Unit, close: () -> Unit) {
+    val user = session.user
+    when {
+        current == "discover" -> DiscoverPage(close, onOpenPlugins = { open("plugins") })
+        current == "plugins" -> IntegrationsPage(close, onFindDevices = { open("discover") })
+        current == "rooms" -> RoomsPage(close)
+        current == "people" -> UsersPage(open, close)
+        current.startsWith("person:") -> PersonEditorPage(current.removePrefix("person:"), user, close)
+        current == "tariff" -> TariffPage(close)
+        current == "notices" -> NoticesPage(close)
+        current == "location" -> LocationPage(close)
+        current == "password" -> ChangePasswordPage(close)
+        current == "links" -> ServerLinksPage(user.isAdmin, close)
+        current == "updates" -> UpdatesPage(close)
+        current == "language" -> LanguagePage(close)
+        current == "about" -> AboutPage(close, onOpenAcknowledgements = { open("acknowledgements") })
+        current == "acknowledgements" -> AcknowledgementsPage(close)
+        current == "avatar" -> AvatarCustomizationPage(user, close)
+        current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
+        current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
     }
 }

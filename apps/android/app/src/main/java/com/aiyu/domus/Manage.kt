@@ -88,14 +88,18 @@ import com.aiyu.domus.ui.components.ShapedIcon
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/** True for a page shown in the right pane of a two-pane Settings: it has no back arrow to leave it. */
+val LocalHideBack = androidx.compose.runtime.compositionLocalOf { false }
+
 /** A full-screen page opened from a tab: back arrow, title, scrolling body capped at 840dp. */
 @Composable
 fun SubPage(title: String, onBack: () -> Unit, actions: @Composable RowScope.() -> Unit = {}, content: @Composable ColumnScope.() -> Unit) {
     Surface(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.widthIn(max = 840.dp).fillMaxSize().statusBarsPadding().imePadding()) {
-                Row(Modifier.padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.manage_back)) }
+                val hideBack = LocalHideBack.current
+                Row(Modifier.padding(horizontal = if (hideBack) 16.dp else 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!hideBack) IconButton(onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.manage_back)) }
                     Text(title, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).semantics { heading() })
                     actions()
                 }
@@ -140,9 +144,15 @@ fun RowCard(
     modifier: Modifier = Modifier,
     leading: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
+    selected: Boolean = false,
     trailing: @Composable RowScope.() -> Unit = {}
 ) {
     val c = MaterialTheme.colorScheme
+    val container by androidx.compose.animation.animateColorAsState(
+        if (selected) c.secondaryContainer else c.surfaceContainerHigh,
+        MaterialTheme.motionScheme.defaultEffectsSpec(),
+        label = "rowSelected",
+    )
     val body: @Composable () -> Unit = {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             if (leading != null) {
@@ -158,8 +168,8 @@ fun RowCard(
             trailing()
         }
     }
-    if (onClick != null) Surface(onClick, modifier.fillMaxWidth(), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, content = body)
-    else Surface(modifier.fillMaxWidth(), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, content = body)
+    if (onClick != null) Surface(onClick, modifier.fillMaxWidth(), color = container, shape = MaterialTheme.shapes.large, content = body)
+    else Surface(modifier.fillMaxWidth(), color = container, shape = MaterialTheme.shapes.large, content = body)
 }
 
 /** One choice out of a list that may be long (devices, rooms): a field that opens the list in a dialog. */

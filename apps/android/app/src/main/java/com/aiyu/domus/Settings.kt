@@ -84,7 +84,7 @@ private val Themes: List<Pair<String, Int>> = listOf(
 )
 
 @Composable
-fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
+fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit, selectedPage: String? = null) {
     val repository = LocalRepository.current
     val appearance by repository.appearance.collectAsStateWithLifecycle()
     val live by repository.live.collectAsStateWithLifecycle()
@@ -122,14 +122,14 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
 
         SectionTitle(stringResource(R.string.settings_section_home))
         if (session.user.isAdmin) {
-            RowCard(stringResource(R.string.settings_add_devices), stringResource(R.string.settings_add_devices_subtitle), Icons.Rounded.AddHome, onClick = { open("discover") })
-            RowCard(stringResource(R.string.settings_plugins), stringResource(R.string.settings_plugins_subtitle), Icons.Rounded.Extension, onClick = { open("plugins") })
-            RowCard(stringResource(R.string.settings_rooms), null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") })
-            RowCard(stringResource(R.string.settings_people), stringResource(R.string.settings_people_subtitle), Icons.Rounded.Group, onClick = { open("people") })
-            RowCard(stringResource(R.string.settings_tariff), stringResource(R.string.settings_tariff_subtitle), Icons.Rounded.Payments, onClick = { open("tariff") })
-            RowCard(stringResource(R.string.settings_location), stringResource(R.string.settings_location_subtitle), Icons.Rounded.WbTwilight, onClick = { open("location") })
+            RowCard(stringResource(R.string.settings_add_devices), stringResource(R.string.settings_add_devices_subtitle), Icons.Rounded.AddHome, onClick = { open("discover") }, selected = selectedPage == "discover")
+            RowCard(stringResource(R.string.settings_plugins), stringResource(R.string.settings_plugins_subtitle), Icons.Rounded.Extension, onClick = { open("plugins") }, selected = selectedPage == "plugins")
+            RowCard(stringResource(R.string.settings_rooms), null, Icons.Rounded.MeetingRoom, onClick = { open("rooms") }, selected = selectedPage == "rooms")
+            RowCard(stringResource(R.string.settings_people), stringResource(R.string.settings_people_subtitle), Icons.Rounded.Group, onClick = { open("people") }, selected = selectedPage == "people")
+            RowCard(stringResource(R.string.settings_tariff), stringResource(R.string.settings_tariff_subtitle), Icons.Rounded.Payments, onClick = { open("tariff") }, selected = selectedPage == "tariff")
+            RowCard(stringResource(R.string.settings_location), stringResource(R.string.settings_location_subtitle), Icons.Rounded.WbTwilight, onClick = { open("location") }, selected = selectedPage == "location")
         }
-        RowCard(stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_subtitle), Icons.Rounded.Notifications, onClick = { open("notices") })
+        RowCard(stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_subtitle), Icons.Rounded.Notifications, onClick = { open("notices") }, selected = selectedPage == "notices")
         // Opt-in: without a cloud push service, alerts need a connection that stays open.
         val alerts by repository.backgroundAlerts.collectAsStateWithLifecycle()
         val setAlerts = { on: Boolean -> repository.setBackgroundAlerts(on); AlertsService.apply(context) }
@@ -246,12 +246,12 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit) {
             }
         }
 
-        RowCard(stringResource(R.string.settings_change_password), stringResource(R.string.settings_change_password_subtitle), Icons.Rounded.LockReset, onClick = { open("password") })
-        RowCard(stringResource(R.string.settings_server_addresses), stringResource(R.string.settings_server_addresses_subtitle), Icons.Rounded.Public, onClick = { open("links") })
-        RowCard(stringResource(R.string.settings_updates), stringResource(R.string.settings_updates_subtitle, version), Icons.Rounded.SystemUpdate, onClick = { open("updates") })
-        RowCard(stringResource(R.string.settings_about), stringResource(R.string.settings_about_subtitle, version), Icons.Rounded.Info, onClick = { open("about") })
+        RowCard(stringResource(R.string.settings_change_password), stringResource(R.string.settings_change_password_subtitle), Icons.Rounded.LockReset, onClick = { open("password") }, selected = selectedPage == "password")
+        RowCard(stringResource(R.string.settings_server_addresses), stringResource(R.string.settings_server_addresses_subtitle), Icons.Rounded.Public, onClick = { open("links") }, selected = selectedPage == "links")
+        RowCard(stringResource(R.string.settings_updates), stringResource(R.string.settings_updates_subtitle, version), Icons.Rounded.SystemUpdate, onClick = { open("updates") }, selected = selectedPage == "updates")
+        RowCard(stringResource(R.string.settings_about), stringResource(R.string.settings_about_subtitle, version), Icons.Rounded.Info, onClick = { open("about") }, selected = selectedPage == "about")
 
-        RowCard(stringResource(R.string.settings_language), languageLabel(), Icons.Rounded.Translate, onClick = { open("language") })
+        RowCard(stringResource(R.string.settings_language), languageLabel(), Icons.Rounded.Translate, onClick = { open("language") }, selected = selectedPage == "language")
 
         CollapsibleCard(
             title = stringResource(R.string.settings_appearance),
