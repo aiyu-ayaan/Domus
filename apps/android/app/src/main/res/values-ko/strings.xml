@@ -1,0 +1,935 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">매우 좋음</string>
+    <string name="air_good">좋음</string>
+    <string name="air_moderate">보통</string>
+    <string name="air_poor">나쁨</string>
+    <string name="channel_stable">안정판</string>
+    <string name="channel_beta">베타</string>
+    <string name="channel_alpha">알파</string>
+    <string name="connect_this_computer">이 컴퓨터</string>
+    <string name="api_untrusted">서버의 인증서를 신뢰할 수 없습니다.</string>
+    <string name="api_offline">Domus 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인하세요.</string>
+    <string name="api_bad_response">서버에서 현재 앱 버전이 이해할 수 없는 응답을 보냈습니다.</string>
+    <string name="api_request_failed">요청 실패 ({status})</string>
+    <string name="error_no_server">서버 없음</string>
+    <string name="connect_cert_changed">승인한 이후 서버의 인증서가 변경되었습니다. 다시 연결하여 새 인증서를 검토하세요.</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 또는 home.example.com과 같은 주소를 입력하세요. https만 지원됩니다.</string>
+    <string name="connect_cert_unreadable">서버의 인증서를 읽지 못했습니다.</string>
+    <string name="automation_ran">“{name}” 실행됨</string>
+    <string name="handover_reset_until">%1$s의 Domus 비밀번호 재설정\n코드: %2$s\n\n로그인 화면에서 \"비밀번호를 잊으셨나요?\"를 선택하고 사용자 이름과 이 코드를 입력하세요. %3$s까지 1회만 사용할 수 있습니다.</string>
+    <string name="handover_reset">%1$s의 Domus 비밀번호 재설정\n코드: %2$s\n\n로그인 화면에서 \"비밀번호를 잊으셨나요?\"를 선택하고 사용자 이름과 이 코드를 입력하세요. 1회만 사용할 수 있습니다.</string>
+    <string name="handover_signin_kid">Domus 로그인 정보\n주소: %1$s\n사용자 이름: %2$s\n비밀번호: %3$s</string>
+    <string name="handover_signin">Domus 로그인 정보\n주소: %1$s\n사용자 이름: %2$s\n비밀번호: %3$s\n\n처음 로그인할 때 본인만의 비밀번호를 설정하라는 안내가 표시됩니다.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">홈</string>
+    <string name="nav_devices">기기</string>
+    <string name="nav_scenes">장면</string>
+    <string name="nav_analytics">분석</string>
+    <string name="nav_settings">설정</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">집 전체를 하나의 앱으로</string>
+    <string name="connect_intro_1_body">Tuya, Tapo, Xiaomi, Philips Hue 및 MQTT의 조명, 플러그, 공기청정기, 센서를 한곳에서 제어하세요.</string>
+    <string name="connect_intro_2_title">설계부터 안전한 개인정보</string>
+    <string name="connect_intro_2_body">Domus는 암호화된 연결을 통해 집 안의 서버와만 통신합니다. 클라우드 계정이 필요 없습니다.</string>
+    <string name="connect_intro_3_title">자동으로 서버 찾기</string>
+    <string name="connect_intro_3_body">Wi‑Fi에 연결되어 있으면 앱이 스스로 서버를 찾습니다. 외부에서는 서버 주소를 입력하세요.</string>
+    <string name="connect_page_of">%2$d페이지 중 %1$d페이지</string>
+    <string name="connect_skip">건너뛰기</string>
+    <string name="connect_get_started">시작하기</string>
+    <string name="connect_next">다음</string>
+    <string name="connect_welcome_title">Domus에 오신 것을 환영합니다</string>
+    <string name="connect_welcome_subtitle">홈을 운영하는 서버에 연결하세요.</string>
+    <string name="connect_on_this_network">이 네트워크에서</string>
+    <string name="connect_looking_for_servers">서버 찾는 중…</string>
+    <string name="connect_no_server_found">응답하는 서버가 없습니다. 이 휴대폰이 서버와 같은 Wi‑Fi에 연결되어 있는지 확인하거나 아래에 주소를 입력하세요.</string>
+    <string name="connect_scan_again">다시 스캔</string>
+    <string name="connect_or_enter_address">또는 주소 직접 입력</string>
+    <string name="connect_server_address">서버 주소</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 또는 home.example.com</string>
+    <string name="connect_action">연결</string>
+    <string name="connect_trust_title">이 서버를 신뢰하시겠습니까?</string>
+    <string name="connect_trust_body">%1$s은(는) 자체 생성한 인증서를 사용하며, 이는 홈 서버에서 일반적인 방식입니다. 서버가 시작될 때 출력하는 지문과 일치하는 경우에만 신뢰하세요.</string>
+    <string name="connect_trust_action">신뢰</string>
+    <string name="connect_cancel">취소</string>
+    <string name="connect_use_another_server">다른 서버 사용</string>
+    <string name="connect_unreachable_title">홈에 연결할 수 없습니다</string>
+    <string name="connect_try_again">다시 시도</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">비밀번호 숨기기</string>
+    <string name="auth_show_password">비밀번호 표시</string>
+    <string name="auth_username">사용자 이름</string>
+    <string name="auth_new_password">새 비밀번호</string>
+    <string name="auth_password_min_length">8자 이상</string>
+    <string name="auth_confirm_password">비밀번호 확인</string>
+    <string name="auth_passwords_mismatch">비밀번호가 일치하지 않습니다</string>
+    <string name="auth_create_admin_title">관리자 계정 만들기</string>
+    <string name="auth_welcome_back_title">다시 오신 것을 환영합니다</string>
+    <string name="auth_create_admin_subtitle">새로운 서버입니다. 첫 번째 계정이 모든 것을 관리합니다.</string>
+    <string name="auth_welcome_back_subtitle">홈에 로그인하세요.</string>
+    <string name="auth_encrypted_connection">암호화된 연결 대상:</string>
+    <string name="auth_email">이메일</string>
+    <string name="auth_password">비밀번호</string>
+    <string name="auth_create_account">계정 만들기</string>
+    <string name="auth_sign_in">로그인</string>
+    <string name="auth_forgot_password">비밀번호를 잊으셨나요?</string>
+    <string name="auth_forgot_title">비밀번호를 잊으셨나요?</string>
+    <string name="auth_forgot_subtitle">Domus는 이메일을 보내지 않습니다. 대신 이 홈의 관리자에게 알림이 전달되며, 관리자가 일회용 코드를 발급해 줍니다.</string>
+    <string name="auth_ask_admin">관리자에게 요청</string>
+    <string name="auth_back_to_sign_in">로그인으로 돌아가기</string>
+    <string name="auth_reset_code_title">재설정 코드 입력</string>
+    <string name="auth_reset_code_subtitle">관리자에게 알림이 전달되었습니다. 관리자에게 %1$s의 8자리 코드를 요청하세요. 코드는 30분 동안 1회만 유효합니다.</string>
+    <string name="auth_reset_code_label">재설정 코드</string>
+    <string name="auth_set_password_sign_in">비밀번호 설정 및 로그인</string>
+    <string name="auth_back">뒤로</string>
+    <string name="auth_choose_password_title">비밀번호 설정</string>
+    <string name="auth_choose_password_subtitle">환영합니다, %1$s님. 로그인에 사용한 비밀번호는 임시로 생성되어 다른 사람에게 노출되었습니다. 계속하려면 본인만의 비밀번호를 설정하세요.</string>
+    <string name="auth_save_continue">저장 후 계속</string>
+    <string name="auth_sign_out">로그아웃</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">백그라운드 활동</string>
+    <string name="service_channel_alerts">홈 알림</string>
+    <string name="service_listening_alerts">Domus가 알림을 수신 대기 중입니다</string>
+    <string name="service_screen_sync_title">화면 동기화 켜짐</string>
+    <string name="service_screen_sync_body">조명이 이 화면을 따라갑니다</string>
+    <string name="service_stop">중지</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (아바타 아트워크)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (서버에서 요청하는 장소 검색)</string>
+    <string name="about_lib_home_assistant">Home Assistant (Tuya QR 흐름)</string>
+    <string name="about_license_inspiration">영감</string>
+    <string name="about_version_unknown">알 수 없음</string>
+    <string name="about_title">Domus 정보</string>
+    <string name="about_section_app">앱</string>
+    <string name="about_version_build">버전 %1$s · 빌드 %2$d</string>
+    <string name="about_privacy_title">개인정보 보호</string>
+    <string name="about_privacy_subtitle">자체 서버에서 실행됩니다. 자격 증명은 해당 서버에 암호화되어 보관됩니다.</string>
+    <string name="about_source_code">소스 코드</string>
+    <string name="about_section_developer">개발자</string>
+    <string name="about_developer_tagline">1인 개발자가 설계하고 제작했습니다.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">포트폴리오</string>
+    <string name="about_section_open_source">오픈소스</string>
+    <string name="about_acknowledgements">오픈소스 고지</string>
+    <string name="about_acknowledgements_subtitle">Domus를 구성하는 라이브러리 및 프로젝트</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s 버전을 사용할 수 있습니다</string>
+    <string name="update_download_failed_retry_prompt">다운로드에 실패했습니다. 다시 시도하시겠습니까?</string>
+    <string name="update_prompt_body">현재 버전은 %1$s입니다. 릴리스 노트와 업데이트 채널은 설정의 업데이트 메뉴에 있습니다.</string>
+    <string name="update_downloading_percent">다운로드 중 %1$d%%</string>
+    <string name="update_action">업데이트</string>
+    <string name="update_later">나중에</string>
+    <string name="update_title">업데이트</string>
+    <string name="update_checking">업데이트 확인 중…</string>
+    <string name="update_check_failed">업데이트를 확인하지 못했습니다</string>
+    <string name="update_dev_build">개발 빌드</string>
+    <string name="update_up_to_date">Domus가 최신 상태입니다</string>
+    <string name="update_download_failed_retry">다운로드에 실패했습니다. 다시 시도하세요.</string>
+    <string name="update_check_failed_body">현재 버전은 %1$s입니다. 연결 상태를 확인하고 다시 시도하세요.</string>
+    <string name="update_dev_build_body">현재 버전은 %1$s입니다. 개발 빌드는 다시 빌드하여 업데이트합니다.</string>
+    <string name="update_you_have">현재 버전은 %1$s입니다.</string>
+    <string name="update_download_install">다운로드 및 설치</string>
+    <string name="update_check_again">다시 확인</string>
+    <string name="update_channel">채널</string>
+    <string name="update_channel_hint">베타 및 알파 채널은 새 빌드와 모든 안정판 빌드를 더 빨리 받습니다.</string>
+    <string name="update_whats_new_in">%1$s의 새로운 기능</string>
+    <string name="update_in_this_version">이 버전의 내용</string>
+    <string name="update_loading_notes">릴리스 노트를 불러오는 중…</string>
+    <string name="update_no_notes">이 버전에 대한 릴리스 노트가 없습니다.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">로봇</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">모험가</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">픽셀 아트</string>
+    <string name="avatar_style_fun_emoji">펀 이모지</string>
+    <string name="avatar_style_thumbs">엄지</string>
+    <string name="avatar_style_shapes">도형</string>
+    <string name="avatar_style_rings">링</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">아바타 사용자 지정</string>
+    <string name="avatar_save">저장</string>
+    <string name="avatar_seed_value">시드: %1$s</string>
+    <string name="avatar_randomize">무작위 생성</string>
+    <string name="avatar_roll_seed">시드 굴리기</string>
+    <string name="avatar_roll_seed_action">시드 굴리기</string>
+    <string name="avatar_style_label">아바타 스타일</string>
+    <string name="avatar_seed_phrase_label">시드 문구</string>
+    <string name="avatar_seed_phrase_hint">아무 키워드, 이름 또는 문자열이나 입력하여 아바타 스타일을 변형하세요.</string>
+    <string name="avatar_seed_label">시드</string>
+    <string name="avatar_apply_avatar">아바타 적용</string>
+    <string name="avatar_apply">적용</string>
+    <string name="avatar_cancel">취소</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">편안한 밤 되세요</string>
+    <string name="home_greeting_morning">좋은 아침입니다</string>
+    <string name="home_greeting_afternoon">좋은 오후입니다</string>
+    <string name="home_greeting_evening">좋은 저녁입니다</string>
+    <string name="home_got_it">확인</string>
+    <string name="home_about_stat">%1$s 정보</string>
+    <string name="home_scene_on_hint">켜짐 · 탭하여 끄기</string>
+    <string name="home_scene_off_hint">탭하여 실행</string>
+    <string name="home_change_avatar">아바타 변경</string>
+    <string name="home_clear_notices_title">모든 알림을 삭제하시겠습니까?</string>
+    <string name="home_clear_notices_body">모든 기기에서 알림이 제거됩니다.</string>
+    <string name="home_delete_all">모두 삭제</string>
+    <string name="home_reconnecting">재연결 중…</string>
+    <string name="home_devices_on_of_total">%2$d개 중 %1$d개 켜짐</string>
+    <string name="home_using_now">현재 사용량</string>
+    <string name="home_using_now_info">모든 전력 측정 기기의 실시간 합산 전력 소비량입니다.</string>
+    <string name="home_today">오늘</string>
+    <string name="home_today_info">자정 이후 사용된 에너지입니다. 아래 금액은 설정된 전기 요율로 추산한 비용입니다.</string>
+    <string name="home_air_quality">공기질</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">장면</string>
+    <string name="home_on_right_now">현재 켜져 있는 기기</string>
+    <string name="home_all_devices">모든 기기</string>
+    <string name="home_no_devices_title">아직 기기 없음</string>
+    <string name="home_no_devices_admin">기기 메뉴를 열고 +를 탭하여 Tuya, Tapo, Xiaomi, Hue 또는 MQTT를 연결하세요.</string>
+    <string name="home_no_devices_member">관리자에게 기기 추가나 방 접근 권한을 요청하세요.</string>
+    <string name="home_everything_off">모든 기기가 꺼져 있습니다.</string>
+    <string name="home_rooms">방</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="other">기기 %1$d개 · 모두 꺼짐</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="other">기기 %1$d개 · %2$d개 켜짐</item>
+    </plurals>
+    <string name="home_recent_activity">최근 활동</string>
+    <string name="home_see_all">모두 보기</string>
+
+    <!-- Devices -->
+    <string name="device_title">기기</string>
+    <string name="device_online_of_total">%2$d개 중 %1$d개 온라인</string>
+    <string name="device_add_devices">기기 추가</string>
+    <string name="device_filter_all">전체</string>
+    <string name="device_category_lights">조명</string>
+    <string name="device_category_power">전원</string>
+    <string name="device_category_air">공기</string>
+    <string name="device_category_climate">온습도</string>
+    <string name="device_all_rooms">모든 방</string>
+    <string name="device_no_room">방 없음</string>
+    <string name="device_manage_rooms">방 관리</string>
+    <string name="device_empty_filtered_title">표시할 항목 없음</string>
+    <string name="device_empty_filtered_body">이 방과 카테고리에 일치하는 기기가 없습니다.</string>
+    <string name="device_empty_admin">+를 탭하여 Tuya, Tapo, Xiaomi, Hue 또는 MQTT를 연결하고 발견된 기기를 추가하세요.</string>
+    <string name="device_online">온라인</string>
+    <string name="device_offline">오프라인</string>
+    <string name="device_on">켜짐</string>
+    <string name="device_off">꺼짐</string>
+    <string name="device_leak">누수</string>
+    <string name="device_motion">움직임</string>
+    <string name="device_motion_detected">감지됨</string>
+    <string name="device_clear">이상 없음</string>
+    <string name="device_open">열림</string>
+    <string name="device_closed">닫힘</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s 전원</string>
+    <string name="device_refresh_a11y">%1$s 새로고침</string>
+    <string name="device_view_only_member">이 기기는 볼 수만 있고 제어할 수 없습니다.</string>
+    <string name="device_view_only_guest">게스트는 기기를 볼 수만 있고 제어할 수 없습니다.</string>
+    <string name="device_brightness">밝기</string>
+    <string name="device_white">백색</string>
+    <string name="device_white_warm">따뜻함</string>
+    <string name="device_white_neutral">중성</string>
+    <string name="device_white_cool">차가움</string>
+    <string name="device_fan_speed">팬 속도</string>
+    <string name="device_mode">모드</string>
+    <string name="device_speed">속도</string>
+    <string name="device_coverage">적용 면적 %1$d–%2$d m²</string>
+    <string name="device_reading_power">전력</string>
+    <string name="device_reading_voltage">전압</string>
+    <string name="device_reading_current">전류</string>
+    <string name="device_reading_temperature">온도</string>
+    <string name="device_reading_humidity">습도</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">필터</string>
+    <string name="device_filter_left">%1$d%% 남음</string>
+    <string name="device_reading_contact">문 또는 창문</string>
+    <string name="device_reading_water">물/누수</string>
+    <string name="device_water_dry">건조함</string>
+    <string name="device_reading_alarm">알람</string>
+    <string name="device_alarm_sounding">울리는 중</string>
+    <string name="device_alarm_quiet">조용함</string>
+    <string name="device_reading_battery">배터리</string>
+    <string name="device_battery_low">부족</string>
+    <string name="device_battery_ok">정상</string>
+    <string name="device_ask_before_switching">전환 전 확인</string>
+    <string name="device_ask_before_switching_desc">앱, 그룹 또는 장면에서 켜거나 끄기 전에 경고를 표시합니다</string>
+    <string name="device_rename_or_move">이름 변경 또는 이동</string>
+    <string name="device_rename">이름 변경</string>
+    <string name="device_remove">제거</string>
+    <string name="device_edit_title">기기 편집</string>
+    <string name="device_field_name">이름</string>
+    <string name="device_field_room">방</string>
+    <string name="device_remove_confirm_title">%1$s을(를) 제거하시겠습니까?</string>
+    <string name="device_remove_confirm_body">홈과 장면에서 제거됩니다. 기기 추가 메뉴에서 다시 추가할 수 있습니다.</string>
+    <string name="device_white_candle">촛불</string>
+    <string name="device_white_soft">전구색</string>
+    <string name="device_white_neutral_preset">백색</string>
+    <string name="device_white_daylight">주백색</string>
+    <string name="device_white_cool_preset">주광색</string>
+    <string name="device_light_off">조명 꺼짐</string>
+    <string name="device_light_effect">효과</string>
+    <string name="device_light_white">백색 조명</string>
+    <string name="device_light_color">컬러 조명</string>
+    <string name="device_light_playing">%1$s 재생 중</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">색상</string>
+    <string name="device_effects">효과</string>
+    <string name="device_color_temp">색온도</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K 따뜻함</string>
+    <string name="device_kelvin_max">6500K 차가움</string>
+    <string name="device_moods">무드</string>
+    <string name="device_stop_effect">효과 중지</string>
+    <string name="device_color_swatch_a11y">색상 %1$s</string>
+    <string name="device_selected">선택됨</string>
+    <string name="device_not_selected">선택 안 됨</string>
+    <string name="device_confirm_switch_one_title">%1$s을(를) 전환하시겠습니까?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="other">기기 %1$d개를 전환하시겠습니까?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">전환 전 확인이 설정된 %1$s이(가) 포함되어 있습니다. 전환하면 연결된 기기의 전원이 차단될 수 있습니다.</string>
+    <string name="device_confirm_switch_many_body">전환 전 확인이 설정된 %1$s이(가) 포함되어 있습니다. 전환하면 연결된 기기의 전원이 차단될 수 있습니다.</string>
+    <string name="device_confirm_switch_action">전환</string>
+    <string name="device_cancel">취소</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">방금 전</string>
+    <string name="scene_time_minutes_ago">%1$d분 전</string>
+    <string name="scene_time_hours_ago">%1$d시간 전</string>
+    <string name="scene_time_days_ago">%1$d일 전</string>
+    <string name="scene_edit_item">%1$s 편집</string>
+    <string name="scene_title">장면</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="other">%1$d개 활성 · 자동화 %2$d개 켜짐</item>
+    </plurals>
+    <string name="scene_empty_title">아직 항목 없음</string>
+    <string name="scene_empty_subtitle">장면은 여러 기기를 한 번에 설정합니다. 자동화는 특정 상황이 발생할 때 이를 대신 실행해 줍니다.</string>
+    <string name="scene_new_scene">새 장면</string>
+    <string name="scene_new_automation">새 자동화</string>
+    <string name="scene_new_screen_sync">새 화면 동기화</string>
+    <string name="scene_sync_active_subtitle">화면 동기화 · 조명이 화면을 따라갑니다</string>
+    <string name="scene_sync_inactive_subtitle">화면 동기화 · 이 화면을 조명에 반영합니다</string>
+    <string name="scene_active">활성</string>
+    <string name="scene_section_automations">자동화</string>
+    <string name="scene_last_ran">마지막 실행: %1$s</string>
+    <string name="scene_never_ran">실행된 적 없음</string>
+    <string name="scene_run_now">지금 %1$s 실행</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">월</string>
+    <string name="editor_day_tue">화</string>
+    <string name="editor_day_wed">수</string>
+    <string name="editor_day_thu">목</string>
+    <string name="editor_day_fri">금</string>
+    <string name="editor_day_sat">토</string>
+    <string name="editor_day_sun">일</string>
+    <string name="editor_prop_temperature">온도</string>
+    <string name="editor_prop_humidity">습도</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">밝기</string>
+    <string name="editor_prop_power_watts">전력 (W)</string>
+    <string name="editor_removed_device">제거된 기기</string>
+    <string name="editor_rule_device_is_off">%1$s 꺼짐</string>
+    <string name="editor_rule_device_is_on">%1$s 켜짐</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s %3$s 초과</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s %3$s 미만</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s = %3$s</string>
+    <string name="editor_rule_time_every_day">매일 %1$s에</string>
+    <string name="editor_rule_time_on_days">%2$s %1$s에</string>
+    <string name="editor_sun_event_sunrise">일출</string>
+    <string name="editor_sun_event_sunset">일몰</string>
+    <string name="editor_rule_sun_at_every_day">매일 %1$s에</string>
+    <string name="editor_rule_sun_at_on_days">%2$s %1$s에</string>
+    <string name="editor_rule_sun_before_every_day">매일 %2$s %1$d분 전</string>
+    <string name="editor_rule_sun_before_on_days">%3$s %2$s %1$d분 전</string>
+    <string name="editor_rule_sun_after_every_day">매일 %2$s %1$d분 후</string>
+    <string name="editor_rule_sun_after_on_days">%3$s %2$s %1$d분 후</string>
+    <string name="editor_rule_power_above">%1$s 전력 소비 %2$s W 초과</string>
+    <string name="editor_rule_device_offline">%1$s 오프라인 전환</string>
+    <string name="editor_rule_device_discovered">새 기기가 발견될 때</string>
+    <string name="editor_rule_time_between">%1$s ~ %2$s 사이</string>
+    <string name="editor_cmd_on">켜기</string>
+    <string name="editor_cmd_off">끄기</string>
+    <string name="editor_cmd_brightness_pct">%1$s%%</string>
+    <string name="editor_cmd_white">백색 %1$s</string>
+    <string name="editor_device_group">기기 그룹</string>
+    <string name="editor_cmd_custom">사용자 지정 명령</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">알림: %1$s</string>
+    <string name="editor_removed_scene">(제거됨)</string>
+    <string name="editor_rule_scene">장면 %1$s 실행</string>
+    <string name="editor_rule_delay">%1$s초 대기</string>
+    <string name="editor_rule_unknown">알 수 없음</string>
+    <string name="editor_trigger_time">시간</string>
+    <string name="editor_trigger_sun">일출 / 일몰</string>
+    <string name="editor_trigger_device_state">기기 상태</string>
+    <string name="editor_trigger_power">전력</string>
+    <string name="editor_trigger_offline">오프라인 전환</string>
+    <string name="editor_trigger_discovered">새 기기</string>
+    <string name="editor_condition_device_state">기기 상태</string>
+    <string name="editor_condition_time_between">시간대</string>
+    <string name="editor_action_device">기기</string>
+    <string name="editor_action_scene">장면</string>
+    <string name="editor_action_notify">알림</string>
+    <string name="editor_action_delay">대기</string>
+    <string name="editor_add">추가</string>
+    <string name="editor_field_device">기기</string>
+    <string name="editor_sun_sunrise">일출</string>
+    <string name="editor_sun_sunset">일몰</string>
+    <string name="editor_sun_after">후</string>
+    <string name="editor_sun_before">전</string>
+    <string name="editor_field_minutes">분</string>
+    <string name="editor_sun_supporting_sunrise">비워 두면 일출 정각에 실행됩니다. 설정에서 홈 위치를 지정해야 합니다.</string>
+    <string name="editor_sun_supporting_sunset">비워 두면 일몰 정각에 실행됩니다. 설정에서 홈 위치를 지정해야 합니다.</string>
+    <string name="editor_every_day">매일</string>
+    <string name="editor_chosen_days">선택한 요일에만</string>
+    <string name="editor_field_is">상태</string>
+    <string name="editor_state_on">켜짐</string>
+    <string name="editor_state_off">꺼짐</string>
+    <string name="editor_compare_above">초과</string>
+    <string name="editor_compare_below">미만</string>
+    <string name="editor_field_value">값</string>
+    <string name="editor_field_watts">와트</string>
+    <string name="editor_time_from">시작</string>
+    <string name="editor_time_until">종료</string>
+    <string name="editor_power_turn_on">켜기</string>
+    <string name="editor_power_turn_off">끄기</string>
+    <string name="editor_power_leave">전원 상태 유지</string>
+    <string name="editor_set_brightness">밝기 설정</string>
+    <string name="editor_set_brightness_value">밝기 %1$d%% 설정</string>
+    <string name="editor_field_scene">장면</string>
+    <string name="editor_field_title">제목</string>
+    <string name="editor_field_message">메시지</string>
+    <string name="editor_field_seconds">초</string>
+    <string name="editor_remove_rule">제거: %1$s</string>
+    <string name="editor_style_vivid">선명하게</string>
+    <string name="editor_style_dominant">주요 색상</string>
+    <string name="editor_style_average">평균</string>
+    <string name="editor_new_screen_sync">새 화면 동기화</string>
+    <string name="editor_new_scene">새 장면</string>
+    <string name="editor_edit_scene">장면 편집</string>
+    <string name="editor_delete">삭제</string>
+    <string name="editor_field_name">이름</string>
+    <string name="editor_sync_lights_title">화면을 따라가는 조명</string>
+    <string name="editor_sync_no_lights">홈에 아직 조명이 없습니다.</string>
+    <string name="editor_sync_color_title">색상</string>
+    <string name="editor_style_vivid_desc">화면에서 가장 강렬한 색상입니다.</string>
+    <string name="editor_style_dominant_desc">가장 많이 나타나는 색상입니다.</string>
+    <string name="editor_style_average_desc">전체 화면의 평균 색상입니다.</string>
+    <string name="editor_region_full">전체 화면</string>
+    <string name="editor_region_edges">가장자리만</string>
+    <string name="editor_sync_dim_dark">어두운 장면에서 밝기 낮추기</string>
+    <string name="editor_sync_restore_lights">중지 시 조명 상태 복원</string>
+    <string name="editor_actions_title">작업</string>
+    <string name="editor_add_action">작업 추가</string>
+    <string name="editor_save">저장</string>
+    <string name="editor_delete_confirm_title">%1$s을(를) 삭제하시겠습니까?</string>
+    <string name="editor_delete_scene_body">이 장면을 실행하는 자동화에서 이 장면을 건너뛰게 됩니다.</string>
+    <string name="editor_new_automation">새 자동화</string>
+    <string name="editor_edit_automation">자동화 편집</string>
+    <string name="editor_field_description_optional">설명 (선택 사항)</string>
+    <string name="editor_enabled">활성화됨</string>
+    <string name="editor_triggers_title">다음 중 하나라도 발생할 때</string>
+    <string name="editor_add_trigger">트리거 추가</string>
+    <string name="editor_conditions_title">다음 조건이 모두 충족될 때만</string>
+    <string name="editor_add_condition">조건 추가</string>
+    <string name="editor_do_this_title">다음 작업 실행</string>
+    <string name="editor_delete_automation_body">자동화 실행이 중지됩니다.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">실시간</string>
+    <string name="analytics_range_hour">1분</string>
+    <string name="analytics_range_day">일간</string>
+    <string name="analytics_range_week">주간</string>
+    <string name="analytics_range_month">월간</string>
+    <string name="analytics_bucket_5s">5초</string>
+    <string name="analytics_bucket_minute">분</string>
+    <string name="analytics_bucket_hour">시간</string>
+    <string name="analytics_bucket_day">일</string>
+    <string name="analytics_title">분석</string>
+    <string name="analytics_subtitle_power">전력 사용량 및 요금</string>
+    <string name="analytics_subtitle_air">공기 상태 및 공기청정기</string>
+    <string name="analytics_electricity_tariff">전기 요금제</string>
+    <string name="analytics_tab_electricity">전기</string>
+    <string name="analytics_tab_air">공기질</string>
+    <string name="analytics_no_energy_title">아직 에너지 데이터 없음</string>
+    <string name="analytics_no_energy_subtitle">전력 측정 플러그나 스위치가 온라인이 된 후 1분 뒤부터 측정값이 표시됩니다.</string>
+    <string name="analytics_using_now">현재 사용량</string>
+    <string name="analytics_projected_cost">이번 청구 주기 예상 요금 %1$s</string>
+    <string name="analytics_today">오늘</string>
+    <string name="analytics_today_info">자정 이후 사용된 에너지입니다. 아래 금액은 설정된 전기 요율로 추산한 비용입니다.</string>
+    <string name="analytics_this_cycle">이번 주기</string>
+    <string name="analytics_this_cycle_info">현재 청구 주기의 에너지 사용량 및 현재까지의 예상 요금입니다.</string>
+    <string name="analytics_history">기록</string>
+    <string name="analytics_nothing_recorded">이 기간에 아직 기록된 데이터가 없습니다.</string>
+    <string name="analytics_metric_energy">에너지</string>
+    <string name="analytics_metric_power">전력</string>
+    <string name="analytics_no_reading">측정값 없음</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">%1$s당 평균 전력</string>
+    <string name="analytics_chart_energy_used">%1$s당 사용 에너지, 총 %2$s</string>
+    <string name="analytics_live_caption">이 페이지가 열려 있는 동안 최근 5분간 5초마다 기록된 측정값입니다.</string>
+    <string name="analytics_total_caption">총 %1$s · %2$s</string>
+    <string name="analytics_insights">인사이트</string>
+    <string name="analytics_peak_hour">피크 시간대</string>
+    <string name="analytics_peak_last_24h">최근 24시간 내 %1$s</string>
+    <string name="analytics_no_usage_yet">아직 사용량 없음</string>
+    <string name="analytics_daily_average">일일 평균</string>
+    <string name="analytics_needs_full_day">하루 전체 데이터 필요</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="other">최근 %1$d일 동안</item>
+    </plurals>
+    <string name="analytics_today_vs_average">오늘 대 평균</string>
+    <string name="analytics_above_usual_day">평소보다 많음</string>
+    <string name="analytics_below_usual_day">평소보다 적음</string>
+    <string name="analytics_about_usual_day">평소와 비슷함</string>
+    <string name="analytics_top_device">최다 사용 기기</string>
+    <string name="analytics_no_metered_device">전력 측정 기기 없음</string>
+    <string name="analytics_billing_cycle">청구 주기</string>
+    <string name="analytics_time_elapsed">경과 시간</string>
+    <string name="analytics_day_of_days">%2$d일 중 %1$d일째</string>
+    <string name="analytics_budget_used">사용된 예산</string>
+    <string name="analytics_cost_of_budget">%2$s 중 %1$s</string>
+    <string name="analytics_spending_ahead">지출 속도가 일정보다 빠릅니다.</string>
+    <string name="analytics_budget_hint">지출을 추적하려면 요금제에서 월간 예산을 설정하세요.</string>
+    <string name="analytics_by_device">기기별</string>
+    <string name="analytics_device_cycle_summary">%1$s · 이번 주기 %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">온도</string>
+    <string name="analytics_reading_humidity">습도</string>
+    <string name="analytics_pm25_now">현재 PM2.5</string>
+    <string name="analytics_air_no_sensor_online">온라인 상태인 센서 없음</string>
+    <string name="analytics_air_status_excellent">매우 좋음 · 깨끗한 실내 공기</string>
+    <string name="analytics_air_status_good">좋음 · 건강한 범위 이내</string>
+    <string name="analytics_air_status_moderate">보통 · 공기청정기를 가동하거나 환기하세요</string>
+    <string name="analytics_air_status_poor">나쁨 · 창문을 닫고 공기청정기를 강하게 가동하세요</string>
+    <string name="analytics_purifiers">공기청정기</string>
+    <string name="analytics_running_of_total">%2$d대 중 %1$d대</string>
+    <string name="analytics_all_on_standby">모두 대기 중</string>
+    <string name="analytics_running_now">현재 작동 중</string>
+    <string name="analytics_filter_life">필터 수명</string>
+    <string name="analytics_filter_replace_soon">조만간 교체 필요</string>
+    <string name="analytics_filter_healthy">양호</string>
+    <string name="analytics_sensors_average">센서 평균</string>
+    <string name="analytics_humidity_dry">건조함</string>
+    <string name="analytics_humidity_humid">습함</string>
+    <string name="analytics_humidity_comfortable">쾌적함</string>
+    <string name="analytics_trend">추이</string>
+    <string name="analytics_no_air_history">아직 기록이 없습니다. 센서가 온라인 상태일 때 매분 측정값이 기록됩니다.</string>
+    <string name="analytics_air_chart_summary">%2$s당 %1$s, 평균 %3$s</string>
+    <string name="analytics_pm25_dashed_caption">점선: 깨끗한 공기 목표치 15 µg/m³, 좋음 상한선 35 µg/m³.</string>
+    <string name="analytics_period_5m">5분</string>
+    <string name="analytics_period_60m">60분</string>
+    <string name="analytics_period_24h">24시간</string>
+    <string name="analytics_period_7d">7일</string>
+    <string name="analytics_period_30d">30일</string>
+    <string name="analytics_average">평균</string>
+    <string name="analytics_air_level_over_period">%2$s 동안 %1$s</string>
+    <string name="analytics_peak">최고치</string>
+    <string name="analytics_value_with_peak">%1$s · 최고 %2$s</string>
+    <string name="analytics_day_hour">%1$s %2$s</string>
+    <string name="analytics_usage_by_hour">시간대별 사용량</string>
+    <string name="analytics_peak_pm25_by_hour">시간대별 최고 PM2.5</string>
+    <string name="analytics_hour_grid_caption">최근 7일의 각 시간을 한 칸으로 표시합니다. 색이 진할수록 수치가 높습니다.</string>
+    <string name="analytics_hour_grid_summary">%1$s, 최근 7일간의 시간대별 추이</string>
+    <string name="analytics_time_at_each_level">수준별 유지 시간</string>
+    <string name="analytics_time_good_air">좋은 공기 유지 시간</string>
+    <string name="analytics_pm25_good_over_period">%1$s 동안 PM2.5 35 µg/m³ 이하</string>
+    <string name="analytics_sensors">센서</string>
+    <string name="analytics_offline">오프라인</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">설정</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">시스템</string>
+    <string name="settings_theme_light">라이트</string>
+    <string name="settings_theme_dark">다크</string>
+    <string name="settings_role_admin">관리자</string>
+    <string name="settings_role_member">구성원</string>
+    <string name="settings_role_guest">게스트</string>
+    <string name="settings_avatar">아바타</string>
+    <string name="settings_section_home">홈</string>
+    <string name="settings_add_devices">기기 추가</string>
+    <string name="settings_add_devices_subtitle">계정 및 네트워크에서 제공하는 기기를 찾아 추가합니다</string>
+    <string name="settings_plugins">플러그인</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue 및 MQTT</string>
+    <string name="settings_rooms">방</string>
+    <string name="settings_people">사용자</string>
+    <string name="settings_people_subtitle">계정, 역할 및 방 접근 권한</string>
+    <string name="settings_tariff">전기 요금제</string>
+    <string name="settings_tariff_subtitle">요율, 청구 주기 및 예산</string>
+    <string name="settings_location">홈 위치</string>
+    <string name="settings_location_subtitle">일출 및 일몰 자동화용</string>
+    <string name="settings_notifications">알림</string>
+    <string name="settings_notifications_subtitle">홈에서 보고된 알림 내역</string>
+    <string name="settings_background_alerts">앱이 닫혀 있을 때 알림 받기</string>
+    <string name="settings_background_alerts_subtitle">서버와의 연결을 유지합니다. 배터리를 약간 소모합니다.</string>
+    <string name="settings_section_server">서버</string>
+    <string name="settings_server_live_pinned">실시간 · 고정된 인증서</string>
+    <string name="settings_server_live_public">실시간 · 공인 인증서</string>
+    <string name="settings_server_reconnecting">재연결 중…</string>
+    <string name="settings_server_live_badge">LIVE</string>
+    <string name="settings_server_cert_public">암호화됨 · 공인 인증 기관에서 확인된 인증서</string>
+    <string name="settings_server_cert_pinned">암호화됨 · 처음 연결 시 이 서버의 자체 인증서를 승인했습니다:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 지문</string>
+    <string name="settings_fingerprint_clip_label">지문</string>
+    <string name="settings_copied">복사됨</string>
+    <string name="settings_copy">복사</string>
+    <string name="settings_change_password">비밀번호 변경</string>
+    <string name="settings_change_password_subtitle">Domus 로그인용</string>
+    <string name="settings_server_addresses">서버 주소</string>
+    <string name="settings_server_addresses_subtitle">홈 네트워크 및 원격 접속</string>
+    <string name="settings_updates">업데이트</string>
+    <string name="settings_updates_subtitle">버전 %1$s, 릴리스 노트 및 채널</string>
+    <string name="settings_about">Domus 정보</string>
+    <string name="settings_about_subtitle">버전 %1$s, 개발자 및 오픈소스 고지</string>
+    <string name="settings_appearance">화면 표시</string>
+    <string name="settings_wallpaper_colors">배경화면 색상</string>
+    <string name="settings_wallpaper_colors_subtitle">앱 색상을 배경화면에 맞춥니다</string>
+    <string name="settings_section_account">계정</string>
+    <string name="settings_account_subtitle">로그아웃하거나 다른 서버 사용</string>
+    <string name="settings_sign_out">로그아웃</string>
+    <string name="settings_use_another_server">다른 서버 사용</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">뒤로</string>
+    <string name="manage_hide_field">%1$s 숨기기</string>
+    <string name="manage_show_field">%1$s 표시</string>
+    <string name="manage_choose">선택…</string>
+    <string name="manage_close">닫기</string>
+    <string name="manage_cancel">취소</string>
+    <string name="manage_save">저장</string>
+    <string name="manage_delete">삭제</string>
+    <string name="manage_rooms_title">방</string>
+    <string name="manage_add_room">방 추가</string>
+    <string name="manage_no_rooms">아직 방 없음</string>
+    <string name="manage_no_rooms_subtitle">방은 기기를 그룹화하고 구성원이나 게스트가 볼 수 있는 기기를 결정합니다.</string>
+    <plurals name="manage_device_count">
+        <item quantity="other">기기 %1$d개</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="other">방 %1$d개</item>
+    </plurals>
+    <string name="manage_room_subtitle">%1$d층 · %2$s</string>
+    <string name="manage_new_room">새 방</string>
+    <string name="manage_edit_room">방 편집</string>
+    <string name="manage_field_name">이름</string>
+    <string name="manage_field_floor">층</string>
+    <string name="manage_role_admin">관리자</string>
+    <string name="manage_role_member">구성원</string>
+    <string name="manage_role_guest">게스트</string>
+    <string name="manage_level_none">없음</string>
+    <string name="manage_level_view">보기 전용</string>
+    <string name="manage_level_control">제어</string>
+    <string name="manage_level_edit">편집</string>
+    <string name="manage_access_to">%1$s 접근 권한</string>
+    <string name="manage_whole_room_level">방 전체 · %1$s</string>
+    <string name="manage_room_devices_of_total">기기 %2$d개 중 %1$d개</string>
+    <string name="manage_no_access">접근 권한 없음</string>
+    <string name="manage_close_item">%1$s 닫기</string>
+    <string name="manage_open_item">%1$s 열기</string>
+    <string name="manage_whole_room">방 전체</string>
+    <string name="manage_whole_room_hint">나중에 추가되는 기기도 포함</string>
+    <string name="manage_no_devices_in_room">이 방에 아직 기기가 없습니다.</string>
+    <string name="manage_people_title">사용자</string>
+    <string name="manage_add_person">사용자 추가</string>
+    <string name="manage_access_whole_home">집 전체</string>
+    <string name="manage_access_none">접근 권한 없음</string>
+    <string name="manage_user_tag_kid">어린이</string>
+    <string name="manage_user_tag_reset_requested">비밀번호 재설정 요청함</string>
+    <string name="manage_person_title">사용자</string>
+    <string name="manage_handover_reset_title">%1$s의 재설정 코드</string>
+    <string name="manage_handover_signin_title">%1$s의 로그인 정보</string>
+    <string name="manage_handover_shown_once">한 번만 표시됩니다. 지금 바로 전달하세요.</string>
+    <string name="manage_copy">복사</string>
+    <string name="manage_share">공유</string>
+    <string name="manage_done">완료</string>
+    <string name="manage_new_person">새 사용자</string>
+    <string name="manage_avatar">아바타</string>
+    <string name="manage_roll">무작위</string>
+    <string name="manage_field_username">사용자 이름</string>
+    <string name="manage_username_supporting">3자 이상</string>
+    <string name="manage_field_email">이메일</string>
+    <string name="manage_email_taken">이미 다른 계정에서 사용 중입니다</string>
+    <string name="manage_email_available">사용 가능</string>
+    <string name="manage_email_hint">직접 입력하거나 사용자 이름에서 생성하세요</string>
+    <string name="manage_generate_email">@domus.home 이메일 생성</string>
+    <string name="manage_section_password">비밀번호</string>
+    <string name="manage_kid_account">어린이 계정</string>
+    <string name="manage_kid_account_on">관리자가 설정한 비밀번호가 그대로 유지됩니다.</string>
+    <string name="manage_kid_account_off">끔: Domus가 임시 비밀번호를 생성하며, 첫 로그인 시 사용자가 직접 비밀번호를 설정합니다.</string>
+    <string name="manage_field_new_password">새 비밀번호</string>
+    <string name="manage_field_password">비밀번호</string>
+    <string name="manage_password_keep_current">현재 비밀번호를 유지하려면 비워 두세요</string>
+    <string name="manage_password_min_length">8자 이상</string>
+    <string name="manage_password_after_saving">저장한 후 복사하거나 공유할 수 있는 비밀번호가 표시됩니다.</string>
+    <string name="manage_reset_requested_notice">%1$s님이 비밀번호를 잊어버려 재설정을 요청했습니다.</string>
+    <string name="manage_reset_code">재설정 코드</string>
+    <string name="manage_reset_code_active">%1$s까지 코드가 활성 상태입니다. 철회하려면 끄세요.</string>
+    <string name="manage_reset_code_help">사용자가 새 비밀번호를 설정하기 위해 \"비밀번호를 잊으셨나요?\"에 입력하는 일회용 코드입니다. 30분 동안 유효합니다.</string>
+    <string name="manage_generate_new_password">새 비밀번호 생성</string>
+    <string name="manage_section_role">역할</string>
+    <string name="manage_role_admin_desc">모든 것을 관리합니다.</string>
+    <string name="manage_role_member_desc">허용된 항목을 볼 수 있습니다. 기기 제어 또는 이름 변경을 포함한 편집 권한은 방과 기기별로 설정됩니다.</string>
+    <string name="manage_role_guest_desc">허용된 항목을 볼 수 있지만 제어할 수는 없습니다.</string>
+    <string name="manage_section_access">접근 권한</string>
+    <string name="manage_custom_access">맞춤 접근 권한</string>
+    <string name="manage_custom_access_off">끔: 집 전체에 접근할 수 있습니다.</string>
+    <string name="manage_custom_access_on">각 방 또는 방 안의 개별 기기별로 권한 수준을 설정합니다.</string>
+    <string name="manage_create_rooms_first">먼저 방을 만드세요.</string>
+    <string name="manage_no_room">방 없음</string>
+    <string name="manage_remove_user_title">%1$s을(를) 제거하시겠습니까?</string>
+    <string name="manage_remove_user_text">즉시 접근 권한을 잃게 됩니다.</string>
+    <string name="manage_remove">제거</string>
+    <string name="manage_tariff_title">전기 요금제</string>
+    <string name="manage_rate_per_kwh">kWh당 요금</string>
+    <string name="manage_currency">통화</string>
+    <string name="manage_currency_supporting">ISO 코드 (예: KRW, INR)</string>
+    <string name="manage_fixed_monthly_charge">월 기본요금</string>
+    <string name="manage_billing_day">청구일</string>
+    <string name="manage_billing_day_supporting">1 ~ 28</string>
+    <string name="manage_monthly_budget">월간 예산 (선택 사항)</string>
+    <string name="manage_usage_slabs">사용량 구간</string>
+    <string name="manage_slabs_empty">단일 요금입니다. 청구 주기 내 사용량에 따라 요금이 달라지는 경우 구간을 추가하세요.</string>
+    <string name="manage_slabs_help">각 구간의 요율은 해당 한도까지 적용됩니다. 그 이상 모든 사용량에 적용하려면 마지막 한도를 비워 두세요.</string>
+    <string name="manage_up_to_kwh">최대 kWh</string>
+    <string name="manage_slab_rate">요율</string>
+    <string name="manage_remove_slab">구간 %1$d 제거</string>
+    <string name="manage_add_slab">구간 추가</string>
+    <string name="manage_time_of_day">시간대별 요금</string>
+    <string name="manage_time_of_day_help">홈 시간 기준으로 위 기본 요율보다 비싸거나 저렴한 시간대입니다. kWh당 차액을 입력하세요: 피크 할증은 1.1, 심야 할인은 -1.5.</string>
+    <string name="manage_window_from">시작</string>
+    <string name="manage_window_until">종료</string>
+    <string name="manage_window_per_kwh">kWh당</string>
+    <string name="manage_remove_time_window">시간대 %1$d 제거</string>
+    <string name="manage_add_time_window">시간대 추가</string>
+    <string name="manage_server_addresses_title">서버 주소</string>
+    <string name="manage_server_addresses_help">Domus는 홈 네트워크에서는 홈 주소를, 외부에서는 원격 주소를 사용합니다. 양쪽 모두에서 로그인 상태가 유지됩니다.</string>
+    <string name="manage_home_network">홈 네트워크</string>
+    <string name="manage_home_network_supporting">예: https://192.168.1.10:8443</string>
+    <string name="manage_remote">원격 주소</string>
+    <string name="manage_remote_supporting">예: Cloudflare Tunnel 호스트 이름</string>
+    <string name="manage_not_set">설정 안 됨</string>
+    <string name="manage_location_disabled">이 휴대폰에서 위치 서비스가 꺼져 있습니다. 대신 장소를 검색하세요.</string>
+    <string name="manage_location_not_found">이 휴대폰의 현재 위치를 찾을 수 없습니다. 대신 장소를 검색하세요.</string>
+    <string name="manage_location_permission_denied">위치 권한이 없으면 장소를 검색하거나 좌표를 직접 입력하세요.</string>
+    <string name="manage_location_title">홈 위치</string>
+    <string name="manage_location_sun_times">오늘 일출은 %1$s, 일몰은 %2$s입니다.</string>
+    <string name="manage_location_help">Domus가 홈의 대략적인 위치를 알면 일출과 일몰에 자동화를 실행할 수 있습니다. 위치 정보는 서버에만 보관됩니다.</string>
+    <string name="manage_use_phone_location">이 휴대폰의 위치 사용</string>
+    <string name="manage_find_place">장소 찾기</string>
+    <string name="manage_find_place_supporting">도시 또는 지역</string>
+    <string name="manage_search_place">장소 검색</string>
+    <string name="manage_no_place_found">해당 이름의 장소가 없습니다. 가까운 도시나 지역명으로 시도해 보세요.</string>
+    <string name="manage_latitude">위도</string>
+    <string name="manage_latitude_supporting">예: 37.57</string>
+    <string name="manage_longitude">경도</string>
+    <string name="manage_longitude_supporting">예: 126.98</string>
+    <string name="manage_change_password_title">비밀번호 변경</string>
+    <string name="manage_change_password_help">이 기기와 다른 모든 기기에서 로그인 상태가 유지됩니다.</string>
+    <string name="manage_current_password">현재 비밀번호</string>
+    <string name="manage_repeat_new_password">새 비밀번호 다시 입력</string>
+    <string name="manage_passwords_mismatch">비밀번호가 일치하지 않습니다</string>
+    <string name="manage_delete_all_notices_title">모든 알림을 삭제하시겠습니까?</string>
+    <string name="manage_delete_all_notices_text">모든 기기에서 알림이 제거됩니다.</string>
+    <string name="manage_delete_all">모두 삭제</string>
+    <string name="manage_notifications_title">알림</string>
+    <string name="manage_mark_all_read">모두 읽음으로 표시</string>
+    <string name="manage_no_notices">아직 알림 없음</string>
+    <string name="manage_no_notices_subtitle">자동화, 새 기기 및 오프라인 기기에 대한 알림이 여기에 표시됩니다.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life 앱으로 스캔할 QR 코드</string>
+    <string name="onboard_region_india">인도</string>
+    <string name="onboard_region_china">중국</string>
+    <string name="onboard_region_europe">유럽</string>
+    <string name="onboard_region_us">미국</string>
+    <string name="onboard_region_singapore">싱가포르</string>
+    <string name="onboard_region_russia">러시아</string>
+    <string name="onboard_region_taiwan">대만</string>
+    <string name="onboard_region_india_old">인도 (구버전)</string>
+    <string name="onboard_plugins_title">플러그인</string>
+    <string name="onboard_local_control">로컬 제어</string>
+    <string name="onboard_cloud">클라우드</string>
+    <plurals name="onboard_device_count">
+        <item quantity="other">기기 %1$d개</item>
+    </plurals>
+    <string name="onboard_account_linked">연결됨</string>
+    <string name="onboard_account_needs_attention">확인 필요</string>
+    <string name="onboard_unlink_account">%1$s 연결 해제</string>
+    <string name="onboard_integration_disabled">서버 구성에서 꺼져 있습니다.</string>
+    <string name="onboard_link_account">계정 연결</string>
+    <string name="onboard_link_another_account">다른 계정 연결</string>
+    <string name="onboard_find_devices">기기 찾기</string>
+    <string name="onboard_unlink_title">%1$s 연결을 해제하시겠습니까?</string>
+    <string name="onboard_unlink_text">이 계정에서 가져온 기기가 Domus에서 제거됩니다.</string>
+    <string name="onboard_unlink">연결 해제</string>
+    <string name="onboard_link_integration">%1$s 연결</string>
+    <string name="onboard_tuya_qr_instructions">Smart Life 또는 Tuya Smart 앱(홈 화면의 스캔 버튼)으로 이 코드를 스캔한 후 앱에서 확인하세요. 같은 휴대폰을 사용하는 경우 이 코드를 다른 화면에 띄우세요.</string>
+    <string name="onboard_waiting_for_scan">스캔 대기 중…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life 앱에서 나 → 설정 → 계정 및 보안 → 사용자 코드를 열고 해당 코드를 여기에 입력하세요.</string>
+    <string name="onboard_user_code">사용자 코드</string>
+    <string name="onboard_qr_expired">QR 코드가 만료되었습니다. 다시 시도하세요.</string>
+    <string name="onboard_verify_title">본인 확인</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi에서 휴대폰으로 인증 코드를 보냈습니다. 여기에 입력하세요. 코드는 몇 분 후에 만료됩니다.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi에서 이메일로 인증 코드를 보냈습니다. 여기에 입력하세요. 코드는 몇 분 후에 만료됩니다.</string>
+    <string name="onboard_verification_code">인증 코드</string>
+    <string name="onboard_send_new_code">새 코드 보내기</string>
+    <string name="onboard_use_another_account">다른 계정 사용</string>
+    <string name="onboard_tapo_instructions">TP-Link 계정으로 로그인하세요. 네트워크의 Tapo 기기와 통신하는 데 사용됩니다.</string>
+    <string name="onboard_xiaomi_instructions">Xiaomi 계정으로 로그인하세요. 기기 토큰은 한 번만 가져오며 제어는 로컬에서 이루어집니다. Xiaomi에서 인증 코드를 보낼 수 있습니다.</string>
+    <string name="onboard_xiaomi_username">이메일, 전화번호 또는 Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">전화번호에는 +82… 또는 +91… 같은 국가 코드가 필요합니다</string>
+    <string name="onboard_email_or_username">이메일 또는 사용자 이름</string>
+    <string name="onboard_password">비밀번호</string>
+    <string name="onboard_server_region">서버 지역</string>
+    <string name="onboard_show_qr_code">QR 코드 표시</string>
+    <string name="onboard_verify">인증</string>
+    <string name="onboard_continue">계속</string>
+    <string name="onboard_link">연결</string>
+    <string name="onboard_add_devices_title">기기 추가</string>
+    <string name="onboard_scanning">스캔 중…</string>
+    <string name="onboard_scan_again">다시 스캔</string>
+    <string name="onboard_add_by_address">주소로 추가</string>
+    <string name="onboard_no_new_devices">새 기기 없음</string>
+    <string name="onboard_no_new_devices_subtitle">발견된 모든 기기가 이미 홈에 추가되어 있습니다. 더 많은 기기를 찾으려면 플러그인에서 계정을 연결하세요.</string>
+    <string name="onboard_open_plugins">플러그인 열기</string>
+    <string name="onboard_found_count">%1$d개 발견됨</string>
+    <string name="onboard_add">추가</string>
+    <string name="onboard_ignore">무시</string>
+    <string name="onboard_add_device_title">%1$s 추가</string>
+    <string name="onboard_field_name">이름</string>
+    <string name="onboard_field_room">방</string>
+    <string name="onboard_no_room">방 없음</string>
+    <string name="onboard_device_token_optional">기기 토큰 (선택 사항)</string>
+    <string name="onboard_device_token_supporting">연결된 Xiaomi 계정이 없는 경우에만 필요합니다</string>
+    <string name="onboard_ip_address">IP 주소</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">이미 존재합니다</string>
+    <string name="code_error_reference_missing" formatted="false">참조된 항목이 존재하지 않습니다</string>
+    <string name="code_error_internal" formatted="false">내부 서버 오류</string>
+    <string name="code_error_session_expired" formatted="false">유효하지 않거나 만료된 세션입니다</string>
+    <string name="code_error_admin_required" formatted="false">관리자 권한이 필요합니다</string>
+    <string name="code_error_guest_no_control" formatted="false">게스트는 기기를 제어할 수 없습니다</string>
+    <string name="code_error_not_signed_in" formatted="false">로그인되어 있지 않습니다</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization 헤더가 누락되었습니다</string>
+    <string name="code_error_account_gone" formatted="false">계정이 더 이상 존재하지 않습니다</string>
+    <string name="code_error_must_change_password" formatted="false">먼저 비밀번호를 변경하세요</string>
+    <string name="code_error_device_not_found" formatted="false">기기를 찾을 수 없습니다</string>
+    <string name="code_error_empty_command" formatted="false">빈 명령</string>
+    <string name="code_error_scan_running" formatted="false">스캔이 이미 실행 중입니다</string>
+    <string name="code_error_discovered_not_found" formatted="false">발견된 기기를 찾을 수 없습니다</string>
+    <string name="code_error_device_already_added" formatted="false">이 기기는 이미 추가되었습니다</string>
+    <string name="code_error_username_too_short" formatted="false">사용자 이름은 3자 이상이어야 합니다</string>
+    <string name="code_error_password_too_short" formatted="false">비밀번호는 8자 이상이어야 합니다</string>
+    <string name="code_error_setup_already_done" formatted="false">설정이 이미 완료되었습니다</string>
+    <string name="code_error_invalid_credentials" formatted="false">사용자 이름 또는 비밀번호가 올바르지 않습니다</string>
+    <string name="code_error_invalid_reset_code" formatted="false">코드가 틀렸거나 더 이상 유효하지 않습니다. 관리자에게 새 코드를 요청하세요.</string>
+    <string name="code_error_wrong_current_password" formatted="false">현재 비밀번호가 올바르지 않습니다</string>
+    <string name="code_error_same_password" formatted="false">현재 비밀번호와 다른 비밀번호를 선택하세요</string>
+    <string name="code_error_avatar_too_long" formatted="false">아바타 문자열이 너무 깁니다</string>
+    <string name="code_error_name_required" formatted="false">이름은 필수입니다</string>
+    <string name="code_error_trigger_required" formatted="false">트리거를 하나 이상 추가하세요</string>
+    <string name="code_error_action_required" formatted="false">작업을 하나 이상 추가하세요</string>
+    <string name="code_error_sun_offset_range" formatted="false">일출 및 일몰 시간은 최대 6시간까지만 조정할 수 있습니다</string>
+    <string name="code_error_automation_not_found" formatted="false">자동화를 찾을 수 없습니다</string>
+    <string name="code_error_cannot_edit_device" formatted="false">이 기기를 편집할 수 없습니다</string>
+    <string name="code_error_admin_only_move_room" formatted="false">관리자만 기기를 다른 방으로 이동할 수 있습니다</string>
+    <string name="code_error_name_empty" formatted="false">이름은 비워둘 수 없습니다</string>
+    <string name="code_error_view_only_device" formatted="false">이 기기는 볼 수만 있고 제어할 수 없습니다</string>
+    <string name="code_error_view_only_devices" formatted="false">이 기기들은 볼 수만 있고 제어할 수 없습니다</string>
+    <string name="code_error_negative_rate" formatted="false">요율은 음수일 수 없습니다</string>
+    <string name="code_error_invalid_billing_day" formatted="false">청구일은 1에서 28 사이여야 합니다</string>
+    <string name="code_error_invalid_currency" formatted="false">통화는 3자리 ISO 코드여야 합니다</string>
+    <string name="code_error_slab_order" formatted="false">각 구간의 끝은 이전 구간보다 커야 합니다</string>
+    <string name="code_error_slab_open_ended" formatted="false">마지막 구간만 상한 없이 설정할 수 있습니다</string>
+    <string name="code_error_tou_format" formatted="false">시간대별 요금 구간은 시작과 종료 시간을 HH:MM 형식으로 입력해야 합니다</string>
+    <string name="code_error_tou_zero_length" formatted="false">시간대별 요금 구간의 시작 시간과 종료 시간은 같을 수 없습니다</string>
+    <string name="code_error_tou_overlap" formatted="false">시간대별 요금 구간은 서로 겹칠 수 없습니다</string>
+    <string name="code_error_group_not_found" formatted="false">그룹을 찾을 수 없습니다</string>
+    <string name="code_error_account_not_found" formatted="false">계정을 찾을 수 없습니다</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya 연동이 비활성화되어 있습니다</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life 앱의 사용자 코드를 입력하세요</string>
+    <string name="code_error_credentials_required" formatted="false">이메일과 비밀번호가 필요합니다</string>
+    <string name="code_error_verification_expired" formatted="false">인증이 만료되었습니다. 다시 로그인하세요</string>
+    <string name="code_error_invalid_port" formatted="false">포트는 숫자여야 합니다</string>
+    <string name="code_error_broker_required" formatted="false">브로커 주소를 입력하세요</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue 연동이 비활성화되어 있습니다</string>
+    <string name="code_error_room_name_required" formatted="false">방 이름은 필수입니다</string>
+    <string name="code_error_room_not_found" formatted="false">방을 찾을 수 없습니다</string>
+    <string name="code_error_sync_lights_required" formatted="false">동기화할 조명을 하나 이상 선택하세요</string>
+    <string name="code_error_scene_not_found" formatted="false">장면을 찾을 수 없습니다</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">화면 동기화를 사용하려면 공유할 화면이 필요합니다. 콘텐츠가 표시되는 기기의 Domus 앱에서 시작하세요.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">장소 검색에 연결할 수 없습니다. 대신 위도와 경도를 직접 입력하세요.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">위도는 -90에서 90 사이, 경도는 -180에서 180 사이여야 합니다</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">해당 사용자 이름에 대해 추천된 모든 주소가 이미 사용 중입니다</string>
+    <string name="code_error_invalid_role" formatted="false">역할은 admin, member 또는 guest여야 합니다</string>
+    <string name="code_error_kid_password_required" formatted="false">어린이 계정에는 비밀번호가 필요합니다</string>
+    <string name="code_error_email_taken" formatted="false">해당 이메일은 이미 다른 계정에서 사용 중입니다</string>
+    <string name="code_error_user_not_found" formatted="false">사용자를 찾을 수 없습니다</string>
+    <string name="code_error_last_admin" formatted="false">최소 한 명의 관리자가 있어야 합니다</string>
+    <string name="code_error_cannot_delete_self" formatted="false">본인 계정은 삭제할 수 없습니다</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue 브리지의 둥근 버튼을 누른 후 30초 이내에 다시 연결하세요</string>
+    <string name="code_error_hue_not_found" formatted="false">Hue 브리지를 찾을 수 없습니다. IP 주소를 입력하세요</string>
+    <string name="code_error_tuya_device_gone" formatted="false">기기가 더 이상 Smart Life에 없습니다</string>
+    <string name="code_error_device_token_required" formatted="false">기기 토큰이 필요합니다</string>
+    <string name="code_error_hue_link_expired" formatted="false">인증 실패: Hue 브리지가 더 이상 이 연결을 허용하지 않습니다. 다시 연결하세요</string>
+    <string name="code_error_hue_removed" formatted="false">인증 실패: Hue 브리지가 제거되었습니다</string>
+    <string name="code_error_mqtt_removed" formatted="false">인증 실패: MQTT 브로커가 제거되었습니다</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">인증 실패: 기기에서 TP-Link 계정 이메일/비밀번호를 거부했습니다</string>
+    <string name="code_error_tapo_account_required" formatted="false">인증 실패: Tapo 기기를 제어하려면 TP-Link 계정을 추가하세요</string>
+    <string name="code_error_tapo_removed" formatted="false">인증 실패: TP-Link 계정이 제거되었습니다</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">인증 실패: Xiaomi에서 보안문자(CAPTCHA)를 요청했습니다. Mi Home 앱이나 브라우저에서 한 번 로그인한 후 다시 시도하세요</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">인증 실패: 잘못된 Xiaomi 사용자 이름 또는 비밀번호입니다</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">인증 실패: 잘못되었거나 만료된 인증 코드입니다</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">인증 실패: Xiaomi에서 코드를 승인하지 않았습니다</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">인증 실패: Xiaomi 세션이 만료되었습니다</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">인증 실패: Xiaomi에서 인증 코드를 요구합니다. 연동 메뉴에서 계정을 다시 연결하세요</string>
+    <string name="code_error_unsupported_command" formatted="false">지원되지 않음: 이 기기는 해당 명령을 지원하지 않습니다</string>
+    <string name="code_error_unsupported_effect" formatted="false">지원되지 않음: 이 조명은 해당 효과를 재생할 수 없습니다</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">지원되지 않음: 이 Xiaomi 모델에는 MIoT 사양이 없습니다</string>
+    <string name="code_error_rate_limited_one" formatted="false">비밀번호 입력 오류가 너무 많습니다. {count}분 후에 다시 시도하세요.</string>
+    <string name="code_error_rate_limited_other" formatted="false">비밀번호 입력 오류가 너무 많습니다. {count}분 후에 다시 시도하세요.</string>
+    <string name="code_error_integration_disabled" formatted="false">\'{integration}\' 연동이 활성화되어 있지 않습니다</string>
+    <string name="code_error_invalid_time" formatted="false">잘못된 시간 형식 \'{time}\', HH:MM 형식을 사용하세요</string>
+    <string name="code_error_invalid_actions" formatted="false">잘못된 작업: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">지역은 {regions} 중 하나여야 합니다</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">잘못된 화면 동기화 설정: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">알 수 없는 장면 유형 \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\"은(는) 올바른 서버 주소가 아닙니다</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">인증 실패: Xiaomi에서 인증 코드를 보내지 못했습니다: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">인증 실패: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">지원되지 않음: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} 전환 확인</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">새 기기 추가됨</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration})이(가) 발견되어 자동으로 추가되었습니다</string>
+    <string name="code_notification_device_found_title" formatted="false">새 기기 발견됨</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration})을(를) 추가할 준비가 되었습니다</string>
+    <string name="code_notification_password_reset_title" formatted="false">비밀번호 재설정 요청됨</string>
+    <string name="code_notification_password_reset" formatted="false">{username}님이 비밀번호를 분실했습니다. 관리자가 설정의 사용자 및 접근 권한 메뉴에서 재설정 코드를 발급할 수 있습니다.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">자동화 \"{name}\"에 문제가 발생했습니다</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>

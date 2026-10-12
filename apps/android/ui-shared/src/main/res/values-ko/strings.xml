@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">색상 휠</string>
+    <string name="ui_expanded">펼쳐짐</string>
+    <string name="ui_collapsed">접혀짐</string>
+    <string name="ui_collapse">접기</string>
+    <string name="ui_expand">펼치기</string>
+</resources>
