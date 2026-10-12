@@ -269,6 +269,7 @@ Goal: no hard-coded UI text, so another language is a new catalog file. Branch `
 - [x] Android: move every string to `res/values/strings.xml`; `core` has no Compose, so its errors, `AirLevel`, `UpdateChannel` and `Format` use message codes resolved in `:app` (`I18n.kt`)
 - [x] Server: send `code` + `params` next to the English `message` for `ApiError` and notifications (additive, old clients keep the text); clients translate by code and fall back to `message`
 - [x] Check on screen: web in the browser and the Electron window (nothing shows a raw key or a literal `\n`), Android on a device
+- [x] Translations (26 languages: `hi`, `es`, `pt-BR`, `id`, `ar`, `fr`, `ru`, `de`, `tr`, `ja`, `ko`, `it`, `vi`, `th`, `zh-CN`, `zh-TW`, `pl`, `bn`, `ta`, `te`, `mr`, `gu`, `kn`, `ml`, `pa`, `ur`) added and registered across Web, Desktop, and Android (`app` + `ui-shared`, `localeFilters` + `generateLocaleConfig`); machine translation, no native review
 
 
 ## Milestone 22: Analytics that keep the peaks (2026-10-12)

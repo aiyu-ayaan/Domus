@@ -67,6 +67,7 @@ hooks and the brand name show up as false positives. A file is done when only th
 | Desktop (`apps/desktop/src/main.js`, `updates.js`, `connect.html`, `i18n.js`, `locales/en.json`) | done (24 keys) |
 | Android (`apps/android/app/src/main/res/values/strings.xml`, `I18n.kt`, `core` message codes) | done (876 strings + 8 plurals; `core` stays free of Android resources in signatures via message codes resolved in `:app`) |
 | Server message codes (`backend/src/api/error.rs`, `modules/notifications/mod.rs`) | done (`code` + `params` sent alongside `message`; translated in web and Android with fallback to `message`) |
+| Translations (26 languages: `hi`, `es`, `pt-BR`, `id`, `ar`, `fr`, `ru`, `de`, `tr`, `ja`, `ko`, `it`, `vi`, `th`, `zh-CN`, `zh-TW`, `pl`, `bn`, `ta`, `te`, `mr`, `gu`, `kn`, `ml`, `pa`, `ur`) | done across Web (`apps/web/src/locales/<tag>.json`), Desktop (`apps/desktop/src/locales/<tag>.json`), and Android (`values-<xx>/strings.xml` in `app` and `ui-shared`) — machine translation, no native review |
 
 ## 4. Gotchas found while doing it
 
