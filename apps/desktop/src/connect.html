@@ -360,6 +360,8 @@
       const $ = (id) => document.getElementById(id)
       const messages = window.domus?.getMessages?.() ?? {}
       const t = (key, fallback) => messages[key] ?? fallback
+      document.documentElement.lang = window.domus?.language ?? 'en'
+      document.documentElement.dir = ['ar', 'ur'].includes(document.documentElement.lang) ? 'rtl' : 'ltr'
       $('title').textContent = t('connect.title', 'Connect to your home')
       $('subtitle').textContent = t('connect.subtitle', 'Choose the Domus server this app should open.')
       $('found-title').textContent = t('connect.onNetwork', 'On this network')

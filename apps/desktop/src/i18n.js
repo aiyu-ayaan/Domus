@@ -27,14 +27,38 @@ const pa = require('./locales/pa.json')
 const ur = require('./locales/ur.json')
 
 /** Catalogs by language tag. To add a language: create `locales/<tag>.json` with the same keys and register it here. */
-const catalogs = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, zh: zhCN, 'zh-CN': zhCN, 'zh-TW': zhTW, pl, bn, ta, te, mr, gu, kn, ml, pa, ur }
+const catalogs = { en, hi, es, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, 'zh-CN': zhCN, 'zh-TW': zhTW, pl, bn, ta, te, mr, gu, kn, ml, pa, ur }
+
+/**
+ * The first requested language that has a catalog, else English. A region falls back to its language
+ * (`es-MX` to `es`); Chinese goes by script, so Hong Kong, Macau and Taiwan read Traditional; every Portuguese reads `pt-BR`.
+ * The same rule is in `apps/web/src/lib/i18n.ts`.
+ */
+function resolveLanguage(requested) {
+  for (const tag of requested) {
+    if (!tag) continue
+    let base = String(tag).split('-')[0].toLowerCase()
+    let script = ''
+    try {
+      const locale = new Intl.Locale(tag).maximize()
+      base = locale.language
+      script = locale.script ?? ''
+    } catch {
+      /* not a language tag: the plain split above is all we have */
+    }
+    if (base === 'en') return 'en'
+    const candidate = base === 'zh' ? (script === 'Hant' ? 'zh-TW' : 'zh-CN') : base === 'pt' ? 'pt-BR' : base
+    if (catalogs[candidate]) return candidate
+  }
+  return 'en'
+}
 
 let language = 'en'
-const setLanguage = (locale) => {
-  const raw = String(locale || 'en')
-  language = catalogs[raw] ? raw : raw.split('-')[0] || 'en'
+/** Takes the system's languages in order of preference. */
+const setLanguage = (...requested) => {
+  language = resolveLanguage(requested.flat())
 }
-setLanguage(Intl.DateTimeFormat().resolvedOptions().locale)
+const getLanguage = () => language
 
 const messages = () => catalogs[language] ?? en
 
@@ -45,4 +69,4 @@ function t(key, params) {
   return params ? text.replace(/\{(\w+)\}/g, (m, name) => (name in params ? String(params[name]) : m)) : text
 }
 
-module.exports = { t, setLanguage, messages }
+module.exports = { t, setLanguage, getLanguage, messages, resolveLanguage }

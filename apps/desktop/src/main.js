@@ -10,7 +10,7 @@ const { Readable } = require('stream')
 const { pipeline } = require('stream/promises')
 const { pathToFileURL } = require('url')
 const updates = require('./updates')
-const { t, setLanguage, messages } = require('./i18n')
+const { t, setLanguage, getLanguage, messages } = require('./i18n')
 
 // The window shows the web UI served by the Domus server itself. Which server
 // is chosen on the connect page (connect.html) and remembered; once signed in,
@@ -211,6 +211,9 @@ ipcMain.on('server:hasSaved', (event) => {
 })
 ipcMain.on('i18n:get', (event) => {
   event.returnValue = trusted(event) ? messages() : {}
+})
+ipcMain.on('i18n:language', (event) => {
+  event.returnValue = trusted(event) ? getLanguage() : 'en'
 })
 
 // The signed-in server's addresses (GET /api/v1/server/links). Its certificate
@@ -432,7 +435,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  setLanguage(app.getLocale())
+  // The system's own list first: app.getLocale() only names languages Chromium itself is translated into.
+  setLanguage(app.getPreferredSystemLanguages(), app.getLocale())
   try {
     config = { ...config, ...JSON.parse(fs.readFileSync(configFile(), 'utf8')) }
   } catch {
