@@ -26,6 +26,8 @@ export default defineConfig({
     },
   },
   build: {
+    // lib/i18n.ts awaits the language catalog at the top level.
+    target: 'es2022',
     rollupOptions: {
       output: {
         manualChunks: {

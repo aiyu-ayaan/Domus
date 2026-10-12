@@ -1,40 +1,58 @@
 import en from '@/locales/en.json'
-import hi from '@/locales/hi.json'
-import es from '@/locales/es.json'
-import ptBR from '@/locales/pt-BR.json'
-import id from '@/locales/id.json'
-import ar from '@/locales/ar.json'
-import fr from '@/locales/fr.json'
-import ru from '@/locales/ru.json'
-import de from '@/locales/de.json'
-import tr from '@/locales/tr.json'
-import ja from '@/locales/ja.json'
-import ko from '@/locales/ko.json'
-import it from '@/locales/it.json'
-import vi from '@/locales/vi.json'
-import th from '@/locales/th.json'
-import zhCN from '@/locales/zh-CN.json'
-import zhTW from '@/locales/zh-TW.json'
-import pl from '@/locales/pl.json'
-import bn from '@/locales/bn.json'
-import ta from '@/locales/ta.json'
-import te from '@/locales/te.json'
-import mr from '@/locales/mr.json'
-import gu from '@/locales/gu.json'
-import kn from '@/locales/kn.json'
-import ml from '@/locales/ml.json'
-import pa from '@/locales/pa.json'
-import ur from '@/locales/ur.json'
 
 export type MessageKey = keyof typeof en
+type Catalog = Record<string, string>
 
-/** Catalogs by language tag. To add a language: create `locales/<tag>.ts` with the same keys and register it here. */
-const catalogs: Record<string, Record<string, string>> = { en, hi, es, pt: ptBR, 'pt-BR': ptBR, id, ar, fr, ru, de, tr, ja, ko, it, vi, th, zh: zhCN, 'zh-CN': zhCN, 'zh-TW': zhTW, pl, bn, ta, te, mr, gu, kn, ml, pa, ur }
+/**
+ * One chunk per language, fetched only for the language in use, so the entry carries English alone.
+ * To add a language: create `locales/<tag>.json` with the keys of `en.json`; this picks it up by file name.
+ */
+const loaders = import.meta.glob<Catalog>(['@/locales/*.json', '!@/locales/en.json'], { import: 'default' })
+const loaderOf = (tag: string) => loaders[`/src/locales/${tag}.json`]
 
-const navLang = (typeof navigator !== 'undefined' && navigator.language) || 'en'
-const language = catalogs[navLang] ? navLang : navLang.split('-')[0] || 'en'
-const messages = catalogs[language] ?? en
+/** Written right to left; the page direction follows. */
+const RTL = ['ar', 'ur']
+
+/**
+ * The first requested language that has a catalog, else English. A region falls back to its language
+ * (`es-MX` to `es`); Chinese goes by script, so Hong Kong, Macau and Taiwan read Traditional; every Portuguese reads `pt-BR`.
+ * The same rule is in `apps/desktop/src/i18n.js`.
+ */
+export function resolveLanguage(requested: readonly (string | undefined)[], supported: (tag: string) => boolean): string {
+  for (const tag of requested) {
+    if (!tag) continue
+    let base = tag.split('-')[0].toLowerCase()
+    let script = ''
+    try {
+      const locale = new Intl.Locale(tag).maximize()
+      base = locale.language
+      script = locale.script ?? ''
+    } catch {
+      /* not a language tag: the plain split above is all we have */
+    }
+    if (base === 'en') return 'en'
+    const candidate = base === 'zh' ? (script === 'Hant' ? 'zh-TW' : 'zh-CN') : base === 'pt' ? 'pt-BR' : base
+    if (supported(candidate)) return candidate
+  }
+  return 'en'
+}
+
+// The desktop app passes the system's language: Chromium's own (navigator.language) has no Punjabi or Marathi build to report.
+const desktopLanguage = (globalThis as { domus?: { language?: string } }).domus?.language
+const browserLanguages = typeof navigator === 'undefined' ? [] : (navigator.languages ?? [navigator.language])
+
+/** The language the app is shown in: a tag with a catalog, or `en`. */
+export const language = resolveLanguage([desktopLanguage, ...browserLanguages], (tag) => !!loaderOf(tag))
+
+// Awaited here, so every module that imports `t()` (also for module-level constants) runs with the catalog in place.
+// A catalog that fails to load leaves the app in English instead of blank.
+const messages: Catalog = language === 'en' ? en : await loaderOf(language)().catch(() => en)
 const plural = new Intl.PluralRules(language)
+
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = language
+  document.documentElement.dir = RTL.includes(language) ? 'rtl' : 'ltr'
+}
 
 /**
  * Looks up a message and fills `{name}` placeholders. With a numeric `count`, `key_one` / `key_other` (the

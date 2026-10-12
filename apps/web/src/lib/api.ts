@@ -34,6 +34,8 @@ interface DesktopBridge {
   isDesktop?: boolean
   flavor?: AppFlavor
   hour12?: boolean
+  /** The system's language as the desktop app resolved it; read by lib/i18n.ts. */
+  language?: string
   apiBase?: string
   /** One token for the local and the remote address, which are different origins. */
   token: { get(): string | null; set(token: string | null): void }
