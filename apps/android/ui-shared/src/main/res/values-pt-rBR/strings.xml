@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Roda de cores</string>
+    <string name="ui_expanded">Expandido</string>
+    <string name="ui_collapsed">Recolhido</string>
+    <string name="ui_collapse">Recolher</string>
+    <string name="ui_expand">Expandir</string>
+</resources>
