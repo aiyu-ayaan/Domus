@@ -35,6 +35,8 @@ import com.aiyu.domus.ui.theme.rememberReducedMotion
 import kotlin.math.absoluteValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -123,9 +125,30 @@ private fun Backdrop() {
 @Composable
 private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, content: @Composable ColumnScope.() -> Unit) {
     val c = MaterialTheme.colorScheme
-    Box(Modifier.fillMaxSize()) {
+    val form: @Composable (Modifier) -> Unit = { modifier ->
+        Surface(color = c.surfaceContainerLow, shape = MaterialTheme.shapes.extraLarge, shadowElevation = 2.dp, modifier = modifier) {
+            Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp), content = content)
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
         Backdrop()
-        Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
+        if (maxWidth >= 840.dp) {
+            // Wide windows split in two: the mark and headline on the start side, the form beside it.
+            Row(Modifier.align(Alignment.Center).widthIn(max = 1120.dp).fillMaxSize().systemBarsPadding().imePadding().padding(horizontal = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(64.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(Modifier.enterStaggered(0), contentAlignment = Alignment.Center) {
+                        MorphingShape(Modifier.size(180.dp))
+                        Icon(icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(72.dp))
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(title, style = MaterialTheme.typography.displayMedium, modifier = Modifier.enterStaggered(1).semantics { heading() })
+                    Text(subtitle, style = MaterialTheme.typography.titleMedium, color = c.onSurfaceVariant, modifier = Modifier.enterStaggered(2))
+                }
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(vertical = 24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    form(Modifier.widthIn(max = 520.dp).fillMaxWidth().enterStaggered(3))
+                }
+            }
+        } else Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
             Column(
                 Modifier.widthIn(max = 520.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -140,9 +163,7 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
                 Spacer(Modifier.height(8.dp))
                 Text(subtitle, style = MaterialTheme.typography.bodyLarge, color = c.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.enterStaggered(2))
                 Spacer(Modifier.height(28.dp))
-                Surface(color = c.surfaceContainerLow, shape = MaterialTheme.shapes.extraLarge, shadowElevation = 2.dp, modifier = Modifier.fillMaxWidth().enterStaggered(3)) {
-                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp), content = content)
-                }
+                form(Modifier.fillMaxWidth().enterStaggered(3))
             }
         }
     }
@@ -167,16 +188,17 @@ fun OnboardingScreen() {
     // Back steps to the previous intro page; on the first page it leaves the app as usual.
     val back = rememberPredictiveBack(pager.currentPage > 0) { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }
     val pageDesc = stringResource(R.string.connect_page_of, pager.currentPage + 1, Intros.size)
-    Box(Modifier.fillMaxSize().predictiveBackEffect { back.value }) {
+    BoxWithConstraints(Modifier.fillMaxSize().predictiveBackEffect { back.value }) {
+        val wide = maxWidth >= 840.dp
         Backdrop()
         Column(Modifier.fillMaxSize().systemBarsPadding().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             TextButton(repository::finishOnboarding, Modifier.align(Alignment.End)) { Text(stringResource(R.string.connect_skip)) }
             HorizontalPager(pager, Modifier.weight(1f)) { page ->
                 val intro = Intros[page]
-                Column(Modifier.fillMaxSize().padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                val mark: @Composable () -> Unit = {
                     Box(
                         Modifier
-                            .size(220.dp)
+                            .size(if (wide) 300.dp else 220.dp)
                             // The shape shrinks and turns away as its page leaves.
                             .graphicsLayer {
                                 val away = ((pager.currentPage - page) + pager.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
@@ -187,7 +209,19 @@ fun OnboardingScreen() {
                             .clip(intro.shape.toShape())
                             .background(c.primary),
                         contentAlignment = Alignment.Center,
-                    ) { Icon(intro.icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(96.dp)) }
+                    ) { Icon(intro.icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(if (wide) 128.dp else 96.dp)) }
+                }
+                if (wide) {
+                    // Wide windows put the words beside the shape instead of under it.
+                    Row(Modifier.fillMaxSize().padding(horizontal = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(72.dp, Alignment.CenterHorizontally)) {
+                        mark()
+                        Column(Modifier.widthIn(max = 460.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Text(stringResource(intro.titleRes), style = MaterialTheme.typography.displayMedium, modifier = Modifier.semantics { heading() })
+                            Text(stringResource(intro.bodyRes), style = MaterialTheme.typography.titleMedium, color = c.onSurfaceVariant)
+                        }
+                    }
+                } else Column(Modifier.fillMaxSize().padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    mark()
                     Spacer(Modifier.height(40.dp))
                     Text(stringResource(intro.titleRes), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
                     Spacer(Modifier.height(12.dp))

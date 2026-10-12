@@ -160,6 +160,10 @@ A self-hosted server has no cloud push channel. `AlertsService` (opt-in in Setti
       W --> DG[DeviceGrid: 4 across]
       SBS --> P[each column: LocalWideScreen = false]
   ```
+- **Before sign-in on wide screens** — from 840dp `EntryColumn` (connect, sign-in, forgot / reset, choose a
+  password, unreachable) splits in two: the larger morphing mark, headline and subtitle on the start side, the
+  form panel beside it, centred and capped at 1120dp. `OnboardingScreen` puts each intro page's shape beside
+  its words instead of above them. Narrower windows keep the single centred column.
 - **Settings on tablets** — from 600dp of content width `SettingsTab` (`SettingsPanes.kt`) shows the list on the
   left (the open row highlighted) and the page it stands for in a right pane. `PageHost` (`MainScreen.kt`) is
   the router both the full-screen pages and the pane use; the pane hides the back arrow (`LocalHideBack`) except
