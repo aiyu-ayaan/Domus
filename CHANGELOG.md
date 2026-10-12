@@ -1,3 +1,79 @@
+## v0.0.1-alpha.5 (2026-10-12)
+
+- !alpha(Release) : Tablet layouts for Settings, Home, Devices, Scenes, Analytics and the sign-in screens
+- docs(TODO) : Add the Android tablet milestone and the road to v1.0.0
+- feat(Android) : Split the onboarding, connect and sign-in screens in two on wide screens
+- docs(Android) : Retake the tablet screenshots with the demo home and add Devices and Scenes
+- docs(Android) : Describe the wide-screen layout and add tablet screenshots
+- feat(Android) : Keep Analytics figures beside the charts on wide screens
+- feat(Android) : Put scenes beside automations on wide screens
+- feat(Android) : Lay Home out in two columns on wide screens
+- feat(Android) : Widen tabs to 1240dp on wide screens and show device tiles four across
+- docs(Android) : Add the tablet Settings screenshot and describe the two-pane layout
+- feat(Android) : Show Settings as a list and a detail pane side by side from 600dp
+- fix(Android) : Pad the Wallpaper colors row in a card so its press ripple has edges
+- docs(README) : Add status, release, license, Docker and tech stack badges
+- docs(Localization) : Describe the 27 languages and the language setting in the README and the language entries
+- docs(Localization) : Describe the web and desktop language picker and the right-to-left rules
+- fix(Web) : Lay the app out right to left for Arabic and Urdu and keep numbers, units and charts left to right
+- feat(Desktop) : Keep the language picked in Settings in the app's config and use it for the connect window
+- feat(Web) : Add a language picker in Settings that overrides the browser's language
+- docs(Localization) : Describe language detection, the Android Language page and the all-languages rule for new strings
+- feat(Android) : Add a Language page in Settings that follows the phone or a chosen language
+- feat(Desktop) : Follow the system's language list, fall back to English and pass the language to the page
+- feat(Web) : Pick the language from the browser's list, fall back to English and load one catalog per language
+- docs(Localization) : Mark 26 translated language catalogs complete
+- i18n(ur) : Add Urdu catalogs
+- i18n(pa) : Add Punjabi catalogs
+- i18n(ml) : Add Malayalam catalogs
+- i18n(kn) : Add Kannada catalogs
+- i18n(gu) : Add Gujarati catalogs
+- i18n(mr) : Add Marathi catalogs
+- i18n(te) : Add Telugu catalogs
+- i18n(ta) : Add Tamil catalogs
+- i18n(bn) : Add Bengali catalogs
+- i18n(pl) : Add Polish catalogs
+- i18n(zh-TW) : Add Traditional Chinese catalogs
+- i18n(zh-CN) : Add Simplified Chinese catalogs
+- i18n(th) : Add Thai catalogs
+- i18n(vi) : Add Vietnamese catalogs
+- i18n(it) : Add Italian catalogs
+- i18n(ko) : Add Korean catalogs
+- i18n(ja) : Add Japanese catalogs
+- i18n(tr) : Add Turkish catalogs
+- i18n(de) : Add German catalogs
+- i18n(ru) : Add Russian catalogs
+- i18n(fr) : Add French catalogs
+- i18n(ar) : Add Arabic catalogs
+- i18n(id) : Add Indonesian catalogs
+- i18n(pt-BR) : Add Portuguese (Brazil) catalogs
+- i18n(es) : Add Spanish catalogs
+- i18n(hi) : Add Hindi catalogs
+- docs(Localization) : Add language entry placeholder and translation prompt
+- docs(Localization) : Update web key and Android string counts
+- feat(Android) : Show peaks, the time at each PM2.5 level and a day-by-hour grid in Analytics
+- docs(Analytics) : Describe per-minute sampling with peaks, the new history fields and the hour grid
+- feat(Web) : Show peaks on the trend, an hour-by-day grid on Energy and Air quality and the time at each PM2.5 level
+- feat(Backend) : Serve peaks, PM2.5 level time and an hour-by-day range in the energy and air history
+- feat(Backend) : Aggregate every poll into per-minute energy and air samples that keep the peak
+- docs(i18n) : Mark Milestone 21 complete and update localization architecture and status
+- chore(claude) : Add a project status line with usage bars, limit resets and git state
+- feat(i18n) : Add server error and notification codes with client catalog lookup
+- feat(i18n) : Move Android strings into strings.xml and give core errors and labels message codes
+- feat(i18n) : Move desktop dialog, connect and update strings into a catalog
+- feat(i18n) : Move remaining web views, avatar picker, Screen Sync and lib strings into the catalog
+- docs(i18n) : Add the localization guide with architecture diagram, update the TODO and keep the string scanner
+- feat(i18n) : Move settings, people and access editor strings into the web catalog
+- feat(i18n) : Move overview insight card strings into the web catalog
+- feat(i18n) : Move overview page strings into the web catalog
+- feat(i18n) : Move light colour control and chart empty-state strings into the web catalog
+- feat(i18n) : Move device drawer, row, light scene and chart strings into the web catalog
+- feat(i18n) : Move rooms and devices view strings into the web catalog
+- feat(i18n) : Move sign-in screens and the app shell navigation strings into the web catalog
+- feat(i18n) : Move shared web components, device labels and update prompt strings into the catalog
+- feat(i18n) : Add the web string catalog with t(), move format and toast texts into it
+- test(Load) : Add k6 public load test with run script, baseline results and notes
+
 ## v0.0.1-alpha.4 (2026-10-11)
 
 - !alpha(Release) : Tap haptics on every Android control and build artifacts deleted once a release is published
