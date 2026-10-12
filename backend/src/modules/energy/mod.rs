@@ -229,8 +229,8 @@ pub struct Buckets {
 }
 
 impl Buckets {
-    /// `range` is "hour" (60 one-minute buckets), "day" (24 hours), "week" (7 days) or "month" (30 days),
-    /// ending at `now`. `tz` is the viewer's IANA zone ("Asia/Kolkata"), so days start at their midnight
+    /// `range` is "hour" (60 one-minute buckets), "day" (24 hours), "week" (7 days), "month" (30 days) or
+    /// "hours" (every hour of the last 7 days, for a day-by-hour grid), ending at `now`. `tz` is the viewer's IANA zone ("Asia/Kolkata"), so days start at their midnight
     /// across DST changes too; without a known one the server's zone is used.
     pub fn new(range: Option<&str>, tz: Option<&str>, now: DateTime<Utc>) -> Self {
         match tz.and_then(|z| z.parse::<chrono_tz::Tz>().ok()) {
@@ -252,6 +252,7 @@ impl Buckets {
             Some("hour") => (0..60).rev().map(|i| minute.clone() - Duration::minutes(i)).collect(),
             Some("week") => (0..7).rev().map(midnight).collect(),
             Some("month") => (0..30).rev().map(midnight).collect(),
+            Some("hours") => (0..).map(|i| midnight(6) + Duration::hours(i)).take_while(|t| *t <= hour).collect(),
             _ => (0..24).rev().map(|i| hour.clone() - Duration::hours(i)).collect(),
         };
         Self { starts: starts.iter().map(DateTime::fixed_offset).collect(), sql_minutes: if range == Some("hour") { 1 } else { 15 } }
@@ -438,7 +439,8 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
 
 #[derive(Deserialize)]
 struct HistoryQuery {
-    /// "hour" (60 one-minute points), "day" (24 hourly points), "week" (7 days) or "month" (30 days).
+    /// "hour" (60 one-minute points), "day" (24 hourly points), "week" (7 days), "month" (30 days)
+    /// or "hours" (every hour of the last 7 days).
     range: Option<String>,
     /// The viewer's IANA time zone, so buckets follow their clock rather than the server's.
     tz: Option<String>,
@@ -452,6 +454,8 @@ struct Point {
     cost: f64,
     /// Average measured power in the bucket; `None` where nothing was measured.
     watts: Option<f64>,
+    /// The highest power any poll read in the bucket, which the average hides.
+    peak_watts: Option<f64>,
 }
 
 async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<HistoryQuery>) -> ApiResult<Json<Vec<Point>>> {
@@ -466,11 +470,12 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
     }
 
     // Fine UTC groups ("YYYY-MM-DDTHH", part of the hour), regrouped into the viewer's buckets below.
-    let rows: Vec<(String, String, i64, f64, f64, i64)> = sqlx::query_as(
+    let rows: Vec<(String, String, i64, f64, f64, i64, Option<f64>)> = sqlx::query_as(
         "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / ?3 AS q,
                 SUM(energy_kwh),
                 COALESCE(SUM(CASE WHEN id NOT LIKE ?2 THEN power_watts END), 0.0),
-                COUNT(CASE WHEN id NOT LIKE ?2 THEN 1 END)
+                COUNT(CASE WHEN id NOT LIKE ?2 THEN 1 END),
+                MAX(CASE WHEN id NOT LIKE ?2 THEN COALESCE(peak_watts, power_watts) END)
          FROM energy_metrics WHERE recorded_at >= ?1 GROUP BY device_id, h, q",
     )
     .bind(buckets.start())
@@ -479,11 +484,15 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
     .fetch_all(&s.pool)
     .await?;
 
-    let mut points: Vec<Point> = (0..buckets.count()).map(|i| Point { t: buckets.time(i), kwh: 0.0, cost: 0.0, watts: None }).collect();
+    let mut points: Vec<Point> = (0..buckets.count()).map(|i| Point { t: buckets.time(i), kwh: 0.0, cost: 0.0, watts: None, peak_watts: None }).collect();
     // (bucket, device) -> sum and count of its measured power samples.
     let mut power: HashMap<(usize, String), (f64, i64)> = HashMap::new();
+    // (bucket, SQL group) -> the devices' peaks in it, added up.
+    // shortcut: devices are assumed to peak together within a group (1 or 15 minutes), so the home's peak
+    // can read high; store a per-minute home total if it has to be exact.
+    let mut peaks: HashMap<(usize, DateTime<Utc>), f64> = HashMap::new();
 
-    for (device_id, hour, part, kwh, watts, samples) in rows {
+    for (device_id, hour, part, kwh, watts, samples, peak) in rows {
         if q.device_id.as_ref().map_or(!visible.contains(&device_id), |d| *d != device_id) {
             continue;
         }
@@ -496,6 +505,12 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
             e.0 += watts;
             e.1 += samples;
         }
+        if let Some(peak) = peak {
+            *peaks.entry((i, t)).or_default() += peak;
+        }
+    }
+    for ((i, _), peak) in peaks {
+        points[i].peak_watts = Some(points[i].peak_watts.map_or(peak, |p| p.max(peak)));
     }
     // The home's power in a bucket is the sum of each device's average.
     for ((i, _), (watts, samples)) in power {
@@ -529,6 +544,11 @@ mod tests {
         assert_eq!((hour.count(), hour.sql_minutes()), (60, 1));
         assert_eq!(hour.time(59).to_rfc3339(), "2026-10-11T22:52:00+05:30");
         assert_eq!(hour.index(hour.group_time("2026-10-11 17", 22).unwrap()), Some(59));
+        // Every hour from midnight six days ago up to the current one.
+        let hours = Buckets::new(Some("hours"), india, now);
+        assert_eq!((hours.count(), hours.sql_minutes()), (6 * 24 + 23, 15));
+        assert_eq!(hours.time(0).to_rfc3339(), "2026-10-05T00:00:00+05:30");
+        assert_eq!(hours.index(now), Some(hours.count() - 1));
         let week = Buckets::new(Some("week"), india, now);
         assert_eq!(week.time(0).to_rfc3339(), "2026-10-05T00:00:00+05:30");
         assert_eq!(week.index(now), Some(6));
