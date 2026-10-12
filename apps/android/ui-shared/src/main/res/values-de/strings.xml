@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Farbrad</string>
+    <string name="ui_expanded">Ausgeklappt</string>
+    <string name="ui_collapsed">Eingeklappt</string>
+    <string name="ui_collapse">Einklappen</string>
+    <string name="ui_expand">Ausklappen</string>
+</resources>
