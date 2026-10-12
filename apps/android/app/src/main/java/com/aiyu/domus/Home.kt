@@ -34,6 +34,7 @@ import com.aiyu.domus.core.Scene
 import com.aiyu.domus.ui.components.pressScale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
@@ -80,6 +81,8 @@ import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.SectionTitle
 import com.aiyu.domus.ui.components.ShapedIcon
+import com.aiyu.domus.ui.components.LocalWideScreen
+import com.aiyu.domus.ui.components.SideBySide
 import com.aiyu.domus.ui.components.enterStaggered
 import java.util.Calendar
 import kotlin.math.roundToInt
@@ -199,85 +202,99 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
             return@ScreenColumn
         }
 
-        // Cards appear only for what the home can measure, like the web overview.
-        val metered = devices.any { it.state.watts != null }
-        val overview = energy
-        if (metered && overview != null) {
-            val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
-            val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
+        val cards: @Composable ColumnScope.() -> Unit = {
+            // Cards appear only for what the home can measure, like the web overview.
+            val metered = devices.any { it.state.watts != null }
+            val overview = energy
+            if (metered && overview != null) {
+                val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+                val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
 
-            // Both cards take the height of the taller one.
-            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(stringResource(R.string.home_using_now), formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.home_using_now_info))
+                // Both cards take the height of the taller one.
+                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).enterStaggered(0), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(stringResource(R.string.home_using_now), formatWatts(wattsToDisplay), null, Icons.Rounded.Bolt, MaterialShapes.Sunny, c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight(), info = stringResource(R.string.home_using_now_info))
+                    StatCard(
+                        stringResource(R.string.home_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
+                        Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
+                        info = stringResource(R.string.home_today_info),
+                    )
+                }
+            }
+            devices.filter { it.isOnline }.mapNotNull { it.state.pm25 }.maxOrNull()?.let { pm ->
                 StatCard(
-                    stringResource(R.string.home_today), formatKwh(overview.todayKwh), formatMoney(overview.todayCost, overview.settings.currency),
-                    Icons.Rounded.Today, MaterialShapes.Clover4Leaf, c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight(),
-                    info = stringResource(R.string.home_today_info),
+                    stringResource(R.string.home_air_quality), airLevel(pm).text(), stringResource(R.string.home_pm25_reading, pm.roundToInt()),
+                    Icons.Rounded.Air, MaterialShapes.Flower, c.tertiaryContainer, c.onTertiaryContainer, Modifier.fillMaxWidth().enterStaggered(1),
                 )
             }
         }
-        devices.filter { it.isOnline }.mapNotNull { it.state.pm25 }.maxOrNull()?.let { pm ->
-            StatCard(
-                stringResource(R.string.home_air_quality), airLevel(pm).text(), stringResource(R.string.home_pm25_reading, pm.roundToInt()),
-                Icons.Rounded.Air, MaterialShapes.Flower, c.tertiaryContainer, c.onTertiaryContainer, Modifier.fillMaxWidth().enterStaggered(1),
-            )
-        }
 
-        val quick = scenes.filter { it.kind == "standard" }
-        if (quick.isNotEmpty()) {
-            SectionTitle(stringResource(R.string.home_scenes))
-            Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(2), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                quick.forEach { scene -> SceneCard(scene, user.canControl) { repository.toggleScene(scene, !scene.isActive) } }
+        val quickScenes: @Composable ColumnScope.() -> Unit = {
+            val quick = scenes.filter { it.kind == "standard" }
+            if (quick.isNotEmpty()) {
+                SectionTitle(stringResource(R.string.home_scenes))
+                Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(2), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    quick.forEach { scene -> SceneCard(scene, user.canControl) { repository.toggleScene(scene, !scene.isActive) } }
+                }
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionTitle(stringResource(R.string.home_on_right_now), Modifier.weight(1f))
-            TextButton(onShowDevices) { Text(stringResource(R.string.home_all_devices)) }
-        }
-        when {
-            devices.isEmpty() -> EmptyState(stringResource(R.string.home_no_devices_title), stringResource(if (user.isAdmin) R.string.home_no_devices_admin else R.string.home_no_devices_member))
-            on.isEmpty() -> Text(stringResource(R.string.home_everything_off), color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
-            else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
+        val onNow: @Composable ColumnScope.() -> Unit = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SectionTitle(stringResource(R.string.home_on_right_now), Modifier.weight(1f))
+                TextButton(onShowDevices) { Text(stringResource(R.string.home_all_devices)) }
+            }
+            when {
+                devices.isEmpty() -> EmptyState(stringResource(R.string.home_no_devices_title), stringResource(if (user.isAdmin) R.string.home_no_devices_admin else R.string.home_no_devices_member))
+                on.isEmpty() -> Text(stringResource(R.string.home_everything_off), color = c.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+                else -> DeviceGrid(on, user.canControl, onOpenDevice, firstIndex = 3)
+            }
         }
 
-        val lived = rooms.sortedBy { it.floor }.map { room -> room to devices.filter { it.roomId == room.id } }.filter { it.second.isNotEmpty() }
-        if (lived.isNotEmpty()) {
-            SectionTitle(stringResource(R.string.home_rooms))
-            Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(5), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                lived.forEach { (room, inRoom) ->
-                    val active = inRoom.count { it.isOnline && it.state.isOn == true }
-                    val summary = if (active == 0) {
-                        pluralStringResource(R.plurals.home_room_summary_off, inRoom.size, inRoom.size)
-                    } else {
-                        pluralStringResource(R.plurals.home_room_summary_on, inRoom.size, inRoom.size, active)
-                    }
-                    Surface(onShowDevices, Modifier.width(156.dp), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large) {
-                        Column(Modifier.padding(16.dp)) {
-                            ShapedIcon(Icons.Rounded.MeetingRoom, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
-                            Spacer(Modifier.height(16.dp))
-                            Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(summary, style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
-                            // The room's temperature, when something in it measures one.
-                            inRoom.firstNotNullOfOrNull { it.state.temperature }?.let { Text("${it.roundToInt()}°", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant) }
+        val roomCards: @Composable ColumnScope.() -> Unit = {
+            val lived = rooms.sortedBy { it.floor }.map { room -> room to devices.filter { it.roomId == room.id } }.filter { it.second.isNotEmpty() }
+            if (lived.isNotEmpty()) {
+                SectionTitle(stringResource(R.string.home_rooms))
+                Row(Modifier.horizontalScroll(rememberScrollState()).enterStaggered(5), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    lived.forEach { (room, inRoom) ->
+                        val active = inRoom.count { it.isOnline && it.state.isOn == true }
+                        val summary = if (active == 0) {
+                            pluralStringResource(R.plurals.home_room_summary_off, inRoom.size, inRoom.size)
+                        } else {
+                            pluralStringResource(R.plurals.home_room_summary_on, inRoom.size, inRoom.size, active)
+                        }
+                        Surface(onShowDevices, Modifier.width(156.dp), color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large) {
+                            Column(Modifier.padding(16.dp)) {
+                                ShapedIcon(Icons.Rounded.MeetingRoom, MaterialShapes.Cookie9Sided, c.secondaryContainer, c.onSecondaryContainer)
+                                Spacer(Modifier.height(16.dp))
+                                Text(room.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(summary, style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+                                // The room's temperature, when something in it measures one.
+                                inRoom.firstNotNullOfOrNull { it.state.temperature }?.let { Text("${it.roundToInt()}°", style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant) }
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (notices.isNotEmpty()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionTitle(stringResource(R.string.home_recent_activity), Modifier.weight(1f))
-                TextButton({ clearNotices = true }) { Text(stringResource(R.string.home_delete_all)) }
-                TextButton({ open("notices") }) { Text(stringResource(R.string.home_see_all)) }
-            }
-            notices.forEachIndexed { i, notice ->
-                key(notice.id) {
-                    // Swipe a row away to delete it; the server then tells every other client.
-                    SwipeNotice(notice, { notices = notices.filter { it.id != notice.id }; scope.launch { repository.request { it.removeNotice(notice.id) } } }, Modifier.enterStaggered(6 + i), onClick = { open("notices") })
+        val activity: @Composable ColumnScope.() -> Unit = {
+            if (notices.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SectionTitle(stringResource(R.string.home_recent_activity), Modifier.weight(1f))
+                    TextButton({ clearNotices = true }) { Text(stringResource(R.string.home_delete_all)) }
+                    TextButton({ open("notices") }) { Text(stringResource(R.string.home_see_all)) }
+                }
+                notices.forEachIndexed { i, notice ->
+                    key(notice.id) {
+                        // Swipe a row away to delete it; the server then tells every other client.
+                        SwipeNotice(notice, { notices = notices.filter { it.id != notice.id }; scope.launch { repository.request { it.removeNotice(notice.id) } } }, Modifier.enterStaggered(6 + i), onClick = { open("notices") })
+                    }
                 }
             }
         }
+
+        // A wide screen keeps the glanceable cards on the start side and what can be acted on beside them.
+        if (LocalWideScreen.current) SideBySide({ cards(); quickScenes(); roomCards() }, { onNow(); activity() })
+        else { cards(); quickScenes(); onNow(); roomCards(); activity() }
     }
 }
