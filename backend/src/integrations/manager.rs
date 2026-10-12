@@ -2,6 +2,7 @@
 //! talks to them: discovery, adoption, polling, commands and energy sampling.
 
 use super::accounts::AccountStore;
+use super::sampling::Window;
 use crate::api::error::ApiError;
 use crate::infrastructure::crypto::Vault;
 use crate::infrastructure::database::{get_setting, set_setting};
@@ -78,7 +79,8 @@ pub struct DeviceManager {
     discovery_lock: Mutex<()>,
     poll_lock: Mutex<()>,
     energy_sample: Duration,
-    last_sample: Mutex<HashMap<String, Instant>>,
+    /// Readings of each device since its last stored sample.
+    windows: Mutex<HashMap<String, Window>>,
     failures: Mutex<HashMap<String, u32>>,
 }
 
@@ -104,7 +106,7 @@ impl DeviceManager {
             discovery_lock: Mutex::new(()),
             poll_lock: Mutex::new(()),
             energy_sample,
-            last_sample: Mutex::new(HashMap::new()),
+            windows: Mutex::new(HashMap::new()),
             failures: Mutex::new(HashMap::new()),
         }
     }
@@ -187,6 +189,7 @@ impl DeviceManager {
             by_type.entry(d.integration_type.clone()).or_default().push(d);
         }
         join_all(by_type.into_iter().map(|(t, recs)| self.poll_group(t, recs))).await;
+        self.store_samples().await;
     }
 
     async fn poll_group(&self, integration: String, recs: Vec<DeviceRecord>) {
@@ -231,12 +234,16 @@ impl DeviceManager {
                         was_online: rec.is_online,
                     });
                 }
-                if p.online {
-                    if let Some(w) = p.state.current_power_watts {
-                        self.sample_energy(&rec.id, w as f64, p.state.today_energy_kwh.map(f64::from)).await;
+                let (watts, pm) = (p.state.current_power_watts, p.state.air_quality_pm25);
+                if p.online && (watts.is_some() || pm.is_some()) {
+                    let now = Instant::now();
+                    let mut windows = self.windows.lock().await;
+                    let w = windows.entry(rec.id.clone()).or_insert_with(|| Window::new(now));
+                    if let Some(watts) = watts {
+                        w.power(now, watts as f64, p.state.today_energy_kwh.map(f64::from), self.energy_sample);
                     }
-                    if let Some(pm) = p.state.air_quality_pm25 {
-                        self.sample_air(&rec.id, pm, p.state.temperature, p.state.humidity).await;
+                    if let Some(pm) = pm {
+                        w.air(pm, p.state.temperature, p.state.humidity);
                     }
                 }
             }
@@ -267,64 +274,63 @@ impl DeviceManager {
         }
     }
 
-    /// Store an air reading for this device, at most every five energy intervals (air changes slowly).
-    async fn sample_air(&self, device_id: &str, pm25: f32, temperature: Option<f32>, humidity: Option<f32>) {
-        {
-            let key = format!("air:{device_id}");
-            let mut last = self.last_sample.lock().await;
-            if last.get(&key).is_some_and(|t| t.elapsed() < self.energy_sample * 5) {
-                return;
-            }
-            last.insert(key, Instant::now());
-        }
-        let res = sqlx::query("INSERT INTO air_metrics (device_id, pm25, temperature, humidity, recorded_at) VALUES (?, ?, ?, ?, ?)")
-            .bind(device_id)
-            .bind(pm25)
-            .bind(temperature)
-            .bind(humidity)
-            .bind(Utc::now())
-            .execute(&self.pool)
-            .await;
-        if let Err(e) = res {
-            tracing::warn!("air sample failed: {e}");
-        }
-    }
-
-    /// Store incremental energy (kWh since the last sample) for this device. `meter_today` is the
-    /// device's own counter for today, when it has one.
-    async fn sample_energy(&self, device_id: &str, watts: f64, meter_today: Option<f64>) {
+    /// Write one row per device whose window is a sample interval old: the average and the peak of
+    /// every poll in it, and the energy those polls add up to.
+    async fn store_samples(&self) {
         let now = Instant::now();
-        let dt = {
-            let mut last = self.last_sample.lock().await;
-            match last.get(device_id) {
-                Some(t) if now.duration_since(*t) < self.energy_sample => return,
-                Some(t) => {
-                    let dt = now.duration_since(*t).min(self.energy_sample * 2);
-                    last.insert(device_id.to_string(), now);
-                    dt
-                }
-                None => {
-                    last.insert(device_id.to_string(), now);
-                    self.energy_sample
+        let done: Vec<(String, Window)> = {
+            let mut windows = self.windows.lock().await;
+            let due: Vec<String> = windows
+                .iter()
+                .filter(|(_, w)| now.duration_since(w.started) >= self.energy_sample)
+                .map(|(id, _)| id.clone())
+                .collect();
+            let mut done = Vec::new();
+            for id in due {
+                // A window nothing was read into belongs to a silent or removed device.
+                match windows.get_mut(&id).and_then(|w| w.take(now)) {
+                    Some(w) => done.push((id, w)),
+                    None => drop(windows.remove(&id)),
                 }
             }
+            done
         };
-        let kwh = watts.max(0.0) * dt.as_secs_f64() / 3_600_000.0;
-        if let Some(meter) = meter_today {
-            self.catch_up(device_id, meter - kwh).await;
-        }
-        let res = sqlx::query(
-            "INSERT INTO energy_metrics (id, device_id, power_watts, energy_kwh, recorded_at) VALUES (?, ?, ?, ?, ?)",
-        )
-        .bind(Uuid::new_v4().to_string())
-        .bind(device_id)
-        .bind(watts)
-        .bind(kwh)
-        .bind(Utc::now())
-        .execute(&self.pool)
-        .await;
-        if let Err(e) = res {
-            tracing::warn!("energy sample failed: {e}");
+        for (device_id, w) in done {
+            if let Some(watts) = w.watts.mean() {
+                if let Some(meter) = w.meter_today {
+                    self.catch_up(&device_id, meter - w.kwh).await;
+                }
+                let res = sqlx::query(
+                    "INSERT INTO energy_metrics (id, device_id, power_watts, peak_watts, energy_kwh, recorded_at) VALUES (?, ?, ?, ?, ?, ?)",
+                )
+                .bind(Uuid::new_v4().to_string())
+                .bind(&device_id)
+                .bind(watts)
+                .bind(w.watts.max())
+                .bind(w.kwh)
+                .bind(Utc::now())
+                .execute(&self.pool)
+                .await;
+                if let Err(e) = res {
+                    tracing::warn!("energy sample failed: {e}");
+                }
+            }
+            if let Some(pm25) = w.pm25.mean() {
+                let res = sqlx::query(
+                    "INSERT INTO air_metrics (device_id, pm25, pm25_max, temperature, humidity, recorded_at) VALUES (?, ?, ?, ?, ?, ?)",
+                )
+                .bind(&device_id)
+                .bind(pm25)
+                .bind(w.pm25.max())
+                .bind(w.temperature.mean())
+                .bind(w.humidity.mean())
+                .bind(Utc::now())
+                .execute(&self.pool)
+                .await;
+                if let Err(e) = res {
+                    tracing::warn!("air sample failed: {e}");
+                }
+            }
         }
     }
 

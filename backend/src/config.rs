@@ -54,7 +54,8 @@ pub struct WorkersConfig {
     pub poll_interval_secs: u64,
     /// Seconds between polls of cloud integrations (Tuya); cloud APIs are rate limited.
     pub cloud_poll_interval_secs: u64,
-    /// Seconds between energy samples written to the database.
+    /// Seconds between the energy and air samples written to the database. Every poll in between counts
+    /// towards the sample's average and peak.
     pub energy_sample_secs: u64,
     pub energy_retention_days: i64,
 }

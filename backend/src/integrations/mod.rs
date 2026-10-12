@@ -5,6 +5,7 @@ pub mod accounts;
 pub mod hue;
 pub mod manager;
 pub mod mqtt;
+mod sampling;
 pub mod tapo;
 pub mod tuya;
 pub mod xiaomi;
