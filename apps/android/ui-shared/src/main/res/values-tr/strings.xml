@@ -1,0 +1,7 @@
+<resources>
+    <string name="ui_color_wheel">Renk çarkı</string>
+    <string name="ui_expanded">Genişletildi</string>
+    <string name="ui_collapsed">Daraltıldı</string>
+    <string name="ui_collapse">Daralt</string>
+    <string name="ui_expand">Genişlet</string>
+</resources>

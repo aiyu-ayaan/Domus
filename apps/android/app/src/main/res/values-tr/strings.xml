@@ -1,0 +1,943 @@
+<resources>
+    <!-- Core & shared resolvers (I18n.kt) -->
+    <string name="air_excellent">Mükemmel</string>
+    <string name="air_good">İyi</string>
+    <string name="air_moderate">Orta</string>
+    <string name="air_poor">Kötü</string>
+    <string name="channel_stable">Kararlı</string>
+    <string name="channel_beta">Beta</string>
+    <string name="channel_alpha">Alpha</string>
+    <string name="connect_this_computer">Bu bilgisayar</string>
+    <string name="api_untrusted">Sunucunun sertifikasına güvenilmiyor.</string>
+    <string name="api_offline">Domus sunucusuna ulaşılamıyor. Çalıştığından emin olun.</string>
+    <string name="api_bad_response">Sunucu, bu uygulama sürümünün anlamadığı bir yanıt gönderdi.</string>
+    <string name="api_request_failed">İstek başarısız oldu ({status})</string>
+    <string name="error_no_server">Sunucu yok</string>
+    <string name="connect_cert_changed">Onayladığınızdan bu yana sunucunun sertifikası değişti. Yenisini incelemek için tekrar bağlanın.</string>
+    <string name="connect_address_invalid">192.168.1.10:8443 veya home.example.com gibi bir adres girin. Yalnızca https desteklenir.</string>
+    <string name="connect_cert_unreadable">Sunucunun sertifikası okunamadı.</string>
+    <string name="automation_ran">“{name}” çalıştırıldı</string>
+    <string name="handover_reset_until">%1$s için Domus parola sıfırlama\nKod: %2$s\n\nGiriş ekranında \"Parolanızı mı unuttunuz?\" seçeneğini seçin, kullanıcı adınızı ve ardından bu kodu girin. %3$s saatine kadar bir kez geçerlidir.</string>
+    <string name="handover_reset">%1$s için Domus parola sıfırlama\nKod: %2$s\n\nGiriş ekranında \"Parolanızı mı unuttunuz?\" seçeneğini seçin, kullanıcı adınızı ve ardından bu kodu girin. Bir kez geçerlidir.</string>
+    <string name="handover_signin_kid">Domus giriş bilgileri\nAdres: %1$s\nKullanıcı adı: %2$s\nParola: %3$s</string>
+    <string name="handover_signin">Domus giriş bilgileri\nAdres: %1$s\nKullanıcı adı: %2$s\nParola: %3$s\n\nİlk kez giriş yaptığınızda kendi parolanızı seçmeniz istenecektir.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Ev</string>
+    <string name="nav_devices">Cihazlar</string>
+    <string name="nav_scenes">Sahneler</string>
+    <string name="nav_analytics">Analizler</string>
+    <string name="nav_settings">Ayarlar</string>
+
+    <!-- Onboarding & Connect -->
+    <string name="connect_intro_1_title">Tüm eviniz, tek uygulama</string>
+    <string name="connect_intro_1_body">Tuya, Tapo, Xiaomi, Philips Hue ve MQTT\'den ışıklar, prizler, hava temizleyiciler ve sensörler yan yana.</string>
+    <string name="connect_intro_2_title">Tasarımdan gelen gizlilik</string>
+    <string name="connect_intro_2_body">Domus şifreli bir bağlantı üzerinden yalnızca evinizdeki sunucuyla konuşur. Bulut hesabı yoktur.</string>
+    <string name="connect_intro_3_title">Sunucunuzu bulur</string>
+    <string name="connect_intro_3_body">Wi‑Fi ağınızda uygulama sunucuyu kendiliğinden bulur. Evden uzaktayken adresini girin.</string>
+    <string name="connect_page_of">Sayfa %1$d / %2$d</string>
+    <string name="connect_skip">Atla</string>
+    <string name="connect_get_started">Başla</string>
+    <string name="connect_next">İleri</string>
+    <string name="connect_welcome_title">Domus\'a Hoş Geldiniz</string>
+    <string name="connect_welcome_subtitle">Evinizi çalıştıran sunucuya bağlanın.</string>
+    <string name="connect_on_this_network">Bu ağda</string>
+    <string name="connect_looking_for_servers">Sunucular aranıyor…</string>
+    <string name="connect_no_server_found">Yanıt veren sunucu yok. Bu telefonun sunucuyla aynı Wi‑Fi ağında olduğundan emin olun veya adresini aşağıya girin.</string>
+    <string name="connect_scan_again">Tekrar tara</string>
+    <string name="connect_or_enter_address">Veya adresi girin</string>
+    <string name="connect_server_address">Sunucu adresi</string>
+    <string name="connect_server_address_placeholder">192.168.1.10:8443 veya home.example.com</string>
+    <string name="connect_action">Bağlan</string>
+    <string name="connect_trust_title">Bu sunucuya güvenilsin mi?</string>
+    <string name="connect_trust_body">%1$s kendi oluşturduğu bir sertifikayı kullanıyor; bu bir ev sunucusu için normaldir. Yalnızca parmak izi, sunucunun başlarken yazdırdığıyla eşleşiyorsa güvenin.</string>
+    <string name="connect_trust_action">Güven</string>
+    <string name="connect_cancel">İptal</string>
+    <string name="connect_use_another_server">Başka bir sunucu kullan</string>
+    <string name="connect_unreachable_title">Evinize ulaşılamıyor</string>
+    <string name="connect_try_again">Tekrar dene</string>
+
+    <!-- Authentication -->
+    <string name="auth_hide_password">Parolayı gizle</string>
+    <string name="auth_show_password">Parolayı göster</string>
+    <string name="auth_username">Kullanıcı adı</string>
+    <string name="auth_new_password">Yeni parola</string>
+    <string name="auth_password_min_length">En az 8 karakter</string>
+    <string name="auth_confirm_password">Parolayı onayla</string>
+    <string name="auth_passwords_mismatch">Parolalar eşleşmiyor</string>
+    <string name="auth_create_admin_title">Yönetici hesabını oluşturun</string>
+    <string name="auth_welcome_back_title">Tekrar hoş geldiniz</string>
+    <string name="auth_create_admin_subtitle">Bu sunucu yeni. İlk hesap her şeyi yönetir.</string>
+    <string name="auth_welcome_back_subtitle">Evinize giriş yapın.</string>
+    <string name="auth_encrypted_connection">Şifreli bağlantı:</string>
+    <string name="auth_email">E-posta</string>
+    <string name="auth_password">Parola</string>
+    <string name="auth_create_account">Hesap oluştur</string>
+    <string name="auth_sign_in">Giriş yap</string>
+    <string name="auth_forgot_password">Parolanızı mı unuttunuz?</string>
+    <string name="auth_forgot_title">Parolanızı mı unuttunuz?</string>
+    <string name="auth_forgot_subtitle">Domus e-posta göndermez. Bunun yerine bu evin bir yöneticisine haber verilir ve size tek kullanımlık bir kod verir.</string>
+    <string name="auth_ask_admin">Bir yöneticiye sor</string>
+    <string name="auth_back_to_sign_in">Giriş ekranına dön</string>
+    <string name="auth_reset_code_title">Sıfırlama kodunuzu girin</string>
+    <string name="auth_reset_code_subtitle">Bir yöneticiye haber verildi. Ondan %1$s için 8 haneli kodu isteyin; 30 dakika boyunca bir kez geçerlidir.</string>
+    <string name="auth_reset_code_label">Sıfırlama kodu</string>
+    <string name="auth_set_password_sign_in">Parolayı ayarla ve giriş yap</string>
+    <string name="auth_back">Geri</string>
+    <string name="auth_choose_password_title">Parolanızı seçin</string>
+    <string name="auth_choose_password_subtitle">Hoş geldin, %1$s. Giriş yaptığın parola senin için oluşturuldu ve başka biri tarafından görüldü. Devam etmek için kendi parolanı seç.</string>
+    <string name="auth_save_continue">Kaydet ve devam et</string>
+    <string name="auth_sign_out">Çıkış yap</string>
+
+    <!-- Services -->
+    <string name="service_channel_status">Arka plan etkinliği</string>
+    <string name="service_channel_alerts">Ev uyarıları</string>
+    <string name="service_listening_alerts">Domus uyarıları dinliyor</string>
+    <string name="service_screen_sync_title">Ekran Senkronizasyonu açık</string>
+    <string name="service_screen_sync_body">Işıklarınız bu ekranı takip ediyor</string>
+    <string name="service_stop">Durdur</string>
+
+    <!-- About & Acknowledgements -->
+    <string name="about_lib_dicebear">DiceBear (avatar çizimleri)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (konum arama, sunucunuz tarafından sorgulanır)</string>
+    <string name="about_lib_home_assistant">Home Assistant (Tuya QR akışı)</string>
+    <string name="about_license_inspiration">İlham</string>
+    <string name="about_version_unknown">bilinmiyor</string>
+    <string name="about_title">Domus Hakkında</string>
+    <string name="about_section_app">Uygulama</string>
+    <string name="about_version_build">Sürüm %1$s · yapı %2$d</string>
+    <string name="about_privacy_title">Gizlilik</string>
+    <string name="about_privacy_subtitle">Kendi sunucunuzda çalışır. Kimlik bilgileri orada şifreli kalır.</string>
+    <string name="about_source_code">Kaynak kodu</string>
+    <string name="about_section_developer">Geliştirici</string>
+    <string name="about_developer_tagline">Tek bir geliştirici tarafından tasarlandı ve geliştirildi.</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_portfolio">Portfolyo</string>
+    <string name="about_section_open_source">Açık kaynak</string>
+    <string name="about_acknowledgements">Teşekkürler</string>
+    <string name="about_acknowledgements_subtitle">Domus\'un üzerine inşa edildiği kütüphaneler ve projeler</string>
+
+    <!-- Updates -->
+    <string name="update_available_title">Domus %1$s mevcut</string>
+    <string name="update_download_failed_retry_prompt">İndirme başarısız oldu. Tekrar denensin mi?</string>
+    <string name="update_prompt_body">%1$s sürümünü kullanıyorsunuz. Sürüm notları ve güncelleme kanalı Ayarlar altındaki Güncellemeler bölümündedir.</string>
+    <string name="update_downloading_percent">%%%1$d indiriliyor</string>
+    <string name="update_action">Güncelle</string>
+    <string name="update_later">Daha sonra</string>
+    <string name="update_title">Güncellemeler</string>
+    <string name="update_checking">Güncellemeler kontrol ediliyor…</string>
+    <string name="update_check_failed">Güncellemeler kontrol edilemedi</string>
+    <string name="update_dev_build">Geliştirme yapısı</string>
+    <string name="update_up_to_date">Domus güncel</string>
+    <string name="update_download_failed_retry">İndirme başarısız oldu. Tekrar deneyin.</string>
+    <string name="update_check_failed_body">%1$s sürümünü kullanıyorsunuz. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="update_dev_build_body">%1$s sürümünü kullanıyorsunuz. Geliştirme yapısı yeniden derlenerek güncellenir.</string>
+    <string name="update_you_have">%1$s sürümünü kullanıyorsunuz.</string>
+    <string name="update_download_install">İndir ve yükle</string>
+    <string name="update_check_again">Tekrar kontrol et</string>
+    <string name="update_channel">Kanal</string>
+    <string name="update_channel_hint">Beta ve Alpha yeni yapıları daha erken alır ve her kararlı sürümü de içerir.</string>
+    <string name="update_whats_new_in">%1$s sürümündeki yenilikler</string>
+    <string name="update_in_this_version">Bu sürümde</string>
+    <string name="update_loading_notes">Sürüm notları yükleniyor…</string>
+    <string name="update_no_notes">Bu sürüm için sürüm notu yok.</string>
+
+    <!-- Avatar -->
+    <string name="avatar_style_bottts">Robotlar</string>
+    <string name="avatar_style_lorelei">Lorelei</string>
+    <string name="avatar_style_avataaars">Avataaars</string>
+    <string name="avatar_style_adventurer">Maceracı</string>
+    <string name="avatar_style_micah">Micah</string>
+    <string name="avatar_style_pixel_art">Piksel Sanatı</string>
+    <string name="avatar_style_fun_emoji">Eğlenceli Emoji</string>
+    <string name="avatar_style_thumbs">Başparmaklar</string>
+    <string name="avatar_style_shapes">Şekiller</string>
+    <string name="avatar_style_rings">Halkalar</string>
+    <string name="avatar_style_identicon">Identicon</string>
+    <string name="avatar_style_notionists">Notionists</string>
+    <string name="avatar_customize_title">Avatarı Özelleştir</string>
+    <string name="avatar_save">Kaydet</string>
+    <string name="avatar_seed_value">Tohum: %1$s</string>
+    <string name="avatar_randomize">Rastgele Oluştur</string>
+    <string name="avatar_roll_seed">Tohum Oluştur</string>
+    <string name="avatar_roll_seed_action">Tohum oluştur</string>
+    <string name="avatar_style_label">Avatar Stili</string>
+    <string name="avatar_seed_phrase_label">Tohum İfadesi</string>
+    <string name="avatar_seed_phrase_hint">Bu avatar stilini dönüştürmek için herhangi bir anahtar kelime, ad veya karakter dizisi girin.</string>
+    <string name="avatar_seed_label">Tohum</string>
+    <string name="avatar_apply_avatar">Avatarı Uygula</string>
+    <string name="avatar_apply">Uygula</string>
+    <string name="avatar_cancel">İptal</string>
+
+    <!-- Home -->
+    <string name="home_greeting_night">İyi geceler</string>
+    <string name="home_greeting_morning">Günaydın</string>
+    <string name="home_greeting_afternoon">Tünaydın</string>
+    <string name="home_greeting_evening">İyi akşamlar</string>
+    <string name="home_got_it">Anladım</string>
+    <string name="home_about_stat">%1$s hakkında</string>
+    <string name="home_scene_on_hint">Açık · kapatmak için dokunun</string>
+    <string name="home_scene_off_hint">Çalıştırmak için dokunun</string>
+    <string name="home_change_avatar">Avatarı değiştir</string>
+    <string name="home_clear_notices_title">Tüm bildirimler silinsin mi?</string>
+    <string name="home_clear_notices_body">Her cihazdan kaldırılırlar.</string>
+    <string name="home_delete_all">Tümünü sil</string>
+    <string name="home_reconnecting">Yeniden bağlanıyor…</string>
+    <string name="home_devices_on_of_total">%2$d cihazdan %1$d tanesi açık</string>
+    <string name="home_using_now">Şu anki kullanım</string>
+    <string name="home_using_now_info">Tüm ölçümlü cihazlarınızın toplam canlı güç tüketimi.</string>
+    <string name="home_today">Bugün</string>
+    <string name="home_today_info">Gece yarısından bu yana kullanılan enerji. Altındaki tutar, elektrik tarifenize göre tahmini maliyettir.</string>
+    <string name="home_air_quality">Hava kalitesi</string>
+    <string name="home_pm25_reading">PM2.5 %1$d µg/m³</string>
+    <string name="home_scenes">Sahneler</string>
+    <string name="home_on_right_now">Şu anda açık</string>
+    <string name="home_all_devices">Tüm cihazlar</string>
+    <string name="home_no_devices_title">Henüz cihaz yok</string>
+    <string name="home_no_devices_admin">Cihazlar\'ı açın ve Tuya, Tapo, Xiaomi, Hue veya MQTT bağlamak için + düğmesine dokunun.</string>
+    <string name="home_no_devices_member">Bir yöneticiden cihaz eklemesini veya size bir odaya erişim vermesini isteyin.</string>
+    <string name="home_everything_off">Her şey kapalı.</string>
+    <string name="home_rooms">Odalar</string>
+    <plurals name="home_room_summary_off">
+        <item quantity="one">%1$d cihaz · tümü kapalı</item>
+        <item quantity="other">%1$d cihaz · tümü kapalı</item>
+    </plurals>
+    <plurals name="home_room_summary_on">
+        <item quantity="one">%1$d cihaz · %2$d açık</item>
+        <item quantity="other">%1$d cihaz · %2$d açık</item>
+    </plurals>
+    <string name="home_recent_activity">Son etkinlikler</string>
+    <string name="home_see_all">Tümünü gör</string>
+
+    <!-- Devices -->
+    <string name="device_title">Cihazlar</string>
+    <string name="device_online_of_total">%2$d cihazdan %1$d tanesi çevrimiçi</string>
+    <string name="device_add_devices">Cihaz ekle</string>
+    <string name="device_filter_all">Tümü</string>
+    <string name="device_category_lights">Işıklar</string>
+    <string name="device_category_power">Güç</string>
+    <string name="device_category_air">Hava</string>
+    <string name="device_category_climate">İklimlendirme</string>
+    <string name="device_all_rooms">Tüm odalar</string>
+    <string name="device_no_room">Oda yok</string>
+    <string name="device_manage_rooms">Odaları yönet</string>
+    <string name="device_empty_filtered_title">Burada bir şey yok</string>
+    <string name="device_empty_filtered_body">Bu oda ve kategoriyle eşleşen cihaz yok.</string>
+    <string name="device_empty_admin">Tuya, Tapo, Xiaomi, Hue veya MQTT bağlamak ve bulduklarını eklemek için + düğmesine dokunun.</string>
+    <string name="device_online">Çevrimiçi</string>
+    <string name="device_offline">Çevrimdışı</string>
+    <string name="device_on">Açık</string>
+    <string name="device_off">Kapalı</string>
+    <string name="device_leak">Sızıntı</string>
+    <string name="device_motion">Hareket</string>
+    <string name="device_motion_detected">Algılandı</string>
+    <string name="device_clear">Temiz</string>
+    <string name="device_open">Açık</string>
+    <string name="device_closed">Kapalı</string>
+    <string name="device_status_pm25">PM2.5 %1$d · %2$s</string>
+    <string name="device_power_a11y">%1$s gücü</string>
+    <string name="device_refresh_a11y">%1$s durumunu yenile</string>
+    <string name="device_view_only_member">Bu cihazı görebilirsiniz ancak kontrol edemezsiniz.</string>
+    <string name="device_view_only_guest">Misafirler cihazları görüntüleyebilir ancak kontrol edemez.</string>
+    <string name="device_brightness">Parlaklık</string>
+    <string name="device_white">Beyaz</string>
+    <string name="device_white_warm">Sıcak</string>
+    <string name="device_white_neutral">Nötr</string>
+    <string name="device_white_cool">Soğuk</string>
+    <string name="device_fan_speed">Fan hızı</string>
+    <string name="device_mode">Mod</string>
+    <string name="device_speed">Hız</string>
+    <string name="device_coverage">Kapsama alanı %1$d–%2$d m²</string>
+    <string name="device_reading_power">Güç</string>
+    <string name="device_reading_voltage">Voltaj</string>
+    <string name="device_reading_current">Akım</string>
+    <string name="device_reading_temperature">Sıcaklık</string>
+    <string name="device_reading_humidity">Nem</string>
+    <string name="device_reading_pm25">PM2.5</string>
+    <string name="device_pm25_value">%1$d µg/m³ · %2$s</string>
+    <string name="device_reading_filter">Filtre</string>
+    <string name="device_filter_left">%%%1$d kaldı</string>
+    <string name="device_reading_contact">Kapı veya pencere</string>
+    <string name="device_reading_water">Su</string>
+    <string name="device_water_dry">Kuru</string>
+    <string name="device_reading_alarm">Alarm</string>
+    <string name="device_alarm_sounding">Çalıyor</string>
+    <string name="device_alarm_quiet">Sessiz</string>
+    <string name="device_reading_battery">Pil</string>
+    <string name="device_battery_low">Düşük</string>
+    <string name="device_battery_ok">İyi</string>
+    <string name="device_ask_before_switching">Değiştirmeden önce sor</string>
+    <string name="device_ask_before_switching_desc">Herhangi bir uygulamadan, bir gruptan veya bir sahneden açılmadan ya da kapatılmadan önce uyarır</string>
+    <string name="device_rename_or_move">Yeniden adlandır veya taşı</string>
+    <string name="device_rename">Yeniden adlandır</string>
+    <string name="device_remove">Kaldır</string>
+    <string name="device_edit_title">Cihazı düzenle</string>
+    <string name="device_field_name">Ad</string>
+    <string name="device_field_room">Oda</string>
+    <string name="device_remove_confirm_title">%1$s kaldırılsın mı?</string>
+    <string name="device_remove_confirm_body">Evinizden ve sahnelerinden ayrılır. Cihaz ekle bölümünden tekrar ekleyebilirsiniz.</string>
+    <string name="device_white_candle">Mum Işığı</string>
+    <string name="device_white_soft">Yumuşak Beyaz</string>
+    <string name="device_white_neutral_preset">Nötr Beyaz</string>
+    <string name="device_white_daylight">Gün Işığı</string>
+    <string name="device_white_cool_preset">Soğuk Beyaz</string>
+    <string name="device_light_off">Işık kapalı</string>
+    <string name="device_light_effect">Efekt</string>
+    <string name="device_light_white">Beyaz ışık</string>
+    <string name="device_light_color">Renkli ışık</string>
+    <string name="device_light_playing">%1$s oynatılıyor</string>
+    <string name="device_white_preset_kelvin">%1$s · %2$dK</string>
+    <string name="device_color">Renk</string>
+    <string name="device_effects">Efektler</string>
+    <string name="device_color_temp">Renk sıcaklığı</string>
+    <string name="device_kelvin_tone">%1$dK · %2$s</string>
+    <string name="device_kelvin_min">2000K sıcak</string>
+    <string name="device_kelvin_max">6500K soğuk</string>
+    <string name="device_moods">Modlar</string>
+    <string name="device_stop_effect">Efekti durdur</string>
+    <string name="device_color_swatch_a11y">Renk %1$s</string>
+    <string name="device_selected">Seçildi</string>
+    <string name="device_not_selected">Seçilmedi</string>
+    <string name="device_confirm_switch_one_title">%1$s değiştirilsin mi?</string>
+    <plurals name="device_confirm_switch_many_title">
+        <item quantity="one">%1$d cihaz değiştirilsin mi?</item>
+        <item quantity="other">%1$d cihaz değiştirilsin mi?</item>
+    </plurals>
+    <string name="device_confirm_switch_one_body">Bu işlem, değiştirmeden önce onay isteyen %1$s cihazını içeriyor. Değiştirmek, bağlı olan her şeyin gücünü kesebilir.</string>
+    <string name="device_confirm_switch_many_body">Bu işlem, değiştirmeden önce onay isteyen %1$s cihazlarını içeriyor. Değiştirmek, bağlı olan her şeyin gücünü kesebilir.</string>
+    <string name="device_confirm_switch_action">Değiştir</string>
+    <string name="device_cancel">İptal</string>
+
+    <!-- Scenes.kt -->
+    <string name="scene_time_just_now">az önce</string>
+    <string name="scene_time_minutes_ago">%1$d dk önce</string>
+    <string name="scene_time_hours_ago">%1$d sa önce</string>
+    <string name="scene_time_days_ago">%1$d gün önce</string>
+    <string name="scene_edit_item">%1$s öğesini düzenle</string>
+    <string name="scene_title">Sahneler</string>
+    <plurals name="scene_header_subtitle">
+        <item quantity="one">%1$d etkin · %2$d otomasyon açık</item>
+        <item quantity="other">%1$d etkin · %2$d otomasyon açık</item>
+    </plurals>
+    <string name="scene_empty_title">Henüz burada bir şey yok</string>
+    <string name="scene_empty_subtitle">Bir sahne aynı anda birden fazla cihazı ayarlar. Bir otomasyon ise bir olay gerçekleştiğinde bunu sizin yerinize yapar.</string>
+    <string name="scene_new_scene">Yeni sahne</string>
+    <string name="scene_new_automation">Yeni otomasyon</string>
+    <string name="scene_new_screen_sync">Yeni Ekran Senkronizasyonu</string>
+    <string name="scene_sync_active_subtitle">Ekran Senkronizasyonu · ışıklar bir ekranı takip ediyor</string>
+    <string name="scene_sync_inactive_subtitle">Ekran Senkronizasyonu · bu ekranı ışıklara yansıtır</string>
+    <string name="scene_active">Etkin</string>
+    <string name="scene_section_automations">Otomasyonlar</string>
+    <string name="scene_last_ran">Son çalışma: %1$s</string>
+    <string name="scene_never_ran">Hiç çalışmadı</string>
+    <string name="scene_run_now">%1$s öğesini şimdi çalıştır</string>
+
+    <!-- Editors.kt -->
+    <string name="editor_day_mon">Pzt</string>
+    <string name="editor_day_tue">Sal</string>
+    <string name="editor_day_wed">Çar</string>
+    <string name="editor_day_thu">Per</string>
+    <string name="editor_day_fri">Cum</string>
+    <string name="editor_day_sat">Cmt</string>
+    <string name="editor_day_sun">Paz</string>
+    <string name="editor_prop_temperature">Sıcaklık</string>
+    <string name="editor_prop_humidity">Nem</string>
+    <string name="editor_prop_pm25">PM2.5</string>
+    <string name="editor_prop_brightness">Parlaklık</string>
+    <string name="editor_prop_power_watts">Güç (W)</string>
+    <string name="editor_removed_device">kaldırılmış bir cihaz</string>
+    <string name="editor_rule_device_is_off">%1$s kapalı</string>
+    <string name="editor_rule_device_is_on">%1$s açık</string>
+    <string name="editor_rule_device_prop_above">%1$s %2$s &gt; %3$s</string>
+    <string name="editor_rule_device_prop_below">%1$s %2$s &lt; %3$s</string>
+    <string name="editor_rule_device_prop_is">%1$s %2$s = %3$s</string>
+    <string name="editor_rule_time_every_day">Her gün saat %1$s</string>
+    <string name="editor_rule_time_on_days">%2$s günleri saat %1$s</string>
+    <string name="editor_sun_event_sunrise">gün doğumu</string>
+    <string name="editor_sun_event_sunset">gün batımı</string>
+    <string name="editor_rule_sun_at_every_day">Her gün %1$s zamanında</string>
+    <string name="editor_rule_sun_at_on_days">%2$s günleri %1$s zamanında</string>
+    <string name="editor_rule_sun_before_every_day">Her gün %2$s zamanından %1$d dk önce</string>
+    <string name="editor_rule_sun_before_on_days">%3$s günleri %2$s zamanından %1$d dk önce</string>
+    <string name="editor_rule_sun_after_every_day">Her gün %2$s zamanından %1$d dk sonra</string>
+    <string name="editor_rule_sun_after_on_days">%3$s günleri %2$s zamanından %1$d dk sonra</string>
+    <string name="editor_rule_power_above">%1$s %2$s W üzerinde güç kullandığında</string>
+    <string name="editor_rule_device_offline">%1$s çevrimdışı olduğunda</string>
+    <string name="editor_rule_device_discovered">Yeni bir cihaz bulunduğunda</string>
+    <string name="editor_rule_time_between">%1$s ile %2$s arasında</string>
+    <string name="editor_cmd_on">açık</string>
+    <string name="editor_cmd_off">kapalı</string>
+    <string name="editor_cmd_brightness_pct">%%%1$s</string>
+    <string name="editor_cmd_white">beyaz %1$s</string>
+    <string name="editor_device_group">Cihaz grubu</string>
+    <string name="editor_cmd_custom">özel komut</string>
+    <string name="editor_rule_command">%1$s: %2$s</string>
+    <string name="editor_rule_notify">Bildir: %1$s</string>
+    <string name="editor_removed_scene">(kaldırıldı)</string>
+    <string name="editor_rule_scene">%1$s sahnesini çalıştır</string>
+    <string name="editor_rule_delay">%1$s sn bekle</string>
+    <string name="editor_rule_unknown">Bilinmeyen</string>
+    <string name="editor_trigger_time">Saat</string>
+    <string name="editor_trigger_sun">Gün doğumu / gün batımı</string>
+    <string name="editor_trigger_device_state">Cihaz durumu</string>
+    <string name="editor_trigger_power">Güç</string>
+    <string name="editor_trigger_offline">Çevrimdışı olur</string>
+    <string name="editor_trigger_discovered">Yeni cihaz</string>
+    <string name="editor_condition_device_state">Cihaz durumu</string>
+    <string name="editor_condition_time_between">Zaman aralığı</string>
+    <string name="editor_action_device">Cihaz</string>
+    <string name="editor_action_scene">Sahne</string>
+    <string name="editor_action_notify">Bildir</string>
+    <string name="editor_action_delay">Bekle</string>
+    <string name="editor_add">Ekle</string>
+    <string name="editor_field_device">Cihaz</string>
+    <string name="editor_sun_sunrise">Gün doğumu</string>
+    <string name="editor_sun_sunset">Gün batımı</string>
+    <string name="editor_sun_after">Sonra</string>
+    <string name="editor_sun_before">Önce</string>
+    <string name="editor_field_minutes">Dakika</string>
+    <string name="editor_sun_supporting_sunrise">Boş bırakılırsa gün doğumunda çalışır. Ayarlar\'da ev konumu gereklidir.</string>
+    <string name="editor_sun_supporting_sunset">Boş bırakılırsa gün batımında çalışır. Ayarlar\'da ev konumu gereklidir.</string>
+    <string name="editor_every_day">Her gün</string>
+    <string name="editor_chosen_days">Yalnızca seçilen günlerde</string>
+    <string name="editor_field_is">Durumu</string>
+    <string name="editor_state_on">Açık</string>
+    <string name="editor_state_off">Kapalı</string>
+    <string name="editor_compare_above">Üzerinde</string>
+    <string name="editor_compare_below">Altında</string>
+    <string name="editor_field_value">Değer</string>
+    <string name="editor_field_watts">Watt</string>
+    <string name="editor_time_from">Başlangıç</string>
+    <string name="editor_time_until">Bitiş</string>
+    <string name="editor_power_turn_on">Aç</string>
+    <string name="editor_power_turn_off">Kapat</string>
+    <string name="editor_power_leave">Güce dokunma</string>
+    <string name="editor_set_brightness">Parlaklığı ayarla</string>
+    <string name="editor_set_brightness_value">Parlaklığı %%%1$d yap</string>
+    <string name="editor_field_scene">Sahne</string>
+    <string name="editor_field_title">Başlık</string>
+    <string name="editor_field_message">Mesaj</string>
+    <string name="editor_field_seconds">Saniye</string>
+    <string name="editor_remove_rule">Kaldır: %1$s</string>
+    <string name="editor_style_vivid">Canlı</string>
+    <string name="editor_style_dominant">Baskın</string>
+    <string name="editor_style_average">Ortalama</string>
+    <string name="editor_new_screen_sync">Yeni Ekran Senkronizasyonu</string>
+    <string name="editor_new_scene">Yeni sahne</string>
+    <string name="editor_edit_scene">Sahneyi düzenle</string>
+    <string name="editor_delete">Sil</string>
+    <string name="editor_field_name">Ad</string>
+    <string name="editor_sync_lights_title">Ekranı takip eden ışıklar</string>
+    <string name="editor_sync_no_lights">Evinizde henüz ışık yok.</string>
+    <string name="editor_sync_color_title">Renk</string>
+    <string name="editor_style_vivid_desc">Ekrandaki en güçlü renk.</string>
+    <string name="editor_style_dominant_desc">En yaygın renk.</string>
+    <string name="editor_style_average_desc">Tüm görüntünün ortalaması.</string>
+    <string name="editor_region_full">Tüm ekran</string>
+    <string name="editor_region_edges">Yalnızca kenarlar</string>
+    <string name="editor_sync_dim_dark">Karanlık sahnelerde kıs</string>
+    <string name="editor_sync_restore_lights">Durduğunda ışıkları eski haline döndür</string>
+    <string name="editor_actions_title">Eylemler</string>
+    <string name="editor_add_action">Eylem ekle</string>
+    <string name="editor_save">Kaydet</string>
+    <string name="editor_delete_confirm_title">%1$s silinsin mi?</string>
+    <string name="editor_delete_scene_body">Bu sahneyi çalıştıran otomasyonlar onu atlayacaktır.</string>
+    <string name="editor_new_automation">Yeni otomasyon</string>
+    <string name="editor_edit_automation">Otomasyonu düzenle</string>
+    <string name="editor_field_description_optional">Açıklama (isteğe bağlı)</string>
+    <string name="editor_enabled">Etkin</string>
+    <string name="editor_triggers_title">Bunlardan herhangi biri olduğunda</string>
+    <string name="editor_add_trigger">Tetikleyici ekle</string>
+    <string name="editor_conditions_title">Yalnızca bunların tümü geçerliyse</string>
+    <string name="editor_add_condition">Koşul ekle</string>
+    <string name="editor_do_this_title">Şunu yap</string>
+    <string name="editor_delete_automation_body">Çalışmayı durdurur.</string>
+
+    <!-- Analytics.kt -->
+    <string name="analytics_range_live">Canlı</string>
+    <string name="analytics_range_hour">1 dk</string>
+    <string name="analytics_range_day">Gün</string>
+    <string name="analytics_range_week">Hafta</string>
+    <string name="analytics_range_month">Ay</string>
+    <string name="analytics_bucket_5s">5 saniye</string>
+    <string name="analytics_bucket_minute">dakika</string>
+    <string name="analytics_bucket_hour">saat</string>
+    <string name="analytics_bucket_day">gün</string>
+    <string name="analytics_title">Analizler</string>
+    <string name="analytics_subtitle_power">Güç kullanımı ve maliyet</string>
+    <string name="analytics_subtitle_air">Hava sağlığı ve temizleyiciler</string>
+    <string name="analytics_electricity_tariff">Elektrik tarifesi</string>
+    <string name="analytics_tab_electricity">Elektrik</string>
+    <string name="analytics_tab_air">Hava kalitesi</string>
+    <string name="analytics_no_energy_title">Henüz enerji verisi yok</string>
+    <string name="analytics_no_energy_subtitle">Ölçümlü bir priz veya anahtar çevrimiçi olduktan bir dakika sonra ölçümler görünür.</string>
+    <string name="analytics_using_now">Şu anki kullanım</string>
+    <string name="analytics_projected_cost">Bu fatura döneminde %1$s seviyesine ulaşması bekleniyor</string>
+    <string name="analytics_today">Bugün</string>
+    <string name="analytics_today_info">Gece yarısından bu yana kullanılan enerji. Altındaki tutar, elektrik tarifenize göre tahmini maliyettir.</string>
+    <string name="analytics_this_cycle">Bu dönem</string>
+    <string name="analytics_this_cycle_info">Mevcut fatura döneminde şu ana kadar kullanılan enerji ve tahmini fatura.</string>
+    <string name="analytics_history">Geçmiş</string>
+    <string name="analytics_nothing_recorded">Bu dönemde henüz hiçbir şey kaydedilmedi.</string>
+    <string name="analytics_metric_energy">Enerji</string>
+    <string name="analytics_metric_power">Güç</string>
+    <string name="analytics_no_reading">Ölçüm yok</string>
+    <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
+    <string name="analytics_chart_avg_power">%1$s başına ortalama güç</string>
+    <string name="analytics_chart_energy_used">%1$s başına kullanılan enerji, toplam %2$s</string>
+    <string name="analytics_live_caption">Bu sayfa açıkken her 5 saniyede bir ölçüm olmak üzere son 5 dakika.</string>
+    <string name="analytics_total_caption">Toplam %1$s · %2$s</string>
+    <string name="analytics_insights">Analizler</string>
+    <string name="analytics_peak_hour">Yoğun saat</string>
+    <string name="analytics_peak_last_24h">Son 24 saatte %1$s</string>
+    <string name="analytics_no_usage_yet">Henüz kullanım yok</string>
+    <string name="analytics_daily_average">Günlük ortalama</string>
+    <string name="analytics_needs_full_day">Tam bir gün gerekli</string>
+    <plurals name="analytics_over_last_days">
+        <item quantity="one">Son %1$d günde</item>
+        <item quantity="other">Son %1$d günde</item>
+    </plurals>
+    <string name="analytics_today_vs_average">Bugün ve ortalama</string>
+    <string name="analytics_above_usual_day">Normal gününüzün üzerinde</string>
+    <string name="analytics_below_usual_day">Normal gününüzün altında</string>
+    <string name="analytics_about_usual_day">Normal gününüz civarında</string>
+    <string name="analytics_top_device">En çok tüketen cihaz</string>
+    <string name="analytics_no_metered_device">Ölçümlü cihaz yok</string>
+    <string name="analytics_billing_cycle">Fatura dönemi</string>
+    <string name="analytics_time_elapsed">Geçen süre</string>
+    <string name="analytics_day_of_days">%2$d günün %1$d. günü</string>
+    <string name="analytics_budget_used">Kullanılan bütçe</string>
+    <string name="analytics_cost_of_budget">%2$s bütçeden %1$s</string>
+    <string name="analytics_spending_ahead">Harcama takvimin ilerisinde gidiyor.</string>
+    <string name="analytics_budget_hint">Harcamaları takip etmek için tarifede aylık bir bütçe belirleyin.</string>
+    <string name="analytics_by_device">Cihaza göre</string>
+    <string name="analytics_device_cycle_summary">%1$s · bu dönem %2$s</string>
+    <string name="analytics_reading_pm25">PM2.5</string>
+    <string name="analytics_reading_temperature">Sıcaklık</string>
+    <string name="analytics_reading_humidity">Nem</string>
+    <string name="analytics_pm25_now">Şu anki PM2.5</string>
+    <string name="analytics_air_no_sensor_online">Çevrimiçi sensör yok</string>
+    <string name="analytics_air_status_excellent">Mükemmel · temiz iç mekan havası</string>
+    <string name="analytics_air_status_good">İyi · sağlıklı aralıkta</string>
+    <string name="analytics_air_status_moderate">Orta · bir hava temizleyici çalıştırın veya odayı havalandırın</string>
+    <string name="analytics_air_status_poor">Kötü · hava temizleyicileri yüksek ayarda çalıştırın ve pencereleri kapalı tutun</string>
+    <string name="analytics_purifiers">Temizleyiciler</string>
+    <string name="analytics_running_of_total">%1$d / %2$d</string>
+    <string name="analytics_all_on_standby">Tümü beklemede</string>
+    <string name="analytics_running_now">Şu anda çalışıyor</string>
+    <string name="analytics_filter_life">Filtre ömrü</string>
+    <string name="analytics_filter_replace_soon">Yakında değiştirin</string>
+    <string name="analytics_filter_healthy">İyi durumda</string>
+    <string name="analytics_sensors_average">Sensörlerinizin ortalaması</string>
+    <string name="analytics_humidity_dry">Kuru</string>
+    <string name="analytics_humidity_humid">Nemli</string>
+    <string name="analytics_humidity_comfortable">İdeal</string>
+    <string name="analytics_trend">Eğilim</string>
+    <string name="analytics_no_air_history">Henüz geçmiş yok. Bir sensör çevrimiçiyken ölçümler her dakika kaydedilir.</string>
+    <string name="analytics_air_chart_summary">%2$s başına %1$s, ortalama %3$s</string>
+    <string name="analytics_pm25_dashed_caption">Kesikli çizgiler: 15 µg/m³ temiz hava hedefi, 35 µg/m³ iyi seviye üst sınırı.</string>
+    <string name="analytics_period_5m">5 dk</string>
+    <string name="analytics_period_60m">60 dk</string>
+    <string name="analytics_period_24h">24 sa</string>
+    <string name="analytics_period_7d">7 gün</string>
+    <string name="analytics_period_30d">30 gün</string>
+    <string name="analytics_average">Ortalama</string>
+    <string name="analytics_air_level_over_period">%2$s boyunca %1$s</string>
+    <string name="analytics_peak">Zirve</string>
+    <string name="analytics_value_with_peak">%1$s · zirve %2$s</string>
+    <string name="analytics_day_hour">%1$s, %2$s</string>
+    <string name="analytics_usage_by_hour">Saate göre kullanım</string>
+    <string name="analytics_peak_pm25_by_hour">Saate göre en yüksek PM2.5</string>
+    <string name="analytics_hour_grid_caption">Son 7 günün her saati için bir hücre. Daha koyu hücre daha yüksek değeri gösterir.</string>
+    <string name="analytics_hour_grid_summary">%1$s, son 7 günün her saati</string>
+    <string name="analytics_time_at_each_level">Her seviyedeki süre</string>
+    <string name="analytics_time_good_air">İyi havayla geçen süre</string>
+    <string name="analytics_pm25_good_over_period">%1$s boyunca 35 µg/m³ veya altında PM2.5</string>
+    <string name="analytics_sensors">Sensörler</string>
+    <string name="analytics_offline">Çevrimdışı</string>
+    <string name="analytics_sensor_pm25_level">%1$d µg/m³ · %2$s</string>
+
+    <!-- Settings.kt -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_subtitle_version">Domus %1$s</string>
+    <string name="settings_theme_system">Sistem</string>
+    <string name="settings_theme_light">Açık</string>
+    <string name="settings_theme_dark">Koyu</string>
+    <string name="settings_role_admin">Yönetici</string>
+    <string name="settings_role_member">Üye</string>
+    <string name="settings_role_guest">Misafir</string>
+    <string name="settings_avatar">Avatar</string>
+    <string name="settings_section_home">Ev</string>
+    <string name="settings_add_devices">Cihaz ekle</string>
+    <string name="settings_add_devices_subtitle">Hesaplarınızın ve ağınızın sunduğu cihazları bulun ve ekleyin</string>
+    <string name="settings_plugins">Eklentiler</string>
+    <string name="settings_plugins_subtitle">Tuya, Tapo, Xiaomi, Hue ve MQTT</string>
+    <string name="settings_rooms">Odalar</string>
+    <string name="settings_people">Kişiler</string>
+    <string name="settings_people_subtitle">Hesaplar, roller ve oda erişimi</string>
+    <string name="settings_tariff">Elektrik tarifesi</string>
+    <string name="settings_tariff_subtitle">Birim fiyat, fatura dönemi ve bütçe</string>
+    <string name="settings_location">Ev konumu</string>
+    <string name="settings_location_subtitle">Gün doğumu ve gün batımı otomasyonları için</string>
+    <string name="settings_notifications">Bildirimler</string>
+    <string name="settings_notifications_subtitle">Evinizin bildirdikleri</string>
+    <string name="settings_background_alerts">Uygulama kapalıyken uyarılar</string>
+    <string name="settings_background_alerts_subtitle">Sunucunuza açık bir bağlantı tutar. Az miktarda pil kullanır.</string>
+    <string name="settings_section_server">Sunucu</string>
+    <string name="settings_server_live_pinned">Canlı · Sabitlenmiş sertifika</string>
+    <string name="settings_server_live_public">Canlı · Genel sertifika</string>
+    <string name="settings_server_reconnecting">Yeniden bağlanıyor…</string>
+    <string name="settings_server_live_badge">CANLI</string>
+    <string name="settings_server_cert_public">Şifreli · sertifika genel bir otorite tarafından doğrulandı</string>
+    <string name="settings_server_cert_pinned">Şifreli · ilk kullanımda bu sunucunun kendi sertifikasını onayladınız:</string>
+    <string name="settings_sha256_fingerprint">SHA-256 Parmak İzi</string>
+    <string name="settings_fingerprint_clip_label">Parmak izi</string>
+    <string name="settings_copied">Kopyalandı</string>
+    <string name="settings_copy">Kopyala</string>
+    <string name="settings_change_password">Parolayı değiştir</string>
+    <string name="settings_change_password_subtitle">Domus\'a giriş yapmak için</string>
+    <string name="settings_server_addresses">Sunucu adresleri</string>
+    <string name="settings_server_addresses_subtitle">Ev ağı ve uzaktan erişim</string>
+    <string name="settings_updates">Güncellemeler</string>
+    <string name="settings_updates_subtitle">Sürüm %1$s, sürüm notları ve kanal</string>
+    <string name="settings_about">Domus Hakkında</string>
+    <string name="settings_about_subtitle">Sürüm %1$s, geliştirici ve teşekkürler</string>
+    <string name="settings_appearance">Görünüm</string>
+    <string name="settings_wallpaper_colors">Duvar kağıdı renkleri</string>
+    <string name="settings_wallpaper_colors_subtitle">Uygulamayı duvar kağıdınızla uyumlu hale getirin</string>
+    <string name="settings_section_account">Hesap</string>
+    <string name="settings_account_subtitle">Çıkış yapın veya başka bir sunucu kullanın</string>
+    <string name="settings_sign_out">Çıkış yap</string>
+    <string name="settings_use_another_server">Başka bir sunucu kullan</string>
+
+    <!-- Manage.kt -->
+    <string name="manage_back">Geri</string>
+    <string name="manage_hide_field">%1$s alanını gizle</string>
+    <string name="manage_show_field">%1$s alanını göster</string>
+    <string name="manage_choose">Seçin…</string>
+    <string name="manage_close">Kapat</string>
+    <string name="manage_cancel">İptal</string>
+    <string name="manage_save">Kaydet</string>
+    <string name="manage_delete">Sil</string>
+    <string name="manage_rooms_title">Odalar</string>
+    <string name="manage_add_room">Oda ekle</string>
+    <string name="manage_no_rooms">Henüz oda yok</string>
+    <string name="manage_no_rooms_subtitle">Odalar cihazları gruplandırır ve bir üyenin veya misafirin hangilerini görebileceğini belirler.</string>
+    <plurals name="manage_device_count">
+        <item quantity="one">%1$d cihaz</item>
+        <item quantity="other">%1$d cihaz</item>
+    </plurals>
+    <plurals name="manage_room_count">
+        <item quantity="one">%1$d oda</item>
+        <item quantity="other">%1$d oda</item>
+    </plurals>
+    <string name="manage_room_subtitle">Kat %1$d · %2$s</string>
+    <string name="manage_new_room">Yeni oda</string>
+    <string name="manage_edit_room">Odayı düzenle</string>
+    <string name="manage_field_name">Ad</string>
+    <string name="manage_field_floor">Kat</string>
+    <string name="manage_role_admin">Yönetici</string>
+    <string name="manage_role_member">Üye</string>
+    <string name="manage_role_guest">Misafir</string>
+    <string name="manage_level_none">Yok</string>
+    <string name="manage_level_view">Yalnızca görüntüle</string>
+    <string name="manage_level_control">Kontrol</string>
+    <string name="manage_level_edit">Düzenle</string>
+    <string name="manage_access_to">%1$s erişimi</string>
+    <string name="manage_whole_room_level">Tüm oda · %1$s</string>
+    <string name="manage_room_devices_of_total">%2$d cihazdan %1$d tanesi</string>
+    <string name="manage_no_access">Erişim yok</string>
+    <string name="manage_close_item">%1$s öğesini kapat</string>
+    <string name="manage_open_item">%1$s öğesini aç</string>
+    <string name="manage_whole_room">Tüm oda</string>
+    <string name="manage_whole_room_hint">Daha sonra eklenen cihazları da kapsar</string>
+    <string name="manage_no_devices_in_room">Bu odada henüz cihaz yok.</string>
+    <string name="manage_people_title">Kişiler</string>
+    <string name="manage_add_person">Kişi ekle</string>
+    <string name="manage_access_whole_home">tüm ev</string>
+    <string name="manage_access_none">erişim yok</string>
+    <string name="manage_user_tag_kid">çocuk</string>
+    <string name="manage_user_tag_reset_requested">parola sıfırlama istedi</string>
+    <string name="manage_person_title">Kişi</string>
+    <string name="manage_handover_reset_title">%1$s için sıfırlama kodu</string>
+    <string name="manage_handover_signin_title">%1$s için giriş bilgileri</string>
+    <string name="manage_handover_shown_once">Yalnızca bir kez gösterilir. Şimdi gönderin.</string>
+    <string name="manage_copy">Kopyala</string>
+    <string name="manage_share">Paylaş</string>
+    <string name="manage_done">Bitti</string>
+    <string name="manage_new_person">Yeni kişi</string>
+    <string name="manage_avatar">Avatar</string>
+    <string name="manage_roll">Rastgele</string>
+    <string name="manage_field_username">Kullanıcı adı</string>
+    <string name="manage_username_supporting">En az 3 karakter</string>
+    <string name="manage_field_email">E-posta</string>
+    <string name="manage_email_taken">Başka bir hesap tarafından zaten kullanılıyor</string>
+    <string name="manage_email_available">Uygun</string>
+    <string name="manage_email_hint">Bir e-posta yazın veya kullanıcı adından oluşturun</string>
+    <string name="manage_generate_email">@domus.home e-postası oluştur</string>
+    <string name="manage_section_password">Parola</string>
+    <string name="manage_kid_account">Çocuk hesabı</string>
+    <string name="manage_kid_account_on">Parolayı siz belirlersiniz ve olduğu gibi kalır.</string>
+    <string name="manage_kid_account_off">Kapalı: Domus bir parola oluşturur ve ilk girişte kendi parolalarını seçerler.</string>
+    <string name="manage_field_new_password">Yeni parola</string>
+    <string name="manage_field_password">Parola</string>
+    <string name="manage_password_keep_current">Mevcut olanı korumak için boş bırakın</string>
+    <string name="manage_password_min_length">En az 8 karakter</string>
+    <string name="manage_password_after_saving">Kaydettikten sonra kopyalamak veya paylaşmak için parolayı alırsınız.</string>
+    <string name="manage_reset_requested_notice">%1$s parolasını unuttu ve sıfırlama istedi.</string>
+    <string name="manage_reset_code">Sıfırlama kodu</string>
+    <string name="manage_reset_code_active">%1$s saatine kadar bir kod etkin. Geri çekmek için kapatın.</string>
+    <string name="manage_reset_code_help">Yeni bir parola seçmek için \"Parolanızı mı unuttunuz?\" altında girdikleri tek kullanımlık kod. 30 dakika geçerlidir.</string>
+    <string name="manage_generate_new_password">Yeni bir parola oluştur</string>
+    <string name="manage_section_role">Rol</string>
+    <string name="manage_role_admin_desc">Her şeyi yönetir.</string>
+    <string name="manage_role_member_desc">Kendilerine verilenleri görür. Kontrol etme veya bir cihazı yeniden adlandırmak üzere düzenleme yetkisi her oda ve cihaz için ayrı ayrı ayarlanır.</string>
+    <string name="manage_role_guest_desc">Kendilerine verilenleri görür, kontrol edemez.</string>
+    <string name="manage_section_access">Erişim</string>
+    <string name="manage_custom_access">Özel erişim</string>
+    <string name="manage_custom_access_off">Kapalı: tüm eve erişebilirler.</string>
+    <string name="manage_custom_access_on">Her oda veya içindeki tekil cihazlar için bir seviye belirleyin.</string>
+    <string name="manage_create_rooms_first">Önce odaları oluşturun.</string>
+    <string name="manage_no_room">Oda yok</string>
+    <string name="manage_remove_user_title">%1$s kaldırılsın mı?</string>
+    <string name="manage_remove_user_text">Erişimlerini anında kaybederler.</string>
+    <string name="manage_remove">Kaldır</string>
+    <string name="manage_tariff_title">Elektrik tarifesi</string>
+    <string name="manage_rate_per_kwh">kWh başına tarife</string>
+    <string name="manage_currency">Para birimi</string>
+    <string name="manage_currency_supporting">ISO kodu, örn. TRY</string>
+    <string name="manage_fixed_monthly_charge">Sabit aylık ücret</string>
+    <string name="manage_billing_day">Fatura kesim günü</string>
+    <string name="manage_billing_day_supporting">1 ile 28 arası</string>
+    <string name="manage_monthly_budget">Aylık bütçe (isteğe bağlı)</string>
+    <string name="manage_usage_slabs">Kullanım kademeleri</string>
+    <string name="manage_slabs_empty">Sabit tarife. Bir fatura döneminde ne kadar kullandığınıza bağlı olarak fiyatınız değişiyorsa kademeler ekleyin.</string>
+    <string name="manage_slabs_help">Her kademenin tarifesi kendi sınırına kadar geçerlidir. Üzerindeki her şey için son sınırı boş bırakın.</string>
+    <string name="manage_up_to_kwh">Şu kWh değerine kadar</string>
+    <string name="manage_slab_rate">Birim fiyat</string>
+    <string name="manage_remove_slab">%1$d. kademeyi kaldır</string>
+    <string name="manage_add_slab">Kademe ekle</string>
+    <string name="manage_time_of_day">Günün saati</string>
+    <string name="manage_time_of_day_help">Evin saatine göre bir birimin yukarıdaki tarifeden daha pahalı veya daha ucuz olduğu saatler. kWh başına farkı girin: yoğun saat ek ücreti için 1.1, gece indirimi için -1.5.</string>
+    <string name="manage_window_from">Başlangıç</string>
+    <string name="manage_window_until">Bitiş</string>
+    <string name="manage_window_per_kwh">kWh başına</string>
+    <string name="manage_remove_time_window">%1$d. zaman dilimini kaldır</string>
+    <string name="manage_add_time_window">Zaman dilimi ekle</string>
+    <string name="manage_server_addresses_title">Sunucu adresleri</string>
+    <string name="manage_server_addresses_help">Domus, kendi ağınızda ev adresini ve diğer her yerde uzak adresi kullanır. Her ikisinde de oturumunuz açık kalır.</string>
+    <string name="manage_home_network">Ev ağı</string>
+    <string name="manage_home_network_supporting">Örneğin https://192.168.1.10:8443</string>
+    <string name="manage_remote">Uzak</string>
+    <string name="manage_remote_supporting">Örneğin bir Cloudflare Tunnel ana bilgisayar adı</string>
+    <string name="manage_not_set">Ayarlanmadı</string>
+    <string name="manage_location_disabled">Bu telefonda konum kapalı. Bunun yerine yeri arayın.</string>
+    <string name="manage_location_not_found">Bu telefon nerede olduğunu bulamadı. Bunun yerine yeri arayın.</string>
+    <string name="manage_location_permission_denied">Konum erişimi olmadan yeri arayın veya koordinatları yazın.</string>
+    <string name="manage_location_title">Ev konumu</string>
+    <string name="manage_location_sun_times">Bugün güneş %1$s saatinde doğuyor ve %2$s saatinde batıyor.</string>
+    <string name="manage_location_help">Domus evin yaklaşık olarak nerede olduğunu bildiğinde otomasyonlar gün doğumunda ve gün batımında çalışabilir. Bu bilgi sunucunuzda kalır.</string>
+    <string name="manage_use_phone_location">Bu telefonun konumunu kullan</string>
+    <string name="manage_find_place">Bir yer bul</string>
+    <string name="manage_find_place_supporting">İlçe veya şehir</string>
+    <string name="manage_search_place">Yeri ara</string>
+    <string name="manage_no_place_found">Bu adda bir yer bulunamadı. En yakın ilçeyi veya şehri deneyin.</string>
+    <string name="manage_latitude">Enlem</string>
+    <string name="manage_latitude_supporting">Örneğin 41.01</string>
+    <string name="manage_longitude">Boylam</string>
+    <string name="manage_longitude_supporting">Örneğin 28.97</string>
+    <string name="manage_change_password_title">Parolayı değiştir</string>
+    <string name="manage_change_password_help">Bu cihazda ve diğer tüm cihazlarda oturumunuz açık kalır.</string>
+    <string name="manage_current_password">Mevcut parola</string>
+    <string name="manage_repeat_new_password">Yeni parolayı tekrar girin</string>
+    <string name="manage_passwords_mismatch">Parolalar eşleşmiyor</string>
+    <string name="manage_delete_all_notices_title">Tüm bildirimler silinsin mi?</string>
+    <string name="manage_delete_all_notices_text">Her cihazdan kaldırılırlar.</string>
+    <string name="manage_delete_all">Tümünü sil</string>
+    <string name="manage_notifications_title">Bildirimler</string>
+    <string name="manage_mark_all_read">Tümünü okundu işaretle</string>
+    <string name="manage_no_notices">Henüz bir şey yok</string>
+    <string name="manage_no_notices_subtitle">Otomasyonlardan, yeni cihazlardan ve çevrimdışı cihazlardan gelen uyarılar burada görünür.</string>
+
+    <!-- Onboard.kt -->
+    <string name="onboard_qr_content_description">Smart Life uygulamasıyla taranacak QR kodu</string>
+    <string name="onboard_region_india">Hindistan</string>
+    <string name="onboard_region_china">Çin</string>
+    <string name="onboard_region_europe">Avrupa</string>
+    <string name="onboard_region_us">Amerika Birleşik Devletleri</string>
+    <string name="onboard_region_singapore">Singapur</string>
+    <string name="onboard_region_russia">Rusya</string>
+    <string name="onboard_region_taiwan">Tayvan</string>
+    <string name="onboard_region_india_old">Hindistan (eski)</string>
+    <string name="onboard_plugins_title">Eklentiler</string>
+    <string name="onboard_local_control">Yerel kontrol</string>
+    <string name="onboard_cloud">Bulut</string>
+    <plurals name="onboard_device_count">
+        <item quantity="one">%1$d cihaz</item>
+        <item quantity="other">%1$d cihaz</item>
+    </plurals>
+    <string name="onboard_account_linked">Bağlandı</string>
+    <string name="onboard_account_needs_attention">İlgi gerekiyor</string>
+    <string name="onboard_unlink_account">%1$s bağlantısını kes</string>
+    <string name="onboard_integration_disabled">Sunucu yapılandırmasında kapatılmış.</string>
+    <string name="onboard_link_account">Hesap bağla</string>
+    <string name="onboard_link_another_account">Başka bir hesap bağla</string>
+    <string name="onboard_find_devices">Cihazları bul</string>
+    <string name="onboard_unlink_title">%1$s bağlantısı kesilsin mi?</string>
+    <string name="onboard_unlink_text">Bu hesaptan gelen cihazlar Domus\'tan kaldırılır.</string>
+    <string name="onboard_unlink">Bağlantıyı kes</string>
+    <string name="onboard_link_integration">%1$s Bağla</string>
+    <string name="onboard_tuya_qr_instructions">Bunu Smart Life veya Tuya Smart uygulamasıyla (ana ekranındaki tarama düğmesiyle) tarayın ve oradan onaylayın. Aynı telefonda bu kodu başka bir ekranda gösterin.</string>
+    <string name="onboard_waiting_for_scan">Tarama bekleniyor…</string>
+    <string name="onboard_tuya_user_code_instructions">Smart Life uygulamasında Ben → Ayarlar → Hesap ve Güvenlik → Kullanıcı Kodu bölümünü açın ve bu kodu buraya yazın.</string>
+    <string name="onboard_user_code">Kullanıcı Kodu</string>
+    <string name="onboard_qr_expired">Bu QR kodunun süresi doldu. Tekrar deneyin.</string>
+    <string name="onboard_verify_title">Siz olduğunuzu doğrulayın</string>
+    <string name="onboard_xiaomi_sent_phone">Xiaomi telefonunuza bir doğrulama kodu gönderdi. Buraya yazın. Birkaç dakika sonra süresi dolar.</string>
+    <string name="onboard_xiaomi_sent_email">Xiaomi e-postanıza bir doğrulama kodu gönderdi. Buraya yazın. Birkaç dakika sonra süresi dolar.</string>
+    <string name="onboard_verification_code">Doğrulama kodu</string>
+    <string name="onboard_send_new_code">Yeni bir kod gönder</string>
+    <string name="onboard_use_another_account">Başka bir hesap kullan</string>
+    <string name="onboard_tapo_instructions">TP-Link hesabınızla giriş yapın. Ağınızdaki Tapo cihazlarınızla iletişim kurmak için kullanılır.</string>
+    <string name="onboard_xiaomi_instructions">Xiaomi hesabınızla giriş yapın. Cihaz belirteçleri bir kez alınır; kontrol yerel kalır. Xiaomi ardından size bir kod gönderebilir.</string>
+    <string name="onboard_xiaomi_username">E-posta, telefon veya Xiaomi ID</string>
+    <string name="onboard_xiaomi_username_supporting">Telefon numarası için +90… gibi ülke kodu gerekir</string>
+    <string name="onboard_email_or_username">E-posta veya kullanıcı adı</string>
+    <string name="onboard_password">Parola</string>
+    <string name="onboard_server_region">Sunucu bölgesi</string>
+    <string name="onboard_show_qr_code">QR kodunu göster</string>
+    <string name="onboard_verify">Doğrula</string>
+    <string name="onboard_continue">Devam et</string>
+    <string name="onboard_link">Bağla</string>
+    <string name="onboard_add_devices_title">Cihaz ekle</string>
+    <string name="onboard_scanning">Taranıyor…</string>
+    <string name="onboard_scan_again">Tekrar tara</string>
+    <string name="onboard_add_by_address">Adresle ekle</string>
+    <string name="onboard_no_new_devices">Yeni cihaz yok</string>
+    <string name="onboard_no_new_devices_subtitle">Bulunan her şey zaten evinizde. Daha fazlasını bulmak için Eklentiler altından bir hesap bağlayın.</string>
+    <string name="onboard_open_plugins">Eklentileri Aç</string>
+    <string name="onboard_found_count">%1$d bulundu</string>
+    <string name="onboard_add">Ekle</string>
+    <string name="onboard_ignore">Yoksay</string>
+    <string name="onboard_add_device_title">%1$s ekle</string>
+    <string name="onboard_field_name">Ad</string>
+    <string name="onboard_field_room">Oda</string>
+    <string name="onboard_no_room">Oda yok</string>
+    <string name="onboard_device_token_optional">Cihaz belirteci (isteğe bağlı)</string>
+    <string name="onboard_device_token_supporting">Yalnızca bağlı bir Xiaomi hesabı olmadığında gereklidir</string>
+    <string name="onboard_ip_address">IP adresi</string>
+
+    <!-- Server error & notification codes -->
+    <string name="code_error_already_exists" formatted="false">Zaten mevcut</string>
+    <string name="code_error_reference_missing" formatted="false">Başvurulan öğe mevcut değil</string>
+    <string name="code_error_internal" formatted="false">İç sunucu hatası</string>
+    <string name="code_error_session_expired" formatted="false">Geçersiz veya süresi dolmuş oturum</string>
+    <string name="code_error_admin_required" formatted="false">Yönetici erişimi gerekli</string>
+    <string name="code_error_guest_no_control" formatted="false">Misafirler cihazları kontrol edemez</string>
+    <string name="code_error_not_signed_in" formatted="false">Giriş yapılmadı</string>
+    <string name="code_error_missing_auth" formatted="false">Authorization üstbilgisi eksik</string>
+    <string name="code_error_account_gone" formatted="false">Hesap artık mevcut değil</string>
+    <string name="code_error_must_change_password" formatted="false">Önce parolanızı değiştirin</string>
+    <string name="code_error_device_not_found" formatted="false">Cihaz bulunamadı</string>
+    <string name="code_error_empty_command" formatted="false">boş komut</string>
+    <string name="code_error_scan_running" formatted="false">Zaten bir tarama çalışıyor</string>
+    <string name="code_error_discovered_not_found" formatted="false">Keşfedilen cihaz bulunamadı</string>
+    <string name="code_error_device_already_added" formatted="false">Bu cihaz zaten eklenmiş</string>
+    <string name="code_error_username_too_short" formatted="false">Kullanıcı adı en az 3 karakter olmalıdır</string>
+    <string name="code_error_password_too_short" formatted="false">Parola en az 8 karakter olmalıdır</string>
+    <string name="code_error_setup_already_done" formatted="false">Kurulum zaten tamamlandı</string>
+    <string name="code_error_invalid_credentials" formatted="false">Geçersiz kullanıcı adı veya parola</string>
+    <string name="code_error_invalid_reset_code" formatted="false">Bu kod yanlış veya artık geçerli değil. Bir yöneticiden yeni bir kod isteyin.</string>
+    <string name="code_error_wrong_current_password" formatted="false">Mevcut parola yanlış</string>
+    <string name="code_error_same_password" formatted="false">Mevcut paroladan farklı bir parola seçin</string>
+    <string name="code_error_avatar_too_long" formatted="false">Avatar dizesi çok uzun</string>
+    <string name="code_error_name_required" formatted="false">Ad gereklidir</string>
+    <string name="code_error_trigger_required" formatted="false">En az bir tetikleyici ekleyin</string>
+    <string name="code_error_action_required" formatted="false">En az bir eylem ekleyin</string>
+    <string name="code_error_sun_offset_range" formatted="false">Gün doğumu ve gün batımı en fazla 6 saat kaydırılabilir</string>
+    <string name="code_error_automation_not_found" formatted="false">Otomasyon bulunamadı</string>
+    <string name="code_error_cannot_edit_device" formatted="false">Bu cihazı düzenleyemezsiniz</string>
+    <string name="code_error_admin_only_move_room" formatted="false">Bir cihazı başka bir odaya yalnızca bir yönetici taşıyabilir</string>
+    <string name="code_error_name_empty" formatted="false">Ad boş olamaz</string>
+    <string name="code_error_view_only_device" formatted="false">Bu cihazı görebilirsiniz ancak kontrol edemezsiniz</string>
+    <string name="code_error_view_only_devices" formatted="false">Bu cihazları görebilirsiniz ancak kontrol edemezsiniz</string>
+    <string name="code_error_negative_rate" formatted="false">Tarife ücretleri negatif olamaz</string>
+    <string name="code_error_invalid_billing_day" formatted="false">Kesim günü 1 ile 28 arasında olmalıdır</string>
+    <string name="code_error_invalid_currency" formatted="false">Para birimi 3 harfli bir ISO kodu olmalıdır</string>
+    <string name="code_error_slab_order" formatted="false">Her kademe bir öncekinden daha yüksek bir değerde bitmelidir</string>
+    <string name="code_error_slab_open_ended" formatted="false">Yalnızca son kademe açık uçlu olabilir</string>
+    <string name="code_error_tou_format" formatted="false">Kullanım saati dilimleri HH:MM biçiminde bir başlangıç ve bitiş gerektirir</string>
+    <string name="code_error_tou_zero_length" formatted="false">Bir kullanım saati dilimi aynı saatte başlayıp bitemez</string>
+    <string name="code_error_tou_overlap" formatted="false">Kullanım saati dilimleri çakışamaz</string>
+    <string name="code_error_group_not_found" formatted="false">Grup bulunamadı</string>
+    <string name="code_error_account_not_found" formatted="false">Hesap bulunamadı</string>
+    <string name="code_error_tuya_disabled" formatted="false">Tuya entegrasyonu devre dışı</string>
+    <string name="code_error_tuya_user_code_required" formatted="false">Smart Life uygulamasından Kullanıcı Kodunu girin</string>
+    <string name="code_error_credentials_required" formatted="false">E-posta ve parola gereklidir</string>
+    <string name="code_error_verification_expired" formatted="false">Doğrulama süresi doldu; tekrar giriş yapın</string>
+    <string name="code_error_invalid_port" formatted="false">Bağlantı noktası (port) bir sayı olmalıdır</string>
+    <string name="code_error_broker_required" formatted="false">Aracı (broker) adresini girin</string>
+    <string name="code_error_hue_disabled" formatted="false">Philips Hue entegrasyonu devre dışı</string>
+    <string name="code_error_room_name_required" formatted="false">Oda adı gereklidir</string>
+    <string name="code_error_room_not_found" formatted="false">Oda bulunamadı</string>
+    <string name="code_error_sync_lights_required" formatted="false">Senkronize etmek için en az bir ışık seçin</string>
+    <string name="code_error_scene_not_found" formatted="false">Sahne bulunamadı</string>
+    <string name="code_error_screen_sync_needs_screen" formatted="false">Ekran Senkronizasyonu için paylaşılacak bir ekran gerekir. İçeriği gösteren cihazdaki Domus uygulamasından başlatın.</string>
+    <string name="code_error_place_search_unreachable" formatted="false">Konum aramasına ulaşılamıyor. Bunun yerine enlem ve boylamı girin.</string>
+    <string name="code_error_invalid_coordinates" formatted="false">Enlem -90 ile 90, boylam -180 ile 180 arasında olmalıdır</string>
+    <string name="code_error_email_suggestions_exhausted" formatted="false">Bu kullanıcı adı için önerilen tüm adresler alınmış</string>
+    <string name="code_error_invalid_role" formatted="false">rol admin, member veya guest olmalıdır</string>
+    <string name="code_error_kid_password_required" formatted="false">Çocuk hesabı için bir parola gerekir</string>
+    <string name="code_error_email_taken" formatted="false">Bu e-posta zaten başka bir hesap tarafından kullanılıyor</string>
+    <string name="code_error_user_not_found" formatted="false">Kullanıcı bulunamadı</string>
+    <string name="code_error_last_admin" formatted="false">En az bir yönetici olmalıdır</string>
+    <string name="code_error_cannot_delete_self" formatted="false">Kendi hesabınızı silemezsiniz</string>
+    <string name="code_error_hue_press_button" formatted="false">Hue köprüsündeki yuvarlak düğmeye basın, ardından 30 saniye içinde tekrar bağlayın</string>
+    <string name="code_error_hue_not_found" formatted="false">Hue köprüsü bulunamadı; IP adresini girin</string>
+    <string name="code_error_tuya_device_gone" formatted="false">cihaz artık Smart Life içinde değil</string>
+    <string name="code_error_device_token_required" formatted="false">cihaz belirteci (token) gereklidir</string>
+    <string name="code_error_hue_link_expired" formatted="false">Kimlik doğrulama başarısız: Hue köprüsü artık bu bağlantıyı kabul etmiyor; tekrar bağlayın</string>
+    <string name="code_error_hue_removed" formatted="false">Kimlik doğrulama başarısız: Hue köprüsü kaldırıldı</string>
+    <string name="code_error_mqtt_removed" formatted="false">Kimlik doğrulama başarısız: MQTT aracısı (broker) kaldırıldı</string>
+    <string name="code_error_tapo_auth_rejected" formatted="false">Kimlik doğrulama başarısız: cihaz TP-Link hesabı e-posta/parolanızı reddetti</string>
+    <string name="code_error_tapo_account_required" formatted="false">Kimlik doğrulama başarısız: Tapo cihazlarını kontrol etmek için TP-Link hesabınızı ekleyin</string>
+    <string name="code_error_tapo_removed" formatted="false">Kimlik doğrulama başarısız: TP-Link hesabı kaldırıldı</string>
+    <string name="code_error_xiaomi_captcha" formatted="false">Kimlik doğrulama başarısız: Xiaomi bir güvenlik kodu (captcha) istedi. Mi Home uygulamasında veya tarayıcıda bir kez giriş yapıp tekrar deneyin</string>
+    <string name="code_error_xiaomi_invalid_credentials" formatted="false">Kimlik doğrulama başarısız: geçersiz Xiaomi kullanıcı adı veya parolası</string>
+    <string name="code_error_xiaomi_invalid_code" formatted="false">Kimlik doğrulama başarısız: yanlış veya süresi dolmuş doğrulama kodu</string>
+    <string name="code_error_xiaomi_code_rejected" formatted="false">Kimlik doğrulama başarısız: Xiaomi kodu kabul etmedi</string>
+    <string name="code_error_xiaomi_session_expired" formatted="false">Kimlik doğrulama başarısız: Xiaomi oturumunun süresi doldu</string>
+    <string name="code_error_xiaomi_verify_needed" formatted="false">Kimlik doğrulama başarısız: Xiaomi bir doğrulama kodu istiyor; Entegrasyonlar altından hesabı tekrar bağlayın</string>
+    <string name="code_error_unsupported_command" formatted="false">Desteklenmiyor: bu cihaz bu komutu desteklemiyor</string>
+    <string name="code_error_unsupported_effect" formatted="false">Desteklenmiyor: bu ışık bu efekti oynatamaz</string>
+    <string name="code_error_xiaomi_no_spec" formatted="false">Desteklenmiyor: bu Xiaomi modelinin MIoT spesifikasyonu yok</string>
+    <string name="code_error_rate_limited_one" formatted="false">Çok fazla yanlış parola denemesi. {count} dakika sonra tekrar deneyin.</string>
+    <string name="code_error_rate_limited_other" formatted="false">Çok fazla yanlış parola denemesi. {count} dakika sonra tekrar deneyin.</string>
+    <string name="code_error_integration_disabled" formatted="false">\'{integration}\' entegrasyonu etkin değil</string>
+    <string name="code_error_invalid_time" formatted="false">Geçersiz saat \'{time}\', HH:MM biçimini kullanın</string>
+    <string name="code_error_invalid_actions" formatted="false">geçersiz eylemler: {reason}</string>
+    <string name="code_error_invalid_region" formatted="false">bölge {regions} değerlerinden biri olmalıdır</string>
+    <string name="code_error_invalid_sync_settings" formatted="false">Geçersiz Ekran Senkronizasyonu ayarları: {reason}</string>
+    <string name="code_error_unknown_scene_type" formatted="false">Bilinmeyen sahne türü \'{kind}\'</string>
+    <string name="code_error_invalid_server_address" formatted="false">\"{address}\" geçerli bir sunucu adresi değil</string>
+    <string name="code_error_xiaomi_send_code_failed" formatted="false">Kimlik doğrulama başarısız: Xiaomi doğrulama kodu gönderemedi: {reason}</string>
+    <string name="code_error_auth_failed" formatted="false">Kimlik doğrulama başarısız: {reason}</string>
+    <string name="code_error_not_supported" formatted="false">Desteklenmiyor: {reason}</string>
+    <string name="code_error_confirm_switching" formatted="false">{names} değişimini onaylayın</string>
+    <string name="code_error_bad_request" formatted="false">{message}</string>
+    <string name="code_error_unauthorized" formatted="false">{message}</string>
+    <string name="code_error_forbidden" formatted="false">{message}</string>
+    <string name="code_error_not_found" formatted="false">{message}</string>
+    <string name="code_error_conflict" formatted="false">{message}</string>
+    <string name="code_error_too_many_requests" formatted="false">{message}</string>
+    <string name="code_error_upstream" formatted="false">{message}</string>
+    <string name="code_notification_device_added_title" formatted="false">Yeni cihaz eklendi</string>
+    <string name="code_notification_device_added" formatted="false">{name} ({integration}) bulundu ve otomatik olarak eklendi</string>
+    <string name="code_notification_device_found_title" formatted="false">Yeni cihaz bulundu</string>
+    <string name="code_notification_device_found" formatted="false">{name} ({integration}) eklenmeye hazır</string>
+    <string name="code_notification_password_reset_title" formatted="false">Parola sıfırlama istendi</string>
+    <string name="code_notification_password_reset" formatted="false">{username} parolasını unuttu. Bir yönetici Ayarlar altındaki Kişiler ve erişim bölümünden sıfırlama kodu verebilir.</string>
+    <string name="code_notification_automation_failed_title" formatted="false">\"{name}\" otomasyonunda sorunlar oluştu</string>
+    <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+</resources>
