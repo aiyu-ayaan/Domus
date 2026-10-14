@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
+  ClockCounterClockwise,
   Lightning,
   Monitor,
   PencilSimple,
@@ -29,6 +30,7 @@ import {
   useScreenSync,
 } from '@/features/screensync/ScreenSync'
 import { ActionEditor, ConditionEditor, TriggerEditor, describeAction, describeTrigger, validateRule } from './RuleEditor'
+import { RunsSheet } from './RunsSheet'
 
 export function AutomationsView() {
   const admin = useIsAdmin()
@@ -41,6 +43,7 @@ export function AutomationsView() {
   const { data: devices = [] } = useDevices()
   const { data: groups = [] } = useGroups()
   const [editing, setEditing] = useState<Automation | 'new' | null>(null)
+  const [tracing, setTracing] = useState<Automation | null>(null)
   const [editingScene, setEditingScene] = useState<Scene | 'new' | null>(null)
   const [deleting, setDeleting] = useState<{ kind: 'automation' | 'scene'; id: string; name: string } | null>(null)
 
@@ -129,6 +132,7 @@ export function AutomationsView() {
                   <p className="mt-0.5 text-caption text-subtle">{t('automations.lastRan', { when: timeAgo(a.last_triggered_at) })}</p>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" aria-label={t('runs.title', { name: a.name })} title={t('runs.title', { name: a.name })} icon={<ClockCounterClockwise size={16} />} onClick={() => setTracing(a)} />
                   {control && <Button variant="ghost" size="sm" aria-label={t('automations.runNow', { name: a.name })} icon={<Play size={16} />} onClick={() => run.mutate(a)} />}
                   {admin && (
                     <>
@@ -252,6 +256,7 @@ export function AutomationsView() {
       </Card>
 
       <AutomationSheet automation={editing} onClose={() => setEditing(null)} />
+      <RunsSheet automation={tracing} devices={devices} onClose={() => setTracing(null)} />
       <SceneSheet scene={editingScene} onClose={() => setEditingScene(null)} devices={devices} groups={groups} />
       <Confirm open={!!deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutate()} loading={remove.isPending} title={t('groups.deleteTitle', { name: deleting?.name ?? '' })} message={t('automations.deleteMessage')} />
     </>

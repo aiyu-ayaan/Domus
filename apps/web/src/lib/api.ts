@@ -22,6 +22,7 @@ import type {
   HomeLocation,
   User,
   LogEntry,
+  AutomationRun,
 } from './types'
 
 import { getStorageKey, type AppFlavor } from './flavor'
@@ -278,6 +279,7 @@ export const api = {
     put<Automation>(`/automations/${id}`, b),
   toggleAutomation: (id: string) => post<Automation>(`/automations/${id}/toggle`),
   runAutomation: (id: string) => post<{ success: boolean; errors: string[] }>(`/automations/${id}/run`),
+  automationRuns: (id: string) => get<AutomationRun[]>(`/automations/${id}/runs`),
   removeAutomation: (id: string) => del<Ok>(`/automations/${id}`),
 
   scenes: () => get<Scene[]>('/scenes'),

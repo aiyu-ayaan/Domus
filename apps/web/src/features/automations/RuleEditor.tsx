@@ -67,7 +67,9 @@ export function describeTrigger(trig: Trigger, devices: Device[]): string {
     case 'device_state':
       return describeStateTrigger(deviceName(devices, trig.device_id), trig, trig.property)
     case 'power_above':
-      return t('rule.when.powerAbove', { device: deviceName(devices, trig.device_id), watts: trig.watts })
+      return trig.for_minutes
+        ? t('rule.when.powerAboveFor', { device: deviceName(devices, trig.device_id), watts: trig.watts, minutes: trig.for_minutes })
+        : t('rule.when.powerAbove', { device: deviceName(devices, trig.device_id), watts: trig.watts })
     case 'device_offline':
       return t('rule.when.goesOffline', { device: deviceName(devices, trig.device_id) })
     case 'device_discovered':
@@ -273,6 +275,15 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
             <>
               <DeviceSelect value={trig.device_id} onChange={(id) => set(i, { ...trig, device_id: id })} filter={(d) => d.state.current_power_watts != null} />
               <Field label={t('rule.watts')} type="number" value={String(trig.watts)} onChange={(e) => set(i, { ...trig, watts: Number(e.target.value) })} />
+              <Field
+                label={t('rule.forMinutes')}
+                type="number"
+                min={1}
+                max={1440}
+                placeholder={t('rule.forMinutesPlaceholder')}
+                value={trig.for_minutes ? String(trig.for_minutes) : ''}
+                onChange={(e) => set(i, { ...trig, for_minutes: Number(e.target.value) > 0 ? Number(e.target.value) : undefined })}
+              />
             </>
           )}
           {trig.type === 'device_offline' && <DeviceSelect value={trig.device_id} onChange={(id) => set(i, { ...trig, device_id: id })} />}

@@ -211,7 +211,8 @@ export type Trigger =
   | ({ type: 'device_state'; device_id: string; property: string } & Comparison)
   | { type: 'time'; at: string; days: number[] }
   | { type: 'sun'; event: 'sunrise' | 'sunset'; offset_minutes: number; days: number[] }
-  | { type: 'power_above'; device_id: string; watts: number }
+  /** With `for_minutes`, only once it has stayed above that long. */
+  | { type: 'power_above'; device_id: string; watts: number; for_minutes?: number }
   | { type: 'device_discovered' }
   | { type: 'device_offline'; device_id: string }
 
@@ -236,6 +237,16 @@ export interface Automation {
   is_enabled: boolean
   last_triggered_at: string | null
   created_at: string
+}
+
+/** One trace of an automation: which trigger matched (or who ran it), each condition, and how it went. */
+export interface AutomationRun {
+  started_at: string
+  finished_at: string | null
+  trigger: { index: number } | { manual: Actor }
+  conditions: { index: number; passed: boolean }[]
+  outcome: 'running' | 'done' | 'failed' | 'blocked'
+  errors: string[]
 }
 
 export type SceneKind = 'standard' | 'screen_sync'
