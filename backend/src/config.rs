@@ -61,6 +61,12 @@ pub struct WorkersConfig {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct MatterConfig {
+    /// UDP port of the Matter bridge; Matter's own is 5540.
+    pub port: u16,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     pub server: ServerConfig,
     pub tls: TlsConfig,
@@ -68,6 +74,7 @@ pub struct AppConfig {
     pub security: SecurityConfig,
     pub integrations: IntegrationsConfig,
     pub workers: WorkersConfig,
+    pub matter: MatterConfig,
 }
 
 impl AppConfig {
@@ -94,6 +101,7 @@ impl AppConfig {
             .set_default("workers.cloud_poll_interval_secs", 15)?
             .set_default("workers.energy_sample_secs", 60)?
             .set_default("workers.energy_retention_days", 400)?
+            .set_default("matter.port", 5540)?
             .add_source(config::File::with_name("config/default").required(false))
             .add_source(config::File::with_name(&format!("config/{}", env)).required(false))
             .add_source(config::Environment::with_prefix("DOMUS").separator("__"));

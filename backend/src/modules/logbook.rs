@@ -40,7 +40,8 @@ pub fn changes(previous: Option<&DeviceState>, state: &DeviceState, was_online: 
     if let (Some(prev), true) = (previous, is_online) {
         for f in FIELDS {
             let (before, now) = (prev.property(f), state.property(f));
-            if before != now && now.is_some() {
+            // A field reported for the first time (a device just added) is not a change.
+            if before != now && before.is_some() && now.is_some() {
                 out.push((f, before, now));
             }
         }
@@ -52,6 +53,8 @@ struct Last {
     row: i64,
     at: Instant,
     actor: Option<Actor>,
+    /// The value before the change the row records.
+    before: Option<Value>,
 }
 
 pub async fn run(pool: SqlitePool, bus: EventBus) {
@@ -73,6 +76,12 @@ pub async fn run(pool: SqlitePool, bus: EventBus) {
             let merge = last
                 .get(&key)
                 .filter(|l| l.at.elapsed() < MERGE && (actor.is_none() || actor == l.actor));
+            // Back where the merged entry started (off and on again within seconds): nothing changed.
+            if let Some(l) = merge.filter(|l| l.before == now) {
+                let _ = sqlx::query("DELETE FROM device_events WHERE id = ?").bind(l.row).execute(&pool).await;
+                last.remove(&key);
+                continue;
+            }
             let result = match merge {
                 Some(l) => sqlx::query("UPDATE device_events SET value = ?, at = ? WHERE id = ?")
                     .bind(now.as_ref().map(Value::to_string))
@@ -80,7 +89,7 @@ pub async fn run(pool: SqlitePool, bus: EventBus) {
                     .bind(l.row)
                     .execute(&pool)
                     .await
-                    .map(|_| (l.row, l.actor.clone())),
+                    .map(|_| (l.row, l.actor.clone(), l.before.clone())),
                 None => sqlx::query("INSERT INTO device_events (device_id, at, field, value, previous, actor) VALUES (?, ?, ?, ?, ?, ?)")
                     .bind(&device_id)
                     .bind(Utc::now())
@@ -90,11 +99,11 @@ pub async fn run(pool: SqlitePool, bus: EventBus) {
                     .bind(actor.as_ref().and_then(|a| serde_json::to_string(a).ok()))
                     .execute(&pool)
                     .await
-                    .map(|r| (r.last_insert_rowid(), actor.clone())),
+                    .map(|r| (r.last_insert_rowid(), actor.clone(), before.clone())),
             };
             match result {
-                Ok((row, actor)) => {
-                    last.insert(key, Last { row, at: Instant::now(), actor });
+                Ok((row, actor, before)) => {
+                    last.insert(key, Last { row, at: Instant::now(), actor, before });
                 }
                 Err(e) => tracing::warn!("logbook: cannot store a change of {device_id}: {e}"),
             }
@@ -131,6 +140,12 @@ mod tests {
         let after = DeviceState { is_on: Some(true), current_power_watts: Some(40.0), ..Default::default() };
         let c = changes(Some(&before), &after, true, true);
         assert_eq!(c, vec![("is_on", Some(Value::Bool(false)), Some(Value::Bool(true)))]);
+    }
+
+    #[test]
+    fn a_first_report_is_not_a_change() {
+        let after = DeviceState { is_on: Some(true), brightness: Some(50), ..Default::default() };
+        assert!(changes(Some(&DeviceState::default()), &after, true, true).is_empty());
     }
 
     #[test]

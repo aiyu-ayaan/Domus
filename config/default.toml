@@ -47,3 +47,7 @@ poll_interval_secs = 3
 cloud_poll_interval_secs = 15
 energy_sample_secs = 60
 energy_retention_days = 400
+
+[matter]
+# UDP port of the Matter bridge (Settings > Matter). Controllers find it by mDNS, so any free port works.
+port = 5540

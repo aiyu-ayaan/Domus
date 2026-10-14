@@ -129,7 +129,7 @@ fn store(data_dir: &Path) -> PathBuf {
 }
 
 /// Keeps the bridge running while it is enabled, restarting it when its devices change.
-pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, data_dir: PathBuf) {
+pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, data_dir: PathBuf, port: u16) {
     loop {
         let mut settings = load(&pool).await;
         if !settings.enabled {
@@ -172,7 +172,7 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
         let ids: Vec<String> = records.iter().map(|d| d.id.clone()).collect();
 
         let pairing = std::mem::take(&mut STATUS.lock().unwrap().pairing);
-        let setup = bridge::Setup { dir: store(&data_dir), passcode: settings.passcode, discriminator: settings.discriminator, host: settings.host.clone(), pairing, port: MATTER_PORT };
+        let setup = bridge::Setup { dir: store(&data_dir), passcode: settings.passcode, discriminator: settings.discriminator, host: settings.host.clone(), pairing, port };
         let _ = std::fs::create_dir_all(&setup.dir);
         let (stop_tx, stop_rx) = async_channel::bounded(1);
         let paired = Arc::new(AtomicBool::new(false));
@@ -313,6 +313,8 @@ async fn put_bridge(State(s): State<AppState>, user: AuthUser, Json(req): Json<B
     settings.enabled = req.enabled;
     settings.devices = req.devices;
     set_setting(&s.pool, KEY, &settings).await?;
+    // Shown at once; the supervisor confirms it (or reports an error) as it restarts the bridge.
+    STATUS.lock().unwrap().running = settings.enabled;
     RESTART.notify_one();
     Ok(Json(dto(&s.pool, &s.server.data_dir).await?))
 }

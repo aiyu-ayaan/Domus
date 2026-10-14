@@ -99,6 +99,13 @@ fn a_controller_pairs_and_drives_the_bridge() {
 async fn controller(sent: Sent, plug: Device, lamp: Device) -> Result<(), Error> {
     // Give the bridge a moment to bind.
     async_io::Timer::after(Duration::from_millis(500)).await;
+    with_controller(|matter| Box::pin(async move { flow(matter, &default_crypto(rand_matter::rng(), DAC_PRIVKEY), sent, plug, lamp).await })).await
+}
+
+type Flow<'a> = core::pin::Pin<Box<dyn core::future::Future<Output = Result<(), Error>> + 'a>>;
+
+/// Runs `flow` with a controller's Matter stack and transport.
+async fn with_controller(flow: impl for<'a> FnOnce(&'a Matter<'a>) -> Flow<'a>) -> Result<(), Error> {
     let matter = Matter::new(&TEST_DEV_DET, TEST_DEV_COMM, &TEST_DEV_ATT, 0);
     let crypto = default_crypto(rand_matter::rng(), DAC_PRIVKEY);
     let socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::UDP)).unwrap();
@@ -107,7 +114,7 @@ async fn controller(sent: Sent, plug: Device, lamp: Device) -> Result<(), Error>
     let socket = async_io::Async::<UdpSocket>::new_nonblocking(socket.into()).unwrap();
 
     let mut transport = pin!(matter.run(&crypto, &socket, &socket, NoNetwork));
-    let mut flow = pin!(flow(&matter, &crypto, sent, plug, lamp));
+    let mut flow = flow(&matter);
     let mut timeout = pin!(async_io::Timer::after(Duration::from_secs(90)));
     match select(&mut flow, select(&mut transport, &mut timeout)).await {
         Either::First(result) => result,
@@ -133,7 +140,7 @@ async fn flow<C: Crypto>(matter: &Matter<'_>, crypto: &C, sent: Sent, plug: Devi
     use rs_matter::dm::clusters::app::on_off::OnOffClient;
     use rs_matter::dm::clusters::decl::bridged_device_basic_information::BridgedDeviceBasicInformationClient;
 
-    let (fab, node) = commission(matter, crypto).await?;
+    let (fab, node) = commission(matter, crypto, PORT, PASSCODE).await?;
     let ex = || Exchange::initiate(matter, default_crypto(rand_matter::rng(), DAC_PRIVKEY), fab, node);
 
     // Names and reachability come from Domus.
@@ -188,7 +195,7 @@ async fn flow<C: Crypto>(matter: &Matter<'_>, crypto: &C, sent: Sent, plug: Devi
 }
 
 /// Builds the controller's fabric and commissions the bridge into it (PASE, then CASE).
-async fn commission<C: Crypto>(matter: &Matter<'_>, crypto: &C) -> Result<(NonZeroU8, u64), Error> {
+async fn commission<C: Crypto>(matter: &Matter<'_>, crypto: &C, port: u16, passcode: u32) -> Result<(NonZeroU8, u64), Error> {
     const FABRIC_ID: u64 = 1;
     const CONTROLLER_NODE_ID: u64 = 112233;
     const DEVICE_NODE_ID: u64 = 112234;
@@ -222,8 +229,8 @@ async fn commission<C: Crypto>(matter: &Matter<'_>, crypto: &C) -> Result<(NonZe
     let mut buf = [0u8; MAX_CERT_TLV_LEN];
     let mut commissioner = Commissioner::new(matter, crypto, fab, &mut nocs, &mut buf).with_transport(TransportPreference::Mrp);
     let opts = CommissionOptions { allow_test_attestation: true, ..CommissionOptions::default() };
-    let peer = SocketAddrV6::new(lan_ipv4().to_ipv6_mapped(), PORT, 0, 0);
-    let result = commissioner.commission(Address::Udp(SocketAddr::V6(peer)), PASSCODE, &opts, DEVICE_NODE_ID, VALID_FOREVER).await?;
+    let peer = SocketAddrV6::new(lan_ipv4().to_ipv6_mapped(), port, 0, 0);
+    let result = commissioner.commission(Address::Udp(SocketAddr::V6(peer)), passcode, &opts, DEVICE_NODE_ID, VALID_FOREVER).await?;
 
     // No mDNS here: answer the operational lookup with the bridge's address.
     let resolver = async {
@@ -235,7 +242,7 @@ async fn commission<C: Crypto>(matter: &Matter<'_>, crypto: &C) -> Result<(NonZe
             matter.transport().try_deposit_mdns_resolve(
                 &MdnsRemoteService {
                     instance_name: DottedName(name.as_str()),
-                    port: Some(PORT),
+                    port: Some(port),
                     addrs: core::iter::once(IpAddr::V6(*peer.ip())),
                     txt: core::iter::empty(),
                     scope_id: 0,
@@ -249,4 +256,44 @@ async fn commission<C: Crypto>(matter: &Matter<'_>, crypto: &C) -> Result<(NonZe
         Either::Second(()) => unreachable!(),
     }
     Ok((fab, result.device_node_id))
+}
+
+/// Pairs with a running Domus server and drives its shared devices, end to end through to the real
+/// (or fake) devices behind it. Opt in: set DOMUS_MATTER_PORT and DOMUS_MATTER_PASSCODE, and
+/// DOMUS_MATTER_PLUG / DOMUS_MATTER_LAMP to the endpoints to switch and to dim and colour.
+#[test]
+#[ignore]
+fn a_controller_drives_a_running_server() {
+    let _ = env_logger::builder().is_test(true).try_init();
+    let var = |k: &str| std::env::var(k).unwrap_or_else(|_| panic!("set {k}")).parse::<u32>().unwrap();
+    let (port, passcode, plug, lamp) = (var("DOMUS_MATTER_PORT") as u16, var("DOMUS_MATTER_PASSCODE"), var("DOMUS_MATTER_PLUG") as u16, var("DOMUS_MATTER_LAMP") as u16);
+    std::thread::Builder::new()
+        .stack_size(32 * 1024 * 1024)
+        .spawn(move || {
+            futures_lite::future::block_on(with_controller(|matter| {
+                Box::pin(async move {
+                    let crypto = &default_crypto(rand_matter::rng(), DAC_PRIVKEY);
+                    use rs_matter::dm::clusters::app::color_control::ColorControlClient;
+                    use rs_matter::dm::clusters::app::level_control::LevelControlClient;
+                    use rs_matter::dm::clusters::app::on_off::OnOffClient;
+                    let (fab, node) = commission(matter, crypto, port, passcode).await?;
+                    let ex = || Exchange::initiate(matter, default_crypto(rand_matter::rng(), DAC_PRIVKEY), fab, node);
+                    ex().await?.on_off().toggle(plug).await?;
+                    ex().await?
+                        .level_control()
+                        .move_to_level(lamp, |r| r.level(127)?.transition_time(rs_matter::tlv::Nullable::none())?.options_mask(Default::default())?.options_override(Default::default())?.end())
+                        .await?;
+                    ex().await?
+                        .color_control()
+                        .move_to_hue_and_saturation(lamp, |r| r.hue(85)?.saturation(254)?.transition_time(0)?.options_mask(Default::default())?.options_override(Default::default())?.end())
+                        .await?;
+                    async_io::Timer::after(Duration::from_secs(1)).await;
+                    Ok(())
+                })
+            }))
+        })
+        .unwrap()
+        .join()
+        .unwrap()
+        .unwrap();
 }

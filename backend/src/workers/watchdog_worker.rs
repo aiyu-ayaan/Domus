@@ -12,6 +12,7 @@ use std::time::{Duration, Instant};
 
 /// A metered device counts as on above this draw, so a TV in standby is "off".
 const ON_WATTS: f32 = 10.0;
+const SLACK: Duration = Duration::from_secs(5);
 /// Filter life (%) at which administrators are told to replace it.
 pub const FILTER_LOW: f32 = 10.0;
 
@@ -40,7 +41,8 @@ fn left_on<'a>(stretches: &mut Stretches, devices: &'a [DeviceRecord], now: Inst
             continue;
         }
         let (since, reported) = stretches.entry(d.id.clone()).or_insert((now, false));
-        if !*reported && now.duration_since(*since) >= Duration::from_secs(minutes as u64 * 60) {
+        // Checked once a minute: a few seconds' slack keeps "60 s on" from reading 59.99 s and slipping a tick.
+        if !*reported && now.duration_since(*since) + SLACK >= Duration::from_secs(minutes as u64 * 60) {
             *reported = true;
             due.push((d, minutes));
         }
@@ -111,7 +113,7 @@ mod tests {
         let mut s = Stretches::new();
         let on = [device(1500.0, Some(60))];
         assert!(left_on(&mut s, &on, at(0)).is_empty());
-        assert!(left_on(&mut s, &on, at(59)).is_empty());
+        assert!(left_on(&mut s, &on, at(58)).is_empty());
         assert_eq!(left_on(&mut s, &on, at(60)).len(), 1);
         assert!(left_on(&mut s, &on, at(90)).is_empty());
         // Standby draw counts as off and starts the next stretch over.
