@@ -60,6 +60,7 @@ private val libraries = listOf(
     Library("Coil", "https://github.com/coil-kt/coil", "Apache-2.0"),
     Library(url = "https://github.com/dicebear/dicebear", license = "MIT", nameRes = R.string.about_lib_dicebear),
     Library(url = "https://open-meteo.com", license = "CC BY 4.0", nameRes = R.string.about_lib_open_meteo),
+    Library(url = "https://atmosphere.copernicus.eu", nameRes = R.string.about_lib_copernicus, licenseRes = R.string.about_license_cams),
     Library(url = "https://www.home-assistant.io", nameRes = R.string.about_lib_home_assistant, licenseRes = R.string.about_license_inspiration),
 )
 

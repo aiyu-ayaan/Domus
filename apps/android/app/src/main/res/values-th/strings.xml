@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (ภาพอวตาร)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (การค้นหาสถานที่ เรียกใช้โดยเซิร์ฟเวอร์ของคุณ)</string>
     <string name="about_lib_home_assistant">Home Assistant (ระบบสแกน QR ของ Tuya)</string>
     <string name="about_license_inspiration">แรงบันดาลใจ</string>
     <string name="about_version_unknown">ไม่ทราบ</string>
@@ -1034,4 +1033,7 @@
     <string name="matter_reset_title">ลืมการจับคู่ทั้งหมด?</string>
     <string name="matter_reset_message">ทุกแอปที่เพิ่มบริดจ์จะไม่เห็นอีก และรหัสจะเปลี่ยน เพิ่มใหม่ด้วยรหัสใหม่</string>
     <string name="logbook_matter">Matter (ผู้ช่วยเสียง)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (สภาพอากาศ อากาศภายนอก และค้นหาสถานที่ เซิร์ฟเวอร์ของคุณเป็นผู้ขอ)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (คุณภาพอากาศภายนอก ผ่าน Open-Meteo)</string>
+    <string name="about_license_cams">มีข้อมูลที่ดัดแปลงจาก Copernicus Atmosphere Monitoring Service</string>
 </resources>

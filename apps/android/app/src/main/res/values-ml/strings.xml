@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (അവതാർ കലാസൃഷ്ടി)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (സ്ഥലം തിരയൽ, നിങ്ങളുടെ സെർവർ വഴി)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR രീതി)</string>
     <string name="about_license_inspiration">പ്രചോദനം</string>
     <string name="about_version_unknown">അജ്ഞാതം</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">എല്ലാ ജോടിയാക്കലുകളും മറക്കണോ?</string>
     <string name="matter_reset_message">ബ്രിഡ്ജ് ചേർത്ത എല്ലാ ആപ്പുകൾക്കും അത് നഷ്ടമാകും, കോഡ് മാറും. പുതിയ കോഡ് ഉപയോഗിച്ച് വീണ്ടും ചേർക്കുക.</string>
     <string name="logbook_matter">Matter (വോയ്‌സ് അസിസ്റ്റന്റ്)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (കാലാവസ്ഥ, പുറത്തെ വായു, സ്ഥല തിരയൽ; നിങ്ങളുടെ സെർവർ ചോദിക്കുന്നു)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (പുറത്തെ വായു ഗുണനിലവാരം, Open-Meteo വഴി)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service-ന്റെ മാറ്റം വരുത്തിയ വിവരങ്ങൾ ഉൾക്കൊള്ളുന്നു</string>
 </resources>

@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (avatar artwork)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (place search, asked by your server)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR flow)</string>
     <string name="about_license_inspiration">Inspiration</string>
     <string name="about_version_unknown">unknown</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">Forget all pairings?</string>
     <string name="matter_reset_message">Every app that added the bridge loses it, and the pairing code changes. Add it again with the new code.</string>
     <string name="logbook_matter">Matter (voice assistant)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (weather, outdoor air and place search, asked by your server)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (outdoor air quality, through Open-Meteo)</string>
+    <string name="about_license_cams">Contains modified Copernicus Atmosphere Monitoring Service information</string>
 </resources>

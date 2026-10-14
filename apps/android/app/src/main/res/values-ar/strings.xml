@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (رسومات الصور الرمزية)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (البحث عن الأماكن، يطلبه خادمك)</string>
     <string name="about_lib_home_assistant">Home Assistant (آلية رمز QR لـ Tuya)</string>
     <string name="about_license_inspiration">الإلهام</string>
     <string name="about_version_unknown">غير معروف</string>
@@ -1074,4 +1073,7 @@
     <string name="matter_reset_title">نسيان كل الاقترانات؟</string>
     <string name="matter_reset_message">ستفقد كل التطبيقات التي أضافت الجسر الوصول إليه، ويتغيّر رمز الاقتران. أضفه مجددًا بالرمز الجديد.</string>
     <string name="logbook_matter">Matter (مساعد صوتي)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (الطقس وهواء الخارج والبحث عن الأماكن، يطلبها خادمك)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (جودة الهواء في الخارج، عبر Open-Meteo)</string>
+    <string name="about_license_cams">يتضمن معلومات معدّلة من Copernicus Atmosphere Monitoring Service</string>
 </resources>

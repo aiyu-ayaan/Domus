@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (đồ họa ảnh đại diện)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (tìm kiếm địa điểm, do máy chủ của bạn truy vấn)</string>
     <string name="about_lib_home_assistant">Home Assistant (quy trình quét QR Tuya)</string>
     <string name="about_license_inspiration">Cảm hứng</string>
     <string name="about_version_unknown">không rõ</string>
@@ -1034,4 +1033,7 @@
     <string name="matter_reset_title">Quên mọi ghép nối?</string>
     <string name="matter_reset_message">Mọi ứng dụng đã thêm cầu nối sẽ mất nó và mã sẽ thay đổi. Hãy thêm lại bằng mã mới.</string>
     <string name="logbook_matter">Matter (trợ lý giọng nói)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (thời tiết, không khí ngoài trời và tìm địa điểm, do máy chủ của bạn yêu cầu)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (chất lượng không khí ngoài trời, qua Open-Meteo)</string>
+    <string name="about_license_cams">Chứa thông tin đã chỉnh sửa từ Copernicus Atmosphere Monitoring Service</string>
 </resources>

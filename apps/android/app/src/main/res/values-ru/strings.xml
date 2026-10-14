@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (графика аватаров)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (поиск мест через ваш сервер)</string>
     <string name="about_lib_home_assistant">Home Assistant (вход Tuya по QR-коду)</string>
     <string name="about_license_inspiration">Вдохновение</string>
     <string name="about_version_unknown">неизвестно</string>
@@ -1058,4 +1057,7 @@
     <string name="matter_reset_title">Забыть все сопряжения?</string>
     <string name="matter_reset_message">Все приложения, добавившие мост, потеряют его, а код сменится. Добавьте его заново с новым кодом.</string>
     <string name="logbook_matter">Matter (голосовой помощник)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (погода, воздух на улице и поиск мест, запрашивает ваш сервер)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (качество воздуха на улице, через Open-Meteo)</string>
+    <string name="about_license_cams">Содержит изменённую информацию Copernicus Atmosphere Monitoring Service</string>
 </resources>

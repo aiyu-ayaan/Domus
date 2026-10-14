@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear（アバターアートワーク）</string>
-    <string name="about_lib_open_meteo">Open-Meteo（場所検索、サーバーから照会）</string>
     <string name="about_lib_home_assistant">Home Assistant（Tuya QR フロー）</string>
     <string name="about_license_inspiration">インスピレーション</string>
     <string name="about_version_unknown">不明</string>
@@ -1034,4 +1033,7 @@
     <string name="matter_reset_title">すべてのペアリングを解除しますか？</string>
     <string name="matter_reset_message">ブリッジを追加したすべてのアプリから削除され、ペアリングコードが変わります。新しいコードで追加し直してください。</string>
     <string name="logbook_matter">Matter（音声アシスタント）</string>
+    <string name="about_lib_open_meteo">Open-Meteo（天気・屋外の空気・地名検索。サーバーが取得）</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service（屋外の大気質。Open-Meteo経由）</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service の情報を加工して含みます</string>
 </resources>

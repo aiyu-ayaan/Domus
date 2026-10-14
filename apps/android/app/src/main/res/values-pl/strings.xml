@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (grafika awatarów)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (wyszukiwanie miejsc odpytywane przez Twój serwer)</string>
     <string name="about_lib_home_assistant">Home Assistant (logowanie kodem QR Tuya)</string>
     <string name="about_license_inspiration">Inspiracja</string>
     <string name="about_version_unknown">nieznana</string>
@@ -1058,4 +1057,7 @@
     <string name="matter_reset_title">Zapomnieć wszystkie parowania?</string>
     <string name="matter_reset_message">Każda aplikacja, która dodała most, straci go, a kod się zmieni. Dodaj go ponownie nowym kodem.</string>
     <string name="logbook_matter">Matter (asystent głosowy)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (pogoda, powietrze na zewnątrz i wyszukiwanie miejsc, pytany przez Twój serwer)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (jakość powietrza na zewnątrz, przez Open-Meteo)</string>
+    <string name="about_license_cams">Zawiera zmodyfikowane informacje Copernicus Atmosphere Monitoring Service</string>
 </resources>

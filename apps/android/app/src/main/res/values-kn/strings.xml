@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (ಅವತಾರ್ ಕಲಾಕೃತಿ)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (ಸ್ಥಳ ಹುಡುಕಾಟ, ನಿಮ್ಮ ಸರ್ವರ್ ಮೂಲಕ ಕೇಳಲಾಗುತ್ತದೆ)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR ವಿಧಾನ)</string>
     <string name="about_license_inspiration">ಸ್ಫೂರ್ತಿ</string>
     <string name="about_version_unknown">ಅಜ್ಞಾತ</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">ಎಲ್ಲಾ ಜೋಡಣೆಗಳನ್ನು ಮರೆಯಬೇಕೇ?</string>
     <string name="matter_reset_message">ಬ್ರಿಡ್ಜ್ ಸೇರಿಸಿದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಅದನ್ನು ಕಳೆದುಕೊಳ್ಳುತ್ತವೆ ಮತ್ತು ಕೋಡ್ ಬದಲಾಗುತ್ತದೆ. ಹೊಸ ಕೋಡ್‌ನಿಂದ ಮತ್ತೆ ಸೇರಿಸಿ.</string>
     <string name="logbook_matter">Matter (ಧ್ವನಿ ಸಹಾಯಕ)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (ಹವಾಮಾನ, ಹೊರಗಿನ ಗಾಳಿ ಮತ್ತು ಸ್ಥಳ ಹುಡುಕಾಟ, ನಿಮ್ಮ ಸರ್ವರ್ ಕೇಳುತ್ತದೆ)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (ಹೊರಗಿನ ವಾಯು ಗುಣಮಟ್ಟ, Open-Meteo ಮೂಲಕ)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service ನ ಬದಲಾದ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿದೆ</string>
 </resources>

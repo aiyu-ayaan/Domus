@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (اوتار آرٹ ورک)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (جگہ کی تلاش، آپ کے سرور کے ذریعے پوچھی گئی)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR فلو)</string>
     <string name="about_license_inspiration">تحریک</string>
     <string name="about_version_unknown">نامعلوم</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">تمام جوڑ بھول جائیں؟</string>
     <string name="matter_reset_message">برج شامل کرنے والی ہر ایپ اسے کھو دے گی اور کوڈ بدل جائے گا۔ نئے کوڈ سے دوبارہ شامل کریں۔</string>
     <string name="logbook_matter">Matter (وائس اسسٹنٹ)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (موسم، باہر کی ہوا اور جگہ کی تلاش، آپ کا سرور پوچھتا ہے)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (باہر کی ہوا کا معیار، Open-Meteo کے ذریعے)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service کی تبدیل شدہ معلومات شامل ہیں</string>
 </resources>

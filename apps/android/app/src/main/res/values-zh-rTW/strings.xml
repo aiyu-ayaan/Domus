@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear（頭像插畫）</string>
-    <string name="about_lib_open_meteo">Open-Meteo（由伺服器發起的地點搜尋）</string>
     <string name="about_lib_home_assistant">Home Assistant（Tuya QR 登入流程）</string>
     <string name="about_license_inspiration">靈感來源</string>
     <string name="about_version_unknown">未知</string>
@@ -1034,4 +1033,7 @@
     <string name="matter_reset_title">忘記所有配對？</string>
     <string name="matter_reset_message">所有新增過此橋接器的應用程式都會失去它，配對碼也會更換。請用新碼重新新增。</string>
     <string name="logbook_matter">Matter（語音助理）</string>
+    <string name="about_lib_open_meteo">Open-Meteo（天氣、室外空氣和地點搜尋，由你的伺服器請求）</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service（室外空氣品質，經由 Open-Meteo）</string>
+    <string name="about_license_cams">含有經修改的 Copernicus Atmosphere Monitoring Service 資訊</string>
 </resources>

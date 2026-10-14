@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (अवतार कलाकृती)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (ठिकाण शोध, तुमच्या सर्व्हरद्वारे विचारलेले)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR फ्लो)</string>
     <string name="about_license_inspiration">प्रेरणा</string>
     <string name="about_version_unknown">अज्ञात</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">सर्व जोडण्या विसरायच्या?</string>
     <string name="matter_reset_message">ब्रिज जोडलेली सर्व ॲप्स तो गमावतील आणि कोड बदलेल. नवीन कोडने पुन्हा जोडा.</string>
     <string name="logbook_matter">Matter (व्हॉइस असिस्टंट)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (हवामान, बाहेरील हवा आणि ठिकाण शोध, तुमचा सर्व्हर विचारतो)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (बाहेरील हवेची गुणवत्ता, Open-Meteo द्वारे)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service ची सुधारित माहिती समाविष्ट</string>
 </resources>

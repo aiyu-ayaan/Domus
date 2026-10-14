@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (grafica avatar)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (ricerca località, richiesta dal tuo server)</string>
     <string name="about_lib_home_assistant">Home Assistant (flusso QR Tuya)</string>
     <string name="about_license_inspiration">Ispirazione</string>
     <string name="about_version_unknown">sconosciuta</string>
@@ -1050,4 +1049,7 @@
     <string name="matter_reset_title">Dimenticare tutte le associazioni?</string>
     <string name="matter_reset_message">Tutte le app che hanno aggiunto il bridge lo perdono e il codice cambia. Aggiungilo di nuovo con il nuovo codice.</string>
     <string name="logbook_matter">Matter (assistente vocale)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (meteo, aria esterna e ricerca luoghi, richiesti dal tuo server)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (qualità dell’aria esterna, tramite Open-Meteo)</string>
+    <string name="about_license_cams">Contiene informazioni modificate del Copernicus Atmosphere Monitoring Service</string>
 </resources>

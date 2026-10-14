@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (ilustrasi avatar)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (pencarian lokasi, diakses oleh server Anda)</string>
     <string name="about_lib_home_assistant">Home Assistant (alur QR Tuya)</string>
     <string name="about_license_inspiration">Inspirasi</string>
     <string name="about_version_unknown">tidak diketahui</string>
@@ -1034,4 +1033,7 @@
     <string name="matter_reset_title">Lupakan semua sambungan?</string>
     <string name="matter_reset_message">Semua aplikasi yang menambahkan bridge akan kehilangannya, dan kodenya berubah. Tambahkan lagi dengan kode baru.</string>
     <string name="logbook_matter">Matter (asisten suara)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (cuaca, udara luar dan pencarian tempat, diminta oleh server Anda)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (kualitas udara luar, lewat Open-Meteo)</string>
+    <string name="about_license_cams">Berisi informasi Copernicus Atmosphere Monitoring Service yang telah diubah</string>
 </resources>

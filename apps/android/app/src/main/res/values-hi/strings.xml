@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (अवतार कलाकृति)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (स्थान खोज, आपके सर्वर द्वारा पूछा गया)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR फ़्लो)</string>
     <string name="about_license_inspiration">प्रेरणा</string>
     <string name="about_version_unknown">अज्ञात</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">सभी जोड़ भूल जाएँ?</string>
     <string name="matter_reset_message">ब्रिज जोड़ने वाले सभी ऐप इसे खो देंगे और कोड बदल जाएगा। नए कोड से फिर जोड़ें।</string>
     <string name="logbook_matter">Matter (वॉइस असिस्टेंट)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (मौसम, बाहर की हवा और स्थान खोज, आपके सर्वर द्वारा पूछा गया)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (बाहर की हवा की गुणवत्ता, Open-Meteo के ज़रिए)</string>
+    <string name="about_license_cams">इसमें Copernicus Atmosphere Monitoring Service की संशोधित जानकारी है</string>
 </resources>

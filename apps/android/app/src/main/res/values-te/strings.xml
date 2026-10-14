@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (అవతార్ ఆర్ట్‌వర్క్)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (స్థల శోధన, మీ సర్వర్ ద్వారా అడగబడుతుంది)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR విధానం)</string>
     <string name="about_license_inspiration">స్ఫూర్తి</string>
     <string name="about_version_unknown">తెలియదు</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">అన్ని జతలను మర్చిపోవాలా?</string>
     <string name="matter_reset_message">బ్రిడ్జ్‌ను జోడించిన అన్ని యాప్‌లు దాన్ని కోల్పోతాయి, కోడ్ మారుతుంది. కొత్త కోడ్‌తో మళ్లీ జోడించండి.</string>
     <string name="logbook_matter">Matter (వాయిస్ అసిస్టెంట్)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (వాతావరణం, బయటి గాలి, ప్రదేశ శోధన; మీ సర్వర్ అడుగుతుంది)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (బయటి గాలి నాణ్యత, Open-Meteo ద్వారా)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service యొక్క మార్చిన సమాచారం ఉంది</string>
 </resources>

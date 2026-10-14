@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (அவதார் கலைப்படைப்பு)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (இடத் தேடல், உங்கள் சர்வரால் கோரப்படுவது)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR முறை)</string>
     <string name="about_license_inspiration">உத்வேகம்</string>
     <string name="about_version_unknown">தெரியாதது</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">அனைத்து இணைப்புகளையும் மறக்கவா?</string>
     <string name="matter_reset_message">பிரிட்ஜைச் சேர்த்த அனைத்து ஆப்களும் அதை இழக்கும், குறியீடு மாறும். புதிய குறியீட்டுடன் மீண்டும் சேர்க்கவும்.</string>
     <string name="logbook_matter">Matter (குரல் உதவியாளர்)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (வானிலை, வெளிப்புறக் காற்று, இடத் தேடல்; உங்கள் சர்வர் கேட்கிறது)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (வெளிப்புறக் காற்றுத் தரம், Open-Meteo வழியாக)</string>
+    <string name="about_license_cams">Copernicus Atmosphere Monitoring Service இன் மாற்றப்பட்ட தகவல்கள் உள்ளன</string>
 </resources>

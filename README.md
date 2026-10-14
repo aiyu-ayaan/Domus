@@ -80,7 +80,7 @@ flowchart LR
     Mgr --> Plugins
     Modules --> DB
     Vault -.-> Keys
-    Modules -. "place search (name only)" .-> Geo(("Open-Meteo<br/>geocoding"))
+    Modules -. "place search, weather and air at the home" .-> Geo(("Open-Meteo<br/>geocoding · weather · air"))
 ```
 
 Clients talk only to the server; the server talks to your devices (locally where the vendor allows it)

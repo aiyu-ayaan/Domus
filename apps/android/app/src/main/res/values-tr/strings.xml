@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (avatar çizimleri)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (konum arama, sunucunuz tarafından sorgulanır)</string>
     <string name="about_lib_home_assistant">Home Assistant (Tuya QR akışı)</string>
     <string name="about_license_inspiration">İlham</string>
     <string name="about_version_unknown">bilinmiyor</string>
@@ -1042,4 +1041,7 @@
     <string name="matter_reset_title">Tüm eşlemeler unutulsun mu?</string>
     <string name="matter_reset_message">Köprüyü ekleyen tüm uygulamalar onu kaybeder ve kod değişir. Yeni kodla yeniden ekleyin.</string>
     <string name="logbook_matter">Matter (sesli asistan)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (hava durumu, dış hava ve yer arama; sunucunuz sorar)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (dış hava kalitesi, Open-Meteo üzerinden)</string>
+    <string name="about_license_cams">Değiştirilmiş Copernicus Atmosphere Monitoring Service bilgileri içerir</string>
 </resources>

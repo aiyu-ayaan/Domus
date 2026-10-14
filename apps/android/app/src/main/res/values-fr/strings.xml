@@ -100,7 +100,6 @@
 
     <!-- About & Acknowledgements -->
     <string name="about_lib_dicebear">DiceBear (illustrations d’avatars)</string>
-    <string name="about_lib_open_meteo">Open-Meteo (recherche de lieux, interrogée par votre serveur)</string>
     <string name="about_lib_home_assistant">Home Assistant (flux QR Tuya)</string>
     <string name="about_license_inspiration">Inspiration</string>
     <string name="about_version_unknown">inconnue</string>
@@ -1050,4 +1049,7 @@
     <string name="matter_reset_title">Oublier toutes les associations ?</string>
     <string name="matter_reset_message">Toutes les apps qui ont ajouté le pont le perdent et le code change. Ajoutez-le à nouveau avec le nouveau code.</string>
     <string name="logbook_matter">Matter (assistant vocal)</string>
+    <string name="about_lib_open_meteo">Open-Meteo (météo, air extérieur et recherche de lieux, interrogé par votre serveur)</string>
+    <string name="about_lib_copernicus">Copernicus Atmosphere Monitoring Service (qualité de l’air extérieur, via Open-Meteo)</string>
+    <string name="about_license_cams">Contient des informations modifiées du Copernicus Atmosphere Monitoring Service</string>
 </resources>
