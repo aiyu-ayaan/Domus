@@ -27,9 +27,39 @@ use std::sync::{Arc, LazyLock, Mutex};
 use tokio::sync::Notify;
 
 const KEY: &str = "matter";
+const MATTER_PORT: u16 = rs_matter::MATTER_PORT;
 
-/// What Domus holds of a shared device: its on and online state, and the bridge's wake-up.
-type Link = (Arc<AtomicBool>, Arc<AtomicBool>, async_channel::Sender<()>);
+/// What Domus holds of a shared device: its live state, and the bridge's wake-ups (on/off, level).
+type Link = (Arc<bridge::Live>, async_channel::Sender<()>, async_channel::Sender<()>);
+
+/// How long a controller's commands to one device are gathered before Domus sends them as one:
+/// a colour fade or a dragged brightness is many Matter steps, and a cloud device takes ~1 a second.
+const GATHER: std::time::Duration = std::time::Duration::from_millis(300);
+
+/// Merge `next` into `into`: later fields win.
+fn merge(into: &mut DeviceCommand, next: DeviceCommand) {
+    let n = next;
+    into.is_on = n.is_on.or(into.is_on);
+    into.brightness = n.brightness.or(into.brightness);
+    if n.color.is_some() || n.color_temp.is_some() {
+        // A new colour replaces the other kind of colour.
+        into.color = n.color;
+        into.color_temp = n.color_temp;
+        into.color_mode = n.color_mode;
+    }
+}
+
+/// What a device can do, which decides its Matter device type.
+fn kind(d: &DeviceRecord) -> bridge::Kind {
+    let s = d.state();
+    let color = s.color.is_some() || s.color_temp.is_some() || s.color_mode.is_some();
+    match (d.device_type == "light", color, s.brightness.is_some()) {
+        (true, true, _) => bridge::Kind::Color,
+        (_, _, true) => bridge::Kind::Dimmable,
+        (true, ..) => bridge::Kind::Light,
+        _ => bridge::Kind::Plug,
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 struct Settings {
@@ -127,17 +157,22 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
             .iter()
             .zip(endpoints)
             .map(|(d, endpoint)| {
-                let on = Arc::new(AtomicBool::new(d.state().is_on == Some(true)));
-                let online = Arc::new(AtomicBool::new(d.is_online));
-                let (tx, rx) = async_channel::bounded(1);
-                links.insert(d.id.clone(), (on.clone(), online.clone(), tx));
-                bridge::Bridged { endpoint, id: d.id.clone(), name: d.name.clone(), light: d.device_type == "light", on, online, changed: rx }
+                let state = d.state();
+                let live = Arc::new(bridge::Live {
+                    on: AtomicBool::new(state.is_on == Some(true)),
+                    online: AtomicBool::new(d.is_online),
+                    brightness: std::sync::atomic::AtomicU8::new(state.brightness.unwrap_or(100).clamp(1, 100)),
+                });
+                let (on_tx, on_changed) = async_channel::bounded(1);
+                let (level_tx, level_changed) = async_channel::bounded(1);
+                links.insert(d.id.clone(), (live.clone(), on_tx, level_tx));
+                bridge::Bridged { endpoint, id: d.id.clone(), name: d.name.clone(), kind: kind(d), live, on_changed, level_changed }
             })
             .collect();
         let ids: Vec<String> = records.iter().map(|d| d.id.clone()).collect();
 
         let pairing = std::mem::take(&mut STATUS.lock().unwrap().pairing);
-        let setup = bridge::Setup { dir: store(&data_dir), passcode: settings.passcode, discriminator: settings.discriminator, host: settings.host.clone(), pairing };
+        let setup = bridge::Setup { dir: store(&data_dir), passcode: settings.passcode, discriminator: settings.discriminator, host: settings.host.clone(), pairing, port: MATTER_PORT };
         let _ = std::fs::create_dir_all(&setup.dir);
         let (stop_tx, stop_rx) = async_channel::bounded(1);
         let paired = Arc::new(AtomicBool::new(false));
@@ -151,12 +186,23 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
         let commands = manager.clone();
         let thread = std::thread::Builder::new().name("matter".into()).spawn(move || {
             // A controller's command goes back to Domus like any other, named Matter in the logbook.
-            let send = move |id: &str, on: bool| {
-                let (manager, id) = (commands.clone(), id.to_string());
+            let pending: Arc<Mutex<HashMap<String, DeviceCommand>>> = Default::default();
+            let send = move |id: &str, command: DeviceCommand| {
+                let first = {
+                    let mut pending = pending.lock().unwrap();
+                    let first = !pending.contains_key(id);
+                    merge(pending.entry(id.to_string()).or_default(), command);
+                    first
+                };
+                if !first {
+                    return;
+                }
+                let (manager, pending, id) = (commands.clone(), pending.clone(), id.to_string());
                 tokio.spawn(async move {
-                    let command = DeviceCommand { is_on: Some(on), ..Default::default() };
+                    tokio::time::sleep(GATHER).await;
+                    let Some(command) = pending.lock().unwrap().remove(&id) else { return };
                     if let Err(e) = manager.command(&id, &command, Some(Actor::Matter)).await {
-                        tracing::warn!("Matter: switching {id} failed: {e}");
+                        tracing::warn!("Matter: commanding {id} failed: {e}");
                     }
                 });
             };
@@ -178,10 +224,15 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
                 _ = RESTART.notified() => break,
                 event = rx.recv() => match event {
                     Ok(SystemEvent::DeviceStateChanged { device_id, state, is_online, .. }) => {
-                        if let Some((on, online, tx)) = links.get(&device_id) {
-                            on.store(state.is_on == Some(true), Ordering::Relaxed);
-                            online.store(is_online, Ordering::Relaxed);
-                            let _ = tx.try_send(());
+                        if let Some((live, on_tx, level_tx)) = links.get(&device_id) {
+                            live.on.store(state.is_on == Some(true), Ordering::Relaxed);
+                            live.online.store(is_online, Ordering::Relaxed);
+                            let _ = on_tx.try_send(());
+                            if let Some(b) = state.brightness {
+                                if live.brightness.swap(b.clamp(1, 100), Ordering::Relaxed) != b.clamp(1, 100) {
+                                    let _ = level_tx.try_send(());
+                                }
+                            }
                         }
                     }
                     // A shared device renamed or removed: the controllers get the new list.
@@ -230,7 +281,7 @@ struct BridgeDto {
 
 async fn dto(pool: &SqlitePool, data_dir: &Path) -> ApiResult<BridgeDto> {
     let s = load(pool).await;
-    let setup = bridge::Setup { dir: store(data_dir), passcode: s.passcode, discriminator: s.discriminator, host: s.host.clone(), pairing: false };
+    let setup = bridge::Setup { dir: store(data_dir), passcode: s.passcode, discriminator: s.discriminator, host: s.host.clone(), pairing: false, port: MATTER_PORT };
     let (qr_payload, qr) = bridge::pairing_qr(&setup).map_err(|e| ApiError::Internal(format!("{e:?}")))?;
     let status = STATUS.lock().unwrap();
     Ok(BridgeDto {
@@ -300,5 +351,13 @@ mod tests {
         s.new_secret();
         assert!(valid_passcode(s.passcode) && s.discriminator < 4096 && s.host.len() == 12);
         assert_eq!((s.endpoint("a"), s.endpoint("b"), s.endpoint("a")), (2, 3, 2));
+    }
+
+    #[test]
+    fn gathered_commands_merge() {
+        let mut c = DeviceCommand { is_on: Some(true), color: Some("#ff0000".into()), color_mode: Some("color".into()), ..Default::default() };
+        merge(&mut c, DeviceCommand { brightness: Some(40), ..Default::default() });
+        merge(&mut c, DeviceCommand { color_temp: Some(10), color_mode: Some("white".into()), ..Default::default() });
+        assert_eq!(c, DeviceCommand { is_on: Some(true), brightness: Some(40), color_temp: Some(10), color_mode: Some("white".into()), ..Default::default() });
     }
 }

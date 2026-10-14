@@ -57,3 +57,8 @@ futures-lite = "2"
 socket2 = "0.6"
 if-addrs = "0.15"
 rand-matter = { package = "rand", version = "0.10", features = ["std", "std_rng", "thread_rng"] }
+
+[dev-dependencies]
+# tests/matter_bridge.rs: a controller pairs with the bridge
+heapless = "0.9"
+env_logger = "0.11"
