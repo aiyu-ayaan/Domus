@@ -295,9 +295,13 @@ let gnomeServer = null
 const gnomeClients = new Set()
 
 function enabledExtensions() {
-  const list = execFileSync('gsettings', ['get', 'org.gnome.shell', 'enabled-extensions'], { timeout: 2000 }).toString()
-  // "@as []" when empty, else "['a', 'b']"
-  return [...list.matchAll(/'([^']*)'/g)].map((m) => m[1])
+  const list = execFileSync('gsettings', ['get', 'org.gnome.shell', 'enabled-extensions'], { timeout: 2000 }).toString().trim()
+  // "@as []" when empty, else "['a', 'b']". Anything else is refused: writing back a misread list would turn off
+  // every other extension the person has.
+  if (list === '@as []') return []
+  const names = [...list.matchAll(/'([^']*)'/g)].map((m) => m[1])
+  if (!/^\[.*\]$/.test(list) || names.length === 0) throw new Error(`unexpected enabled-extensions: ${list.slice(0, 80)}`)
+  return names
 }
 
 function gnomeStatus() {
