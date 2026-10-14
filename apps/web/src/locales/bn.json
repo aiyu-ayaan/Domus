@@ -1151,5 +1151,13 @@
   "user.pick": "বেছে নিন",
   "user.resetCode": "রিসেট কোড",
   "user.resetWithdrawn": "রিসেট কোড প্রত্যাহার করা হয়েছে",
-  "user.roomsAndDevices": "ঘর এবং ডিভাইসসমূহ"
+  "user.roomsAndDevices": "ঘর এবং ডিভাইসসমূহ",
+  "chart.devices": "দেখানোর ডিভাইস",
+  "chart.combined": "সব একসাথে",
+  "tray.summary": "বায়ুর মান: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: অফলাইন",
+  "settings.tray.title": "সিস্টেম ট্রেতে দেখান",
+  "settings.tray.hint": "মেনু বার, টপ বার বা নোটিফিকেশন এলাকায় বায়ুর মান ও আপনার এয়ার পিউরিফায়ার। উইন্ডো বন্ধ করলেও Domus সেখানে চলতে থাকে।",
+  "settings.tray.noHost": "এই ডেস্কটপে ট্রে আইকন দেখানোর জায়গা নেই। GNOME-এ AppIndicator এক্সটেনশন ইনস্টল করে চালু করুন, তারপর Domus আবার চালু করুন।"
 }

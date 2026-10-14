@@ -1151,5 +1151,13 @@
   "user.pick": "ಆಯ್ಕೆಮಾಡಿ",
   "user.resetCode": "ರೀಸೆಟ್ ಕೋಡ್",
   "user.resetWithdrawn": "ರೀಸೆಟ್ ಕೋಡ್ ಹಿಂಪಡೆಯಲಾಗಿದೆ",
-  "user.roomsAndDevices": "ಕೊಠಡಿಗಳು ಮತ್ತು ಸಾಧನಗಳು"
+  "user.roomsAndDevices": "ಕೊಠಡಿಗಳು ಮತ್ತು ಸಾಧನಗಳು",
+  "chart.devices": "ತೋರಿಸಬೇಕಾದ ಸಾಧನಗಳು",
+  "chart.combined": "ಎಲ್ಲವೂ ಸೇರಿ",
+  "tray.summary": "ಗಾಳಿಯ ಗುಣಮಟ್ಟ: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ಆಫ್‌ಲೈನ್",
+  "settings.tray.title": "ಸಿಸ್ಟಮ್ ಟ್ರೇಯಲ್ಲಿ ತೋರಿಸಿ",
+  "settings.tray.hint": "ಮೆನು ಬಾರ್, ಟಾಪ್ ಬಾರ್ ಅಥವಾ ಅಧಿಸೂಚನೆ ಪ್ರದೇಶದಲ್ಲಿ ಗಾಳಿಯ ಗುಣಮಟ್ಟ ಮತ್ತು ನಿಮ್ಮ ಏರ್ ಪ್ಯೂರಿಫೈಯರ್‌ಗಳು. ವಿಂಡೋ ಮುಚ್ಚಿದರೂ Domus ಅಲ್ಲಿ ಚಾಲನೆಯಲ್ಲಿರುತ್ತದೆ.",
+  "settings.tray.noHost": "ಈ ಡೆಸ್ಕ್‌ಟಾಪ್‌ನಲ್ಲಿ ಟ್ರೇ ಐಕಾನ್‌ಗಳನ್ನು ತೋರಿಸಲು ಸ್ಥಳವಿಲ್ಲ. GNOME ನಲ್ಲಿ AppIndicator ವಿಸ್ತರಣೆಯನ್ನು ಸ್ಥಾಪಿಸಿ ಆನ್ ಮಾಡಿ, ನಂತರ Domus ಮರುಪ್ರಾರಂಭಿಸಿ."
 }

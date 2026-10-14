@@ -1151,5 +1151,13 @@
   "user.pick": "เลือก",
   "user.resetCode": "รหัสรีเซ็ต",
   "user.resetWithdrawn": "ยกเลิกรหัสรีเซ็ตแล้ว",
-  "user.roomsAndDevices": "ห้องและอุปกรณ์"
+  "user.roomsAndDevices": "ห้องและอุปกรณ์",
+  "chart.devices": "อุปกรณ์ที่จะแสดง",
+  "chart.combined": "รวมทั้งหมด",
+  "tray.summary": "คุณภาพอากาศ: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ออฟไลน์",
+  "settings.tray.title": "แสดงในถาดระบบ",
+  "settings.tray.hint": "คุณภาพอากาศและเครื่องฟอกอากาศในแถบเมนู แถบด้านบน หรือพื้นที่แจ้งเตือน เมื่อปิดหน้าต่าง Domus จะยังทำงานอยู่ที่นั่น",
+  "settings.tray.noHost": "เดสก์ท็อปนี้ไม่มีที่แสดงไอคอนถาด บน GNOME ให้ติดตั้งและเปิดส่วนขยาย AppIndicator แล้วเริ่ม Domus ใหม่"
 }

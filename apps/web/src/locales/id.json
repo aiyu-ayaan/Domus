@@ -1151,5 +1151,13 @@
   "user.pick": "Pilih",
   "user.resetCode": "Kode reset",
   "user.resetWithdrawn": "Kode reset dicabut",
-  "user.roomsAndDevices": "Ruangan dan perangkat"
+  "user.roomsAndDevices": "Ruangan dan perangkat",
+  "chart.devices": "Perangkat yang ditampilkan",
+  "chart.combined": "Semua digabung",
+  "tray.summary": "Kualitas udara: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Tampilkan di baki sistem",
+  "settings.tray.hint": "Kualitas udara dan pembersih udara Anda di bilah menu, bilah atas, atau area notifikasi. Menutup jendela membuat Domus tetap berjalan di sana.",
+  "settings.tray.noHost": "Desktop ini tidak punya tempat untuk ikon baki. Di GNOME, pasang dan aktifkan ekstensi AppIndicator, lalu mulai ulang Domus."
 }

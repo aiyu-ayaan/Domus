@@ -1165,5 +1165,13 @@
   "user.pick": "Choisir",
   "user.resetCode": "Code de réinitialisation",
   "user.resetWithdrawn": "Code de réinitialisation retiré",
-  "user.roomsAndDevices": "Pièces et appareils"
+  "user.roomsAndDevices": "Pièces et appareils",
+  "chart.devices": "Appareils à afficher",
+  "chart.combined": "Tous combinés",
+  "tray.summary": "Qualité de l’air : {value} µg/m³, {label}",
+  "tray.deviceReading": "{name} : {value} µg/m³",
+  "tray.deviceOffline": "{name} : hors ligne",
+  "settings.tray.title": "Afficher dans la barre d’état système",
+  "settings.tray.hint": "La qualité de l’air et vos purificateurs dans la barre de menus, la barre supérieure ou la zone de notification. Fermer la fenêtre laisse Domus tourner là.",
+  "settings.tray.noHost": "Ce bureau n’a rien pour afficher les icônes de la barre d’état. Sous GNOME, installez et activez l’extension AppIndicator, puis redémarrez Domus."
 }

@@ -257,6 +257,7 @@ function ServerCard() {
   return (
     <Card>
       <CardHeader title={t('settings.server.title')} action={desktop && <Button size="sm" onClick={() => desktop?.chooseServer()}>{t('auth.changeServer')}</Button>} />
+      {desktop?.tray && <TrayRow />}
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -274,6 +275,29 @@ function ServerCard() {
         )}
       </form>
     </Card>
+  )
+}
+
+/** Desktop only: the tray menu with air quality and the purifiers. */
+function TrayRow() {
+  const [on, setOn] = useState(() => desktop!.tray!.enabled())
+  const [host] = useState(() => desktop!.tray!.hasHost())
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-border p-4">
+      <div className="min-w-0">
+        <p className="text-body font-medium">{t('settings.tray.title')}</p>
+        <p className="text-label text-muted">{t('settings.tray.hint')}</p>
+        {host === false && <p className="mt-1 text-label text-warn">{t('settings.tray.noHost')}</p>}
+      </div>
+      <Switch
+        checked={on}
+        label={t('settings.tray.title')}
+        onChange={(v) => {
+          desktop!.tray!.setEnabled(v)
+          setOn(v)
+        }}
+      />
+    </div>
   )
 }
 

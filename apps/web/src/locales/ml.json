@@ -1151,5 +1151,13 @@
   "user.pick": "തിരഞ്ഞെടുക്കുക",
   "user.resetCode": "റീസെറ്റ് കോഡ്",
   "user.resetWithdrawn": "റീസെറ്റ് കോഡ് പിൻവലിച്ചു",
-  "user.roomsAndDevices": "മുറികളും ഉപകരണങ്ങളും"
+  "user.roomsAndDevices": "മുറികളും ഉപകരണങ്ങളും",
+  "chart.devices": "കാണിക്കേണ്ട ഉപകരണങ്ങൾ",
+  "chart.combined": "എല്ലാം ചേർത്ത്",
+  "tray.summary": "വായുവിന്റെ ഗുണനിലവാരം: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ഓഫ്‌ലൈൻ",
+  "settings.tray.title": "സിസ്റ്റം ട്രേയിൽ കാണിക്കുക",
+  "settings.tray.hint": "മെനു ബാർ, ടോപ്പ് ബാർ അല്ലെങ്കിൽ അറിയിപ്പ് ഏരിയയിൽ വായുവിന്റെ ഗുണനിലവാരവും എയർ പ്യൂരിഫയറുകളും. വിൻഡോ അടച്ചാലും Domus അവിടെ പ്രവർത്തിക്കും.",
+  "settings.tray.noHost": "ഈ ഡെസ്ക്ടോപ്പിൽ ട്രേ ഐക്കണുകൾ കാണിക്കാൻ ഇടമില്ല. GNOME-ൽ AppIndicator എക്സ്റ്റൻഷൻ ഇൻസ്റ്റാൾ ചെയ്ത് ഓണാക്കി Domus വീണ്ടും തുടങ്ങുക."
 }

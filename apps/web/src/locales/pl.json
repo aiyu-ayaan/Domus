@@ -1179,5 +1179,13 @@
   "user.pick": "Wybierz",
   "user.resetCode": "Kod resetowania",
   "user.resetWithdrawn": "Wycofano kod resetowania",
-  "user.roomsAndDevices": "Pokoje i urządzenia"
+  "user.roomsAndDevices": "Pokoje i urządzenia",
+  "chart.devices": "Pokazywane urządzenia",
+  "chart.combined": "Wszystkie razem",
+  "tray.summary": "Jakość powietrza: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Pokaż w zasobniku systemowym",
+  "settings.tray.hint": "Jakość powietrza i oczyszczacze na pasku menu, górnym pasku lub w obszarze powiadomień. Po zamknięciu okna Domus działa tam dalej.",
+  "settings.tray.noHost": "Ten pulpit nie ma gdzie pokazać ikon zasobnika. W GNOME zainstaluj i włącz rozszerzenie AppIndicator, a potem uruchom ponownie Domus."
 }

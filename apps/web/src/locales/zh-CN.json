@@ -1151,5 +1151,13 @@
   "user.pick": "选择",
   "user.resetCode": "重置码",
   "user.resetWithdrawn": "重置码已撤回",
-  "user.roomsAndDevices": "房间与设备"
+  "user.roomsAndDevices": "房间与设备",
+  "chart.devices": "显示的设备",
+  "chart.combined": "全部合并",
+  "tray.summary": "空气质量：{value} µg/m³，{label}",
+  "tray.deviceReading": "{name}：{value} µg/m³",
+  "tray.deviceOffline": "{name}：离线",
+  "settings.tray.title": "在系统托盘中显示",
+  "settings.tray.hint": "在菜单栏、顶栏或通知区域显示空气质量和空气净化器。关闭窗口后 Domus 会继续在那里运行。",
+  "settings.tray.noHost": "此桌面没有显示托盘图标的位置。在 GNOME 上，请安装并启用 AppIndicator 扩展，然后重启 Domus。"
 }

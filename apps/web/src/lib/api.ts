@@ -45,6 +45,17 @@ interface DesktopBridge {
   chooseServer(): void
   /** 'system' | 'light' | 'dark': the window buttons follow the app theme. */
   setTheme(theme: string): void
+  /** The tray menu (desktop main.js). Absent in older desktop builds. */
+  tray?: {
+    enabled(): boolean
+    /** False when the Linux desktop has no tray (GNOME without the AppIndicator extension); null when unknown. */
+    hasHost(): boolean | null
+    setEnabled(on: boolean): void
+    update(state: { title: string; summary: string; devices: { id: string; label: string; on: boolean; enabled: boolean }[] } | null): void
+    show(): void
+    /** A purifier switched from the menu. Returns the function that stops listening. */
+    onToggle(listener: (id: string, on: boolean) => void): () => void
+  }
   /** The desktop app's own releases. Absent in desktop builds older than the update channel. */
   updates?: {
     info(): Promise<{ version: string; channel: UpdateChannel; selfInstall: boolean; skipped?: string | null } | null>
@@ -273,7 +284,8 @@ export const api = {
   energyHistory: (range: Exclude<Range, 'live'> | 'hours', deviceId?: string) =>
     get<EnergyPoint[]>(`/energy/history?range=${range}&tz=${zone()}${deviceId ? `&device_id=${deviceId}` : ''}`),
   /** Air is sampled every few minutes, so it has no per-minute range. */
-  airHistory: (range: Exclude<Range, 'live'> | 'hours') => get<AirPoint[]>(`/air/history?range=${range}&tz=${zone()}`),
+  airHistory: (range: Exclude<Range, 'live'> | 'hours', deviceId?: string) =>
+    get<AirPoint[]>(`/air/history?range=${range}&tz=${zone()}${deviceId ? `&device_id=${deviceId}` : ''}`),
   energySettings: () => get<ElectricitySettings>('/energy/settings'),
   saveEnergySettings: (b: ElectricitySettings) => put<ElectricitySettings>('/energy/settings', b),
 

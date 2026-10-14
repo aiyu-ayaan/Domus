@@ -1151,5 +1151,13 @@
   "user.pick": "選択",
   "user.resetCode": "リセットコード",
   "user.resetWithdrawn": "リセットコードを取り消しました",
-  "user.roomsAndDevices": "部屋とデバイス"
+  "user.roomsAndDevices": "部屋とデバイス",
+  "chart.devices": "表示するデバイス",
+  "chart.combined": "すべて合算",
+  "tray.summary": "空気質: {value} µg/m³、{label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: オフライン",
+  "settings.tray.title": "システムトレイに表示",
+  "settings.tray.hint": "メニューバー、トップバー、通知領域に空気質と空気清浄機を表示します。ウィンドウを閉じても Domus はそこで動き続けます。",
+  "settings.tray.noHost": "このデスクトップにはトレイアイコンを表示する場所がありません。GNOME では AppIndicator 拡張機能をインストールして有効にし、Domus を再起動してください。"
 }

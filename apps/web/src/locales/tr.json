@@ -1151,5 +1151,13 @@
   "user.pick": "Seç",
   "user.resetCode": "Sıfırlama kodu",
   "user.resetWithdrawn": "Sıfırlama kodu geri çekildi",
-  "user.roomsAndDevices": "Odalar ve cihazlar"
+  "user.roomsAndDevices": "Odalar ve cihazlar",
+  "chart.devices": "Gösterilecek cihazlar",
+  "chart.combined": "Tümü birlikte",
+  "tray.summary": "Hava kalitesi: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: çevrimdışı",
+  "settings.tray.title": "Sistem tepsisinde göster",
+  "settings.tray.hint": "Menü çubuğunda, üst çubukta veya bildirim alanında hava kalitesi ve hava temizleyicileriniz. Pencereyi kapatınca Domus orada çalışmaya devam eder.",
+  "settings.tray.noHost": "Bu masaüstünde tepsi simgelerini gösterecek bir yer yok. GNOME'da AppIndicator uzantısını kurup açın, sonra Domus'u yeniden başlatın."
 }

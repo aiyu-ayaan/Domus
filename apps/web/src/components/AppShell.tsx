@@ -19,6 +19,7 @@ import {
 } from '@phosphor-icons/react'
 import { useAuth, useIsAdmin } from '@/lib/auth'
 import { useLiveEvents } from '@/lib/live'
+import { useDesktopTray } from '@/lib/desktopTray'
 import { keys, useDevices, useDiscovered, useEnergy, useNotifications, useServerLinks } from '@/lib/queries'
 import { api, desktop } from '@/lib/api'
 import { cn } from '@/lib/cn'
@@ -374,6 +375,7 @@ export function AppShell() {
   const { data: pending = [] } = useDiscovered('pending')
   const { data: devices = [] } = useDevices()
   const { data: energy } = useEnergy()
+  useDesktopTray()
   useServerLinks() // fetched on every launch so the desktop app follows address changes made elsewhere
 
   const hasEnergy =

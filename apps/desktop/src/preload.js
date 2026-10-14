@@ -34,6 +34,20 @@ contextBridge.exposeInMainWorld('domus', {
       return () => ipcRenderer.removeListener('update:progress', heard)
     },
   },
+  // The tray (main.js): on or off, the page's summary for its menu, and a purifier switched from the menu.
+  tray: {
+    enabled: () => ipcRenderer.sendSync('tray:get'),
+    hasHost: () => ipcRenderer.sendSync('tray:host'),
+    setEnabled: (on) => ipcRenderer.send('tray:set', on),
+    update: (state) => ipcRenderer.send('tray:update', state),
+    show: () => ipcRenderer.send('tray:show'),
+    // Returns the function that stops listening.
+    onToggle: (listener) => {
+      const heard = (_event, id, on) => listener(id, on)
+      ipcRenderer.on('tray:toggle', heard)
+      return () => ipcRenderer.removeListener('tray:toggle', heard)
+    },
+  },
   // Connect page only.
   connect: (address) => ipcRenderer.invoke('server:connect', address),
   discover: () => ipcRenderer.invoke('server:discover'),

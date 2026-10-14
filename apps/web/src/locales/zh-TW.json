@@ -1151,5 +1151,13 @@
   "user.pick": "選擇",
   "user.resetCode": "重設碼",
   "user.resetWithdrawn": "重設碼已撤回",
-  "user.roomsAndDevices": "房間與裝置"
+  "user.roomsAndDevices": "房間與裝置",
+  "chart.devices": "顯示的裝置",
+  "chart.combined": "全部合併",
+  "tray.summary": "空氣品質：{value} µg/m³，{label}",
+  "tray.deviceReading": "{name}：{value} µg/m³",
+  "tray.deviceOffline": "{name}：離線",
+  "settings.tray.title": "在系統匣中顯示",
+  "settings.tray.hint": "在選單列、頂端列或通知區域顯示空氣品質和空氣清淨機。關閉視窗後 Domus 會繼續在那裡執行。",
+  "settings.tray.noHost": "此桌面沒有顯示系統匣圖示的位置。在 GNOME 上，請安裝並啟用 AppIndicator 擴充功能，然後重新啟動 Domus。"
 }

@@ -1207,5 +1207,13 @@
   "user.pick": "اختيار",
   "user.resetCode": "رمز إعادة التعيين",
   "user.resetWithdrawn": "تم سحب رمز إعادة التعيين",
-  "user.roomsAndDevices": "الغرف والأجهزة"
+  "user.roomsAndDevices": "الغرف والأجهزة",
+  "chart.devices": "الأجهزة المعروضة",
+  "chart.combined": "الكل مجتمعة",
+  "tray.summary": "جودة الهواء: {value} µg/m³، {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: غير متصل",
+  "settings.tray.title": "الإظهار في علبة النظام",
+  "settings.tray.hint": "جودة الهواء وأجهزة تنقية الهواء في شريط القوائم أو الشريط العلوي أو منطقة الإشعارات. إغلاق النافذة يُبقي Domus يعمل هناك.",
+  "settings.tray.noHost": "لا يوجد في سطح المكتب هذا مكان لعرض أيقونات العلبة. على GNOME، ثبّت امتداد AppIndicator وفعّله ثم أعد تشغيل Domus."
 }

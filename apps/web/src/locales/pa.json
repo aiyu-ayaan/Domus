@@ -1151,5 +1151,13 @@
   "user.pick": "ਚੁਣੋ",
   "user.resetCode": "ਰੀਸੈਟ ਕੋਡ",
   "user.resetWithdrawn": "ਰੀਸੈਟ ਕੋਡ ਵਾਪਸ ਲੈ ਲਿਆ ਗਿਆ",
-  "user.roomsAndDevices": "ਕਮਰੇ ਅਤੇ ਡਿਵਾਈਸਾਂ"
+  "user.roomsAndDevices": "ਕਮਰੇ ਅਤੇ ਡਿਵਾਈਸਾਂ",
+  "chart.devices": "ਦਿਖਾਉਣ ਵਾਲੇ ਡਿਵਾਈਸ",
+  "chart.combined": "ਸਾਰੇ ਮਿਲਾ ਕੇ",
+  "tray.summary": "ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ਔਫਲਾਈਨ",
+  "settings.tray.title": "ਸਿਸਟਮ ਟ੍ਰੇ ਵਿੱਚ ਦਿਖਾਓ",
+  "settings.tray.hint": "ਮੀਨੂ ਬਾਰ, ਟੌਪ ਬਾਰ ਜਾਂ ਸੂਚਨਾ ਖੇਤਰ ਵਿੱਚ ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ ਅਤੇ ਤੁਹਾਡੇ ਏਅਰ ਪਿਊਰੀਫਾਇਰ। ਵਿੰਡੋ ਬੰਦ ਕਰਨ ’ਤੇ ਵੀ Domus ਉੱਥੇ ਚੱਲਦਾ ਰਹਿੰਦਾ ਹੈ।",
+  "settings.tray.noHost": "ਇਸ ਡੈਸਕਟਾਪ ਵਿੱਚ ਟ੍ਰੇ ਆਈਕਨ ਦਿਖਾਉਣ ਦੀ ਥਾਂ ਨਹੀਂ ਹੈ। GNOME ’ਤੇ AppIndicator ਐਕਸਟੈਂਸ਼ਨ ਇੰਸਟਾਲ ਕਰਕੇ ਚਾਲੂ ਕਰੋ, ਫਿਰ Domus ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ।"
 }

@@ -1179,5 +1179,13 @@
   "user.pick": "Выбрать",
   "user.resetCode": "Код сброса",
   "user.resetWithdrawn": "Код сброса отозван",
-  "user.roomsAndDevices": "Комнаты и устройства"
+  "user.roomsAndDevices": "Комнаты и устройства",
+  "chart.devices": "Показывать устройства",
+  "chart.combined": "Все вместе",
+  "tray.summary": "Качество воздуха: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: не в сети",
+  "settings.tray.title": "Показывать в системном трее",
+  "settings.tray.hint": "Качество воздуха и ваши очистители в строке меню, верхней панели или области уведомлений. После закрытия окна Domus продолжает работать там.",
+  "settings.tray.noHost": "В этой среде негде показывать значки трея. В GNOME установите и включите расширение AppIndicator, затем перезапустите Domus."
 }

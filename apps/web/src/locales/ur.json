@@ -1151,5 +1151,13 @@
   "user.pick": "منتخب کریں",
   "user.resetCode": "ری سیٹ کوڈ",
   "user.resetWithdrawn": "ری سیٹ کوڈ واپس لے لیا گیا",
-  "user.roomsAndDevices": "کمرے اور آلات"
+  "user.roomsAndDevices": "کمرے اور آلات",
+  "chart.devices": "دکھانے کے آلات",
+  "chart.combined": "سب ملا کر",
+  "tray.summary": "ہوا کا معیار: {value} µg/m³، {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: آف لائن",
+  "settings.tray.title": "سسٹم ٹرے میں دکھائیں",
+  "settings.tray.hint": "مینو بار، ٹاپ بار یا اطلاعات کے حصے میں ہوا کا معیار اور آپ کے ایئر پیوریفائر۔ ونڈو بند کرنے پر بھی Domus وہاں چلتا رہتا ہے۔",
+  "settings.tray.noHost": "اس ڈیسک ٹاپ میں ٹرے آئیکن دکھانے کی جگہ نہیں ہے۔ GNOME پر AppIndicator ایکسٹینشن انسٹال کر کے آن کریں، پھر Domus دوبارہ شروع کریں۔"
 }

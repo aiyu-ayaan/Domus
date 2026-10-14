@@ -1151,5 +1151,13 @@
   "user.pick": "Pick",
   "user.resetCode": "Reset code",
   "user.resetWithdrawn": "Reset code withdrawn",
-  "user.roomsAndDevices": "Rooms and devices"
+  "user.roomsAndDevices": "Rooms and devices",
+  "chart.devices": "Devices to show",
+  "chart.combined": "All combined",
+  "tray.summary": "Air quality: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Show in the system tray",
+  "settings.tray.hint": "Air quality and your air purifiers in the menu bar, top bar or notification area. Closing the window keeps Domus running there.",
+  "settings.tray.noHost": "This desktop has nothing to show tray icons in. On GNOME, install and turn on the AppIndicator extension, then restart Domus."
 }

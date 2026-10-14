@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useConfirmSwitch } from '@/components/devices/ConfirmSwitch'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { CalendarBlank, CalendarDot, CalendarDots, Clock, Pulse, Wind, ShieldCheck } from '@phosphor-icons/react'
 import { Card, CardHeader, Metric, PageHeader, Badge, Skeleton, EmptyState } from '@/components/ui/Card'
 import { Segmented, Switch } from '@/components/ui/Controls'
 import { useCanControl } from '@/lib/auth'
 import { TrendChart } from '@/components/devices/TrendChart'
+import { DevicePicker } from '@/components/devices/DevicePicker'
 import { HourGrid } from '@/components/devices/HourGrid'
 import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
@@ -13,7 +14,7 @@ import { useLive } from '@/lib/liveSamples'
 import { t } from '@/lib/i18n'
 import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
 import { airQuality, formatBucket, formatNumber, type Range } from '@/lib/format'
-import type { AirPoint } from '@/lib/types'
+import type { AirPoint, Device } from '@/lib/types'
 import { cn } from '@/lib/cn'
 
 const RANGES = [
@@ -40,10 +41,15 @@ const LEVELS = [
 const levelOf = (pm: number) => (pm <= 12 ? 0 : pm <= 35 ? 1 : pm <= 55 ? 2 : 3)
 
 /** Recorded history: the chart, and what it says about the period. */
-function Trend() {
+function Trend({ sensors }: { sensors: Device[] }) {
   const [range, setRange] = useState<Range>('day')
   const [reading, setReading] = useState<Reading>('pm25')
+  // Devices compared line by line; none is the home's combined line.
+  const [picked, setPicked] = useState<string[]>([])
   const history = useQuery({ queryKey: keys.airHistory(range), queryFn: () => api.airHistory(range as Exclude<Range, 'live'>), enabled: range !== 'live', refetchInterval: 60_000 })
+  const perDevice = useQueries({
+    queries: picked.map((id) => ({ queryKey: keys.airHistory(range, id), queryFn: () => api.airHistory(range as Exclude<Range, 'live'>, id), enabled: range !== 'live', refetchInterval: 60_000 })),
+  })
   const { data: devices = [] } = useDevices()
   // Live follows the page's headline: the worst PM2.5 online, the sensors' average climate.
   const mean = (values: (number | undefined)[]) => {
@@ -56,14 +62,21 @@ function Trend() {
     pm25: livePm.length ? Math.max(...livePm) : null,
     temperature: mean(online.map((d) => d.state.temperature)),
     humidity: mean(online.map((d) => d.state.humidity)),
+    by: Object.fromEntries(online.map((d) => [d.id, d.state])),
   }))
   const hours = useQuery({ queryKey: keys.airHistory('hours'), queryFn: () => api.airHistory('hours'), refetchInterval: 300_000 })
   const data: AirPoint[] = range === 'live' ? live : history.data ?? []
-  const isLoading = range !== 'live' && history.isLoading
+  const isLoading = range !== 'live' && (history.isLoading || perDevice.some((q) => q.isLoading))
   // Offer only the readings the home's devices actually report.
   const available = (Object.keys(READINGS) as Reading[]).filter((r) => r === 'pm25' || data.some((p) => p[r] != null))
   const shown = available.includes(reading) ? reading : 'pm25'
   const meta = READINGS[shown]
+  const series = picked.length
+    ? picked.map((id, k) => ({
+        name: sensors.find((d) => d.id === id)?.name ?? '—',
+        values: range === 'live' ? live.map((s) => (shown === 'pm25' ? s.by[id]?.air_quality_pm25 : s.by[id]?.[shown]) ?? null) : (perDevice[k].data ?? []).map((p) => p[shown]),
+      }))
+    : undefined
 
   const pm = data.flatMap((p) => (p.pm25 == null ? [] : [p]))
   const average = pm.length ? pm.reduce((s, p) => s + p.pm25!, 0) / pm.length : null
@@ -94,14 +107,16 @@ function Trend() {
           }
         />
         <div className="p-4">
+          <DevicePicker devices={sensors} value={picked} onChange={setPicked} />
           {isLoading ? (
             <Skeleton className="h-[240px]" />
           ) : (
             <TrendChart
-              points={data.map((p) => ({ t: p.t, value: p[shown], peak: shown === 'pm25' ? p.pm25_max : undefined }))}
+              points={data.map((p) => ({ t: p.t, value: p[shown], peak: shown === 'pm25' && !series ? p.pm25_max : undefined }))}
               range={range}
               unit={meta.unit}
               digits={meta.digits}
+              series={series}
               marks={shown === 'pm25' ? [{ value: 15, label: t('air.mark.clean') }, { value: 35, label: t('air.mark.good') }] : []}
               empty={t('air.noHistory')}
               height={200}
@@ -273,7 +288,7 @@ export function AirQualityView() {
         />
       </div>
 
-      <Trend />
+      <Trend sensors={aqDevices} />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Purifier controls */}

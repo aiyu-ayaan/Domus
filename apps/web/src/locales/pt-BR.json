@@ -1165,5 +1165,13 @@
   "user.pick": "Escolher",
   "user.resetCode": "Código de redefinição",
   "user.resetWithdrawn": "Código de redefinição revogado",
-  "user.roomsAndDevices": "Cômodos e dispositivos"
+  "user.roomsAndDevices": "Cômodos e dispositivos",
+  "chart.devices": "Dispositivos a exibir",
+  "chart.combined": "Todos combinados",
+  "tray.summary": "Qualidade do ar: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Mostrar na bandeja do sistema",
+  "settings.tray.hint": "A qualidade do ar e seus purificadores na barra de menus, na barra superior ou na área de notificação. Ao fechar a janela, o Domus continua rodando ali.",
+  "settings.tray.noHost": "Este desktop não tem onde mostrar ícones de bandeja. No GNOME, instale e ative a extensão AppIndicator e reinicie o Domus."
 }

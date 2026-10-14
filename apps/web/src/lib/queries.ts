@@ -16,7 +16,7 @@ export const keys = {
   scenes: ['scenes'] as const,
   energy: ['energy'] as const,
   energyHistory: (range: string, device?: string) => ['energy', 'history', range, device ?? 'all'] as const,
-  airHistory: (range: string) => ['air', 'history', range] as const,
+  airHistory: (range: string, device?: string) => ['air', 'history', range, device ?? 'all'] as const,
   notifications: ['notifications'] as const,
   users: ['users'] as const,
   serverLinks: ['server-links'] as const,

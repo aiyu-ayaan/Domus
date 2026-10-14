@@ -1151,5 +1151,13 @@
   "user.pick": "Auswählen",
   "user.resetCode": "Rücksetzcode",
   "user.resetWithdrawn": "Rücksetzcode zurückgezogen",
-  "user.roomsAndDevices": "Räume und Geräte"
+  "user.roomsAndDevices": "Räume und Geräte",
+  "chart.devices": "Angezeigte Geräte",
+  "chart.combined": "Alle zusammen",
+  "tray.summary": "Luftqualität: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Im Infobereich anzeigen",
+  "settings.tray.hint": "Luftqualität und deine Luftreiniger in der Menüleiste, der oberen Leiste oder im Infobereich. Wird das Fenster geschlossen, läuft Domus dort weiter.",
+  "settings.tray.noHost": "Dieser Desktop kann keine Infobereich-Symbole anzeigen. Unter GNOME die Erweiterung AppIndicator installieren und aktivieren, dann Domus neu starten."
 }

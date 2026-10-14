@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
 import { CalendarBlank, CalendarDot, CalendarDots, Clock, Pulse } from '@phosphor-icons/react'
 import { Segmented } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
+import { TrendChart } from '@/components/devices/TrendChart'
+import { DevicePicker } from '@/components/devices/DevicePicker'
 import { HourGrid } from '@/components/devices/HourGrid'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
@@ -29,12 +31,17 @@ export function EnergyView() {
   const { data: o, isLoading } = useEnergy()
   const { data: devices } = useDevices()
   const [range, setRange] = useState<Range>('day')
+  // Devices compared line by line; none is the home's combined chart.
+  const [picked, setPicked] = useState<string[]>([])
   const history = useQuery({ queryKey: keys.energyHistory(range), queryFn: () => api.energyHistory(range as Exclude<Range, 'live'>), enabled: range !== 'live', refetchInterval: 60_000 })
+  const perDevice = useQueries({
+    queries: picked.map((id) => ({ queryKey: keys.energyHistory(range, id), queryFn: () => api.energyHistory(range as Exclude<Range, 'live'>, id), enabled: range !== 'live', refetchInterval: 60_000 })),
+  })
   // Watts come from the live device list; kWh and cost from the periodic energy query.
   const power = new Map((devices ?? []).map((d) => [d.id, d.is_online ? d.state.current_power_watts ?? 0 : 0]))
   const watts = (id: string, fallback: number) => power.get(id) ?? fallback
   const totalWatts = o ? o.devices.reduce((sum, d) => sum + watts(d.device_id, d.current_watts), 0) : null
-  const live = useLive(() => ({ kwh: 0, cost: 0, watts: totalWatts }))
+  const live = useLive(() => ({ kwh: 0, cost: 0, watts: totalWatts, by: Object.fromEntries(power) }))
   // The insights always compare against today's hours and the last 7 days, whatever range the chart shows.
   const day = useQuery({ queryKey: keys.energyHistory('day'), queryFn: () => api.energyHistory('day'), refetchInterval: 60_000 })
   const week = useQuery({ queryKey: keys.energyHistory('week'), queryFn: () => api.energyHistory('week'), refetchInterval: 60_000 })
@@ -68,7 +75,28 @@ export function EnergyView() {
             <Segmented<Range> size="sm" label={t('energy.range')} value={range} onChange={setRange} options={RANGES.map((r) => ({ ...r, label: t(r.label) }))} />
           }
         />
-        <div className="p-4">{range !== 'live' && history.isLoading ? <Skeleton className="h-[220px]" /> : <EnergyChart points={range === 'live' ? live : history.data ?? []} range={range} currency={currency} height={220} />}</div>
+        <div className="p-4">
+          <DevicePicker devices={o.devices.map((d) => ({ id: d.device_id, name: d.name }))} value={picked} onChange={setPicked} />
+          {range !== 'live' && (history.isLoading || perDevice.some((q) => q.isLoading)) ? (
+            <Skeleton className="h-[220px]" />
+          ) : picked.length ? (
+            // Compared devices: energy per bucket, or the power each draws while live.
+            <TrendChart
+              points={(range === 'live' ? live : history.data ?? []).map((p) => ({ t: p.t, value: null }))}
+              series={picked.map((id, k) => ({
+                name: o.devices.find((d) => d.device_id === id)?.name ?? '—',
+                values: range === 'live' ? live.map((p) => p.by[id] ?? null) : (perDevice[k].data ?? []).map((p) => (p.kwh > 0 || p.watts != null ? p.kwh : null)),
+              }))}
+              range={range}
+              unit={range === 'live' ? 'W' : 'kWh'}
+              digits={range === 'live' ? 0 : 2}
+              empty={range === 'live' ? t('chart.waiting') : t('chart.noConsumption')}
+              height={220}
+            />
+          ) : (
+            <EnergyChart points={range === 'live' ? live : history.data ?? []} range={range} currency={currency} height={220} />
+          )}
+        </div>
       </Card>
 
       <Insights o={o} day={day.data ?? []} week={week.data ?? []} />

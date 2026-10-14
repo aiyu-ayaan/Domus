@@ -1165,5 +1165,13 @@
   "user.pick": "Scegli",
   "user.resetCode": "Codice di ripristino",
   "user.resetWithdrawn": "Codice di ripristino revocato",
-  "user.roomsAndDevices": "Stanze e dispositivi"
+  "user.roomsAndDevices": "Stanze e dispositivi",
+  "chart.devices": "Dispositivi da mostrare",
+  "chart.combined": "Tutti insieme",
+  "tray.summary": "Qualità dell'aria: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: offline",
+  "settings.tray.title": "Mostra nell'area di notifica",
+  "settings.tray.hint": "La qualità dell'aria e i tuoi purificatori nella barra dei menu, nella barra superiore o nell'area di notifica. Chiudendo la finestra Domus resta attivo lì.",
+  "settings.tray.noHost": "Questo desktop non ha dove mostrare le icone dell'area di notifica. Su GNOME installa e attiva l'estensione AppIndicator, poi riavvia Domus."
 }

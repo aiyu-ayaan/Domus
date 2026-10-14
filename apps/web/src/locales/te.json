@@ -1151,5 +1151,13 @@
   "user.pick": "ఎంచుకోండి",
   "user.resetCode": "రీసెట్ కోడ్",
   "user.resetWithdrawn": "రీసెట్ కోడ్ ఉపసంహరించుకోబడింది",
-  "user.roomsAndDevices": "గదులు మరియు పరికరాలు"
+  "user.roomsAndDevices": "గదులు మరియు పరికరాలు",
+  "chart.devices": "చూపాల్సిన పరికరాలు",
+  "chart.combined": "అన్నీ కలిపి",
+  "tray.summary": "గాలి నాణ్యత: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ఆఫ్‌లైన్",
+  "settings.tray.title": "సిస్టమ్ ట్రేలో చూపించు",
+  "settings.tray.hint": "మెనూ బార్, టాప్ బార్ లేదా నోటిఫికేషన్ ప్రాంతంలో గాలి నాణ్యత, మీ ఎయిర్ ప్యూరిఫైయర్లు. విండో మూసినా Domus అక్కడ నడుస్తూనే ఉంటుంది.",
+  "settings.tray.noHost": "ఈ డెస్క్‌టాప్‌లో ట్రే ఐకాన్‌లు చూపడానికి స్థలం లేదు. GNOMEలో AppIndicator ఎక్స్‌టెన్షన్‌ను ఇన్‌స్టాల్ చేసి ఆన్ చేయండి, ఆపై Domusను మళ్లీ ప్రారంభించండి."
 }

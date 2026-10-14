@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, ipcMain, nativeTheme, safeStorage, shell, session, desktopCapturer } = require('electron')
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, nativeImage, nativeTheme, safeStorage, shell, session, desktopCapturer } = require('electron')
 const { execFileSync } = require('child_process')
 const dgram = require('dgram')
 const fs = require('fs')
@@ -37,6 +37,10 @@ app.setName(isDev ? 'Domus Dev' : 'Domus')
 if (app.setAppUserModelId) {
   app.setAppUserModelId(isDev ? 'com.aiyu.domus.dev' : 'com.aiyu.domus')
 }
+
+// One window per flavor (the lock follows userData): opening the app again, say while it sits in the tray, shows that window.
+if (!app.requestSingleInstanceLock()) app.exit(0)
+app.on('second-instance', () => showWindow())
 
 /** servers: origins to try in order. pins: origin -> approved self-signed certificate (SHA-256, AA:BB:..). */
 let config = { servers: [], pins: {}, token: null }
@@ -227,7 +231,91 @@ ipcMain.on('i18n:set', (event, tag) => {
   config.language = tag
   save()
   applyLanguage()
+  renderTray()
 })
+
+// --- Tray: the Windows notification area, the macOS menu bar, the Linux top bar or panel ---
+// Linux shows it through StatusNotifierItem (KDE, Cinnamon, XFCE, MATE, Budgie; GNOME with the AppIndicator
+// extension, which Ubuntu ships). The page keeps the menu current while the window is hidden, so closing the
+// window only hides it when the tray is on.
+let tray = null
+/** What the page last sent: { title, summary, devices: [{ id, label, on, enabled }] }, or null when signed out. */
+let trayState = null
+let quitting = false
+app.on('before-quit', () => (quitting = true))
+
+const text = (v) => String(v ?? '').slice(0, 120)
+
+function renderTray() {
+  if (!tray) return
+  const s = trayState
+  const items = []
+  if (s?.summary) items.push({ label: s.summary, enabled: false })
+  for (const d of s?.devices ?? []) {
+    items.push({ label: d.label, type: 'checkbox', checked: d.on, enabled: d.enabled, click: () => win?.webContents.send('tray:toggle', d.id, !d.on) })
+  }
+  if (s && !s.devices.length) items.push({ label: t('tray.noPurifiers'), enabled: false })
+  if (items.length) items.push({ type: 'separator' })
+  items.push({ label: t('tray.open'), click: showWindow }, { label: t('tray.quit'), click: () => app.quit() })
+  tray.setContextMenu(Menu.buildFromTemplate(items))
+  tray.setToolTip(s?.summary || app.getName())
+  // Text beside the icon: macOS only. Electron publishes no label on Linux (checked on its StatusNotifierItem).
+  if (process.platform === 'darwin') tray.setTitle(s?.title ?? '')
+}
+
+function setTray(on) {
+  if (on && !tray) {
+    const size = process.platform === 'linux' ? 22 : process.platform === 'darwin' ? 18 : 16
+    tray = new Tray(nativeImage.createFromPath(appIcon()).resize({ width: size, height: size }))
+    // Windows opens the menu on a right click, so a left click opens the app. macOS and Linux open the menu on any click.
+    tray.on('click', () => process.platform === 'win32' && showWindow())
+    renderTray()
+  } else if (!on && tray) {
+    tray.destroy()
+    tray = null
+  }
+}
+
+ipcMain.on('tray:get', (event) => {
+  event.returnValue = !!config.tray
+})
+/** False when Linux has nothing to show the tray in (GNOME without the AppIndicator extension); null when unknown. */
+let host
+function trayHost() {
+  if (host !== undefined) return host
+  if (process.platform !== 'linux') return (host = true)
+  try {
+    const args = ['call', '--session', '--dest', 'org.freedesktop.DBus', '--object-path', '/org/freedesktop/DBus', '--method', 'org.freedesktop.DBus.NameHasOwner', 'org.kde.StatusNotifierWatcher']
+    host = execFileSync('gdbus', args, { timeout: 2000 }).toString().includes('true')
+  } catch {
+    host = null
+  }
+  return host
+}
+ipcMain.on('tray:host', (event) => {
+  event.returnValue = trayHost()
+})
+ipcMain.on('tray:set', (event, on) => {
+  if (!trusted(event)) return
+  config.tray = !!on
+  save()
+  setTray(config.tray)
+})
+ipcMain.on('tray:update', (event, state) => {
+  if (!trusted(event)) return
+  trayState =
+    state && typeof state === 'object'
+      ? {
+          title: text(state.title),
+          summary: text(state.summary),
+          devices: (Array.isArray(state.devices) ? state.devices : [])
+            .slice(0, 20)
+            .map((d) => ({ id: text(d?.id), label: text(d?.label), on: !!d?.on, enabled: !!d?.enabled })),
+        }
+      : null
+  renderTray()
+})
+ipcMain.on('tray:show', (event) => trusted(event) && showWindow())
 
 // The signed-in server's addresses (GET /api/v1/server/links). Its certificate
 // fingerprint arrives over a connection that is already trusted.
@@ -380,12 +468,24 @@ ipcMain.handle('update:setChannel', (event, channel) => {
   save()
 })
 
-function createWindow() {
+function appIcon() {
   const iconPath = isDev
     ? (app.isPackaged ? path.join(process.resourcesPath, 'icon-dev.png') : path.join(__dirname, '../build/icon-dev.png'))
     : (app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../build/icon.png'))
   const defaultIcon = app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../build/icon.png')
-  const iconToUse = fs.existsSync(iconPath) ? iconPath : defaultIcon
+  return fs.existsSync(iconPath) ? iconPath : defaultIcon
+}
+
+function showWindow() {
+  if (!app.isReady()) return
+  if (!win) return createWindow()
+  if (win.isMinimized()) win.restore()
+  win.show()
+  win.focus()
+}
+
+function createWindow() {
+  const iconToUse = appIcon()
 
   win = new BrowserWindow({
     title: isDev ? 'Domus (Dev)' : 'Domus',
@@ -416,6 +516,14 @@ function createWindow() {
 
   win.once('ready-to-show', () => win.show())
   win.on('closed', () => (win = null))
+  // With the tray on, closing hides the window so the tray stays live; Quit in the tray menu ends the app.
+  win.on('close', (event) => {
+    // Without a tray to come back from (no host), closing quits as before.
+    if (tray && !quitting && trayHost() !== false) {
+      event.preventDefault()
+      win.hide()
+    }
+  })
 
   // Keep the app on the Domus server; open anything else in the browser.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -473,9 +581,8 @@ app.whenReady().then(() => {
     })
   }
   createWindow()
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+  setTray(!!config.tray)
+  app.on('activate', () => showWindow())
 })
 
 app.on('window-all-closed', () => {

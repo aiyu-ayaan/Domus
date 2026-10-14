@@ -1151,5 +1151,13 @@
   "user.pick": "선택",
   "user.resetCode": "재설정 코드",
   "user.resetWithdrawn": "재설정 코드가 철회되었습니다",
-  "user.roomsAndDevices": "방 및 기기"
+  "user.roomsAndDevices": "방 및 기기",
+  "chart.devices": "표시할 기기",
+  "chart.combined": "모두 합치기",
+  "tray.summary": "공기질: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: 오프라인",
+  "settings.tray.title": "시스템 트레이에 표시",
+  "settings.tray.hint": "메뉴 막대, 상단 막대 또는 알림 영역에 공기질과 공기청정기를 표시합니다. 창을 닫아도 Domus는 그곳에서 계속 실행됩니다.",
+  "settings.tray.noHost": "이 데스크톱에는 트레이 아이콘을 표시할 곳이 없습니다. GNOME에서는 AppIndicator 확장을 설치하고 켠 다음 Domus를 다시 시작하세요."
 }

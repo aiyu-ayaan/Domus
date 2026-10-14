@@ -1151,5 +1151,13 @@
   "user.pick": "Chọn",
   "user.resetCode": "Mã đặt lại",
   "user.resetWithdrawn": "Đã thu hồi mã đặt lại",
-  "user.roomsAndDevices": "Phòng và thiết bị"
+  "user.roomsAndDevices": "Phòng và thiết bị",
+  "chart.devices": "Thiết bị hiển thị",
+  "chart.combined": "Tất cả gộp lại",
+  "tray.summary": "Chất lượng không khí: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ngoại tuyến",
+  "settings.tray.title": "Hiển thị trong khay hệ thống",
+  "settings.tray.hint": "Chất lượng không khí và máy lọc không khí trên thanh menu, thanh trên cùng hoặc vùng thông báo. Đóng cửa sổ thì Domus vẫn chạy ở đó.",
+  "settings.tray.noHost": "Màn hình này không có chỗ hiển thị biểu tượng khay. Trên GNOME, hãy cài và bật tiện ích AppIndicator rồi khởi động lại Domus."
 }

@@ -1151,5 +1151,13 @@
   "user.pick": "निवडा",
   "user.resetCode": "रीसेट कोड",
   "user.resetWithdrawn": "रीसेट कोड मागे घेतला",
-  "user.roomsAndDevices": "खोल्या आणि उपकरणे"
+  "user.roomsAndDevices": "खोल्या आणि उपकरणे",
+  "chart.devices": "दाखवायची उपकरणे",
+  "chart.combined": "सर्व एकत्र",
+  "tray.summary": "हवेची गुणवत्ता: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ऑफलाइन",
+  "settings.tray.title": "सिस्टम ट्रेमध्ये दाखवा",
+  "settings.tray.hint": "मेनू बार, टॉप बार किंवा सूचना क्षेत्रात हवेची गुणवत्ता आणि तुमचे एअर प्युरिफायर. विंडो बंद केली तरी Domus तिथे चालू राहते.",
+  "settings.tray.noHost": "या डेस्कटॉपवर ट्रे आयकॉन दाखवायला जागा नाही. GNOME वर AppIndicator एक्सटेंशन इन्स्टॉल करून चालू करा, मग Domus पुन्हा सुरू करा."
 }

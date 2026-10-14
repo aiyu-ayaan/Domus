@@ -1151,5 +1151,13 @@
   "user.pick": "தேர்ந்தெடு",
   "user.resetCode": "மீட்டமைப்புக் குறியீடு",
   "user.resetWithdrawn": "மீட்டமைப்புக் குறியீடு திரும்பப் பெறப்பட்டது",
-  "user.roomsAndDevices": "அறைகள் மற்றும் சாதனங்கள்"
+  "user.roomsAndDevices": "அறைகள் மற்றும் சாதனங்கள்",
+  "chart.devices": "காட்ட வேண்டிய சாதனங்கள்",
+  "chart.combined": "அனைத்தும் சேர்த்து",
+  "tray.summary": "காற்றின் தரம்: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ஆஃப்லைன்",
+  "settings.tray.title": "சிஸ்டம் ட்ரேயில் காட்டு",
+  "settings.tray.hint": "மெனு பார், மேல் பட்டி அல்லது அறிவிப்புப் பகுதியில் காற்றின் தரமும் உங்கள் காற்று சுத்திகரிப்பான்களும். சாளரத்தை மூடினாலும் Domus அங்கே இயங்கும்.",
+  "settings.tray.noHost": "இந்த டெஸ்க்டாப்பில் ட்ரே ஐகான்களைக் காட்ட இடமில்லை. GNOME-இல் AppIndicator நீட்டிப்பை நிறுவி இயக்கி, Domus-ஐ மீண்டும் தொடங்குங்கள்."
 }

@@ -1151,5 +1151,13 @@
   "user.pick": "પસંદ કરો",
   "user.resetCode": "રીસેટ કોડ",
   "user.resetWithdrawn": "રીસેટ કોડ પાછો ખેંચ્યો",
-  "user.roomsAndDevices": "રૂમ્સ અને ઉપકરણો"
+  "user.roomsAndDevices": "રૂમ્સ અને ઉપકરણો",
+  "chart.devices": "બતાવવાના ઉપકરણો",
+  "chart.combined": "બધા સાથે",
+  "tray.summary": "હવાની ગુણવત્તા: {value} µg/m³, {label}",
+  "tray.deviceReading": "{name}: {value} µg/m³",
+  "tray.deviceOffline": "{name}: ઑફલાઇન",
+  "settings.tray.title": "સિસ્ટમ ટ્રેમાં બતાવો",
+  "settings.tray.hint": "મેનૂ બાર, ટોપ બાર અથવા સૂચના વિસ્તારમાં હવાની ગુણવત્તા અને તમારા એર પ્યુરિફાયર. વિન્ડો બંધ કરવા છતાં Domus ત્યાં ચાલતું રહે છે.",
+  "settings.tray.noHost": "આ ડેસ્કટોપમાં ટ્રે આઇકન બતાવવાની જગ્યા નથી. GNOME પર AppIndicator એક્સટેન્શન ઇન્સ્ટોલ કરીને ચાલુ કરો, પછી Domus ફરી શરૂ કરો."
 }
