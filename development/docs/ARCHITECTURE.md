@@ -290,6 +290,10 @@ fetched on its own (`?device_id=` on `/energy/history` and `/air/history`) and d
 value for that bucket. Live mode compares the devices' current readings sampled every five seconds.
 Energy compares kWh per bucket (W while live); Air compares the selected reading.
 
+Android does the same on Analytics (`DevicePicker` and `CompareChart` in `Analytics.kt`, `MultiLineChart` in
+`ui-shared/.../Charts.kt`): `FilterChip`s above the chart, one line per device in its own Material colour
+and dash (`seriesColor`, `seriesDash`), the selected bucket's value for each device above the chart.
+
 ### Notifications
 
 One shared inbox. `DELETE /notifications/{id}`, `DELETE /notifications` (all), and the read calls publish a

@@ -304,7 +304,8 @@ Design: `development/docs/ARCHITECTURE.md` ("History outlives the device", "Comp
 - [x] Backend: removing a device keeps its readings; adding it again reuses its id (`removed_devices`, migration `0014`)
 - [x] Web: device picker on the Energy and Air quality charts, one line per device with a hover readout of each
 - [x] Desktop: tray / menu bar / top bar with PM2.5 and a power switch per purifier, opt-in in Settings, hint on GNOME without AppIndicator
-- [ ] Android: the same device comparison on Analytics
+- [x] Android: the same device comparison on Analytics (Electricity and Air, every range including live; opened on the emulator against a test server)
+- [ ] Android: re-record the baseline profile (`pnpm android:profile`) after the comparison charts
 - [ ] Show removed devices' history (pick them in the comparison, count them in the home's totals)
 - [ ] Tray: smart plugs' power, start hidden at login
 - [ ] Check the tray on Windows and macOS hardware
