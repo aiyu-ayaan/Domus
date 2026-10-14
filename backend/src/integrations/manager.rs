@@ -670,7 +670,7 @@ impl DeviceManager {
 
         let now = Utc::now();
         let device = DeviceRecord {
-            id: Uuid::new_v4().to_string(),
+            id: self.device_id(&rec.integration_type, &rec.external_id).await?,
             name: req.name.filter(|n| !n.trim().is_empty()).unwrap_or(name),
             room_id: req.room_id.filter(|r| !r.is_empty()),
             integration_type: rec.integration_type.clone(),
@@ -714,7 +714,7 @@ impl DeviceManager {
         }
         let now = Utc::now();
         let device = DeviceRecord {
-            id: Uuid::new_v4().to_string(),
+            id: self.device_id(&req.integration_type, &d.external_id).await?,
             name: req.name.filter(|n| !n.trim().is_empty()).unwrap_or(d.name),
             room_id: req.room_id.filter(|r| !r.is_empty()),
             integration_type: req.integration_type.clone(),
@@ -738,6 +738,11 @@ impl DeviceManager {
         self.repo.delete_discovery_for(&req.integration_type, &d.external_id).await?;
         self.after_add(&device.id);
         Ok(device)
+    }
+
+    /// A device added again gets the id it had, so the history kept from before continues.
+    async fn device_id(&self, integration: &str, external_id: &str) -> sqlx::Result<String> {
+        Ok(self.repo.previous_id(integration, external_id).await?.unwrap_or_else(|| Uuid::new_v4().to_string()))
     }
 
     fn after_add(self: &Arc<Self>, device_id: &str) {

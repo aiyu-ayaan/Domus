@@ -68,7 +68,17 @@ impl DeviceRepository {
         .bind(d.last_seen)
         .execute(&self.pool)
         .await?;
+        sqlx::query("DELETE FROM removed_devices WHERE device_id = ?").bind(&d.id).execute(&self.pool).await?;
         Ok(())
+    }
+
+    /// The id this device had before it was removed, so its kept history carries on under it.
+    pub async fn previous_id(&self, integration: &str, external_id: &str) -> sqlx::Result<Option<String>> {
+        sqlx::query_scalar("SELECT device_id FROM removed_devices WHERE integration_type = ? AND external_id = ?")
+            .bind(integration)
+            .bind(external_id)
+            .fetch_optional(&self.pool)
+            .await
     }
 
     pub async fn update_meta(
@@ -140,12 +150,19 @@ impl DeviceRepository {
         Ok(())
     }
 
+    /// Removes the device but keeps its readings, remembering its id for when it is added again.
     pub async fn delete(&self, id: &str) -> sqlx::Result<()> {
-        sqlx::query("DELETE FROM devices WHERE id = ?")
-            .bind(id)
-            .execute(&self.pool)
-            .await?;
-        Ok(())
+        let mut tx = self.pool.begin().await?;
+        sqlx::query(
+            "INSERT OR REPLACE INTO removed_devices (integration_type, external_id, device_id, removed_at)
+             SELECT integration_type, external_id, id, ? FROM devices WHERE id = ? AND external_id IS NOT NULL",
+        )
+        .bind(Utc::now())
+        .bind(id)
+        .execute(&mut *tx)
+        .await?;
+        sqlx::query("DELETE FROM devices WHERE id = ?").bind(id).execute(&mut *tx).await?;
+        tx.commit().await
     }
 
     // --- discovery inbox -------------------------------------------------
@@ -220,5 +237,48 @@ impl DeviceRepository {
             .execute(&self.pool)
             .await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn removed_device_keeps_history_and_its_id() {
+        let pool = crate::infrastructure::database::init_pool("sqlite::memory:", 1).await.unwrap();
+        let repo = DeviceRepository::new(pool.clone());
+        let now = Utc::now();
+        let device = DeviceRecord {
+            id: "d1".into(),
+            name: "Purifier".into(),
+            room_id: None,
+            integration_type: "xiaomi".into(),
+            device_type: "air_purifier".into(),
+            model: None,
+            ip_address: None,
+            mac_address: None,
+            config_json: "{}".into(),
+            state_json: "{}".into(),
+            is_online: true,
+            created_at: now,
+            updated_at: now,
+            external_id: Some("ext".into()),
+            account_id: None,
+            secrets_enc: None,
+            icon: None,
+            last_seen: None,
+            confirm_changes: false,
+        };
+        repo.insert(&device).await.unwrap();
+        sqlx::query("INSERT INTO air_metrics (device_id, pm25) VALUES ('d1', 20)").execute(&pool).await.unwrap();
+
+        repo.delete("d1").await.unwrap();
+        let kept: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM air_metrics WHERE device_id = 'd1'").fetch_one(&pool).await.unwrap();
+        assert_eq!(kept, 1);
+        assert_eq!(repo.previous_id("xiaomi", "ext").await.unwrap().as_deref(), Some("d1"));
+
+        repo.insert(&device).await.unwrap();
+        assert_eq!(repo.previous_id("xiaomi", "ext").await.unwrap(), None);
     }
 }
