@@ -193,23 +193,48 @@ flowchart TD
   (`html.desktop` in `apps/web/src/index.css`, `--titlebar` offsets everything pinned to the top) and
   Electron overlays the window buttons on its right end, coloured from the theme chosen in Settings.
 - **Change server**: Settings → Server addresses → Change server.
-- **Tray**: Settings → Server addresses → Show in the system tray (`config.tray`, off by default). The tray
-  menu shows the home's worst PM2.5 and a power checkbox per air purifier; the macOS menu bar also shows the
-  PM2.5 beside the icon (Electron has no such label on Linux, so there it is in the tooltip and the menu). The page builds the menu (`useDesktopTray`,
-  `apps/web/src/lib/desktopTray.ts`) and sends it with `tray:update`; a click comes back as `tray:toggle` and
-  is sent as an ordinary command, so a device that asks before switching shows its question in the window.
-  With the tray on, closing the window hides it and Quit in the menu ends the app; opening the app again
-  shows the window (single-instance lock, per flavor).
+- **Tray and GNOME Quick Settings**: Settings → Server addresses → Show in the system tray (`config.tray`, off
+  by default). It shows the home's worst PM2.5 and a switch per air purifier, wherever the desktop puts such
+  things. The page builds the state (`useDesktopTray`, `apps/web/src/lib/desktopTray.ts`) and sends it with
+  `tray:update`; a switch comes back as `tray:toggle` and is sent as an ordinary command, so a device that asks
+  before switching shows its question in the window. With it on, closing the window hides it and Quit ends the
+  app; opening the app again shows the window (single-instance lock, per flavor).
 
-  | System | Where | Click |
+  | System | Where | How |
   | --- | --- | --- |
-  | Windows | notification area | left: open the window, right: menu |
-  | macOS | menu bar, with the PM2.5 as text | menu |
-  | Linux (KDE, Cinnamon, XFCE, MATE, Budgie) | panel, through StatusNotifierItem | menu |
-  | Linux GNOME | top bar only with the AppIndicator extension (Ubuntu ships it) | menu |
+  | Windows 10 / 11 | notification area | Electron `Tray`. Left click opens the window, right click the menu. Windows' own Quick Settings panel takes no tiles from apps. |
+  | macOS | menu bar, with the PM2.5 as text | Electron `Tray` |
+  | KDE Plasma, Cinnamon, XFCE, MATE, Budgie, LXQt, Ubuntu's GNOME | panel | Electron `Tray` through StatusNotifierItem |
+  | GNOME (any) | Quick Settings tile "Air purifiers" next to Wired and Power Mode, a top-bar icon while one runs | the `domus@aiyu.dev` Shell extension (`apps/desktop/src/gnome-extension`, GNOME 45 to 49) |
 
-  Without a StatusNotifierWatcher on the session bus (plain GNOME) there is nowhere to show it: Settings says
-  so, and closing the window quits as before instead of hiding it.
+  ```mermaid
+  flowchart LR
+      Page["web page (window, also while hidden)<br/>useDesktopTray"] -- "tray:update" --> Main["main.js"]
+      Main --> Tray["Electron Tray<br/>Windows, macOS, KDE, XFCE, ..."]
+      Main -- "JSON line per change<br/>$XDG_RUNTIME_DIR/domus/tray.sock" --> Ext["GNOME Shell extension<br/>Quick Settings tile"]
+      Ext -- "{toggle, on} / {open}" --> Main
+      Tray -- "menu click" --> Main
+      Main -- "tray:toggle" --> Page
+      Page -- "POST /devices/:id/command" --> Server[("Domus server")]
+  ```
+
+  GNOME has no tray, and only a Shell extension can add a Quick Settings tile. On GNOME, Settings offers
+  **Add to Quick Settings**: it copies the extension to `~/.local/share/gnome-shell/extensions/domus@aiyu.dev`,
+  adds it to `org.gnome.shell enabled-extensions` and tries `gnome-extensions enable`. GNOME loads a new
+  extension only at login, so the first time needs a log out and back in. The app copies the bundled
+  extension over the installed one when it starts, so an app update updates the tile too (from the next login).
+  The extension reads the app's state from a socket in the user's runtime directory (`domus` for the
+  installed app, `domus-dev` for development, mode `0600` in a `0700` directory): only this user reaches it,
+  and the extension accepts nothing but a switch for a purifier the menu offers, or "open". It shows nothing
+  while Domus is not running or not signed in, and looks again every five seconds. Every text in it comes
+  from the app, in the app's language.
+
+  Without a tray host and without the extension (plain GNOME before it is added), closing the window quits as
+  before instead of hiding it.
+
+  Checked: the tray on GNOME with a stand-in StatusNotifierWatcher (menu, switches, open, quit, hide), and the
+  Quick Settings tile in a nested GNOME Shell 46 (tile, menu, switches, the tile switching every online
+  purifier). Not checked on Windows, macOS or a real KDE / XFCE session.
 - **Development**: `DOMUS_URL=http://localhost:3000 pnpm dev:desktop` skips the connect page.
 
 ### Linux

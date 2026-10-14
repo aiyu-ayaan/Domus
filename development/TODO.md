@@ -308,7 +308,8 @@ Design: `development/docs/ARCHITECTURE.md` ("History outlives the device", "Comp
 - [ ] Android: re-record the baseline profile (`pnpm android:profile`) after the comparison charts
 - [ ] Show removed devices' history (pick them in the comparison, count them in the home's totals)
 - [ ] Tray: smart plugs' power, start hidden at login
-- [ ] Check the tray on Windows and macOS hardware
+- [x] GNOME: Quick Settings tile through the `domus@aiyu.dev` Shell extension, installed from Settings (checked in a nested GNOME Shell 46)
+- [ ] Check the tray on Windows and macOS hardware, and on a real KDE / XFCE session
 
 ## Road to v1.0.0 (assessment 2026-10-12, to work through later)
 Order matters: each step unblocks the next. Suggested scope for 1.0: Android + web + Docker with Tuya, Tapo and Xiaomi; desktop, Hue, MQTT and Zigbee labelled beta.
