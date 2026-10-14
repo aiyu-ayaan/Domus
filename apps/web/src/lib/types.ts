@@ -294,6 +294,19 @@ export interface ElectricitySettings {
   slabs: { up_to_kwh: number | null; rate: number }[]
   /** Windows of the day ("HH:MM" on the home's clock) whose units cost `adjust` more, or less when negative. */
   time_of_use: { start: string; end: string; adjust: number }[]
+  /** Devices that measure solar generation: counted as production, not consumption. */
+  solar_device_ids: string[]
+  /** 'net': exported units offset imported ones; 'feed_in': they are paid at export_rate. */
+  export_mode: 'net' | 'feed_in'
+  export_rate: number
+}
+
+/** Energy through the grid connection, worked out per quarter hour from metered use and generation. */
+export interface Flows {
+  generated_kwh: number
+  self_used_kwh: number
+  imported_kwh: number
+  exported_kwh: number
 }
 
 export interface EnergyOverview {
@@ -319,6 +332,8 @@ export interface EnergyOverview {
     standby_watts: number | null
     standby_monthly_cost: number | null
   }[]
+  /** Present when solar devices are set. */
+  solar: { current_watts: number; today: Flows; cycle: Flows; cycle_credit: number } | null
 }
 
 export interface EnergyPoint {

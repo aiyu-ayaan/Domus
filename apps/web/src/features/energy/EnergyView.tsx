@@ -3,7 +3,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { Card, CardHeader, Metric, PageHeader, Skeleton } from '@/components/ui/Card'
 import { CalendarBlank, CalendarDot, CalendarDots, Clock, Pulse } from '@phosphor-icons/react'
 import { Segmented } from '@/components/ui/Controls'
-import { Field, SelectField } from '@/components/ui/Field'
+import { Checkbox, Field, SelectField } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
 import { EnergyChart } from '@/components/devices/EnergyChart'
 import { TrendChart } from '@/components/devices/TrendChart'
@@ -16,7 +16,7 @@ import { t, formatLocale } from '@/lib/i18n'
 import { keys, useDevices, useEnergy } from '@/lib/queries'
 import { formatBucket, formatKwh, formatMoney, formatNumber, formatWatts, ltr, type Range } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
-import type { ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
+import type { Device, ElectricitySettings, EnergyOverview, EnergyPoint } from '@/lib/types'
 
 const RANGES = [
   { value: 'live' as const, label: 'common.live', icon: Pulse },
@@ -147,6 +147,29 @@ export function EnergyView() {
         )}
       </Card>
 
+      {o.solar && (
+        <Card className="mt-6">
+          <CardHeader title={t('energy.solar.title')} />
+          <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-5">
+            {[
+              [t('energy.solar.now'), formatWatts(o.solar.current_watts)],
+              [t('energy.solar.generated'), formatKwh(o.solar.cycle.generated_kwh)],
+              [t('energy.solar.selfUsed'), formatKwh(o.solar.cycle.self_used_kwh)],
+              [t('energy.solar.exported'), formatKwh(o.solar.cycle.exported_kwh)],
+              o.settings.export_mode === 'feed_in'
+                ? [t('energy.solar.earned'), formatMoney(o.solar.cycle_credit, currency)]
+                : [t('energy.solar.imported'), formatKwh(o.solar.cycle.imported_kwh)],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-panel px-4 py-3">
+                <p className="text-label text-muted">{label}</p>
+                <p className="mt-0.5 text-title font-semibold tabular">{value}</p>
+              </div>
+            ))}
+          </div>
+          <p className="border-t border-border px-4 py-2 text-caption text-subtle">{t('energy.solar.hint')}</p>
+        </Card>
+      )}
+
       {o.devices.some((d) => d.standby_watts != null) && (
         <Card className="mt-6">
           <CardHeader title={t('energy.standby.title')} />
@@ -167,7 +190,7 @@ export function EnergyView() {
         </Card>
       )}
 
-      {admin && <Plan initial={o.settings} />}
+      {admin && <Plan initial={o.settings} devices={devices ?? []} />}
     </>
   )
 }
@@ -265,7 +288,7 @@ function useCurrencies(current: string) {
 
 type SlabRow = { up_to_kwh: string; rate: string }
 
-function Plan({ initial }: { initial: ElectricitySettings }) {
+function Plan({ initial, devices }: { initial: ElectricitySettings; devices: Device[] }) {
   const qc = useQueryClient()
   const toast = useToast()
   const [s, setS] = useState({
@@ -284,6 +307,10 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
           { up_to_kwh: '', rate: '' },
         ],
   )
+  const [solarIds, setSolarIds] = useState(initial.solar_device_ids)
+  const [exportMode, setExportMode] = useState(initial.export_mode)
+  const [exportRate, setExportRate] = useState(String(initial.export_rate))
+  const meters = devices.filter((d) => d.state.current_power_watts != null || solarIds.includes(d.id))
   const [windows, setWindows] = useState(initial.time_of_use.map((w) => ({ ...w, adjust: String(w.adjust) })))
   const setWindow = (i: number, k: 'start' | 'end' | 'adjust', v: string) => setWindows(windows.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const currencies = useCurrencies(s.currency)
@@ -300,6 +327,9 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
           ? slabs.map((x, i) => ({ up_to_kwh: x.up_to_kwh === '' || i === slabs.length - 1 ? null : Number(x.up_to_kwh), rate: Number(x.rate) }))
           : [],
         time_of_use: windows.map((w) => ({ ...w, adjust: Number(w.adjust) })),
+        solar_device_ids: solarIds,
+        export_mode: exportMode,
+        export_rate: Number(exportRate || 0),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['energy'] })
@@ -381,6 +411,39 @@ function Plan({ initial }: { initial: ElectricitySettings }) {
             </Button>
           </div>
         </fieldset>
+        {meters.length > 0 && (
+          <fieldset className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
+            <legend className="mb-1 text-label font-medium text-fg">{t('energy.solar.title')}</legend>
+            <p className="text-label text-muted">{t('energy.solar.devicesHelp')}</p>
+            <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+              {meters.map((d) => (
+                <Checkbox key={d.id} checked={solarIds.includes(d.id)} onChange={() => setSolarIds(solarIds.includes(d.id) ? solarIds.filter((x) => x !== d.id) : [...solarIds, d.id])}>
+                  {d.name}
+                </Checkbox>
+              ))}
+            </div>
+            {solarIds.length > 0 && (
+              <div className="grid items-end gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-label font-medium text-fg">{t('energy.solar.exportMode')}</span>
+                  <Segmented
+                    size="sm"
+                    label={t('energy.solar.exportMode')}
+                    value={exportMode}
+                    onChange={(v) => setExportMode(v as 'net' | 'feed_in')}
+                    options={[
+                      { value: 'net', label: t('energy.solar.net') },
+                      { value: 'feed_in', label: t('energy.solar.feedIn') },
+                    ]}
+                  />
+                </div>
+                {exportMode === 'feed_in' && (
+                  <Field label={t('energy.solar.exportRate')} type="number" step="0.0001" min="0" required value={exportRate} onChange={(e) => setExportRate(e.target.value)} />
+                )}
+              </div>
+            )}
+          </fieldset>
+        )}
         <SelectField label={t('energy.plan.currency')} required value={s.currency} onChange={(e) => setS({ ...s, currency: e.target.value })}>
           {currencies.map((c) => (
             <option key={c.code} value={c.code}>
