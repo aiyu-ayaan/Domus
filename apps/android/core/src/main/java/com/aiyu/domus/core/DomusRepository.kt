@@ -413,9 +413,8 @@ class DomusRepository(
     private fun replace(device: Device) {
         _devices.update { list ->
             val next = list.map { if (it.id == device.id) device else it }
-            val liveWatts = next.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
             _energy.update { current ->
-                current?.copy(watts = liveWatts)
+                current?.copy(watts = next.usingWatts(current.settings.solarDeviceIds))
             }
             next
         }
@@ -507,7 +506,7 @@ class DomusRepository(
                     delay(5000)
                     if (foreground) {
                         attempt { it.energyOverview() }?.let { overview ->
-                            val currentLiveWatts = _devices.value.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+                            val currentLiveWatts = _devices.value.usingWatts(overview.settings.solarDeviceIds)
                             val wattsToKeep = if (_devices.value.any { it.isOnline && it.state.watts != null }) currentLiveWatts else overview.watts
                             _energy.value = overview.copy(watts = wattsToKeep)
                         }

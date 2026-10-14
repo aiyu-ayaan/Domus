@@ -48,6 +48,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aiyu.domus.core.usingWatts
 import com.aiyu.domus.core.AirLevel
 import com.aiyu.domus.core.AirPoint
 import com.aiyu.domus.core.Device
@@ -348,7 +349,7 @@ private fun ColumnScope.ElectricitySection() {
     }
     val currency = overview.settings.currency
 
-    val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+    val liveWatts = devices.usingWatts(overview.settings.solarDeviceIds)
     val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
 
     val summary: @Composable ColumnScope.() -> Unit = {

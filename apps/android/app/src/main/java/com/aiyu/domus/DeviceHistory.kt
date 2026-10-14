@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Device
+import com.aiyu.domus.ui.components.CollapsibleCard
 import com.aiyu.domus.core.EffectCatalog
 import com.aiyu.domus.core.LogActor
 import com.aiyu.domus.core.LogEntry
@@ -66,28 +70,25 @@ fun DeviceHistory(device: Device) {
     }
     val list = entries ?: return
     val c = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.logbook_title), style = MaterialTheme.typography.titleSmall)
-        if (list.isEmpty()) {
-            Text(stringResource(R.string.logbook_empty), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
-            return@Column
-        }
-        Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large) {
-            Column {
-                list.forEachIndexed { i, e ->
-                    if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = c.outlineVariant)
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        val color = (e.value as? JsonPrimitive)?.content?.takeIf { e.field == "color" }
-                        color?.let { hex -> runCatching { Color(hex.toColorInt()) }.getOrNull() }?.let {
-                            Box(Modifier.size(12.dp).background(it, CircleShape))
-                        }
-                        Column(Modifier.weight(1f)) {
-                            Text(what(e, effects), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            if (e.field != "is_online") Text(who(e.actor), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                        Text(moment(e.at), style = MaterialTheme.typography.labelMedium, color = c.onSurfaceVariant)
-                    }
+    // Collapsed by default: the sheet stays about controls, the latest change still shows.
+    CollapsibleCard(
+        title = stringResource(R.string.logbook_title),
+        subtitle = list.firstOrNull()?.let { "${what(it, effects)} · ${moment(it.at)}" } ?: stringResource(R.string.logbook_empty),
+        leading = { Icon(Icons.Rounded.History, contentDescription = null, tint = c.onSurfaceVariant) },
+    ) {
+        list.forEachIndexed { i, e ->
+            // The card already spaces its items and pads the sides.
+            if (i > 0) HorizontalDivider(color = c.outlineVariant)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                val color = (e.value as? JsonPrimitive)?.content?.takeIf { e.field == "color" }
+                color?.let { hex -> runCatching { Color(hex.toColorInt()) }.getOrNull() }?.let {
+                    Box(Modifier.size(12.dp).background(it, CircleShape))
                 }
+                Column(Modifier.weight(1f)) {
+                    Text(what(e, effects), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (e.field != "is_online") Text(who(e.actor), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                Text(moment(e.at), style = MaterialTheme.typography.labelMedium, color = c.onSurfaceVariant)
             }
         }
         if (list.size >= limit && limit < 200) TextButton({ limit += PAGE * 2 }) { Text(stringResource(R.string.logbook_more)) }

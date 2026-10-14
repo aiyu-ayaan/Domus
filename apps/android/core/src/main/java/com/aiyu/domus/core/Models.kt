@@ -329,6 +329,9 @@ data class EnergySettings(
     @SerialName("export_rate") val exportRate: Double = 0.0,
 )
 
+/** What the home draws right now: online metered devices, solar generation left out. */
+fun List<Device>.usingWatts(solar: List<String>): Double = filter { it.isOnline && it.id !in solar }.mapNotNull { it.state.watts }.sum().toDouble()
+
 /** Energy through the grid connection, worked out per quarter hour from metered use and generation. */
 @Serializable
 data class Flows(

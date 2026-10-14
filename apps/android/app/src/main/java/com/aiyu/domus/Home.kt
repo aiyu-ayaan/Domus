@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
+import com.aiyu.domus.core.usingWatts
 import com.aiyu.domus.core.Notice
 import com.aiyu.domus.core.Scene
 import com.aiyu.domus.ui.components.pressScale
@@ -208,7 +209,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
             val metered = devices.any { it.state.watts != null }
             val overview = energy
             if (metered && overview != null) {
-                val liveWatts = devices.filter { it.isOnline }.mapNotNull { it.state.watts }.sum().toDouble()
+                val liveWatts = devices.usingWatts(overview.settings.solarDeviceIds)
                 val wattsToDisplay = if (devices.any { it.isOnline && it.state.watts != null }) liveWatts else overview.watts
 
                 // Both cards take the height of the taller one.

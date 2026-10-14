@@ -70,6 +70,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -191,8 +192,12 @@ fun <T> Picker(label: String, options: List<Pair<T, String>>, selected: T, onSel
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     options.forEach { (value, name) ->
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(value == selected, { onSelect(value); open = false })
+                        // The whole row picks, not just the radio dot.
+                        Row(
+                            Modifier.fillMaxWidth().selectable(value == selected, role = Role.RadioButton) { onSelect(value); open = false },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(value == selected, onClick = null, modifier = Modifier.minimumInteractiveComponentSize())
                             Text(name, Modifier.weight(1f))
                         }
                     }
