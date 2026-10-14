@@ -1,3 +1,7 @@
+<img src="design-system/domus/brand/app-icon.svg" alt="Domus logo" width="72" />
+
+# Domus
+
 <p align="center">
   <b>Translations</b><br>
   <a href="README.md">English</a> ·
@@ -28,10 +32,6 @@
   <a href="README.zh-CN.md">简体中文</a> ·
   <a href="README.zh-TW.md">繁體中文</a>
 </p>
-
-<img src="design-system/domus/brand/app-icon.svg" alt="Domus logo" width="72" />
-
-# Domus
 
 [![Release](https://img.shields.io/github/actions/workflow/status/aiyu-ayaan/Domus-Rust/release.yml?branch=master&label=release&logo=githubactions&logoColor=white)](https://github.com/aiyu-ayaan/Domus-Rust/actions/workflows/release.yml)
 [![Latest release](https://img.shields.io/github/v/release/aiyu-ayaan/Domus-Rust?include_prereleases&label=version&logo=github)](https://github.com/aiyu-ayaan/Domus-Rust/releases)
