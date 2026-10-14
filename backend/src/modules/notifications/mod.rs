@@ -60,7 +60,8 @@ pub fn classify_notification(title: &str, message: &str) -> (Option<String>, Opt
     }
     if let Some(name) = title.strip_suffix(" left on") {
         if let Some(minutes) = message.strip_prefix(&format!("{name} has been on for ")).and_then(|m| m.strip_suffix(" minutes.")) {
-            return (Some("notification.left_on".into()), Some(json!({ "name": name, "minutes": minutes.parse::<i64>().unwrap_or(0) })));
+            // Params are strings: older apps read them as such.
+            return (Some("notification.left_on".into()), Some(json!({ "name": name, "minutes": minutes })));
         }
     }
     if let Some(name) = title.strip_prefix("Replace the filter of ") {
@@ -202,7 +203,7 @@ mod tests {
     fn watchdog_alerts_get_codes() {
         let (code, params) = classify_notification("Heater left on", "Heater has been on for 90 minutes.");
         assert_eq!(code.as_deref(), Some("notification.left_on"));
-        assert_eq!(params, Some(json!({ "name": "Heater", "minutes": 90 })));
+        assert_eq!(params, Some(json!({ "name": "Heater", "minutes": "90" })));
         let (code, params) = classify_notification("Replace the filter of Purifier", "8% of the filter life is left.");
         assert_eq!(code.as_deref(), Some("notification.filter_low"));
         assert_eq!(params, Some(json!({ "name": "Purifier", "percent": "8" })));

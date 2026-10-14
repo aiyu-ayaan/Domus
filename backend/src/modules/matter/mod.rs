@@ -170,6 +170,7 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
             })
             .collect();
         let ids: Vec<String> = records.iter().map(|d| d.id.clone()).collect();
+        let names: HashMap<String, String> = records.iter().map(|d| (d.id.clone(), d.name.clone())).collect();
 
         let pairing = std::mem::take(&mut STATUS.lock().unwrap().pairing);
         let setup = bridge::Setup { dir: store(&data_dir), passcode: settings.passcode, discriminator: settings.discriminator, host: settings.host.clone(), pairing, port };
@@ -235,8 +236,15 @@ pub async fn run(pool: SqlitePool, manager: Arc<DeviceManager>, bus: EventBus, d
                             }
                         }
                     }
-                    // A shared device renamed or removed: the controllers get the new list.
-                    Ok(SystemEvent::DeviceUpdated { device_id } | SystemEvent::DeviceRemoved { device_id }) if ids.contains(&device_id) => break,
+                    // A shared device removed or renamed: the controllers get the new list. Other edits
+                    // (its room, an alert) do not touch Matter.
+                    Ok(SystemEvent::DeviceRemoved { device_id }) if ids.contains(&device_id) => break,
+                    Ok(SystemEvent::DeviceUpdated { device_id }) if ids.contains(&device_id) => {
+                        let renamed = manager.get(&device_id).await.map_or(true, |d| names.get(&device_id) != Some(&d.name));
+                        if renamed {
+                            break;
+                        }
+                    }
                     Err(tokio::sync::broadcast::error::RecvError::Closed) => return,
                     _ => {}
                 },
