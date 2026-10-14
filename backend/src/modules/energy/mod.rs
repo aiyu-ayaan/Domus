@@ -34,6 +34,43 @@ pub struct ElectricitySettings {
     #[sqlx(json)]
     #[serde(default)]
     pub time_of_use: Vec<TimeOfUse>,
+    /// Devices that measure solar generation: counted as production, never as consumption.
+    #[sqlx(json)]
+    #[serde(default)]
+    pub solar_device_ids: Vec<String>,
+    /// "net": exported units offset imported ones; "feed_in": they are paid at `export_rate`.
+    #[serde(default = "net")]
+    pub export_mode: String,
+    #[serde(default)]
+    pub export_rate: f64,
+}
+
+fn net() -> String {
+    "net".into()
+}
+
+/// Energy through the grid connection, from metered use and solar generation per quarter hour.
+/// shortcut: only metered devices count as use, so with unmetered loads the export is overstated; add a
+/// whole-home meter device when that matters.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Serialize)]
+pub struct Flows {
+    pub generated_kwh: f64,
+    pub self_used_kwh: f64,
+    pub imported_kwh: f64,
+    pub exported_kwh: f64,
+}
+
+impl Flows {
+    /// `quarters` holds (use, generation) in kWh per quarter hour.
+    pub fn from_quarters(quarters: impl IntoIterator<Item = (f64, f64)>) -> Self {
+        quarters.into_iter().fold(Self::default(), |mut f, (used, made)| {
+            f.generated_kwh += made;
+            f.self_used_kwh += used.min(made);
+            f.imported_kwh += (used - made).max(0.0);
+            f.exported_kwh += (made - used).max(0.0);
+            f
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -123,6 +160,9 @@ impl Default for ElectricitySettings {
             fixed_monthly_charge: 0.0,
             slabs: vec![],
             time_of_use: vec![],
+            solar_device_ids: vec![],
+            export_mode: net(),
+            export_rate: 0.0,
         }
     }
 }
@@ -136,7 +176,8 @@ pub fn energy_routes() -> Router<AppState> {
 
 pub async fn load_settings(pool: &SqlitePool) -> ElectricitySettings {
     sqlx::query_as(
-        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use FROM electricity_settings LIMIT 1",
+        "SELECT rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use, solar_device_ids, export_mode, export_rate
+         FROM electricity_settings LIMIT 1",
     )
     .fetch_optional(pool)
     .await
@@ -155,7 +196,7 @@ async fn put_settings(
     Json(req): Json<ElectricitySettings>,
 ) -> ApiResult<Json<ElectricitySettings>> {
     user.require_admin()?;
-    if req.rate_per_kwh < 0.0 || req.fixed_monthly_charge < 0.0 {
+    if req.rate_per_kwh < 0.0 || req.fixed_monthly_charge < 0.0 || req.export_rate < 0.0 {
         return Err(ApiError::BadRequest("Rates cannot be negative".into()));
     }
     if !(1..=28).contains(&req.billing_cycle_day) {
@@ -194,11 +235,15 @@ async fn put_settings(
             }
         }
     }
+    if !matches!(req.export_mode.as_str(), "net" | "feed_in") {
+        return Err(ApiError::BadRequest("Exported units are either netted or paid at a rate".into()));
+    }
     let mut tx = s.pool.begin().await?;
     sqlx::query("DELETE FROM electricity_settings").execute(&mut *tx).await?;
     sqlx::query(
-        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use, updated_at)
-         VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO electricity_settings (id, rate_per_kwh, currency, monthly_budget, billing_cycle_day, fixed_monthly_charge, slabs, time_of_use,
+             solar_device_ids, export_mode, export_rate, updated_at)
+         VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(req.rate_per_kwh)
     .bind(req.currency.trim().to_uppercase())
@@ -207,6 +252,9 @@ async fn put_settings(
     .bind(req.fixed_monthly_charge)
     .bind(sqlx::types::Json(&req.slabs))
     .bind(sqlx::types::Json(&req.time_of_use))
+    .bind(sqlx::types::Json(&req.solar_device_ids))
+    .bind(&req.export_mode)
+    .bind(req.export_rate)
     .bind(Utc::now())
     .execute(&mut *tx)
     .await?;
@@ -377,11 +425,44 @@ struct Overview {
     budget_used_percent: Option<f64>,
     settings: ElectricitySettings,
     devices: Vec<DeviceUsage>,
+    /// Present when solar devices are set: generation and the grid flows it implies.
+    solar: Option<Solar>,
+}
+
+#[derive(Serialize)]
+struct Solar {
+    current_watts: f64,
+    today: Flows,
+    cycle: Flows,
+    /// What exported units earned this cycle (feed-in only; netted units lower the bill instead).
+    cycle_credit: f64,
+}
+
+/// (use, generation) in kWh per quarter hour since `from`, keyed by when the quarter began.
+async fn quarters(pool: &SqlitePool, from: DateTime<Utc>, users: &[&str], makers: &[&str]) -> ApiResult<Vec<(DateTime<Utc>, f64, f64)>> {
+    let rows: Vec<(String, String, i64, f64)> = sqlx::query_as(
+        "SELECT device_id, substr(recorded_at, 1, 13) AS h, CAST(substr(recorded_at, 15, 2) AS INTEGER) / 15 AS q, SUM(energy_kwh)
+         FROM energy_metrics WHERE recorded_at >= ? GROUP BY device_id, h, q",
+    )
+    .bind(from)
+    .fetch_all(pool)
+    .await?;
+    let mut by_time: HashMap<DateTime<Utc>, (f64, f64)> = HashMap::new();
+    for (device, hour, part, kwh) in rows {
+        let Some(t) = utc_group(&hour, part * 15) else { continue };
+        if users.contains(&device.as_str()) {
+            by_time.entry(t).or_default().0 += kwh;
+        } else if makers.contains(&device.as_str()) {
+            by_time.entry(t).or_default().1 += kwh;
+        }
+    }
+    Ok(by_time.into_iter().map(|(t, (used, made))| (t, used, made)).collect())
 }
 
 async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Overview>> {
     let settings = load_settings(&s.pool).await;
-    let devices = visible_devices(&s, &user).await?;
+    let (solar_devices, devices): (Vec<_>, Vec<_>) =
+        visible_devices(&s, &user).await?.into_iter().partition(|d| settings.solar_device_ids.contains(&d.id));
     let now = Local::now();
     let today = now.date_naive();
     let (cycle_start, cycle_days) = billing_cycle(today, settings.billing_cycle_day as u32);
@@ -428,13 +509,39 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     // Days elapsed including a fraction of today, so early-cycle projections stay sane.
     let elapsed = (now - local_midnight(cycle_start)).num_minutes() as f64 / 1440.0;
     let projected_kwh = if elapsed > 0.25 { cycle_kwh / elapsed * cycle_days as f64 } else { cycle_kwh };
-    let energy_cost = settings.energy_cost(cycle_kwh);
-    let cycle_cost = energy_cost + cycle_timed + settings.fixed_monthly_charge;
-    // The rest of the cycle is assumed to be used at the same times of day as so far.
-    let projected_timed = if cycle_kwh > 0.0 { cycle_timed * projected_kwh / cycle_kwh } else { 0.0 };
-    let projected_cost = settings.energy_cost(projected_kwh) + projected_timed + settings.fixed_monthly_charge;
+    // With solar, the bill is for the units bought from the grid (less the exported ones when netted).
+    let mut solar = None;
+    let (mut billed, mut billed_today, mut timed_share, mut credit, mut credit_today) = (cycle_kwh, today_kwh, 1.0, 0.0, 0.0);
+    if !solar_devices.is_empty() {
+        let users: Vec<&str> = devices.iter().map(|d| d.id.as_str()).collect();
+        let makers: Vec<&str> = solar_devices.iter().map(|d| d.id.as_str()).collect();
+        let rows = quarters(&s.pool, local_midnight(cycle_start).with_timezone(&Utc), &users, &makers).await?;
+        let midnight = local_midnight(today).with_timezone(&Utc);
+        let cycle = Flows::from_quarters(rows.iter().map(|r| (r.1, r.2)));
+        let day = Flows::from_quarters(rows.iter().filter(|r| r.0 >= midnight).map(|r| (r.1, r.2)));
+        let feed_in = settings.export_mode == "feed_in";
+        let bill = |f: &Flows| if feed_in { f.imported_kwh } else { (f.imported_kwh - f.exported_kwh).max(0.0) };
+        let paid = |f: &Flows| if feed_in { f.exported_kwh * settings.export_rate } else { 0.0 };
+        (billed, billed_today, credit, credit_today) = (bill(&cycle), bill(&day), paid(&cycle), paid(&day));
+        // shortcut: time-of-use charges follow the share of use that came from the grid, not each quarter's import.
+        timed_share = if cycle_kwh > 0.0 { (cycle.imported_kwh / cycle_kwh).min(1.0) } else { 0.0 };
+        let current_watts = solar_devices
+            .iter()
+            .filter(|d| d.is_online)
+            .filter_map(|d| d.state().current_power_watts)
+            .map(f64::from)
+            .sum::<f64>()
+            + 0.0;
+        solar = Some(Solar { current_watts, today: day, cycle, cycle_credit: credit });
+    }
+    let energy_cost = settings.energy_cost(billed);
+    let cycle_cost = energy_cost + cycle_timed * timed_share + settings.fixed_monthly_charge - credit;
+    // The rest of the cycle is assumed to go like it has so far, at the same times of day.
+    let scale = if cycle_kwh > 0.0 { projected_kwh / cycle_kwh } else { 1.0 };
+    let projected_cost =
+        settings.energy_cost(billed * scale) + cycle_timed * timed_share * scale + settings.fixed_monthly_charge - credit * scale;
     // Today's units are the latest in the cycle, so they sit in the highest slabs reached.
-    let today_cost = energy_cost - settings.energy_cost((cycle_kwh - today_kwh).max(0.0)) + today_timed;
+    let today_cost = energy_cost - settings.energy_cost((billed - billed_today).max(0.0)) + today_timed * timed_share - credit_today;
     // Devices share the cycle's energy charge at the average rate.
     let avg_rate = if cycle_kwh > 0.0 { energy_cost / cycle_kwh } else { settings.energy_cost(1.0) };
     let standby = standby_by_device(&s.pool).await?;
@@ -463,6 +570,7 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
             .map(|b| cycle_cost / b * 100.0),
         settings,
         devices: usage,
+        solar,
     }))
 }
 
@@ -522,7 +630,8 @@ async fn history(State(s): State<AppState>, user: AuthUser, Query(q): Query<Hist
     let mut peaks: HashMap<(usize, DateTime<Utc>), f64> = HashMap::new();
 
     for (device_id, hour, part, kwh, watts, samples, peak) in rows {
-        if q.device_id.as_ref().map_or(!visible.contains(&device_id), |d| *d != device_id) {
+        // The home's use leaves out solar generation; one device asked for by id is shown as it is.
+        if q.device_id.as_ref().map_or(!visible.contains(&device_id) || settings.solar_device_ids.contains(&device_id), |d| *d != device_id) {
             continue;
         }
         let Some((t, i)) = buckets.group_time(&hour, part).and_then(|t| Some((t, buckets.index(t)?))) else { continue };
@@ -588,6 +697,17 @@ mod tests {
         assert_eq!(berlin.index(Utc.with_ymd_and_hms(2026, 10, 25, 22, 30, 0).unwrap()), Some(4)); // 23:30 on the 25-hour day
         // An unknown zone falls back to the server's instead of failing.
         assert_eq!(Buckets::new(None, Some("Mars/Olympus"), now).count(), 24);
+    }
+
+    #[test]
+    fn solar_splits_into_grid_flows() {
+        // Morning: 0.3 used, 0.1 made. Noon: 0.2 used, 0.5 made. Night: 0.4 used.
+        let f = Flows::from_quarters([(0.3, 0.1), (0.2, 0.5), (0.4, 0.0)]);
+        let close = |a: f64, b: f64| (a - b).abs() < 1e-9;
+        assert!(close(f.generated_kwh, 0.6));
+        assert!(close(f.self_used_kwh, 0.3));
+        assert!(close(f.imported_kwh, 0.6));
+        assert!(close(f.exported_kwh, 0.3));
     }
 
     #[test]
