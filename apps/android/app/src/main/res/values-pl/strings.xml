@@ -978,4 +978,21 @@
     <string name="logbook_client_desktop">Aplikacja na komputer</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Pokaż więcej</string>
+    <string name="runs_title">Uruchomienia: %1$s</string>
+    <string name="runs_hint">Każde wystąpienie wyzwalacza i jego wynik.</string>
+    <string name="runs_empty">Brak uruchomień. Każdy wyzwalacz jest tu widoczny, nawet gdy zatrzyma go warunek.</string>
+    <string name="runs_outcome_done">Wykonano</string>
+    <string name="runs_outcome_failed">Błąd</string>
+    <string name="runs_outcome_blocked">Pominięto</string>
+    <string name="runs_outcome_running">W toku</string>
+    <string name="runs_manual">Uruchomił(a): %1$s</string>
+    <string name="runs_trigger_removed">Wyzwalacz, który został usunięty</string>
+    <string name="runs_held_back">Nie uruchomiono: %1$s</string>
+    <string name="runs_cond_between">nie było między %1$s a %2$s</string>
+    <string name="runs_cond_state">%1$s nie był(a) w wymaganym stanie</string>
+    <string name="runs_cond_removed">warunek, który został usunięty</string>
+    <string name="editor_rule_power_above_for">Gdy %1$s pobiera ponad %2$s W przez %3$s min</string>
+    <string name="editor_field_for_minutes">Przez co najmniej (minuty)</string>
+    <string name="code_error_power_duration_range">Wyzwalacz mocy może czekać od 1 minuty do 24 godzin</string>
+    <string name="editor_for_minutes_supporting">Zostaw puste, aby zacząć od razu</string>
 </resources>

@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">டெஸ்க்டாப் ஆப்</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">மேலும் காட்டு</string>
+    <string name="runs_title">%1$s இயக்கங்கள்</string>
+    <string name="runs_hint">ஒவ்வொரு முறை தூண்டுதல் நடந்தபோதும் என்ன ஆனது.</string>
+    <string name="runs_empty">இன்னும் இயக்கங்கள் இல்லை. நிபந்தனை தடுத்தாலும் ஒவ்வொரு தூண்டுதலும் இங்கே காட்டப்படும்.</string>
+    <string name="runs_outcome_done">இயங்கியது</string>
+    <string name="runs_outcome_failed">தோல்வி</string>
+    <string name="runs_outcome_blocked">தவிர்க்கப்பட்டது</string>
+    <string name="runs_outcome_running">இயங்குகிறது</string>
+    <string name="runs_manual">%1$s இயக்கினார்</string>
+    <string name="runs_trigger_removed">பின்னர் நீக்கப்பட்ட தூண்டுதல்</string>
+    <string name="runs_held_back">இயங்கவில்லை: %1$s</string>
+    <string name="runs_cond_between">நேரம் %1$s முதல் %2$s வரை இல்லை</string>
+    <string name="runs_cond_state">%1$s தேவையான நிலையில் இல்லை</string>
+    <string name="runs_cond_removed">பின்னர் நீக்கப்பட்ட நிபந்தனை</string>
+    <string name="editor_rule_power_above_for">%1$s %3$s நிமிடம் %2$s W-க்கு மேல் எடுக்கும்போது</string>
+    <string name="editor_field_for_minutes">குறைந்தது (நிமிடங்கள்)</string>
+    <string name="code_error_power_duration_range">மின் தூண்டுதல் 1 நிமிடம் முதல் 24 மணி நேரம் வரை காத்திருக்கலாம்</string>
+    <string name="editor_for_minutes_supporting">உடனே தொடங்க காலியாக விடவும்</string>
 </resources>

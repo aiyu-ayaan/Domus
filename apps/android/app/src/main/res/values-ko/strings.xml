@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">데스크톱 앱</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">더 보기</string>
+    <string name="runs_title">%1$s 실행 기록</string>
+    <string name="runs_hint">트리거가 발생할 때마다 어떻게 되었는지 보여 줍니다.</string>
+    <string name="runs_empty">아직 실행 기록이 없습니다. 조건 때문에 멈춘 경우에도 트리거마다 기록됩니다.</string>
+    <string name="runs_outcome_done">실행됨</string>
+    <string name="runs_outcome_failed">실패</string>
+    <string name="runs_outcome_blocked">건너뜀</string>
+    <string name="runs_outcome_running">실행 중</string>
+    <string name="runs_manual">%1$s님이 실행</string>
+    <string name="runs_trigger_removed">이후 삭제된 트리거</string>
+    <string name="runs_held_back">실행 안 됨: %1$s</string>
+    <string name="runs_cond_between">%1$s~%2$s 사이가 아니었습니다</string>
+    <string name="runs_cond_state">%1$s이(가) 필요한 상태가 아니었습니다</string>
+    <string name="runs_cond_removed">이후 삭제된 조건</string>
+    <string name="editor_rule_power_above_for">%1$s이(가) %3$s분 동안 %2$s W를 넘게 사용할 때</string>
+    <string name="editor_field_for_minutes">최소 지속 시간(분)</string>
+    <string name="code_error_power_duration_range">전력 트리거는 1분에서 24시간까지 기다릴 수 있습니다</string>
+    <string name="editor_for_minutes_supporting">바로 시작하려면 비워 두세요</string>
 </resources>

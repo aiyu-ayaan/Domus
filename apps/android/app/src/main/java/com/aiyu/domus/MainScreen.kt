@@ -136,5 +136,6 @@ internal fun PageHost(current: String, session: Session.SignedIn, open: (String)
         current == "avatar" -> AvatarCustomizationPage(user, close)
         current.startsWith("scene:") -> SceneEditorPage(current.removePrefix("scene:"), close)
         current.startsWith("automation:") -> AutomationEditorPage(current.removePrefix("automation:"), close)
+        current.startsWith("runs:") -> AutomationRunsPage(current.removePrefix("runs:"), close)
     }
 }

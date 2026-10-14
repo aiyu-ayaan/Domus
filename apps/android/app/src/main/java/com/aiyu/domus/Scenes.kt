@@ -31,8 +31,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
@@ -178,6 +180,9 @@ fun ScenesScreen(user: User, open: (String) -> Unit) {
                     onEdit = if (user.isAdmin) ({ open("automation:${automation.id}") }) else null,
                     modifier = Modifier.enterStaggered(scenes.size + index),
                 ) {
+                    IconButton({ open("runs:${automation.id}") }) {
+                        Icon(Icons.Rounded.History, stringResource(R.string.runs_title, automation.name))
+                    }
                     FilledTonalIconButton({ repository.runAutomation(automation) }, enabled = canControl) {
                         Icon(Icons.Rounded.PlayArrow, stringResource(R.string.scene_run_now, automation.name))
                     }

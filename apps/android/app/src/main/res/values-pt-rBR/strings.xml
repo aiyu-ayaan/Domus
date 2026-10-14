@@ -970,4 +970,21 @@
     <string name="logbook_client_desktop">App para computador</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Mostrar mais</string>
+    <string name="runs_title">Execuções de %1$s</string>
+    <string name="runs_hint">Cada vez que um gatilho ocorreu e o que resultou.</string>
+    <string name="runs_empty">Nenhuma execução ainda. Cada gatilho aparece aqui, mesmo quando uma condição o impede.</string>
+    <string name="runs_outcome_done">Executada</string>
+    <string name="runs_outcome_failed">Falhou</string>
+    <string name="runs_outcome_blocked">Ignorada</string>
+    <string name="runs_outcome_running">Em execução</string>
+    <string name="runs_manual">Executada por %1$s</string>
+    <string name="runs_trigger_removed">Um gatilho que já foi removido</string>
+    <string name="runs_held_back">Não executada: %1$s</string>
+    <string name="runs_cond_between">não era entre %1$s e %2$s</string>
+    <string name="runs_cond_state">%1$s não estava no estado exigido</string>
+    <string name="runs_cond_removed">uma condição que já foi removida</string>
+    <string name="editor_rule_power_above_for">Quando %1$s consumir mais de %2$s W por %3$s min</string>
+    <string name="editor_field_for_minutes">Por pelo menos (minutos)</string>
+    <string name="code_error_power_duration_range">Um gatilho de consumo pode esperar de 1 minuto a 24 horas</string>
+    <string name="editor_for_minutes_supporting">Deixe vazio para começar imediatamente</string>
 </resources>

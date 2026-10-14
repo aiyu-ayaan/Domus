@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">ಡೆಸ್ಕ್‌ಟಾಪ್ ಆ್ಯಪ್</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">ಇನ್ನಷ್ಟು ತೋರಿಸಿ</string>
+    <string name="runs_title">%1$s ನ ರನ್‌ಗಳು</string>
+    <string name="runs_hint">ಪ್ರತಿಯೊಂದು ಬಾರಿ ಟ್ರಿಗರ್ ಆದಾಗ ಏನಾಯಿತು.</string>
+    <string name="runs_empty">ಇನ್ನೂ ಯಾವುದೇ ರನ್ ಇಲ್ಲ. ಷರತ್ತು ತಡೆದರೂ ಪ್ರತಿಯೊಂದು ಟ್ರಿಗರ್ ಇಲ್ಲಿ ಕಾಣುತ್ತದೆ.</string>
+    <string name="runs_outcome_done">ನಡೆಯಿತು</string>
+    <string name="runs_outcome_failed">ವಿಫಲ</string>
+    <string name="runs_outcome_blocked">ಬಿಡಲಾಗಿದೆ</string>
+    <string name="runs_outcome_running">ನಡೆಯುತ್ತಿದೆ</string>
+    <string name="runs_manual">%1$s ಅವರು ಚಲಾಯಿಸಿದರು</string>
+    <string name="runs_trigger_removed">ನಂತರ ತೆಗೆದುಹಾಕಲಾದ ಟ್ರಿಗರ್</string>
+    <string name="runs_held_back">ನಡೆಯಲಿಲ್ಲ: %1$s</string>
+    <string name="runs_cond_between">ಸಮಯ %1$s ಮತ್ತು %2$s ನಡುವೆ ಇರಲಿಲ್ಲ</string>
+    <string name="runs_cond_state">%1$s ಅಗತ್ಯವಿರುವ ಸ್ಥಿತಿಯಲ್ಲಿ ಇರಲಿಲ್ಲ</string>
+    <string name="runs_cond_removed">ನಂತರ ತೆಗೆದುಹಾಕಲಾದ ಷರತ್ತು</string>
+    <string name="editor_rule_power_above_for">%1$s %3$s ನಿಮಿಷ %2$s W ಗಿಂತ ಹೆಚ್ಚು ಬಳಸಿದಾಗ</string>
+    <string name="editor_field_for_minutes">ಕನಿಷ್ಠ (ನಿಮಿಷ)</string>
+    <string name="code_error_power_duration_range">ಪವರ್ ಟ್ರಿಗರ್ 1 ನಿಮಿಷದಿಂದ 24 ಗಂಟೆಗಳವರೆಗೆ ಕಾಯಬಹುದು</string>
+    <string name="editor_for_minutes_supporting">ತಕ್ಷಣ ಆರಂಭಿಸಲು ಖಾಲಿ ಬಿಡಿ</string>
 </resources>

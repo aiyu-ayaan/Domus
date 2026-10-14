@@ -994,4 +994,21 @@
     <string name="logbook_client_desktop">تطبيق سطح المكتب</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">عرض المزيد</string>
+    <string name="runs_title">تشغيلات %1$s</string>
+    <string name="runs_hint">كل مرة حدث فيها مشغّل، وما نتج عنه.</string>
+    <string name="runs_empty">لا توجد تشغيلات بعد. تُدرَج كل مرة يحدث فيها مشغّل، حتى لو منعه شرط.</string>
+    <string name="runs_outcome_done">تم التشغيل</string>
+    <string name="runs_outcome_failed">فشل</string>
+    <string name="runs_outcome_blocked">تم التخطي</string>
+    <string name="runs_outcome_running">قيد التشغيل</string>
+    <string name="runs_manual">شغّله %1$s</string>
+    <string name="runs_trigger_removed">مشغّل أُزيل لاحقًا</string>
+    <string name="runs_held_back">لم يُشغَّل: %1$s</string>
+    <string name="runs_cond_between">لم يكن الوقت بين %1$s و%2$s</string>
+    <string name="runs_cond_state">لم يكن %1$s في الحالة المطلوبة</string>
+    <string name="runs_cond_removed">شرط أُزيل لاحقًا</string>
+    <string name="editor_rule_power_above_for">عندما يستهلك %1$s أكثر من %2$s W لمدة %3$s دقيقة</string>
+    <string name="editor_field_for_minutes">لمدة لا تقل عن (دقائق)</string>
+    <string name="code_error_power_duration_range">يمكن لمشغّل الطاقة أن ينتظر من دقيقة إلى 24 ساعة</string>
+    <string name="editor_for_minutes_supporting">اتركه فارغًا للبدء فورًا</string>
 </resources>

@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">デスクトップアプリ</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">さらに表示</string>
+    <string name="runs_title">%1$sの実行履歴</string>
+    <string name="runs_hint">トリガーが発生するたびの結果です。</string>
+    <string name="runs_empty">まだ実行はありません。条件で止められた場合も、トリガーごとに記録されます。</string>
+    <string name="runs_outcome_done">実行済み</string>
+    <string name="runs_outcome_failed">失敗</string>
+    <string name="runs_outcome_blocked">スキップ</string>
+    <string name="runs_outcome_running">実行中</string>
+    <string name="runs_manual">%1$s が実行</string>
+    <string name="runs_trigger_removed">その後削除されたトリガー</string>
+    <string name="runs_held_back">未実行: %1$s</string>
+    <string name="runs_cond_between">%1$s〜%2$sの時間外でした</string>
+    <string name="runs_cond_state">%1$sが必要な状態ではありませんでした</string>
+    <string name="runs_cond_removed">その後削除された条件</string>
+    <string name="editor_rule_power_above_for">%1$sが%3$s分間%2$s Wを超えたとき</string>
+    <string name="editor_field_for_minutes">継続時間（分）</string>
+    <string name="code_error_power_duration_range">電力トリガーの待機時間は1分〜24時間です</string>
+    <string name="editor_for_minutes_supporting">すぐに開始する場合は空欄のまま</string>
 </resources>

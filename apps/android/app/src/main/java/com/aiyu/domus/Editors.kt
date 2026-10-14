@@ -70,7 +70,8 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24H
                 else -> stringResource(R.string.editor_rule_sun_after_on_days, abs(offset), event, dayList)
             }
         }
-        "power_above" -> stringResource(R.string.editor_rule_power_above, device, rule.text("watts").orEmpty())
+        "power_above" -> rule.text("for_minutes")?.let { stringResource(R.string.editor_rule_power_above_for, device, rule.text("watts").orEmpty(), it) }
+            ?: stringResource(R.string.editor_rule_power_above, device, rule.text("watts").orEmpty())
         "device_offline" -> stringResource(R.string.editor_rule_device_offline, device)
         "device_discovered" -> stringResource(R.string.editor_rule_device_discovered)
         "time_between" -> {
@@ -118,6 +119,8 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
     var dim by remember { mutableStateOf(false) }
     var brightness by remember { mutableFloatStateOf(50f) }
     var heading by remember { mutableStateOf("") }
+    // power_above: how long it must stay above, empty = right away
+    var lasting by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var days by remember { mutableStateOf(emptySet<Int>()) }
     // sun: the event, and [number] minutes before or after it
@@ -135,6 +138,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
         "notify" -> heading.isNotBlank()
         "device_command" -> power != null || dim
         "sun" -> number.isBlank() || number.toIntOrNull() in 0..360
+        "power_above" -> lasting.isBlank() || lasting.toIntOrNull() in 1..1440
         else -> true
     }
     fun build() = buildJsonObject {
@@ -151,7 +155,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
                 "on", "off" -> { put("property", "is_on"); put("equals", state == "on") }
                 else -> { put("property", state); put(if (above) "above" else "below", number.toDouble()) }
             }
-            "power_above" -> put("watts", number.toDouble())
+            "power_above" -> { put("watts", number.toDouble()); lasting.toIntOrNull()?.let { put("for_minutes", it) } }
             "time_between" -> { put("start", time(start)); put("end", time(end)) }
             "device_command" -> put("command", buildJsonObject { power?.let { put("is_on", it) }; if (dim) put("brightness", brightness.roundToInt()) })
             "scene" -> put("scene_id", sceneId)
@@ -182,7 +186,10 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
                     Field(number, { number = it }, stringResource(R.string.editor_field_value), keyboard = KeyboardType.Decimal)
                 }
             }
-            "power_above" -> Field(number, { number = it }, stringResource(R.string.editor_field_watts), keyboard = KeyboardType.Decimal)
+            "power_above" -> {
+                Field(number, { number = it }, stringResource(R.string.editor_field_watts), keyboard = KeyboardType.Decimal)
+                Field(lasting, { lasting = it }, stringResource(R.string.editor_field_for_minutes), keyboard = KeyboardType.Number, supporting = stringResource(R.string.editor_for_minutes_supporting))
+            }
             "time_between" -> { Text(stringResource(R.string.editor_time_from)); TimeInput(start); Text(stringResource(R.string.editor_time_until)); TimeInput(end) }
             "device_command" -> {
                 Choice(listOf<Pair<Boolean?, String>>(true to stringResource(R.string.editor_power_turn_on), false to stringResource(R.string.editor_power_turn_off), null to stringResource(R.string.editor_power_leave)), power, { power = it })

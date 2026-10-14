@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">ഡെസ്ക്ടോപ്പ് ആപ്പ്</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">കൂടുതൽ കാണിക്കുക</string>
+    <string name="runs_title">%1$s പ്രവർത്തനങ്ങൾ</string>
+    <string name="runs_hint">ഓരോ തവണ ട്രിഗർ സംഭവിച്ചപ്പോഴും എന്തുണ്ടായി.</string>
+    <string name="runs_empty">ഇതുവരെ പ്രവർത്തനങ്ങളൊന്നുമില്ല. ഒരു വ്യവസ്ഥ തടഞ്ഞാലും ഓരോ ട്രിഗറും ഇവിടെ കാണിക്കും.</string>
+    <string name="runs_outcome_done">പ്രവർത്തിച്ചു</string>
+    <string name="runs_outcome_failed">പരാജയപ്പെട്ടു</string>
+    <string name="runs_outcome_blocked">ഒഴിവാക്കി</string>
+    <string name="runs_outcome_running">പ്രവർത്തിക്കുന്നു</string>
+    <string name="runs_manual">%1$s പ്രവർത്തിപ്പിച്ചു</string>
+    <string name="runs_trigger_removed">പിന്നീട് നീക്കം ചെയ്ത ട്രിഗർ</string>
+    <string name="runs_held_back">പ്രവർത്തിച്ചില്ല: %1$s</string>
+    <string name="runs_cond_between">സമയം %1$s-നും %2$s-നും ഇടയിലായിരുന്നില്ല</string>
+    <string name="runs_cond_state">%1$s ആവശ്യമായ നിലയിലായിരുന്നില്ല</string>
+    <string name="runs_cond_removed">പിന്നീട് നീക്കം ചെയ്ത വ്യവസ്ഥ</string>
+    <string name="editor_rule_power_above_for">%1$s %3$s മിനിറ്റ് %2$s W-ൽ കൂടുതൽ ഉപയോഗിക്കുമ്പോൾ</string>
+    <string name="editor_field_for_minutes">കുറഞ്ഞത് (മിനിറ്റ്)</string>
+    <string name="code_error_power_duration_range">പവർ ട്രിഗറിന് 1 മിനിറ്റ് മുതൽ 24 മണിക്കൂർ വരെ കാത്തിരിക്കാം</string>
+    <string name="editor_for_minutes_supporting">ഉടൻ ആരംഭിക്കാൻ ശൂന്യമായി വിടുക</string>
 </resources>

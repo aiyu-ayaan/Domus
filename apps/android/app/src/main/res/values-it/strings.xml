@@ -970,4 +970,21 @@
     <string name="logbook_client_desktop">App desktop</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Mostra altro</string>
+    <string name="runs_title">Esecuzioni di %1$s</string>
+    <string name="runs_hint">Ogni volta che è scattato un attivatore e cosa ne è seguito.</string>
+    <string name="runs_empty">Nessuna esecuzione. Ogni attivazione è elencata, anche se una condizione la blocca.</string>
+    <string name="runs_outcome_done">Eseguita</string>
+    <string name="runs_outcome_failed">Non riuscita</string>
+    <string name="runs_outcome_blocked">Saltata</string>
+    <string name="runs_outcome_running">In corso</string>
+    <string name="runs_manual">Avviata da %1$s</string>
+    <string name="runs_trigger_removed">Un attivatore poi rimosso</string>
+    <string name="runs_held_back">Non eseguita: %1$s</string>
+    <string name="runs_cond_between">non era tra le %1$s e le %2$s</string>
+    <string name="runs_cond_state">%1$s non era nello stato richiesto</string>
+    <string name="runs_cond_removed">una condizione poi rimossa</string>
+    <string name="editor_rule_power_above_for">Quando %1$s assorbe più di %2$s W per %3$s min</string>
+    <string name="editor_field_for_minutes">Per almeno (minuti)</string>
+    <string name="code_error_power_duration_range">Un attivatore di potenza può attendere da 1 minuto a 24 ore</string>
+    <string name="editor_for_minutes_supporting">Lascia vuoto per partire subito</string>
 </resources>

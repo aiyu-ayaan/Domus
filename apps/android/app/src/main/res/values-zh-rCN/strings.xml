@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">桌面应用</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">显示更多</string>
+    <string name="runs_title">%1$s 的运行记录</string>
+    <string name="runs_hint">每次触发及其结果。</string>
+    <string name="runs_empty">尚无运行记录。即使被条件拦下，每次触发也会列在这里。</string>
+    <string name="runs_outcome_done">已运行</string>
+    <string name="runs_outcome_failed">失败</string>
+    <string name="runs_outcome_blocked">已跳过</string>
+    <string name="runs_outcome_running">运行中</string>
+    <string name="runs_manual">由 %1$s 运行</string>
+    <string name="runs_trigger_removed">已删除的触发条件</string>
+    <string name="runs_held_back">未运行：%1$s</string>
+    <string name="runs_cond_between">当时不在 %1$s 至 %2$s 之间</string>
+    <string name="runs_cond_state">%1$s 不在所需状态</string>
+    <string name="runs_cond_removed">已删除的条件</string>
+    <string name="editor_rule_power_above_for">当 %1$s 持续 %3$s 分钟功率超过 %2$s W 时</string>
+    <string name="editor_field_for_minutes">持续至少（分钟）</string>
+    <string name="code_error_power_duration_range">功率触发可等待 1 分钟至 24 小时</string>
+    <string name="editor_for_minutes_supporting">留空则立即开始</string>
 </resources>

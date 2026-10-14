@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">Desktop app</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Show more</string>
+    <string name="runs_title">Runs of %1$s</string>
+    <string name="runs_hint">Each time a trigger happened, and what came of it.</string>
+    <string name="runs_empty">No runs yet. A run is listed each time a trigger happens, even when a condition holds it back.</string>
+    <string name="runs_outcome_done">Ran</string>
+    <string name="runs_outcome_failed">Failed</string>
+    <string name="runs_outcome_blocked">Skipped</string>
+    <string name="runs_outcome_running">Running</string>
+    <string name="runs_manual">Run by %1$s</string>
+    <string name="runs_trigger_removed">A trigger that has since been removed</string>
+    <string name="runs_held_back">Not run: %1$s</string>
+    <string name="runs_cond_between">it was not between %1$s and %2$s</string>
+    <string name="runs_cond_state">%1$s was not in the required state</string>
+    <string name="runs_cond_removed">a condition that has since been removed</string>
+    <string name="editor_rule_power_above_for">When %1$s draws over %2$s W for %3$s min</string>
+    <string name="editor_field_for_minutes">For at least (minutes)</string>
+    <string name="code_error_power_duration_range">A power trigger can wait 1 minute to 24 hours</string>
+    <string name="editor_for_minutes_supporting">Leave empty to start right away</string>
 </resources>

@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">ਡੈਸਕਟਾਪ ਐਪ</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">ਹੋਰ ਵੇਖੋ</string>
+    <string name="runs_title">%1$s ਦੇ ਰਨ</string>
+    <string name="runs_hint">ਹਰ ਵਾਰ ਟ੍ਰਿਗਰ ਹੋਣ ’ਤੇ ਕੀ ਹੋਇਆ।</string>
+    <string name="runs_empty">ਹਾਲੇ ਕੋਈ ਰਨ ਨਹੀਂ। ਹਰ ਟ੍ਰਿਗਰ ਇੱਥੇ ਦਿਖਦਾ ਹੈ, ਭਾਵੇਂ ਕੋਈ ਸ਼ਰਤ ਰੋਕ ਦੇਵੇ।</string>
+    <string name="runs_outcome_done">ਚੱਲਿਆ</string>
+    <string name="runs_outcome_failed">ਅਸਫਲ</string>
+    <string name="runs_outcome_blocked">ਛੱਡਿਆ</string>
+    <string name="runs_outcome_running">ਚੱਲ ਰਿਹਾ ਹੈ</string>
+    <string name="runs_manual">%1$s ਨੇ ਚਲਾਇਆ</string>
+    <string name="runs_trigger_removed">ਬਾਅਦ ਵਿੱਚ ਹਟਾਇਆ ਟ੍ਰਿਗਰ</string>
+    <string name="runs_held_back">ਨਹੀਂ ਚੱਲਿਆ: %1$s</string>
+    <string name="runs_cond_between">ਸਮਾਂ %1$s ਅਤੇ %2$s ਦੇ ਵਿਚਕਾਰ ਨਹੀਂ ਸੀ</string>
+    <string name="runs_cond_state">%1$s ਲੋੜੀਂਦੀ ਸਥਿਤੀ ਵਿੱਚ ਨਹੀਂ ਸੀ</string>
+    <string name="runs_cond_removed">ਬਾਅਦ ਵਿੱਚ ਹਟਾਈ ਸ਼ਰਤ</string>
+    <string name="editor_rule_power_above_for">ਜਦੋਂ %1$s %3$s ਮਿੰਟ ਤੱਕ %2$s W ਤੋਂ ਵੱਧ ਖਿੱਚੇ</string>
+    <string name="editor_field_for_minutes">ਘੱਟੋ-ਘੱਟ (ਮਿੰਟ)</string>
+    <string name="code_error_power_duration_range">ਪਾਵਰ ਟ੍ਰਿਗਰ 1 ਮਿੰਟ ਤੋਂ 24 ਘੰਟੇ ਤੱਕ ਉਡੀਕ ਕਰ ਸਕਦਾ ਹੈ</string>
+    <string name="editor_for_minutes_supporting">ਤੁਰੰਤ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਖਾਲੀ ਛੱਡੋ</string>
 </resources>

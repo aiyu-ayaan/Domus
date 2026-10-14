@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">ڈیسک ٹاپ ایپ</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">مزید دکھائیں</string>
+    <string name="runs_title">%1$s کے رن</string>
+    <string name="runs_hint">ہر بار ٹرگر ہونے پر کیا ہوا۔</string>
+    <string name="runs_empty">ابھی کوئی رن نہیں۔ ہر ٹرگر یہاں دکھتا ہے، چاہے کوئی شرط اسے روک دے۔</string>
+    <string name="runs_outcome_done">چلا</string>
+    <string name="runs_outcome_failed">ناکام</string>
+    <string name="runs_outcome_blocked">چھوڑ دیا گیا</string>
+    <string name="runs_outcome_running">چل رہا ہے</string>
+    <string name="runs_manual">%1$s نے چلایا</string>
+    <string name="runs_trigger_removed">ایک ٹرگر جو بعد میں ہٹا دیا گیا</string>
+    <string name="runs_held_back">نہیں چلا: %1$s</string>
+    <string name="runs_cond_between">وقت %1$s اور %2$s کے درمیان نہیں تھا</string>
+    <string name="runs_cond_state">%1$s مطلوبہ حالت میں نہیں تھا</string>
+    <string name="runs_cond_removed">ایک شرط جو بعد میں ہٹا دی گئی</string>
+    <string name="editor_rule_power_above_for">جب %1$s %3$s منٹ تک %2$s W سے زیادہ کھینچے</string>
+    <string name="editor_field_for_minutes">کم از کم (منٹ)</string>
+    <string name="code_error_power_duration_range">پاور ٹرگر 1 منٹ سے 24 گھنٹے تک انتظار کر سکتا ہے</string>
+    <string name="editor_for_minutes_supporting">فوراً شروع کرنے کے لیے خالی چھوڑیں</string>
 </resources>

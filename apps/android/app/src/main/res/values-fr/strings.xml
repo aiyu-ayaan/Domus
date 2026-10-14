@@ -970,4 +970,21 @@
     <string name="logbook_client_desktop">Application de bureau</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Afficher plus</string>
+    <string name="runs_title">Exécutions de %1$s</string>
+    <string name="runs_hint">Chaque déclenchement et ce qui en a résulté.</string>
+    <string name="runs_empty">Aucune exécution. Chaque déclenchement est listé, même quand une condition le retient.</string>
+    <string name="runs_outcome_done">Exécutée</string>
+    <string name="runs_outcome_failed">Échec</string>
+    <string name="runs_outcome_blocked">Ignorée</string>
+    <string name="runs_outcome_running">En cours</string>
+    <string name="runs_manual">Lancée par %1$s</string>
+    <string name="runs_trigger_removed">Un déclencheur supprimé depuis</string>
+    <string name="runs_held_back">Non exécutée : %1$s</string>
+    <string name="runs_cond_between">il n’était pas entre %1$s et %2$s</string>
+    <string name="runs_cond_state">%1$s n’était pas dans l’état requis</string>
+    <string name="runs_cond_removed">une condition supprimée depuis</string>
+    <string name="editor_rule_power_above_for">Quand %1$s consomme plus de %2$s W pendant %3$s min</string>
+    <string name="editor_field_for_minutes">Pendant au moins (minutes)</string>
+    <string name="code_error_power_duration_range">Un déclencheur de puissance peut attendre de 1 minute à 24 heures</string>
+    <string name="editor_for_minutes_supporting">Laissez vide pour démarrer immédiatement</string>
 </resources>

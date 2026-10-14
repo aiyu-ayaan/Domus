@@ -240,6 +240,7 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun automations() = call("GET", "/automations", ListSerializer(Automation.serializer()))
     suspend fun toggleAutomation(id: String) = call("POST", "/automations/$id/toggle", Automation.serializer())
     suspend fun runAutomation(id: String) = call("POST", "/automations/$id/run", ActionResult.serializer())
+    suspend fun automationRuns(id: String) = call("GET", "/automations/$id/runs", ListSerializer(AutomationRun.serializer()))
 
     suspend fun energyOverview() = call("GET", "/energy/overview", EnergyOverview.serializer())
     /** [range] is `hour` (per minute), `day`, `week` or `month`; [deviceId] narrows it to one device, else the whole home. */

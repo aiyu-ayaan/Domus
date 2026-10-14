@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">Desktop-App</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Mehr anzeigen</string>
+    <string name="runs_title">Ausführungen von %1$s</string>
+    <string name="runs_hint">Jedes Mal, wenn ein Auslöser eintrat, und was daraus wurde.</string>
+    <string name="runs_empty">Noch keine Ausführungen. Jeder Auslöser wird aufgeführt, auch wenn eine Bedingung ihn zurückhält.</string>
+    <string name="runs_outcome_done">Ausgeführt</string>
+    <string name="runs_outcome_failed">Fehlgeschlagen</string>
+    <string name="runs_outcome_blocked">Übersprungen</string>
+    <string name="runs_outcome_running">Läuft</string>
+    <string name="runs_manual">Gestartet von %1$s</string>
+    <string name="runs_trigger_removed">Ein inzwischen entfernter Auslöser</string>
+    <string name="runs_held_back">Nicht ausgeführt: %1$s</string>
+    <string name="runs_cond_between">es war nicht zwischen %1$s und %2$s</string>
+    <string name="runs_cond_state">%1$s war nicht im geforderten Zustand</string>
+    <string name="runs_cond_removed">eine inzwischen entfernte Bedingung</string>
+    <string name="editor_rule_power_above_for">Wenn %1$s %3$s Min. lang mehr als %2$s W zieht</string>
+    <string name="editor_field_for_minutes">Mindestens (Minuten)</string>
+    <string name="code_error_power_duration_range">Ein Leistungsauslöser kann 1 Minute bis 24 Stunden warten</string>
+    <string name="editor_for_minutes_supporting">Leer lassen, um sofort zu starten</string>
 </resources>

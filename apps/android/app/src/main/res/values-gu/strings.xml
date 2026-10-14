@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">ડેસ્કટોપ એપ</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">વધુ બતાવો</string>
+    <string name="runs_title">%1$s ના રન</string>
+    <string name="runs_hint">દર વખતે ટ્રિગર થયું ત્યારે શું થયું.</string>
+    <string name="runs_empty">હજી કોઈ રન નથી. દરેક ટ્રિગર અહીં દેખાય છે, ભલે કોઈ શરત તેને રોકે.</string>
+    <string name="runs_outcome_done">ચાલ્યું</string>
+    <string name="runs_outcome_failed">નિષ્ફળ</string>
+    <string name="runs_outcome_blocked">છોડી દીધું</string>
+    <string name="runs_outcome_running">ચાલી રહ્યું છે</string>
+    <string name="runs_manual">%1$s એ ચલાવ્યું</string>
+    <string name="runs_trigger_removed">પછીથી કાઢી નાખેલું ટ્રિગર</string>
+    <string name="runs_held_back">ચાલ્યું નહીં: %1$s</string>
+    <string name="runs_cond_between">સમય %1$s અને %2$s વચ્ચે ન હતો</string>
+    <string name="runs_cond_state">%1$s જરૂરી સ્થિતિમાં ન હતું</string>
+    <string name="runs_cond_removed">પછીથી કાઢી નાખેલી શરત</string>
+    <string name="editor_rule_power_above_for">જ્યારે %1$s %3$s મિનિટ સુધી %2$s W થી વધુ વાપરે</string>
+    <string name="editor_field_for_minutes">ઓછામાં ઓછું (મિનિટ)</string>
+    <string name="code_error_power_duration_range">પાવર ટ્રિગર 1 મિનિટથી 24 કલાક સુધી રાહ જોઈ શકે છે</string>
+    <string name="editor_for_minutes_supporting">તરત શરૂ કરવા ખાલી રાખો</string>
 </resources>

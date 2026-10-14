@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">Aplikasi desktop</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Tampilkan lainnya</string>
+    <string name="runs_title">Jalannya %1$s</string>
+    <string name="runs_hint">Setiap kali pemicu terjadi, dan hasilnya.</string>
+    <string name="runs_empty">Belum ada. Setiap pemicu dicatat, meski ditahan oleh syarat.</string>
+    <string name="runs_outcome_done">Berjalan</string>
+    <string name="runs_outcome_failed">Gagal</string>
+    <string name="runs_outcome_blocked">Dilewati</string>
+    <string name="runs_outcome_running">Berjalan</string>
+    <string name="runs_manual">Dijalankan oleh %1$s</string>
+    <string name="runs_trigger_removed">Pemicu yang sudah dihapus</string>
+    <string name="runs_held_back">Tidak dijalankan: %1$s</string>
+    <string name="runs_cond_between">bukan antara %1$s dan %2$s</string>
+    <string name="runs_cond_state">%1$s tidak dalam keadaan yang diperlukan</string>
+    <string name="runs_cond_removed">syarat yang sudah dihapus</string>
+    <string name="editor_rule_power_above_for">Saat %1$s memakai lebih dari %2$s W selama %3$s mnt</string>
+    <string name="editor_field_for_minutes">Selama minimal (menit)</string>
+    <string name="code_error_power_duration_range">Pemicu daya bisa menunggu 1 menit hingga 24 jam</string>
+    <string name="editor_for_minutes_supporting">Kosongkan untuk langsung mulai</string>
 </resources>

@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">แอปเดสก์ท็อป</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">แสดงเพิ่มเติม</string>
+    <string name="runs_title">การทำงานของ %1$s</string>
+    <string name="runs_hint">ทุกครั้งที่ทริกเกอร์เกิดขึ้น และผลที่ได้</string>
+    <string name="runs_empty">ยังไม่มีการทำงาน ทุกครั้งที่ทริกเกอร์เกิดขึ้นจะแสดงที่นี่ แม้เงื่อนไขจะหยุดไว้</string>
+    <string name="runs_outcome_done">ทำงานแล้ว</string>
+    <string name="runs_outcome_failed">ล้มเหลว</string>
+    <string name="runs_outcome_blocked">ข้าม</string>
+    <string name="runs_outcome_running">กำลังทำงาน</string>
+    <string name="runs_manual">%1$s สั่งทำงาน</string>
+    <string name="runs_trigger_removed">ทริกเกอร์ที่ถูกลบไปแล้ว</string>
+    <string name="runs_held_back">ไม่ได้ทำงาน: %1$s</string>
+    <string name="runs_cond_between">ไม่อยู่ในช่วง %1$s ถึง %2$s</string>
+    <string name="runs_cond_state">%1$s ไม่อยู่ในสถานะที่กำหนด</string>
+    <string name="runs_cond_removed">เงื่อนไขที่ถูกลบไปแล้ว</string>
+    <string name="editor_rule_power_above_for">เมื่อ %1$s ใช้ไฟเกิน %2$s W นาน %3$s นาที</string>
+    <string name="editor_field_for_minutes">อย่างน้อย (นาที)</string>
+    <string name="code_error_power_duration_range">ทริกเกอร์กำลังไฟรอได้ 1 นาทีถึง 24 ชั่วโมง</string>
+    <string name="editor_for_minutes_supporting">เว้นว่างไว้เพื่อเริ่มทันที</string>
 </resources>

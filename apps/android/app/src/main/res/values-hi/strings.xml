@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">डेस्कटॉप ऐप</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">और दिखाएँ</string>
+    <string name="runs_title">%1$s के रन</string>
+    <string name="runs_hint">हर बार ट्रिगर होने पर क्या हुआ।</string>
+    <string name="runs_empty">अभी कोई रन नहीं। हर ट्रिगर यहाँ दिखता है, भले कोई शर्त उसे रोक दे।</string>
+    <string name="runs_outcome_done">चला</string>
+    <string name="runs_outcome_failed">विफल</string>
+    <string name="runs_outcome_blocked">छोड़ा गया</string>
+    <string name="runs_outcome_running">चल रहा है</string>
+    <string name="runs_manual">%1$s ने चलाया</string>
+    <string name="runs_trigger_removed">एक ट्रिगर जो बाद में हटा दिया गया</string>
+    <string name="runs_held_back">नहीं चला: %1$s</string>
+    <string name="runs_cond_between">समय %1$s और %2$s के बीच नहीं था</string>
+    <string name="runs_cond_state">%1$s ज़रूरी स्थिति में नहीं था</string>
+    <string name="runs_cond_removed">एक शर्त जो बाद में हटा दी गई</string>
+    <string name="editor_rule_power_above_for">जब %1$s %3$s मिनट तक %2$s W से ज़्यादा खींचे</string>
+    <string name="editor_field_for_minutes">कम से कम (मिनट)</string>
+    <string name="code_error_power_duration_range">पावर ट्रिगर 1 मिनट से 24 घंटे तक रुक सकता है</string>
+    <string name="editor_for_minutes_supporting">तुरंत शुरू करने के लिए खाली छोड़ें</string>
 </resources>

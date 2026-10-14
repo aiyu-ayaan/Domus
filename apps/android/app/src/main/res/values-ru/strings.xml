@@ -978,4 +978,21 @@
     <string name="logbook_client_desktop">Приложение для компьютера</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Показать ещё</string>
+    <string name="runs_title">Запуски: %1$s</string>
+    <string name="runs_hint">Каждое срабатывание триггера и его результат.</string>
+    <string name="runs_empty">Запусков пока нет. Каждое срабатывание отображается, даже если его остановило условие.</string>
+    <string name="runs_outcome_done">Выполнено</string>
+    <string name="runs_outcome_failed">Ошибка</string>
+    <string name="runs_outcome_blocked">Пропущено</string>
+    <string name="runs_outcome_running">Выполняется</string>
+    <string name="runs_manual">Запустил(а) %1$s</string>
+    <string name="runs_trigger_removed">Удалённый с тех пор триггер</string>
+    <string name="runs_held_back">Не запущено: %1$s</string>
+    <string name="runs_cond_between">время было не между %1$s и %2$s</string>
+    <string name="runs_cond_state">%1$s не был(а) в нужном состоянии</string>
+    <string name="runs_cond_removed">удалённое с тех пор условие</string>
+    <string name="editor_rule_power_above_for">Когда %1$s потребляет больше %2$s W в течение %3$s мин</string>
+    <string name="editor_field_for_minutes">Не менее (минут)</string>
+    <string name="code_error_power_duration_range">Триггер мощности может ждать от 1 минуты до 24 часов</string>
+    <string name="editor_for_minutes_supporting">Оставьте пустым, чтобы сработало сразу</string>
 </resources>

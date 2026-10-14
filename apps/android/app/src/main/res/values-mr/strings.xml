@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">डेस्कटॉप ॲप</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">अधिक दाखवा</string>
+    <string name="runs_title">%1$s चे रन</string>
+    <string name="runs_hint">प्रत्येक वेळी ट्रिगर झाल्यावर काय झाले.</string>
+    <string name="runs_empty">अद्याप रन नाही. अटीने थांबवले तरी प्रत्येक ट्रिगर येथे दिसतो.</string>
+    <string name="runs_outcome_done">चालले</string>
+    <string name="runs_outcome_failed">अयशस्वी</string>
+    <string name="runs_outcome_blocked">वगळले</string>
+    <string name="runs_outcome_running">चालू आहे</string>
+    <string name="runs_manual">%1$s यांनी चालवले</string>
+    <string name="runs_trigger_removed">नंतर काढलेला ट्रिगर</string>
+    <string name="runs_held_back">चालले नाही: %1$s</string>
+    <string name="runs_cond_between">वेळ %1$s आणि %2$s दरम्यान नव्हती</string>
+    <string name="runs_cond_state">%1$s आवश्यक स्थितीत नव्हते</string>
+    <string name="runs_cond_removed">नंतर काढलेली अट</string>
+    <string name="editor_rule_power_above_for">जेव्हा %1$s %3$s मिनिटे %2$s W पेक्षा जास्त वापरते</string>
+    <string name="editor_field_for_minutes">किमान (मिनिटे)</string>
+    <string name="code_error_power_duration_range">पॉवर ट्रिगर 1 मिनिट ते 24 तास थांबू शकतो</string>
+    <string name="editor_for_minutes_supporting">लगेच सुरू करण्यासाठी रिकामे ठेवा</string>
 </resources>

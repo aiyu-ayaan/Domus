@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">Masaüstü uygulaması</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Daha fazla göster</string>
+    <string name="runs_title">%1$s çalıştırmaları</string>
+    <string name="runs_hint">Bir tetikleyicinin her gerçekleşmesi ve sonucu.</string>
+    <string name="runs_empty">Henüz çalıştırma yok. Bir koşul durdursa bile her tetikleme burada listelenir.</string>
+    <string name="runs_outcome_done">Çalıştı</string>
+    <string name="runs_outcome_failed">Başarısız</string>
+    <string name="runs_outcome_blocked">Atlandı</string>
+    <string name="runs_outcome_running">Çalışıyor</string>
+    <string name="runs_manual">%1$s çalıştırdı</string>
+    <string name="runs_trigger_removed">Sonradan kaldırılan bir tetikleyici</string>
+    <string name="runs_held_back">Çalışmadı: %1$s</string>
+    <string name="runs_cond_between">saat %1$s ile %2$s arasında değildi</string>
+    <string name="runs_cond_state">%1$s gereken durumda değildi</string>
+    <string name="runs_cond_removed">sonradan kaldırılan bir koşul</string>
+    <string name="editor_rule_power_above_for">%1$s %3$s dk boyunca %2$s W üzerinde çektiğinde</string>
+    <string name="editor_field_for_minutes">En az (dakika)</string>
+    <string name="code_error_power_duration_range">Güç tetikleyicisi 1 dakika ile 24 saat arasında bekleyebilir</string>
+    <string name="editor_for_minutes_supporting">Hemen başlaması için boş bırakın</string>
 </resources>

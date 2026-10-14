@@ -962,4 +962,21 @@
     <string name="logbook_client_desktop">డెస్క్‌టాప్ యాప్</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">మరిన్ని చూపించు</string>
+    <string name="runs_title">%1$s రన్‌లు</string>
+    <string name="runs_hint">ప్రతి సారి ట్రిగ్గర్ జరిగినప్పుడు ఏమైంది.</string>
+    <string name="runs_empty">ఇంకా రన్‌లు లేవు. షరతు ఆపినా ప్రతి ట్రిగ్గర్ ఇక్కడ కనిపిస్తుంది.</string>
+    <string name="runs_outcome_done">నడిచింది</string>
+    <string name="runs_outcome_failed">విఫలమైంది</string>
+    <string name="runs_outcome_blocked">దాటవేయబడింది</string>
+    <string name="runs_outcome_running">నడుస్తోంది</string>
+    <string name="runs_manual">%1$s నడిపారు</string>
+    <string name="runs_trigger_removed">తర్వాత తీసివేసిన ట్రిగ్గర్</string>
+    <string name="runs_held_back">నడవలేదు: %1$s</string>
+    <string name="runs_cond_between">సమయం %1$s మరియు %2$s మధ్య లేదు</string>
+    <string name="runs_cond_state">%1$s అవసరమైన స్థితిలో లేదు</string>
+    <string name="runs_cond_removed">తర్వాత తీసివేసిన షరతు</string>
+    <string name="editor_rule_power_above_for">%1$s %3$s నిమిషాలు %2$s W కంటే ఎక్కువ వాడినప్పుడు</string>
+    <string name="editor_field_for_minutes">కనీసం (నిమిషాలు)</string>
+    <string name="code_error_power_duration_range">పవర్ ట్రిగ్గర్ 1 నిమిషం నుండి 24 గంటల వరకు వేచి ఉండగలదు</string>
+    <string name="editor_for_minutes_supporting">వెంటనే ప్రారంభించడానికి ఖాళీగా వదలండి</string>
 </resources>

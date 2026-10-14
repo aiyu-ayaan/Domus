@@ -266,6 +266,19 @@ data class Automation(
     val actions: List<JsonObject> = emptyList(),
 )
 
+/** One trace of an automation: [trigger] is {"index": n} or {"manual": actor}; [outcome] running, done, failed or blocked. */
+@Serializable
+data class AutomationRun(
+    @SerialName("started_at") val startedAt: String,
+    val trigger: JsonObject = JsonObject(emptyMap()),
+    val conditions: List<RunCondition> = emptyList(),
+    val outcome: String = "done",
+    val errors: List<String> = emptyList(),
+)
+
+@Serializable
+data class RunCondition(val index: Int, val passed: Boolean)
+
 /** A usage slab of the billing cycle; [upToKwh] null = everything above. */
 @Serializable
 data class Slab(@SerialName("up_to_kwh") val upToKwh: Double? = null, val rate: Double = 0.0)

@@ -970,4 +970,21 @@
     <string name="logbook_client_desktop">App de escritorio</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Mostrar más</string>
+    <string name="runs_title">Ejecuciones de %1$s</string>
+    <string name="runs_hint">Cada vez que ocurrió un disparador y qué resultó.</string>
+    <string name="runs_empty">Aún no hay ejecuciones. Se registra cada vez que ocurre un disparador, aunque una condición lo detenga.</string>
+    <string name="runs_outcome_done">Ejecutada</string>
+    <string name="runs_outcome_failed">Falló</string>
+    <string name="runs_outcome_blocked">Omitida</string>
+    <string name="runs_outcome_running">En curso</string>
+    <string name="runs_manual">Ejecutada por %1$s</string>
+    <string name="runs_trigger_removed">Un disparador que ya se eliminó</string>
+    <string name="runs_held_back">No se ejecutó: %1$s</string>
+    <string name="runs_cond_between">no era entre las %1$s y las %2$s</string>
+    <string name="runs_cond_state">%1$s no estaba en el estado requerido</string>
+    <string name="runs_cond_removed">una condición que ya se eliminó</string>
+    <string name="editor_rule_power_above_for">Cuando %1$s consume más de %2$s W durante %3$s min</string>
+    <string name="editor_field_for_minutes">Durante al menos (minutos)</string>
+    <string name="code_error_power_duration_range">Un disparador de consumo puede esperar de 1 minuto a 24 horas</string>
+    <string name="editor_for_minutes_supporting">Déjalo vacío para empezar de inmediato</string>
 </resources>

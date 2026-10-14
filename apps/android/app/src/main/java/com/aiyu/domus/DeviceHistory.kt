@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aiyu.domus.core.Device
 import com.aiyu.domus.core.EffectCatalog
@@ -77,7 +78,7 @@ fun DeviceHistory(device: Device) {
                     if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = c.outlineVariant)
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         val color = (e.value as? JsonPrimitive)?.content?.takeIf { e.field == "color" }
-                        color?.let { hex -> runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull() }?.let {
+                        color?.let { hex -> runCatching { Color(hex.toColorInt()) }.getOrNull() }?.let {
                             Box(Modifier.size(12.dp).background(it, CircleShape))
                         }
                         Column(Modifier.weight(1f)) {
@@ -127,7 +128,7 @@ private fun who(actor: LogActor?): String = when (actor?.kind) {
 
 /** A clock time, with the day in front when it is not today; follows the phone's 12/24-hour setting. */
 @Composable
-private fun moment(iso: String): String {
+fun moment(iso: String): String {
     val millis = runCatching { Instant.parse(iso).toEpochMilli() }.getOrNull() ?: return ""
     val flags = if (DateUtils.isToday(millis)) DateUtils.FORMAT_SHOW_TIME
     else DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_NO_YEAR

@@ -954,4 +954,21 @@
     <string name="logbook_client_desktop">Ứng dụng máy tính</string>
     <string name="logbook_client_android">Android</string>
     <string name="logbook_more">Xem thêm</string>
+    <string name="runs_title">Các lần chạy của %1$s</string>
+    <string name="runs_hint">Mỗi lần trình kích hoạt xảy ra và kết quả.</string>
+    <string name="runs_empty">Chưa có lần chạy. Mỗi lần kích hoạt đều được liệt kê, kể cả khi bị điều kiện chặn.</string>
+    <string name="runs_outcome_done">Đã chạy</string>
+    <string name="runs_outcome_failed">Thất bại</string>
+    <string name="runs_outcome_blocked">Đã bỏ qua</string>
+    <string name="runs_outcome_running">Đang chạy</string>
+    <string name="runs_manual">Do %1$s chạy</string>
+    <string name="runs_trigger_removed">Một trình kích hoạt đã bị xóa</string>
+    <string name="runs_held_back">Không chạy: %1$s</string>
+    <string name="runs_cond_between">không nằm trong khoảng %1$s đến %2$s</string>
+    <string name="runs_cond_state">%1$s không ở trạng thái yêu cầu</string>
+    <string name="runs_cond_removed">một điều kiện đã bị xóa</string>
+    <string name="editor_rule_power_above_for">Khi %1$s tiêu thụ trên %2$s W trong %3$s phút</string>
+    <string name="editor_field_for_minutes">Trong ít nhất (phút)</string>
+    <string name="code_error_power_duration_range">Trình kích hoạt công suất có thể chờ từ 1 phút đến 24 giờ</string>
+    <string name="editor_for_minutes_supporting">Để trống để bắt đầu ngay</string>
 </resources>
