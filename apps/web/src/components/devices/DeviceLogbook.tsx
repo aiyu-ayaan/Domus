@@ -33,6 +33,7 @@ function what(e: LogEntry, catalog?: EffectCatalog) {
 function who(actor: Actor | null) {
   if (!actor) return t('logbook.onDevice')
   if (actor.kind === 'screen_sync') return t('logbook.screenSync')
+  if (actor.kind === 'matter') return t('logbook.matter')
   if (actor.kind === 'automation') return t('logbook.byAutomation', { name: actor.name })
   return actor.client ? t('logbook.byUserFrom', { name: actor.name, app: t(`logbook.client.${actor.client}`) }) : t('logbook.byUser', { name: actor.name })
 }

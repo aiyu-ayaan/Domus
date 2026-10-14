@@ -24,6 +24,7 @@ import type {
   LogEntry,
   AutomationRun,
   Weather,
+  MatterBridge,
 } from './types'
 
 import { getStorageKey, type AppFlavor } from './flavor'
@@ -251,6 +252,10 @@ export const api = {
   effects: () => get<EffectCatalog>('/devices/effects'),
   refresh: (id: string) => post<Device>(`/devices/${id}/refresh`),
   weather: () => get<Weather | null>('/weather'),
+  matter: () => get<MatterBridge>('/matter'),
+  saveMatter: (b: { enabled: boolean; devices: string[] }) => put<MatterBridge>('/matter', b),
+  matterPairing: () => post<MatterBridge>('/matter/pairing'),
+  matterReset: () => post<MatterBridge>('/matter/reset'),
   logbook: (id: string, limit: number) => get<LogEntry[]>(`/devices/${id}/logbook?limit=${limit}`),
   addManual: (b: { integration_type: string; host: string; token?: string; name?: string; room_id?: string }) =>
     post<Device>('/devices/manual', b),

@@ -19,6 +19,7 @@ import { errorMessage, useToast } from '@/lib/toast'
 import { formatTime } from '@/lib/format'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/cn'
+import { MatterCard } from './MatterCard'
 import type { Device, Role, Room, User } from '@/lib/types'
 
 const roleHelp: Record<Role, string> = {
@@ -163,6 +164,7 @@ export function SettingsView() {
         <ServerCard />
         <LocationCard />
         <BackupCard />
+        {admin && <MatterCard />}
         <AboutCard />
       </div>
       {admin && <People />}

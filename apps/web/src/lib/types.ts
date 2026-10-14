@@ -122,6 +122,7 @@ export type Actor =
   | { kind: 'user'; id: string; name: string; client: 'web' | 'desktop' | 'android' | null }
   | { kind: 'automation'; id: string; name: string }
   | { kind: 'screen_sync' }
+  | { kind: 'matter' }
 
 /** One line of a device's logbook. */
 export interface LogEntry {
@@ -387,6 +388,21 @@ export type LiveEvent =
     }
   | { type: 'automation_triggered'; automation_id: string; name: string }
   | { type: 'weather_changed'; weather: Weather }
+
+/** The Matter bridge as an administrator sees it. */
+export interface MatterBridge {
+  enabled: boolean
+  running: boolean
+  /** At least one controller has paired. */
+  paired: boolean
+  error: string | null
+  /** Devices shared with Matter controllers. */
+  devices: string[]
+  pairing_code: string
+  qr_payload: string
+  /** QR modules row by row, '1' = dark. */
+  qr: string[]
+}
 
 /** Outdoor weather and air at the home's location (Open-Meteo). */
 export interface Weather {
