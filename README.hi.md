@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 आपके होम सर्वर के लिए एक लोकल-फर्स्ट स्मार्ट-होम हब। रस्ट (Rust) बैकएंड, SQLite, React वेब UI (Electron डेस्कटॉप शेल के साथ), और **Tuya / Smart Life** (QR-कोड लॉगिन, बिना डेवलपर अकाउंट के), **TP-Link Tapo** (लोकल), **Xiaomi Mi Home** (लोकल, आपके Mi अकाउंट से टोकन), **Philips Hue** (लोकल ब्रिज) और **MQTT** (Zigbee2MQTT, ESPHome और Home Assistant डिस्कवरी सपोर्ट करने वाले अन्य डिवाइस) के लिए प्लगेबल इंटीग्रेशन। एक इन-बिल्ट **Matter ब्रिज** की मदद से Google Home, Apple Home, Alexa और Home Assistant आपके अपने लोकल नेटवर्क पर इन उपकरणों को स्विच, डिम और उनका रंग बदल सकते हैं।

@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 專為您的家用伺服器打造的本地優先（Local-First）智慧家庭中樞。採用 Rust 後端、SQLite、React 網頁介面（以及 Electron 桌面應用外殼），並提供可插拔式整合，支援 **Tuya / 智慧生活 (Smart Life)**（QR 碼掃描登入，無需開發者帳號）、**TP-Link Tapo**（區域網路本地控制）、**小米米家 (Xiaomi Mi Home)**（本地控制，從您的小米帳號取得權杖）、**飛利浦 Hue (Philips Hue)**（本地橋接器）以及 **MQTT**（Zigbee2MQTT、ESPHome 及任何支援 Home Assistant 自動探索協議的裝置）。內建 **Matter 橋接器**，讓 Google Home、Apple Home、Alexa 與 Home Assistant 能夠透過您自己的區域網路控制這些裝置的開關、調光與調色。

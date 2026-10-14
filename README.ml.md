@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 നിങ്ങളുടെ ഹോം സെർവറിനായുള്ള ലോക്കൽ-ഫസ്റ്റ് സ്മാർട്ട്-ഹോം ഹബ്. Rust ബാക്കെൻഡ്, SQLite, React വെബ് UI (Electron ഡെസ്ക്ടോപ്പ് ഷെല്ലോടെ), കൂടാതെ **Tuya / Smart Life** (QR-കോഡ് ലോഗിൻ, ഡെവലപ്പർ അക്കൗണ്ട് ആവശ്യമില്ല), **TP-Link Tapo** (ലോക്കൽ), **Xiaomi Mi Home** (ലോക്കൽ, നിങ്ങളുടെ Mi അക്കൗണ്ടിൽ നിന്നുള്ള ടോക്കണുകൾ), **Philips Hue** (ലോക്കൽ ബ്രിഡ്ജ്), **MQTT** (Zigbee2MQTT, ESPHome കൂടാതെ Home Assistant ഡിസ്കവറി പിന്തുണയ്ക്കുന്ന മറ്റേതൊരു ഉപകരണവും) എന്നിവയ്ക്കായുള്ള പ്ലഗ് ചെയ്യാവുന്ന ഇന്റഗ്രേഷനുകൾ. അന്തർനിർമ്മിത **Matter ബ്രിഡ്ജ്** വഴി Google Home, Apple Home, Alexa, Home Assistant എന്നിവയ്ക്ക് നിങ്ങളുടെ സ്വന്തം ലോക്കൽ നെറ്റ്‌വർക്കിൽ തന്നെ ഈ ഉപകരണങ്ങൾ സ്വിച്ച് ചെയ്യാനും, തെളിച്ചം കൂട്ടാനും കുറയ്ക്കാനും, നിറങ്ങൾ മാറ്റാനും കഴിയും.

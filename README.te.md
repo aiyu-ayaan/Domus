@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 మీ హోమ్ సర్వర్ కోసం లోకల్-ఫస్ట్ స్మార్ట్-హోమ్ హబ్. Rust బ్యాకెండ్, SQLite, React వెబ్ UI (Electron డెస్క్‌టాప్ షెల్‌తో), మరియు **Tuya / Smart Life** (QR-కోడ్ లాగిన్, డెవలపర్ ఖాతా అవసరం లేదు), **TP-Link Tapo** (లోకల్), **Xiaomi Mi Home** (లోకల్, మీ Mi ఖాతా నుండి టోకెన్లు), **Philips Hue** (లోకల్ బ్రిడ్జ్) మరియు **MQTT** (Zigbee2MQTT, ESPHome మరియు Home Assistant డిస్కవరీని సపోర్ట్ చేసే ఏదైనా పరికరం) కోసం ప్లగ్ చేయగల ఇంటిగ్రేషన్లు. అంతర్నిర్మిత **Matter బ్రిడ్జ్** ద్వారా Google Home, Apple Home, Alexa మరియు Home Assistant మీ స్వంత లోకల్ నెట్‌వర్క్‌లోనే ఈ పరికరాలను స్విచ్ చేయడం, డిమ్ చేయడం మరియు రంగులను మార్చడం వంటివి చేయగలవు.

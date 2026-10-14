@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 Un hub domotique local pour votre serveur domestique. Backend en Rust, base de données SQLite, interface Web en React (avec application de bureau Electron) et intégrations modulaires pour **Tuya / Smart Life** (connexion par code QR, aucun compte développeur requis), **TP-Link Tapo** (local), **Xiaomi Mi Home** (local, jetons récupérés depuis votre compte Mi), **Philips Hue** (pont local) et **MQTT** (Zigbee2MQTT, ESPHome et tout appareil compatible avec la découverte Home Assistant). Un **pont Matter** intégré permet à Google Home, Apple Home, Alexa et Home Assistant d'allumer, varier et changer la couleur de ces appareils directement sur votre réseau local.

@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 Un hub domotico locale per il tuo server domestico. Backend in Rust, SQLite, interfaccia Web in React (con applicazione desktop Electron) e integrazioni modulari per **Tuya / Smart Life** (accesso tramite codice QR, nessun account sviluppatore necessario), **TP-Link Tapo** (locale), **Xiaomi Mi Home** (locale, token recuperati dal tuo account Mi), **Philips Hue** (bridge locale) e **MQTT** (Zigbee2MQTT, ESPHome e qualsiasi dispositivo con rilevamento Home Assistant). Un **bridge Matter** integrato consente a Google Home, Apple Home, Alexa e Home Assistant di accendere, regolare e cambiare il colore di questi dispositivi direttamente sulla tua rete locale.

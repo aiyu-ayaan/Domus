@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 உங்கள் சொந்த ஹோம் சர்வர்க்கான லோக்கல்-ஃபர்ஸ்ட் ஸ்மார்ட் ஹோம் ஹப். Rust பின்தளம் (backend), SQLite, React வலை UI (Electron டெஸ்க்டாப் ஷெல் உடன்), மற்றும் **Tuya / Smart Life** (QR-குறியீடு உள்நுழைவு, டெவலப்பர் கணக்கு தேவையில்லை), **TP-Link Tapo** (உள்ளூர்/local), **Xiaomi Mi Home** (உள்ளூர், உங்கள் Mi கணக்கிலிருந்து டோக்கன்கள்), **Philips Hue** (உள்ளூர் பிரிட்ஜ்) மற்றும் **MQTT** (Zigbee2MQTT, ESPHome மற்றும் Home Assistant discovery ஆதரிக்கும் பிற சாதனங்கள்) ஆகியவற்றிற்கான செருகுநிரல் ஒருங்கிணைப்புகள் (pluggable integrations). உள்ளமைக்கப்பட்ட **Matter பிரிட்ஜ்** மூலம் Google Home, Apple Home, Alexa மற்றும் Home Assistant ஆகியவை உங்கள் சொந்த உள்ளூர் நெட்வொர்க்கிலேயே இந்தச் சாதனங்களை இயக்கவும், ஒளியைக் கூட்ட/குறைக்கவும் மற்றும் வண்ணங்களை மாற்றவும் உதவுகிறது.

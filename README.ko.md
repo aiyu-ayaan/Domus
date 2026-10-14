@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 홈 서버를 위해 설계된 로컬 우선(Local-first) 스마트 홈 허브입니다. Rust 백엔드, SQLite, React 웹 UI(및 Electron 데스크톱 셸)를 기반으로 구축되었으며, **Tuya / Smart Life**(개발자 계정 필요 없는 QR 코드 로그인), **TP-Link Tapo**(로컬 제어), **Xiaomi Mi Home**(로컬 제어, Mi 계정에서 토큰 추출), **Philips Hue**(로컬 브리지), **MQTT**(Zigbee2MQTT, ESPHome 및 Home Assistant 자동 검색을 지원하는 모든 장치) 등 플러그형 연동을 지원합니다. 내장된 **Matter 브리지**를 통해 Google Home, Apple Home, Alexa, Home Assistant에서 자체 로컬 네트워크를 통해 해당 기기의 전원 전환, 디밍 및 색상 조절을 직접 수행할 수 있습니다.

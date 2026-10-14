@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 Trung tâm nhà thông minh ưu tiên cục bộ (local-first) dành cho máy chủ gia đình của bạn. Sử dụng backend bằng Rust, SQLite, giao diện web React (cùng vỏ bọc máy tính để bàn Electron), tích hợp mô-đun linh hoạt cho **Tuya / Smart Life** (đăng nhập bằng mã QR, không cần tài khoản nhà phát triển), **TP-Link Tapo** (điều khiển cục bộ), **Xiaomi Mi Home** (cục bộ, lấy token từ tài khoản Mi của bạn), **Philips Hue** (cầu nối cục bộ) và **MQTT** (Zigbee2MQTT, ESPHome và bất kỳ thiết bị nào hỗ trợ cơ chế phát hiện của Home Assistant). **Cầu nối Matter** tích hợp sẵn cho phép Google Home, Apple Home, Alexa và Home Assistant bật tắt, điều chỉnh độ sáng và đổi màu các thiết bị đó trực tiếp qua mạng nội bộ của bạn.

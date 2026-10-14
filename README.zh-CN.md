@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 专为您的家庭服务器打造的本地优先（Local-First）智能家居中心。采用 Rust 后端、SQLite、React 网页界面（以及 Electron 桌面应用外壳），并提供可插拔式集成，支持 **Tuya / 智能生活**（二维码扫码登录，无需开发者账号）、**TP-Link Tapo**（局域网本地控制）、**小米米家 (Xiaomi Mi Home)**（本地控制，从您的小米账号获取 Token）、**飞利浦 Hue (Philips Hue)**（本地网桥）以及 **MQTT**（Zigbee2MQTT、ESPHome 以及任何支持 Home Assistant 发现协议的设备）。内置 **Matter 网桥**，让 Google Home、Apple Home、Alexa 和 Home Assistant 能够通过您自己的局域网控制这些设备的开关、调光和调色。

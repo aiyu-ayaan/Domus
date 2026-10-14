@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 آپ کے ہوم سرور کے لیے ایک لوکل فرسٹ اسمارٹ ہوم ہب۔ Rust بیک اینڈ، SQLite، React ویب UI (Electron ڈیسک ٹاپ شیل کے ساتھ)، اور **Tuya / Smart Life** (کیو آر کوڈ لاگ ان، کسی ڈویلپر اکاؤنٹ کی ضرورت نہیں)، **TP-Link Tapo** (مقامی)، **Xiaomi Mi Home** (مقامی، آپ کے Mi اکاؤنٹ سے ٹوکنز)، **Philips Hue** (لوکل برج) اور **MQTT** (Zigbee2MQTT، ESPHome اور Home Assistant ڈسکوری کی حمایت کرنے والے دیگر آلات) کے لیے پلگ ایبل انٹیگریشنز۔ اندرونی ساختہ **Matter برج** کے ذریعے Google Home، Apple Home، Alexa اور Home Assistant آپ کے اپنے لوکل نیٹ ورک پر ان آلات کو آن/آف، مدہم (dim) اور ان کے رنگ تبدیل کر سکتے ہیں۔

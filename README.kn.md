@@ -49,6 +49,7 @@
 ![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
+[![Lines of code](https://img.shields.io/endpoint?url=https%3A%2F%2Fghloc.dev%2Fapi%2Faiyu-ayaan%2FDomus%2Fbadge%3Ffilter%3D.rs%24%2C.ts%24%2C.tsx%24%2C.kt%24%2C.kts%24%2C.js%24%2C.mjs%24%2C.css%24%2C.sql%24&label=lines%20of%20code&color=orange)](https://ghloc.dev/aiyu-ayaan/Domus)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
 
 ನಿಮ್ಮ ಹೋಮ್ ಸರ್ವರ್‌ಗಾಗಿ ಲೋಕಲ್-ಫಸ್ಟ್ ಸ್ಮಾರ್ಟ್-ಹೋಮ್ ಹಬ್. Rust ಬ್ಯಾಕೆಂಡ್, SQLite, React ವೆಬ್ UI (Electron ಡೆಸ್ಕ್‌ಟಾಪ್ ಶೆಲ್‌ನೊಂದಿಗೆ), ಮತ್ತು **Tuya / Smart Life** (QR-ಕೋಡ್ ಲಾಗಿನ್, ಡೆವಲಪರ್ ಖಾತೆಯ ಅಗತ್ಯವಿಲ್ಲ), **TP-Link Tapo** (ಸ್ಥಳೀಯ), **Xiaomi Mi Home** (ಸ್ಥಳೀಯ, ನಿಮ್ಮ Mi ಖಾತೆಯಿಂದ ಟೋಕನ್‌ಗಳು), **Philips Hue** (ಸ್ಥಳೀಯ ಬ್ರಿಡ್ಜ್) ಮತ್ತು **MQTT** (Zigbee2MQTT, ESPHome ಮತ್ತು Home Assistant discovery ಬೆಂಬಲಿಸುವ ಇತರ ಸಾಧನಗಳು) ಗಾಗಿ ಪ್ಲಗ್ ಮಾಡಬಹುದಾದ ಇಂಟಿಗ್ರೇಷನ್‌ಗಳು. ಅಂತರ್ನಿರ್ಮಿತ **Matter ಬ್ರಿಡ್ಜ್** ಮೂಲಕ Google Home, Apple Home, Alexa ಮತ್ತು Home Assistant ನಿಮ್ಮದೇ ಆದ ಸ್ಥಳೀಯ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಈ ಸಾಧನಗಳನ್ನು ಆನ್/ಆಫ್ ಮಾಡಲು, ಡಿಮ್ ಮಾಡಲು ಮತ್ತು ಬಣ್ಣ ಬದಲಾಯಿಸಲು ಅನುಮತಿಸುತ್ತದೆ.
