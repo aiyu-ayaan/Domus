@@ -15,6 +15,7 @@
 ![Electron](https://img.shields.io/badge/desktop-Electron-47848F?logo=electron&logoColor=white)
 ![Android](https://img.shields.io/badge/android-Kotlin%20%2B%20Compose-3DDC84?logo=android&logoColor=white)
 ![MQTT](https://img.shields.io/badge/MQTT-Home%20Assistant%20discovery-660066?logo=mqtt&logoColor=white)
+![Matter](https://img.shields.io/badge/Matter-bridge-1A1A1A?logo=matter&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows%20%7C%20Android-informational)
 ![Languages](https://img.shields.io/badge/languages-27-blue?logo=googletranslate&logoColor=white)
 ![Encrypted](https://img.shields.io/badge/HTTPS-by%20default-success?logo=letsencrypt&logoColor=white)
@@ -24,13 +25,19 @@ React web UI (with an Electron desktop shell), and pluggable integrations for
 **Tuya / Smart Life** (QR-code login, no developer account), **TP-Link Tapo**
 (local), **Xiaomi Mi Home** (local, tokens from your Mi account), **Philips Hue**
 (local bridge) and **MQTT** (Zigbee2MQTT, ESPHome and anything else that speaks
-Home Assistant discovery).
+Home Assistant discovery). A built-in **Matter bridge** lets Google Home, Apple Home, Alexa and Home
+Assistant switch, dim and colour those devices over your own network.
 
 - Automatic discovery of new devices, with an inbox or auto-add
 - Live dashboard: power draw, bill so far and projected bill, air quality, motion / door / leak / battery readings
-- Rooms, device groups, scenes and automations; triggers at a time, at **sunrise or sunset** (with an offset), on a device change, power level or going offline
+- Rooms, device groups, scenes and automations; triggers at a time, at **sunrise or sunset** (with an offset), on a device change, power level (also *above X for N minutes*), going offline or the **outdoor weather**
+- **Automation runs**: each automation keeps its last 50 runs, with the trigger that fired it and the condition that held it back
+- **Device history**: every change of a device and who made it (a person and the app they used, an automation, Matter, or the device itself)
+- **Alerts** without writing an automation: a device left on too long, an air purifier filter running low
+- **Matter bridge**: share the devices you pick with Google Home, Apple Home, Alexa or Home Assistant, locally, with no cloud account
+- **Outdoor weather and air** at the home (Open-Meteo, no key) on the dashboard, beside the indoor reading
 - **Ask before switching**: mark a main switch and every app, group, scene and manual automation run warns before it is turned on or off
-- Electricity billing with flat, slab and **time-of-day** tariffs in any currency
+- Electricity billing with flat, slab and **time-of-day** tariffs in any currency, **standby cost** per device, and **solar**: generation, export, and net metering or a feed-in rate
 - Multiple users with admin / member / guest roles and access per room or per device, each see-only, control or edit
 - Web, Electron desktop (Linux, Windows) and a native Android app, kept in sync live
 - **27 languages** in the web, desktop and Android apps, following your system's language with a picker in Settings; right to left for Arabic and Urdu
@@ -54,17 +61,24 @@ flowchart LR
     subgraph Server["Domus server: Rust (Axum, Tokio), one binary or Docker image"]
         direction TB
         TLS["HTTPS (rustls)"] --> Auth["JWT auth<br/>role and access read from the database"]
-        Auth --> Modules["modules<br/>users · devices · rooms · scenes · automations<br/>energy · notifications · integrations"]
+        Auth --> Modules["modules<br/>users · devices · rooms · scenes · automations<br/>energy · solar · notifications · integrations"]
         Auth --> WS["live events (WebSocket)"]
         Modules --> Mgr["DeviceManager<br/>poll · discover · command"]
         Mgr --> Bus(("EventBus"))
-        Bus --> Engine["AutomationEngine<br/>time · sun · state triggers"]
+        Bus --> Engine["AutomationEngine<br/>time · sun · state · power · weather triggers<br/>run traces"]
         Engine --> Mgr
         Bus --> WS
+        Bus --> Log["Logbook<br/>who changed what"]
+        Bus --> Watch["Watchdog<br/>left-on · filter alerts"]
         Workers["workers<br/>poller · discovery · scheduler"] --> Mgr
         Workers --> Engine
+        Weather["Weather<br/>every 30 min"] --> Bus
         Mgr --> Vault["Vault<br/>AES-256-GCM"]
+        Bus --> Matter["Matter bridge<br/>rs-matter, own thread"]
+        Matter --> Mgr
     end
+
+    Ctrl["Google Home · Apple Home<br/>Alexa · Home Assistant"] <-->|"Matter over UDP 5540, mDNS"| Matter
 
     subgraph Plugins["integrations"]
         Tuya["Tuya / Smart Life<br/>cloud, QR login"]
@@ -80,13 +94,15 @@ flowchart LR
     Mgr --> Plugins
     Modules --> DB
     Vault -.-> Keys
-    Modules -. "place search, weather and air at the home" .-> Geo(("Open-Meteo<br/>geocoding · weather · air"))
+    Modules -. "place search" .-> Geo(("Open-Meteo<br/>geocoding · weather · air"))
+    Weather -. "weather and air at the home" .-> Geo
 ```
 
 Clients talk only to the server; the server talks to your devices (locally where the vendor allows it)
 and keeps everything in one SQLite file. The cloud is used only where a vendor offers no local control
-(Tuya) or to fetch device keys (Xiaomi), plus two optional lookups: place search for the home location and
-GitHub for update checks.
+(Tuya) or to fetch device keys (Xiaomi), plus optional lookups: place search, weather and outdoor air for
+the home location (Open-Meteo, only once a location is set) and GitHub for update checks. The Matter bridge
+works on the local network only.
 
 ### Data model
 
@@ -103,6 +119,8 @@ erDiagram
     device_groups ||--o{ device_group_members : ""
     devices ||--o{ energy_metrics : samples
     devices ||--o{ air_metrics : samples
+    devices ||--o{ device_events : history
+    automations ||--o{ automation_runs : traces
     users {
         text id PK
         text role
@@ -130,6 +148,22 @@ erDiagram
         text secrets_enc
         bool is_online
         bool confirm_changes
+        int left_on_alert_minutes
+    }
+    device_events {
+        text device_id
+        text field
+        text value
+        text previous
+        text actor
+        datetime at
+    }
+    automation_runs {
+        text automation_id
+        text trigger
+        text conditions
+        text outcome
+        text errors
     }
     discovered_devices {
         text id PK
@@ -167,6 +201,9 @@ erDiagram
         text currency
         text slabs
         text time_of_use
+        text solar_device_ids
+        text export_mode
+        real export_rate
     }
     notifications {
         text level
@@ -310,7 +347,8 @@ pnpm build:web                     # builds apps/web/dist, served by the backend
 APP_ENV=production cargo run --release --manifest-path backend/Cargo.toml
 ```
 
-Then open `https://<server-ip>:8443`.
+Then open `https://<server-ip>:8443`. The Matter bridge, when turned on, also uses UDP 5540
+(`[matter] port`) and mDNS on the LAN.
 
 Or build the Docker image from this checkout (host networking, data in the `domus_data` volume):
 
@@ -439,6 +477,42 @@ automation that would switch it. The setting is kept on the server, so it is the
 Android. Automations that fire on their own cannot ask and run as written, and nothing outside Domus (a
 vendor app, a wall switch) is covered.
 
+## Matter (Google Home, Apple Home, Alexa)
+
+Settings → **Matter** (administrators): turn it on, tick the devices to share, then scan the QR or type the
+pairing code in Google Home, Apple Home, Alexa or Home Assistant. Lights come through as colour or dimmable
+lights, everything else with an on/off switch as a plug; switching, dimming and colour work, and changes made
+in Domus (on/off, brightness) show up in the controller. "Allow pairing for 15 minutes" adds a second
+ecosystem; "Forget all pairings" starts over with a new code.
+
+The bridge is not certified (it uses the Matter test attestation), so apps ask you to confirm adding it, and
+Google Home only accepts it after the bridge is added as a test device in the Google Home Developer
+Console. Details: [`development/docs/MATTER.md`](development/docs/MATTER.md).
+
+## History, automation runs and alerts
+
+- **History** in every device sheet: what changed, when, and who did it (*By Ayaan · Android*,
+  *Automation "Night mode"*, *Matter*, *On the device*). Kept as long as the energy history.
+- **Runs** of each automation: *Ran*, *Failed* with the error, or *Skipped* with the condition that held
+  it back, so "why didn't this fire?" has an answer.
+- **Alert when left on** in the device sheet (30 minutes to 12 hours): administrators get a notification.
+  A metered device counts as on above 10 W, so a TV in standby is off.
+- **Filter running low**: a notification when an air purifier's filter drops to 10%.
+
+## Weather, standby and solar
+
+- With a home location set, the dashboard shows the **weather and outdoor PM2.5** next to the indoor
+  reading, and automations can use them (*when outdoor PM2.5 rises above 35*, *only if outdoor
+  temperature is below 20*).
+- Energy → **Standby** lists what each device draws when nobody uses it (its lowest hour this week) and
+  what that costs a month.
+- Energy → *Electricity plan* → **Solar**: tick the plugs that measure solar generation, then choose net
+  metering or a feed-in rate. The bill then counts only what you buy from the grid, and the Solar card
+  shows generated, used at home, exported and earned. Grid flows are worked out every 15 minutes from
+  metered devices, so appliances without a meter make the export read high.
+
+Plan and diagrams: [`development/docs/ROADMAP.md`](development/docs/ROADMAP.md).
+
 ## License
 
 Domus is released under the [MIT License](LICENSE). Third-party libraries keep their own licenses; they are
@@ -450,3 +524,6 @@ listed under About → Acknowledgements in every app.
 cargo test --workspace
 pnpm --filter @domus/web exec tsc -b
 ```
+
+`cargo test --workspace` includes `backend/tests/matter_bridge.rs`, which pairs a Matter controller with the
+bridge over UDP and switches, dims and colours its devices (it needs a network interface with IPv4).
