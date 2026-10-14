@@ -2,6 +2,37 @@
 
 # Domus
 
+<p align="center">
+  <b>Translations</b><br>
+  <a href="README.md">English</a> ·
+  <a href="README.ar.md">العربية</a> ·
+  <a href="README.bn.md">বাংলা</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.gu.md">ગુજરાતી</a> ·
+  <a href="README.hi.md">हिन्दी</a> ·
+  <a href="README.id.md">Bahasa Indonesia</a> ·
+  <a href="README.it.md">Italiano</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.kn.md">ಕನ್ನಡ</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.ml.md">മലയാളം</a> ·
+  <a href="README.mr.md">मराठी</a> ·
+  <a href="README.pa.md">ਪੰਜਾਬੀ</a> ·
+  <a href="README.pl.md">Polski</a> ·
+  <a href="README.pt-BR.md">Português (Brasil)</a> ·
+  <a href="README.ru.md">Русский</a> ·
+  <a href="README.ta.md">தமிழ்</a> ·
+  <a href="README.te.md">తెలుగు</a> ·
+  <a href="README.th.md">ไทย</a> ·
+  <a href="README.tr.md">Türkçe</a> ·
+  <a href="README.ur.md">اردو</a> ·
+  <a href="README.vi.md">Tiếng Việt</a> ·
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="README.zh-TW.md">繁體中文</a>
+</p>
+
 [![Release](https://img.shields.io/github/actions/workflow/status/aiyu-ayaan/Domus-Rust/release.yml?branch=master&label=release&logo=githubactions&logoColor=white)](https://github.com/aiyu-ayaan/Domus-Rust/actions/workflows/release.yml)
 [![Latest release](https://img.shields.io/github/v/release/aiyu-ayaan/Domus-Rust?include_prereleases&label=version&logo=github)](https://github.com/aiyu-ayaan/Domus-Rust/releases)
 [![License: MIT](https://img.shields.io/github/license/aiyu-ayaan/Domus-Rust)](LICENSE)
