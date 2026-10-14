@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">రీడింగ్ లేదు</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">%1$s కు సగటు పవర్</string>
+    <string name="analytics_compare_devices">చూపాల్సిన పరికరాలు</string>
+    <string name="analytics_compare_combined">అన్నీ కలిపి</string>
+    <string name="analytics_compare_summary">ప్రతి పరికరానికి ఒక గీత, ప్రతి %1$s</string>
     <string name="analytics_chart_energy_used">%1$s కు ఉపయోగించిన శక్తి, మొత్తం %2$s</string>
     <string name="analytics_live_caption">గత 5 నిమిషాలు, ఈ పేజీ తెరిచి ఉన్నప్పుడు ప్రతి 5 సెకన్లకు ఒక రీడింగ్.</string>
     <string name="analytics_total_caption">మొత్తం %1$s · %2$s</string>

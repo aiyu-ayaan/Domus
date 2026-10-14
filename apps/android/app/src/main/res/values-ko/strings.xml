@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">측정값 없음</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">%1$s당 평균 전력</string>
+    <string name="analytics_compare_devices">표시할 기기</string>
+    <string name="analytics_compare_combined">모두 합치기</string>
+    <string name="analytics_compare_summary">기기마다 선 하나, %1$s 단위</string>
     <string name="analytics_chart_energy_used">%1$s당 사용 에너지, 총 %2$s</string>
     <string name="analytics_live_caption">이 페이지가 열려 있는 동안 최근 5분간 5초마다 기록된 측정값입니다.</string>
     <string name="analytics_total_caption">총 %1$s · %2$s</string>

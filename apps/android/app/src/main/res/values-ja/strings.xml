@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">測定値なし</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">%1$sあたりの平均電力</string>
+    <string name="analytics_compare_devices">表示するデバイス</string>
+    <string name="analytics_compare_combined">すべて合算</string>
+    <string name="analytics_compare_summary">デバイスごとに 1 本の線（%1$s ごと）</string>
     <string name="analytics_chart_energy_used">%1$sあたりの使用電力量、合計 %2$s</string>
     <string name="analytics_live_caption">このページを開いている間、5秒ごとに測定される直近5分間のデータです。</string>
     <string name="analytics_total_caption">合計 %1$s · %2$s</string>

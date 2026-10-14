@@ -463,7 +463,7 @@ class DomusRepository(
         }
     }
 
-    suspend fun energyHistory(range: String): List<EnergyPoint> = attempt { it.energyHistory(range) }.orEmpty()
+    suspend fun energyHistory(range: String, deviceId: String? = null): List<EnergyPoint> = attempt { it.energyHistory(range, deviceId) }.orEmpty()
 
     // --- live events: only while the app is on screen ---
 

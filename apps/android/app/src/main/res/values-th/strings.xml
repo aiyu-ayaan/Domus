@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">ไม่มีค่าที่วัดได้</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">กำลังไฟเฉลี่ยต่อ%1$s</string>
+    <string name="analytics_compare_devices">อุปกรณ์ที่จะแสดง</string>
+    <string name="analytics_compare_combined">รวมทั้งหมด</string>
+    <string name="analytics_compare_summary">หนึ่งเส้นต่ออุปกรณ์ ต่อ%1$s</string>
     <string name="analytics_chart_energy_used">พลังงานที่ใช้ต่อ%1$s รวมทั้งหมด %2$s</string>
     <string name="analytics_live_caption">5 นาทีล่าสุด บันทึกค่าทุก 5 วินาทีขณะที่เปิดหน้านี้อยู่</string>
     <string name="analytics_total_caption">รวม %1$s · %2$s</string>

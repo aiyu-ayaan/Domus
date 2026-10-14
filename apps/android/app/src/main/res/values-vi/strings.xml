@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">Không có số đo</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">Công suất trung bình mỗi %1$s</string>
+    <string name="analytics_compare_devices">Thiết bị hiển thị</string>
+    <string name="analytics_compare_combined">Tất cả gộp lại</string>
+    <string name="analytics_compare_summary">Mỗi thiết bị một đường, theo %1$s</string>
     <string name="analytics_chart_energy_used">Điện năng đã dùng mỗi %1$s, tổng cộng %2$s</string>
     <string name="analytics_live_caption">5 phút qua, cập nhật mỗi 5 giây khi trang này đang mở.</string>
     <string name="analytics_total_caption">Tổng cộng %1$s · %2$s</string>

@@ -175,8 +175,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun saveAutomation(id: String?, body: JsonObject) = write(if (id == null) "POST" else "PUT", "/automations${id?.let { "/$it" }.orEmpty()}", body)
     suspend fun removeAutomation(id: String) = write("DELETE", "/automations/$id")
 
-    /** [range] is `day`, `week` or `month`. */
-    suspend fun airHistory(range: String) = call("GET", "/air/history?range=$range&tz=${zone()}", ListSerializer(AirPoint.serializer()))
+    /** [range] is `hour`, `day`, `week`, `month` or `hours`; [deviceId] narrows it to one device, else the whole home. */
+    suspend fun airHistory(range: String, deviceId: String? = null) =
+        call("GET", "/air/history?range=$range&tz=${zone()}${deviceId?.let { "&device_id=$it" }.orEmpty()}", ListSerializer(AirPoint.serializer()))
 
     suspend fun energySettings() = call("GET", "/energy/settings", EnergySettings.serializer())
     suspend fun saveEnergySettings(settings: EnergySettings) =
@@ -239,8 +240,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun runAutomation(id: String) = call("POST", "/automations/$id/run", ActionResult.serializer())
 
     suspend fun energyOverview() = call("GET", "/energy/overview", EnergyOverview.serializer())
-    /** [range] is `hour` (per minute), `day`, `week` or `month`. */
-    suspend fun energyHistory(range: String) = call("GET", "/energy/history?range=$range&tz=${zone()}", ListSerializer(EnergyPoint.serializer()))
+    /** [range] is `hour` (per minute), `day`, `week` or `month`; [deviceId] narrows it to one device, else the whole home. */
+    suspend fun energyHistory(range: String, deviceId: String? = null) =
+        call("GET", "/energy/history?range=$range&tz=${zone()}${deviceId?.let { "&device_id=$it" }.orEmpty()}", ListSerializer(EnergyPoint.serializer()))
 
     /** Server event stream. [onEvent] gets each event object; [onClosed] fires once when the connection ends for any reason. */
     fun live(onOpen: () -> Unit, onEvent: (JsonObject) -> Unit, onClosed: () -> Unit) = socket("/ws", onOpen, onEvent, onClosed)

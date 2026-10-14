@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">无读数</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">每%1$s平均功率</string>
+    <string name="analytics_compare_devices">显示的设备</string>
+    <string name="analytics_compare_combined">全部合并</string>
+    <string name="analytics_compare_summary">每台设备一条线，每%1$s</string>
     <string name="analytics_chart_energy_used">每%1$s能耗，总计 %2$s</string>
     <string name="analytics_live_caption">过去 5 分钟的数据，此页面打开时每 5 秒记录一次读数。</string>
     <string name="analytics_total_caption">总计 %1$s · %2$s</string>

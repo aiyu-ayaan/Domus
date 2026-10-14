@@ -3,6 +3,7 @@ package com.aiyu.domus.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.MaterialTheme
@@ -109,6 +110,68 @@ fun LineChart(values: List<Double?>, selected: Int, onSelect: (Int) -> Unit, sum
             drawLine(c.outline, Offset(x(selected), 0f), Offset(x(selected), size.height), 1.dp.toPx())
             drawCircle(c.surface, 7.dp.toPx(), Offset(x(selected), y(v)))
             drawCircle(c.primary, 5.dp.toPx(), Offset(x(selected), y(v)))
+        }
+    }
+}
+
+/** The color of the [index]th compared line. */
+@Composable
+fun seriesColor(index: Int): Color {
+    val c = MaterialTheme.colorScheme
+    return listOf(c.primary, c.tertiary, c.secondary, c.error)[index % 4]
+}
+
+/** The dash of the [index]th compared line, so lines differ by more than color; the first is solid. */
+fun seriesDash(index: Int): PathEffect? =
+    listOf(null, floatArrayOf(14f, 8f), floatArrayOf(3f, 8f), floatArrayOf(20f, 8f, 4f, 8f))[index % 4]?.let { PathEffect.dashPathEffect(it) }
+
+/** A short sample of the [index]th compared line, for a legend or a chip. */
+@Composable
+fun SeriesSwatch(index: Int, modifier: Modifier = Modifier) {
+    val color = seriesColor(index)
+    Canvas(modifier.size(width = 18.dp, height = 8.dp)) {
+        drawLine(color, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 2.5.dp.toPx(), StrokeCap.Round, seriesDash(index))
+    }
+}
+
+/**
+ * Several lines over the same buckets, one per device ([series]), each with its [seriesColor] and [seriesDash].
+ * null breaks a line. The selected bucket marks every line's value.
+ */
+@Composable
+fun MultiLineChart(series: List<List<Double?>>, selected: Int, onSelect: (Int) -> Unit, summary: String, modifier: Modifier = Modifier) {
+    val c = MaterialTheme.colorScheme
+    val colors = series.indices.map { seriesColor(it) }
+    val count = series.maxOfOrNull { it.size } ?: 0
+    // Draws in when devices are added or removed, not on each live sample (that would restart it every 5 s).
+    val reveal = rememberReveal(series.size)
+    // Not floored at 1 like LineChart: compared energy is often a few hundredths of a kWh.
+    val top = (series.flatten().filterNotNull().maxOrNull()?.takeIf { it > 0 } ?: 1.0) * 1.1
+    Canvas(modifier.semantics { contentDescription = summary }.selectBucket(count, onSelect)) {
+        if (count == 0) return@Canvas
+        fun x(i: Int) = if (count == 1) size.width / 2 else size.width * i / (count - 1)
+        fun y(v: Double) = size.height - (v / top).toFloat() * size.height
+        clipRect(right = size.width * reveal.value.coerceIn(0f, 1f)) {
+            series.forEachIndexed { s, values ->
+                val path = Path()
+                values.forEachIndexed { i, v ->
+                    if (v == null) return@forEachIndexed
+                    if (i > 0 && values[i - 1] != null) path.lineTo(x(i), y(v)) else path.moveTo(x(i), y(v))
+                }
+                drawPath(path, colors[s], style = Stroke(2.5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round, pathEffect = seriesDash(s)))
+                values.forEachIndexed { i, v ->
+                    if (v != null && values.getOrNull(i - 1) == null && values.getOrNull(i + 1) == null) drawCircle(colors[s], 3.dp.toPx(), Offset(x(i), y(v)))
+                }
+            }
+        }
+        if (selected in 0 until count) {
+            drawLine(c.outline, Offset(x(selected), 0f), Offset(x(selected), size.height), 1.dp.toPx())
+            series.forEachIndexed { s, values ->
+                values.getOrNull(selected)?.let { v ->
+                    drawCircle(c.surface, 6.dp.toPx(), Offset(x(selected), y(v)))
+                    drawCircle(colors[s], 4.dp.toPx(), Offset(x(selected), y(v)))
+                }
+            }
         }
     }
 }

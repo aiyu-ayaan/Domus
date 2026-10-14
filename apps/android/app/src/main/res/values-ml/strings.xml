@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">റീഡിംഗ് ഇല്ല</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">ഓരോ %1$s-ലെയും ശരാശരി പവർ</string>
+    <string name="analytics_compare_devices">കാണിക്കേണ്ട ഉപകരണങ്ങൾ</string>
+    <string name="analytics_compare_combined">എല്ലാം ചേർത്ത്</string>
+    <string name="analytics_compare_summary">ഓരോ ഉപകരണത്തിനും ഒരു വര, ഓരോ %1$s</string>
     <string name="analytics_chart_energy_used">ഓരോ %1$s-ലും ഉപയോഗിച്ച ഊർജ്ജം, ആകെ %2$s</string>
     <string name="analytics_live_caption">കഴിഞ്ഞ 5 മിനിറ്റ്, ഈ പേജ് തുറന്നിരിക്കുമ്പോൾ ഓരോ 5 സെക്കൻഡിലും ഒരു റീഡിംഗ്.</string>
     <string name="analytics_total_caption">ആകെ %1$s · %2$s</string>

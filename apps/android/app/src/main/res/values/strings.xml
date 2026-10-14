@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">No reading</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">Average power per %1$s</string>
+    <string name="analytics_compare_devices">Devices to show</string>
+    <string name="analytics_compare_combined">All combined</string>
+    <string name="analytics_compare_summary">One line per device, per %1$s</string>
     <string name="analytics_chart_energy_used">Energy used per %1$s, %2$s in total</string>
     <string name="analytics_live_caption">The last 5 minutes, a reading every 5 seconds while this page is open.</string>
     <string name="analytics_total_caption">Total %1$s · %2$s</string>

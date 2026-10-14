@@ -493,6 +493,9 @@
     <string name="analytics_no_reading">Нет данных</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">Средняя мощность за %1$s</string>
+    <string name="analytics_compare_devices">Показывать устройства</string>
+    <string name="analytics_compare_combined">Все вместе</string>
+    <string name="analytics_compare_summary">Одна линия на устройство, за %1$s</string>
     <string name="analytics_chart_energy_used">Расход энергии за %1$s, всего %2$s</string>
     <string name="analytics_live_caption">Последние 5 минут, обновление каждые 5 секунд, пока открыт этот экран.</string>
     <string name="analytics_total_caption">Всего %1$s · %2$s</string>

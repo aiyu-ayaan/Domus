@@ -501,6 +501,9 @@
     <string name="analytics_no_reading">لا توجد قراءة</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">متوسط القدرة لكل %1$s</string>
+    <string name="analytics_compare_devices">الأجهزة المعروضة</string>
+    <string name="analytics_compare_combined">الكل مجتمعة</string>
+    <string name="analytics_compare_summary">خط لكل جهاز، لكل %1$s</string>
     <string name="analytics_chart_energy_used">الطاقة المستخدمة لكل %1$s، الإجمالي %2$s</string>
     <string name="analytics_live_caption">آخر 5 دقائق، قراءة كل 5 ثوانٍ طالما هذه الصفحة مفتوحة.</string>
     <string name="analytics_total_caption">الإجمالي %1$s · %2$s</string>

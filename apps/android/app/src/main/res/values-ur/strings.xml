@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">کوئی ریڈنگ نہیں</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">فی %1$s اوسط پاور</string>
+    <string name="analytics_compare_devices">دکھانے کے آلات</string>
+    <string name="analytics_compare_combined">سب ملا کر</string>
+    <string name="analytics_compare_summary">ہر آلے کے لیے ایک لکیر، فی %1$s</string>
     <string name="analytics_chart_energy_used">فی %1$s استعمال شدہ توانائی، کل %2$s</string>
     <string name="analytics_live_caption">پچھلے 5 منٹ، جب تک یہ صفحہ کھلا ہے ہر 5 سیکنڈ میں ایک ریڈنگ۔</string>
     <string name="analytics_total_caption">کل %1$s · %2$s</string>

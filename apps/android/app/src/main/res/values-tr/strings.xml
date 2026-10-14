@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">Ölçüm yok</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">%1$s başına ortalama güç</string>
+    <string name="analytics_compare_devices">Gösterilecek cihazlar</string>
+    <string name="analytics_compare_combined">Tümü birlikte</string>
+    <string name="analytics_compare_summary">Cihaz başına bir çizgi, %1$s başına</string>
     <string name="analytics_chart_energy_used">%1$s başına kullanılan enerji, toplam %2$s</string>
     <string name="analytics_live_caption">Bu sayfa açıkken her 5 saniyede bir ölçüm olmak üzere son 5 dakika.</string>
     <string name="analytics_total_caption">Toplam %1$s · %2$s</string>

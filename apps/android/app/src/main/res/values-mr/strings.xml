@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">कोणतीही नोंद नाही</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">प्रति %1$s सरासरी पॉवर</string>
+    <string name="analytics_compare_devices">दाखवायची उपकरणे</string>
+    <string name="analytics_compare_combined">सर्व एकत्र</string>
+    <string name="analytics_compare_summary">प्रत्येक उपकरणासाठी एक रेषा, प्रति %1$s</string>
     <string name="analytics_chart_energy_used">प्रति %1$s वापरलेली ऊर्जा, एकूण %2$s</string>
     <string name="analytics_live_caption">हे पृष्ठ उघडे असताना मागील ५ मिनिटे, दर ५ सेकंदांनी एक नोंद.</string>
     <string name="analytics_total_caption">एकूण %1$s · %2$s</string>

@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">Kein Messwert</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">Durchschnittliche Leistung pro %1$s</string>
+    <string name="analytics_compare_devices">Angezeigte Geräte</string>
+    <string name="analytics_compare_combined">Alle zusammen</string>
+    <string name="analytics_compare_summary">Eine Linie pro Gerät, pro %1$s</string>
     <string name="analytics_chart_energy_used">Verbrauchte Energie pro %1$s, %2$s insgesamt</string>
     <string name="analytics_live_caption">Die letzten 5 Minuten, alle 5 Sekunden ein Messwert, solange diese Seite geöffnet ist.</string>
     <string name="analytics_total_caption">Gesamt %1$s · %2$s</string>

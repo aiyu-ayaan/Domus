@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">कोई रीडिंग नहीं</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">प्रति %1$s औसत पावर</string>
+    <string name="analytics_compare_devices">दिखाने के लिए डिवाइस</string>
+    <string name="analytics_compare_combined">सभी मिलाकर</string>
+    <string name="analytics_compare_summary">हर डिवाइस की एक रेखा, प्रति %1$s</string>
     <string name="analytics_chart_energy_used">प्रति %1$s उपयोग की गई ऊर्जा, कुल %2$s</string>
     <string name="analytics_live_caption">पिछले 5 मिनट, जब तक यह पृष्ठ खुला है हर 5 सेकंड में एक रीडिंग।</string>
     <string name="analytics_total_caption">कुल %1$s · %2$s</string>

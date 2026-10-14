@@ -481,6 +481,9 @@
     <string name="analytics_no_reading">無讀數</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">每%1$s平均功率</string>
+    <string name="analytics_compare_devices">顯示的裝置</string>
+    <string name="analytics_compare_combined">全部合併</string>
+    <string name="analytics_compare_summary">每台裝置一條線，每%1$s</string>
     <string name="analytics_chart_energy_used">每%1$s用電量，總計 %2$s</string>
     <string name="analytics_live_caption">過去 5 分鐘的資料，此頁面開啟時每 5 秒記錄一次讀數。</string>
     <string name="analytics_total_caption">總計 %1$s · %2$s</string>

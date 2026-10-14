@@ -485,6 +485,9 @@
     <string name="analytics_no_reading">அளவீடு இல்லை</string>
     <string name="analytics_kwh_and_cost">%1$s · %2$s</string>
     <string name="analytics_chart_avg_power">%1$s க்கான சராசரி மின்சாரம்</string>
+    <string name="analytics_compare_devices">காட்ட வேண்டிய சாதனங்கள்</string>
+    <string name="analytics_compare_combined">அனைத்தும் சேர்த்து</string>
+    <string name="analytics_compare_summary">ஒவ்வொரு சாதனத்திற்கும் ஒரு கோடு, ஒவ்வொரு %1$s</string>
     <string name="analytics_chart_energy_used">%1$s க்கு பயன்படுத்தப்பட்ட ஆற்றல், மொத்தம் %2$s</string>
     <string name="analytics_live_caption">கடந்த 5 நிமிடங்கள், இந்தப் பக்கம் திறந்திருக்கும்போது ஒவ்வொரு 5 விநாடிகளுக்கும் ஒரு அளவீடு.</string>
     <string name="analytics_total_caption">மொத்தம் %1$s · %2$s</string>

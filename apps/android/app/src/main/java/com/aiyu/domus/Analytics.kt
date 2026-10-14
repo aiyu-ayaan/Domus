@@ -60,6 +60,8 @@ import com.aiyu.domus.core.formatMoney
 import com.aiyu.domus.core.formatWatts
 import com.aiyu.domus.ui.components.BarChart
 import com.aiyu.domus.ui.components.LineChart
+import com.aiyu.domus.ui.components.MultiLineChart
+import com.aiyu.domus.ui.components.SeriesSwatch
 import com.aiyu.domus.ui.components.RollingText
 import com.aiyu.domus.ui.components.ScreenColumn
 import com.aiyu.domus.ui.components.ScreenHeader
@@ -112,6 +114,52 @@ private fun <T> rememberLive(sample: (String) -> T): List<T> {
         }
     }
     return samples
+}
+
+/** Which devices a chart compares: none picked is the home's combined line, else one line per picked device. */
+@Composable
+private fun DevicePicker(devices: List<Pair<String, String>>, picked: List<String>, onChange: (List<String>) -> Unit) {
+    if (devices.size < 2) return
+    val label = stringResource(R.string.analytics_compare_devices)
+    FlowRow(Modifier.fillMaxWidth().semantics { contentDescription = label }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(picked.isEmpty(), { onChange(emptyList()) }, { Text(stringResource(R.string.analytics_compare_combined)) })
+        devices.forEach { (id, name) ->
+            val at = picked.indexOf(id)
+            FilterChip(
+                at >= 0, { onChange(if (at >= 0) picked - id else picked + id) }, { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                leadingIcon = if (at >= 0) ({ SeriesSwatch(at) }) else null,
+            )
+        }
+    }
+}
+
+/**
+ * The compared devices over [times]: each one's value at the selected bucket above a line per device.
+ * [series] follows [names]; [format] writes a value.
+ */
+@Composable
+private fun ColumnScope.CompareChart(names: List<String>, series: List<List<Double?>>, times: List<String>, range: String, empty: String, format: @Composable (Double) -> String) {
+    val c = MaterialTheme.colorScheme
+    val is24Hour = rememberIs24HourFormat()
+    if (times.isEmpty() || series.all { s -> s.all { it == null } }) {
+        Text(empty, color = c.onSurfaceVariant)
+        return
+    }
+    var picked by remember(range) { mutableStateOf<Int?>(null) }
+    // Starts on the latest bucket any device measured.
+    val selected = (picked ?: series.maxOf { s -> s.indexOfLast { it != null } }).coerceIn(0, times.lastIndex)
+    Text(formatBucket(times[selected], range, is24Hour), style = MaterialTheme.typography.labelLarge, color = c.onSurfaceVariant)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        names.forEachIndexed { i, name ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                SeriesSwatch(i)
+                Text(name, style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(series[i].getOrNull(selected)?.let { format(it) } ?: stringResource(R.string.analytics_no_reading), style = MaterialTheme.typography.titleSmall)
+            }
+        }
+    }
+    MultiLineChart(series, selected, { picked = it }, stringResource(R.string.analytics_compare_summary, bucketOf(range)), Modifier.fillMaxWidth().height(160.dp))
+    ChartAxis(formatBucket(times.first(), range, is24Hour), formatBucket(times.last(), range, is24Hour))
 }
 
 /** Tracks the device's 12/24-hour clock setting, refreshing when the app resumes from system settings. */
@@ -284,6 +332,12 @@ private fun ColumnScope.ElectricitySection() {
         if (range == "month") month = repository.energyHistory("month")
         if (range == "hour") hour = repository.energyHistory("hour")
     }
+    // Devices compared line by line, and each one's history for the range shown.
+    var compared by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var perDevice by remember { mutableStateOf<Map<String, List<EnergyPoint>>>(emptyMap()) }
+    LaunchedEffect(range, compared, energy?.todayKwh) {
+        if (range != "live") perDevice = compared.associateWith { repository.energyHistory(range, it) }
+    }
     val c = MaterialTheme.colorScheme
 
     val overview = energy
@@ -313,9 +367,22 @@ private fun ColumnScope.ElectricitySection() {
 
     val history: @Composable ColumnScope.() -> Unit = {
         val live = rememberLive { EnergyPoint(it, watts = wattsToDisplay) }
+        val liveByDevice = rememberLive { t -> t to devices.filter { it.isOnline }.associate { d -> d.id to d.state.watts?.toDouble() } }
         SectionTitle(stringResource(R.string.analytics_history))
         RangePicker(range, Ranges) { range = it }
-        ChartCard {
+        DevicePicker(overview.devices.map { it.deviceId to it.name }, compared) { compared = it }
+        if (compared.isNotEmpty()) ChartCard {
+            val isLive = range == "live"
+            if (!isLive && compared.any { it !in perDevice }) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
+            else CompareChart(
+                names = compared.map { id -> overview.devices.firstOrNull { it.deviceId == id }?.name ?: "—" },
+                // Energy per bucket, or the power each draws while live. An unmeasured bucket breaks the line.
+                series = compared.map { id -> if (isLive) liveByDevice.map { it.second[id] } else perDevice[id].orEmpty().map { p -> p.kwh.takeIf { it > 0 || p.watts != null } } },
+                times = if (isLive) liveByDevice.map { it.first } else perDevice[compared.first()].orEmpty().map { it.t },
+                range = range,
+                empty = stringResource(R.string.analytics_nothing_recorded),
+            ) { if (isLive) formatWatts(it) else formatKwh(it) }
+        } else ChartCard {
             val isLive = range == "live"
             val points = when (range) { "live" -> live; "hour" -> hour; "day" -> day; "week" -> week; else -> month }
             if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
@@ -456,6 +523,12 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     LaunchedEffect(range, pm?.roundToInt()) { if (range != "live") history = repository.request { it.airHistory(range) } ?: history ?: emptyList() }
     var hours by remember { mutableStateOf<List<AirPoint>?>(null) }
     LaunchedEffect(pm?.roundToInt()) { hours = repository.request { it.airHistory("hours") } ?: hours ?: emptyList() }
+    // Devices compared line by line, and each one's history for the range shown.
+    var compared by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var perDevice by remember { mutableStateOf<Map<String, List<AirPoint>>>(emptyMap()) }
+    LaunchedEffect(range, compared, pm?.roundToInt()) {
+        if (range != "live") perDevice = compared.associateWith { id -> repository.request { it.airHistory(range, id) } ?: perDevice[id].orEmpty() }
+    }
 
     val level = pm?.let(::airLevel)
     val (tone, onTone) = when (level) {
@@ -504,6 +577,7 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
     val factRows: @Composable ColumnScope.() -> Unit = { facts.chunked(2).forEachIndexed { i, pair -> FactRow(*pair.toTypedArray(), index = 1 + i) } }
 
     val live = rememberLive { AirPoint(it, pm?.toDouble(), temperature, humidity) }
+    val liveByDevice = rememberLive { t -> t to sensors.filter { it.isOnline }.associate { d -> d.id to AirPoint(t, d.state.pm25?.toDouble(), d.state.temperature?.toDouble(), d.state.humidity?.toDouble()) } }
     val points = if (range == "live") live else history
     // Offer only the readings the home's devices report.
     val available = Readings.filter { (key, _) -> key == "pm25" || points.orEmpty().any { it.reading(key) != null } }
@@ -512,7 +586,18 @@ private fun ColumnScope.AirSection(user: User, onOpenDevice: (String) -> Unit) {
         SectionTitle(stringResource(R.string.analytics_trend))
         RangePicker(range, Ranges) { range = it }
         if (available.size > 1) Choice(available.map { it.first to stringResource(it.second) }, shown, { reading = it })
-        ChartCard {
+        DevicePicker(sensors.map { it.id to it.name }, compared) { compared = it }
+        if (compared.isNotEmpty()) ChartCard {
+            val isLive = range == "live"
+            if (!isLive && compared.any { it !in perDevice }) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
+            else CompareChart(
+                names = compared.map { id -> sensors.firstOrNull { it.id == id }?.name ?: "—" },
+                series = compared.map { id -> if (isLive) liveByDevice.map { it.second[id]?.reading(shown) } else perDevice[id].orEmpty().map { it.reading(shown) } },
+                times = if (isLive) liveByDevice.map { it.first } else perDevice[compared.first()].orEmpty().map { it.t },
+                range = range,
+                empty = stringResource(R.string.analytics_no_air_history),
+            ) { readingText(shown, it) }
+        } else ChartCard {
             if (points == null) LoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
             else if (points.none { it.reading(shown) != null }) Text(stringResource(R.string.analytics_no_air_history), color = c.onSurfaceVariant)
             else {
