@@ -15,7 +15,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockReset
@@ -138,7 +137,7 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Box(Modifier.enterStaggered(0), contentAlignment = Alignment.Center) {
                         MorphingShape(Modifier.size(180.dp))
-                        Icon(icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(72.dp))
+                        HeroIcon(icon, Modifier.size(72.dp))
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(title, style = MaterialTheme.typography.displayMedium, modifier = Modifier.enterStaggered(1).semantics { heading() })
@@ -156,7 +155,7 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
                 Spacer(Modifier.height(32.dp))
                 Box(Modifier.enterStaggered(0), contentAlignment = Alignment.Center) {
                     MorphingShape(Modifier.size(136.dp))
-                    Icon(icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(56.dp))
+                    HeroIcon(icon, Modifier.size(56.dp))
                 }
                 Spacer(Modifier.height(24.dp))
                 Text(title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.enterStaggered(1).semantics { heading() })
@@ -169,10 +168,11 @@ private fun EntryColumn(icon: ImageVector, title: String, subtitle: String, cont
     }
 }
 
-private class Intro(val icon: ImageVector, val shape: RoundedPolygon, @StringRes val titleRes: Int, @StringRes val bodyRes: Int)
+/** [icon] null is the brand mark. */
+private class Intro(val icon: ImageVector?, val shape: RoundedPolygon, @StringRes val titleRes: Int, @StringRes val bodyRes: Int)
 
 private val Intros = listOf(
-    Intro(Icons.Rounded.Home, MaterialShapes.Cookie9Sided, R.string.connect_intro_1_title, R.string.connect_intro_1_body),
+    Intro(null, MaterialShapes.Cookie9Sided, R.string.connect_intro_1_title, R.string.connect_intro_1_body),
     Intro(Icons.Rounded.Lock, MaterialShapes.Clover4Leaf, R.string.connect_intro_2_title, R.string.connect_intro_2_body),
     Intro(Icons.Rounded.Router, MaterialShapes.Sunny, R.string.connect_intro_3_title, R.string.connect_intro_3_body),
 )
@@ -209,7 +209,7 @@ fun OnboardingScreen() {
                             .clip(intro.shape.toShape())
                             .background(c.primary),
                         contentAlignment = Alignment.Center,
-                    ) { Icon(intro.icon, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(if (wide) 128.dp else 96.dp)) }
+                    ) { HeroIcon(intro.icon ?: rememberBrandMark(), Modifier.size(if (wide) 128.dp else 96.dp)) }
                 }
                 if (wide) {
                     // Wide windows put the words beside the shape instead of under it.
@@ -293,7 +293,7 @@ fun ConnectScreen() {
         }
     }
 
-    EntryColumn(Icons.Rounded.Home, stringResource(R.string.connect_welcome_title), stringResource(R.string.connect_welcome_subtitle)) {
+    EntryColumn(rememberBrandMark(gradient = true), stringResource(R.string.connect_welcome_title), stringResource(R.string.connect_welcome_subtitle)) {
         Text(stringResource(R.string.connect_on_this_network), style = MaterialTheme.typography.titleMedium, modifier = Modifier.fillMaxWidth().semantics { heading() })
         found.forEachIndexed { index, server ->
             Card(
@@ -455,7 +455,7 @@ private fun SignInPage(session: Session.SignedOut, username: String, onUsername:
     }
 
     EntryColumn(
-        if (session.needsSetup) Icons.Rounded.AdminPanelSettings else Icons.Rounded.Home,
+        if (session.needsSetup) Icons.Rounded.AdminPanelSettings else rememberBrandMark(gradient = true),
         stringResource(if (session.needsSetup) R.string.auth_create_admin_title else R.string.auth_welcome_back_title),
         stringResource(if (session.needsSetup) R.string.auth_create_admin_subtitle else R.string.auth_welcome_back_subtitle),
     ) {
