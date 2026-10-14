@@ -9,6 +9,7 @@ import { Segmented, Slider, Switch } from '@/components/ui/Controls'
 import { Field, SelectField } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/Card'
 import { EnergyChart } from './EnergyChart'
+import { DeviceLogbook } from './DeviceLogbook'
 import { FanSpeedSlider } from './FanSpeedSlider'
 import { LightColorControls } from './LightColorControls'
 import { LightEffects, LightMoods, useEffectCatalog } from './LightScenes'
@@ -227,6 +228,10 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
           <EnergyChart points={history.data ?? []} range="day" currency={energy?.settings.currency ?? 'USD'} height={120} />
         </Section>
       )}
+
+      <Section title={t('logbook.title')}>
+        <DeviceLogbook deviceId={device.id} catalog={catalog} />
+      </Section>
 
       {(admin || device.can_edit) && (
         <Section title={t('drawer.settings')}>

@@ -115,6 +115,21 @@ export interface LightPreset {
   color_temp?: number
 }
 
+/** Who changed a device; none means it was changed on the device itself. */
+export type Actor =
+  | { kind: 'user'; id: string; name: string; client: 'web' | 'desktop' | 'android' | null }
+  | { kind: 'automation'; id: string; name: string }
+  | { kind: 'screen_sync' }
+
+/** One line of a device's logbook. */
+export interface LogEntry {
+  at: string
+  field: string
+  value: unknown
+  previous: unknown
+  actor: Actor | null
+}
+
 export interface EffectCatalog {
   moods: LightPreset[]
   effects: LightPreset[]

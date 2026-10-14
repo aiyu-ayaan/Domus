@@ -52,6 +52,13 @@ export const formatTime = (value: Date | string) => {
   return ltr(d.toLocaleTimeString(formatLocale, { hour: 'numeric', minute: '2-digit', ...hour12Option() }))
 }
 
+/** A moment as a clock time, with the day in front when it is not today. */
+export const formatMoment = (value: string) => {
+  const d = new Date(value)
+  if (d.toDateString() === new Date().toDateString()) return formatTime(d)
+  return ltr(d.toLocaleString(formatLocale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', ...hour12Option() }))
+}
+
 /** Formats a stored 24-hour rule time ("HH:MM", e.g. "07:00" or "22:00") following the device/OS 12/24-hour preference. */
 export const formatClockTime = (hhmm: string) => {
   const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim())

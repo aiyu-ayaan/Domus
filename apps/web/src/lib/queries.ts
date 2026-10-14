@@ -21,6 +21,7 @@ export const keys = {
   users: ['users'] as const,
   serverLinks: ['server-links'] as const,
   homeLocation: ['home-location'] as const,
+  logbook: (device: string) => ['logbook', device] as const,
 }
 
 export const useDevices = () => useQuery({ queryKey: keys.devices, queryFn: api.devices })

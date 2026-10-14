@@ -64,6 +64,8 @@ export function useLiveEvents(enabled: boolean) {
               qc.setQueryData<Device[]>(keys.devices, (l) =>
                 l?.map((d) => (d.id === ev.device_id ? { ...d, state: ev.state, is_online: ev.is_online } : d)),
               )
+            // The logbook is written from the same event: give it a moment before reading it back.
+            setTimeout(() => qc.invalidateQueries({ queryKey: keys.logbook(ev.device_id) }), 800)
             break
           }
           case 'device_added':
