@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME は小さな拡張機能を使ってアプリをクイック設定に表示します。Domus が自動でインストールします。",
   "settings.tray.gnomeRestart": "追加しました。ログアウトして再ログインすると、クイック設定に Domus が表示されます。",
   "settings.tray.gnomeOn": "Domus はクイック設定にあります。",
-  "settings.tray.gnomeFailed": "Domus をクイック設定に追加できませんでした: {reason}"
+  "settings.tray.gnomeFailed": "Domus をクイック設定に追加できませんでした: {reason}",
+  "settings.autostart.title": "コンピューターと一緒に起動",
+  "settings.autostart.hint": "このコンピューターにサインインすると Domus を開きます。トレイがオンの場合は、ウィンドウを開かずにトレイで待機します。"
 }

@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME hiển thị ứng dụng trong Cài đặt nhanh qua một tiện ích mở rộng nhỏ. Domus sẽ cài nó cho bạn.",
   "settings.tray.gnomeRestart": "Đã thêm. Đăng xuất rồi đăng nhập lại để thấy Domus trong Cài đặt nhanh.",
   "settings.tray.gnomeOn": "Domus đã có trong Cài đặt nhanh.",
-  "settings.tray.gnomeFailed": "Không thể thêm Domus vào Cài đặt nhanh: {reason}"
+  "settings.tray.gnomeFailed": "Không thể thêm Domus vào Cài đặt nhanh: {reason}",
+  "settings.autostart.title": "Khởi động cùng máy tính",
+  "settings.autostart.hint": "Mở Domus khi bạn đăng nhập vào máy tính này. Khi bật khay hệ thống, Domus chờ ở đó thay vì mở cửa sổ."
 }

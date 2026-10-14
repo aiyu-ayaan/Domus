@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME एका छोट्या एक्सटेंशनद्वारे अ‍ॅप्स क्विक सेटिंग्जमध्ये दाखवते. Domus ते तुमच्यासाठी इन्स्टॉल करते.",
   "settings.tray.gnomeRestart": "जोडले. क्विक सेटिंग्जमध्ये Domus पाहण्यासाठी लॉग आउट करून पुन्हा लॉग इन करा.",
   "settings.tray.gnomeOn": "Domus क्विक सेटिंग्जमध्ये आहे.",
-  "settings.tray.gnomeFailed": "Domus क्विक सेटिंग्जमध्ये जोडता आले नाही: {reason}"
+  "settings.tray.gnomeFailed": "Domus क्विक सेटिंग्जमध्ये जोडता आले नाही: {reason}",
+  "settings.autostart.title": "संगणकासोबत सुरू करा",
+  "settings.autostart.hint": "या संगणकावर साइन इन केल्यावर Domus उघडते. ट्रे चालू असल्यास विंडो न उघडता ते तिथे थांबते."
 }

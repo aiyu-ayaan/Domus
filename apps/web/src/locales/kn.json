@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME ಒಂದು ಸಣ್ಣ ವಿಸ್ತರಣೆಯ ಮೂಲಕ ಆ್ಯಪ್‌ಗಳನ್ನು ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ತೋರಿಸುತ್ತದೆ. Domus ಅದನ್ನು ನಿಮಗಾಗಿ ಸ್ಥಾಪಿಸುತ್ತದೆ.",
   "settings.tray.gnomeRestart": "ಸೇರಿಸಲಾಗಿದೆ. ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ Domus ನೋಡಲು ಲಾಗ್ ಔಟ್ ಮಾಡಿ ಮತ್ತೆ ಲಾಗ್ ಇನ್ ಮಾಡಿ.",
   "settings.tray.gnomeOn": "Domus ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿದೆ.",
-  "settings.tray.gnomeFailed": "Domus ಅನ್ನು ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಲಿಲ್ಲ: {reason}"
+  "settings.tray.gnomeFailed": "Domus ಅನ್ನು ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಲಿಲ್ಲ: {reason}",
+  "settings.autostart.title": "ಕಂಪ್ಯೂಟರ್ ಜೊತೆ ಪ್ರಾರಂಭಿಸಿ",
+  "settings.autostart.hint": "ಈ ಕಂಪ್ಯೂಟರ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿದಾಗ Domus ತೆರೆಯುತ್ತದೆ. ಟ್ರೇ ಆನ್ ಆಗಿದ್ದರೆ, ವಿಂಡೋ ತೆರೆಯುವ ಬದಲು ಅಲ್ಲಿ ಕಾಯುತ್ತದೆ."
 }

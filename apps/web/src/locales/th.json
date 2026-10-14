@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME แสดงแอปในการตั้งค่าด่วนผ่านส่วนขยายเล็กๆ Domus จะติดตั้งให้คุณ",
   "settings.tray.gnomeRestart": "เพิ่มแล้ว ออกจากระบบแล้วเข้าใหม่เพื่อดู Domus ในการตั้งค่าด่วน",
   "settings.tray.gnomeOn": "Domus อยู่ในการตั้งค่าด่วนแล้ว",
-  "settings.tray.gnomeFailed": "เพิ่ม Domus ในการตั้งค่าด่วนไม่ได้: {reason}"
+  "settings.tray.gnomeFailed": "เพิ่ม Domus ในการตั้งค่าด่วนไม่ได้: {reason}",
+  "settings.autostart.title": "เริ่มพร้อมคอมพิวเตอร์",
+  "settings.autostart.hint": "เปิด Domus เมื่อคุณลงชื่อเข้าใช้คอมพิวเตอร์เครื่องนี้ หากเปิดถาดระบบไว้ จะรออยู่ที่นั่นแทนการเปิดหน้าต่าง"
 }

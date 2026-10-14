@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME shows apps in Quick Settings through a small extension. Domus installs it for you.",
   "settings.tray.gnomeRestart": "Added. Log out and back in to see Domus in Quick Settings.",
   "settings.tray.gnomeOn": "Domus is in Quick Settings.",
-  "settings.tray.gnomeFailed": "Could not add Domus to Quick Settings: {reason}"
+  "settings.tray.gnomeFailed": "Could not add Domus to Quick Settings: {reason}",
+  "settings.autostart.title": "Start with the computer",
+  "settings.autostart.hint": "Opens Domus when you sign in to this computer. With the tray on, it waits there instead of opening a window."
 }

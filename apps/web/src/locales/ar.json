@@ -1220,5 +1220,7 @@
   "settings.tray.gnomeHint": "يعرض GNOME التطبيقات في الإعدادات السريعة عبر امتداد صغير. يثبّته Domus نيابةً عنك.",
   "settings.tray.gnomeRestart": "تمت الإضافة. سجّل الخروج ثم الدخول لترى Domus في الإعدادات السريعة.",
   "settings.tray.gnomeOn": "Domus موجود في الإعدادات السريعة.",
-  "settings.tray.gnomeFailed": "تعذّرت إضافة Domus إلى الإعدادات السريعة: {reason}"
+  "settings.tray.gnomeFailed": "تعذّرت إضافة Domus إلى الإعدادات السريعة: {reason}",
+  "settings.autostart.title": "التشغيل مع الحاسوب",
+  "settings.autostart.hint": "يفتح Domus عند تسجيل الدخول إلى هذا الحاسوب. عند تفعيل العلبة ينتظر هناك بدلاً من فتح نافذة."
 }

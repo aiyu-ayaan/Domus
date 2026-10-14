@@ -1192,5 +1192,7 @@
   "settings.tray.gnomeHint": "GNOME показывает приложения в быстрых настройках через небольшое расширение. Domus установит его сам.",
   "settings.tray.gnomeRestart": "Добавлено. Выйдите из системы и войдите снова, чтобы увидеть Domus в быстрых настройках.",
   "settings.tray.gnomeOn": "Domus в быстрых настройках.",
-  "settings.tray.gnomeFailed": "Не удалось добавить Domus в быстрые настройки: {reason}"
+  "settings.tray.gnomeFailed": "Не удалось добавить Domus в быстрые настройки: {reason}",
+  "settings.autostart.title": "Запускать вместе с компьютером",
+  "settings.autostart.hint": "Открывает Domus при входе в систему на этом компьютере. Если трей включён, Domus ждёт там, а не открывает окно."
 }

@@ -1192,5 +1192,7 @@
   "settings.tray.gnomeHint": "GNOME pokazuje aplikacje w Szybkich ustawieniach przez małe rozszerzenie. Domus zainstaluje je za Ciebie.",
   "settings.tray.gnomeRestart": "Dodano. Wyloguj się i zaloguj ponownie, aby zobaczyć Domus w Szybkich ustawieniach.",
   "settings.tray.gnomeOn": "Domus jest w Szybkich ustawieniach.",
-  "settings.tray.gnomeFailed": "Nie udało się dodać Domus do Szybkich ustawień: {reason}"
+  "settings.tray.gnomeFailed": "Nie udało się dodać Domus do Szybkich ustawień: {reason}",
+  "settings.autostart.title": "Uruchamiaj z komputerem",
+  "settings.autostart.hint": "Otwiera Domus po zalogowaniu się na tym komputerze. Gdy zasobnik jest włączony, czeka tam zamiast otwierać okno."
 }

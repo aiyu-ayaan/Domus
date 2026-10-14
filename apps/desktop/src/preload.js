@@ -34,6 +34,11 @@ contextBridge.exposeInMainWorld('domus', {
       return () => ipcRenderer.removeListener('update:progress', heard)
     },
   },
+  // Start with the computer (main.js): a login item, or an XDG autostart entry on Linux.
+  autostart: {
+    enabled: () => ipcRenderer.sendSync('autostart:get'),
+    setEnabled: (on) => ipcRenderer.send('autostart:set', on),
+  },
   // The tray (main.js): on or off, the page's summary for its menu, and a purifier switched from the menu.
   tray: {
     enabled: () => ipcRenderer.sendSync('tray:get'),

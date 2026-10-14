@@ -45,6 +45,8 @@ interface DesktopBridge {
   chooseServer(): void
   /** 'system' | 'light' | 'dark': the window buttons follow the app theme. */
   setTheme(theme: string): void
+  /** Start with the computer, in the background when there is a tray or tile. Absent in older desktop builds. */
+  autostart?: { enabled(): boolean; setEnabled(on: boolean): void }
   /** The tray menu (desktop main.js). Absent in older desktop builds. */
   tray?: {
     enabled(): boolean

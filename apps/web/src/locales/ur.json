@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME ایک چھوٹی ایکسٹینشن کے ذریعے ایپس کو فوری ترتیبات میں دکھاتا ہے۔ Domus اسے آپ کے لیے انسٹال کرتا ہے۔",
   "settings.tray.gnomeRestart": "شامل ہو گیا۔ فوری ترتیبات میں Domus دیکھنے کے لیے لاگ آؤٹ کر کے دوبارہ لاگ ان کریں۔",
   "settings.tray.gnomeOn": "Domus فوری ترتیبات میں ہے۔",
-  "settings.tray.gnomeFailed": "Domus کو فوری ترتیبات میں شامل نہیں کیا جا سکا: {reason}"
+  "settings.tray.gnomeFailed": "Domus کو فوری ترتیبات میں شامل نہیں کیا جا سکا: {reason}",
+  "settings.autostart.title": "کمپیوٹر کے ساتھ شروع کریں",
+  "settings.autostart.hint": "اس کمپیوٹر میں سائن ان کرنے پر Domus کھلتا ہے۔ ٹرے آن ہو تو ونڈو کھولنے کے بجائے وہیں انتظار کرتا ہے۔"
 }

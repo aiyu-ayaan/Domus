@@ -1178,5 +1178,7 @@
   "settings.tray.gnomeHint": "GNOME mostra le app nelle Impostazioni rapide tramite una piccola estensione. Domus la installa per te.",
   "settings.tray.gnomeRestart": "Aggiunto. Esci e rientra per vedere Domus nelle Impostazioni rapide.",
   "settings.tray.gnomeOn": "Domus è nelle Impostazioni rapide.",
-  "settings.tray.gnomeFailed": "Impossibile aggiungere Domus alle Impostazioni rapide: {reason}"
+  "settings.tray.gnomeFailed": "Impossibile aggiungere Domus alle Impostazioni rapide: {reason}",
+  "settings.autostart.title": "Avvia con il computer",
+  "settings.autostart.hint": "Apre Domus quando accedi a questo computer. Con l'area di notifica attiva, resta lì invece di aprire una finestra."
 }

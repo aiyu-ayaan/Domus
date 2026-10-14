@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME 通过一个小扩展在快速设置中显示应用。Domus 会为你安装它。",
   "settings.tray.gnomeRestart": "已添加。注销并重新登录后即可在快速设置中看到 Domus。",
   "settings.tray.gnomeOn": "Domus 已在快速设置中。",
-  "settings.tray.gnomeFailed": "无法将 Domus 添加到快速设置：{reason}"
+  "settings.tray.gnomeFailed": "无法将 Domus 添加到快速设置：{reason}",
+  "settings.autostart.title": "随计算机启动",
+  "settings.autostart.hint": "登录这台计算机时打开 Domus。开启系统托盘后，它会在托盘中等待，而不是打开窗口。"
 }

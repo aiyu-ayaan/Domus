@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME menampilkan aplikasi di Setelan Cepat lewat ekstensi kecil. Domus memasangnya untuk Anda.",
   "settings.tray.gnomeRestart": "Ditambahkan. Keluar lalu masuk lagi untuk melihat Domus di Setelan Cepat.",
   "settings.tray.gnomeOn": "Domus ada di Setelan Cepat.",
-  "settings.tray.gnomeFailed": "Tidak dapat menambahkan Domus ke Setelan Cepat: {reason}"
+  "settings.tray.gnomeFailed": "Tidak dapat menambahkan Domus ke Setelan Cepat: {reason}",
+  "settings.autostart.title": "Mulai bersama komputer",
+  "settings.autostart.hint": "Membuka Domus saat Anda masuk ke komputer ini. Jika baki aktif, Domus menunggu di sana alih-alih membuka jendela."
 }

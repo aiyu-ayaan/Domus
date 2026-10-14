@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME zeigt Apps in den Schnelleinstellungen über eine kleine Erweiterung. Domus installiert sie für dich.",
   "settings.tray.gnomeRestart": "Hinzugefügt. Ab- und wieder anmelden, um Domus in den Schnelleinstellungen zu sehen.",
   "settings.tray.gnomeOn": "Domus ist in den Schnelleinstellungen.",
-  "settings.tray.gnomeFailed": "Domus konnte nicht zu den Schnelleinstellungen hinzugefügt werden: {reason}"
+  "settings.tray.gnomeFailed": "Domus konnte nicht zu den Schnelleinstellungen hinzugefügt werden: {reason}",
+  "settings.autostart.title": "Mit dem Computer starten",
+  "settings.autostart.hint": "Öffnet Domus, wenn du dich an diesem Computer anmeldest. Ist der Infobereich aktiv, wartet Domus dort, statt ein Fenster zu öffnen."
 }

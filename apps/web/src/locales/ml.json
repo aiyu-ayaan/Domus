@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "ഒരു ചെറിയ എക്സ്റ്റൻഷൻ വഴിയാണ് GNOME ആപ്പുകൾ ക്വിക്ക് സെറ്റിംഗ്‌സിൽ കാണിക്കുന്നത്. Domus അത് നിങ്ങൾക്കായി ഇൻസ്റ്റാൾ ചെയ്യും.",
   "settings.tray.gnomeRestart": "ചേർത്തു. ക്വിക്ക് സെറ്റിംഗ്‌സിൽ Domus കാണാൻ ലോഗ് ഔട്ട് ചെയ്ത് വീണ്ടും ലോഗ് ഇൻ ചെയ്യുക.",
   "settings.tray.gnomeOn": "Domus ക്വിക്ക് സെറ്റിംഗ്‌സിലുണ്ട്.",
-  "settings.tray.gnomeFailed": "Domus ക്വിക്ക് സെറ്റിംഗ്‌സിൽ ചേർക്കാനായില്ല: {reason}"
+  "settings.tray.gnomeFailed": "Domus ക്വിക്ക് സെറ്റിംഗ്‌സിൽ ചേർക്കാനായില്ല: {reason}",
+  "settings.autostart.title": "കമ്പ്യൂട്ടറിനൊപ്പം തുടങ്ങുക",
+  "settings.autostart.hint": "ഈ കമ്പ്യൂട്ടറിൽ സൈൻ ഇൻ ചെയ്യുമ്പോൾ Domus തുറക്കും. ട്രേ ഓണാണെങ്കിൽ വിൻഡോ തുറക്കാതെ അവിടെ കാത്തിരിക്കും."
 }

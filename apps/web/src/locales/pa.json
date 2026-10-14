@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME ਇੱਕ ਛੋਟੀ ਐਕਸਟੈਂਸ਼ਨ ਰਾਹੀਂ ਐਪਾਂ ਨੂੰ ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਦਿਖਾਉਂਦਾ ਹੈ। Domus ਇਸਨੂੰ ਤੁਹਾਡੇ ਲਈ ਇੰਸਟਾਲ ਕਰਦਾ ਹੈ।",
   "settings.tray.gnomeRestart": "ਜੋੜ ਦਿੱਤਾ। ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ Domus ਦੇਖਣ ਲਈ ਲੌਗ ਆਊਟ ਕਰਕੇ ਮੁੜ ਲੌਗ ਇਨ ਕਰੋ।",
   "settings.tray.gnomeOn": "Domus ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਹੈ।",
-  "settings.tray.gnomeFailed": "Domus ਨੂੰ ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਨਹੀਂ ਜੋੜਿਆ ਜਾ ਸਕਿਆ: {reason}"
+  "settings.tray.gnomeFailed": "Domus ਨੂੰ ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਨਹੀਂ ਜੋੜਿਆ ਜਾ ਸਕਿਆ: {reason}",
+  "settings.autostart.title": "ਕੰਪਿਊਟਰ ਨਾਲ ਸ਼ੁਰੂ ਕਰੋ",
+  "settings.autostart.hint": "ਇਸ ਕੰਪਿਊਟਰ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰਨ ’ਤੇ Domus ਖੁੱਲ੍ਹਦਾ ਹੈ। ਟ੍ਰੇ ਚਾਲੂ ਹੋਵੇ ਤਾਂ ਵਿੰਡੋ ਖੋਲ੍ਹਣ ਦੀ ਬਜਾਏ ਉੱਥੇ ਉਡੀਕ ਕਰਦਾ ਹੈ।"
 }

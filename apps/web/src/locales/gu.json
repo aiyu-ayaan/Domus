@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME એક નાના એક્સટેન્શન દ્વારા ઍપ્સને ક્વિક સેટિંગ્સમાં બતાવે છે. Domus તે તમારા માટે ઇન્સ્ટોલ કરે છે.",
   "settings.tray.gnomeRestart": "ઉમેરાયું. ક્વિક સેટિંગ્સમાં Domus જોવા લૉગ આઉટ કરીને ફરી લૉગ ઇન કરો.",
   "settings.tray.gnomeOn": "Domus ક્વિક સેટિંગ્સમાં છે.",
-  "settings.tray.gnomeFailed": "Domus ને ક્વિક સેટિંગ્સમાં ઉમેરી શકાયું નહીં: {reason}"
+  "settings.tray.gnomeFailed": "Domus ને ક્વિક સેટિંગ્સમાં ઉમેરી શકાયું નહીં: {reason}",
+  "settings.autostart.title": "કમ્પ્યુટર સાથે શરૂ કરો",
+  "settings.autostart.hint": "આ કમ્પ્યુટરમાં સાઇન ઇન કરો ત્યારે Domus ખૂલે છે. ટ્રે ચાલુ હોય તો વિન્ડો ખોલવાને બદલે ત્યાં રાહ જુએ છે."
 }

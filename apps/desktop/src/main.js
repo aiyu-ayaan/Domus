@@ -395,6 +395,60 @@ function setGnomeBridge(on) {
   }
 }
 
+/** Somewhere to bring a hidden window back from: a tray the desktop shows, or the GNOME Quick Settings tile. */
+const canHide = () => !!tray && (trayHost() !== false || gnomeClients.size > 0 || gnomeStatus().installed)
+
+// --- Start with the computer ---
+// Windows and macOS keep login items themselves; Linux desktops read an XDG autostart entry (KDE, GNOME, XFCE,
+// Cinnamon, MATE, Budgie and LXQt all do). A start at login opens in the background when there is a tray or
+// tile to come back from, else with its window as usual.
+const autostartFile = () => path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'), 'autostart', isDev ? 'domus-dev.desktop' : 'domus.desktop')
+
+function autostartEnabled() {
+  if (process.platform === 'linux') return fs.existsSync(autostartFile())
+  return app.getLoginItemSettings({ args: ['--hidden'] }).openAtLogin
+}
+
+function setAutostart(on) {
+  if (process.platform !== 'linux') return app.setLoginItemSettings({ openAtLogin: on, args: ['--hidden'] })
+  if (!on) return fs.rmSync(autostartFile(), { force: true })
+  // Desktop Entry quoting: \ " ` $ escaped inside quotes, and % doubled.
+  const quote = (a) => `"${a.replace(/(["\\`$])/g, '\\$1').replace(/%/g, '%%')}"`
+  // The AppImage moves to a new mount each run, so its own file is what starts; a development run needs the app path.
+  const command = process.env.APPIMAGE ? [process.env.APPIMAGE] : app.isPackaged ? [process.execPath] : [process.execPath, app.getAppPath()]
+  // The same flavor as this run, when it was chosen by the environment.
+  if (process.env.DOMUS_FLAVOR) command.unshift('env', `DOMUS_FLAVOR=${flavor}`)
+  // Carried over: where Chromium's sandbox is unavailable the app starts only with it (DEPLOYMENT.md, Linux).
+  if (process.argv.includes('--no-sandbox')) command.push('--no-sandbox')
+  command.push('--hidden')
+  fs.mkdirSync(path.dirname(autostartFile()), { recursive: true })
+  const lines = [
+    '[Desktop Entry]',
+    'Type=Application',
+    `Name=${app.getName()}`,
+    `Exec=${command.map(quote).join(' ')}`,
+    `Icon=${appIcon()}`,
+    'X-GNOME-Autostart-enabled=true',
+    'NoDisplay=true',
+  ]
+  fs.writeFileSync(autostartFile(), `${lines.join('\n')}\n`)
+}
+
+/** Started by the login item or autostart entry rather than by the person. */
+const startedAtLogin = () => process.argv.includes('--hidden') || (process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAtLogin)
+
+ipcMain.on('autostart:get', (event) => {
+  event.returnValue = trusted(event) ? autostartEnabled() : null
+})
+ipcMain.on('autostart:set', (event, on) => {
+  if (!trusted(event)) return
+  try {
+    setAutostart(!!on)
+  } catch (e) {
+    console.error('autostart:', e.message)
+  }
+})
+
 ipcMain.on('tray:gnome', (event) => {
   event.returnValue = trusted(event) ? gnomeStatus() : null
 })
@@ -648,12 +702,13 @@ function createWindow() {
     })
   }
 
-  win.once('ready-to-show', () => win.show())
+  // Started at login: stays in the tray or tile; the page still loads, so they stay current.
+  win.once('ready-to-show', () => (startedAtLogin() && canHide() ? null : win.show()))
   win.on('closed', () => (win = null))
   // With the tray on, closing hides the window so the tray stays live; Quit in the tray menu ends the app.
   win.on('close', (event) => {
     // Without a tray or a Quick Settings tile to come back from, closing quits as before.
-    if (tray && !quitting && (trayHost() !== false || gnomeClients.size > 0)) {
+    if (!quitting && canHide()) {
       event.preventDefault()
       win.hide()
     }

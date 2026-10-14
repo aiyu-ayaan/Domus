@@ -1178,5 +1178,7 @@
   "settings.tray.gnomeHint": "GNOME muestra apps en Ajustes rápidos mediante una pequeña extensión. Domus la instala por ti.",
   "settings.tray.gnomeRestart": "Añadido. Cierra sesión y vuelve a entrar para ver Domus en Ajustes rápidos.",
   "settings.tray.gnomeOn": "Domus está en Ajustes rápidos.",
-  "settings.tray.gnomeFailed": "No se pudo añadir Domus a Ajustes rápidos: {reason}"
+  "settings.tray.gnomeFailed": "No se pudo añadir Domus a Ajustes rápidos: {reason}",
+  "settings.autostart.title": "Iniciar con el ordenador",
+  "settings.autostart.hint": "Abre Domus al iniciar sesión en este ordenador. Con la bandeja activada, espera ahí en lugar de abrir una ventana."
 }

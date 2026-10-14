@@ -1178,5 +1178,7 @@
   "settings.tray.gnomeHint": "O GNOME mostra apps nas Configurações rápidas por meio de uma pequena extensão. O Domus a instala para você.",
   "settings.tray.gnomeRestart": "Adicionado. Saia e entre de novo para ver o Domus nas Configurações rápidas.",
   "settings.tray.gnomeOn": "O Domus está nas Configurações rápidas.",
-  "settings.tray.gnomeFailed": "Não foi possível adicionar o Domus às Configurações rápidas: {reason}"
+  "settings.tray.gnomeFailed": "Não foi possível adicionar o Domus às Configurações rápidas: {reason}",
+  "settings.autostart.title": "Iniciar com o computador",
+  "settings.autostart.hint": "Abre o Domus quando você entra neste computador. Com a bandeja ativada, ele espera ali em vez de abrir uma janela."
 }

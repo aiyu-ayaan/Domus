@@ -1164,5 +1164,7 @@
   "settings.tray.gnomeHint": "GNOME একটি ছোট এক্সটেনশনের মাধ্যমে অ্যাপগুলো কুইক সেটিংসে দেখায়। Domus আপনার জন্য এটি ইনস্টল করে।",
   "settings.tray.gnomeRestart": "যোগ হয়েছে। কুইক সেটিংসে Domus দেখতে লগ আউট করে আবার লগ ইন করুন।",
   "settings.tray.gnomeOn": "Domus কুইক সেটিংসে আছে।",
-  "settings.tray.gnomeFailed": "Domus কুইক সেটিংসে যোগ করা যায়নি: {reason}"
+  "settings.tray.gnomeFailed": "Domus কুইক সেটিংসে যোগ করা যায়নি: {reason}",
+  "settings.autostart.title": "কম্পিউটারের সাথে চালু করুন",
+  "settings.autostart.hint": "এই কম্পিউটারে সাইন ইন করলে Domus খোলে। ট্রে চালু থাকলে উইন্ডো না খুলে সেখানে অপেক্ষা করে।"
 }

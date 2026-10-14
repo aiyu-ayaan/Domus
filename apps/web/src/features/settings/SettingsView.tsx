@@ -257,6 +257,7 @@ function ServerCard() {
   return (
     <Card>
       <CardHeader title={t('settings.server.title')} action={desktop && <Button size="sm" onClick={() => desktop?.chooseServer()}>{t('auth.changeServer')}</Button>} />
+      {desktop?.autostart && <AutostartRow />}
       {desktop?.tray && <TrayRow />}
       <form
         className="flex flex-col gap-4 p-4"
@@ -275,6 +276,28 @@ function ServerCard() {
         )}
       </form>
     </Card>
+  )
+}
+
+/** Desktop only: open Domus when this computer starts. */
+function AutostartRow() {
+  const autostart = desktop!.autostart!
+  const [on, setOn] = useState(() => autostart.enabled())
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-border p-4">
+      <div className="min-w-0">
+        <p className="text-body font-medium">{t('settings.autostart.title')}</p>
+        <p className="text-label text-muted">{t('settings.autostart.hint')}</p>
+      </div>
+      <Switch
+        checked={on}
+        label={t('settings.autostart.title')}
+        onChange={(v) => {
+          autostart.setEnabled(v)
+          setOn(autostart.enabled())
+        }}
+      />
+    </div>
   )
 }
 

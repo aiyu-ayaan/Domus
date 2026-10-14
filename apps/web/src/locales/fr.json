@@ -1178,5 +1178,7 @@
   "settings.tray.gnomeHint": "GNOME affiche les applications dans les Réglages rapides grâce à une petite extension. Domus l’installe pour vous.",
   "settings.tray.gnomeRestart": "Ajouté. Déconnectez-vous puis reconnectez-vous pour voir Domus dans les Réglages rapides.",
   "settings.tray.gnomeOn": "Domus est dans les Réglages rapides.",
-  "settings.tray.gnomeFailed": "Impossible d’ajouter Domus aux Réglages rapides : {reason}"
+  "settings.tray.gnomeFailed": "Impossible d’ajouter Domus aux Réglages rapides : {reason}",
+  "settings.autostart.title": "Lancer au démarrage de l’ordinateur",
+  "settings.autostart.hint": "Ouvre Domus quand vous vous connectez à cet ordinateur. Avec la barre d’état activée, il attend là au lieu d’ouvrir une fenêtre."
 }
