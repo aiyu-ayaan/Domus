@@ -2,6 +2,7 @@ package com.aiyu.domus.core
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonObject
 
 // Mirrors the server DTOs (apps/web/src/lib/types.ts). Unknown fields are ignored, so the server can grow.
@@ -456,6 +457,16 @@ data class TuyaQrStatus(val status: String = "waiting", val name: String? = null
 @Serializable
 data class XiaomiLink(@SerialName("account_id") val accountId: String? = null, @SerialName("verify_id") val verifyId: String? = null, val via: String? = null)
 
+/** Message params as text, whatever JSON type the server used for each (a count may come as a number). */
+object TextParams : kotlinx.serialization.KSerializer<Map<String, String>> {
+    private val inner = kotlinx.serialization.builtins.MapSerializer(String.serializer(), kotlinx.serialization.json.JsonElement.serializer())
+    override val descriptor = inner.descriptor
+    override fun deserialize(decoder: kotlinx.serialization.encoding.Decoder): Map<String, String> =
+        inner.deserialize(decoder).mapValues { (_, v) -> (v as? kotlinx.serialization.json.JsonPrimitive)?.content ?: v.toString() }
+    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: Map<String, String>) =
+        inner.serialize(encoder, value.mapValues { kotlinx.serialization.json.JsonPrimitive(it.value) })
+}
+
 @Serializable
 data class Notice(
     val id: String,
@@ -463,7 +474,7 @@ data class Notice(
     val title: String = "",
     val message: String = "",
     val code: String? = null,
-    val params: Map<String, String> = emptyMap(),
+    @Serializable(with = TextParams::class) val params: Map<String, String> = emptyMap(),
     @SerialName("is_read") val isRead: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null,
 )

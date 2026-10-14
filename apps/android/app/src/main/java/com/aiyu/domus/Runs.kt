@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,10 +47,8 @@ fun AutomationRunsPage(id: String, onBack: () -> Unit) {
     val is24Hour = rememberIs24HourFormat()
     val c = MaterialTheme.colorScheme
     SubPage(stringResource(R.string.runs_title, automation?.name.orEmpty()), onBack) {
-        Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        // SubPage scrolls and pads the body; a second scroll here would crash.
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.runs_hint), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
             val list = runs ?: return@Column
             if (list.isEmpty() || automation == null) {
