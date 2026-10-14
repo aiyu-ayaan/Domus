@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">குறைந்தது (நிமிடங்கள்)</string>
     <string name="code_error_power_duration_range">மின் தூண்டுதல் 1 நிமிடம் முதல் 24 மணி நேரம் வரை காத்திருக்கலாம்</string>
     <string name="editor_for_minutes_supporting">உடனே தொடங்க காலியாக விடவும்</string>
+    <string name="device_left_on_title">இயங்கியபடியே விடப்பட்டால் எச்சரிக்கை</string>
+    <string name="device_left_on_hint">இதைவிட நீண்ட நேரம் இயங்கினால் நிர்வாகிகளுக்கு அறிவிப்பு வரும்.</string>
+    <string name="device_left_on_never">ஒருபோதும் இல்லை</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} நிமிடமாக இயங்குகிறது.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} இயங்கியபடியே உள்ளது</string>
+    <string name="code_notification_filter_low" formatted="false">வடிகட்டியின் ஆயுளில் {percent}% மீதம் உள்ளது. விரைவில் மாற்றவும்.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} இன் வடிகட்டியை மாற்றவும்</string>
+    <string name="code_error_left_on_range">எச்சரிக்கை 1 நிமிடம் முதல் 24 மணி நேரம் வரை காத்திருக்கலாம்</string>
+    <string name="analytics_standby">காத்திருப்பு: %1$s · மாதம் ≈ %2$s</string>
 </resources>

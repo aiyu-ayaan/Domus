@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">For at least (minutes)</string>
     <string name="code_error_power_duration_range">A power trigger can wait 1 minute to 24 hours</string>
     <string name="editor_for_minutes_supporting">Leave empty to start right away</string>
+    <string name="device_left_on_title">Alert when left on</string>
+    <string name="device_left_on_hint">Administrators get a notification when it stays on longer than this.</string>
+    <string name="device_left_on_never">Never</string>
+    <string name="code_notification_left_on" formatted="false">{name} has been on for {minutes} min.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} left on</string>
+    <string name="code_notification_filter_low" formatted="false">{percent}% of the filter life is left. Replace it soon.</string>
+    <string name="code_notification_filter_low_title" formatted="false">Replace the filter of {name}</string>
+    <string name="code_error_left_on_range">A left-on alert can wait 1 minute to 24 hours</string>
+    <string name="analytics_standby">Standby: %1$s · ≈ %2$s a month</string>
 </resources>

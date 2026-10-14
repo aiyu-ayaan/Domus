@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">En az (dakika)</string>
     <string name="code_error_power_duration_range">Güç tetikleyicisi 1 dakika ile 24 saat arasında bekleyebilir</string>
     <string name="editor_for_minutes_supporting">Hemen başlaması için boş bırakın</string>
+    <string name="device_left_on_title">Açık kalırsa uyar</string>
+    <string name="device_left_on_hint">Bundan uzun süre açık kalırsa yöneticilere bildirim gider.</string>
+    <string name="device_left_on_never">Asla</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} dakikadır açık.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} açık kaldı</string>
+    <string name="code_notification_filter_low" formatted="false">Filtre ömrünün %{percent} kadarı kaldı. Yakında değiştirin.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} filtresini değiştirin</string>
+    <string name="code_error_left_on_range">Açık kalma uyarısı 1 dakika ile 24 saat arasında bekleyebilir</string>
+    <string name="analytics_standby">Bekleme: %1$s · ayda ≈ %2$s</string>
 </resources>

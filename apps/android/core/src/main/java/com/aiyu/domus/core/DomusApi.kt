@@ -139,6 +139,8 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun effects() = call("GET", "/devices/effects", EffectCatalog.serializer())
     suspend fun setConfirmChanges(id: String, on: Boolean) =
         call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("confirm_changes", on) }.toString())
+    suspend fun setLeftOnAlert(id: String, minutes: Int?) =
+        call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("left_on_alert_minutes", minutes) }.toString())
     suspend fun refresh(id: String) = call("POST", "/devices/$id/refresh", Device.serializer())
     suspend fun logbook(id: String, limit: Int) = call("GET", "/devices/$id/logbook?limit=$limit", ListSerializer(LogEntry.serializer()))
 

@@ -995,4 +995,13 @@
     <string name="editor_field_for_minutes">Przez co najmniej (minuty)</string>
     <string name="code_error_power_duration_range">Wyzwalacz mocy może czekać od 1 minuty do 24 godzin</string>
     <string name="editor_for_minutes_supporting">Zostaw puste, aby zacząć od razu</string>
+    <string name="device_left_on_title">Powiadom, gdy zostanie włączone</string>
+    <string name="device_left_on_hint">Administratorzy dostaną powiadomienie, gdy będzie włączone dłużej.</string>
+    <string name="device_left_on_never">Nigdy</string>
+    <string name="code_notification_left_on" formatted="false">{name} jest włączone od {minutes} min.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} jest nadal włączone</string>
+    <string name="code_notification_filter_low" formatted="false">Zostało {percent}% żywotności filtra. Wymień go wkrótce.</string>
+    <string name="code_notification_filter_low_title" formatted="false">Wymień filtr: {name}</string>
+    <string name="code_error_left_on_range">Powiadomienie może czekać od 1 minuty do 24 godzin</string>
+    <string name="analytics_standby">Czuwanie: %1$s · ≈ %2$s miesięcznie</string>
 </resources>

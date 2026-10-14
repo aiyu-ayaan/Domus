@@ -216,6 +216,8 @@ data class Device(
     @SerialName("can_edit") val canEdit: Boolean = false,
     /** Ask before switching it on or off. Kept on the server, so it is the same on every app. */
     @SerialName("confirm_changes") val confirmChanges: Boolean = false,
+    /** Administrators are notified when it stays on longer than this; null = never. */
+    @SerialName("left_on_alert_minutes") val leftOnAlertMinutes: Int? = null,
 ) {
     /** What the server will report once [cmd] lands; shown at once so controls feel instant. */
     fun applying(cmd: DeviceCommand) = copy(
@@ -307,6 +309,9 @@ data class DeviceEnergy(
     @SerialName("current_watts") val watts: Double = 0.0,
     val kwh: Double = 0.0,
     val cost: Double = 0.0,
+    /** The least it drew in any hour of the last week; null until a day has been measured. */
+    @SerialName("standby_watts") val standbyWatts: Double? = null,
+    @SerialName("standby_monthly_cost") val standbyMonthlyCost: Double? = null,
 )
 
 @Serializable

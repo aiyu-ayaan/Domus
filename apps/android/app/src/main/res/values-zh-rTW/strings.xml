@@ -971,4 +971,13 @@
     <string name="editor_field_for_minutes">持續至少（分鐘）</string>
     <string name="code_error_power_duration_range">功率觸發可等待 1 分鐘至 24 小時</string>
     <string name="editor_for_minutes_supporting">留空則立即開始</string>
+    <string name="device_left_on_title">忘記關閉時提醒</string>
+    <string name="device_left_on_hint">開啟時間超過此值時會通知管理員。</string>
+    <string name="device_left_on_never">從不</string>
+    <string name="code_notification_left_on" formatted="false">{name} 已開啟 {minutes} 分鐘。</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} 未關閉</string>
+    <string name="code_notification_filter_low" formatted="false">濾網壽命剩餘 {percent}%，請盡快更換。</string>
+    <string name="code_notification_filter_low_title" formatted="false">更換 {name} 的濾網</string>
+    <string name="code_error_left_on_range">開啟提醒可等待 1 分鐘至 24 小時</string>
+    <string name="analytics_standby">待機: %1$s · 每月約 %2$s</string>
 </resources>

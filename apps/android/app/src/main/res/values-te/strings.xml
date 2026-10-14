@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">కనీసం (నిమిషాలు)</string>
     <string name="code_error_power_duration_range">పవర్ ట్రిగ్గర్ 1 నిమిషం నుండి 24 గంటల వరకు వేచి ఉండగలదు</string>
     <string name="editor_for_minutes_supporting">వెంటనే ప్రారంభించడానికి ఖాళీగా వదలండి</string>
+    <string name="device_left_on_title">ఆన్‌లోనే ఉంటే హెచ్చరించు</string>
+    <string name="device_left_on_hint">దీనికంటే ఎక్కువసేపు ఆన్‌లో ఉంటే నిర్వాహకులకు నోటిఫికేషన్ వస్తుంది.</string>
+    <string name="device_left_on_never">ఎప్పుడూ వద్దు</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} నిమిషాలుగా ఆన్‌లో ఉంది.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} ఆన్‌లోనే ఉంది</string>
+    <string name="code_notification_filter_low" formatted="false">ఫిల్టర్ జీవితకాలం {percent}% మిగిలి ఉంది. త్వరలో మార్చండి.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} ఫిల్టర్‌ను మార్చండి</string>
+    <string name="code_error_left_on_range">ఆన్ హెచ్చరిక 1 నిమిషం నుండి 24 గంటల వరకు వేచి ఉండగలదు</string>
+    <string name="analytics_standby">స్టాండ్‌బై: %1$s · నెలకు ≈ %2$s</string>
 </resources>

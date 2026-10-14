@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">കുറഞ്ഞത് (മിനിറ്റ്)</string>
     <string name="code_error_power_duration_range">പവർ ട്രിഗറിന് 1 മിനിറ്റ് മുതൽ 24 മണിക്കൂർ വരെ കാത്തിരിക്കാം</string>
     <string name="editor_for_minutes_supporting">ഉടൻ ആരംഭിക്കാൻ ശൂന്യമായി വിടുക</string>
+    <string name="device_left_on_title">ഓണായി കിടന്നാൽ അറിയിക്കുക</string>
+    <string name="device_left_on_hint">ഇതിലും കൂടുതൽ സമയം ഓണായാൽ അഡ്മിൻമാർക്ക് അറിയിപ്പ് ലഭിക്കും.</string>
+    <string name="device_left_on_never">ഒരിക്കലുമില്ല</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} മിനിറ്റായി ഓണാണ്.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} ഓണായി കിടക്കുന്നു</string>
+    <string name="code_notification_filter_low" formatted="false">ഫിൽട്ടറിന്റെ {percent}% ആയുസ്സ് ബാക്കി. ഉടൻ മാറ്റുക.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} ന്റെ ഫിൽട്ടർ മാറ്റുക</string>
+    <string name="code_error_left_on_range">ഓൺ അലേർട്ടിന് 1 മിനിറ്റ് മുതൽ 24 മണിക്കൂർ വരെ കാത്തിരിക്കാം</string>
+    <string name="analytics_standby">സ്റ്റാൻഡ്‌ബൈ: %1$s · മാസം ≈ %2$s</string>
 </resources>

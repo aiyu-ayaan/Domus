@@ -431,6 +431,18 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                     }
                 }
             }
+            if ((user.isAdmin || device.canEdit) && s.isOn != null && device.type != "sensor") {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val choices = (listOf(30, 60, 120, 180, 360, 720) + listOfNotNull(device.leftOnAlertMinutes)).distinct().sorted()
+                    Picker(
+                        stringResource(R.string.device_left_on_title),
+                        listOf<Pair<Int?, String>>(null to stringResource(R.string.device_left_on_never)) + choices.map { it to formatDuration(it) },
+                        device.leftOnAlertMinutes,
+                        { repository.setLeftOnAlert(device, it) },
+                    )
+                    Text(stringResource(R.string.device_left_on_hint), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
+                }
+            }
             if (user.isAdmin || device.canEdit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton({ editing = true }) { Text(stringResource(if (user.isAdmin) R.string.device_rename_or_move else R.string.device_rename)) }
@@ -456,6 +468,13 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
             scope.launch { repository.change { it.removeDevice(device.id) } }
         }, { removing = false })
     }
+}
+
+/** "30 minutes", "2 hours" in the phone's language, plural forms included. */
+fun formatDuration(minutes: Int): String {
+    val (value, unit) = if (minutes % 60 == 0) minutes / 60 to android.icu.util.MeasureUnit.HOUR else minutes to android.icu.util.MeasureUnit.MINUTE
+    return android.icu.text.MeasureFormat.getInstance(java.util.Locale.getDefault(), android.icu.text.MeasureFormat.FormatWidth.WIDE)
+        .format(android.icu.util.Measure(value, unit))
 }
 
 // Colors of light itself (white temperatures, bulb colors): device data, not theme colors. Same values as the web app.

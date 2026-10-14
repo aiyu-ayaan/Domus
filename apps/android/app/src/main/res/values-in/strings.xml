@@ -971,4 +971,13 @@
     <string name="editor_field_for_minutes">Selama minimal (menit)</string>
     <string name="code_error_power_duration_range">Pemicu daya bisa menunggu 1 menit hingga 24 jam</string>
     <string name="editor_for_minutes_supporting">Kosongkan untuk langsung mulai</string>
+    <string name="device_left_on_title">Beri tahu jika dibiarkan menyala</string>
+    <string name="device_left_on_hint">Admin diberi tahu jika menyala lebih lama dari ini.</string>
+    <string name="device_left_on_never">Tidak pernah</string>
+    <string name="code_notification_left_on" formatted="false">{name} sudah menyala {minutes} mnt.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} masih menyala</string>
+    <string name="code_notification_filter_low" formatted="false">Umur filter tersisa {percent}%. Segera ganti.</string>
+    <string name="code_notification_filter_low_title" formatted="false">Ganti filter {name}</string>
+    <string name="code_error_left_on_range">Peringatan menyala bisa menunggu 1 menit hingga 24 jam</string>
+    <string name="analytics_standby">Siaga: %1$s · ≈ %2$s per bulan</string>
 </resources>

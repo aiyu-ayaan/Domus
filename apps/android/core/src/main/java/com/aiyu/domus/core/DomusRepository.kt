@@ -428,6 +428,12 @@ class DomusRepository(
         }
     }
 
+    /** The left-on alert of [device] in minutes (null = never); shown at once and put back if the server refuses. */
+    fun setLeftOnAlert(device: Device, minutes: Int?) {
+        replace(device.copy(leftOnAlertMinutes = minutes))
+        scope.launch { attempt { it.setLeftOnAlert(device.id, minutes) }?.let(::replace) ?: replace(device) }
+    }
+
     /** "Ask before switching" for [device]; shown at once and put back if the server refuses. */
     fun setConfirmChanges(device: Device, on: Boolean) {
         replace(device.copy(confirmChanges = on))

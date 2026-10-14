@@ -987,4 +987,13 @@
     <string name="editor_field_for_minutes">Per almeno (minuti)</string>
     <string name="code_error_power_duration_range">Un attivatore di potenza può attendere da 1 minuto a 24 ore</string>
     <string name="editor_for_minutes_supporting">Lascia vuoto per partire subito</string>
+    <string name="device_left_on_title">Avvisa se resta acceso</string>
+    <string name="device_left_on_hint">Gli amministratori ricevono una notifica se resta acceso più a lungo.</string>
+    <string name="device_left_on_never">Mai</string>
+    <string name="code_notification_left_on" formatted="false">{name} è acceso da {minutes} min.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} è rimasto acceso</string>
+    <string name="code_notification_filter_low" formatted="false">Resta il {percent}% di vita del filtro. Sostituiscilo presto.</string>
+    <string name="code_notification_filter_low_title" formatted="false">Sostituisci il filtro di {name}</string>
+    <string name="code_error_left_on_range">Un avviso può attendere da 1 minuto a 24 ore</string>
+    <string name="analytics_standby">Standby: %1$s · ≈ %2$s al mese</string>
 </resources>

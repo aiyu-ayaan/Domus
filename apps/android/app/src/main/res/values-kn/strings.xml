@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">ಕನಿಷ್ಠ (ನಿಮಿಷ)</string>
     <string name="code_error_power_duration_range">ಪವರ್ ಟ್ರಿಗರ್ 1 ನಿಮಿಷದಿಂದ 24 ಗಂಟೆಗಳವರೆಗೆ ಕಾಯಬಹುದು</string>
     <string name="editor_for_minutes_supporting">ತಕ್ಷಣ ಆರಂಭಿಸಲು ಖಾಲಿ ಬಿಡಿ</string>
+    <string name="device_left_on_title">ಆನ್ ಆಗಿಯೇ ಇದ್ದರೆ ಎಚ್ಚರಿಸಿ</string>
+    <string name="device_left_on_hint">ಇದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಆನ್ ಇದ್ದರೆ ನಿರ್ವಾಹಕರಿಗೆ ಅಧಿಸೂಚನೆ ಬರುತ್ತದೆ.</string>
+    <string name="device_left_on_never">ಎಂದಿಗೂ ಇಲ್ಲ</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} ನಿಮಿಷದಿಂದ ಆನ್ ಆಗಿದೆ.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} ಆನ್ ಆಗಿಯೇ ಇದೆ</string>
+    <string name="code_notification_filter_low" formatted="false">ಫಿಲ್ಟರ್‌ನ {percent}% ಆಯುಷ್ಯ ಉಳಿದಿದೆ. ಶೀಘ್ರ ಬದಲಿಸಿ.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} ನ ಫಿಲ್ಟರ್ ಬದಲಿಸಿ</string>
+    <string name="code_error_left_on_range">ಆನ್ ಎಚ್ಚರಿಕೆ 1 ನಿಮಿಷದಿಂದ 24 ಗಂಟೆಗಳವರೆಗೆ ಕಾಯಬಹುದು</string>
+    <string name="analytics_standby">ಸ್ಟ್ಯಾಂಡ್‌ಬೈ: %1$s · ತಿಂಗಳಿಗೆ ≈ %2$s</string>
 </resources>

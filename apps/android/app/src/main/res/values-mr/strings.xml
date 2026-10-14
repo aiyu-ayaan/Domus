@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">किमान (मिनिटे)</string>
     <string name="code_error_power_duration_range">पॉवर ट्रिगर 1 मिनिट ते 24 तास थांबू शकतो</string>
     <string name="editor_for_minutes_supporting">लगेच सुरू करण्यासाठी रिकामे ठेवा</string>
+    <string name="device_left_on_title">चालू राहिल्यास सूचना द्या</string>
+    <string name="device_left_on_hint">यापेक्षा जास्त वेळ चालू राहिल्यास प्रशासकांना सूचना मिळते.</string>
+    <string name="device_left_on_never">कधीही नाही</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} मिनिटांपासून चालू आहे.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} चालूच राहिले</string>
+    <string name="code_notification_filter_low" formatted="false">फिल्टरचे {percent}% आयुष्य शिल्लक आहे. लवकर बदला.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} चा फिल्टर बदला</string>
+    <string name="code_error_left_on_range">चालू राहण्याची सूचना 1 मिनिट ते 24 तास थांबू शकते</string>
+    <string name="analytics_standby">स्टँडबाय: %1$s · दरमहा ≈ %2$s</string>
 </resources>

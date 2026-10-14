@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">कम से कम (मिनट)</string>
     <string name="code_error_power_duration_range">पावर ट्रिगर 1 मिनट से 24 घंटे तक रुक सकता है</string>
     <string name="editor_for_minutes_supporting">तुरंत शुरू करने के लिए खाली छोड़ें</string>
+    <string name="device_left_on_title">चालू रह जाने पर सूचना दें</string>
+    <string name="device_left_on_hint">इससे ज़्यादा देर चालू रहने पर व्यवस्थापकों को सूचना मिलती है।</string>
+    <string name="device_left_on_never">कभी नहीं</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} मिनट से चालू है।</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} चालू रह गया</string>
+    <string name="code_notification_filter_low" formatted="false">फ़िल्टर की {percent}% उम्र बची है। जल्द बदलें।</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} का फ़िल्टर बदलें</string>
+    <string name="code_error_left_on_range">चालू रहने की सूचना 1 मिनट से 24 घंटे तक रुक सकती है</string>
+    <string name="analytics_standby">स्टैंडबाय: %1$s · ≈ %2$s प्रति माह</string>
 </resources>

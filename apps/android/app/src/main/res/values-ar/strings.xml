@@ -1011,4 +1011,13 @@
     <string name="editor_field_for_minutes">لمدة لا تقل عن (دقائق)</string>
     <string name="code_error_power_duration_range">يمكن لمشغّل الطاقة أن ينتظر من دقيقة إلى 24 ساعة</string>
     <string name="editor_for_minutes_supporting">اتركه فارغًا للبدء فورًا</string>
+    <string name="device_left_on_title">تنبيه عند تركه يعمل</string>
+    <string name="device_left_on_hint">يتلقى المسؤولون إشعارًا عندما يبقى يعمل لمدة أطول من هذه.</string>
+    <string name="device_left_on_never">أبدًا</string>
+    <string name="code_notification_left_on" formatted="false">{name} يعمل منذ {minutes} دقيقة.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} تُرك يعمل</string>
+    <string name="code_notification_filter_low" formatted="false">تبقّى {percent}% من عمر الفلتر. استبدله قريبًا.</string>
+    <string name="code_notification_filter_low_title" formatted="false">استبدل فلتر {name}</string>
+    <string name="code_error_left_on_range">يمكن لتنبيه التشغيل أن ينتظر من دقيقة إلى 24 ساعة</string>
+    <string name="analytics_standby">الاستعداد: %1$s · ≈ %2$s شهريًا</string>
 </resources>

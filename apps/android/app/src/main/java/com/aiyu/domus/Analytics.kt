@@ -471,6 +471,11 @@ private fun ColumnScope.ElectricitySection() {
                 }
                 LinearProgressIndicator(progress = { (device.kwh / most).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
                 Text(stringResource(R.string.analytics_device_cycle_summary, formatKwh(device.kwh), formatMoney(device.cost, currency)), style = MaterialTheme.typography.bodyMedium, color = c.onSurfaceVariant)
+                // The least it drew in any hour this week: what it costs even when nobody uses it.
+                if (device.standbyWatts != null) Text(
+                    stringResource(R.string.analytics_standby, formatWatts(device.standbyWatts), formatMoney(device.standbyMonthlyCost ?: 0.0, currency)),
+                    style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant,
+                )
             }
         }
     }

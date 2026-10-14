@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">Mindestens (Minuten)</string>
     <string name="code_error_power_duration_range">Ein Leistungsauslöser kann 1 Minute bis 24 Stunden warten</string>
     <string name="editor_for_minutes_supporting">Leer lassen, um sofort zu starten</string>
+    <string name="device_left_on_title">Warnen, wenn eingeschaltet gelassen</string>
+    <string name="device_left_on_hint">Administratoren werden benachrichtigt, wenn es länger eingeschaltet bleibt.</string>
+    <string name="device_left_on_never">Nie</string>
+    <string name="code_notification_left_on" formatted="false">{name} ist seit {minutes} Min. eingeschaltet.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} ist noch an</string>
+    <string name="code_notification_filter_low" formatted="false">Noch {percent}% Filterlebensdauer. Bald ersetzen.</string>
+    <string name="code_notification_filter_low_title" formatted="false">Filter von {name} ersetzen</string>
+    <string name="code_error_left_on_range">Eine Warnung kann 1 Minute bis 24 Stunden warten</string>
+    <string name="analytics_standby">Standby: %1$s · ≈ %2$s im Monat</string>
 </resources>

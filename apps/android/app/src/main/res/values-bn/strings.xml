@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">অন্তত কত মিনিট ধরে</string>
     <string name="code_error_power_duration_range">পাওয়ার ট্রিগার ১ মিনিট থেকে ২৪ ঘণ্টা অপেক্ষা করতে পারে</string>
     <string name="editor_for_minutes_supporting">সঙ্গে সঙ্গে শুরু করতে ফাঁকা রাখুন</string>
+    <string name="device_left_on_title">চালু থেকে গেলে সতর্ক করুন</string>
+    <string name="device_left_on_hint">এর চেয়ে বেশি সময় চালু থাকলে অ্যাডমিনরা বিজ্ঞপ্তি পান।</string>
+    <string name="device_left_on_never">কখনও না</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} মিনিট ধরে চালু আছে।</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} চালু রয়ে গেছে</string>
+    <string name="code_notification_filter_low" formatted="false">ফিল্টারের আয়ু {percent}% বাকি। শীঘ্রই বদলান।</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name}-এর ফিল্টার বদলান</string>
+    <string name="code_error_left_on_range">চালু থাকার সতর্কতা ১ মিনিট থেকে ২৪ ঘণ্টা অপেক্ষা করতে পারে</string>
+    <string name="analytics_standby">স্ট্যান্ডবাই: %1$s · মাসে ≈ %2$s</string>
 </resources>

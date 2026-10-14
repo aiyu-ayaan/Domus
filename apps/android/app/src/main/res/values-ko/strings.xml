@@ -971,4 +971,13 @@
     <string name="editor_field_for_minutes">최소 지속 시간(분)</string>
     <string name="code_error_power_duration_range">전력 트리거는 1분에서 24시간까지 기다릴 수 있습니다</string>
     <string name="editor_for_minutes_supporting">바로 시작하려면 비워 두세요</string>
+    <string name="device_left_on_title">켜 둔 채로 있으면 알림</string>
+    <string name="device_left_on_hint">이보다 오래 켜져 있으면 관리자에게 알림이 갑니다.</string>
+    <string name="device_left_on_never">알리지 않음</string>
+    <string name="code_notification_left_on" formatted="false">{name}이(가) {minutes}분째 켜져 있습니다.</string>
+    <string name="code_notification_left_on_title" formatted="false">{name}이(가) 켜져 있음</string>
+    <string name="code_notification_filter_low" formatted="false">필터 수명이 {percent}% 남았습니다. 곧 교체하세요.</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} 필터를 교체하세요</string>
+    <string name="code_error_left_on_range">켜짐 알림은 1분에서 24시간까지 기다릴 수 있습니다</string>
+    <string name="analytics_standby">대기 전력: %1$s · 월 ≈ %2$s</string>
 </resources>

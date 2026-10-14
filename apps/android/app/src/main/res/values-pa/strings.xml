@@ -979,4 +979,13 @@
     <string name="editor_field_for_minutes">ਘੱਟੋ-ਘੱਟ (ਮਿੰਟ)</string>
     <string name="code_error_power_duration_range">ਪਾਵਰ ਟ੍ਰਿਗਰ 1 ਮਿੰਟ ਤੋਂ 24 ਘੰਟੇ ਤੱਕ ਉਡੀਕ ਕਰ ਸਕਦਾ ਹੈ</string>
     <string name="editor_for_minutes_supporting">ਤੁਰੰਤ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਖਾਲੀ ਛੱਡੋ</string>
+    <string name="device_left_on_title">ਚਾਲੂ ਰਹਿ ਜਾਣ ’ਤੇ ਸੂਚਿਤ ਕਰੋ</string>
+    <string name="device_left_on_hint">ਇਸ ਤੋਂ ਵੱਧ ਸਮਾਂ ਚਾਲੂ ਰਹਿਣ ’ਤੇ ਪ੍ਰਬੰਧਕਾਂ ਨੂੰ ਸੂਚਨਾ ਮਿਲਦੀ ਹੈ।</string>
+    <string name="device_left_on_never">ਕਦੇ ਨਹੀਂ</string>
+    <string name="code_notification_left_on" formatted="false">{name} {minutes} ਮਿੰਟ ਤੋਂ ਚਾਲੂ ਹੈ।</string>
+    <string name="code_notification_left_on_title" formatted="false">{name} ਚਾਲੂ ਰਹਿ ਗਿਆ</string>
+    <string name="code_notification_filter_low" formatted="false">ਫਿਲਟਰ ਦੀ {percent}% ਉਮਰ ਬਾਕੀ ਹੈ। ਜਲਦੀ ਬਦਲੋ।</string>
+    <string name="code_notification_filter_low_title" formatted="false">{name} ਦਾ ਫਿਲਟਰ ਬਦਲੋ</string>
+    <string name="code_error_left_on_range">ਚਾਲੂ ਰਹਿਣ ਦੀ ਸੂਚਨਾ 1 ਮਿੰਟ ਤੋਂ 24 ਘੰਟੇ ਤੱਕ ਉਡੀਕ ਕਰ ਸਕਦੀ ਹੈ</string>
+    <string name="analytics_standby">ਸਟੈਂਡਬਾਈ: %1$s · ਮਹੀਨੇ ਦਾ ≈ %2$s</string>
 </resources>
