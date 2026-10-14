@@ -1,3 +1,48 @@
+## v0.0.1-alpha.6 (2026-10-14)
+
+- !alpha : Matter bridge, device history, automation runs, weather triggers, solar energy and standby alerts
+- feat(Android): Introduce brand mark and hero icon components for consistent UI representation
+- docs(Readme) : Add the Matter bridge, history, automation runs, alerts, weather, standby and solar to the features, diagrams and guides
+- docs(About) : Credit rs-matter and its runtime crates, and Open-Meteo weather and Copernicus air data, on web, desktop and Android
+- docs(Matter) : Give the bridged device information its own point
+- docs(Matter) : Describe brightness and colour, the port, the end-to-end tests and what was checked
+- fix(Android) : Stop the Matter and Runs pages crashing, and read notification params of any type
+- fix(Matter) : Restart the bridge only when a shared device is renamed or removed, and send notification params as text
+- feat(Android) : Fold device history into a collapsed card, count no solar as use, and pick by tapping a row
+- fix(Energy) : Leave solar generation out of the power the web Overview shows in use
+- fix(Matter) : Bind the configured port, and keep first reports, undone changes and a tick's jitter out of the logbook and alerts
+- feat(Matter) : Dim and colour lights through the bridge, with a test that pairs a controller
+- docs(Roadmap) : Describe the logbook, traces, alerts, weather, solar and the Matter bridge as built
+- feat(Android) : Turn on the Matter bridge, pick shared devices and pair from Settings
+- feat(Matter) : Turn on the bridge, pick shared devices and pair from web Settings
+- feat(Matter) : Bridge shared devices to Google Home, Apple Home and Alexa over Matter
+- feat(Android) : Pick solar devices and export pay in the tariff and show solar in Analytics
+- feat(Energy) : Pick solar devices and export pay on the web and show generation and export
+- feat(Energy) : Count solar generation, split grid import and export, and bill net or feed-in
+- feat(Android) : Show outdoor weather on Home and add weather rules to the editor
+- feat(Weather) : Show outdoor weather on the web and add weather rules to the editor
+- feat(Weather) : Fetch outdoor weather and air from Open-Meteo, with a weather trigger and condition
+- feat(Android) : Set the left-on alert per device and show standby cost in Analytics
+- feat(Alerts) : Set the left-on alert per device and show standby cost on the web
+- feat(Alerts) : Notify when a device is left on or a filter runs low, and work out standby cost
+- feat(Android) : Show automation runs and the left-on duration in the rule editor
+- feat(Automations) : Show each automation's runs and the left-on duration in the web editor
+- feat(Automations) : Keep a trace of each run and add a power trigger that waits for a duration
+- feat(Android) : Show a device's history in the device sheet
+- feat(Logbook) : Show a device's history in the web and desktop device sheet
+- feat(Logbook) : Record every device change and who made it, from which app
+- docs(Roadmap) : Plan the logbook, traces, alerts, weather, solar export and Matter bridge
+- fix(Desktop) : Refuse to rewrite the GNOME extension list when it cannot be read exactly
+- docs(Desktop) : Describe starting with the computer on every system
+- feat(Desktop) : Start with the computer, in the background when the tray or GNOME tile is there
+- docs(Desktop) : Describe the tray and the GNOME Quick Settings tile on every desktop
+- feat(Desktop) : Add the air purifiers to GNOME Quick Settings through a Shell extension
+- docs(Android) : Describe the device comparison on Analytics
+- feat(Android) : Compare devices on the Electricity and Air quality charts
+- docs(Architecture) : Describe kept history, device comparison and the desktop tray
+- feat(Analytics) : Compare devices on the Energy and Air quality charts and add the desktop tray with the air purifiers
+- fix(Devices) : Keep a removed device's history and give it back its id when it is added again
+
 ## v0.0.1-alpha.5 (2026-10-12)
 
 - !alpha(Release) : Tablet layouts for Settings, Home, Devices, Scenes, Analytics and the sign-in screens
