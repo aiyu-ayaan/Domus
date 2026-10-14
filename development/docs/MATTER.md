@@ -53,7 +53,7 @@ flowchart LR
   to a (possibly cloud) device.
 - **Domus to Matter**: on/off, online and brightness changes are reported to controllers. Colour is not:
   rs-matter 0.4.1 keeps it inside the cluster with no way to set it from outside.
-  The Bridged Device Basic Information cluster carries the Domus name (NodeLabel), id (UniqueID) and
+- The Bridged Device Basic Information cluster carries the Domus name (NodeLabel), id (UniqueID) and
   online state (Reachable).
 - **Restarts**: turning the bridge on or off, changing the shared devices, renaming or removing a shared
   device restarts the bridge (other edits do not). Pairings live in `data/matter` and survive restarts.
