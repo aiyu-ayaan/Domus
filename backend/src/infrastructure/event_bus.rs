@@ -11,6 +11,8 @@ pub enum Actor {
     User { id: String, name: String, client: Option<String> },
     Automation { id: String, name: String },
     ScreenSync,
+    /// A Matter controller (Google Home, Apple Home, Alexa) through the bridge.
+    Matter,
 }
 
 impl Actor {

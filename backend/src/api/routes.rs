@@ -65,6 +65,7 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
         .nest("/integrations", integration_routes())
         .nest("/server", server_routes())
         .nest("/weather", crate::modules::weather::weather_routes())
+        .nest("/matter", crate::modules::matter::matter_routes())
         .route("/ws", get(ws_handler))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth_middleware));
 

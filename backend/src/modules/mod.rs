@@ -6,6 +6,7 @@ pub mod energy;
 pub mod groups;
 pub mod integrations;
 pub mod logbook;
+pub mod matter;
 pub mod notifications;
 pub mod rooms;
 pub mod scenes;
