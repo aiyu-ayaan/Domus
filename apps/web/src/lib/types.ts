@@ -82,6 +82,8 @@ export interface Device {
   icon: string | null
   /** Ask before switching this device on or off. Set per device, shared by every app. */
   confirm_changes: boolean
+  /** Administrators are notified when it stays on longer than this; null = never. */
+  left_on_alert_minutes: number | null
   is_online: boolean
   state: DeviceState
   last_seen: string | null
@@ -303,7 +305,16 @@ export interface EnergyOverview {
   projected_cost: number
   budget_used_percent: number | null
   settings: ElectricitySettings
-  devices: { device_id: string; name: string; current_watts: number; kwh: number; cost: number }[]
+  devices: {
+    device_id: string
+    name: string
+    current_watts: number
+    kwh: number
+    cost: number
+    /** The least it drew in any hour of the last week; null until a day has been measured. */
+    standby_watts: number | null
+    standby_monthly_cost: number | null
+  }[]
 }
 
 export interface EnergyPoint {

@@ -18,7 +18,7 @@ import { keys, useCommand, useEnergy, useRooms } from '@/lib/queries'
 import { useCanControl, useIsAdmin } from '@/lib/auth'
 import { errorMessage, useToast } from '@/lib/toast'
 import { canToggle, deviceTypeLabel, integrationLabel } from '@/lib/devices'
-import { airQuality, formatKwh, formatNumber, formatWatts, timeAgo } from '@/lib/format'
+import { airQuality, formatDuration, formatKwh, formatNumber, formatWatts, timeAgo } from '@/lib/format'
 import type { Device, DeviceCommand } from '@/lib/types'
 
 export function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () => void }) {
@@ -91,6 +91,11 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
   // Saved at once, not with "Save changes": it is a setting of how the device is handled, not of its name.
   const ask = useMutation({
     mutationFn: (on: boolean) => api.updateDevice(device.id, { confirm_changes: on }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.devices }),
+    onError: (e) => toast.push({ tone: 'error', title: t('drawer.saveFailed'), message: errorMessage(e) }),
+  })
+  const leftOn = useMutation({
+    mutationFn: (minutes: number | null) => api.updateDevice(device.id, { left_on_alert_minutes: minutes }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.devices }),
     onError: (e) => toast.push({ tone: 'error', title: t('drawer.saveFailed'), message: errorMessage(e) }),
   })
@@ -256,6 +261,25 @@ function Detail({ device, onClose }: { device: Device; onClose: () => void }) {
               </div>
               <Switch checked={device.confirm_changes} onChange={(on) => ask.mutate(on)} label={t('drawer.askBefore.title')} disabled={ask.isPending} />
             </div>
+          )}
+          {canToggle(device) && (
+            <SelectField
+              className="mt-4"
+              label={t('drawer.leftOn.title')}
+              hint={t('drawer.leftOn.hint')}
+              value={device.left_on_alert_minutes ?? ''}
+              disabled={leftOn.isPending}
+              onChange={(e) => leftOn.mutate(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">{t('drawer.leftOn.never')}</option>
+              {[...new Set([30, 60, 120, 180, 360, 720, ...(device.left_on_alert_minutes ? [device.left_on_alert_minutes] : [])])]
+                .sort((x, y) => x - y)
+                .map((m) => (
+                  <option key={m} value={m}>
+                    {formatDuration(m)}
+                  </option>
+                ))}
+            </SelectField>
           )}
           <div className="mt-4 flex flex-wrap justify-between gap-2">
             {admin ? (

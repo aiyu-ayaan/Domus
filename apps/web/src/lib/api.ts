@@ -243,7 +243,7 @@ export const api = {
 
   devices: () => get<Device[]>('/devices'),
   device: (id: string) => get<Device>(`/devices/${id}`),
-  updateDevice: (id: string, b: { name?: string; room_id?: string | null; icon?: string | null; confirm_changes?: boolean }) =>
+  updateDevice: (id: string, b: { name?: string; room_id?: string | null; icon?: string | null; confirm_changes?: boolean; left_on_alert_minutes?: number | null }) =>
     patch<Device>(`/devices/${id}`, b),
   removeDevice: (id: string) => del<Ok>(`/devices/${id}`),
   command: (id: string, cmd: DeviceCommand) => post<Device>(`/devices/${id}/command`, cmd),

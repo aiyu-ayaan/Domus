@@ -52,6 +52,12 @@ export const formatTime = (value: Date | string) => {
   return ltr(d.toLocaleTimeString(formatLocale, { hour: 'numeric', minute: '2-digit', ...hour12Option() }))
 }
 
+/** "30 minutes", "2 hours": spelled out by Intl in the reader's language, plural forms included. */
+export const formatDuration = (minutes: number) => {
+  const [value, unit] = minutes % 60 === 0 ? [minutes / 60, 'hour'] : [minutes, 'minute']
+  return ltr(new Intl.NumberFormat(formatLocale, { style: 'unit', unit, unitDisplay: 'long' }).format(value))
+}
+
 /** A moment as a clock time, with the day in front when it is not today. */
 export const formatMoment = (value: string) => {
   const d = new Date(value)

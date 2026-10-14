@@ -147,6 +147,26 @@ export function EnergyView() {
         )}
       </Card>
 
+      {o.devices.some((d) => d.standby_watts != null) && (
+        <Card className="mt-6">
+          <CardHeader title={t('energy.standby.title')} />
+          <p className="px-4 pt-3 text-label text-muted">{t('energy.standby.hint')}</p>
+          <ul className="divide-y divide-border tabular">
+            {o.devices
+              .filter((d) => d.standby_watts != null)
+              .sort((a, b) => (b.standby_monthly_cost ?? 0) - (a.standby_monthly_cost ?? 0))
+              .map((d) => (
+                <li key={d.device_id} className="flex min-h-11 items-center justify-between gap-4 px-4 py-2 text-body">
+                  <span className="min-w-0 truncate">{d.name}</span>
+                  <span className="shrink-0 text-muted">
+                    {t('energy.standby.cost', { watts: formatWatts(d.standby_watts), cost: formatMoney(d.standby_monthly_cost ?? 0, currency) })}
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </Card>
+      )}
+
       {admin && <Plan initial={o.settings} />}
     </>
   )
