@@ -1,7 +1,7 @@
 # Roadmap: insight, smarter automations and voice
 
-Planned features after the MVP, in build order. Each one leans on the one
-before it. Tracking lives in `development/TODO.md` (Milestone 17).
+Features after the MVP, in build order. All seven are built (Milestone 17 in
+`development/TODO.md`); what is left to check on hardware is listed there.
 
 ## Architecture
 
@@ -92,7 +92,18 @@ tariff, and a net bill in the energy overview.
 
 ## 7. Matter bridge
 
-Domus becomes a Matter bridge so Google Home and Alexa control its devices
-over the local network, with no cloud account. Evaluate the `rs-matter` crate
-first; commissioning needs a QR or pairing code shown in Settings. The largest
-item here, so it comes last.
+Domus is a Matter bridge (rs-matter 0.4.1): Google Home, Apple Home, Alexa and
+Home Assistant switch the shared devices over the local network. Details,
+diagram and limits: `development/docs/MATTER.md`.
+
+## As built
+
+| Feature | Where |
+|---|---|
+| Logbook | `device_events` (0015), `modules/logbook.rs`, `GET /devices/:id/logbook`; `X-Domus-Client` names the app |
+| Traces | `automation_runs` (0016), `GET /automations/:id/runs`; `power_above.for_minutes` checked each minute |
+| Alerts | `devices.left_on_alert_minutes` (0017), `workers/watchdog_worker.rs`; notification codes `left_on`, `filter_low` |
+| Standby | `standby_watts` in `/energy/overview`: lowest hourly average of the last 7 days |
+| Weather | `modules/weather.rs`, `GET /weather`, `weather_changed` event; trigger and condition type `weather` |
+| Solar | `electricity_settings` solar columns (0018), `Flows` per quarter hour, `solar` in `/energy/overview` |
+| Matter | `modules/matter/`, `GET/PUT /matter`, `POST /matter/pairing`, `POST /matter/reset` |

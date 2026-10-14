@@ -129,7 +129,7 @@ flowchart TD
 
 | Area | State |
 |---|---|
-| Web catalog + `t()` / `tOr()` | done (1,151 keys in `apps/web/src/locales/en.json`) |
+| Web catalog + `t()` / `tOr()` | done (1,268 keys in `apps/web/src/locales/en.json`) |
 | Web: format, toast, shared ui, device labels, update prompt, sign-in, app shell, rooms, devices, overview, device drawer / row / charts / light controls, settings | done |
 | Web: Automations, RuleEditor, Energy, Integrations, Air quality, About, Updates, Avatar picker, ScreenSync, `lib/api.ts`, `lib/avatar.ts`, `lib/credits.ts` group names, `lib/devices.tsx` | done |
 | Desktop (`apps/desktop/src/main.js`, `updates.js`, `connect.html`, `i18n.js`, `locales/en.json`) | done (24 keys) |

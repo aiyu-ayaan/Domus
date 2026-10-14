@@ -338,13 +338,16 @@ Order matters: each step unblocks the next. Suggested scope for 1.0: Android + w
 6. Stability gate
    - [ ] A beta in daily use for about two weeks with no new data-loss, security or crash bug before tagging `!major`
 
-## Milestone 17: Insight, smarter automations and voice (planned — 2026-10-14)
+## Milestone 17: Insight, smarter automations and voice (DONE — 2026-10-15)
 Plan and diagram: `development/docs/ROADMAP.md`. Order: each builds on the one before.
-- [ ] Device logbook: per-device timeline from the event bus (what changed, who, from which app), retention limit, web + desktop + Android
-- [ ] Automation run traces ("why didn't this fire?"): which trigger matched, which condition failed, each action's result; conditions `TimeBetween` / `DeviceState` already exist
-- [ ] Left-on trigger: power above X for Y minutes (today `PowerAbove` fires instantly)
-- [ ] Standby / left-on alerts from energy sampling (power above X for Y hours, monthly standby cost)
-- [ ] Maintenance reminders: notify when purifier filter life drops below a threshold
-- [ ] Weather from Open-Meteo (no key, uses the stored home location): outdoor temperature and PM2.5 on Overview, outdoor-AQI trigger
-- [ ] Solar and grid export: net metering in the energy module (import/export readings, export tariff)
-- [ ] Matter bridge: expose Domus devices to Google Home / Alexa locally (evaluate `rs-matter` maturity first)
+- [x] Device logbook: per-device timeline from the event bus (what changed, who, from which app), retention limit, web + desktop + Android
+- [x] Automation run traces ("why didn't this fire?"): which trigger matched, which condition failed, each action's result; conditions `TimeBetween` / `DeviceState` already exist
+- [x] Left-on trigger: power above X for Y minutes (today `PowerAbove` fires instantly)
+- [x] Standby / left-on alerts from energy sampling (power above X for Y hours, monthly standby cost)
+- [x] Maintenance reminders: notify when purifier filter life drops below a threshold
+- [x] Weather from Open-Meteo (no key, uses the stored home location): outdoor temperature and PM2.5 on Overview, outdoor-AQI trigger
+- [x] Solar and grid export: net metering in the energy module (import/export readings, export tariff)
+- [x] Matter bridge (rs-matter 0.4.1, on/off devices, Settings > Matter on web and Android): `development/docs/MATTER.md`
+- [ ] Matter: commission with a real Google Home / Apple Home / Alexa; brightness and colour clusters
+- [ ] Verify on hardware: left-on alert, filter alert, solar import/export with a real inverter plug
+- [ ] Android: check the new screens on a phone (History, Runs, Matter, solar, weather card)

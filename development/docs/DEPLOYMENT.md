@@ -48,7 +48,7 @@ docker compose --profile mqtt up -d    # also start the optional Mosquitto broke
 | | |
 |---|---|
 | Image | `Dockerfile`: Node stage builds `apps/web`, Rust stage builds `domus-backend`, runtime is `gcr.io/distroless/cc-debian12` (glibc, CA certificates, tzdata, no shell), uid 1000 |
-| Network | `network_mode: host`. Tapo and Xiaomi discovery and the app beacon are LAN broadcasts; they do not reach a bridged container |
+| Network | `network_mode: host`. Tapo and Xiaomi discovery, the app beacon and the Matter bridge (UDP 5540, mDNS 5353, see `MATTER.md`) are LAN traffic; they do not reach a bridged container |
 | Data | Named volume `domus_data` at `/app/data`. It holds the database, the master key that decrypts integration credentials, the JWT secret and the TLS certificate. Back it up (Settings > Backup, see below); losing `master.key` loses every linked account |
 | Config | `APP_ENV=production` (listens on `0.0.0.0`). Any key of `config/default.toml` as `DOMUS__<SECTION>__<KEY>` in `environment:` |
 
