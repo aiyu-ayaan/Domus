@@ -193,6 +193,17 @@ flowchart TD
   (`html.desktop` in `apps/web/src/index.css`, `--titlebar` offsets everything pinned to the top) and
   Electron overlays the window buttons on its right end, coloured from the theme chosen in Settings.
 - **Change server**: Settings → Server addresses → Change server.
+- **Start with the computer**: Settings → Server addresses → Start with the computer. Windows and macOS get a
+  login item (`app.setLoginItemSettings`, with `--hidden`); Linux gets an XDG autostart entry
+  (`~/.config/autostart/domus.desktop`, `domus-dev.desktop` for development), which KDE, GNOME, XFCE, Cinnamon,
+  MATE, Budgie and LXQt all read. Its `Exec` is the AppImage file for an AppImage, the installed binary for the
+  deb, and for a development run Electron with the app path; `--no-sandbox` and a `DOMUS_FLAVOR` set in the
+  environment are carried over. A start at login (`--hidden`, or macOS `wasOpenedAtLogin`) keeps the window
+  hidden when the tray or the GNOME tile is there to open it from, and shows it otherwise. The page still
+  loads while hidden, so the tray and tile are current from the start. The switch reads the state from the
+  system each time, so turning it off elsewhere (Task Manager, Login Items, deleting the file) shows here.
+  Checked on Linux: the entry passes `desktop-file-validate`, and running its `Exec` line starts hidden with a
+  tray host and shows the window without one. Windows and macOS not checked.
 - **Tray and GNOME Quick Settings**: Settings → Server addresses → Show in the system tray (`config.tray`, off
   by default). It shows the home's worst PM2.5 and a switch per air purifier, wherever the desktop puts such
   things. The page builds the state (`useDesktopTray`, `apps/web/src/lib/desktopTray.ts`) and sends it with
