@@ -23,6 +23,7 @@ import type {
   User,
   LogEntry,
   AutomationRun,
+  Weather,
 } from './types'
 
 import { getStorageKey, type AppFlavor } from './flavor'
@@ -249,6 +250,7 @@ export const api = {
   command: (id: string, cmd: DeviceCommand) => post<Device>(`/devices/${id}/command`, cmd),
   effects: () => get<EffectCatalog>('/devices/effects'),
   refresh: (id: string) => post<Device>(`/devices/${id}/refresh`),
+  weather: () => get<Weather | null>('/weather'),
   logbook: (id: string, limit: number) => get<LogEntry[]>(`/devices/${id}/logbook?limit=${limit}`),
   addManual: (b: { integration_type: string; host: string; token?: string; name?: string; room_id?: string }) =>
     post<Device>('/devices/manual', b),

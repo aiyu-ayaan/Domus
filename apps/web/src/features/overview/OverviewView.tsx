@@ -10,10 +10,11 @@ import { Avatar } from '@/components/ui/Avatar'
 import { DeviceRow } from '@/components/devices/DeviceRow'
 import { DeviceDrawer } from '@/components/devices/DeviceDrawer'
 import { OverviewInsights } from './OverviewInsights'
+import { OutdoorCard } from './OutdoorCard'
 import { useScreenSync } from '@/features/screensync/ScreenSync'
 import { api } from '@/lib/api'
 import { useAuth, useCanControl, useIsAdmin } from '@/lib/auth'
-import { keys, useDevices, useDiscovered, useEnergy, useGroups, useRooms, useScenes } from '@/lib/queries'
+import { keys, useDevices, useDiscovered, useEnergy, useGroups, useRooms, useScenes, useWeather } from '@/lib/queries'
 import { airQuality, formatKwh, formatMoney, formatNumber, formatWatts } from '@/lib/format'
 import { errorMessage, useToast } from '@/lib/toast'
 import { cn } from '@/lib/cn'
@@ -142,6 +143,7 @@ export function OverviewView() {
   const showAirQuality = aqDevices.length > 0
   const showClimate = climateDevices.length > 0
   const hasInsights = showEnergy || showAirQuality || showClimate
+  const { data: weather } = useWeather()
 
   // Categories list for filtering
   const categories = useMemo(() => {
@@ -377,8 +379,9 @@ export function OverviewView() {
           )}
         </Card>
 
-        {(hasInsights || scenes.length > 0 || groups.length > 0) && (
+        {(hasInsights || weather || scenes.length > 0 || groups.length > 0) && (
           <div className="flex flex-col gap-6">
+            {weather && <OutdoorCard weather={weather} indoorPm25={climate.pm25} />}
             {hasInsights && (
               <OverviewInsights
                 devices={list}

@@ -217,10 +217,14 @@ export type Trigger =
   | { type: 'power_above'; device_id: string; watts: number; for_minutes?: number }
   | { type: 'device_discovered' }
   | { type: 'device_offline'; device_id: string }
+  /** An outdoor reading at the home starts matching; checked each time the weather is fetched. */
+  | ({ type: 'weather'; property: string } & Comparison)
 
 export type Condition =
   | ({ type: 'device_state'; device_id: string; property: string } & Comparison)
   | { type: 'time_between'; start: string; end: string }
+  /** The latest outdoor reading at the home (Open-Meteo). */
+  | ({ type: 'weather'; property: string } & Comparison)
 
 export type Action =
   | { type: 'device_command'; device_id: string; command: DeviceCommand }
@@ -367,6 +371,19 @@ export type LiveEvent =
       params?: Record<string, string | number>
     }
   | { type: 'automation_triggered'; automation_id: string; name: string }
+  | { type: 'weather_changed'; weather: Weather }
+
+/** Outdoor weather and air at the home's location (Open-Meteo). */
+export interface Weather {
+  temperature: number | null
+  humidity: number | null
+  /** WMO weather code. */
+  weather_code: number | null
+  is_day: boolean | null
+  pm25: number | null
+  us_aqi: number | null
+  fetched_at: string
+}
 
 /** Where the home is, with today's sunrise and sunset there. All null until an administrator sets it. */
 export interface HomeLocation {

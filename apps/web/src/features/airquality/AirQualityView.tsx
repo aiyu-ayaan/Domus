@@ -12,7 +12,8 @@ import { FanSpeedSlider } from '@/components/devices/FanSpeedSlider'
 import { api } from '@/lib/api'
 import { useLive } from '@/lib/liveSamples'
 import { t } from '@/lib/i18n'
-import { keys, useCommand, useDevices, useRooms } from '@/lib/queries'
+import { keys, useCommand, useDevices, useRooms, useWeather } from '@/lib/queries'
+import { OutdoorCard } from '@/features/overview/OutdoorCard'
 import { airQuality, formatBucket, formatNumber, type Range } from '@/lib/format'
 import type { AirPoint, Device } from '@/lib/types'
 import { cn } from '@/lib/cn'
@@ -213,6 +214,8 @@ export function AirQualityView() {
   const maxPm = pmReadings.length > 0 ? Math.max(...pmReadings) : undefined
   const aq = airQuality(maxPm)
 
+  const { data: weather } = useWeather()
+
   const runningCount = purifiers.filter((d) => d.is_online && d.state.is_on).length
 
   // Filter life average
@@ -251,6 +254,12 @@ export function AirQualityView() {
         title={t('nav.airQuality')}
         description={t('air.subtitle')}
       />
+
+      {weather && (
+        <div className="mb-6">
+          <OutdoorCard weather={weather} indoorPm25={maxPm} />
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Metric

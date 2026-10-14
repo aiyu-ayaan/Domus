@@ -22,7 +22,11 @@ export const keys = {
   serverLinks: ['server-links'] as const,
   homeLocation: ['home-location'] as const,
   logbook: (device: string) => ['logbook', device] as const,
+  weather: ['weather'] as const,
 }
+
+/** Outdoor weather at the home; null without a location. Pushed live as it is fetched. */
+export const useWeather = () => useQuery({ queryKey: keys.weather, queryFn: api.weather, staleTime: 10 * 60_000 })
 
 export const useDevices = () => useQuery({ queryKey: keys.devices, queryFn: api.devices })
 export const useRooms = () => useQuery({ queryKey: keys.rooms, queryFn: api.rooms })

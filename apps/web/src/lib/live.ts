@@ -99,6 +99,9 @@ export function useLiveEvents(enabled: boolean) {
           case 'rooms_changed':
             qc.invalidateQueries({ queryKey: keys.rooms })
             break
+          case 'weather_changed':
+            qc.setQueryData(keys.weather, ev.weather)
+            break
           case 'automation_triggered':
             qc.invalidateQueries({ queryKey: keys.automations })
             break

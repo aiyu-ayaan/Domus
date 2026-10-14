@@ -19,6 +19,22 @@ export const PROPERTIES: { value: string; label: string; kind: 'bool' | 'number'
   { value: 'brightness', label: t('drawer.brightness'), kind: 'number' },
   { value: 'color_temp', label: t('rule.prop.colorTemp'), kind: 'number' },
 ]
+/** Outdoor readings a weather trigger or condition can compare. */
+export const WEATHER_PROPERTIES: typeof PROPERTIES = [
+  { value: 'temperature', label: t('weather.reading.temperature'), kind: 'number' },
+  { value: 'humidity', label: t('weather.reading.humidity'), kind: 'number' },
+  { value: 'pm25', label: t('weather.reading.pm25'), kind: 'number' },
+  { value: 'us_aqi', label: t('weather.reading.usAqi'), kind: 'number' },
+]
+
+/** "When outdoor PM2.5 rises above 35". */
+export function describeWeather(c: { property: string; equals?: unknown; above?: number; below?: number }) {
+  const reading = WEATHER_PROPERTIES.find((p) => p.value === c.property)?.label ?? c.property
+  if (c.above !== undefined) return t('rule.when.weatherAbove', { reading, value: c.above })
+  if (c.below !== undefined) return t('rule.when.weatherBelow', { reading, value: c.below })
+  return t('rule.when.weatherIs', { reading, value: String(c.equals ?? '') })
+}
+
 const DAYS = [
   t('rule.day.mon'),
   t('rule.day.tue'),
@@ -74,6 +90,8 @@ export function describeTrigger(trig: Trigger, devices: Device[]): string {
       return t('rule.when.goesOffline', { device: deviceName(devices, trig.device_id) })
     case 'device_discovered':
       return t('rule.when.deviceDiscovered')
+    case 'weather':
+      return describeWeather(trig)
   }
 }
 
@@ -131,11 +149,13 @@ function DeviceSelect({ value, onChange, filter }: { value: string; onChange: (v
 function StateCompare<T extends { property: string; equals?: unknown; above?: number; below?: number }>({
   value,
   onChange,
+  properties = PROPERTIES,
 }: {
   value: T
   onChange: (v: T) => void
+  properties?: typeof PROPERTIES
 }) {
-  const prop = PROPERTIES.find((p) => p.value === value.property) ?? PROPERTIES[0]
+  const prop = properties.find((p) => p.value === value.property) ?? properties[0]
   const op = value.above !== undefined ? 'above' : value.below !== undefined ? 'below' : 'equals'
   const base = { ...value, equals: undefined, above: undefined, below: undefined }
   return (
@@ -144,11 +164,11 @@ function StateCompare<T extends { property: string; equals?: unknown; above?: nu
         label={t('rule.property')}
         value={value.property}
         onChange={(e) => {
-          const p = PROPERTIES.find((x) => x.value === e.target.value)!
+          const p = properties.find((x) => x.value === e.target.value)!
           onChange({ ...base, property: p.value, ...(p.kind === 'bool' ? { equals: true } : { above: 0 }) } as T)
         }}
       >
-        {PROPERTIES.map((p) => (
+        {properties.map((p) => (
           <option key={p.value} value={p.value}>
             {p.label}
           </option>
@@ -227,6 +247,7 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
     power_above: { type: 'power_above', device_id: '', watts: 1000 },
     device_offline: { type: 'device_offline', device_id: '' },
     device_discovered: { type: 'device_discovered' },
+    weather: { type: 'weather', property: 'pm25', above: 35 },
   }
   return (
     <div className="flex flex-col gap-3">
@@ -239,7 +260,9 @@ export function TriggerEditor({ value, onChange }: { value: Trigger[]; onChange:
             <option value="power_above">{t('rule.trigger.powerAbove')}</option>
             <option value="device_offline">{t('rule.trigger.deviceOffline')}</option>
             <option value="device_discovered">{t('rule.trigger.deviceDiscovered')}</option>
+            <option value="weather">{t('rule.trigger.weather')}</option>
           </SelectField>
+          {trig.type === 'weather' && <StateCompare value={trig} onChange={(v) => set(i, v)} properties={WEATHER_PROPERTIES} />}
           {trig.type === 'time' && <Field label={t('rule.time')} type="time" value={trig.at} onChange={(e) => set(i, { ...trig, at: e.target.value })} />}
           {trig.type === 'sun' && <SunFields value={trig} onChange={(v) => set(i, v)} />}
           {(trig.type === 'time' || trig.type === 'sun') && (
@@ -306,13 +329,23 @@ export function ConditionEditor({ value, onChange }: { value: Condition[]; onCha
             label={t('automations.onlyIf')}
             value={c.type}
             onChange={(e) =>
-              set(i, e.target.value === 'time_between' ? { type: 'time_between', start: '22:00', end: '06:00' } : { type: 'device_state', device_id: '', property: 'is_on', equals: true })
+              set(
+                i,
+                e.target.value === 'time_between'
+                  ? { type: 'time_between', start: '22:00', end: '06:00' }
+                  : e.target.value === 'weather'
+                    ? { type: 'weather', property: 'pm25', above: 35 }
+                    : { type: 'device_state', device_id: '', property: 'is_on', equals: true },
+              )
             }
           >
             <option value="time_between">{t('rule.condition.timeBetween')}</option>
             <option value="device_state">{t('rule.condition.deviceState')}</option>
+            <option value="weather">{t('rule.condition.weather')}</option>
           </SelectField>
-          {c.type === 'time_between' ? (
+          {c.type === 'weather' ? (
+            <StateCompare value={c} onChange={(v) => set(i, v)} properties={WEATHER_PROPERTIES} />
+          ) : c.type === 'time_between' ? (
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('rule.from')} type="time" value={c.start} onChange={(e) => set(i, { ...c, start: e.target.value })} />
               <Field label={t('rule.to')} type="time" value={c.end} onChange={(e) => set(i, { ...c, end: e.target.value })} />

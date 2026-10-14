@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Card'
 import { api } from '@/lib/api'
 import { formatClockTime, formatMoment } from '@/lib/format'
 import type { Automation, AutomationRun, Device } from '@/lib/types'
-import { describeTrigger } from './RuleEditor'
+import { WEATHER_PROPERTIES, describeTrigger } from './RuleEditor'
 
 const TONE = { done: 'on', failed: 'danger', blocked: 'neutral', running: 'info' } as const
 
@@ -25,6 +25,7 @@ function heldBack(run: AutomationRun, a: Automation, devices: Device[]) {
     .map(({ index }) => {
       const c = a.conditions[index]
       if (!c) return t('runs.cond.removed')
+      if (c.type === 'weather') return t('runs.cond.weather', { reading: WEATHER_PROPERTIES.find((p) => p.value === c.property)?.label ?? c.property })
       if (c.type === 'time_between') return t('runs.cond.between', { start: formatClockTime(c.start), end: formatClockTime(c.end) })
       return t('runs.cond.state', { device: devices.find((d) => d.id === c.device_id)?.name ?? t('rule.deviceFallback') })
     })
