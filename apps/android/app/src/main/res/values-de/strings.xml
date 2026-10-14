@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">Aus dem Netz bezogen</string>
     <string name="analytics_solar_hint">Alle 15 Minuten aus gemessenen Geräten berechnet. Geräte ohne Messung fehlen, die Einspeisung kann also zu hoch sein.</string>
     <string name="code_error_export_mode">Eingespeiste Einheiten werden entweder saldiert oder vergütet</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Geräte über Matter teilen</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa oder Home Assistant schalten die gewählten Geräte über Ihr eigenes Netz, ohne Cloud-Konto.</string>
+    <string name="matter_paired">Gekoppelt</string>
+    <string name="matter_waiting">Wartet auf Kopplung</string>
+    <string name="matter_error">Läuft nicht</string>
+    <string name="matter_qr">Matter-QR-Code zum Koppeln</string>
+    <string name="matter_code">Kopplungscode</string>
+    <string name="matter_uncertified">Scannen oder den Code in Ihrer Matter-App eingeben. Die Bridge ist nicht zertifiziert, daher fragt die App vor dem Hinzufügen nach.</string>
+    <string name="matter_devices">Geteilte Geräte</string>
+    <string name="matter_no_devices">Noch keine Geräte mit Ein/Aus.</string>
+    <string name="matter_allow_pairing">Kopplung 15 Minuten erlauben</string>
+    <string name="matter_reset">Alle Kopplungen vergessen</string>
+    <string name="matter_reset_title">Alle Kopplungen vergessen?</string>
+    <string name="matter_reset_message">Alle Apps, die die Bridge hinzugefügt haben, verlieren sie, und der Kopplungscode ändert sich. Fügen Sie sie mit dem neuen Code erneut hinzu.</string>
+    <string name="logbook_matter">Matter (Sprachassistent)</string>
 </resources>

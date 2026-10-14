@@ -1058,4 +1058,20 @@
     <string name="analytics_solar_imported">المشترى من الشبكة</string>
     <string name="analytics_solar_hint">تُحسب كل 15 دقيقة من الأجهزة المقيسة. الأجهزة بلا عداد لا تُحتسب، لذا قد يظهر التصدير أعلى.</string>
     <string name="code_error_export_mode">الوحدات المصدّرة إما تُقاص أو تُدفع بسعر</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">مشاركة الأجهزة عبر Matter</string>
+    <string name="matter_explain">يتيح لـ Google Home أو Apple Home أو Alexa أو Home Assistant تشغيل الأجهزة التي تختارها وإيقافها عبر شبكتك، دون حساب سحابي.</string>
+    <string name="matter_paired">مقترن</string>
+    <string name="matter_waiting">في انتظار الاقتران</string>
+    <string name="matter_error">لا يعمل</string>
+    <string name="matter_qr">رمز QR لاقتران Matter</string>
+    <string name="matter_code">رمز الاقتران</string>
+    <string name="matter_uncertified">امسحه أو اكتب الرمز في تطبيق Matter. الجسر غير معتمد، لذا يطلب التطبيق تأكيدك قبل إضافته.</string>
+    <string name="matter_devices">الأجهزة المشتركة</string>
+    <string name="matter_no_devices">لا توجد أجهزة بمفتاح تشغيل وإيقاف بعد.</string>
+    <string name="matter_allow_pairing">السماح بالاقتران لمدة 15 دقيقة</string>
+    <string name="matter_reset">نسيان كل الاقترانات</string>
+    <string name="matter_reset_title">نسيان كل الاقترانات؟</string>
+    <string name="matter_reset_message">ستفقد كل التطبيقات التي أضافت الجسر الوصول إليه، ويتغيّر رمز الاقتران. أضفه مجددًا بالرمز الجديد.</string>
+    <string name="logbook_matter">Matter (مساعد صوتي)</string>
 </resources>

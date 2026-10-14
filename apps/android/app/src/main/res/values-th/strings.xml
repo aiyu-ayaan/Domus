@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">ซื้อจากการไฟฟ้า</string>
     <string name="analytics_solar_hint">คำนวณทุก 15 นาทีจากอุปกรณ์ที่มีการวัด เครื่องใช้ที่ไม่มีมิเตอร์ไม่ถูกนับ การส่งออกจึงอาจสูงกว่าจริง</string>
     <string name="code_error_export_mode">หน่วยที่ส่งออกจะหักลบหรือจ่ายตามอัตรา</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">แชร์อุปกรณ์ผ่าน Matter</string>
+    <string name="matter_explain">ให้ Google Home, Apple Home, Alexa หรือ Home Assistant สั่งเปิดปิดอุปกรณ์ที่เลือกผ่านเครือข่ายของคุณเอง ไม่ต้องใช้บัญชีคลาวด์</string>
+    <string name="matter_paired">จับคู่แล้ว</string>
+    <string name="matter_waiting">รอการจับคู่</string>
+    <string name="matter_error">ไม่ทำงาน</string>
+    <string name="matter_qr">คิวอาร์โค้ดจับคู่ Matter</string>
+    <string name="matter_code">รหัสจับคู่</string>
+    <string name="matter_uncertified">สแกนหรือพิมพ์รหัสในแอป Matter บริดจ์นี้ยังไม่ได้รับการรับรอง แอปจะให้ยืนยันก่อนเพิ่ม</string>
+    <string name="matter_devices">อุปกรณ์ที่แชร์</string>
+    <string name="matter_no_devices">ยังไม่มีอุปกรณ์ที่เปิดปิดได้</string>
+    <string name="matter_allow_pairing">อนุญาตให้จับคู่ 15 นาที</string>
+    <string name="matter_reset">ลืมการจับคู่ทั้งหมด</string>
+    <string name="matter_reset_title">ลืมการจับคู่ทั้งหมด?</string>
+    <string name="matter_reset_message">ทุกแอปที่เพิ่มบริดจ์จะไม่เห็นอีก และรหัสจะเปลี่ยน เพิ่มใหม่ด้วยรหัสใหม่</string>
+    <string name="logbook_matter">Matter (ผู้ช่วยเสียง)</string>
 </resources>

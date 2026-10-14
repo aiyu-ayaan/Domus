@@ -1034,4 +1034,20 @@
     <string name="analytics_solar_imported">Comprado da rede</string>
     <string name="analytics_solar_hint">Calculado a cada 15 minutos a partir dos dispositivos medidos. Aparelhos sem medição não entram, então a injeção pode aparecer alta.</string>
     <string name="code_error_export_mode">Unidades injetadas são compensadas ou pagas a uma tarifa</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Compartilhar dispositivos via Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa ou Home Assistant podem ligar e desligar os dispositivos escolhidos pela sua rede, sem conta na nuvem.</string>
+    <string name="matter_paired">Pareado</string>
+    <string name="matter_waiting">Aguardando pareamento</string>
+    <string name="matter_error">Parado</string>
+    <string name="matter_qr">QR code de pareamento Matter</string>
+    <string name="matter_code">Código de pareamento</string>
+    <string name="matter_uncertified">Escaneie ou digite o código no seu app Matter. A ponte não é certificada, então o app pede confirmação antes de adicioná-la.</string>
+    <string name="matter_devices">Dispositivos compartilhados</string>
+    <string name="matter_no_devices">Ainda não há dispositivos com liga/desliga.</string>
+    <string name="matter_allow_pairing">Permitir pareamento por 15 minutos</string>
+    <string name="matter_reset">Esquecer todos os pareamentos</string>
+    <string name="matter_reset_title">Esquecer todos os pareamentos?</string>
+    <string name="matter_reset_message">Todos os apps que adicionaram a ponte a perdem, e o código muda. Adicione de novo com o novo código.</string>
+    <string name="logbook_matter">Matter (assistente de voz)</string>
 </resources>

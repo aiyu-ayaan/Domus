@@ -1042,4 +1042,20 @@
     <string name="analytics_solar_imported">Pobrano z sieci</string>
     <string name="analytics_solar_hint">Liczone co 15 minut z mierzonych urządzeń. Urządzenia bez pomiaru nie są liczone, więc oddana energia może wyjść zawyżona.</string>
     <string name="code_error_export_mode">Oddane jednostki są rozliczane netto albo płatne według stawki</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Udostępniaj urządzenia przez Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa lub Home Assistant mogą przełączać wybrane urządzenia w Twojej sieci, bez konta w chmurze.</string>
+    <string name="matter_paired">Sparowano</string>
+    <string name="matter_waiting">Czeka na sparowanie</string>
+    <string name="matter_error">Nie działa</string>
+    <string name="matter_qr">Kod QR parowania Matter</string>
+    <string name="matter_code">Kod parowania</string>
+    <string name="matter_uncertified">Zeskanuj go lub wpisz kod w aplikacji Matter. Most nie jest certyfikowany, więc aplikacja poprosi o potwierdzenie przed dodaniem.</string>
+    <string name="matter_devices">Udostępnione urządzenia</string>
+    <string name="matter_no_devices">Brak jeszcze urządzeń z włącznikiem.</string>
+    <string name="matter_allow_pairing">Zezwól na parowanie przez 15 minut</string>
+    <string name="matter_reset">Zapomnij wszystkie parowania</string>
+    <string name="matter_reset_title">Zapomnieć wszystkie parowania?</string>
+    <string name="matter_reset_message">Każda aplikacja, która dodała most, straci go, a kod się zmieni. Dodaj go ponownie nowym kodem.</string>
+    <string name="logbook_matter">Matter (asystent głosowy)</string>
 </resources>

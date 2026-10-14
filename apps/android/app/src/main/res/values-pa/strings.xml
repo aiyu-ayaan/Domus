@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">ਗ੍ਰਿਡ ਤੋਂ ਖਰੀਦੀ</string>
     <string name="analytics_solar_hint">ਮੀਟਰ ਵਾਲੀਆਂ ਡਿਵਾਈਸਾਂ ਤੋਂ ਹਰ 15 ਮਿੰਟ ਗਿਣਤੀ। ਬਿਨਾਂ ਮੀਟਰ ਉਪਕਰਣ ਨਹੀਂ ਗਿਣੇ ਜਾਂਦੇ, ਇਸ ਲਈ ਨਿਰਯਾਤ ਵੱਧ ਦਿਖ ਸਕਦਾ ਹੈ।</string>
     <string name="code_error_export_mode">ਨਿਰਯਾਤ ਯੂਨਿਟ ਜਾਂ ਤਾਂ ਨੈੱਟ ਹੁੰਦੇ ਹਨ ਜਾਂ ਦਰ ’ਤੇ ਭੁਗਤਾਨ</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter ਰਾਹੀਂ ਡਿਵਾਈਸਾਂ ਸਾਂਝੀਆਂ ਕਰੋ</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa ਜਾਂ Home Assistant ਤੁਹਾਡੇ ਆਪਣੇ ਨੈੱਟਵਰਕ ’ਤੇ, ਬਿਨਾਂ ਕਲਾਊਡ ਖਾਤੇ, ਚੁਣੀਆਂ ਡਿਵਾਈਸਾਂ ਚਲਾ ਸਕਦੇ ਹਨ।</string>
+    <string name="matter_paired">ਜੁੜਿਆ</string>
+    <string name="matter_waiting">ਜੁੜਨ ਦੀ ਉਡੀਕ</string>
+    <string name="matter_error">ਚੱਲ ਨਹੀਂ ਰਿਹਾ</string>
+    <string name="matter_qr">Matter ਜੋੜਨ ਦਾ QR ਕੋਡ</string>
+    <string name="matter_code">ਜੋੜਨ ਦਾ ਕੋਡ</string>
+    <string name="matter_uncertified">ਆਪਣੀ Matter ਐਪ ਵਿੱਚ ਸਕੈਨ ਕਰੋ ਜਾਂ ਕੋਡ ਲਿਖੋ। ਬ੍ਰਿਜ ਪ੍ਰਮਾਣਿਤ ਨਹੀਂ, ਇਸ ਲਈ ਜੋੜਨ ਤੋਂ ਪਹਿਲਾਂ ਐਪ ਪੁਸ਼ਟੀ ਮੰਗੇਗੀ।</string>
+    <string name="matter_devices">ਸਾਂਝੀਆਂ ਡਿਵਾਈਸਾਂ</string>
+    <string name="matter_no_devices">ਹਾਲੇ ਚਾਲੂ/ਬੰਦ ਸਵਿੱਚ ਵਾਲੀ ਕੋਈ ਡਿਵਾਈਸ ਨਹੀਂ।</string>
+    <string name="matter_allow_pairing">15 ਮਿੰਟ ਲਈ ਜੋੜਨ ਦਿਓ</string>
+    <string name="matter_reset">ਸਾਰੇ ਜੋੜ ਭੁੱਲ ਜਾਓ</string>
+    <string name="matter_reset_title">ਕੀ ਸਾਰੇ ਜੋੜ ਭੁੱਲਣੇ ਹਨ?</string>
+    <string name="matter_reset_message">ਬ੍ਰਿਜ ਜੋੜਨ ਵਾਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਇਸਨੂੰ ਗੁਆ ਦੇਣਗੀਆਂ ਅਤੇ ਕੋਡ ਬਦਲ ਜਾਵੇਗਾ। ਨਵੇਂ ਕੋਡ ਨਾਲ ਦੁਬਾਰਾ ਜੋੜੋ।</string>
+    <string name="logbook_matter">Matter (ਵੌਇਸ ਸਹਾਇਕ)</string>
 </resources>

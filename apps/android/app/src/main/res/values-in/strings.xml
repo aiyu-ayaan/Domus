@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">Dibeli dari jaringan</string>
     <string name="analytics_solar_hint">Dihitung tiap 15 menit dari perangkat bermeteran. Alat tanpa meteran tidak dihitung, jadi ekspor bisa terbaca tinggi.</string>
     <string name="code_error_export_mode">Unit ekspor dinetkan atau dibayar per tarif</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Bagikan perangkat lewat Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa, atau Home Assistant bisa menyalakan perangkat pilihan Anda lewat jaringan sendiri, tanpa akun cloud.</string>
+    <string name="matter_paired">Tersambung</string>
+    <string name="matter_waiting">Menunggu disambungkan</string>
+    <string name="matter_error">Tidak berjalan</string>
+    <string name="matter_qr">Kode QR penyambungan Matter</string>
+    <string name="matter_code">Kode penyambungan</string>
+    <string name="matter_uncertified">Pindai atau ketik kodenya di aplikasi Matter. Bridge ini belum tersertifikasi, jadi aplikasi meminta konfirmasi sebelum menambahkannya.</string>
+    <string name="matter_devices">Perangkat yang dibagikan</string>
+    <string name="matter_no_devices">Belum ada perangkat dengan sakelar nyala/mati.</string>
+    <string name="matter_allow_pairing">Izinkan penyambungan selama 15 menit</string>
+    <string name="matter_reset">Lupakan semua sambungan</string>
+    <string name="matter_reset_title">Lupakan semua sambungan?</string>
+    <string name="matter_reset_message">Semua aplikasi yang menambahkan bridge akan kehilangannya, dan kodenya berubah. Tambahkan lagi dengan kode baru.</string>
+    <string name="logbook_matter">Matter (asisten suara)</string>
 </resources>

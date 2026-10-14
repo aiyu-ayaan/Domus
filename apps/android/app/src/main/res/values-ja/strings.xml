@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">買電</string>
     <string name="analytics_solar_hint">計測中のデバイスから15分ごとに算出します。計測していない機器は含まれないため、売電量が多めに出ることがあります。</string>
     <string name="code_error_export_mode">売電分は相殺か単価での買い取りのどちらかです</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matterでデバイスを共有</string>
+    <string name="matter_explain">Google Home、Apple Home、Alexa、Home Assistantから、選んだデバイスを自宅のネットワーク内で操作できます。クラウドアカウントは不要です。</string>
+    <string name="matter_paired">ペアリング済み</string>
+    <string name="matter_waiting">ペアリング待ち</string>
+    <string name="matter_error">停止中</string>
+    <string name="matter_qr">Matterペアリング用QRコード</string>
+    <string name="matter_code">ペアリングコード</string>
+    <string name="matter_uncertified">Matterアプリでスキャンするか、コードを入力します。ブリッジは未認証のため、追加前にアプリで確認を求められます。</string>
+    <string name="matter_devices">共有するデバイス</string>
+    <string name="matter_no_devices">オン・オフできるデバイスはまだありません。</string>
+    <string name="matter_allow_pairing">15分間ペアリングを許可</string>
+    <string name="matter_reset">すべてのペアリングを解除</string>
+    <string name="matter_reset_title">すべてのペアリングを解除しますか？</string>
+    <string name="matter_reset_message">ブリッジを追加したすべてのアプリから削除され、ペアリングコードが変わります。新しいコードで追加し直してください。</string>
+    <string name="logbook_matter">Matter（音声アシスタント）</string>
 </resources>

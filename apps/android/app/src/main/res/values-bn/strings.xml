@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">গ্রিড থেকে কেনা</string>
     <string name="analytics_solar_hint">মিটারযুক্ত ডিভাইস থেকে প্রতি ১৫ মিনিটে হিসাব। মিটারহীন যন্ত্র গোনা হয় না, তাই রপ্তানি বেশি দেখাতে পারে।</string>
     <string name="code_error_export_mode">রপ্তানি ইউনিট হয় নেট হয়, নয়তো দরে পরিশোধ হয়</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter দিয়ে ডিভাইস শেয়ার করুন</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa বা Home Assistant আপনার বাছাই করা ডিভাইস নিজের নেটওয়ার্কেই চালু-বন্ধ করতে পারে, কোনো ক্লাউড অ্যাকাউন্ট ছাড়া।</string>
+    <string name="matter_paired">যুক্ত</string>
+    <string name="matter_waiting">যুক্ত হওয়ার অপেক্ষায়</string>
+    <string name="matter_error">চলছে না</string>
+    <string name="matter_qr">Matter যুক্ত করার QR কোড</string>
+    <string name="matter_code">যুক্ত করার কোড</string>
+    <string name="matter_uncertified">Matter অ্যাপে স্ক্যান করুন বা কোডটি লিখুন। ব্রিজটি সার্টিফায়েড নয়, তাই যোগ করার আগে অ্যাপ নিশ্চিত করতে বলবে।</string>
+    <string name="matter_devices">শেয়ার করা ডিভাইস</string>
+    <string name="matter_no_devices">এখনও চালু/বন্ধ সুইচসহ কোনো ডিভাইস নেই।</string>
+    <string name="matter_allow_pairing">১৫ মিনিটের জন্য যুক্ত করার অনুমতি দিন</string>
+    <string name="matter_reset">সব সংযোগ ভুলে যান</string>
+    <string name="matter_reset_title">সব সংযোগ ভুলে যাবেন?</string>
+    <string name="matter_reset_message">যে অ্যাপগুলো ব্রিজ যোগ করেছে সেগুলো এটি হারাবে, আর কোড বদলে যাবে। নতুন কোড দিয়ে আবার যোগ করুন।</string>
+    <string name="logbook_matter">Matter (ভয়েস অ্যাসিস্ট্যান্ট)</string>
 </resources>

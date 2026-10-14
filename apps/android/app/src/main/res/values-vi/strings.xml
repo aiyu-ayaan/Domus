@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">Mua từ lưới</string>
     <string name="analytics_solar_hint">Tính mỗi 15 phút từ các thiết bị có đo. Thiết bị không đo không được tính, nên lượng phát lên lưới có thể cao hơn thực tế.</string>
     <string name="code_error_export_mode">Số điện phát lên lưới được bù trừ hoặc trả theo đơn giá</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Chia sẻ thiết bị qua Matter</string>
+    <string name="matter_explain">Cho phép Google Home, Apple Home, Alexa hoặc Home Assistant bật tắt thiết bị bạn chọn qua mạng nhà, không cần tài khoản đám mây.</string>
+    <string name="matter_paired">Đã ghép nối</string>
+    <string name="matter_waiting">Đang chờ ghép nối</string>
+    <string name="matter_error">Không chạy</string>
+    <string name="matter_qr">Mã QR ghép nối Matter</string>
+    <string name="matter_code">Mã ghép nối</string>
+    <string name="matter_uncertified">Quét mã hoặc nhập mã trong ứng dụng Matter. Cầu nối chưa được chứng nhận nên ứng dụng sẽ hỏi xác nhận trước khi thêm.</string>
+    <string name="matter_devices">Thiết bị được chia sẻ</string>
+    <string name="matter_no_devices">Chưa có thiết bị nào có công tắc bật/tắt.</string>
+    <string name="matter_allow_pairing">Cho phép ghép nối trong 15 phút</string>
+    <string name="matter_reset">Quên mọi ghép nối</string>
+    <string name="matter_reset_title">Quên mọi ghép nối?</string>
+    <string name="matter_reset_message">Mọi ứng dụng đã thêm cầu nối sẽ mất nó và mã sẽ thay đổi. Hãy thêm lại bằng mã mới.</string>
+    <string name="logbook_matter">Matter (trợ lý giọng nói)</string>
 </resources>

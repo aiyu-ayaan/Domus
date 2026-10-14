@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">从电网购电</string>
     <string name="analytics_solar_hint">每 15 分钟根据有计量的设备计算。未计量的电器不计入，因此上网电量可能偏高。</string>
     <string name="code_error_export_mode">上网电量要么净额抵扣，要么按电价结算</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">通过 Matter 共享设备</string>
+    <string name="matter_explain">让 Google Home、Apple Home、Alexa 或 Home Assistant 通过你自己的网络控制所选设备，无需云账号。</string>
+    <string name="matter_paired">已配对</string>
+    <string name="matter_waiting">等待配对</string>
+    <string name="matter_error">未运行</string>
+    <string name="matter_qr">Matter 配对二维码</string>
+    <string name="matter_code">配对码</string>
+    <string name="matter_uncertified">在 Matter 应用中扫码或输入配对码。该网桥未经认证，添加前应用会要求你确认。</string>
+    <string name="matter_devices">共享的设备</string>
+    <string name="matter_no_devices">还没有可开关的设备。</string>
+    <string name="matter_allow_pairing">允许配对 15 分钟</string>
+    <string name="matter_reset">忘记所有配对</string>
+    <string name="matter_reset_title">忘记所有配对？</string>
+    <string name="matter_reset_message">所有添加过此网桥的应用都会失去它，配对码也会更换。请用新码重新添加。</string>
+    <string name="logbook_matter">Matter（语音助手）</string>
 </resources>

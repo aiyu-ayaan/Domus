@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">ഗ്രിഡിൽ നിന്ന് വാങ്ങിയത്</string>
     <string name="analytics_solar_hint">മീറ്ററുള്ള ഉപകരണങ്ങളിൽ നിന്ന് ഓരോ 15 മിനിറ്റിലും കണക്കാക്കുന്നു. മീറ്ററില്ലാത്തവ ഉൾപ്പെടില്ല, അതിനാൽ കയറ്റുമതി കൂടുതലായി കാണാം.</string>
     <string name="code_error_export_mode">കയറ്റുമതി യൂണിറ്റുകൾ നെറ്റ് ചെയ്യുകയോ നിരക്കിൽ പണം നൽകുകയോ ചെയ്യും</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter വഴി ഉപകരണങ്ങൾ പങ്കിടുക</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa അല്ലെങ്കിൽ Home Assistant-ന് നിങ്ങളുടെ സ്വന്തം നെറ്റ്‌വർക്കിൽ, ക്ലൗഡ് അക്കൗണ്ടില്ലാതെ, തിരഞ്ഞെടുത്ത ഉപകരണങ്ങൾ നിയന്ത്രിക്കാം.</string>
+    <string name="matter_paired">ജോടിയാക്കി</string>
+    <string name="matter_waiting">ജോടിയാക്കാൻ കാത്തിരിക്കുന്നു</string>
+    <string name="matter_error">പ്രവർത്തിക്കുന്നില്ല</string>
+    <string name="matter_qr">Matter ജോടിയാക്കൽ QR കോഡ്</string>
+    <string name="matter_code">ജോടിയാക്കൽ കോഡ്</string>
+    <string name="matter_uncertified">നിങ്ങളുടെ Matter ആപ്പിൽ സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ കോഡ് ടൈപ്പ് ചെയ്യുക. ബ്രിഡ്ജ് സർട്ടിഫൈ ചെയ്തിട്ടില്ലാത്തതിനാൽ ചേർക്കുന്നതിന് മുമ്പ് ആപ്പ് സ്ഥിരീകരണം ചോദിക്കും.</string>
+    <string name="matter_devices">പങ്കിട്ട ഉപകരണങ്ങൾ</string>
+    <string name="matter_no_devices">ഓൺ/ഓഫ് സ്വിച്ചുള്ള ഉപകരണങ്ങൾ ഇതുവരെ ഇല്ല.</string>
+    <string name="matter_allow_pairing">15 മിനിറ്റ് ജോടിയാക്കാൻ അനുവദിക്കുക</string>
+    <string name="matter_reset">എല്ലാ ജോടിയാക്കലുകളും മറക്കുക</string>
+    <string name="matter_reset_title">എല്ലാ ജോടിയാക്കലുകളും മറക്കണോ?</string>
+    <string name="matter_reset_message">ബ്രിഡ്ജ് ചേർത്ത എല്ലാ ആപ്പുകൾക്കും അത് നഷ്ടമാകും, കോഡ് മാറും. പുതിയ കോഡ് ഉപയോഗിച്ച് വീണ്ടും ചേർക്കുക.</string>
+    <string name="logbook_matter">Matter (വോയ്‌സ് അസിസ്റ്റന്റ്)</string>
 </resources>

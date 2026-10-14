@@ -1042,4 +1042,20 @@
     <string name="analytics_solar_imported">Взято из сети</string>
     <string name="analytics_solar_hint">Считается каждые 15 минут по устройствам с учётом. Приборы без учёта не входят, поэтому отдача может быть завышена.</string>
     <string name="code_error_export_mode">Отданные единицы либо зачитываются, либо оплачиваются по тарифу</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Открыть устройства через Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa или Home Assistant смогут переключать выбранные устройства по вашей сети, без облачного аккаунта.</string>
+    <string name="matter_paired">Сопряжено</string>
+    <string name="matter_waiting">Ожидает сопряжения</string>
+    <string name="matter_error">Не работает</string>
+    <string name="matter_qr">QR-код сопряжения Matter</string>
+    <string name="matter_code">Код сопряжения</string>
+    <string name="matter_uncertified">Отсканируйте или введите код в приложении Matter. Мост не сертифицирован, поэтому приложение попросит подтвердить добавление.</string>
+    <string name="matter_devices">Открытые устройства</string>
+    <string name="matter_no_devices">Пока нет устройств с включением и выключением.</string>
+    <string name="matter_allow_pairing">Разрешить сопряжение на 15 минут</string>
+    <string name="matter_reset">Забыть все сопряжения</string>
+    <string name="matter_reset_title">Забыть все сопряжения?</string>
+    <string name="matter_reset_message">Все приложения, добавившие мост, потеряют его, а код сменится. Добавьте его заново с новым кодом.</string>
+    <string name="logbook_matter">Matter (голосовой помощник)</string>
 </resources>

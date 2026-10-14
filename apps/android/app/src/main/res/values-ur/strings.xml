@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">گرڈ سے خریدی</string>
     <string name="analytics_solar_hint">میٹر والی ڈیوائسز سے ہر 15 منٹ میں حساب۔ بغیر میٹر آلات شمار نہیں ہوتے، اس لیے برآمد زیادہ دکھ سکتی ہے۔</string>
     <string name="code_error_export_mode">برآمد یونٹ یا تو نیٹ ہوتے ہیں یا شرح پر ادا ہوتے ہیں</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter کے ذریعے ڈیوائسز شیئر کریں</string>
+    <string name="matter_explain">Google Home، Apple Home، Alexa یا Home Assistant آپ کے اپنے نیٹ ورک پر، بغیر کلاؤڈ اکاؤنٹ، منتخب ڈیوائسز چلا سکتے ہیں۔</string>
+    <string name="matter_paired">جڑا ہوا</string>
+    <string name="matter_waiting">جوڑنے کا انتظار</string>
+    <string name="matter_error">نہیں چل رہا</string>
+    <string name="matter_qr">Matter جوڑنے کا QR کوڈ</string>
+    <string name="matter_code">جوڑنے کا کوڈ</string>
+    <string name="matter_uncertified">اپنی Matter ایپ میں اسکین کریں یا کوڈ لکھیں۔ برج تصدیق شدہ نہیں، اس لیے شامل کرنے سے پہلے ایپ تصدیق مانگے گی۔</string>
+    <string name="matter_devices">شیئر کی گئی ڈیوائسز</string>
+    <string name="matter_no_devices">ابھی آن/آف سوئچ والی کوئی ڈیوائس نہیں۔</string>
+    <string name="matter_allow_pairing">15 منٹ کے لیے جوڑنے دیں</string>
+    <string name="matter_reset">تمام جوڑ بھول جائیں</string>
+    <string name="matter_reset_title">تمام جوڑ بھول جائیں؟</string>
+    <string name="matter_reset_message">برج شامل کرنے والی ہر ایپ اسے کھو دے گی اور کوڈ بدل جائے گا۔ نئے کوڈ سے دوبارہ شامل کریں۔</string>
+    <string name="logbook_matter">Matter (وائس اسسٹنٹ)</string>
 </resources>

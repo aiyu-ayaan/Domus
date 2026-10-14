@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">கிரிடிலிருந்து வாங்கியது</string>
     <string name="analytics_solar_hint">அளவிடப்படும் சாதனங்களிலிருந்து ஒவ்வொரு 15 நிமிடமும் கணக்கிடப்படுகிறது. மீட்டர் இல்லாதவை சேராது, எனவே ஏற்றுமதி அதிகமாகத் தெரியலாம்.</string>
     <string name="code_error_export_mode">ஏற்றுமதி யூனிட்கள் நிகரமாக்கப்படும் அல்லது விலையில் செலுத்தப்படும்</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter மூலம் சாதனங்களைப் பகிர்</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa அல்லது Home Assistant உங்கள் சொந்த நெட்வொர்க்கில், கிளவுட் கணக்கு இல்லாமல், தேர்ந்த சாதனங்களை இயக்கலாம்.</string>
+    <string name="matter_paired">இணைக்கப்பட்டது</string>
+    <string name="matter_waiting">இணைப்புக்குக் காத்திருக்கிறது</string>
+    <string name="matter_error">இயங்கவில்லை</string>
+    <string name="matter_qr">Matter இணைப்பு QR குறியீடு</string>
+    <string name="matter_code">இணைப்புக் குறியீடு</string>
+    <string name="matter_uncertified">உங்கள் Matter ஆப்பில் ஸ்கேன் செய்யவும் அல்லது குறியீட்டை உள்ளிடவும். பிரிட்ஜ் சான்றளிக்கப்படாததால் சேர்க்கும் முன் ஆப் உறுதிப்படுத்தக் கேட்கும்.</string>
+    <string name="matter_devices">பகிரப்பட்ட சாதனங்கள்</string>
+    <string name="matter_no_devices">ஆன்/ஆஃப் சுவிட்ச் கொண்ட சாதனங்கள் இன்னும் இல்லை.</string>
+    <string name="matter_allow_pairing">15 நிமிடங்களுக்கு இணைப்பை அனுமதி</string>
+    <string name="matter_reset">அனைத்து இணைப்புகளையும் மற</string>
+    <string name="matter_reset_title">அனைத்து இணைப்புகளையும் மறக்கவா?</string>
+    <string name="matter_reset_message">பிரிட்ஜைச் சேர்த்த அனைத்து ஆப்களும் அதை இழக்கும், குறியீடு மாறும். புதிய குறியீட்டுடன் மீண்டும் சேர்க்கவும்.</string>
+    <string name="logbook_matter">Matter (குரல் உதவியாளர்)</string>
 </resources>

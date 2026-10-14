@@ -1034,4 +1034,20 @@
     <string name="analytics_solar_imported">Prelevato dalla rete</string>
     <string name="analytics_solar_hint">Calcolato ogni 15 minuti dai dispositivi misurati. Gli apparecchi senza misura non sono contati, quindi l’immissione può risultare alta.</string>
     <string name="code_error_export_mode">Le unità immesse sono compensate o pagate a una tariffa</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Condividi i dispositivi con Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa o Home Assistant possono accendere i dispositivi scelti sulla tua rete, senza account cloud.</string>
+    <string name="matter_paired">Associato</string>
+    <string name="matter_waiting">In attesa di associazione</string>
+    <string name="matter_error">Non attivo</string>
+    <string name="matter_qr">Codice QR di associazione Matter</string>
+    <string name="matter_code">Codice di associazione</string>
+    <string name="matter_uncertified">Scansionalo o inserisci il codice nell’app Matter. Il bridge non è certificato, quindi l’app chiede conferma prima di aggiungerlo.</string>
+    <string name="matter_devices">Dispositivi condivisi</string>
+    <string name="matter_no_devices">Ancora nessun dispositivo con accensione.</string>
+    <string name="matter_allow_pairing">Consenti l’associazione per 15 minuti</string>
+    <string name="matter_reset">Dimentica tutte le associazioni</string>
+    <string name="matter_reset_title">Dimenticare tutte le associazioni?</string>
+    <string name="matter_reset_message">Tutte le app che hanno aggiunto il bridge lo perdono e il codice cambia. Aggiungilo di nuovo con il nuovo codice.</string>
+    <string name="logbook_matter">Matter (assistente vocale)</string>
 </resources>

@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">ಗ್ರಿಡ್‌ನಿಂದ ಖರೀದಿ</string>
     <string name="analytics_solar_hint">ಮೀಟರ್ ಇರುವ ಸಾಧನಗಳಿಂದ ಪ್ರತಿ 15 ನಿಮಿಷಕ್ಕೆ ಲೆಕ್ಕ. ಮೀಟರ್ ಇಲ್ಲದ ಉಪಕರಣಗಳು ಎಣಿಕೆಯಾಗುವುದಿಲ್ಲ, ಹಾಗಾಗಿ ರಫ್ತು ಹೆಚ್ಚು ಕಾಣಬಹುದು.</string>
     <string name="code_error_export_mode">ರಫ್ತು ಯೂನಿಟ್‌ಗಳು ನೆಟ್ ಆಗುತ್ತವೆ ಅಥವಾ ದರದಲ್ಲಿ ಪಾವತಿಯಾಗುತ್ತವೆ</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter ಮೂಲಕ ಸಾಧನಗಳನ್ನು ಹಂಚಿ</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa ಅಥವಾ Home Assistant ನಿಮ್ಮದೇ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ, ಕ್ಲೌಡ್ ಖಾತೆ ಇಲ್ಲದೆ, ಆಯ್ದ ಸಾಧನಗಳನ್ನು ಆನ್/ಆಫ್ ಮಾಡಬಹುದು.</string>
+    <string name="matter_paired">ಜೋಡಿಸಲಾಗಿದೆ</string>
+    <string name="matter_waiting">ಜೋಡಣೆಗೆ ಕಾಯುತ್ತಿದೆ</string>
+    <string name="matter_error">ನಡೆಯುತ್ತಿಲ್ಲ</string>
+    <string name="matter_qr">Matter ಜೋಡಣೆ QR ಕೋಡ್</string>
+    <string name="matter_code">ಜೋಡಣೆ ಕೋಡ್</string>
+    <string name="matter_uncertified">ನಿಮ್ಮ Matter ಆ್ಯಪ್‌ನಲ್ಲಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಅಥವಾ ಕೋಡ್ ಟೈಪ್ ಮಾಡಿ. ಬ್ರಿಡ್ಜ್ ಪ್ರಮಾಣೀಕೃತವಲ್ಲ, ಹಾಗಾಗಿ ಸೇರಿಸುವ ಮೊದಲು ಆ್ಯಪ್ ದೃಢೀಕರಣ ಕೇಳುತ್ತದೆ.</string>
+    <string name="matter_devices">ಹಂಚಿದ ಸಾಧನಗಳು</string>
+    <string name="matter_no_devices">ಇನ್ನೂ ಆನ್/ಆಫ್ ಸ್ವಿಚ್ ಇರುವ ಸಾಧನಗಳಿಲ್ಲ.</string>
+    <string name="matter_allow_pairing">15 ನಿಮಿಷ ಜೋಡಣೆಗೆ ಅನುಮತಿಸಿ</string>
+    <string name="matter_reset">ಎಲ್ಲಾ ಜೋಡಣೆಗಳನ್ನು ಮರೆಯಿರಿ</string>
+    <string name="matter_reset_title">ಎಲ್ಲಾ ಜೋಡಣೆಗಳನ್ನು ಮರೆಯಬೇಕೇ?</string>
+    <string name="matter_reset_message">ಬ್ರಿಡ್ಜ್ ಸೇರಿಸಿದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಅದನ್ನು ಕಳೆದುಕೊಳ್ಳುತ್ತವೆ ಮತ್ತು ಕೋಡ್ ಬದಲಾಗುತ್ತದೆ. ಹೊಸ ಕೋಡ್‌ನಿಂದ ಮತ್ತೆ ಸೇರಿಸಿ.</string>
+    <string name="logbook_matter">Matter (ಧ್ವನಿ ಸಹಾಯಕ)</string>
 </resources>

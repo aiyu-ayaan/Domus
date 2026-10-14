@@ -1034,4 +1034,20 @@
     <string name="analytics_solar_imported">Acheté au réseau</string>
     <string name="analytics_solar_hint">Calculé toutes les 15 minutes à partir des appareils mesurés. Les appareils sans mesure ne sont pas comptés : l’injection peut paraître élevée.</string>
     <string name="code_error_export_mode">Les unités injectées sont soit compensées, soit payées à un tarif</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Partager les appareils via Matter</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa ou Home Assistant commandent les appareils choisis sur votre réseau, sans compte cloud.</string>
+    <string name="matter_paired">Associé</string>
+    <string name="matter_waiting">En attente d’association</string>
+    <string name="matter_error">Arrêté</string>
+    <string name="matter_qr">QR code d’association Matter</string>
+    <string name="matter_code">Code d’association</string>
+    <string name="matter_uncertified">Scannez-le ou saisissez le code dans votre app Matter. Le pont n’est pas certifié : l’app vous demandera de confirmer avant de l’ajouter.</string>
+    <string name="matter_devices">Appareils partagés</string>
+    <string name="matter_no_devices">Aucun appareil avec marche/arrêt pour l’instant.</string>
+    <string name="matter_allow_pairing">Autoriser l’association pendant 15 minutes</string>
+    <string name="matter_reset">Oublier toutes les associations</string>
+    <string name="matter_reset_title">Oublier toutes les associations ?</string>
+    <string name="matter_reset_message">Toutes les apps qui ont ajouté le pont le perdent et le code change. Ajoutez-le à nouveau avec le nouveau code.</string>
+    <string name="logbook_matter">Matter (assistant vocal)</string>
 </resources>

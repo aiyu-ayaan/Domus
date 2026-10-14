@@ -32,6 +32,7 @@ import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.WbTwilight
+import androidx.compose.material.icons.rounded.Hub
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.FilledTonalButton
@@ -128,6 +129,7 @@ fun SettingsScreen(session: Session.SignedIn, open: (String) -> Unit, selectedPa
             RowCard(stringResource(R.string.settings_people), stringResource(R.string.settings_people_subtitle), Icons.Rounded.Group, onClick = { open("people") }, selected = selectedPage == "people")
             RowCard(stringResource(R.string.settings_tariff), stringResource(R.string.settings_tariff_subtitle), Icons.Rounded.Payments, onClick = { open("tariff") }, selected = selectedPage == "tariff")
             RowCard(stringResource(R.string.settings_location), stringResource(R.string.settings_location_subtitle), Icons.Rounded.WbTwilight, onClick = { open("location") }, selected = selectedPage == "location")
+            RowCard(stringResource(R.string.matter_title), stringResource(R.string.matter_enable), Icons.Rounded.Hub, onClick = { open("matter") }, selected = selectedPage == "matter")
         }
         RowCard(stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_subtitle), Icons.Rounded.Notifications, onClick = { open("notices") }, selected = selectedPage == "notices")
         // Opt-in: without a cloud push service, alerts need a connection that stays open.

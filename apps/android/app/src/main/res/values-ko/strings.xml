@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">전력망 구매</string>
     <string name="analytics_solar_hint">측정 기기 기준으로 15분마다 계산합니다. 측정하지 않는 기기는 빠지므로 송전량이 높게 보일 수 있습니다.</string>
     <string name="code_error_export_mode">송전량은 상계하거나 단가로 정산합니다</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter로 기기 공유</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa, Home Assistant에서 선택한 기기를 클라우드 계정 없이 집 네트워크로 제어합니다.</string>
+    <string name="matter_paired">페어링됨</string>
+    <string name="matter_waiting">페어링 대기 중</string>
+    <string name="matter_error">실행 안 됨</string>
+    <string name="matter_qr">Matter 페어링 QR 코드</string>
+    <string name="matter_code">페어링 코드</string>
+    <string name="matter_uncertified">Matter 앱에서 스캔하거나 코드를 입력하세요. 브리지가 인증되지 않아 추가 전에 앱에서 확인을 요청합니다.</string>
+    <string name="matter_devices">공유 기기</string>
+    <string name="matter_no_devices">아직 켜고 끌 수 있는 기기가 없습니다.</string>
+    <string name="matter_allow_pairing">15분 동안 페어링 허용</string>
+    <string name="matter_reset">모든 페어링 삭제</string>
+    <string name="matter_reset_title">모든 페어링을 삭제할까요?</string>
+    <string name="matter_reset_message">브리지를 추가한 모든 앱에서 사라지고 페어링 코드가 바뀝니다. 새 코드로 다시 추가하세요.</string>
+    <string name="logbook_matter">Matter(음성 비서)</string>
 </resources>

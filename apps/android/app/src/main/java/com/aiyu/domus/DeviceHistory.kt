@@ -117,6 +117,7 @@ private fun what(e: LogEntry, catalog: EffectCatalog): String {
 private fun who(actor: LogActor?): String = when (actor?.kind) {
     null -> stringResource(R.string.logbook_on_device)
     "screen_sync" -> stringResource(R.string.logbook_screen_sync)
+    "matter" -> stringResource(R.string.logbook_matter)
     "automation" -> stringResource(R.string.logbook_by_automation, actor.name.orEmpty())
     else -> when (actor.client) {
         "web" -> stringResource(R.string.logbook_by_user_from, actor.name.orEmpty(), stringResource(R.string.logbook_client_web))

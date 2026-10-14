@@ -1018,4 +1018,20 @@
     <string name="analytics_solar_imported">從電網購電</string>
     <string name="analytics_solar_hint">每 15 分鐘根據有計量的裝置計算。未計量的電器不計入，因此上網電量可能偏高。</string>
     <string name="code_error_export_mode">上網電量要麼淨額抵扣，要麼按電價結算</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">透過 Matter 分享裝置</string>
+    <string name="matter_explain">讓 Google Home、Apple Home、Alexa 或 Home Assistant 透過你自己的網路控制所選裝置，無需雲端帳號。</string>
+    <string name="matter_paired">已配對</string>
+    <string name="matter_waiting">等待配對</string>
+    <string name="matter_error">未執行</string>
+    <string name="matter_qr">Matter 配對 QR 碼</string>
+    <string name="matter_code">配對碼</string>
+    <string name="matter_uncertified">在 Matter 應用程式中掃描或輸入配對碼。此橋接器未經認證，新增前應用程式會要求你確認。</string>
+    <string name="matter_devices">分享的裝置</string>
+    <string name="matter_no_devices">還沒有可開關的裝置。</string>
+    <string name="matter_allow_pairing">允許配對 15 分鐘</string>
+    <string name="matter_reset">忘記所有配對</string>
+    <string name="matter_reset_title">忘記所有配對？</string>
+    <string name="matter_reset_message">所有新增過此橋接器的應用程式都會失去它，配對碼也會更換。請用新碼重新新增。</string>
+    <string name="logbook_matter">Matter（語音助理）</string>
 </resources>

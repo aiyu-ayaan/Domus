@@ -183,6 +183,19 @@ data class LightPreset(
 )
 
 /** Moods suit every light; a light can play the effects listed in its `options["effect"]`. */
+/** The Matter bridge as an administrator sees it; [qr] holds the QR modules row by row ('1' = dark). */
+@Serializable
+data class MatterBridge(
+    val enabled: Boolean = false,
+    val running: Boolean = false,
+    val paired: Boolean = false,
+    val error: String? = null,
+    val devices: List<String> = emptyList(),
+    @SerialName("pairing_code") val pairingCode: String = "",
+    @SerialName("qr_payload") val qrPayload: String = "",
+    val qr: List<String> = emptyList(),
+)
+
 /** Outdoor weather and air at the home's location (Open-Meteo). */
 @Serializable
 data class Weather(

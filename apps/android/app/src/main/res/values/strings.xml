@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">Bought from the grid</string>
     <string name="analytics_solar_hint">Worked out every 15 minutes from metered devices. Appliances without a meter are not counted, so the export can read high.</string>
     <string name="code_error_export_mode">Exported units are either netted or paid at a rate</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Share devices over Matter</string>
+    <string name="matter_explain">Lets Google Home, Apple Home, Alexa or Home Assistant switch the devices you pick, over your own network and with no cloud account.</string>
+    <string name="matter_paired">Paired</string>
+    <string name="matter_waiting">Waiting to be paired</string>
+    <string name="matter_error">Not running</string>
+    <string name="matter_qr">Matter pairing QR code</string>
+    <string name="matter_code">Pairing code</string>
+    <string name="matter_uncertified">Scan it or type the code in your Matter app. The bridge is not certified, so the app asks you to confirm before adding it.</string>
+    <string name="matter_devices">Shared devices</string>
+    <string name="matter_no_devices">No devices with an on/off switch yet.</string>
+    <string name="matter_allow_pairing">Allow pairing for 15 minutes</string>
+    <string name="matter_reset">Forget all pairings</string>
+    <string name="matter_reset_title">Forget all pairings?</string>
+    <string name="matter_reset_message">Every app that added the bridge loses it, and the pairing code changes. Add it again with the new code.</string>
+    <string name="logbook_matter">Matter (voice assistant)</string>
 </resources>

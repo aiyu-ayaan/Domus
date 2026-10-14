@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">Şebekeden alınan</string>
     <string name="analytics_solar_hint">Ölçülen cihazlardan 15 dakikada bir hesaplanır. Sayacı olmayan cihazlar sayılmaz, bu yüzden verilen enerji yüksek görünebilir.</string>
     <string name="code_error_export_mode">Verilen birimler ya mahsup edilir ya da birim fiyatla ödenir</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Cihazları Matter ile paylaş</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa veya Home Assistant seçtiğiniz cihazları kendi ağınız üzerinden, bulut hesabı olmadan açıp kapatabilir.</string>
+    <string name="matter_paired">Eşlendi</string>
+    <string name="matter_waiting">Eşleşme bekleniyor</string>
+    <string name="matter_error">Çalışmıyor</string>
+    <string name="matter_qr">Matter eşleme QR kodu</string>
+    <string name="matter_code">Eşleme kodu</string>
+    <string name="matter_uncertified">Matter uygulamanızda tarayın veya kodu yazın. Köprü sertifikalı değildir; uygulama eklemeden önce onay ister.</string>
+    <string name="matter_devices">Paylaşılan cihazlar</string>
+    <string name="matter_no_devices">Henüz açılıp kapanabilen cihaz yok.</string>
+    <string name="matter_allow_pairing">15 dakika eşlemeye izin ver</string>
+    <string name="matter_reset">Tüm eşlemeleri unut</string>
+    <string name="matter_reset_title">Tüm eşlemeler unutulsun mu?</string>
+    <string name="matter_reset_message">Köprüyü ekleyen tüm uygulamalar onu kaybeder ve kod değişir. Yeni kodla yeniden ekleyin.</string>
+    <string name="logbook_matter">Matter (sesli asistan)</string>
 </resources>

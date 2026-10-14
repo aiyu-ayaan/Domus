@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">ग्रिड से खरीदा</string>
     <string name="analytics_solar_hint">मीटर वाले डिवाइस से हर 15 मिनट में गणना। बिना मीटर के उपकरण नहीं गिने जाते, इसलिए निर्यात ज़्यादा दिख सकता है।</string>
     <string name="code_error_export_mode">निर्यात यूनिट या तो नेट होते हैं या दर पर भुगतान होते हैं</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter से डिवाइस शेयर करें</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa या Home Assistant आपके चुने डिवाइस आपके ही नेटवर्क पर, बिना क्लाउड अकाउंट के, चालू-बंद कर सकते हैं।</string>
+    <string name="matter_paired">जुड़ा हुआ</string>
+    <string name="matter_waiting">जुड़ने की प्रतीक्षा</string>
+    <string name="matter_error">चल नहीं रहा</string>
+    <string name="matter_qr">Matter जोड़ने का QR कोड</string>
+    <string name="matter_code">जोड़ने का कोड</string>
+    <string name="matter_uncertified">Matter ऐप में इसे स्कैन करें या कोड टाइप करें। ब्रिज प्रमाणित नहीं है, इसलिए जोड़ने से पहले ऐप पुष्टि मांगेगा।</string>
+    <string name="matter_devices">शेयर किए डिवाइस</string>
+    <string name="matter_no_devices">अभी चालू/बंद वाला कोई डिवाइस नहीं।</string>
+    <string name="matter_allow_pairing">15 मिनट के लिए जोड़ने दें</string>
+    <string name="matter_reset">सभी जोड़ भूल जाएँ</string>
+    <string name="matter_reset_title">सभी जोड़ भूल जाएँ?</string>
+    <string name="matter_reset_message">ब्रिज जोड़ने वाले सभी ऐप इसे खो देंगे और कोड बदल जाएगा। नए कोड से फिर जोड़ें।</string>
+    <string name="logbook_matter">Matter (वॉइस असिस्टेंट)</string>
 </resources>

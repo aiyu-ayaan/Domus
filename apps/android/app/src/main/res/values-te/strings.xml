@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">గ్రిడ్ నుండి కొన్నది</string>
     <string name="analytics_solar_hint">మీటర్ ఉన్న పరికరాల నుండి ప్రతి 15 నిమిషాలకు లెక్కిస్తుంది. మీటర్ లేని ఉపకరణాలు లెక్కలోకి రావు, కాబట్టి ఎగుమతి ఎక్కువగా కనిపించవచ్చు.</string>
     <string name="code_error_export_mode">ఎగుమతి యూనిట్లు నెట్ అవుతాయి లేదా రేటుకు చెల్లించబడతాయి</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter ద్వారా పరికరాలను షేర్ చేయండి</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa లేదా Home Assistant మీ సొంత నెట్‌వర్క్‌లో, క్లౌడ్ ఖాతా లేకుండా, ఎంచుకున్న పరికరాలను ఆన్/ఆఫ్ చేయగలవు.</string>
+    <string name="matter_paired">జత చేయబడింది</string>
+    <string name="matter_waiting">జత కోసం వేచి ఉంది</string>
+    <string name="matter_error">నడవడం లేదు</string>
+    <string name="matter_qr">Matter జత QR కోడ్</string>
+    <string name="matter_code">జత కోడ్</string>
+    <string name="matter_uncertified">మీ Matter యాప్‌లో స్కాన్ చేయండి లేదా కోడ్ టైప్ చేయండి. బ్రిడ్జ్ ధృవీకరించబడలేదు, కాబట్టి జోడించే ముందు యాప్ నిర్ధారణ అడుగుతుంది.</string>
+    <string name="matter_devices">షేర్ చేసిన పరికరాలు</string>
+    <string name="matter_no_devices">ఇంకా ఆన్/ఆఫ్ స్విచ్ ఉన్న పరికరాలు లేవు.</string>
+    <string name="matter_allow_pairing">15 నిమిషాల పాటు జత చేయడానికి అనుమతించు</string>
+    <string name="matter_reset">అన్ని జతలను మర్చిపో</string>
+    <string name="matter_reset_title">అన్ని జతలను మర్చిపోవాలా?</string>
+    <string name="matter_reset_message">బ్రిడ్జ్‌ను జోడించిన అన్ని యాప్‌లు దాన్ని కోల్పోతాయి, కోడ్ మారుతుంది. కొత్త కోడ్‌తో మళ్లీ జోడించండి.</string>
+    <string name="logbook_matter">Matter (వాయిస్ అసిస్టెంట్)</string>
 </resources>

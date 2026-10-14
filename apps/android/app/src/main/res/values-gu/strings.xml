@@ -1026,4 +1026,20 @@
     <string name="analytics_solar_imported">ગ્રીડમાંથી ખરીદેલું</string>
     <string name="analytics_solar_hint">મીટરવાળાં ઉપકરણોમાંથી દર 15 મિનિટે ગણાય છે. મીટર વગરનાં ઉપકરણો ગણાતાં નથી, તેથી નિકાસ વધુ દેખાઈ શકે.</string>
     <string name="code_error_export_mode">નિકાસ યુનિટ કાં તો નેટ થાય છે અથવા દરે ચૂકવાય છે</string>
+    <string name="matter_title">Matter</string>
+    <string name="matter_enable">Matter દ્વારા ઉપકરણો શેર કરો</string>
+    <string name="matter_explain">Google Home, Apple Home, Alexa અથવા Home Assistant તમારા નેટવર્ક પર, ક્લાઉડ એકાઉન્ટ વિના, પસંદ કરેલાં ઉપકરણો ચાલુ-બંધ કરી શકે છે.</string>
+    <string name="matter_paired">જોડાયેલું</string>
+    <string name="matter_waiting">જોડાણની રાહ</string>
+    <string name="matter_error">ચાલતું નથી</string>
+    <string name="matter_qr">Matter જોડાણ QR કોડ</string>
+    <string name="matter_code">જોડાણ કોડ</string>
+    <string name="matter_uncertified">તમારી Matter એપમાં સ્કેન કરો અથવા કોડ લખો. બ્રિજ પ્રમાણિત નથી, તેથી ઉમેરતા પહેલાં એપ પુષ્ટિ માંગશે.</string>
+    <string name="matter_devices">શેર કરેલાં ઉપકરણો</string>
+    <string name="matter_no_devices">હજી ચાલુ/બંધ સ્વિચવાળું કોઈ ઉપકરણ નથી.</string>
+    <string name="matter_allow_pairing">15 મિનિટ માટે જોડાણની મંજૂરી</string>
+    <string name="matter_reset">બધાં જોડાણ ભૂલી જાઓ</string>
+    <string name="matter_reset_title">બધાં જોડાણ ભૂલી જવાં છે?</string>
+    <string name="matter_reset_message">બ્રિજ ઉમેરનાર દરેક એપ તેને ગુમાવશે અને કોડ બદલાશે. નવા કોડથી ફરી ઉમેરો.</string>
+    <string name="logbook_matter">Matter (વૉઇસ સહાયક)</string>
 </resources>
