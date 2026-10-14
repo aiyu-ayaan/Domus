@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$sไม่ตรงตามเงื่อนไข</string>
     <string name="code_error_unknown_weather_reading">ค่าสภาพอากาศที่ไม่รู้จัก</string>
     <string name="editor_field_reading">ค่าที่วัด</string>
+    <string name="manage_solar">โซลาร์</string>
+    <string name="analytics_solar">โซลาร์</string>
+    <string name="manage_solar_help">เลือกอุปกรณ์ที่วัดการผลิตไฟจากโซลาร์ จะนับเป็นการผลิต ไม่ใช่การใช้</string>
+    <string name="manage_solar_export">หน่วยที่ส่งออก</string>
+    <string name="manage_solar_net">Net metering</string>
+    <string name="manage_solar_feed_in">จ่ายต่อหน่วย</string>
+    <string name="manage_solar_export_rate">ราคาต่อ kWh ที่ส่งออก</string>
+    <string name="analytics_solar_now">กำลังผลิตตอนนี้</string>
+    <string name="analytics_solar_generated">ผลิตได้ในรอบนี้</string>
+    <string name="analytics_solar_self_used">ใช้ในบ้าน</string>
+    <string name="analytics_solar_exported">ส่งออก</string>
+    <string name="analytics_solar_earned">รายได้</string>
+    <string name="analytics_solar_imported">ซื้อจากการไฟฟ้า</string>
+    <string name="analytics_solar_hint">คำนวณทุก 15 นาทีจากอุปกรณ์ที่มีการวัด เครื่องใช้ที่ไม่มีมิเตอร์ไม่ถูกนับ การส่งออกจึงอาจสูงกว่าจริง</string>
+    <string name="code_error_export_mode">หน่วยที่ส่งออกจะหักลบหรือจ่ายตามอัตรา</string>
 </resources>

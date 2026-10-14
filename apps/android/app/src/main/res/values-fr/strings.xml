@@ -1019,4 +1019,19 @@
     <string name="runs_cond_weather">%1$s ne correspondait pas</string>
     <string name="code_error_unknown_weather_reading">Mesure météo inconnue</string>
     <string name="editor_field_reading">Mesure</string>
+    <string name="manage_solar">Solaire</string>
+    <string name="analytics_solar">Solaire</string>
+    <string name="manage_solar_help">Cochez les appareils qui mesurent la production solaire. Ils comptent comme production, pas comme consommation.</string>
+    <string name="manage_solar_export">Unités injectées</string>
+    <string name="manage_solar_net">Facturation nette</string>
+    <string name="manage_solar_feed_in">Payées à l’unité</string>
+    <string name="manage_solar_export_rate">Prix par kWh injecté</string>
+    <string name="analytics_solar_now">Production actuelle</string>
+    <string name="analytics_solar_generated">Produit ce cycle</string>
+    <string name="analytics_solar_self_used">Consommé sur place</string>
+    <string name="analytics_solar_exported">Injecté</string>
+    <string name="analytics_solar_earned">Gagné</string>
+    <string name="analytics_solar_imported">Acheté au réseau</string>
+    <string name="analytics_solar_hint">Calculé toutes les 15 minutes à partir des appareils mesurés. Les appareils sans mesure ne sont pas comptés : l’injection peut paraître élevée.</string>
+    <string name="code_error_export_mode">Les unités injectées sont soit compensées, soit payées à un tarif</string>
 </resources>

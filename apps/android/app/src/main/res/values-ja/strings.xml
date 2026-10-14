@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$sが条件を満たしませんでした</string>
     <string name="code_error_unknown_weather_reading">不明な気象データです</string>
     <string name="editor_field_reading">項目</string>
+    <string name="manage_solar">太陽光</string>
+    <string name="analytics_solar">太陽光</string>
+    <string name="manage_solar_help">太陽光の発電量を測るデバイスを選びます。消費ではなく発電として数えます。</string>
+    <string name="manage_solar_export">売電分</string>
+    <string name="manage_solar_net">ネットメータリング</string>
+    <string name="manage_solar_feed_in">単価で買い取り</string>
+    <string name="manage_solar_export_rate">売電単価（kWh あたり）</string>
+    <string name="analytics_solar_now">現在の発電</string>
+    <string name="analytics_solar_generated">今期の発電量</string>
+    <string name="analytics_solar_self_used">自家消費</string>
+    <string name="analytics_solar_exported">売電</string>
+    <string name="analytics_solar_earned">売電収入</string>
+    <string name="analytics_solar_imported">買電</string>
+    <string name="analytics_solar_hint">計測中のデバイスから15分ごとに算出します。計測していない機器は含まれないため、売電量が多めに出ることがあります。</string>
+    <string name="code_error_export_mode">売電分は相殺か単価での買い取りのどちらかです</string>
 </resources>

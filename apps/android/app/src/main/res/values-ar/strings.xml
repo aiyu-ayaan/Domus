@@ -1043,4 +1043,19 @@
     <string name="runs_cond_weather">لم يكن %1$s كما هو مطلوب</string>
     <string name="code_error_unknown_weather_reading">قراءة طقس غير معروفة</string>
     <string name="editor_field_reading">القراءة</string>
+    <string name="manage_solar">الطاقة الشمسية</string>
+    <string name="analytics_solar">الطاقة الشمسية</string>
+    <string name="manage_solar_help">حدد الأجهزة التي تقيس توليد الطاقة الشمسية. تُحسب إنتاجًا لا استهلاكًا.</string>
+    <string name="manage_solar_export">الوحدات المصدّرة</string>
+    <string name="manage_solar_net">القياس الصافي</string>
+    <string name="manage_solar_feed_in">مدفوعة لكل وحدة</string>
+    <string name="manage_solar_export_rate">السعر لكل kWh مصدّرة</string>
+    <string name="analytics_solar_now">التوليد الآن</string>
+    <string name="analytics_solar_generated">المُولَّد في هذه الدورة</string>
+    <string name="analytics_solar_self_used">المُستخدم في المنزل</string>
+    <string name="analytics_solar_exported">المُصدَّر</string>
+    <string name="analytics_solar_earned">المكتسب</string>
+    <string name="analytics_solar_imported">المشترى من الشبكة</string>
+    <string name="analytics_solar_hint">تُحسب كل 15 دقيقة من الأجهزة المقيسة. الأجهزة بلا عداد لا تُحتسب، لذا قد يظهر التصدير أعلى.</string>
+    <string name="code_error_export_mode">الوحدات المصدّرة إما تُقاص أو تُدفع بسعر</string>
 </resources>

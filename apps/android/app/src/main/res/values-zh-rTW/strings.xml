@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$s不符合條件</string>
     <string name="code_error_unknown_weather_reading">未知的天氣讀數</string>
     <string name="editor_field_reading">讀數</string>
+    <string name="manage_solar">太陽能</string>
+    <string name="analytics_solar">太陽能</string>
+    <string name="manage_solar_help">勾選測量太陽能發電的裝置。它們計為發電，而不是用電。</string>
+    <string name="manage_solar_export">上網電量</string>
+    <string name="manage_solar_net">淨計量</string>
+    <string name="manage_solar_feed_in">按電量付費</string>
+    <string name="manage_solar_export_rate">每度上網電價</string>
+    <string name="analytics_solar_now">目前發電</string>
+    <string name="analytics_solar_generated">本週期發電</string>
+    <string name="analytics_solar_self_used">自用</string>
+    <string name="analytics_solar_exported">上網</string>
+    <string name="analytics_solar_earned">收益</string>
+    <string name="analytics_solar_imported">從電網購電</string>
+    <string name="analytics_solar_hint">每 15 分鐘根據有計量的裝置計算。未計量的電器不計入，因此上網電量可能偏高。</string>
+    <string name="code_error_export_mode">上網電量要麼淨額抵扣，要麼按電價結算</string>
 </resources>

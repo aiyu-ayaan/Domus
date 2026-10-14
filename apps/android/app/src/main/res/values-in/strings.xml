@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$s tidak sesuai syarat</string>
     <string name="code_error_unknown_weather_reading">Bacaan cuaca tidak dikenal</string>
     <string name="editor_field_reading">Bacaan</string>
+    <string name="manage_solar">Surya</string>
+    <string name="analytics_solar">Surya</string>
+    <string name="manage_solar_help">Centang perangkat yang mengukur produksi surya. Dihitung sebagai produksi, bukan pemakaian.</string>
+    <string name="manage_solar_export">Unit yang diekspor</string>
+    <string name="manage_solar_net">Net metering</string>
+    <string name="manage_solar_feed_in">Dibayar per unit</string>
+    <string name="manage_solar_export_rate">Harga per kWh diekspor</string>
+    <string name="analytics_solar_now">Produksi saat ini</string>
+    <string name="analytics_solar_generated">Diproduksi siklus ini</string>
+    <string name="analytics_solar_self_used">Dipakai di rumah</string>
+    <string name="analytics_solar_exported">Diekspor</string>
+    <string name="analytics_solar_earned">Pendapatan</string>
+    <string name="analytics_solar_imported">Dibeli dari jaringan</string>
+    <string name="analytics_solar_hint">Dihitung tiap 15 menit dari perangkat bermeteran. Alat tanpa meteran tidak dihitung, jadi ekspor bisa terbaca tinggi.</string>
+    <string name="code_error_export_mode">Unit ekspor dinetkan atau dibayar per tarif</string>
 </resources>

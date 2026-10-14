@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s مطلوبہ نہیں تھا</string>
     <string name="code_error_unknown_weather_reading">نامعلوم موسمی ریڈنگ</string>
     <string name="editor_field_reading">ریڈنگ</string>
+    <string name="manage_solar">شمسی</string>
+    <string name="analytics_solar">شمسی</string>
+    <string name="manage_solar_help">شمسی پیداوار ناپنے والی ڈیوائسز منتخب کریں۔ یہ استعمال نہیں، پیداوار شمار ہوتی ہیں۔</string>
+    <string name="manage_solar_export">برآمد شدہ یونٹ</string>
+    <string name="manage_solar_net">نیٹ میٹرنگ</string>
+    <string name="manage_solar_feed_in">فی یونٹ ادائیگی</string>
+    <string name="manage_solar_export_rate">فی برآمد kWh قیمت</string>
+    <string name="analytics_solar_now">ابھی پیداوار</string>
+    <string name="analytics_solar_generated">اس سائیکل میں پیداوار</string>
+    <string name="analytics_solar_self_used">گھر میں استعمال</string>
+    <string name="analytics_solar_exported">برآمد</string>
+    <string name="analytics_solar_earned">آمدنی</string>
+    <string name="analytics_solar_imported">گرڈ سے خریدی</string>
+    <string name="analytics_solar_hint">میٹر والی ڈیوائسز سے ہر 15 منٹ میں حساب۔ بغیر میٹر آلات شمار نہیں ہوتے، اس لیے برآمد زیادہ دکھ سکتی ہے۔</string>
+    <string name="code_error_export_mode">برآمد یونٹ یا تو نیٹ ہوتے ہیں یا شرح پر ادا ہوتے ہیں</string>
 </resources>

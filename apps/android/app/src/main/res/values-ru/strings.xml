@@ -1027,4 +1027,19 @@
     <string name="runs_cond_weather">%1$s не соответствовал(а) условию</string>
     <string name="code_error_unknown_weather_reading">Неизвестный погодный показатель</string>
     <string name="editor_field_reading">Показатель</string>
+    <string name="manage_solar">Солнечная энергия</string>
+    <string name="analytics_solar">Солнечная энергия</string>
+    <string name="manage_solar_help">Отметьте устройства, которые измеряют солнечную генерацию. Они считаются выработкой, а не потреблением.</string>
+    <string name="manage_solar_export">Отданные в сеть единицы</string>
+    <string name="manage_solar_net">Взаимозачёт</string>
+    <string name="manage_solar_feed_in">Оплата за единицу</string>
+    <string name="manage_solar_export_rate">Цена за отданный кВт·ч</string>
+    <string name="analytics_solar_now">Выработка сейчас</string>
+    <string name="analytics_solar_generated">Выработано за период</string>
+    <string name="analytics_solar_self_used">Использовано дома</string>
+    <string name="analytics_solar_exported">Отдано в сеть</string>
+    <string name="analytics_solar_earned">Заработано</string>
+    <string name="analytics_solar_imported">Взято из сети</string>
+    <string name="analytics_solar_hint">Считается каждые 15 минут по устройствам с учётом. Приборы без учёта не входят, поэтому отдача может быть завышена.</string>
+    <string name="code_error_export_mode">Отданные единицы либо зачитываются, либо оплачиваются по тарифу</string>
 </resources>

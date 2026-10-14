@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s అవసరమైనట్లు లేదు</string>
     <string name="code_error_unknown_weather_reading">తెలియని వాతావరణ రీడింగ్</string>
     <string name="editor_field_reading">రీడింగ్</string>
+    <string name="manage_solar">సౌర</string>
+    <string name="analytics_solar">సౌర</string>
+    <string name="manage_solar_help">సౌర ఉత్పత్తిని కొలిచే పరికరాలను ఎంచుకోండి. అవి వినియోగంగా కాదు, ఉత్పత్తిగా లెక్కించబడతాయి.</string>
+    <string name="manage_solar_export">ఎగుమతి యూనిట్లు</string>
+    <string name="manage_solar_net">నెట్ మీటరింగ్</string>
+    <string name="manage_solar_feed_in">యూనిట్‌కు చెల్లింపు</string>
+    <string name="manage_solar_export_rate">ఎగుమతి kWh కి ధర</string>
+    <string name="analytics_solar_now">ఇప్పటి ఉత్పత్తి</string>
+    <string name="analytics_solar_generated">ఈ చక్రంలో ఉత్పత్తి</string>
+    <string name="analytics_solar_self_used">ఇంట్లో వాడినది</string>
+    <string name="analytics_solar_exported">ఎగుమతి</string>
+    <string name="analytics_solar_earned">ఆదాయం</string>
+    <string name="analytics_solar_imported">గ్రిడ్ నుండి కొన్నది</string>
+    <string name="analytics_solar_hint">మీటర్ ఉన్న పరికరాల నుండి ప్రతి 15 నిమిషాలకు లెక్కిస్తుంది. మీటర్ లేని ఉపకరణాలు లెక్కలోకి రావు, కాబట్టి ఎగుమతి ఎక్కువగా కనిపించవచ్చు.</string>
+    <string name="code_error_export_mode">ఎగుమతి యూనిట్లు నెట్ అవుతాయి లేదా రేటుకు చెల్లించబడతాయి</string>
 </resources>

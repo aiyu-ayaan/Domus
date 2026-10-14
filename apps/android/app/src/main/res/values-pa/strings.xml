@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s ਲੋੜ ਮੁਤਾਬਕ ਨਹੀਂ ਸੀ</string>
     <string name="code_error_unknown_weather_reading">ਅਣਜਾਣ ਮੌਸਮ ਰੀਡਿੰਗ</string>
     <string name="editor_field_reading">ਰੀਡਿੰਗ</string>
+    <string name="manage_solar">ਸੂਰਜੀ</string>
+    <string name="analytics_solar">ਸੂਰਜੀ</string>
+    <string name="manage_solar_help">ਸੂਰਜੀ ਉਤਪਾਦਨ ਮਾਪਣ ਵਾਲੀਆਂ ਡਿਵਾਈਸਾਂ ਚੁਣੋ। ਉਹ ਖਪਤ ਨਹੀਂ, ਉਤਪਾਦਨ ਵਜੋਂ ਗਿਣੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।</string>
+    <string name="manage_solar_export">ਨਿਰਯਾਤ ਯੂਨਿਟ</string>
+    <string name="manage_solar_net">ਨੈੱਟ ਮੀਟਰਿੰਗ</string>
+    <string name="manage_solar_feed_in">ਪ੍ਰਤੀ ਯੂਨਿਟ ਭੁਗਤਾਨ</string>
+    <string name="manage_solar_export_rate">ਪ੍ਰਤੀ ਨਿਰਯਾਤ kWh ਕੀਮਤ</string>
+    <string name="analytics_solar_now">ਹੁਣ ਉਤਪਾਦਨ</string>
+    <string name="analytics_solar_generated">ਇਸ ਚੱਕਰ ਵਿੱਚ ਉਤਪਾਦਨ</string>
+    <string name="analytics_solar_self_used">ਘਰ ਵਿੱਚ ਵਰਤੀ</string>
+    <string name="analytics_solar_exported">ਨਿਰਯਾਤ</string>
+    <string name="analytics_solar_earned">ਕਮਾਈ</string>
+    <string name="analytics_solar_imported">ਗ੍ਰਿਡ ਤੋਂ ਖਰੀਦੀ</string>
+    <string name="analytics_solar_hint">ਮੀਟਰ ਵਾਲੀਆਂ ਡਿਵਾਈਸਾਂ ਤੋਂ ਹਰ 15 ਮਿੰਟ ਗਿਣਤੀ। ਬਿਨਾਂ ਮੀਟਰ ਉਪਕਰਣ ਨਹੀਂ ਗਿਣੇ ਜਾਂਦੇ, ਇਸ ਲਈ ਨਿਰਯਾਤ ਵੱਧ ਦਿਖ ਸਕਦਾ ਹੈ।</string>
+    <string name="code_error_export_mode">ਨਿਰਯਾਤ ਯੂਨਿਟ ਜਾਂ ਤਾਂ ਨੈੱਟ ਹੁੰਦੇ ਹਨ ਜਾਂ ਦਰ ’ਤੇ ਭੁਗਤਾਨ</string>
 </resources>

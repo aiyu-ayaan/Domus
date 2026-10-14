@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s જરૂર મુજબ ન હતું</string>
     <string name="code_error_unknown_weather_reading">અજાણ્યું હવામાન રીડિંગ</string>
     <string name="editor_field_reading">રીડિંગ</string>
+    <string name="manage_solar">સૌર</string>
+    <string name="analytics_solar">સૌર</string>
+    <string name="manage_solar_help">સૌર ઉત્પાદન માપતાં ઉપકરણો પસંદ કરો. તે વપરાશ નહીં, ઉત્પાદન તરીકે ગણાય છે.</string>
+    <string name="manage_solar_export">નિકાસ થયેલા યુનિટ</string>
+    <string name="manage_solar_net">નેટ મીટરિંગ</string>
+    <string name="manage_solar_feed_in">યુનિટ દીઠ ચુકવણી</string>
+    <string name="manage_solar_export_rate">નિકાસ થયેલા kWh દીઠ ભાવ</string>
+    <string name="analytics_solar_now">હાલનું ઉત્પાદન</string>
+    <string name="analytics_solar_generated">આ ચક્રમાં ઉત્પાદન</string>
+    <string name="analytics_solar_self_used">ઘરે વપરાયેલું</string>
+    <string name="analytics_solar_exported">નિકાસ</string>
+    <string name="analytics_solar_earned">કમાણી</string>
+    <string name="analytics_solar_imported">ગ્રીડમાંથી ખરીદેલું</string>
+    <string name="analytics_solar_hint">મીટરવાળાં ઉપકરણોમાંથી દર 15 મિનિટે ગણાય છે. મીટર વગરનાં ઉપકરણો ગણાતાં નથી, તેથી નિકાસ વધુ દેખાઈ શકે.</string>
+    <string name="code_error_export_mode">નિકાસ યુનિટ કાં તો નેટ થાય છે અથવા દરે ચૂકવાય છે</string>
 </resources>

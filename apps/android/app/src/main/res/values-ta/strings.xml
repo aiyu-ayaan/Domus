@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s தேவைக்கேற்ப இல்லை</string>
     <string name="code_error_unknown_weather_reading">தெரியாத வானிலை அளவீடு</string>
     <string name="editor_field_reading">அளவீடு</string>
+    <string name="manage_solar">சூரிய ஆற்றல்</string>
+    <string name="analytics_solar">சூரிய ஆற்றல்</string>
+    <string name="manage_solar_help">சூரிய உற்பத்தியை அளக்கும் சாதனங்களைத் தேர்ந்தெடுக்கவும். அவை பயன்பாடாக அல்ல, உற்பத்தியாகக் கணக்கிடப்படும்.</string>
+    <string name="manage_solar_export">ஏற்றுமதி யூனிட்கள்</string>
+    <string name="manage_solar_net">நிகர அளவீடு</string>
+    <string name="manage_solar_feed_in">யூனிட்டுக்குக் கட்டணம்</string>
+    <string name="manage_solar_export_rate">ஏற்றுமதி kWh-க்கு விலை</string>
+    <string name="analytics_solar_now">இப்போது உற்பத்தி</string>
+    <string name="analytics_solar_generated">இந்தச் சுழற்சியில் உற்பத்தி</string>
+    <string name="analytics_solar_self_used">வீட்டில் பயன்படுத்தியது</string>
+    <string name="analytics_solar_exported">ஏற்றுமதி</string>
+    <string name="analytics_solar_earned">வருமானம்</string>
+    <string name="analytics_solar_imported">கிரிடிலிருந்து வாங்கியது</string>
+    <string name="analytics_solar_hint">அளவிடப்படும் சாதனங்களிலிருந்து ஒவ்வொரு 15 நிமிடமும் கணக்கிடப்படுகிறது. மீட்டர் இல்லாதவை சேராது, எனவே ஏற்றுமதி அதிகமாகத் தெரியலாம்.</string>
+    <string name="code_error_export_mode">ஏற்றுமதி யூனிட்கள் நிகரமாக்கப்படும் அல்லது விலையில் செலுத்தப்படும்</string>
 </resources>

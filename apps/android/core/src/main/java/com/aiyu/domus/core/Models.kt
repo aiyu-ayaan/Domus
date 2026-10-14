@@ -309,6 +309,28 @@ data class EnergySettings(
     val slabs: List<Slab> = emptyList(),
     /** Windows of the day whose units cost more or less than the rate above. */
     @SerialName("time_of_use") val timeOfUse: List<TimeOfUse> = emptyList(),
+    /** Devices that measure solar generation: counted as production, not consumption. */
+    @SerialName("solar_device_ids") val solarDeviceIds: List<String> = emptyList(),
+    /** "net" (exported units offset imported ones) or "feed_in" (paid at [exportRate]). */
+    @SerialName("export_mode") val exportMode: String = "net",
+    @SerialName("export_rate") val exportRate: Double = 0.0,
+)
+
+/** Energy through the grid connection, worked out per quarter hour from metered use and generation. */
+@Serializable
+data class Flows(
+    @SerialName("generated_kwh") val generatedKwh: Double = 0.0,
+    @SerialName("self_used_kwh") val selfUsedKwh: Double = 0.0,
+    @SerialName("imported_kwh") val importedKwh: Double = 0.0,
+    @SerialName("exported_kwh") val exportedKwh: Double = 0.0,
+)
+
+@Serializable
+data class SolarSummary(
+    @SerialName("current_watts") val watts: Double = 0.0,
+    val today: Flows = Flows(),
+    val cycle: Flows = Flows(),
+    @SerialName("cycle_credit") val cycleCredit: Double = 0.0,
 )
 
 /** [start] and [end] are "HH:mm" on the home's clock; [adjust] is added to each kWh's price (negative = cheaper). */
@@ -340,6 +362,8 @@ data class EnergyOverview(
     @SerialName("budget_used_percent") val budgetUsedPercent: Double? = null,
     val settings: EnergySettings = EnergySettings(),
     val devices: List<DeviceEnergy> = emptyList(),
+    /** Present when solar devices are set. */
+    val solar: SolarSummary? = null,
 )
 
 @Serializable

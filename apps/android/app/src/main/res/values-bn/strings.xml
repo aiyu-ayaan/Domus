@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s প্রয়োজন অনুযায়ী ছিল না</string>
     <string name="code_error_unknown_weather_reading">অজানা আবহাওয়া রিডিং</string>
     <string name="editor_field_reading">রিডিং</string>
+    <string name="manage_solar">সৌরশক্তি</string>
+    <string name="analytics_solar">সৌরশক্তি</string>
+    <string name="manage_solar_help">যে ডিভাইসগুলো সৌর উৎপাদন মাপে সেগুলো বাছুন। সেগুলো উৎপাদন হিসেবে গণ্য হবে, ব্যবহার হিসেবে নয়।</string>
+    <string name="manage_solar_export">রপ্তানি করা ইউনিট</string>
+    <string name="manage_solar_net">নেট মিটারিং</string>
+    <string name="manage_solar_feed_in">প্রতি ইউনিটে মূল্য</string>
+    <string name="manage_solar_export_rate">প্রতি রপ্তানি kWh-এর দাম</string>
+    <string name="analytics_solar_now">এখন উৎপাদন</string>
+    <string name="analytics_solar_generated">এই চক্রে উৎপাদন</string>
+    <string name="analytics_solar_self_used">বাড়িতে ব্যবহৃত</string>
+    <string name="analytics_solar_exported">রপ্তানি</string>
+    <string name="analytics_solar_earned">আয়</string>
+    <string name="analytics_solar_imported">গ্রিড থেকে কেনা</string>
+    <string name="analytics_solar_hint">মিটারযুক্ত ডিভাইস থেকে প্রতি ১৫ মিনিটে হিসাব। মিটারহীন যন্ত্র গোনা হয় না, তাই রপ্তানি বেশি দেখাতে পারে।</string>
+    <string name="code_error_export_mode">রপ্তানি ইউনিট হয় নেট হয়, নয়তো দরে পরিশোধ হয়</string>
 </resources>

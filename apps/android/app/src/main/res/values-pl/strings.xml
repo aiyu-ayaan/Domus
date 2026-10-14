@@ -1027,4 +1027,19 @@
     <string name="runs_cond_weather">%1$s nie spełniał(a) warunku</string>
     <string name="code_error_unknown_weather_reading">Nieznany odczyt pogody</string>
     <string name="editor_field_reading">Odczyt</string>
+    <string name="manage_solar">Fotowoltaika</string>
+    <string name="analytics_solar">Fotowoltaika</string>
+    <string name="manage_solar_help">Zaznacz urządzenia mierzące produkcję z paneli. Liczą się jako produkcja, nie zużycie.</string>
+    <string name="manage_solar_export">Oddane jednostki</string>
+    <string name="manage_solar_net">Net-metering</string>
+    <string name="manage_solar_feed_in">Płatne za jednostkę</string>
+    <string name="manage_solar_export_rate">Cena za oddaną kWh</string>
+    <string name="analytics_solar_now">Produkcja teraz</string>
+    <string name="analytics_solar_generated">Wyprodukowano w tym okresie</string>
+    <string name="analytics_solar_self_used">Zużyto w domu</string>
+    <string name="analytics_solar_exported">Oddano</string>
+    <string name="analytics_solar_earned">Zarobiono</string>
+    <string name="analytics_solar_imported">Pobrano z sieci</string>
+    <string name="analytics_solar_hint">Liczone co 15 minut z mierzonych urządzeń. Urządzenia bez pomiaru nie są liczone, więc oddana energia może wyjść zawyżona.</string>
+    <string name="code_error_export_mode">Oddane jednostki są rozliczane netto albo płatne według stawki</string>
 </resources>

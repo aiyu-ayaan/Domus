@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$s不符合条件</string>
     <string name="code_error_unknown_weather_reading">未知的天气读数</string>
     <string name="editor_field_reading">读数</string>
+    <string name="manage_solar">太阳能</string>
+    <string name="analytics_solar">太阳能</string>
+    <string name="manage_solar_help">勾选测量太阳能发电的设备。它们计为发电，而不是用电。</string>
+    <string name="manage_solar_export">上网电量</string>
+    <string name="manage_solar_net">净计量</string>
+    <string name="manage_solar_feed_in">按电量付费</string>
+    <string name="manage_solar_export_rate">每度上网电价</string>
+    <string name="analytics_solar_now">当前发电</string>
+    <string name="analytics_solar_generated">本周期发电</string>
+    <string name="analytics_solar_self_used">自用</string>
+    <string name="analytics_solar_exported">上网</string>
+    <string name="analytics_solar_earned">收益</string>
+    <string name="analytics_solar_imported">从电网购电</string>
+    <string name="analytics_solar_hint">每 15 分钟根据有计量的设备计算。未计量的电器不计入，因此上网电量可能偏高。</string>
+    <string name="code_error_export_mode">上网电量要么净额抵扣，要么按电价结算</string>
 </resources>

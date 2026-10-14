@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s was not as required</string>
     <string name="code_error_unknown_weather_reading">Unknown weather reading</string>
     <string name="editor_field_reading">Reading</string>
+    <string name="manage_solar">Solar</string>
+    <string name="analytics_solar">Solar</string>
+    <string name="manage_solar_help">Tick the devices that measure solar generation. They count as production, not as use.</string>
+    <string name="manage_solar_export">Exported units</string>
+    <string name="manage_solar_net">Net metering</string>
+    <string name="manage_solar_feed_in">Paid per unit</string>
+    <string name="manage_solar_export_rate">Price per exported kWh</string>
+    <string name="analytics_solar_now">Generating now</string>
+    <string name="analytics_solar_generated">Generated this cycle</string>
+    <string name="analytics_solar_self_used">Used at home</string>
+    <string name="analytics_solar_exported">Exported</string>
+    <string name="analytics_solar_earned">Earned</string>
+    <string name="analytics_solar_imported">Bought from the grid</string>
+    <string name="analytics_solar_hint">Worked out every 15 minutes from metered devices. Appliances without a meter are not counted, so the export can read high.</string>
+    <string name="code_error_export_mode">Exported units are either netted or paid at a rate</string>
 </resources>

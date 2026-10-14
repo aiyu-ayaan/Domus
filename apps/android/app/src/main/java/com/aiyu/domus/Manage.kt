@@ -68,6 +68,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -625,12 +627,17 @@ fun TariffPage(onBack: () -> Unit) {
     val slabs = remember { mutableStateListOf<Pair<String, String>>() }
     // (start, end, difference per kWh) as typed.
     val windows = remember { mutableStateListOf<Triple<String, String, String>>() }
+    val solarIds = remember { mutableStateListOf<String>() }
+    var exportMode by remember { mutableStateOf("net") }
+    var exportRate by remember { mutableStateOf("") }
+    val devices by repository.devices.collectAsStateWithLifecycle()
     fun show(s: EnergySettings) {
         fun text(v: Double) = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString()
         rate = text(s.ratePerKwh); currency = s.currency; budget = s.monthlyBudget?.let(::text).orEmpty()
         day = s.billingCycleDay.toString(); fixed = text(s.fixedMonthlyCharge)
         slabs.clear(); slabs.addAll(s.slabs.map { (it.upToKwh?.let(::text).orEmpty()) to text(it.rate) })
         windows.clear(); windows.addAll(s.timeOfUse.map { Triple(it.start, it.end, text(it.adjust)) })
+        solarIds.clear(); solarIds.addAll(s.solarDeviceIds); exportMode = s.exportMode; exportRate = text(s.exportRate)
         loaded = true
     }
     LaunchedEffect(Unit) { repository.request { it.energySettings() }?.let(::show) }
@@ -643,9 +650,12 @@ fun TariffPage(onBack: () -> Unit) {
         fixedMonthlyCharge = fixed.toDoubleOrNull() ?: -1.0,
         slabs = slabs.map { Slab(it.first.toDoubleOrNull(), it.second.toDoubleOrNull() ?: -1.0) },
         timeOfUse = windows.map { TimeOfUse(it.first.trim(), it.second.trim(), it.third.toDoubleOrNull() ?: 0.0) },
+        solarDeviceIds = solarIds.toList(),
+        exportMode = exportMode,
+        exportRate = if (exportMode == "feed_in") exportRate.toDoubleOrNull() ?: -1.0 else exportRate.toDoubleOrNull() ?: 0.0,
     )
     val clock = Regex("""([01]\d|2[0-3]):[0-5]\d""")
-    val valid = typed.ratePerKwh >= 0 && typed.fixedMonthlyCharge >= 0 && typed.currency.length == 3 && typed.billingCycleDay in 1..28 &&
+    val valid = typed.ratePerKwh >= 0 && typed.fixedMonthlyCharge >= 0 && typed.exportRate >= 0 && typed.currency.length == 3 && typed.billingCycleDay in 1..28 &&
         (budget.isBlank() || typed.monthlyBudget != null) && typed.slabs.all { it.rate >= 0 } &&
         windows.all { clock.matches(it.first.trim()) && clock.matches(it.second.trim()) && it.third.toDoubleOrNull() != null }
 
@@ -692,6 +702,27 @@ fun TariffPage(onBack: () -> Unit) {
             }
         }
         OutlinedButton({ windows.add(Triple("", "", "")) }) { Text(stringResource(R.string.manage_add_time_window)) }
+
+        val meters = devices.filter { it.state.watts != null || it.id in solarIds }
+        if (meters.isNotEmpty()) {
+            SectionTitle(stringResource(R.string.manage_solar))
+            Text(stringResource(R.string.manage_solar_help), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            meters.forEach { device ->
+                Row(
+                    Modifier.fillMaxWidth().toggleable(device.id in solarIds, role = Role.Checkbox) { if (it) solarIds.add(device.id) else solarIds.remove(device.id) }.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(device.id in solarIds, onCheckedChange = null)
+                    Spacer(Modifier.width(12.dp))
+                    Text(device.name, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            if (solarIds.isNotEmpty()) {
+                Text(stringResource(R.string.manage_solar_export), style = MaterialTheme.typography.titleSmall)
+                Choice(listOf("net" to stringResource(R.string.manage_solar_net), "feed_in" to stringResource(R.string.manage_solar_feed_in)), exportMode, { exportMode = it })
+                if (exportMode == "feed_in") Field(exportRate, { exportRate = it }, stringResource(R.string.manage_solar_export_rate), keyboard = KeyboardType.Decimal)
+            }
+        }
 
         Button(
             { scope.launch { repository.change { it.saveEnergySettings(typed) }?.let { show(it); onBack() } } },

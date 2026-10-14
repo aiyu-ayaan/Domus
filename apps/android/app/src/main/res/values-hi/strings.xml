@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s ज़रूरत के मुताबिक नहीं था</string>
     <string name="code_error_unknown_weather_reading">अज्ञात मौसम रीडिंग</string>
     <string name="editor_field_reading">रीडिंग</string>
+    <string name="manage_solar">सौर</string>
+    <string name="analytics_solar">सौर</string>
+    <string name="manage_solar_help">सौर उत्पादन मापने वाले डिवाइस चुनें। ये खपत नहीं, उत्पादन गिने जाते हैं।</string>
+    <string name="manage_solar_export">निर्यात यूनिट</string>
+    <string name="manage_solar_net">नेट मीटरिंग</string>
+    <string name="manage_solar_feed_in">प्रति यूनिट भुगतान</string>
+    <string name="manage_solar_export_rate">प्रति निर्यात kWh कीमत</string>
+    <string name="analytics_solar_now">अभी उत्पादन</string>
+    <string name="analytics_solar_generated">इस चक्र में उत्पादन</string>
+    <string name="analytics_solar_self_used">घर में इस्तेमाल</string>
+    <string name="analytics_solar_exported">निर्यात</string>
+    <string name="analytics_solar_earned">कमाई</string>
+    <string name="analytics_solar_imported">ग्रिड से खरीदा</string>
+    <string name="analytics_solar_hint">मीटर वाले डिवाइस से हर 15 मिनट में गणना। बिना मीटर के उपकरण नहीं गिने जाते, इसलिए निर्यात ज़्यादा दिख सकता है।</string>
+    <string name="code_error_export_mode">निर्यात यूनिट या तो नेट होते हैं या दर पर भुगतान होते हैं</string>
 </resources>

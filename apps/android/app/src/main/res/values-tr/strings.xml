@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s gerekeni karşılamadı</string>
     <string name="code_error_unknown_weather_reading">Bilinmeyen hava ölçümü</string>
     <string name="editor_field_reading">Ölçüm</string>
+    <string name="manage_solar">Güneş enerjisi</string>
+    <string name="analytics_solar">Güneş enerjisi</string>
+    <string name="manage_solar_help">Güneş üretimini ölçen cihazları işaretleyin. Bunlar tüketim değil üretim olarak sayılır.</string>
+    <string name="manage_solar_export">Şebekeye verilen birimler</string>
+    <string name="manage_solar_net">Net ölçüm</string>
+    <string name="manage_solar_feed_in">Birim başına ödeme</string>
+    <string name="manage_solar_export_rate">Verilen kWh başına fiyat</string>
+    <string name="analytics_solar_now">Şu anki üretim</string>
+    <string name="analytics_solar_generated">Bu dönem üretilen</string>
+    <string name="analytics_solar_self_used">Evde kullanılan</string>
+    <string name="analytics_solar_exported">Şebekeye verilen</string>
+    <string name="analytics_solar_earned">Kazanç</string>
+    <string name="analytics_solar_imported">Şebekeden alınan</string>
+    <string name="analytics_solar_hint">Ölçülen cihazlardan 15 dakikada bir hesaplanır. Sayacı olmayan cihazlar sayılmaz, bu yüzden verilen enerji yüksek görünebilir.</string>
+    <string name="code_error_export_mode">Verilen birimler ya mahsup edilir ya da birim fiyatla ödenir</string>
 </resources>

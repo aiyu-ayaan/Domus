@@ -1003,4 +1003,19 @@
     <string name="runs_cond_weather">%1$s không đạt yêu cầu</string>
     <string name="code_error_unknown_weather_reading">Chỉ số thời tiết không xác định</string>
     <string name="editor_field_reading">Chỉ số</string>
+    <string name="manage_solar">Điện mặt trời</string>
+    <string name="analytics_solar">Điện mặt trời</string>
+    <string name="manage_solar_help">Chọn các thiết bị đo sản lượng điện mặt trời. Chúng được tính là sản xuất, không phải tiêu thụ.</string>
+    <string name="manage_solar_export">Số điện phát lên lưới</string>
+    <string name="manage_solar_net">Bù trừ điện năng</string>
+    <string name="manage_solar_feed_in">Trả theo số điện</string>
+    <string name="manage_solar_export_rate">Giá mỗi kWh phát lên lưới</string>
+    <string name="analytics_solar_now">Đang phát</string>
+    <string name="analytics_solar_generated">Đã phát kỳ này</string>
+    <string name="analytics_solar_self_used">Dùng tại nhà</string>
+    <string name="analytics_solar_exported">Phát lên lưới</string>
+    <string name="analytics_solar_earned">Thu được</string>
+    <string name="analytics_solar_imported">Mua từ lưới</string>
+    <string name="analytics_solar_hint">Tính mỗi 15 phút từ các thiết bị có đo. Thiết bị không đo không được tính, nên lượng phát lên lưới có thể cao hơn thực tế.</string>
+    <string name="code_error_export_mode">Số điện phát lên lưới được bù trừ hoặc trả theo đơn giá</string>
 </resources>

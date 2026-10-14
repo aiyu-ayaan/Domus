@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s ಅಗತ್ಯದಂತೆ ಇರಲಿಲ್ಲ</string>
     <string name="code_error_unknown_weather_reading">ಅಜ್ಞಾತ ಹವಾಮಾನ ರೀಡಿಂಗ್</string>
     <string name="editor_field_reading">ರೀಡಿಂಗ್</string>
+    <string name="manage_solar">ಸೌರ</string>
+    <string name="analytics_solar">ಸೌರ</string>
+    <string name="manage_solar_help">ಸೌರ ಉತ್ಪಾದನೆ ಅಳೆಯುವ ಸಾಧನಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಅವು ಬಳಕೆಯಾಗಿ ಅಲ್ಲ, ಉತ್ಪಾದನೆಯಾಗಿ ಎಣಿಕೆಯಾಗುತ್ತವೆ.</string>
+    <string name="manage_solar_export">ರಫ್ತು ಮಾಡಿದ ಯೂನಿಟ್‌ಗಳು</string>
+    <string name="manage_solar_net">ನೆಟ್ ಮೀಟರಿಂಗ್</string>
+    <string name="manage_solar_feed_in">ಪ್ರತಿ ಯೂನಿಟ್‌ಗೆ ಪಾವತಿ</string>
+    <string name="manage_solar_export_rate">ರಫ್ತು kWh ಗೆ ಬೆಲೆ</string>
+    <string name="analytics_solar_now">ಈಗಿನ ಉತ್ಪಾದನೆ</string>
+    <string name="analytics_solar_generated">ಈ ಚಕ್ರದಲ್ಲಿ ಉತ್ಪಾದನೆ</string>
+    <string name="analytics_solar_self_used">ಮನೆಯಲ್ಲಿ ಬಳಸಿದ್ದು</string>
+    <string name="analytics_solar_exported">ರಫ್ತು</string>
+    <string name="analytics_solar_earned">ಗಳಿಕೆ</string>
+    <string name="analytics_solar_imported">ಗ್ರಿಡ್‌ನಿಂದ ಖರೀದಿ</string>
+    <string name="analytics_solar_hint">ಮೀಟರ್ ಇರುವ ಸಾಧನಗಳಿಂದ ಪ್ರತಿ 15 ನಿಮಿಷಕ್ಕೆ ಲೆಕ್ಕ. ಮೀಟರ್ ಇಲ್ಲದ ಉಪಕರಣಗಳು ಎಣಿಕೆಯಾಗುವುದಿಲ್ಲ, ಹಾಗಾಗಿ ರಫ್ತು ಹೆಚ್ಚು ಕಾಣಬಹುದು.</string>
+    <string name="code_error_export_mode">ರಫ್ತು ಯೂನಿಟ್‌ಗಳು ನೆಟ್ ಆಗುತ್ತವೆ ಅಥವಾ ದರದಲ್ಲಿ ಪಾವತಿಯಾಗುತ್ತವೆ</string>
 </resources>

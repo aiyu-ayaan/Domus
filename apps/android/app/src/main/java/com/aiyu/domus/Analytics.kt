@@ -460,6 +460,28 @@ private fun ColumnScope.ElectricitySection() {
     // A wide screen reads the figures on the start side and keeps the charts beside them.
     if (LocalWideScreen.current) SideBySide({ summary(); insights() }, history) else { summary(); history(); insights() }
 
+    overview.solar?.let { solar ->
+        SectionTitle(stringResource(R.string.analytics_solar))
+        Surface(color = c.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOfNotNull(
+                    stringResource(R.string.analytics_solar_now) to formatWatts(solar.watts),
+                    stringResource(R.string.analytics_solar_generated) to formatKwh(solar.cycle.generatedKwh),
+                    stringResource(R.string.analytics_solar_self_used) to formatKwh(solar.cycle.selfUsedKwh),
+                    stringResource(R.string.analytics_solar_exported) to formatKwh(solar.cycle.exportedKwh),
+                    if (overview.settings.exportMode == "feed_in") stringResource(R.string.analytics_solar_earned) to formatMoney(solar.cycleCredit, currency)
+                    else stringResource(R.string.analytics_solar_imported) to formatKwh(solar.cycle.importedKwh),
+                ).forEach { (label, value) ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        RollingText(value, MaterialTheme.typography.titleMedium)
+                    }
+                }
+                Text(stringResource(R.string.analytics_solar_hint), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
+            }
+        }
+    }
+
     if (overview.devices.isNotEmpty()) SectionTitle(stringResource(R.string.analytics_by_device))
     val most = overview.devices.maxOfOrNull { it.kwh }?.takeIf { it > 0 } ?: 1.0
     overview.devices.sortedByDescending { it.kwh }.forEachIndexed { index, device ->

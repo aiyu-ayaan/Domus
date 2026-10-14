@@ -1019,4 +1019,19 @@
     <string name="runs_cond_weather">%1$s não estava como exigido</string>
     <string name="code_error_unknown_weather_reading">Leitura de clima desconhecida</string>
     <string name="editor_field_reading">Leitura</string>
+    <string name="manage_solar">Solar</string>
+    <string name="analytics_solar">Solar</string>
+    <string name="manage_solar_help">Marque os dispositivos que medem a geração solar. Eles contam como produção, não como consumo.</string>
+    <string name="manage_solar_export">Unidades injetadas</string>
+    <string name="manage_solar_net">Compensação</string>
+    <string name="manage_solar_feed_in">Pagas por unidade</string>
+    <string name="manage_solar_export_rate">Preço por kWh injetado</string>
+    <string name="analytics_solar_now">Gerando agora</string>
+    <string name="analytics_solar_generated">Gerado neste ciclo</string>
+    <string name="analytics_solar_self_used">Usado em casa</string>
+    <string name="analytics_solar_exported">Injetado</string>
+    <string name="analytics_solar_earned">Ganho</string>
+    <string name="analytics_solar_imported">Comprado da rede</string>
+    <string name="analytics_solar_hint">Calculado a cada 15 minutos a partir dos dispositivos medidos. Aparelhos sem medição não entram, então a injeção pode aparecer alta.</string>
+    <string name="code_error_export_mode">Unidades injetadas são compensadas ou pagas a uma tarifa</string>
 </resources>

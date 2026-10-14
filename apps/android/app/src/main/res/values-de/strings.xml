@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s passte nicht</string>
     <string name="code_error_unknown_weather_reading">Unbekannter Wetterwert</string>
     <string name="editor_field_reading">Messwert</string>
+    <string name="manage_solar">Solar</string>
+    <string name="analytics_solar">Solar</string>
+    <string name="manage_solar_help">Wählen Sie die Geräte, die Solarertrag messen. Sie zählen als Erzeugung, nicht als Verbrauch.</string>
+    <string name="manage_solar_export">Eingespeiste Einheiten</string>
+    <string name="manage_solar_net">Saldierung</string>
+    <string name="manage_solar_feed_in">Vergütung pro Einheit</string>
+    <string name="manage_solar_export_rate">Preis pro eingespeister kWh</string>
+    <string name="analytics_solar_now">Erzeugung jetzt</string>
+    <string name="analytics_solar_generated">Erzeugt in diesem Zeitraum</string>
+    <string name="analytics_solar_self_used">Selbst genutzt</string>
+    <string name="analytics_solar_exported">Eingespeist</string>
+    <string name="analytics_solar_earned">Vergütung</string>
+    <string name="analytics_solar_imported">Aus dem Netz bezogen</string>
+    <string name="analytics_solar_hint">Alle 15 Minuten aus gemessenen Geräten berechnet. Geräte ohne Messung fehlen, die Einspeisung kann also zu hoch sein.</string>
+    <string name="code_error_export_mode">Eingespeiste Einheiten werden entweder saldiert oder vergütet</string>
 </resources>

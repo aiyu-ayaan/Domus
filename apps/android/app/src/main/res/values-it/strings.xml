@@ -1019,4 +1019,19 @@
     <string name="runs_cond_weather">%1$s non corrispondeva</string>
     <string name="code_error_unknown_weather_reading">Lettura meteo sconosciuta</string>
     <string name="editor_field_reading">Lettura</string>
+    <string name="manage_solar">Solare</string>
+    <string name="analytics_solar">Solare</string>
+    <string name="manage_solar_help">Seleziona i dispositivi che misurano la produzione solare. Contano come produzione, non come consumo.</string>
+    <string name="manage_solar_export">Unità immesse</string>
+    <string name="manage_solar_net">Scambio sul posto</string>
+    <string name="manage_solar_feed_in">Pagate a unità</string>
+    <string name="manage_solar_export_rate">Prezzo per kWh immesso</string>
+    <string name="analytics_solar_now">Produzione attuale</string>
+    <string name="analytics_solar_generated">Prodotto in questo ciclo</string>
+    <string name="analytics_solar_self_used">Usato in casa</string>
+    <string name="analytics_solar_exported">Immesso</string>
+    <string name="analytics_solar_earned">Guadagnato</string>
+    <string name="analytics_solar_imported">Prelevato dalla rete</string>
+    <string name="analytics_solar_hint">Calcolato ogni 15 minuti dai dispositivi misurati. Gli apparecchi senza misura non sono contati, quindi l’immissione può risultare alta.</string>
+    <string name="code_error_export_mode">Le unità immesse sono compensate o pagate a una tariffa</string>
 </resources>

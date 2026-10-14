@@ -1011,4 +1011,19 @@
     <string name="runs_cond_weather">%1$s ആവശ്യമായ നിലയിലായിരുന്നില്ല</string>
     <string name="code_error_unknown_weather_reading">അജ്ഞാത കാലാവസ്ഥാ റീഡിംഗ്</string>
     <string name="editor_field_reading">റീഡിംഗ്</string>
+    <string name="manage_solar">സോളാർ</string>
+    <string name="analytics_solar">സോളാർ</string>
+    <string name="manage_solar_help">സോളാർ ഉൽപ്പാദനം അളക്കുന്ന ഉപകരണങ്ങൾ തിരഞ്ഞെടുക്കുക. അവ ഉപയോഗമല്ല, ഉൽപ്പാദനമായി കണക്കാക്കും.</string>
+    <string name="manage_solar_export">കയറ്റുമതി ചെയ്ത യൂണിറ്റുകൾ</string>
+    <string name="manage_solar_net">നെറ്റ് മീറ്ററിംഗ്</string>
+    <string name="manage_solar_feed_in">യൂണിറ്റിന് പണം</string>
+    <string name="manage_solar_export_rate">കയറ്റുമതി ചെയ്ത kWh-ന് വില</string>
+    <string name="analytics_solar_now">ഇപ്പോഴത്തെ ഉൽപ്പാദനം</string>
+    <string name="analytics_solar_generated">ഈ സൈക്കിളിലെ ഉൽപ്പാദനം</string>
+    <string name="analytics_solar_self_used">വീട്ടിൽ ഉപയോഗിച്ചത്</string>
+    <string name="analytics_solar_exported">കയറ്റുമതി</string>
+    <string name="analytics_solar_earned">വരുമാനം</string>
+    <string name="analytics_solar_imported">ഗ്രിഡിൽ നിന്ന് വാങ്ങിയത്</string>
+    <string name="analytics_solar_hint">മീറ്ററുള്ള ഉപകരണങ്ങളിൽ നിന്ന് ഓരോ 15 മിനിറ്റിലും കണക്കാക്കുന്നു. മീറ്ററില്ലാത്തവ ഉൾപ്പെടില്ല, അതിനാൽ കയറ്റുമതി കൂടുതലായി കാണാം.</string>
+    <string name="code_error_export_mode">കയറ്റുമതി യൂണിറ്റുകൾ നെറ്റ് ചെയ്യുകയോ നിരക്കിൽ പണം നൽകുകയോ ചെയ്യും</string>
 </resources>

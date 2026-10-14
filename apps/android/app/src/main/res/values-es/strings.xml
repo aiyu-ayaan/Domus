@@ -1019,4 +1019,19 @@
     <string name="runs_cond_weather">%1$s no era el requerido</string>
     <string name="code_error_unknown_weather_reading">Lectura meteorológica desconocida</string>
     <string name="editor_field_reading">Lectura</string>
+    <string name="manage_solar">Solar</string>
+    <string name="analytics_solar">Solar</string>
+    <string name="manage_solar_help">Marca los dispositivos que miden la generación solar. Cuentan como producción, no como consumo.</string>
+    <string name="manage_solar_export">Unidades exportadas</string>
+    <string name="manage_solar_net">Balance neto</string>
+    <string name="manage_solar_feed_in">Pago por unidad</string>
+    <string name="manage_solar_export_rate">Precio por kWh exportado</string>
+    <string name="analytics_solar_now">Generando ahora</string>
+    <string name="analytics_solar_generated">Generado este ciclo</string>
+    <string name="analytics_solar_self_used">Usado en casa</string>
+    <string name="analytics_solar_exported">Exportado</string>
+    <string name="analytics_solar_earned">Ganado</string>
+    <string name="analytics_solar_imported">Comprado a la red</string>
+    <string name="analytics_solar_hint">Calculado cada 15 minutos a partir de los dispositivos medidos. Los aparatos sin medidor no cuentan, así que la exportación puede salir alta.</string>
+    <string name="code_error_export_mode">Las unidades exportadas se compensan o se pagan a un precio</string>
 </resources>
