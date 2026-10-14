@@ -41,6 +41,9 @@ contextBridge.exposeInMainWorld('domus', {
     setEnabled: (on) => ipcRenderer.send('tray:set', on),
     update: (state) => ipcRenderer.send('tray:update', state),
     show: () => ipcRenderer.send('tray:show'),
+    // GNOME Quick Settings (main.js): whether it is GNOME, the extension is installed, and it is connected now.
+    gnome: () => ipcRenderer.sendSync('tray:gnome'),
+    installGnome: () => ipcRenderer.invoke('tray:installGnome'),
     // Returns the function that stops listening.
     onToggle: (listener) => {
       const heard = (_event, id, on) => listener(id, on)

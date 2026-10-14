@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: ਔਫਲਾਈਨ",
   "settings.tray.title": "ਸਿਸਟਮ ਟ੍ਰੇ ਵਿੱਚ ਦਿਖਾਓ",
   "settings.tray.hint": "ਮੀਨੂ ਬਾਰ, ਟੌਪ ਬਾਰ ਜਾਂ ਸੂਚਨਾ ਖੇਤਰ ਵਿੱਚ ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ ਅਤੇ ਤੁਹਾਡੇ ਏਅਰ ਪਿਊਰੀਫਾਇਰ। ਵਿੰਡੋ ਬੰਦ ਕਰਨ ’ਤੇ ਵੀ Domus ਉੱਥੇ ਚੱਲਦਾ ਰਹਿੰਦਾ ਹੈ।",
-  "settings.tray.noHost": "ਇਸ ਡੈਸਕਟਾਪ ਵਿੱਚ ਟ੍ਰੇ ਆਈਕਨ ਦਿਖਾਉਣ ਦੀ ਥਾਂ ਨਹੀਂ ਹੈ। GNOME ’ਤੇ AppIndicator ਐਕਸਟੈਂਸ਼ਨ ਇੰਸਟਾਲ ਕਰਕੇ ਚਾਲੂ ਕਰੋ, ਫਿਰ Domus ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ।"
+  "settings.tray.noHost": "ਇਸ ਡੈਸਕਟਾਪ ਵਿੱਚ ਟ੍ਰੇ ਆਈਕਨ ਦਿਖਾਉਣ ਦੀ ਥਾਂ ਨਹੀਂ ਹੈ। GNOME ’ਤੇ AppIndicator ਐਕਸਟੈਂਸ਼ਨ ਇੰਸਟਾਲ ਕਰਕੇ ਚਾਲੂ ਕਰੋ, ਫਿਰ Domus ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ।",
+  "settings.tray.gnomeAdd": "ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜੋੜੋ",
+  "settings.tray.gnomeHint": "GNOME ਇੱਕ ਛੋਟੀ ਐਕਸਟੈਂਸ਼ਨ ਰਾਹੀਂ ਐਪਾਂ ਨੂੰ ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਦਿਖਾਉਂਦਾ ਹੈ। Domus ਇਸਨੂੰ ਤੁਹਾਡੇ ਲਈ ਇੰਸਟਾਲ ਕਰਦਾ ਹੈ।",
+  "settings.tray.gnomeRestart": "ਜੋੜ ਦਿੱਤਾ। ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ Domus ਦੇਖਣ ਲਈ ਲੌਗ ਆਊਟ ਕਰਕੇ ਮੁੜ ਲੌਗ ਇਨ ਕਰੋ।",
+  "settings.tray.gnomeOn": "Domus ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਹੈ।",
+  "settings.tray.gnomeFailed": "Domus ਨੂੰ ਕੁਇੱਕ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਨਹੀਂ ਜੋੜਿਆ ਜਾ ਸਕਿਆ: {reason}"
 }

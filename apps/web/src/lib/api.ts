@@ -51,8 +51,12 @@ interface DesktopBridge {
     /** False when the Linux desktop has no tray (GNOME without the AppIndicator extension); null when unknown. */
     hasHost(): boolean | null
     setEnabled(on: boolean): void
-    update(state: { title: string; summary: string; devices: { id: string; label: string; on: boolean; enabled: boolean }[] } | null): void
+    update(state: { heading: string; title: string; summary: string; devices: { id: string; label: string; on: boolean; enabled: boolean }[] } | null): void
     show(): void
+    /** GNOME Quick Settings: on GNOME, the extension installed and enabled, and connected to this app now. Absent in older builds. */
+    gnome?(): { gnome: boolean; installed: boolean; connected: boolean } | null
+    /** Installs and enables the GNOME extension; '' when done (it loads at the next login), else why it failed. */
+    installGnome?(): Promise<string>
     /** A purifier switched from the menu. Returns the function that stops listening. */
     onToggle(listener: (id: string, on: boolean) => void): () => void
   }

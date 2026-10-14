@@ -3,6 +3,7 @@ const { execFileSync } = require('child_process')
 const dgram = require('dgram')
 const fs = require('fs')
 const http = require('http')
+const net = require('net')
 const https = require('https')
 const os = require('os')
 const path = require('path')
@@ -239,14 +240,17 @@ ipcMain.on('i18n:set', (event, tag) => {
 // extension, which Ubuntu ships). The page keeps the menu current while the window is hidden, so closing the
 // window only hides it when the tray is on.
 let tray = null
-/** What the page last sent: { title, summary, devices: [{ id, label, on, enabled }] }, or null when signed out. */
+/** What the page last sent: { heading, title, summary, devices: [{ id, label, on, enabled }] }, or null when signed out. */
 let trayState = null
 let quitting = false
 app.on('before-quit', () => (quitting = true))
+// Closing the socket server removes its file, so the GNOME extension doesn't knock on a dead socket.
+app.on('will-quit', () => setGnomeBridge(false))
 
 const text = (v) => String(v ?? '').slice(0, 120)
 
 function renderTray() {
+  publishToGnome()
   if (!tray) return
   const s = trayState
   const items = []
@@ -274,7 +278,136 @@ function setTray(on) {
     tray.destroy()
     tray = null
   }
+  setGnomeBridge(on)
 }
+
+// --- GNOME Quick Settings ---
+// Plain GNOME has no tray, so a small Shell extension (src/gnome-extension, installed from Settings) puts a tile
+// in Quick Settings instead. It reads the tray state as JSON lines from this socket and writes back
+// {toggle, on} or {open}. The socket sits in the user's own runtime directory (mode 0700), so only this user
+// reaches it.
+const GNOME_UUID = 'domus@aiyu.dev'
+const GNOME_FILES = ['metadata.json', 'extension.js']
+const gnomeSocket = path.join(process.env.XDG_RUNTIME_DIR || os.tmpdir(), isDev ? 'domus-dev' : 'domus', 'tray.sock')
+const gnomeDir = () => path.join(process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share'), 'gnome-shell', 'extensions', GNOME_UUID)
+const isGnome = () => process.platform === 'linux' && /gnome/i.test(process.env.XDG_CURRENT_DESKTOP || '')
+let gnomeServer = null
+const gnomeClients = new Set()
+
+function enabledExtensions() {
+  const list = execFileSync('gsettings', ['get', 'org.gnome.shell', 'enabled-extensions'], { timeout: 2000 }).toString()
+  // "@as []" when empty, else "['a', 'b']"
+  return [...list.matchAll(/'([^']*)'/g)].map((m) => m[1])
+}
+
+function gnomeStatus() {
+  let enabled = false
+  try {
+    enabled = enabledExtensions().includes(GNOME_UUID)
+  } catch {
+    /* no gsettings */
+  }
+  return { gnome: isGnome(), installed: enabled && fs.existsSync(path.join(gnomeDir(), 'extension.js')), connected: gnomeClients.size > 0 }
+}
+
+/** Copies the extension in (also to update it after an app update) and lists it as enabled; GNOME loads it at the next login. */
+function installGnome(enable) {
+  const dir = gnomeDir()
+  fs.mkdirSync(dir, { recursive: true })
+  for (const f of GNOME_FILES) {
+    // Read through Electron's fs, which also reads inside the packaged app.asar.
+    const bundled = fs.readFileSync(path.join(__dirname, 'gnome-extension', f))
+    const target = path.join(dir, f)
+    if (!fs.existsSync(target) || !bundled.equals(fs.readFileSync(target))) fs.writeFileSync(target, bundled)
+  }
+  if (enable) {
+    const names = enabledExtensions()
+    if (!names.includes(GNOME_UUID)) execFileSync('gsettings', ['set', 'org.gnome.shell', 'enabled-extensions', JSON.stringify([...names, GNOME_UUID])], { timeout: 2000 })
+    // A shell that already knows the extension (installed before) turns it on now; a new one waits for the next login.
+    try {
+      execFileSync('gnome-extensions', ['enable', GNOME_UUID], { timeout: 3000, stdio: 'ignore' })
+    } catch {
+      /* not loaded by the running shell yet */
+    }
+  }
+}
+
+function gnomePayload() {
+  const s = trayState ?? { heading: '', title: '', summary: '', devices: [] }
+  return `${JSON.stringify({ ...s, open: t('tray.open') })}\n`
+}
+
+function publishToGnome() {
+  const line = gnomePayload()
+  for (const c of gnomeClients) c.write(line)
+}
+
+function onGnomeCommand(line) {
+  let cmd
+  try {
+    cmd = JSON.parse(line)
+  } catch {
+    return
+  }
+  if (cmd?.open === true) return showWindow()
+  // Only a purifier the menu offers, and only while it may be switched.
+  const device = trayState?.devices.find((d) => d.id === cmd?.toggle)
+  if (device?.enabled && typeof cmd.on === 'boolean') win?.webContents.send('tray:toggle', device.id, cmd.on)
+}
+
+function setGnomeBridge(on) {
+  if (process.platform !== 'linux') return
+  if (on && !gnomeServer) {
+    if (fs.existsSync(path.join(gnomeDir(), 'extension.js'))) {
+      try {
+        installGnome(false)
+      } catch {
+        /* keep the installed copy */
+      }
+    }
+    fs.mkdirSync(path.dirname(gnomeSocket), { recursive: true, mode: 0o700 })
+    // A socket left by a crash; the single-instance lock means no other Domus of this flavor is listening.
+    fs.rmSync(gnomeSocket, { force: true })
+    gnomeServer = net.createServer((socket) => {
+      gnomeClients.add(socket)
+      socket.setEncoding('utf8')
+      socket.write(gnomePayload())
+      let pending = ''
+      socket.on('data', (chunk) => {
+        pending += chunk
+        let end
+        while ((end = pending.indexOf('\n')) >= 0) {
+          onGnomeCommand(pending.slice(0, end))
+          pending = pending.slice(end + 1)
+        }
+        if (pending.length > 4096) socket.destroy()
+      })
+      socket.on('close', () => gnomeClients.delete(socket))
+      socket.on('error', () => gnomeClients.delete(socket))
+    })
+    gnomeServer.on('error', (e) => console.error('GNOME Quick Settings socket:', e.message))
+    gnomeServer.listen(gnomeSocket, () => fs.chmodSync(gnomeSocket, 0o600))
+  } else if (!on && gnomeServer) {
+    for (const c of gnomeClients) c.destroy()
+    gnomeClients.clear()
+    gnomeServer.close()
+    gnomeServer = null
+  }
+}
+
+ipcMain.on('tray:gnome', (event) => {
+  event.returnValue = trusted(event) ? gnomeStatus() : null
+})
+// '' when installed, else the reason it failed.
+ipcMain.handle('tray:installGnome', (event) => {
+  if (!trusted(event) || !isGnome()) return 'not GNOME'
+  try {
+    installGnome(true)
+    return ''
+  } catch (e) {
+    return e.message
+  }
+})
 
 ipcMain.on('tray:get', (event) => {
   event.returnValue = !!config.tray
@@ -306,6 +439,7 @@ ipcMain.on('tray:update', (event, state) => {
   trayState =
     state && typeof state === 'object'
       ? {
+          heading: text(state.heading),
           title: text(state.title),
           summary: text(state.summary),
           devices: (Array.isArray(state.devices) ? state.devices : [])
@@ -518,8 +652,8 @@ function createWindow() {
   win.on('closed', () => (win = null))
   // With the tray on, closing hides the window so the tray stays live; Quit in the tray menu ends the app.
   win.on('close', (event) => {
-    // Without a tray to come back from (no host), closing quits as before.
-    if (tray && !quitting && trayHost() !== false) {
+    // Without a tray or a Quick Settings tile to come back from, closing quits as before.
+    if (tray && !quitting && (trayHost() !== false || gnomeClients.size > 0)) {
       event.preventDefault()
       win.hide()
     }

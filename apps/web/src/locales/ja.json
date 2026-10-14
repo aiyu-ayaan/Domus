@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: オフライン",
   "settings.tray.title": "システムトレイに表示",
   "settings.tray.hint": "メニューバー、トップバー、通知領域に空気質と空気清浄機を表示します。ウィンドウを閉じても Domus はそこで動き続けます。",
-  "settings.tray.noHost": "このデスクトップにはトレイアイコンを表示する場所がありません。GNOME では AppIndicator 拡張機能をインストールして有効にし、Domus を再起動してください。"
+  "settings.tray.noHost": "このデスクトップにはトレイアイコンを表示する場所がありません。GNOME では AppIndicator 拡張機能をインストールして有効にし、Domus を再起動してください。",
+  "settings.tray.gnomeAdd": "クイック設定に追加",
+  "settings.tray.gnomeHint": "GNOME は小さな拡張機能を使ってアプリをクイック設定に表示します。Domus が自動でインストールします。",
+  "settings.tray.gnomeRestart": "追加しました。ログアウトして再ログインすると、クイック設定に Domus が表示されます。",
+  "settings.tray.gnomeOn": "Domus はクイック設定にあります。",
+  "settings.tray.gnomeFailed": "Domus をクイック設定に追加できませんでした: {reason}"
 }

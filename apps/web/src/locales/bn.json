@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: অফলাইন",
   "settings.tray.title": "সিস্টেম ট্রেতে দেখান",
   "settings.tray.hint": "মেনু বার, টপ বার বা নোটিফিকেশন এলাকায় বায়ুর মান ও আপনার এয়ার পিউরিফায়ার। উইন্ডো বন্ধ করলেও Domus সেখানে চলতে থাকে।",
-  "settings.tray.noHost": "এই ডেস্কটপে ট্রে আইকন দেখানোর জায়গা নেই। GNOME-এ AppIndicator এক্সটেনশন ইনস্টল করে চালু করুন, তারপর Domus আবার চালু করুন।"
+  "settings.tray.noHost": "এই ডেস্কটপে ট্রে আইকন দেখানোর জায়গা নেই। GNOME-এ AppIndicator এক্সটেনশন ইনস্টল করে চালু করুন, তারপর Domus আবার চালু করুন।",
+  "settings.tray.gnomeAdd": "কুইক সেটিংসে যোগ করুন",
+  "settings.tray.gnomeHint": "GNOME একটি ছোট এক্সটেনশনের মাধ্যমে অ্যাপগুলো কুইক সেটিংসে দেখায়। Domus আপনার জন্য এটি ইনস্টল করে।",
+  "settings.tray.gnomeRestart": "যোগ হয়েছে। কুইক সেটিংসে Domus দেখতে লগ আউট করে আবার লগ ইন করুন।",
+  "settings.tray.gnomeOn": "Domus কুইক সেটিংসে আছে।",
+  "settings.tray.gnomeFailed": "Domus কুইক সেটিংসে যোগ করা যায়নি: {reason}"
 }

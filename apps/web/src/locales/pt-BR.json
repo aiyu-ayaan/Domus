@@ -1173,5 +1173,10 @@
   "tray.deviceOffline": "{name}: offline",
   "settings.tray.title": "Mostrar na bandeja do sistema",
   "settings.tray.hint": "A qualidade do ar e seus purificadores na barra de menus, na barra superior ou na área de notificação. Ao fechar a janela, o Domus continua rodando ali.",
-  "settings.tray.noHost": "Este desktop não tem onde mostrar ícones de bandeja. No GNOME, instale e ative a extensão AppIndicator e reinicie o Domus."
+  "settings.tray.noHost": "Este desktop não tem onde mostrar ícones de bandeja. No GNOME, instale e ative a extensão AppIndicator e reinicie o Domus.",
+  "settings.tray.gnomeAdd": "Adicionar às Configurações rápidas",
+  "settings.tray.gnomeHint": "O GNOME mostra apps nas Configurações rápidas por meio de uma pequena extensão. O Domus a instala para você.",
+  "settings.tray.gnomeRestart": "Adicionado. Saia e entre de novo para ver o Domus nas Configurações rápidas.",
+  "settings.tray.gnomeOn": "O Domus está nas Configurações rápidas.",
+  "settings.tray.gnomeFailed": "Não foi possível adicionar o Domus às Configurações rápidas: {reason}"
 }

@@ -1215,5 +1215,10 @@
   "tray.deviceOffline": "{name}: غير متصل",
   "settings.tray.title": "الإظهار في علبة النظام",
   "settings.tray.hint": "جودة الهواء وأجهزة تنقية الهواء في شريط القوائم أو الشريط العلوي أو منطقة الإشعارات. إغلاق النافذة يُبقي Domus يعمل هناك.",
-  "settings.tray.noHost": "لا يوجد في سطح المكتب هذا مكان لعرض أيقونات العلبة. على GNOME، ثبّت امتداد AppIndicator وفعّله ثم أعد تشغيل Domus."
+  "settings.tray.noHost": "لا يوجد في سطح المكتب هذا مكان لعرض أيقونات العلبة. على GNOME، ثبّت امتداد AppIndicator وفعّله ثم أعد تشغيل Domus.",
+  "settings.tray.gnomeAdd": "إضافة إلى الإعدادات السريعة",
+  "settings.tray.gnomeHint": "يعرض GNOME التطبيقات في الإعدادات السريعة عبر امتداد صغير. يثبّته Domus نيابةً عنك.",
+  "settings.tray.gnomeRestart": "تمت الإضافة. سجّل الخروج ثم الدخول لترى Domus في الإعدادات السريعة.",
+  "settings.tray.gnomeOn": "Domus موجود في الإعدادات السريعة.",
+  "settings.tray.gnomeFailed": "تعذّرت إضافة Domus إلى الإعدادات السريعة: {reason}"
 }

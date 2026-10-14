@@ -278,23 +278,49 @@ function ServerCard() {
   )
 }
 
-/** Desktop only: the tray menu with air quality and the purifiers. */
+/** Desktop only: the tray menu with air quality and the purifiers, or on GNOME a Quick Settings tile. */
 function TrayRow() {
-  const [on, setOn] = useState(() => desktop!.tray!.enabled())
-  const [host] = useState(() => desktop!.tray!.hasHost())
+  const toast = useToast()
+  const tray = desktop!.tray!
+  const [on, setOn] = useState(() => tray.enabled())
+  const [host] = useState(() => tray.hasHost())
+  const [gnome, setGnome] = useState(() => tray.gnome?.() ?? null)
+  const [installing, setInstalling] = useState(false)
+  const install = async () => {
+    setInstalling(true)
+    const reason = await tray.installGnome!()
+    setInstalling(false)
+    if (reason) toast.push({ tone: 'error', title: t('settings.tray.gnomeFailed', { reason }) })
+    setGnome(tray.gnome!())
+  }
   return (
     <div className="flex items-center justify-between gap-4 border-b border-border p-4">
       <div className="min-w-0">
         <p className="text-body font-medium">{t('settings.tray.title')}</p>
         <p className="text-label text-muted">{t('settings.tray.hint')}</p>
-        {host === false && <p className="mt-1 text-label text-warn">{t('settings.tray.noHost')}</p>}
+        {host === false && !gnome?.gnome && <p className="mt-1 text-label text-warn">{t('settings.tray.noHost')}</p>}
+        {on && gnome?.gnome &&
+          (gnome.connected ? (
+            <p className="mt-1 text-label text-on">{t('settings.tray.gnomeOn')}</p>
+          ) : gnome.installed ? (
+            <p className="mt-1 text-label text-warn">{t('settings.tray.gnomeRestart')}</p>
+          ) : (
+            <div className="mt-2 flex flex-col items-start gap-2">
+              <p className="text-label text-muted">{t('settings.tray.gnomeHint')}</p>
+              <Button size="sm" loading={installing} onClick={install}>
+                {t('settings.tray.gnomeAdd')}
+              </Button>
+            </div>
+          ))}
       </div>
       <Switch
         checked={on}
         label={t('settings.tray.title')}
         onChange={(v) => {
-          desktop!.tray!.setEnabled(v)
+          tray.setEnabled(v)
           setOn(v)
+          // The tile connects within a few seconds of the socket opening.
+          setTimeout(() => setGnome(tray.gnome?.() ?? null), 6000)
         }}
       />
     </div>

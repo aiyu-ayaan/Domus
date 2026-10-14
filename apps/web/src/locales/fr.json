@@ -1173,5 +1173,10 @@
   "tray.deviceOffline": "{name} : hors ligne",
   "settings.tray.title": "Afficher dans la barre d’état système",
   "settings.tray.hint": "La qualité de l’air et vos purificateurs dans la barre de menus, la barre supérieure ou la zone de notification. Fermer la fenêtre laisse Domus tourner là.",
-  "settings.tray.noHost": "Ce bureau n’a rien pour afficher les icônes de la barre d’état. Sous GNOME, installez et activez l’extension AppIndicator, puis redémarrez Domus."
+  "settings.tray.noHost": "Ce bureau n’a rien pour afficher les icônes de la barre d’état. Sous GNOME, installez et activez l’extension AppIndicator, puis redémarrez Domus.",
+  "settings.tray.gnomeAdd": "Ajouter aux Réglages rapides",
+  "settings.tray.gnomeHint": "GNOME affiche les applications dans les Réglages rapides grâce à une petite extension. Domus l’installe pour vous.",
+  "settings.tray.gnomeRestart": "Ajouté. Déconnectez-vous puis reconnectez-vous pour voir Domus dans les Réglages rapides.",
+  "settings.tray.gnomeOn": "Domus est dans les Réglages rapides.",
+  "settings.tray.gnomeFailed": "Impossible d’ajouter Domus aux Réglages rapides : {reason}"
 }

@@ -1173,5 +1173,10 @@
   "tray.deviceOffline": "{name}: offline",
   "settings.tray.title": "Mostra nell'area di notifica",
   "settings.tray.hint": "La qualità dell'aria e i tuoi purificatori nella barra dei menu, nella barra superiore o nell'area di notifica. Chiudendo la finestra Domus resta attivo lì.",
-  "settings.tray.noHost": "Questo desktop non ha dove mostrare le icone dell'area di notifica. Su GNOME installa e attiva l'estensione AppIndicator, poi riavvia Domus."
+  "settings.tray.noHost": "Questo desktop non ha dove mostrare le icone dell'area di notifica. Su GNOME installa e attiva l'estensione AppIndicator, poi riavvia Domus.",
+  "settings.tray.gnomeAdd": "Aggiungi alle Impostazioni rapide",
+  "settings.tray.gnomeHint": "GNOME mostra le app nelle Impostazioni rapide tramite una piccola estensione. Domus la installa per te.",
+  "settings.tray.gnomeRestart": "Aggiunto. Esci e rientra per vedere Domus nelle Impostazioni rapide.",
+  "settings.tray.gnomeOn": "Domus è nelle Impostazioni rapide.",
+  "settings.tray.gnomeFailed": "Impossibile aggiungere Domus alle Impostazioni rapide: {reason}"
 }

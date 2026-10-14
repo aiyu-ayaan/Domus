@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: offline",
   "settings.tray.title": "Tampilkan di baki sistem",
   "settings.tray.hint": "Kualitas udara dan pembersih udara Anda di bilah menu, bilah atas, atau area notifikasi. Menutup jendela membuat Domus tetap berjalan di sana.",
-  "settings.tray.noHost": "Desktop ini tidak punya tempat untuk ikon baki. Di GNOME, pasang dan aktifkan ekstensi AppIndicator, lalu mulai ulang Domus."
+  "settings.tray.noHost": "Desktop ini tidak punya tempat untuk ikon baki. Di GNOME, pasang dan aktifkan ekstensi AppIndicator, lalu mulai ulang Domus.",
+  "settings.tray.gnomeAdd": "Tambahkan ke Setelan Cepat",
+  "settings.tray.gnomeHint": "GNOME menampilkan aplikasi di Setelan Cepat lewat ekstensi kecil. Domus memasangnya untuk Anda.",
+  "settings.tray.gnomeRestart": "Ditambahkan. Keluar lalu masuk lagi untuk melihat Domus di Setelan Cepat.",
+  "settings.tray.gnomeOn": "Domus ada di Setelan Cepat.",
+  "settings.tray.gnomeFailed": "Tidak dapat menambahkan Domus ke Setelan Cepat: {reason}"
 }

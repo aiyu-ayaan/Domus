@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: ngoại tuyến",
   "settings.tray.title": "Hiển thị trong khay hệ thống",
   "settings.tray.hint": "Chất lượng không khí và máy lọc không khí trên thanh menu, thanh trên cùng hoặc vùng thông báo. Đóng cửa sổ thì Domus vẫn chạy ở đó.",
-  "settings.tray.noHost": "Màn hình này không có chỗ hiển thị biểu tượng khay. Trên GNOME, hãy cài và bật tiện ích AppIndicator rồi khởi động lại Domus."
+  "settings.tray.noHost": "Màn hình này không có chỗ hiển thị biểu tượng khay. Trên GNOME, hãy cài và bật tiện ích AppIndicator rồi khởi động lại Domus.",
+  "settings.tray.gnomeAdd": "Thêm vào Cài đặt nhanh",
+  "settings.tray.gnomeHint": "GNOME hiển thị ứng dụng trong Cài đặt nhanh qua một tiện ích mở rộng nhỏ. Domus sẽ cài nó cho bạn.",
+  "settings.tray.gnomeRestart": "Đã thêm. Đăng xuất rồi đăng nhập lại để thấy Domus trong Cài đặt nhanh.",
+  "settings.tray.gnomeOn": "Domus đã có trong Cài đặt nhanh.",
+  "settings.tray.gnomeFailed": "Không thể thêm Domus vào Cài đặt nhanh: {reason}"
 }

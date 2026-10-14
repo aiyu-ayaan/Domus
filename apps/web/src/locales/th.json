@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: ออฟไลน์",
   "settings.tray.title": "แสดงในถาดระบบ",
   "settings.tray.hint": "คุณภาพอากาศและเครื่องฟอกอากาศในแถบเมนู แถบด้านบน หรือพื้นที่แจ้งเตือน เมื่อปิดหน้าต่าง Domus จะยังทำงานอยู่ที่นั่น",
-  "settings.tray.noHost": "เดสก์ท็อปนี้ไม่มีที่แสดงไอคอนถาด บน GNOME ให้ติดตั้งและเปิดส่วนขยาย AppIndicator แล้วเริ่ม Domus ใหม่"
+  "settings.tray.noHost": "เดสก์ท็อปนี้ไม่มีที่แสดงไอคอนถาด บน GNOME ให้ติดตั้งและเปิดส่วนขยาย AppIndicator แล้วเริ่ม Domus ใหม่",
+  "settings.tray.gnomeAdd": "เพิ่มในการตั้งค่าด่วน",
+  "settings.tray.gnomeHint": "GNOME แสดงแอปในการตั้งค่าด่วนผ่านส่วนขยายเล็กๆ Domus จะติดตั้งให้คุณ",
+  "settings.tray.gnomeRestart": "เพิ่มแล้ว ออกจากระบบแล้วเข้าใหม่เพื่อดู Domus ในการตั้งค่าด่วน",
+  "settings.tray.gnomeOn": "Domus อยู่ในการตั้งค่าด่วนแล้ว",
+  "settings.tray.gnomeFailed": "เพิ่ม Domus ในการตั้งค่าด่วนไม่ได้: {reason}"
 }

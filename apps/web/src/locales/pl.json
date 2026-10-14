@@ -1187,5 +1187,10 @@
   "tray.deviceOffline": "{name}: offline",
   "settings.tray.title": "Pokaż w zasobniku systemowym",
   "settings.tray.hint": "Jakość powietrza i oczyszczacze na pasku menu, górnym pasku lub w obszarze powiadomień. Po zamknięciu okna Domus działa tam dalej.",
-  "settings.tray.noHost": "Ten pulpit nie ma gdzie pokazać ikon zasobnika. W GNOME zainstaluj i włącz rozszerzenie AppIndicator, a potem uruchom ponownie Domus."
+  "settings.tray.noHost": "Ten pulpit nie ma gdzie pokazać ikon zasobnika. W GNOME zainstaluj i włącz rozszerzenie AppIndicator, a potem uruchom ponownie Domus.",
+  "settings.tray.gnomeAdd": "Dodaj do Szybkich ustawień",
+  "settings.tray.gnomeHint": "GNOME pokazuje aplikacje w Szybkich ustawieniach przez małe rozszerzenie. Domus zainstaluje je za Ciebie.",
+  "settings.tray.gnomeRestart": "Dodano. Wyloguj się i zaloguj ponownie, aby zobaczyć Domus w Szybkich ustawieniach.",
+  "settings.tray.gnomeOn": "Domus jest w Szybkich ustawieniach.",
+  "settings.tray.gnomeFailed": "Nie udało się dodać Domus do Szybkich ustawień: {reason}"
 }

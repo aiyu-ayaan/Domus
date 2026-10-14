@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}：離線",
   "settings.tray.title": "在系統匣中顯示",
   "settings.tray.hint": "在選單列、頂端列或通知區域顯示空氣品質和空氣清淨機。關閉視窗後 Domus 會繼續在那裡執行。",
-  "settings.tray.noHost": "此桌面沒有顯示系統匣圖示的位置。在 GNOME 上，請安裝並啟用 AppIndicator 擴充功能，然後重新啟動 Domus。"
+  "settings.tray.noHost": "此桌面沒有顯示系統匣圖示的位置。在 GNOME 上，請安裝並啟用 AppIndicator 擴充功能，然後重新啟動 Domus。",
+  "settings.tray.gnomeAdd": "加入快速設定",
+  "settings.tray.gnomeHint": "GNOME 透過一個小型擴充功能在快速設定中顯示應用程式。Domus 會為你安裝。",
+  "settings.tray.gnomeRestart": "已加入。登出後重新登入，即可在快速設定中看到 Domus。",
+  "settings.tray.gnomeOn": "Domus 已在快速設定中。",
+  "settings.tray.gnomeFailed": "無法將 Domus 加入快速設定：{reason}"
 }

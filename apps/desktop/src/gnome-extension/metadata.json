@@ -1,0 +1,7 @@
+{
+  "uuid": "domus@aiyu.dev",
+  "name": "Domus",
+  "description": "Air quality and your air purifiers from the Domus desktop app in Quick Settings.",
+  "shell-version": ["45", "46", "47", "48", "49"],
+  "url": "https://github.com/aiyu-ayaan/Domus-Rust"
+}

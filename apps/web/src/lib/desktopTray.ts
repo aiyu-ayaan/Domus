@@ -18,6 +18,7 @@ export function useDesktopTray() {
   const worst = pm.length ? Math.round(Math.max(...pm)) : null
   // Native menus get plain text: no direction marks from formatNumber.
   const state = {
+    heading: t('air.airPurifiers'),
     title: worst != null ? `${worst} µg/m³` : '',
     summary: worst != null ? t('tray.summary', { value: worst, label: airQuality(worst)!.label }) : '',
     devices: devices

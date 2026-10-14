@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: çevrimdışı",
   "settings.tray.title": "Sistem tepsisinde göster",
   "settings.tray.hint": "Menü çubuğunda, üst çubukta veya bildirim alanında hava kalitesi ve hava temizleyicileriniz. Pencereyi kapatınca Domus orada çalışmaya devam eder.",
-  "settings.tray.noHost": "Bu masaüstünde tepsi simgelerini gösterecek bir yer yok. GNOME'da AppIndicator uzantısını kurup açın, sonra Domus'u yeniden başlatın."
+  "settings.tray.noHost": "Bu masaüstünde tepsi simgelerini gösterecek bir yer yok. GNOME'da AppIndicator uzantısını kurup açın, sonra Domus'u yeniden başlatın.",
+  "settings.tray.gnomeAdd": "Hızlı Ayarlar'a ekle",
+  "settings.tray.gnomeHint": "GNOME uygulamaları Hızlı Ayarlar'da küçük bir uzantıyla gösterir. Domus bunu sizin için kurar.",
+  "settings.tray.gnomeRestart": "Eklendi. Domus'u Hızlı Ayarlar'da görmek için oturumu kapatıp yeniden açın.",
+  "settings.tray.gnomeOn": "Domus Hızlı Ayarlar'da.",
+  "settings.tray.gnomeFailed": "Domus Hızlı Ayarlar'a eklenemedi: {reason}"
 }

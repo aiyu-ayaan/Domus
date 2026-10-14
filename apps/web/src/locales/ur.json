@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: آف لائن",
   "settings.tray.title": "سسٹم ٹرے میں دکھائیں",
   "settings.tray.hint": "مینو بار، ٹاپ بار یا اطلاعات کے حصے میں ہوا کا معیار اور آپ کے ایئر پیوریفائر۔ ونڈو بند کرنے پر بھی Domus وہاں چلتا رہتا ہے۔",
-  "settings.tray.noHost": "اس ڈیسک ٹاپ میں ٹرے آئیکن دکھانے کی جگہ نہیں ہے۔ GNOME پر AppIndicator ایکسٹینشن انسٹال کر کے آن کریں، پھر Domus دوبارہ شروع کریں۔"
+  "settings.tray.noHost": "اس ڈیسک ٹاپ میں ٹرے آئیکن دکھانے کی جگہ نہیں ہے۔ GNOME پر AppIndicator ایکسٹینشن انسٹال کر کے آن کریں، پھر Domus دوبارہ شروع کریں۔",
+  "settings.tray.gnomeAdd": "فوری ترتیبات میں شامل کریں",
+  "settings.tray.gnomeHint": "GNOME ایک چھوٹی ایکسٹینشن کے ذریعے ایپس کو فوری ترتیبات میں دکھاتا ہے۔ Domus اسے آپ کے لیے انسٹال کرتا ہے۔",
+  "settings.tray.gnomeRestart": "شامل ہو گیا۔ فوری ترتیبات میں Domus دیکھنے کے لیے لاگ آؤٹ کر کے دوبارہ لاگ ان کریں۔",
+  "settings.tray.gnomeOn": "Domus فوری ترتیبات میں ہے۔",
+  "settings.tray.gnomeFailed": "Domus کو فوری ترتیبات میں شامل نہیں کیا جا سکا: {reason}"
 }

@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: 오프라인",
   "settings.tray.title": "시스템 트레이에 표시",
   "settings.tray.hint": "메뉴 막대, 상단 막대 또는 알림 영역에 공기질과 공기청정기를 표시합니다. 창을 닫아도 Domus는 그곳에서 계속 실행됩니다.",
-  "settings.tray.noHost": "이 데스크톱에는 트레이 아이콘을 표시할 곳이 없습니다. GNOME에서는 AppIndicator 확장을 설치하고 켠 다음 Domus를 다시 시작하세요."
+  "settings.tray.noHost": "이 데스크톱에는 트레이 아이콘을 표시할 곳이 없습니다. GNOME에서는 AppIndicator 확장을 설치하고 켠 다음 Domus를 다시 시작하세요.",
+  "settings.tray.gnomeAdd": "빠른 설정에 추가",
+  "settings.tray.gnomeHint": "GNOME은 작은 확장을 통해 앱을 빠른 설정에 표시합니다. Domus가 대신 설치합니다.",
+  "settings.tray.gnomeRestart": "추가했습니다. 로그아웃했다가 다시 로그인하면 빠른 설정에 Domus가 보입니다.",
+  "settings.tray.gnomeOn": "Domus가 빠른 설정에 있습니다.",
+  "settings.tray.gnomeFailed": "Domus를 빠른 설정에 추가하지 못했습니다: {reason}"
 }

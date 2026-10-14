@@ -1159,5 +1159,10 @@
   "tray.deviceOffline": "{name}: offline",
   "settings.tray.title": "Im Infobereich anzeigen",
   "settings.tray.hint": "Luftqualität und deine Luftreiniger in der Menüleiste, der oberen Leiste oder im Infobereich. Wird das Fenster geschlossen, läuft Domus dort weiter.",
-  "settings.tray.noHost": "Dieser Desktop kann keine Infobereich-Symbole anzeigen. Unter GNOME die Erweiterung AppIndicator installieren und aktivieren, dann Domus neu starten."
+  "settings.tray.noHost": "Dieser Desktop kann keine Infobereich-Symbole anzeigen. Unter GNOME die Erweiterung AppIndicator installieren und aktivieren, dann Domus neu starten.",
+  "settings.tray.gnomeAdd": "Zu den Schnelleinstellungen hinzufügen",
+  "settings.tray.gnomeHint": "GNOME zeigt Apps in den Schnelleinstellungen über eine kleine Erweiterung. Domus installiert sie für dich.",
+  "settings.tray.gnomeRestart": "Hinzugefügt. Ab- und wieder anmelden, um Domus in den Schnelleinstellungen zu sehen.",
+  "settings.tray.gnomeOn": "Domus ist in den Schnelleinstellungen.",
+  "settings.tray.gnomeFailed": "Domus konnte nicht zu den Schnelleinstellungen hinzugefügt werden: {reason}"
 }
