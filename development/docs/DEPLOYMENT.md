@@ -193,6 +193,23 @@ flowchart TD
   (`html.desktop` in `apps/web/src/index.css`, `--titlebar` offsets everything pinned to the top) and
   Electron overlays the window buttons on its right end, coloured from the theme chosen in Settings.
 - **Change server**: Settings → Server addresses → Change server.
+- **Tray**: Settings → Server addresses → Show in the system tray (`config.tray`, off by default). The tray
+  menu shows the home's worst PM2.5 and a power checkbox per air purifier; the macOS menu bar also shows the
+  PM2.5 beside the icon (Electron has no such label on Linux, so there it is in the tooltip and the menu). The page builds the menu (`useDesktopTray`,
+  `apps/web/src/lib/desktopTray.ts`) and sends it with `tray:update`; a click comes back as `tray:toggle` and
+  is sent as an ordinary command, so a device that asks before switching shows its question in the window.
+  With the tray on, closing the window hides it and Quit in the menu ends the app; opening the app again
+  shows the window (single-instance lock, per flavor).
+
+  | System | Where | Click |
+  | --- | --- | --- |
+  | Windows | notification area | left: open the window, right: menu |
+  | macOS | menu bar, with the PM2.5 as text | menu |
+  | Linux (KDE, Cinnamon, XFCE, MATE, Budgie) | panel, through StatusNotifierItem | menu |
+  | Linux GNOME | top bar only with the AppIndicator extension (Ubuntu ships it) | menu |
+
+  Without a StatusNotifierWatcher on the session bus (plain GNOME) there is nowhere to show it: Settings says
+  so, and closing the window quits as before instead of hiding it.
 - **Development**: `DOMUS_URL=http://localhost:3000 pnpm dev:desktop` skips the connect page.
 
 ### Linux

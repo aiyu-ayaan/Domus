@@ -299,6 +299,16 @@ Design: `development/docs/ANDROID_APP.md` ("Wide screens", "Before sign-in on wi
 - [ ] Web and desktop: review the same screens at tablet widths
 - [ ] Re-record the baseline profile after the layout changes (`pnpm android:profile`)
 
+## Milestone 24: Kept history, device comparison and the desktop tray (2026-10-14)
+Design: `development/docs/ARCHITECTURE.md` ("History outlives the device", "Comparing devices"), `DEPLOYMENT.md` (Desktop app, Tray).
+- [x] Backend: removing a device keeps its readings; adding it again reuses its id (`removed_devices`, migration `0014`)
+- [x] Web: device picker on the Energy and Air quality charts, one line per device with a hover readout of each
+- [x] Desktop: tray / menu bar / top bar with PM2.5 and a power switch per purifier, opt-in in Settings, hint on GNOME without AppIndicator
+- [ ] Android: the same device comparison on Analytics
+- [ ] Show removed devices' history (pick them in the comparison, count them in the home's totals)
+- [ ] Tray: smart plugs' power, start hidden at login
+- [ ] Check the tray on Windows and macOS hardware
+
 ## Road to v1.0.0 (assessment 2026-10-12, to work through later)
 Order matters: each step unblocks the next. Suggested scope for 1.0: Android + web + Docker with Tuya, Tapo and Xiaomi; desktop, Hue, MQTT and Zigbee labelled beta.
 1. Release pipeline

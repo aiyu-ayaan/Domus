@@ -266,6 +266,30 @@ peaks added up per SQL group (1 or 15 minutes), then the highest group, so for a
 little high when devices peak at different moments. The clients draw it as a line chart next to
 the kWh bars (`EnergyChart` + `TrendChart` on the web, `LineChart` on Android).
 
+**History outlives the device.** `energy_metrics` and `air_metrics` have no foreign key to `devices`
+(migration `0014`), so removing a device keeps its readings. `DeviceRepository::delete` records the device's
+id in `removed_devices` under its integration and external id; adding the same device again (`adopt`,
+`add_manual`, auto-adopt) takes that id back (`IntegrationManager::device_id`), so its history, and any
+automation or scene that names it, carries on. A removed device's readings are left out of the home's
+totals until it is added again, and the retention job deletes them like any other old row. History removed
+before `0014` (by the old `ON DELETE CASCADE`) cannot be brought back.
+
+```mermaid
+flowchart LR
+    R["Remove device"] --> RD[("removed_devices<br/>integration + external id → old id")]
+    R -. "readings kept" .-> M[("energy_metrics / air_metrics")]
+    A["Add the same device<br/>(adopt, manual, auto-adopt)"] --> Q{"in removed_devices?"}
+    Q -- yes --> OLD["reuse the old id"] --> M
+    Q -- no --> NEW["new id"]
+```
+
+**Comparing devices.** On the web, the Energy and Air quality charts have a device picker (`DevicePicker`)
+above them. With nothing picked the chart is the home's combined history, as before. Each picked device is
+fetched on its own (`?device_id=` on `/energy/history` and `/air/history`) and drawn as its own line in
+`TrendChart` (`series`), told apart by a dash pattern rather than a colour; hovering shows every device's
+value for that bucket. Live mode compares the devices' current readings sampled every five seconds.
+Energy compares kWh per bucket (W while live); Air compares the selected reading.
+
 ### Notifications
 
 One shared inbox. `DELETE /notifications/{id}`, `DELETE /notifications` (all), and the read calls publish a
