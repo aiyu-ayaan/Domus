@@ -980,4 +980,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name}のフィルターを交換</string>
     <string name="code_error_left_on_range">つけっぱなし通知の待機時間は1分〜24時間です</string>
     <string name="analytics_standby">待機電力: %1$s · 月額 ≈ %2$s</string>
+    <string name="weather_title">屋外</string>
+    <string name="weather_clear">晴れ</string>
+    <string name="weather_partly_cloudy">晴れ時々曇り</string>
+    <string name="weather_overcast">曇り</string>
+    <string name="weather_fog">霧</string>
+    <string name="weather_drizzle">霧雨</string>
+    <string name="weather_rain">雨</string>
+    <string name="weather_snow">雪</string>
+    <string name="weather_storm">雷雨</string>
+    <string name="weather_reading_temperature">屋外の気温</string>
+    <string name="weather_reading_humidity">屋外の湿度</string>
+    <string name="weather_reading_pm25">屋外のPM2.5</string>
+    <string name="weather_reading_us_aqi">屋外の大気質指数（US AQI）</string>
+    <string name="editor_trigger_weather">屋外の天気</string>
+    <string name="editor_condition_weather">屋外の天気</string>
+    <string name="weather_humidity">湿度 %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">屋外のPM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">%1$sが%2$sを超えたとき</string>
+    <string name="editor_rule_weather_below">%1$sが%2$sを下回ったとき</string>
+    <string name="editor_rule_weather_is">%1$sが%2$sのとき</string>
+    <string name="runs_cond_weather">%1$sが条件を満たしませんでした</string>
+    <string name="code_error_unknown_weather_reading">不明な気象データです</string>
+    <string name="editor_field_reading">項目</string>
 </resources>

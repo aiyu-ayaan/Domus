@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">Replace the filter of {name}</string>
     <string name="code_error_left_on_range">A left-on alert can wait 1 minute to 24 hours</string>
     <string name="analytics_standby">Standby: %1$s · ≈ %2$s a month</string>
+    <string name="weather_title">Outside</string>
+    <string name="weather_clear">Clear</string>
+    <string name="weather_partly_cloudy">Partly cloudy</string>
+    <string name="weather_overcast">Overcast</string>
+    <string name="weather_fog">Fog</string>
+    <string name="weather_drizzle">Drizzle</string>
+    <string name="weather_rain">Rain</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_storm">Thunderstorm</string>
+    <string name="weather_reading_temperature">Outdoor temperature</string>
+    <string name="weather_reading_humidity">Outdoor humidity</string>
+    <string name="weather_reading_pm25">Outdoor PM2.5</string>
+    <string name="weather_reading_us_aqi">Outdoor air quality index (US AQI)</string>
+    <string name="editor_trigger_weather">Outdoor weather</string>
+    <string name="editor_condition_weather">Outdoor weather</string>
+    <string name="weather_humidity">Humidity %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">Outdoor PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">When %1$s rises above %2$s</string>
+    <string name="editor_rule_weather_below">When %1$s drops below %2$s</string>
+    <string name="editor_rule_weather_is">When %1$s is %2$s</string>
+    <string name="runs_cond_weather">%1$s was not as required</string>
+    <string name="code_error_unknown_weather_reading">Unknown weather reading</string>
+    <string name="editor_field_reading">Reading</string>
 </resources>

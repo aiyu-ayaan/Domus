@@ -980,4 +980,27 @@
     <string name="code_notification_filter_low_title" formatted="false">Thay bộ lọc của {name}</string>
     <string name="code_error_left_on_range">Cảnh báo có thể chờ từ 1 phút đến 24 giờ</string>
     <string name="analytics_standby">Chờ: %1$s · ≈ %2$s mỗi tháng</string>
+    <string name="weather_title">Bên ngoài</string>
+    <string name="weather_clear">Quang đãng</string>
+    <string name="weather_partly_cloudy">Có mây rải rác</string>
+    <string name="weather_overcast">U ám</string>
+    <string name="weather_fog">Sương mù</string>
+    <string name="weather_drizzle">Mưa phùn</string>
+    <string name="weather_rain">Mưa</string>
+    <string name="weather_snow">Tuyết</string>
+    <string name="weather_storm">Dông</string>
+    <string name="weather_reading_temperature">Nhiệt độ ngoài trời</string>
+    <string name="weather_reading_humidity">Độ ẩm ngoài trời</string>
+    <string name="weather_reading_pm25">PM2.5 ngoài trời</string>
+    <string name="weather_reading_us_aqi">Chỉ số chất lượng không khí ngoài trời (US AQI)</string>
+    <string name="editor_trigger_weather">Thời tiết ngoài trời</string>
+    <string name="editor_condition_weather">Thời tiết ngoài trời</string>
+    <string name="weather_humidity">Độ ẩm %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 ngoài trời %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">Khi %1$s vượt quá %2$s</string>
+    <string name="editor_rule_weather_below">Khi %1$s giảm dưới %2$s</string>
+    <string name="editor_rule_weather_is">Khi %1$s là %2$s</string>
+    <string name="runs_cond_weather">%1$s không đạt yêu cầu</string>
+    <string name="code_error_unknown_weather_reading">Chỉ số thời tiết không xác định</string>
+    <string name="editor_field_reading">Chỉ số</string>
 </resources>

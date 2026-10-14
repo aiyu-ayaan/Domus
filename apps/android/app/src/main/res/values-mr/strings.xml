@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} चा फिल्टर बदला</string>
     <string name="code_error_left_on_range">चालू राहण्याची सूचना 1 मिनिट ते 24 तास थांबू शकते</string>
     <string name="analytics_standby">स्टँडबाय: %1$s · दरमहा ≈ %2$s</string>
+    <string name="weather_title">बाहेर</string>
+    <string name="weather_clear">निरभ्र</string>
+    <string name="weather_partly_cloudy">अंशतः ढगाळ</string>
+    <string name="weather_overcast">ढगाळ</string>
+    <string name="weather_fog">धुके</string>
+    <string name="weather_drizzle">रिमझिम</string>
+    <string name="weather_rain">पाऊस</string>
+    <string name="weather_snow">हिमवर्षाव</string>
+    <string name="weather_storm">वादळी पाऊस</string>
+    <string name="weather_reading_temperature">बाहेरील तापमान</string>
+    <string name="weather_reading_humidity">बाहेरील आर्द्रता</string>
+    <string name="weather_reading_pm25">बाहेरील PM2.5</string>
+    <string name="weather_reading_us_aqi">बाहेरील हवा गुणवत्ता निर्देशांक (US AQI)</string>
+    <string name="editor_trigger_weather">बाहेरील हवामान</string>
+    <string name="editor_condition_weather">बाहेरील हवामान</string>
+    <string name="weather_humidity">आर्द्रता %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">बाहेरील PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">जेव्हा %1$s %2$s पेक्षा वर जाते</string>
+    <string name="editor_rule_weather_below">जेव्हा %1$s %2$s पेक्षा खाली जाते</string>
+    <string name="editor_rule_weather_is">जेव्हा %1$s %2$s असते</string>
+    <string name="runs_cond_weather">%1$s आवश्यकतेनुसार नव्हते</string>
+    <string name="code_error_unknown_weather_reading">अज्ञात हवामान वाचन</string>
+    <string name="editor_field_reading">वाचन</string>
 </resources>

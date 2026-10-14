@@ -980,4 +980,27 @@
     <string name="code_notification_filter_low_title" formatted="false">更换 {name} 的滤网</string>
     <string name="code_error_left_on_range">开启提醒可等待 1 分钟至 24 小时</string>
     <string name="analytics_standby">待机: %1$s · 每月约 %2$s</string>
+    <string name="weather_title">室外</string>
+    <string name="weather_clear">晴</string>
+    <string name="weather_partly_cloudy">多云</string>
+    <string name="weather_overcast">阴</string>
+    <string name="weather_fog">雾</string>
+    <string name="weather_drizzle">毛毛雨</string>
+    <string name="weather_rain">雨</string>
+    <string name="weather_snow">雪</string>
+    <string name="weather_storm">雷暴</string>
+    <string name="weather_reading_temperature">室外温度</string>
+    <string name="weather_reading_humidity">室外湿度</string>
+    <string name="weather_reading_pm25">室外 PM2.5</string>
+    <string name="weather_reading_us_aqi">室外空气质量指数（US AQI）</string>
+    <string name="editor_trigger_weather">室外天气</string>
+    <string name="editor_condition_weather">室外天气</string>
+    <string name="weather_humidity">湿度 %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">室外 PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">当%1$s升至 %2$s 以上时</string>
+    <string name="editor_rule_weather_below">当%1$s降至 %2$s 以下时</string>
+    <string name="editor_rule_weather_is">当%1$s为 %2$s 时</string>
+    <string name="runs_cond_weather">%1$s不符合条件</string>
+    <string name="code_error_unknown_weather_reading">未知的天气读数</string>
+    <string name="editor_field_reading">读数</string>
 </resources>

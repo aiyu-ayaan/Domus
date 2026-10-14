@@ -74,6 +74,14 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24H
             ?: stringResource(R.string.editor_rule_power_above, device, rule.text("watts").orEmpty())
         "device_offline" -> stringResource(R.string.editor_rule_device_offline, device)
         "device_discovered" -> stringResource(R.string.editor_rule_device_discovered)
+        "weather" -> {
+            val label = WeatherReadings.firstOrNull { it.first == rule.text("property") }?.let { stringResource(it.second) } ?: rule.text("property").orEmpty()
+            when {
+                rule["above"] != null -> stringResource(R.string.editor_rule_weather_above, label, rule.text("above").orEmpty())
+                rule["below"] != null -> stringResource(R.string.editor_rule_weather_below, label, rule.text("below").orEmpty())
+                else -> stringResource(R.string.editor_rule_weather_is, label, rule.text("equals").orEmpty())
+            }
+        }
         "time_between" -> {
             val start = rule.text("start")?.let { formatClockTime(it, is24Hour) }.orEmpty()
             val end = rule.text("end")?.let { formatClockTime(it, is24Hour) }.orEmpty()
@@ -99,8 +107,8 @@ fun describe(rule: JsonObject, devices: List<Device>, scenes: List<Scene>, is24H
     }
 }
 
-private val TriggerKinds = listOf("time" to R.string.editor_trigger_time, "sun" to R.string.editor_trigger_sun, "device_state" to R.string.editor_trigger_device_state, "power_above" to R.string.editor_trigger_power, "device_offline" to R.string.editor_trigger_offline, "device_discovered" to R.string.editor_trigger_discovered)
-private val ConditionKinds = listOf("device_state" to R.string.editor_condition_device_state, "time_between" to R.string.editor_condition_time_between)
+private val TriggerKinds = listOf("time" to R.string.editor_trigger_time, "sun" to R.string.editor_trigger_sun, "device_state" to R.string.editor_trigger_device_state, "power_above" to R.string.editor_trigger_power, "device_offline" to R.string.editor_trigger_offline, "device_discovered" to R.string.editor_trigger_discovered, "weather" to R.string.editor_trigger_weather)
+private val ConditionKinds = listOf("device_state" to R.string.editor_condition_device_state, "time_between" to R.string.editor_condition_time_between, "weather" to R.string.editor_condition_weather)
 private val ActionKinds = listOf("device_command" to R.string.editor_action_device, "scene" to R.string.editor_action_scene, "notify" to R.string.editor_action_notify, "delay" to R.string.editor_action_delay)
 
 /** Builds one rule of any of [kinds]. One dialog for triggers, conditions and actions: they share most fields. */
@@ -119,6 +127,8 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
     var dim by remember { mutableStateOf(false) }
     var brightness by remember { mutableFloatStateOf(50f) }
     var heading by remember { mutableStateOf("") }
+    // weather: which outdoor reading, compared with [above] and [number]
+    var reading by remember { mutableStateOf("pm25") }
     // power_above: how long it must stay above, empty = right away
     var lasting by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
@@ -132,7 +142,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
     fun time(s: TimePickerState) = "%02d:%02d".format(s.hour, s.minute)
 
     val needsDevice = kind in setOf("device_state", "power_above", "device_offline", "device_command")
-    val needsNumber = kind == "power_above" || kind == "delay" || (kind == "device_state" && state !in setOf("on", "off"))
+    val needsNumber = kind == "power_above" || kind == "delay" || kind == "weather" || (kind == "device_state" && state !in setOf("on", "off"))
     val valid = (!needsDevice || deviceId != null) && (!needsNumber || number.toDoubleOrNull() != null) && when (kind) {
         "scene" -> sceneId != null
         "notify" -> heading.isNotBlank()
@@ -157,6 +167,7 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
             }
             "power_above" -> { put("watts", number.toDouble()); lasting.toIntOrNull()?.let { put("for_minutes", it) } }
             "time_between" -> { put("start", time(start)); put("end", time(end)) }
+            "weather" -> { put("property", reading); put(if (above) "above" else "below", number.toDouble()) }
             "device_command" -> put("command", buildJsonObject { power?.let { put("is_on", it) }; if (dim) put("brightness", brightness.roundToInt()) })
             "scene" -> put("scene_id", sceneId)
             "notify" -> { put("title", heading.trim()); put("message", message.trim()) }
@@ -191,6 +202,11 @@ private fun AddRuleDialog(title: String, kinds: List<Pair<String, Int>>, devices
                 Field(lasting, { lasting = it }, stringResource(R.string.editor_field_for_minutes), keyboard = KeyboardType.Number, supporting = stringResource(R.string.editor_for_minutes_supporting))
             }
             "time_between" -> { Text(stringResource(R.string.editor_time_from)); TimeInput(start); Text(stringResource(R.string.editor_time_until)); TimeInput(end) }
+            "weather" -> {
+                Picker(stringResource(R.string.editor_field_reading), WeatherReadings.map { it.first to stringResource(it.second) }, reading, { reading = it })
+                Choice(listOf(true to stringResource(R.string.editor_compare_above), false to stringResource(R.string.editor_compare_below)), above, { above = it })
+                Field(number, { number = it }, stringResource(R.string.editor_field_value), keyboard = KeyboardType.Decimal)
+            }
             "device_command" -> {
                 Choice(listOf<Pair<Boolean?, String>>(true to stringResource(R.string.editor_power_turn_on), false to stringResource(R.string.editor_power_turn_off), null to stringResource(R.string.editor_power_leave)), power, { power = it })
                 Row(verticalAlignment = Alignment.CenterVertically) {

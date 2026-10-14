@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -142,6 +143,9 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun setLeftOnAlert(id: String, minutes: Int?) =
         call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("left_on_alert_minutes", minutes) }.toString())
     suspend fun refresh(id: String) = call("POST", "/devices/$id/refresh", Device.serializer())
+    /** Null without a home location or before the server's first fetch. */
+    suspend fun weather() = call("GET", "/weather", Weather.serializer().nullable)
+    internal fun decodeWeather(element: JsonElement) = json.decodeFromJsonElement(Weather.serializer(), element)
     suspend fun logbook(id: String, limit: Int) = call("GET", "/devices/$id/logbook?limit=$limit", ListSerializer(LogEntry.serializer()))
 
     /** A write whose answer is not needed (or is read loosely). */

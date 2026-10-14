@@ -996,4 +996,27 @@
     <string name="code_notification_filter_low_title" formatted="false">Troque o filtro de {name}</string>
     <string name="code_error_left_on_range">Um aviso de ligado pode esperar de 1 minuto a 24 horas</string>
     <string name="analytics_standby">Em espera: %1$s · ≈ %2$s por mês</string>
+    <string name="weather_title">Lá fora</string>
+    <string name="weather_clear">Céu limpo</string>
+    <string name="weather_partly_cloudy">Parcialmente nublado</string>
+    <string name="weather_overcast">Nublado</string>
+    <string name="weather_fog">Neblina</string>
+    <string name="weather_drizzle">Garoa</string>
+    <string name="weather_rain">Chuva</string>
+    <string name="weather_snow">Neve</string>
+    <string name="weather_storm">Tempestade</string>
+    <string name="weather_reading_temperature">Temperatura externa</string>
+    <string name="weather_reading_humidity">Umidade externa</string>
+    <string name="weather_reading_pm25">PM2.5 externo</string>
+    <string name="weather_reading_us_aqi">Índice de qualidade do ar externo (US AQI)</string>
+    <string name="editor_trigger_weather">Clima externo</string>
+    <string name="editor_condition_weather">Clima externo</string>
+    <string name="weather_humidity">Umidade %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 externo %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">Quando %1$s passar de %2$s</string>
+    <string name="editor_rule_weather_below">Quando %1$s ficar abaixo de %2$s</string>
+    <string name="editor_rule_weather_is">Quando %1$s for %2$s</string>
+    <string name="runs_cond_weather">%1$s não estava como exigido</string>
+    <string name="code_error_unknown_weather_reading">Leitura de clima desconhecida</string>
+    <string name="editor_field_reading">Leitura</string>
 </resources>

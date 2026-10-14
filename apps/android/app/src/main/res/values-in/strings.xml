@@ -980,4 +980,27 @@
     <string name="code_notification_filter_low_title" formatted="false">Ganti filter {name}</string>
     <string name="code_error_left_on_range">Peringatan menyala bisa menunggu 1 menit hingga 24 jam</string>
     <string name="analytics_standby">Siaga: %1$s · ≈ %2$s per bulan</string>
+    <string name="weather_title">Di luar</string>
+    <string name="weather_clear">Cerah</string>
+    <string name="weather_partly_cloudy">Berawan sebagian</string>
+    <string name="weather_overcast">Mendung</string>
+    <string name="weather_fog">Kabut</string>
+    <string name="weather_drizzle">Gerimis</string>
+    <string name="weather_rain">Hujan</string>
+    <string name="weather_snow">Salju</string>
+    <string name="weather_storm">Badai petir</string>
+    <string name="weather_reading_temperature">Suhu luar</string>
+    <string name="weather_reading_humidity">Kelembapan luar</string>
+    <string name="weather_reading_pm25">PM2.5 luar</string>
+    <string name="weather_reading_us_aqi">Indeks kualitas udara luar (US AQI)</string>
+    <string name="editor_trigger_weather">Cuaca luar</string>
+    <string name="editor_condition_weather">Cuaca luar</string>
+    <string name="weather_humidity">Kelembapan %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 luar %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">Saat %1$s naik di atas %2$s</string>
+    <string name="editor_rule_weather_below">Saat %1$s turun di bawah %2$s</string>
+    <string name="editor_rule_weather_is">Saat %1$s bernilai %2$s</string>
+    <string name="runs_cond_weather">%1$s tidak sesuai syarat</string>
+    <string name="code_error_unknown_weather_reading">Bacaan cuaca tidak dikenal</string>
+    <string name="editor_field_reading">Bacaan</string>
 </resources>

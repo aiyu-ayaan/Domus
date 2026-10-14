@@ -1004,4 +1004,27 @@
     <string name="code_notification_filter_low_title" formatted="false">Замените фильтр: {name}</string>
     <string name="code_error_left_on_range">Предупреждение может ждать от 1 минуты до 24 часов</string>
     <string name="analytics_standby">Режим ожидания: %1$s · ≈ %2$s в месяц</string>
+    <string name="weather_title">На улице</string>
+    <string name="weather_clear">Ясно</string>
+    <string name="weather_partly_cloudy">Переменная облачность</string>
+    <string name="weather_overcast">Пасмурно</string>
+    <string name="weather_fog">Туман</string>
+    <string name="weather_drizzle">Морось</string>
+    <string name="weather_rain">Дождь</string>
+    <string name="weather_snow">Снег</string>
+    <string name="weather_storm">Гроза</string>
+    <string name="weather_reading_temperature">Температура на улице</string>
+    <string name="weather_reading_humidity">Влажность на улице</string>
+    <string name="weather_reading_pm25">PM2.5 на улице</string>
+    <string name="weather_reading_us_aqi">Индекс качества воздуха на улице (US AQI)</string>
+    <string name="editor_trigger_weather">Погода на улице</string>
+    <string name="editor_condition_weather">Погода на улице</string>
+    <string name="weather_humidity">Влажность %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 на улице %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">Когда %1$s поднимается выше %2$s</string>
+    <string name="editor_rule_weather_below">Когда %1$s опускается ниже %2$s</string>
+    <string name="editor_rule_weather_is">Когда %1$s равно %2$s</string>
+    <string name="runs_cond_weather">%1$s не соответствовал(а) условию</string>
+    <string name="code_error_unknown_weather_reading">Неизвестный погодный показатель</string>
+    <string name="editor_field_reading">Показатель</string>
 </resources>

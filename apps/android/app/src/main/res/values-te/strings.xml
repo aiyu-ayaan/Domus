@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} ఫిల్టర్‌ను మార్చండి</string>
     <string name="code_error_left_on_range">ఆన్ హెచ్చరిక 1 నిమిషం నుండి 24 గంటల వరకు వేచి ఉండగలదు</string>
     <string name="analytics_standby">స్టాండ్‌బై: %1$s · నెలకు ≈ %2$s</string>
+    <string name="weather_title">బయట</string>
+    <string name="weather_clear">నిర్మలం</string>
+    <string name="weather_partly_cloudy">పాక్షిక మేఘావృతం</string>
+    <string name="weather_overcast">మేఘావృతం</string>
+    <string name="weather_fog">పొగమంచు</string>
+    <string name="weather_drizzle">జల్లు</string>
+    <string name="weather_rain">వర్షం</string>
+    <string name="weather_snow">మంచు</string>
+    <string name="weather_storm">ఉరుములతో వర్షం</string>
+    <string name="weather_reading_temperature">బయటి ఉష్ణోగ్రత</string>
+    <string name="weather_reading_humidity">బయటి తేమ</string>
+    <string name="weather_reading_pm25">బయటి PM2.5</string>
+    <string name="weather_reading_us_aqi">బయటి గాలి నాణ్యత సూచిక (US AQI)</string>
+    <string name="editor_trigger_weather">బయటి వాతావరణం</string>
+    <string name="editor_condition_weather">బయటి వాతావరణం</string>
+    <string name="weather_humidity">తేమ %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">బయటి PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">%1$s %2$s కంటే పెరిగినప్పుడు</string>
+    <string name="editor_rule_weather_below">%1$s %2$s కంటే తగ్గినప్పుడు</string>
+    <string name="editor_rule_weather_is">%1$s %2$s అయినప్పుడు</string>
+    <string name="runs_cond_weather">%1$s అవసరమైనట్లు లేదు</string>
+    <string name="code_error_unknown_weather_reading">తెలియని వాతావరణ రీడింగ్</string>
+    <string name="editor_field_reading">రీడింగ్</string>
 </resources>

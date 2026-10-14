@@ -183,6 +183,19 @@ data class LightPreset(
 )
 
 /** Moods suit every light; a light can play the effects listed in its `options["effect"]`. */
+/** Outdoor weather and air at the home's location (Open-Meteo). */
+@Serializable
+data class Weather(
+    val temperature: Double? = null,
+    val humidity: Double? = null,
+    /** WMO weather code. */
+    @SerialName("weather_code") val weatherCode: Int? = null,
+    @SerialName("is_day") val isDay: Boolean? = null,
+    val pm25: Double? = null,
+    @SerialName("us_aqi") val usAqi: Double? = null,
+    @SerialName("fetched_at") val fetchedAt: String = "",
+)
+
 /** Who changed a device: `user` (with the app it came from), `automation` or `screen_sync`. None means on the device itself. */
 @Serializable
 data class LogActor(val kind: String, val id: String? = null, val name: String? = null, val client: String? = null)

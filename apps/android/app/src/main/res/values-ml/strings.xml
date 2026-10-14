@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} ന്റെ ഫിൽട്ടർ മാറ്റുക</string>
     <string name="code_error_left_on_range">ഓൺ അലേർട്ടിന് 1 മിനിറ്റ് മുതൽ 24 മണിക്കൂർ വരെ കാത്തിരിക്കാം</string>
     <string name="analytics_standby">സ്റ്റാൻഡ്‌ബൈ: %1$s · മാസം ≈ %2$s</string>
+    <string name="weather_title">പുറത്ത്</string>
+    <string name="weather_clear">തെളിഞ്ഞ</string>
+    <string name="weather_partly_cloudy">ഭാഗികമായി മേഘാവൃതം</string>
+    <string name="weather_overcast">മേഘാവൃതം</string>
+    <string name="weather_fog">മൂടൽമഞ്ഞ്</string>
+    <string name="weather_drizzle">ചാറ്റൽമഴ</string>
+    <string name="weather_rain">മഴ</string>
+    <string name="weather_snow">മഞ്ഞുവീഴ്ച</string>
+    <string name="weather_storm">ഇടിമിന്നൽ</string>
+    <string name="weather_reading_temperature">പുറത്തെ താപനില</string>
+    <string name="weather_reading_humidity">പുറത്തെ ഈർപ്പം</string>
+    <string name="weather_reading_pm25">പുറത്തെ PM2.5</string>
+    <string name="weather_reading_us_aqi">പുറത്തെ വായു ഗുണനിലവാര സൂചിക (US AQI)</string>
+    <string name="editor_trigger_weather">പുറത്തെ കാലാവസ്ഥ</string>
+    <string name="editor_condition_weather">പുറത്തെ കാലാവസ്ഥ</string>
+    <string name="weather_humidity">ഈർപ്പം %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">പുറത്തെ PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">%1$s %2$s-ന് മുകളിൽ ഉയരുമ്പോൾ</string>
+    <string name="editor_rule_weather_below">%1$s %2$s-ന് താഴെ ആകുമ്പോൾ</string>
+    <string name="editor_rule_weather_is">%1$s %2$s ആകുമ്പോൾ</string>
+    <string name="runs_cond_weather">%1$s ആവശ്യമായ നിലയിലായിരുന്നില്ല</string>
+    <string name="code_error_unknown_weather_reading">അജ്ഞാത കാലാവസ്ഥാ റീഡിംഗ്</string>
+    <string name="editor_field_reading">റീഡിംഗ്</string>
 </resources>

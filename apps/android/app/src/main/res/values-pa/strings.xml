@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} ਦਾ ਫਿਲਟਰ ਬਦਲੋ</string>
     <string name="code_error_left_on_range">ਚਾਲੂ ਰਹਿਣ ਦੀ ਸੂਚਨਾ 1 ਮਿੰਟ ਤੋਂ 24 ਘੰਟੇ ਤੱਕ ਉਡੀਕ ਕਰ ਸਕਦੀ ਹੈ</string>
     <string name="analytics_standby">ਸਟੈਂਡਬਾਈ: %1$s · ਮਹੀਨੇ ਦਾ ≈ %2$s</string>
+    <string name="weather_title">ਬਾਹਰ</string>
+    <string name="weather_clear">ਸਾਫ਼</string>
+    <string name="weather_partly_cloudy">ਕੁਝ ਬੱਦਲ</string>
+    <string name="weather_overcast">ਬੱਦਲਵਾਈ</string>
+    <string name="weather_fog">ਧੁੰਦ</string>
+    <string name="weather_drizzle">ਬੂੰਦਾਬਾਂਦੀ</string>
+    <string name="weather_rain">ਮੀਂਹ</string>
+    <string name="weather_snow">ਬਰਫ਼</string>
+    <string name="weather_storm">ਤੂਫ਼ਾਨ</string>
+    <string name="weather_reading_temperature">ਬਾਹਰ ਦਾ ਤਾਪਮਾਨ</string>
+    <string name="weather_reading_humidity">ਬਾਹਰ ਦੀ ਨਮੀ</string>
+    <string name="weather_reading_pm25">ਬਾਹਰ ਦਾ PM2.5</string>
+    <string name="weather_reading_us_aqi">ਬਾਹਰ ਦਾ ਹਵਾ ਗੁਣਵੱਤਾ ਸੂਚਕ (US AQI)</string>
+    <string name="editor_trigger_weather">ਬਾਹਰ ਦਾ ਮੌਸਮ</string>
+    <string name="editor_condition_weather">ਬਾਹਰ ਦਾ ਮੌਸਮ</string>
+    <string name="weather_humidity">ਨਮੀ %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">ਬਾਹਰ ਦਾ PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">ਜਦੋਂ %1$s %2$s ਤੋਂ ਉੱਪਰ ਜਾਵੇ</string>
+    <string name="editor_rule_weather_below">ਜਦੋਂ %1$s %2$s ਤੋਂ ਹੇਠਾਂ ਜਾਵੇ</string>
+    <string name="editor_rule_weather_is">ਜਦੋਂ %1$s %2$s ਹੋਵੇ</string>
+    <string name="runs_cond_weather">%1$s ਲੋੜ ਮੁਤਾਬਕ ਨਹੀਂ ਸੀ</string>
+    <string name="code_error_unknown_weather_reading">ਅਣਜਾਣ ਮੌਸਮ ਰੀਡਿੰਗ</string>
+    <string name="editor_field_reading">ਰੀਡਿੰਗ</string>
 </resources>

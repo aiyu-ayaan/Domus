@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} filtresini değiştirin</string>
     <string name="code_error_left_on_range">Açık kalma uyarısı 1 dakika ile 24 saat arasında bekleyebilir</string>
     <string name="analytics_standby">Bekleme: %1$s · ayda ≈ %2$s</string>
+    <string name="weather_title">Dışarısı</string>
+    <string name="weather_clear">Açık</string>
+    <string name="weather_partly_cloudy">Parçalı bulutlu</string>
+    <string name="weather_overcast">Kapalı</string>
+    <string name="weather_fog">Sis</string>
+    <string name="weather_drizzle">Çisenti</string>
+    <string name="weather_rain">Yağmur</string>
+    <string name="weather_snow">Kar</string>
+    <string name="weather_storm">Fırtına</string>
+    <string name="weather_reading_temperature">Dış sıcaklık</string>
+    <string name="weather_reading_humidity">Dış nem</string>
+    <string name="weather_reading_pm25">Dış ortam PM2.5</string>
+    <string name="weather_reading_us_aqi">Dış hava kalitesi endeksi (US AQI)</string>
+    <string name="editor_trigger_weather">Dış hava</string>
+    <string name="editor_condition_weather">Dış hava</string>
+    <string name="weather_humidity">Nem %%%1$d</string>
+    <string name="weather_outdoor_pm25_value">Dış ortam PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">%1$s %2$s üzerine çıktığında</string>
+    <string name="editor_rule_weather_below">%1$s %2$s altına düştüğünde</string>
+    <string name="editor_rule_weather_is">%1$s %2$s olduğunda</string>
+    <string name="runs_cond_weather">%1$s gerekeni karşılamadı</string>
+    <string name="code_error_unknown_weather_reading">Bilinmeyen hava ölçümü</string>
+    <string name="editor_field_reading">Ölçüm</string>
 </resources>

@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} નું ફિલ્ટર બદલો</string>
     <string name="code_error_left_on_range">ચાલુ રહેવાની ચેતવણી 1 મિનિટથી 24 કલાક સુધી રાહ જોઈ શકે છે</string>
     <string name="analytics_standby">સ્ટેન્ડબાય: %1$s · મહિને ≈ %2$s</string>
+    <string name="weather_title">બહાર</string>
+    <string name="weather_clear">સ્વચ્છ</string>
+    <string name="weather_partly_cloudy">આંશિક વાદળછાયું</string>
+    <string name="weather_overcast">વાદળછાયું</string>
+    <string name="weather_fog">ધુમ્મસ</string>
+    <string name="weather_drizzle">ઝરમર</string>
+    <string name="weather_rain">વરસાદ</string>
+    <string name="weather_snow">હિમવર્ષા</string>
+    <string name="weather_storm">વાવાઝોડું</string>
+    <string name="weather_reading_temperature">બહારનું તાપમાન</string>
+    <string name="weather_reading_humidity">બહારનો ભેજ</string>
+    <string name="weather_reading_pm25">બહારનું PM2.5</string>
+    <string name="weather_reading_us_aqi">બહારની હવાની ગુણવત્તા સૂચકાંક (US AQI)</string>
+    <string name="editor_trigger_weather">બહારનું હવામાન</string>
+    <string name="editor_condition_weather">બહારનું હવામાન</string>
+    <string name="weather_humidity">ભેજ %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">બહારનું PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">જ્યારે %1$s %2$s થી ઉપર જાય</string>
+    <string name="editor_rule_weather_below">જ્યારે %1$s %2$s થી નીચે જાય</string>
+    <string name="editor_rule_weather_is">જ્યારે %1$s %2$s હોય</string>
+    <string name="runs_cond_weather">%1$s જરૂર મુજબ ન હતું</string>
+    <string name="code_error_unknown_weather_reading">અજાણ્યું હવામાન રીડિંગ</string>
+    <string name="editor_field_reading">રીડિંગ</string>
 </resources>

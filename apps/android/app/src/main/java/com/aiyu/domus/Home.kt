@@ -179,6 +179,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
     val devices by repository.devices.collectAsStateWithLifecycle()
     val scenes by repository.scenes.collectAsStateWithLifecycle()
     val energy by repository.energy.collectAsStateWithLifecycle()
+    val weather by repository.weather.collectAsStateWithLifecycle()
     val loading by repository.loading.collectAsStateWithLifecycle()
     val live by repository.live.collectAsStateWithLifecycle()
     val c = MaterialTheme.colorScheme
@@ -226,6 +227,7 @@ fun HomeScreen(user: User, onOpenDevice: (String) -> Unit, onShowDevices: () -> 
                     Icons.Rounded.Air, MaterialShapes.Flower, c.tertiaryContainer, c.onTertiaryContainer, Modifier.fillMaxWidth().enterStaggered(1),
                 )
             }
+            weather?.let { OutdoorCard(it, Modifier.fillMaxWidth().enterStaggered(1)) }
         }
 
         val quickScenes: @Composable ColumnScope.() -> Unit = {

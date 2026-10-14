@@ -1020,4 +1020,27 @@
     <string name="code_notification_filter_low_title" formatted="false">استبدل فلتر {name}</string>
     <string name="code_error_left_on_range">يمكن لتنبيه التشغيل أن ينتظر من دقيقة إلى 24 ساعة</string>
     <string name="analytics_standby">الاستعداد: %1$s · ≈ %2$s شهريًا</string>
+    <string name="weather_title">في الخارج</string>
+    <string name="weather_clear">صافٍ</string>
+    <string name="weather_partly_cloudy">غائم جزئيًا</string>
+    <string name="weather_overcast">غائم</string>
+    <string name="weather_fog">ضباب</string>
+    <string name="weather_drizzle">رذاذ</string>
+    <string name="weather_rain">مطر</string>
+    <string name="weather_snow">ثلج</string>
+    <string name="weather_storm">عاصفة رعدية</string>
+    <string name="weather_reading_temperature">درجة الحرارة في الخارج</string>
+    <string name="weather_reading_humidity">الرطوبة في الخارج</string>
+    <string name="weather_reading_pm25">PM2.5 في الخارج</string>
+    <string name="weather_reading_us_aqi">مؤشر جودة الهواء في الخارج (US AQI)</string>
+    <string name="editor_trigger_weather">الطقس في الخارج</string>
+    <string name="editor_condition_weather">الطقس في الخارج</string>
+    <string name="weather_humidity">الرطوبة %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 في الخارج %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">عندما يرتفع %1$s فوق %2$s</string>
+    <string name="editor_rule_weather_below">عندما ينخفض %1$s تحت %2$s</string>
+    <string name="editor_rule_weather_is">عندما يكون %1$s %2$s</string>
+    <string name="runs_cond_weather">لم يكن %1$s كما هو مطلوب</string>
+    <string name="code_error_unknown_weather_reading">قراءة طقس غير معروفة</string>
+    <string name="editor_field_reading">القراءة</string>
 </resources>

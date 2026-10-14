@@ -980,4 +980,27 @@
     <string name="code_notification_filter_low_title" formatted="false">เปลี่ยนไส้กรองของ {name}</string>
     <string name="code_error_left_on_range">การแจ้งเตือนรอได้ 1 นาทีถึง 24 ชั่วโมง</string>
     <string name="analytics_standby">สแตนด์บาย: %1$s · ≈ %2$s ต่อเดือน</string>
+    <string name="weather_title">ภายนอก</string>
+    <string name="weather_clear">ท้องฟ้าแจ่มใส</string>
+    <string name="weather_partly_cloudy">มีเมฆบางส่วน</string>
+    <string name="weather_overcast">เมฆมาก</string>
+    <string name="weather_fog">หมอก</string>
+    <string name="weather_drizzle">ฝนปรอย</string>
+    <string name="weather_rain">ฝนตก</string>
+    <string name="weather_snow">หิมะ</string>
+    <string name="weather_storm">พายุฝนฟ้าคะนอง</string>
+    <string name="weather_reading_temperature">อุณหภูมิภายนอก</string>
+    <string name="weather_reading_humidity">ความชื้นภายนอก</string>
+    <string name="weather_reading_pm25">PM2.5 ภายนอก</string>
+    <string name="weather_reading_us_aqi">ดัชนีคุณภาพอากาศภายนอก (US AQI)</string>
+    <string name="editor_trigger_weather">สภาพอากาศภายนอก</string>
+    <string name="editor_condition_weather">สภาพอากาศภายนอก</string>
+    <string name="weather_humidity">ความชื้น %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">PM2.5 ภายนอก %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">เมื่อ%1$sสูงกว่า %2$s</string>
+    <string name="editor_rule_weather_below">เมื่อ%1$sต่ำกว่า %2$s</string>
+    <string name="editor_rule_weather_is">เมื่อ%1$sเท่ากับ %2$s</string>
+    <string name="runs_cond_weather">%1$sไม่ตรงตามเงื่อนไข</string>
+    <string name="code_error_unknown_weather_reading">ค่าสภาพอากาศที่ไม่รู้จัก</string>
+    <string name="editor_field_reading">ค่าที่วัด</string>
 </resources>

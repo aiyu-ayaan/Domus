@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} ನ ಫಿಲ್ಟರ್ ಬದಲಿಸಿ</string>
     <string name="code_error_left_on_range">ಆನ್ ಎಚ್ಚರಿಕೆ 1 ನಿಮಿಷದಿಂದ 24 ಗಂಟೆಗಳವರೆಗೆ ಕಾಯಬಹುದು</string>
     <string name="analytics_standby">ಸ್ಟ್ಯಾಂಡ್‌ಬೈ: %1$s · ತಿಂಗಳಿಗೆ ≈ %2$s</string>
+    <string name="weather_title">ಹೊರಗೆ</string>
+    <string name="weather_clear">ಸ್ಪಷ್ಟ</string>
+    <string name="weather_partly_cloudy">ಭಾಗಶಃ ಮೋಡ</string>
+    <string name="weather_overcast">ಮೋಡ ಕವಿದ</string>
+    <string name="weather_fog">ಮಂಜು</string>
+    <string name="weather_drizzle">ತುಂತುರು ಮಳೆ</string>
+    <string name="weather_rain">ಮಳೆ</string>
+    <string name="weather_snow">ಹಿಮ</string>
+    <string name="weather_storm">ಗುಡುಗು ಸಹಿತ ಮಳೆ</string>
+    <string name="weather_reading_temperature">ಹೊರಗಿನ ತಾಪಮಾನ</string>
+    <string name="weather_reading_humidity">ಹೊರಗಿನ ತೇವಾಂಶ</string>
+    <string name="weather_reading_pm25">ಹೊರಗಿನ PM2.5</string>
+    <string name="weather_reading_us_aqi">ಹೊರಗಿನ ವಾಯು ಗುಣಮಟ್ಟ ಸೂಚ್ಯಂಕ (US AQI)</string>
+    <string name="editor_trigger_weather">ಹೊರಗಿನ ಹವಾಮಾನ</string>
+    <string name="editor_condition_weather">ಹೊರಗಿನ ಹವಾಮಾನ</string>
+    <string name="weather_humidity">ತೇವಾಂಶ %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">ಹೊರಗಿನ PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">%1$s %2$s ಮೀರಿದಾಗ</string>
+    <string name="editor_rule_weather_below">%1$s %2$s ಕ್ಕಿಂತ ಕಡಿಮೆಯಾದಾಗ</string>
+    <string name="editor_rule_weather_is">%1$s %2$s ಆಗಿದ್ದಾಗ</string>
+    <string name="runs_cond_weather">%1$s ಅಗತ್ಯದಂತೆ ಇರಲಿಲ್ಲ</string>
+    <string name="code_error_unknown_weather_reading">ಅಜ್ಞಾತ ಹವಾಮಾನ ರೀಡಿಂಗ್</string>
+    <string name="editor_field_reading">ರೀಡಿಂಗ್</string>
 </resources>

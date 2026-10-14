@@ -73,6 +73,9 @@ class DomusRepository(
     val scenes: StateFlow<List<Scene>> = _scenes
     private val _automations = MutableStateFlow<List<Automation>>(emptyList())
     val automations: StateFlow<List<Automation>> = _automations
+    private val _weather = MutableStateFlow<Weather?>(null)
+    /** Outdoor weather at the home; null without a location. Pushed live as the server fetches it. */
+    val weather: StateFlow<Weather?> = _weather
     private val _energy = MutableStateFlow<EnergyOverview?>(null)
     val energy: StateFlow<EnergyOverview?> = _energy
     private val _effects = MutableStateFlow(EffectCatalog())
@@ -399,6 +402,7 @@ class DomusRepository(
                 _energy.value = energy.await()
                 // Optional too: an older server has no catalog, lights then just show no moods.
                 if (_effects.value.moods.isEmpty()) runCatching { api.effects() }.getOrNull()?.let { _effects.value = it }
+                runCatching { api.weather() }.onSuccess { _weather.value = it }
                 // Optional as well; this is how an address saved on another device arrives here.
                 runCatching { api.serverLinks() }.getOrNull()?.let(::remember)
             }
@@ -545,6 +549,7 @@ class DomusRepository(
                 val state = runCatching { api?.decodeState(event.getValue("state")) }.getOrNull() ?: return
                 replace(known.copy(state = state, isOnline = event["is_online"]?.jsonPrimitive?.booleanOrNull ?: known.isOnline))
             }
+            "weather_changed" -> runCatching { api?.decodeWeather(event.getValue("weather")) }.getOrNull()?.let { _weather.value = it }
             "device_added", "device_updated", "device_removed", "rooms_changed", "automation_triggered", "resync" -> {
                 _revision.update { it + 1 }
                 refresh()

@@ -988,4 +988,27 @@
     <string name="code_notification_filter_low_title" formatted="false">{name} کا فلٹر بدلیں</string>
     <string name="code_error_left_on_range">چالو رہنے کی اطلاع 1 منٹ سے 24 گھنٹے تک انتظار کر سکتی ہے</string>
     <string name="analytics_standby">اسٹینڈ بائی: %1$s · ≈ %2$s ماہانہ</string>
+    <string name="weather_title">باہر</string>
+    <string name="weather_clear">صاف</string>
+    <string name="weather_partly_cloudy">جزوی ابر آلود</string>
+    <string name="weather_overcast">ابر آلود</string>
+    <string name="weather_fog">دھند</string>
+    <string name="weather_drizzle">بوندا باندی</string>
+    <string name="weather_rain">بارش</string>
+    <string name="weather_snow">برف</string>
+    <string name="weather_storm">آندھی طوفان</string>
+    <string name="weather_reading_temperature">باہر کا درجہ حرارت</string>
+    <string name="weather_reading_humidity">باہر کی نمی</string>
+    <string name="weather_reading_pm25">باہر کا PM2.5</string>
+    <string name="weather_reading_us_aqi">باہر کی ہوا کا معیار انڈیکس (US AQI)</string>
+    <string name="editor_trigger_weather">باہر کا موسم</string>
+    <string name="editor_condition_weather">باہر کا موسم</string>
+    <string name="weather_humidity">نمی %1$d%%</string>
+    <string name="weather_outdoor_pm25_value">باہر کا PM2.5 %1$d (%2$s)</string>
+    <string name="editor_rule_weather_above">جب %1$s %2$s سے اوپر جائے</string>
+    <string name="editor_rule_weather_below">جب %1$s %2$s سے نیچے جائے</string>
+    <string name="editor_rule_weather_is">جب %1$s %2$s ہو</string>
+    <string name="runs_cond_weather">%1$s مطلوبہ نہیں تھا</string>
+    <string name="code_error_unknown_weather_reading">نامعلوم موسمی ریڈنگ</string>
+    <string name="editor_field_reading">ریڈنگ</string>
 </resources>

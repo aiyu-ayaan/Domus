@@ -104,6 +104,10 @@ private fun heldBack(run: AutomationRun, automation: Automation, devices: List<D
         val text = { key: String -> (condition?.get(key) as? JsonPrimitive)?.contentOrNull }
         when (text("type")) {
             null -> stringResource(R.string.runs_cond_removed)
+            "weather" -> stringResource(
+                R.string.runs_cond_weather,
+                WeatherReadings.firstOrNull { it.first == text("property") }?.let { stringResource(it.second) } ?: text("property").orEmpty(),
+            )
             "time_between" -> stringResource(
                 R.string.runs_cond_between,
                 text("start")?.let { formatClockTime(it, is24Hour) }.orEmpty(),
