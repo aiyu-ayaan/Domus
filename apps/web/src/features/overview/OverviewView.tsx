@@ -84,7 +84,9 @@ export function OverviewView() {
   const controllable = list.filter((d) => d.device_type !== 'sensor')
   const onCount = controllable.filter((d) => d.is_online && d.state.is_on).length
   // From the live device list (WebSocket), not the energy query, so it moves as devices report.
-  const watts = list.reduce((sum, d) => sum + (d.is_online ? d.state.current_power_watts ?? 0 : 0), 0)
+  // Solar generation is production, not use.
+  const solar = energy?.settings.solar_device_ids ?? []
+  const watts = list.reduce((sum, d) => sum + (d.is_online && !solar.includes(d.id) ? d.state.current_power_watts ?? 0 : 0), 0)
   const offline = list.filter((d) => !d.is_online).length
   const aq = airQuality(climate.pm25)
   const date = new Date().toLocaleDateString(formatLocale, { weekday: 'long', day: 'numeric', month: 'long' })
