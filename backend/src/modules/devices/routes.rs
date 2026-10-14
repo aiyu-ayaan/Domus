@@ -80,6 +80,12 @@ async fn update(
     }
     let room = req.room_id.unwrap_or(rec.room_id.clone()).filter(|r| !r.is_empty());
     let icon = req.icon.unwrap_or(rec.icon.clone());
+    if let Some(minutes) = req.left_on_alert_minutes {
+        if minutes.is_some_and(|m| !(1..=1440).contains(&m)) {
+            return Err(ApiError::BadRequest("A left-on alert can wait 1 minute to 24 hours".into()));
+        }
+        s.manager.repo.set_left_on_alert(&id, minutes).await?;
+    }
     s.manager.repo.update_meta(&id, &name, room.as_deref(), icon.as_deref(), req.confirm_changes.unwrap_or(rec.confirm_changes)).await?;
     s.bus.publish(SystemEvent::DeviceUpdated { device_id: id.clone() });
     Ok(Json(s.manager.get(&id).await?.to_dto()))

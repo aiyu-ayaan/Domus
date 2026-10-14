@@ -81,6 +81,16 @@ impl DeviceRepository {
             .await
     }
 
+    pub async fn set_left_on_alert(&self, id: &str, minutes: Option<i64>) -> sqlx::Result<()> {
+        sqlx::query("UPDATE devices SET left_on_alert_minutes = ?, updated_at = ? WHERE id = ?")
+            .bind(minutes)
+            .bind(Utc::now())
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .map(|_| ())
+    }
+
     pub async fn update_meta(
         &self,
         id: &str,
@@ -269,6 +279,7 @@ mod tests {
             icon: None,
             last_seen: None,
             confirm_changes: false,
+            left_on_alert_minutes: None,
         };
         repo.insert(&device).await.unwrap();
         sqlx::query("INSERT INTO air_metrics (device_id, pm25) VALUES ('d1', 20)").execute(&pool).await.unwrap();

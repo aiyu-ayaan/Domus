@@ -70,6 +70,7 @@ pub fn classify_error(status: StatusCode, message: &str) -> (&'static str, serde
         "Add at least one action" => ("error.action_required", json!({})),
         "Sunrise and sunset can be shifted by at most 6 hours" => ("error.sun_offset_range", json!({})),
         "A power trigger can wait 1 minute to 24 hours" => ("error.power_duration_range", json!({})),
+        "A left-on alert can wait 1 minute to 24 hours" => ("error.left_on_range", json!({})),
         "Automation not found" => ("error.automation_not_found", json!({})),
         "You cannot edit this device" => ("error.cannot_edit_device", json!({})),
         "Only an administrator can move a device to another room" => ("error.admin_only_move_room", json!({})),

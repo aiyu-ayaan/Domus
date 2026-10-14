@@ -153,11 +153,11 @@ pub async fn action_devices(s: &AppState, actions: Vec<Action>) -> ApiResult<Vec
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use chrono::Utc;
 
-    fn device(id: &str, room: Option<&str>) -> DeviceRecord {
+    pub(crate) fn device(id: &str, room: Option<&str>) -> DeviceRecord {
         DeviceRecord {
             id: id.into(),
             name: id.into(),
@@ -178,6 +178,7 @@ mod tests {
             icon: None,
             last_seen: None,
             confirm_changes: false,
+            left_on_alert_minutes: None,
         }
     }
 

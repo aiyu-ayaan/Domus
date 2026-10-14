@@ -58,6 +58,16 @@ pub fn classify_notification(title: &str, message: &str) -> (Option<String>, Opt
             );
         }
     }
+    if let Some(name) = title.strip_suffix(" left on") {
+        if let Some(minutes) = message.strip_prefix(&format!("{name} has been on for ")).and_then(|m| m.strip_suffix(" minutes.")) {
+            return (Some("notification.left_on".into()), Some(json!({ "name": name, "minutes": minutes.parse::<i64>().unwrap_or(0) })));
+        }
+    }
+    if let Some(name) = title.strip_prefix("Replace the filter of ") {
+        if let Some(percent) = message.strip_suffix("% of the filter life is left.") {
+            return (Some("notification.filter_low".into()), Some(json!({ "name": name, "percent": percent })));
+        }
+    }
     if let Some(name) = title.strip_prefix("Automation \"").and_then(|s| s.strip_suffix("\" had problems")) {
         return (
             Some("notification.automation_failed".into()),
@@ -182,4 +192,19 @@ async fn changed<'q>(s: &AppState, q: sqlx::query::Query<'q, sqlx::Sqlite, sqlx:
     q.execute(&s.pool).await?;
     s.bus.publish(SystemEvent::NotificationsChanged);
     Ok(Json(json!({ "success": true })))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn watchdog_alerts_get_codes() {
+        let (code, params) = classify_notification("Heater left on", "Heater has been on for 90 minutes.");
+        assert_eq!(code.as_deref(), Some("notification.left_on"));
+        assert_eq!(params, Some(json!({ "name": "Heater", "minutes": 90 })));
+        let (code, params) = classify_notification("Replace the filter of Purifier", "8% of the filter life is left.");
+        assert_eq!(code.as_deref(), Some("notification.filter_low"));
+        assert_eq!(params, Some(json!({ "name": "Purifier", "percent": "8" })));
+    }
 }

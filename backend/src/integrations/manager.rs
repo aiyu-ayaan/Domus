@@ -696,6 +696,7 @@ impl DeviceManager {
             icon: None,
             last_seen: Some(now),
             confirm_changes: false,
+            left_on_alert_minutes: None,
         };
         self.repo.insert(&device).await?;
         self.repo.set_discovery_status(&rec.id, "adopted").await?;
@@ -740,6 +741,7 @@ impl DeviceManager {
             icon: None,
             last_seen: Some(now),
             confirm_changes: false,
+            left_on_alert_minutes: None,
         };
         self.repo.insert(&device).await?;
         self.repo.delete_discovery_for(&req.integration_type, &d.external_id).await?;

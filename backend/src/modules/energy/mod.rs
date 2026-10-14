@@ -338,6 +338,28 @@ struct DeviceUsage {
     current_watts: f64,
     kwh: f64,
     cost: f64,
+    /// The least it drew in any hour of the last week: what it costs even when nobody uses it.
+    standby_watts: Option<f64>,
+    /// That draw over 30 days, at the cycle's average rate.
+    standby_monthly_cost: Option<f64>,
+}
+
+/// Below this a device counts as really off (plugs report a watt or so of noise).
+const STANDBY_MIN_WATTS: f64 = 0.5;
+
+/// Each device's lowest hourly average power over the last 7 days. Needs a day of well-sampled
+/// hours, so a device added this morning has none yet.
+async fn standby_by_device(pool: &SqlitePool) -> ApiResult<HashMap<String, f64>> {
+    let rows: Vec<(String, f64)> = sqlx::query_as(
+        "SELECT device_id, MIN(avg) FROM (
+             SELECT device_id, AVG(power_watts) AS avg FROM energy_metrics WHERE recorded_at >= ?
+             GROUP BY device_id, substr(recorded_at, 1, 13) HAVING COUNT(*) >= 10
+         ) GROUP BY device_id HAVING COUNT(*) >= 24",
+    )
+    .bind(Utc::now() - Duration::days(7))
+    .fetch_all(pool)
+    .await?;
+    Ok(rows.into_iter().filter(|(_, w)| *w >= STANDBY_MIN_WATTS).collect())
 }
 
 #[derive(Serialize)]
@@ -390,6 +412,8 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
                 current_watts: watts,
                 kwh,
                 cost: 0.0,
+                standby_watts: None,
+                standby_monthly_cost: None,
             })
         })
         .collect();
@@ -413,8 +437,13 @@ async fn overview(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<O
     let today_cost = energy_cost - settings.energy_cost((cycle_kwh - today_kwh).max(0.0)) + today_timed;
     // Devices share the cycle's energy charge at the average rate.
     let avg_rate = if cycle_kwh > 0.0 { energy_cost / cycle_kwh } else { settings.energy_cost(1.0) };
+    let standby = standby_by_device(&s.pool).await?;
     for u in &mut usage {
         u.cost = u.kwh * avg_rate + timed.get(&u.device_id).copied().unwrap_or(0.0);
+        if let Some(&w) = standby.get(&u.device_id) {
+            u.standby_watts = Some(w);
+            u.standby_monthly_cost = Some(w * 24.0 * 30.0 / 1000.0 * avg_rate);
+        }
     }
 
     Ok(Json(Overview {

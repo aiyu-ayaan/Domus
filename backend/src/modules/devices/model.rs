@@ -24,6 +24,7 @@ pub struct DeviceRecord {
     pub icon: Option<String>,
     pub last_seen: Option<DateTime<Utc>>,
     pub confirm_changes: bool,
+    pub left_on_alert_minutes: Option<i64>,
 }
 
 impl DeviceRecord {
@@ -47,6 +48,7 @@ impl DeviceRecord {
             mac_address: self.mac_address.clone(),
             icon: self.icon.clone(),
             confirm_changes: self.confirm_changes,
+            left_on_alert_minutes: self.left_on_alert_minutes,
             is_online: self.is_online,
             state: self.state(),
             last_seen: self.last_seen,
@@ -71,6 +73,8 @@ pub struct DeviceDto {
     pub icon: Option<String>,
     /// Clients ask for confirmation before switching this device on or off.
     pub confirm_changes: bool,
+    /// Administrators are told when it stays on longer than this.
+    pub left_on_alert_minutes: Option<i64>,
     pub is_online: bool,
     pub state: DeviceState,
     pub last_seen: Option<DateTime<Utc>>,
@@ -90,6 +94,9 @@ pub struct UpdateDeviceRequest {
     #[serde(default, with = "double_option")]
     pub icon: Option<Option<String>>,
     pub confirm_changes: Option<bool>,
+    /// `Some(None)` turns the left-on alert off.
+    #[serde(default, with = "double_option")]
+    pub left_on_alert_minutes: Option<Option<i64>>,
 }
 
 #[derive(Debug, Deserialize)]

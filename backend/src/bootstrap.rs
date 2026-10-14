@@ -93,6 +93,7 @@ pub async fn bootstrap() -> anyhow::Result<()> {
         )
         .run());
     tokio::spawn(DiscoveryWorker::new(manager.clone()).run());
+    tokio::spawn(crate::workers::WatchdogWorker::new(manager.clone(), notifier.clone(), bus.clone()).run());
     tokio::spawn(SchedulerWorker::new(automations.clone(), pool.clone(), config.workers.energy_retention_days).run());
 
     let rustls = if config.tls.enabled { Some(tls::load_rustls(&config.tls, &config.server).await?) } else { None };
