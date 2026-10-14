@@ -128,7 +128,8 @@ export const setConfirmHandler = (fn: typeof askToConfirm) => {
 }
 
 async function request<T>(method: string, path: string, body?: unknown, confirmed = false): Promise<T> {
-  const headers: Record<string, string> = {}
+  // Named in the device logbook ("by Ayaan from the desktop app").
+  const headers: Record<string, string> = { 'X-Domus-Client': desktop ? 'desktop' : 'web' }
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   const token = session.token
   if (token) headers.Authorization = `Bearer ${token}`

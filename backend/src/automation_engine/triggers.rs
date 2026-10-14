@@ -15,7 +15,7 @@ pub fn matches_event(trigger: &Trigger, event: &SystemEvent) -> bool {
     match (trigger, event) {
         (
             Trigger::DeviceState { device_id, property: prop, compare },
-            SystemEvent::DeviceStateChanged { device_id: id, state, is_online, previous, was_online },
+            SystemEvent::DeviceStateChanged { device_id: id, state, is_online, previous, was_online, .. },
         ) if device_id == id => {
             let now = compare.matches(property(Some(state), *is_online, prop).as_ref());
             let before = compare.matches(property(previous.as_ref(), *was_online, prop).as_ref());
@@ -70,6 +70,7 @@ mod tests {
             is_online: true,
             previous: Some(DeviceState { is_on: Some(prev_on), ..Default::default() }),
             was_online: true,
+            actor: None,
         }
     }
 

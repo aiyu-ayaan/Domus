@@ -6,7 +6,7 @@ use super::sampling::Window;
 use crate::api::error::ApiError;
 use crate::infrastructure::crypto::Vault;
 use crate::infrastructure::database::{get_setting, set_setting};
-use crate::infrastructure::event_bus::{EventBus, SystemEvent};
+use crate::infrastructure::event_bus::{Actor, EventBus, SystemEvent};
 use crate::modules::devices::model::{AdoptRequest, DeviceRecord, DiscoveryRecord, ManualAddRequest};
 use crate::modules::devices::repository::DeviceRepository;
 use crate::modules::notifications::Notifier;
@@ -232,6 +232,7 @@ impl DeviceManager {
                         is_online: p.online,
                         previous: Some(previous),
                         was_online: rec.is_online,
+                        actor: None,
                     });
                 }
                 let (watts, pm) = (p.state.current_power_watts, p.state.air_quality_pm25);
@@ -266,6 +267,7 @@ impl DeviceManager {
                         is_online: false,
                         previous: Some(rec.state()),
                         was_online: true,
+                        actor: None,
                     });
                 } else {
                     tracing::debug!("poll of '{}' failed ({count}): {e}", rec.name);
@@ -382,7 +384,7 @@ impl DeviceManager {
             .ok_or_else(|| ApiError::NotFound("Device not found".into()))
     }
 
-    pub async fn command(self: &Arc<Self>, device_id: &str, cmd: &DeviceCommand) -> Result<(), ApiError> {
+    pub async fn command(self: &Arc<Self>, device_id: &str, cmd: &DeviceCommand, actor: Option<Actor>) -> Result<(), ApiError> {
         if cmd.is_empty() {
             return Err(ApiError::BadRequest("empty command".into()));
         }
@@ -399,7 +401,7 @@ impl DeviceManager {
         plugin.send_command(&self.context(&rec, &accounts), cmd).await?;
 
         // Optimistic update so the UI reacts instantly; a refresh follows.
-        self.record_command(&rec, cmd).await?;
+        self.record_command(&rec, cmd, actor).await?;
 
         let this = self.clone();
         let id = rec.id.clone();
@@ -411,7 +413,7 @@ impl DeviceManager {
     }
 
     /// Apply an already-sent command to the cached state, store it and tell the UI.
-    pub async fn record_command(&self, rec: &DeviceRecord, cmd: &DeviceCommand) -> Result<(), ApiError> {
+    pub async fn record_command(&self, rec: &DeviceRecord, cmd: &DeviceCommand, actor: Option<Actor>) -> Result<(), ApiError> {
         let previous = rec.state();
         let mut state = previous.clone();
         cmd.apply_to(&mut state);
@@ -423,6 +425,7 @@ impl DeviceManager {
             is_online: true,
             previous: Some(previous),
             was_online: rec.is_online,
+            actor,
         });
         Ok(())
     }
@@ -466,8 +469,12 @@ impl DeviceManager {
     }
 
     /// Run a command on several devices concurrently; returns per-device errors.
-    pub async fn command_many(self: &Arc<Self>, ids: &[String], cmd: &DeviceCommand) -> Vec<(String, String)> {
-        let results = join_all(ids.iter().map(|id| async move { (id.clone(), self.command(id, cmd).await) })).await;
+    pub async fn command_many(self: &Arc<Self>, ids: &[String], cmd: &DeviceCommand, actor: Option<Actor>) -> Vec<(String, String)> {
+        let results = join_all(ids.iter().map(|id| {
+            let actor = actor.clone();
+            async move { (id.clone(), self.command(id, cmd, actor).await) }
+        }))
+        .await;
         results
             .into_iter()
             .filter_map(|(id, r)| r.err().map(|e| (id, e.to_string())))

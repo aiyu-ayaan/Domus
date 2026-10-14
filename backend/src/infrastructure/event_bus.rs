@@ -1,6 +1,29 @@
 use home_core::DeviceState;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
+
+/// Who changed a device: kept in the device logbook. A change nobody sent (a button on the device,
+/// its own app, a schedule inside it) has no actor.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum Actor {
+    /// `client` is the app it came from: `web`, `desktop` or `android`.
+    User { id: String, name: String, client: Option<String> },
+    Automation { id: String, name: String },
+    ScreenSync,
+}
+
+impl Actor {
+    /// A person, with the app named by the `X-Domus-Client` header.
+    pub fn user(user: &crate::api::middleware::AuthUser, headers: &axum::http::HeaderMap) -> Self {
+        let client = headers
+            .get("x-domus-client")
+            .and_then(|v| v.to_str().ok())
+            .filter(|c| matches!(*c, "web" | "desktop" | "android"))
+            .map(str::to_string);
+        Self::User { id: user.id.clone(), name: user.username.clone(), client }
+    }
+}
 
 /// Events fanned out to the automation engine, workers and WebSocket clients.
 #[derive(Debug, Clone, Serialize)]
@@ -16,6 +39,8 @@ pub enum SystemEvent {
         previous: Option<DeviceState>,
         #[serde(skip)]
         was_online: bool,
+        #[serde(skip)]
+        actor: Option<Actor>,
     },
     DeviceAdded {
         device_id: String,

@@ -67,6 +67,7 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     }
 
     private fun request(path: String) = Request.Builder().url("$baseUrl/api/v1$path").apply {
+        header("X-Domus-Client", "android") // named in the device logbook
         token()?.let { header("Authorization", "Bearer $it") }
     }
 

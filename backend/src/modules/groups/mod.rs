@@ -4,7 +4,9 @@
 use crate::api::error::{ApiError, ApiResult, Confirmed};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::infrastructure::event_bus::Actor;
 use crate::modules::devices::service::{controllable_ids, visible_ids};
+use axum::http::HeaderMap;
 use axum::{
     extract::{Path, Query, State},
     routing::{get, post, put},
@@ -133,6 +135,7 @@ async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
 async fn command(
     State(s): State<AppState>,
     user: AuthUser,
+    headers: HeaderMap,
     Path(id): Path<String>,
     Query(q): Query<Confirmed>,
     Json(cmd): Json<DeviceCommand>,
@@ -149,7 +152,7 @@ async fn command(
         .into_iter()
         .filter(|i| allowed.as_ref().is_none_or(|a| a.contains(i)))
         .collect();
-    let failures = s.manager.command_many(&ids, &cmd).await;
+    let failures = s.manager.command_many(&ids, &cmd, Some(Actor::user(&user, &headers))).await;
     Ok(Json(json!({
         "sent": ids.len() - failures.len(),
         "failed": failures.iter().map(|(id, e)| json!({ "device_id": id, "error": e })).collect::<Vec<_>>(),

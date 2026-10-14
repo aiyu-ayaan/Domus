@@ -17,6 +17,7 @@
 use super::ScreenSyncConfig;
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::infrastructure::event_bus::Actor;
 use crate::integrations::manager::StreamTarget;
 use crate::modules::devices::service::{access, can_control, Access};
 use axum::{
@@ -278,7 +279,7 @@ async fn run_session(mut socket: WebSocket, s: AppState, user: AuthUser, scene_i
             let mut cmd = frame.command();
             cmd.is_on = Some(true);
             if let Ok(rec) = s.manager.get(&id).await {
-                let _ = s.manager.record_command(&rec, &cmd).await;
+                let _ = s.manager.record_command(&rec, &cmd, Some(Actor::ScreenSync)).await;
             }
         }
     }
@@ -367,13 +368,13 @@ async fn restore(s: &AppState, device_id: &str, before: &DeviceState) {
         cmd.is_on = Some(true);
     }
     if !cmd.is_empty() {
-        if let Err(e) = s.manager.command(device_id, &cmd).await {
+        if let Err(e) = s.manager.command(device_id, &cmd, Some(Actor::ScreenSync)).await {
             tracing::debug!("screen sync: restoring {device_id} failed: {e}");
         }
     }
     if !was_on {
         let off = DeviceCommand { is_on: Some(false), ..Default::default() };
-        if let Err(e) = s.manager.command(device_id, &off).await {
+        if let Err(e) = s.manager.command(device_id, &off, Some(Actor::ScreenSync)).await {
             tracing::debug!("screen sync: switching {device_id} off failed: {e}");
         }
     }

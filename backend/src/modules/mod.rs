@@ -5,6 +5,7 @@ pub mod devices;
 pub mod energy;
 pub mod groups;
 pub mod integrations;
+pub mod logbook;
 pub mod notifications;
 pub mod rooms;
 pub mod scenes;

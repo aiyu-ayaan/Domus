@@ -1,7 +1,9 @@
 use crate::api::error::{ApiError, ApiResult, Confirmed};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
+use crate::infrastructure::event_bus::Actor;
 use crate::modules::devices::service::{action_devices, require_control_of, sees_all, visible_ids};
+use axum::http::HeaderMap;
 use axum::{
     extract::{Path, Query, State},
     routing::{get, post},
@@ -242,14 +244,20 @@ async fn toggle(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
     Ok(Json(fetch(&s, &id).await?.into()))
 }
 
-async fn run_now(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>, Query(q): Query<Confirmed>) -> ApiResult<Json<Value>> {
+async fn run_now(
+    State(s): State<AppState>,
+    user: AuthUser,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+    Query(q): Query<Confirmed>,
+) -> ApiResult<Json<Value>> {
     user.require_control()?;
     let row = fetch_visible(&s, &user, &id).await?;
     let actions: Vec<Action> =
         serde_json::from_str(&row.actions_json).map_err(|e| ApiError::BadRequest(format!("invalid actions: {e}")))?;
     require_control_of(&s, &user, &action_devices(&s, actions.clone()).await?).await?;
     s.automations.require_confirmed(&actions, q.confirmed).await?;
-    let errors = s.automations.execute(&actions, 0).await;
+    let errors = s.automations.execute(&actions, 0, &Actor::user(&user, &headers)).await;
     Ok(Json(json!({ "success": errors.is_empty(), "errors": errors })))
 }
 

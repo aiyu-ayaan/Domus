@@ -78,7 +78,7 @@ pub fn create_router(state: AppState, web_dir: &Path, tls: bool) -> Router {
             HeaderValue::from_static("file://"),
         ])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH, Method::DELETE])
-        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE]);
+        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::HeaderName::from_static("x-domus-client")]);
 
     let mut app = Router::new()
         .nest("/api/v1", api)

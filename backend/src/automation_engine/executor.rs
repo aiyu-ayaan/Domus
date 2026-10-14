@@ -1,5 +1,5 @@
 use super::{conditions, triggers};
-use crate::infrastructure::event_bus::{EventBus, SystemEvent};
+use crate::infrastructure::event_bus::{Actor, EventBus, SystemEvent};
 use crate::integrations::DeviceManager;
 use crate::modules::notifications::Notifier;
 use chrono::{DateTime, Local, Utc};
@@ -167,7 +167,8 @@ impl AutomationEngine {
         });
         // Actions may contain delays; never block the event loop.
         tokio::spawn(async move {
-            let errors = self.execute(&rule.actions, 0).await;
+            let actor = Actor::Automation { id: rule.id.clone(), name: rule.name.clone() };
+            let errors = self.execute(&rule.actions, 0, &actor).await;
             if !errors.is_empty() {
                 self.notifier
                     .notify_admins("warning", &format!("Automation \"{}\" had problems", rule.name), &errors.join("; "), Some("/automations"))
@@ -181,19 +182,20 @@ impl AutomationEngine {
         self: &'a Arc<Self>,
         actions: &'a [Action],
         depth: u8,
+        actor: &'a Actor,
     ) -> futures::future::BoxFuture<'a, Vec<String>> {
         Box::pin(async move {
             let mut errors = Vec::new();
             for action in actions {
                 match action {
                     Action::DeviceCommand { device_id, command } => {
-                        if let Err(e) = self.manager.command(device_id, command).await {
+                        if let Err(e) = self.manager.command(device_id, command, Some(actor.clone())).await {
                             errors.push(format!("{device_id}: {e}"));
                         }
                     }
                     Action::GroupCommand { group_id, command } => match self.manager.group_device_ids(group_id).await {
                         Ok(ids) => {
-                            for (id, e) in self.manager.command_many(&ids, command).await {
+                            for (id, e) in self.manager.command_many(&ids, command, Some(actor.clone())).await {
                                 errors.push(format!("{id}: {e}"));
                             }
                         }
@@ -208,7 +210,7 @@ impl AutomationEngine {
                             continue;
                         }
                         match self.scene_actions(scene_id).await {
-                            Some(list) => errors.extend(self.execute(&list, depth + 1).await),
+                            Some(list) => errors.extend(self.execute(&list, depth + 1, actor).await),
                             None => errors.push(format!("scene {scene_id} not found")),
                         }
                     }

@@ -3,8 +3,9 @@ use super::service::{access, can_control, can_edit, can_see, Access};
 use crate::api::error::{ApiError, ApiResult};
 use crate::api::middleware::AuthUser;
 use crate::api::AppState;
-use crate::infrastructure::event_bus::SystemEvent;
+use crate::infrastructure::event_bus::{Actor, SystemEvent};
 use crate::integrations::manager::{DiscoveryReport, DiscoverySettings};
+use axum::http::HeaderMap;
 use axum::{
     extract::{Path, Query, State},
     routing::{get, post},
@@ -22,6 +23,7 @@ pub fn device_routes() -> Router<AppState> {
         .route("/:id", get(get_one).patch(update).delete(remove))
         .route("/:id/command", post(command))
         .route("/:id/refresh", post(refresh))
+        .route("/:id/logbook", get(logbook))
 }
 
 pub fn discovery_routes() -> Router<AppState> {
@@ -92,6 +94,7 @@ async fn remove(State(s): State<AppState>, user: AuthUser, Path(id): Path<String
 async fn command(
     State(s): State<AppState>,
     user: AuthUser,
+    headers: HeaderMap,
     Path(id): Path<String>,
     Json(cmd): Json<DeviceCommand>,
 ) -> ApiResult<Json<DeviceDto>> {
@@ -100,7 +103,7 @@ async fn command(
     if !dto_for(&access, &user, &s.manager.get(&id).await?)?.can_control {
         return Err(ApiError::Forbidden("You can see this device but not control it".into()));
     }
-    s.manager.command(&id, &cmd).await?;
+    s.manager.command(&id, &cmd, Some(Actor::user(&user, &headers))).await?;
     dto_for(&access, &user, &s.manager.get(&id).await?).map(Json)
 }
 
@@ -109,6 +112,24 @@ async fn refresh(State(s): State<AppState>, user: AuthUser, Path(id): Path<Strin
     dto_for(&access, &user, &s.manager.get(&id).await?)?;
     s.manager.refresh(&id).await?;
     dto_for(&access, &user, &s.manager.get(&id).await?).map(Json)
+}
+
+#[derive(Deserialize)]
+struct LogbookQuery {
+    before: Option<chrono::DateTime<chrono::Utc>>,
+    limit: Option<u32>,
+}
+
+/// The device's changes, newest first; page with `before` (the `at` of the last entry shown).
+async fn logbook(
+    State(s): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<String>,
+    Query(q): Query<LogbookQuery>,
+) -> ApiResult<Json<Vec<crate::modules::logbook::LogEntry>>> {
+    let access = access(&s, &user).await?;
+    dto_for(&access, &user, &s.manager.get(&id).await?)?;
+    Ok(Json(crate::modules::logbook::list(&s.pool, &id, q.before, q.limit.unwrap_or(50)).await?))
 }
 
 async fn add_manual(
