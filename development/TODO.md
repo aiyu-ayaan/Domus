@@ -348,6 +348,8 @@ Plan and diagram: `development/docs/ROADMAP.md`. Order: each builds on the one b
 - [x] Weather from Open-Meteo (no key, uses the stored home location): outdoor temperature and PM2.5 on Overview, outdoor-AQI trigger
 - [x] Solar and grid export: net metering in the energy module (import/export readings, export tariff)
 - [x] Matter bridge (rs-matter 0.4.1, on/off devices, Settings > Matter on web and Android): `development/docs/MATTER.md`
-- [ ] Matter: commission with a real Google Home / Apple Home / Alexa; brightness and colour clusters
-- [ ] Verify on hardware: left-on alert, filter alert, solar import/export with a real inverter plug
-- [ ] Android: check the new screens on a phone (History, Runs, Matter, solar, weather card)
+- [x] Matter: brightness and colour (Level Control, Color Control), paired and driven end to end by rs-matter's commissioner in `backend/tests/matter_bridge.rs`
+- [ ] Matter: commission with a real Google Home / Apple Home / Alexa; report colour changed in Domus back to controllers
+- [x] Checked against fake MQTT devices on a test server: logbook attribution, automation traces, left-on trigger and alert (timing), weather trigger and condition, solar split, Matter end to end
+- [ ] Verify on hardware: filter alert (MQTT discovery maps no filter life), solar with a real inverter plug
+- [x] Android: History (collapsed card), Runs, Matter page and QR, left-on picker, weather card, solar-free "Using now" checked on an emulator
