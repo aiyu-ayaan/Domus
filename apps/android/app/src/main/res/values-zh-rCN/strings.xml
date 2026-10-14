@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} 忘记了密码。管理员可以在“设置 → 成员与权限”中为其生成重置码。</string>
     <string name="code_notification_automation_failed_title" formatted="false">自动化 \"{name}\" 出现问题</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">历史记录</string>
+    <string name="logbook_empty">尚无变更记录</string>
+    <string name="logbook_turned_on">已打开</string>
+    <string name="logbook_turned_off">已关闭</string>
+    <string name="logbook_came_online">已上线</string>
+    <string name="logbook_went_offline">已离线</string>
+    <string name="logbook_effect_stopped">效果已停止</string>
+    <string name="logbook_set_to">%1$s设为 %2$s</string>
+    <string name="logbook_on_device">在设备上</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">自动化“%1$s”</string>
+    <string name="logbook_by_user">由 %1$s</string>
+    <string name="logbook_by_user_from">由 %1$s · %2$s</string>
+    <string name="logbook_client_web">网页</string>
+    <string name="logbook_client_desktop">桌面应用</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">显示更多</string>
 </resources>

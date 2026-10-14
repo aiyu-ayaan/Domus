@@ -977,4 +977,21 @@
     <string name="code_notification_password_reset" formatted="false">نسي {username} كلمة المرور الخاصة به. يمكن للمسؤول منحه رمز إعادة تعيين في الإعدادات، ضمن الأشخاص والصلاحيات.</string>
     <string name="code_notification_automation_failed_title" formatted="false">واجهت الأتمتة \"{name}\" مشاكل</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">السجل</string>
+    <string name="logbook_empty">لم تُسجَّل أي تغييرات بعد</string>
+    <string name="logbook_turned_on">تم التشغيل</string>
+    <string name="logbook_turned_off">تم الإيقاف</string>
+    <string name="logbook_came_online">أصبح متصلاً</string>
+    <string name="logbook_went_offline">انقطع الاتصال</string>
+    <string name="logbook_effect_stopped">توقف التأثير</string>
+    <string name="logbook_set_to">تم ضبط %1$s على %2$s</string>
+    <string name="logbook_on_device">من الجهاز نفسه</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">الأتمتة «%1$s»</string>
+    <string name="logbook_by_user">بواسطة %1$s</string>
+    <string name="logbook_by_user_from">بواسطة %1$s · %2$s</string>
+    <string name="logbook_client_web">الويب</string>
+    <string name="logbook_client_desktop">تطبيق سطح المكتب</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">عرض المزيد</string>
 </resources>

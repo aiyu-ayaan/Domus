@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} forgot their password. An administrator can give them a reset code in Settings, under People and access.</string>
     <string name="code_notification_automation_failed_title" formatted="false">Automation \"{name}\" had problems</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">History</string>
+    <string name="logbook_empty">No changes recorded yet</string>
+    <string name="logbook_turned_on">Turned on</string>
+    <string name="logbook_turned_off">Turned off</string>
+    <string name="logbook_came_online">Came online</string>
+    <string name="logbook_went_offline">Went offline</string>
+    <string name="logbook_effect_stopped">Effect stopped</string>
+    <string name="logbook_set_to">%1$s set to %2$s</string>
+    <string name="logbook_on_device">On the device</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automation “%1$s”</string>
+    <string name="logbook_by_user">By %1$s</string>
+    <string name="logbook_by_user_from">By %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Desktop app</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Show more</string>
 </resources>

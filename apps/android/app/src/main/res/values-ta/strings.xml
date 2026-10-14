@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} தனது கடவுச்சொல்லை மறந்துவிட்டார். அமைப்புகளில் (Settings), நபர்கள் மற்றும் அணுகல் (People and access) என்பதன் கீழ் நிர்வாகி அவருக்கு மீட்டமைப்புக் குறியீட்டை வழங்கலாம்.</string>
     <string name="code_notification_automation_failed_title" formatted="false">\"{name}\" தானியங்கியில் சிக்கல்கள் ஏற்பட்டன</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">வரலாறு</string>
+    <string name="logbook_empty">இதுவரை மாற்றங்கள் எதுவும் பதிவாகவில்லை</string>
+    <string name="logbook_turned_on">இயக்கப்பட்டது</string>
+    <string name="logbook_turned_off">அணைக்கப்பட்டது</string>
+    <string name="logbook_came_online">ஆன்லைனுக்கு வந்தது</string>
+    <string name="logbook_went_offline">ஆஃப்லைன் ஆனது</string>
+    <string name="logbook_effect_stopped">விளைவு நிறுத்தப்பட்டது</string>
+    <string name="logbook_set_to">%1$s %2$s ஆக அமைக்கப்பட்டது</string>
+    <string name="logbook_on_device">சாதனத்திலேயே</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">தானியக்கம் “%1$s”</string>
+    <string name="logbook_by_user">%1$s மூலம்</string>
+    <string name="logbook_by_user_from">%1$s மூலம் · %2$s</string>
+    <string name="logbook_client_web">இணையம்</string>
+    <string name="logbook_client_desktop">டெஸ்க்டாப் ஆப்</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">மேலும் காட்டு</string>
 </resources>

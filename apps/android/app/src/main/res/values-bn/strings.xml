@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} তার পাসওয়ার্ড ভুলে গেছেন। একজন অ্যাডমিনিস্ট্রেটর সেটিংসের অধীনে মানুষ ও অ্যাক্সেস থেকে তাকে একটি রিসেট কোড দিতে পারেন।</string>
     <string name="code_notification_automation_failed_title" formatted="false">অটোমেশন \"{name}\"-এ সমস্যা হয়েছে</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">ইতিহাস</string>
+    <string name="logbook_empty">এখনও কোনো পরিবর্তন রেকর্ড হয়নি</string>
+    <string name="logbook_turned_on">চালু করা হয়েছে</string>
+    <string name="logbook_turned_off">বন্ধ করা হয়েছে</string>
+    <string name="logbook_came_online">অনলাইনে এসেছে</string>
+    <string name="logbook_went_offline">অফলাইনে গেছে</string>
+    <string name="logbook_effect_stopped">ইফেক্ট বন্ধ হয়েছে</string>
+    <string name="logbook_set_to">%1$s %2$s এ সেট করা হয়েছে</string>
+    <string name="logbook_on_device">ডিভাইস থেকেই</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">অটোমেশন “%1$s”</string>
+    <string name="logbook_by_user">%1$s করেছেন</string>
+    <string name="logbook_by_user_from">%1$s করেছেন · %2$s</string>
+    <string name="logbook_client_web">ওয়েব</string>
+    <string name="logbook_client_desktop">ডেস্কটপ অ্যাপ</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">আরও দেখুন</string>
 </resources>

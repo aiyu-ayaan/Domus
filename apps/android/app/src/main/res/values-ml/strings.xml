@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} അവരുടെ പാസ്‌വേഡ് മറന്നു. ഒരു അഡ്മിനിസ്ട്രേറ്റർക്ക് ക്രമീകരണങ്ങളിലെ ആളുകളും ആക്സസും എന്ന വിഭാഗത്തിൽ നിന്ന് അവർക്ക് ഒരു റീസെറ്റ് കോഡ് നൽകാം.</string>
     <string name="code_notification_automation_failed_title" formatted="false">\"{name}\" ഓട്ടോമേഷനിൽ പ്രശ്നങ്ങളുണ്ടായിരുന്നു</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">ചരിത്രം</string>
+    <string name="logbook_empty">ഇതുവരെ മാറ്റങ്ങളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല</string>
+    <string name="logbook_turned_on">ഓൺ ചെയ്തു</string>
+    <string name="logbook_turned_off">ഓഫ് ചെയ്തു</string>
+    <string name="logbook_came_online">ഓൺലൈനിൽ വന്നു</string>
+    <string name="logbook_went_offline">ഓഫ്‌ലൈനായി</string>
+    <string name="logbook_effect_stopped">ഇഫക്റ്റ് നിർത്തി</string>
+    <string name="logbook_set_to">%1$s %2$s ആയി സജ്ജമാക്കി</string>
+    <string name="logbook_on_device">ഉപകരണത്തിൽ നിന്ന്</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">ഓട്ടോമേഷൻ “%1$s”</string>
+    <string name="logbook_by_user">%1$s മുഖേന</string>
+    <string name="logbook_by_user_from">%1$s മുഖേന · %2$s</string>
+    <string name="logbook_client_web">വെബ്</string>
+    <string name="logbook_client_desktop">ഡെസ്ക്ടോപ്പ് ആപ്പ്</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">കൂടുതൽ കാണിക്കുക</string>
 </resources>

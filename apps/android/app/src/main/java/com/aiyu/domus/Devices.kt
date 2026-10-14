@@ -410,6 +410,7 @@ fun DeviceSheet(device: Device, user: User, onDismiss: () -> Unit) {
                     }
                 }
             }
+            DeviceHistory(device)
             Text(listOfNotNull(device.model, device.integration.replaceFirstChar(Char::uppercase)).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = c.onSurfaceVariant)
             // A main switch, say: warn before it is turned on or off, from any app, a group or a scene.
             if ((user.isAdmin || device.canEdit) && s.isOn != null && device.type != "sensor") {

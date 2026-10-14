@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} ลืมรหัสผ่าน ผู้ดูแลระบบสามารถออกรหัสรีเซ็ตให้ได้ในการตั้งค่า ภายใต้เมนูผู้คนและสิทธิ์การเข้าถึง</string>
     <string name="code_notification_automation_failed_title" formatted="false">การทำงานอัตโนมัติ \"{name}\" มีปัญหา</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">ประวัติ</string>
+    <string name="logbook_empty">ยังไม่มีการบันทึกการเปลี่ยนแปลง</string>
+    <string name="logbook_turned_on">เปิดแล้ว</string>
+    <string name="logbook_turned_off">ปิดแล้ว</string>
+    <string name="logbook_came_online">กลับมาออนไลน์</string>
+    <string name="logbook_went_offline">ออฟไลน์</string>
+    <string name="logbook_effect_stopped">หยุดเอฟเฟกต์แล้ว</string>
+    <string name="logbook_set_to">ตั้ง%1$sเป็น %2$s</string>
+    <string name="logbook_on_device">ที่ตัวอุปกรณ์</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">ระบบอัตโนมัติ “%1$s”</string>
+    <string name="logbook_by_user">โดย %1$s</string>
+    <string name="logbook_by_user_from">โดย %1$s · %2$s</string>
+    <string name="logbook_client_web">เว็บ</string>
+    <string name="logbook_client_desktop">แอปเดสก์ท็อป</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">แสดงเพิ่มเติม</string>
 </resources>

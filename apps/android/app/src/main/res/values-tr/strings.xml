@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} parolasını unuttu. Bir yönetici Ayarlar altındaki Kişiler ve erişim bölümünden sıfırlama kodu verebilir.</string>
     <string name="code_notification_automation_failed_title" formatted="false">\"{name}\" otomasyonunda sorunlar oluştu</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Geçmiş</string>
+    <string name="logbook_empty">Henüz kaydedilen değişiklik yok</string>
+    <string name="logbook_turned_on">Açıldı</string>
+    <string name="logbook_turned_off">Kapatıldı</string>
+    <string name="logbook_came_online">Çevrimiçi oldu</string>
+    <string name="logbook_went_offline">Çevrimdışı oldu</string>
+    <string name="logbook_effect_stopped">Efekt durduruldu</string>
+    <string name="logbook_set_to">%1$s %2$s olarak ayarlandı</string>
+    <string name="logbook_on_device">Cihazın üzerinden</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">“%1$s” otomasyonu</string>
+    <string name="logbook_by_user">%1$s tarafından</string>
+    <string name="logbook_by_user_from">%1$s tarafından · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Masaüstü uygulaması</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Daha fazla göster</string>
 </resources>

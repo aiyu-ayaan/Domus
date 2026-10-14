@@ -961,4 +961,21 @@
     <string name="code_notification_password_reset" formatted="false">Użytkownik {username} zapomniał hasła. Administrator może przekazać mu kod resetowania w Ustawieniach, w sekcji Osoby i dostęp.</string>
     <string name="code_notification_automation_failed_title" formatted="false">Automatyzacja \"{name}\" napotkała problemy</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Historia</string>
+    <string name="logbook_empty">Nie zapisano jeszcze żadnych zmian</string>
+    <string name="logbook_turned_on">Włączono</string>
+    <string name="logbook_turned_off">Wyłączono</string>
+    <string name="logbook_came_online">Połączono</string>
+    <string name="logbook_went_offline">Rozłączono</string>
+    <string name="logbook_effect_stopped">Efekt zatrzymany</string>
+    <string name="logbook_set_to">%1$s: ustawiono %2$s</string>
+    <string name="logbook_on_device">Na urządzeniu</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automatyzacja „%1$s”</string>
+    <string name="logbook_by_user">Przez: %1$s</string>
+    <string name="logbook_by_user_from">Przez: %1$s · %2$s</string>
+    <string name="logbook_client_web">Przeglądarka</string>
+    <string name="logbook_client_desktop">Aplikacja na komputer</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Pokaż więcej</string>
 </resources>

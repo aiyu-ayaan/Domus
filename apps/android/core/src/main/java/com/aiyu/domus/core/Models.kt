@@ -183,6 +183,20 @@ data class LightPreset(
 )
 
 /** Moods suit every light; a light can play the effects listed in its `options["effect"]`. */
+/** Who changed a device: `user` (with the app it came from), `automation` or `screen_sync`. None means on the device itself. */
+@Serializable
+data class LogActor(val kind: String, val id: String? = null, val name: String? = null, val client: String? = null)
+
+/** One line of a device's logbook. */
+@Serializable
+data class LogEntry(
+    val at: String,
+    val field: String,
+    val value: kotlinx.serialization.json.JsonElement? = null,
+    val previous: kotlinx.serialization.json.JsonElement? = null,
+    val actor: LogActor? = null,
+)
+
 @Serializable
 data class EffectCatalog(val moods: List<LightPreset> = emptyList(), val effects: List<LightPreset> = emptyList())
 

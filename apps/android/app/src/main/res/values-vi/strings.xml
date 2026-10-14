@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} đã quên mật khẩu. Quản trị viên có thể cấp mã đặt lại cho họ trong Cài đặt, dưới mục Người dùng và quyền truy cập.</string>
     <string name="code_notification_automation_failed_title" formatted="false">Tự động hóa \"{name}\" gặp sự cố</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Lịch sử</string>
+    <string name="logbook_empty">Chưa có thay đổi nào được ghi lại</string>
+    <string name="logbook_turned_on">Đã bật</string>
+    <string name="logbook_turned_off">Đã tắt</string>
+    <string name="logbook_came_online">Đã trực tuyến</string>
+    <string name="logbook_went_offline">Đã ngoại tuyến</string>
+    <string name="logbook_effect_stopped">Đã dừng hiệu ứng</string>
+    <string name="logbook_set_to">Đặt %1$s thành %2$s</string>
+    <string name="logbook_on_device">Trên thiết bị</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Tự động hóa “%1$s”</string>
+    <string name="logbook_by_user">Bởi %1$s</string>
+    <string name="logbook_by_user_from">Bởi %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Ứng dụng máy tính</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Xem thêm</string>
 </resources>

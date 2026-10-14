@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} اپنا پاس ورڈ بھول گیا ہے۔ ایڈمنسٹریٹر انہیں ترتیبات میں، لوگ اور رسائی کے تحت ری سیٹ کوڈ دے سکتا ہے۔</string>
     <string name="code_notification_automation_failed_title" formatted="false">آٹومیشن \"{name}\" میں مسائل پیش آئے</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">تاریخچہ</string>
+    <string name="logbook_empty">ابھی تک کوئی تبدیلی درج نہیں ہوئی</string>
+    <string name="logbook_turned_on">آن کیا گیا</string>
+    <string name="logbook_turned_off">آف کیا گیا</string>
+    <string name="logbook_came_online">آن لائن ہوا</string>
+    <string name="logbook_went_offline">آف لائن ہوا</string>
+    <string name="logbook_effect_stopped">ایفیکٹ رک گیا</string>
+    <string name="logbook_set_to">%1$s کو %2$s پر سیٹ کیا گیا</string>
+    <string name="logbook_on_device">ڈیوائس پر ہی</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">آٹومیشن “%1$s”</string>
+    <string name="logbook_by_user">%1$s کی جانب سے</string>
+    <string name="logbook_by_user_from">%1$s کی جانب سے · %2$s</string>
+    <string name="logbook_client_web">ویب</string>
+    <string name="logbook_client_desktop">ڈیسک ٹاپ ایپ</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">مزید دکھائیں</string>
 </resources>

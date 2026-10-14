@@ -945,4 +945,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} hat das Passwort vergessen. Ein Administrator kann in den Einstellungen unter „Personen und Zugriff“ einen Rücksetzcode erstellen.</string>
     <string name="code_notification_automation_failed_title" formatted="false">Automatisierung \"{name}\" hatte Probleme</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Verlauf</string>
+    <string name="logbook_empty">Noch keine Änderungen aufgezeichnet</string>
+    <string name="logbook_turned_on">Eingeschaltet</string>
+    <string name="logbook_turned_off">Ausgeschaltet</string>
+    <string name="logbook_came_online">Wieder online</string>
+    <string name="logbook_went_offline">Offline gegangen</string>
+    <string name="logbook_effect_stopped">Effekt beendet</string>
+    <string name="logbook_set_to">%1$s auf %2$s gesetzt</string>
+    <string name="logbook_on_device">Am Gerät</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automation „%1$s“</string>
+    <string name="logbook_by_user">Von %1$s</string>
+    <string name="logbook_by_user_from">Von %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Desktop-App</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Mehr anzeigen</string>
 </resources>

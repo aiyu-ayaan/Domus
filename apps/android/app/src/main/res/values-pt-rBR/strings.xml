@@ -953,4 +953,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} esqueceu a senha. Um administrador pode gerar um código de redefinição em Configurações, em Pessoas e acesso.</string>
     <string name="code_notification_automation_failed_title" formatted="false">A automação \"{name}\" teve problemas</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Histórico</string>
+    <string name="logbook_empty">Nenhuma alteração registrada ainda</string>
+    <string name="logbook_turned_on">Ligado</string>
+    <string name="logbook_turned_off">Desligado</string>
+    <string name="logbook_came_online">Ficou online</string>
+    <string name="logbook_went_offline">Ficou offline</string>
+    <string name="logbook_effect_stopped">Efeito interrompido</string>
+    <string name="logbook_set_to">%1$s definido como %2$s</string>
+    <string name="logbook_on_device">No próprio dispositivo</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automação “%1$s”</string>
+    <string name="logbook_by_user">Por %1$s</string>
+    <string name="logbook_by_user_from">Por %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">App para computador</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Mostrar mais</string>
 </resources>

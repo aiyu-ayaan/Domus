@@ -953,4 +953,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} olvidó su contraseña. Un administrador puede darle un código de restablecimiento en Ajustes, bajo Personas y acceso.</string>
     <string name="code_notification_automation_failed_title" formatted="false">La automatización \"{name}\" tuvo problemas</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Historial</string>
+    <string name="logbook_empty">Aún no hay cambios registrados</string>
+    <string name="logbook_turned_on">Encendido</string>
+    <string name="logbook_turned_off">Apagado</string>
+    <string name="logbook_came_online">Se conectó</string>
+    <string name="logbook_went_offline">Se desconectó</string>
+    <string name="logbook_effect_stopped">Efecto detenido</string>
+    <string name="logbook_set_to">%1$s ajustado a %2$s</string>
+    <string name="logbook_on_device">Desde el dispositivo</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automatización «%1$s»</string>
+    <string name="logbook_by_user">Por %1$s</string>
+    <string name="logbook_by_user_from">Por %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">App de escritorio</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Mostrar más</string>
 </resources>

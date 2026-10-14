@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} 忘記了密碼。管理員可以在「設定 → 成員與權限」中為其產生重設碼。</string>
     <string name="code_notification_automation_failed_title" formatted="false">自動化 \"{name}\" 發生問題</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">歷史紀錄</string>
+    <string name="logbook_empty">尚無變更紀錄</string>
+    <string name="logbook_turned_on">已開啟</string>
+    <string name="logbook_turned_off">已關閉</string>
+    <string name="logbook_came_online">已上線</string>
+    <string name="logbook_went_offline">已離線</string>
+    <string name="logbook_effect_stopped">效果已停止</string>
+    <string name="logbook_set_to">%1$s設為 %2$s</string>
+    <string name="logbook_on_device">在裝置上</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">自動化「%1$s」</string>
+    <string name="logbook_by_user">由 %1$s</string>
+    <string name="logbook_by_user_from">由 %1$s · %2$s</string>
+    <string name="logbook_client_web">網頁</string>
+    <string name="logbook_client_desktop">桌面應用程式</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">顯示更多</string>
 </resources>

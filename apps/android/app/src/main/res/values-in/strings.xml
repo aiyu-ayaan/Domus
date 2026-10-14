@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} lupa kata sandinya. Administrator dapat memberikan kode reset di Pengaturan, pada bagian Orang dan akses.</string>
     <string name="code_notification_automation_failed_title" formatted="false">Otomasi \"{name}\" mengalami masalah</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Riwayat</string>
+    <string name="logbook_empty">Belum ada perubahan yang tercatat</string>
+    <string name="logbook_turned_on">Dinyalakan</string>
+    <string name="logbook_turned_off">Dimatikan</string>
+    <string name="logbook_came_online">Kembali online</string>
+    <string name="logbook_went_offline">Terputus</string>
+    <string name="logbook_effect_stopped">Efek dihentikan</string>
+    <string name="logbook_set_to">%1$s diatur ke %2$s</string>
+    <string name="logbook_on_device">Di perangkat</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Otomasi “%1$s”</string>
+    <string name="logbook_by_user">Oleh %1$s</string>
+    <string name="logbook_by_user_from">Oleh %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Aplikasi desktop</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Tampilkan lainnya</string>
 </resources>

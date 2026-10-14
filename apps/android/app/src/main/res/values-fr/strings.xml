@@ -953,4 +953,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} a oublié son mot de passe. Un administrateur peut lui donner un code de réinitialisation dans Paramètres, sous Personnes et accès.</string>
     <string name="code_notification_automation_failed_title" formatted="false">L’automatisation \"{name}\" a rencontré des problèmes</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">Historique</string>
+    <string name="logbook_empty">Aucun changement enregistré pour l’instant</string>
+    <string name="logbook_turned_on">Allumé</string>
+    <string name="logbook_turned_off">Éteint</string>
+    <string name="logbook_came_online">De nouveau en ligne</string>
+    <string name="logbook_went_offline">Hors ligne</string>
+    <string name="logbook_effect_stopped">Effet arrêté</string>
+    <string name="logbook_set_to">%1$s réglé sur %2$s</string>
+    <string name="logbook_on_device">Sur l’appareil</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Automatisation « %1$s »</string>
+    <string name="logbook_by_user">Par %1$s</string>
+    <string name="logbook_by_user_from">Par %1$s · %2$s</string>
+    <string name="logbook_client_web">Web</string>
+    <string name="logbook_client_desktop">Application de bureau</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Afficher plus</string>
 </resources>

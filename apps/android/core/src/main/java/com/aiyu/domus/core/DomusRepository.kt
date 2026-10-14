@@ -464,6 +464,8 @@ class DomusRepository(
     }
 
     suspend fun energyHistory(range: String, deviceId: String? = null): List<EnergyPoint> = attempt { it.energyHistory(range, deviceId) }.orEmpty()
+    /** Null when it could not be read. */
+    suspend fun logbook(deviceId: String, limit: Int): List<LogEntry>? = attempt { it.logbook(deviceId, limit) }
 
     // --- live events: only while the app is on screen ---
 

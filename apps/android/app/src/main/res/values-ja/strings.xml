@@ -937,4 +937,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} がパスワードを忘れました。管理者は「設定」の「メンバーとアクセス権」からリセットコードを発行できます。</string>
     <string name="code_notification_automation_failed_title" formatted="false">オートメーション \"{name}\" で問題が発生しました</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">履歴</string>
+    <string name="logbook_empty">まだ変更の記録はありません</string>
+    <string name="logbook_turned_on">オンにしました</string>
+    <string name="logbook_turned_off">オフにしました</string>
+    <string name="logbook_came_online">オンラインになりました</string>
+    <string name="logbook_went_offline">オフラインになりました</string>
+    <string name="logbook_effect_stopped">エフェクトを停止しました</string>
+    <string name="logbook_set_to">%1$sを%2$sに設定</string>
+    <string name="logbook_on_device">デバイス本体で</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">オートメーション「%1$s」</string>
+    <string name="logbook_by_user">%1$s による操作</string>
+    <string name="logbook_by_user_from">%1$s による操作 · %2$s</string>
+    <string name="logbook_client_web">ウェブ</string>
+    <string name="logbook_client_desktop">デスクトップアプリ</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">さらに表示</string>
 </resources>

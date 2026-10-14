@@ -961,4 +961,21 @@
     <string name="code_notification_password_reset" formatted="false">{username} забыл(а) пароль. Администратор может выдать код сброса в разделе «Настройки» → «Люди и доступ».</string>
     <string name="code_notification_automation_failed_title" formatted="false">В автоматизации \"{name}\" возникли проблемы</string>
     <string name="code_notification_automation_failed" formatted="false">{errors}</string>
+    <string name="logbook_title">История</string>
+    <string name="logbook_empty">Изменений пока нет</string>
+    <string name="logbook_turned_on">Включено</string>
+    <string name="logbook_turned_off">Выключено</string>
+    <string name="logbook_came_online">В сети</string>
+    <string name="logbook_went_offline">Не в сети</string>
+    <string name="logbook_effect_stopped">Эффект остановлен</string>
+    <string name="logbook_set_to">%1$s: %2$s</string>
+    <string name="logbook_on_device">На устройстве</string>
+    <string name="logbook_screen_sync">Screen Sync</string>
+    <string name="logbook_by_automation">Автоматизация «%1$s»</string>
+    <string name="logbook_by_user">%1$s</string>
+    <string name="logbook_by_user_from">%1$s · %2$s</string>
+    <string name="logbook_client_web">Веб</string>
+    <string name="logbook_client_desktop">Приложение для компьютера</string>
+    <string name="logbook_client_android">Android</string>
+    <string name="logbook_more">Показать ещё</string>
 </resources>

@@ -140,6 +140,7 @@ class DomusApi(val baseUrl: String, pin: String?, connectSeconds: Long = 6, priv
     suspend fun setConfirmChanges(id: String, on: Boolean) =
         call("PATCH", "/devices/$id", Device.serializer(), buildJsonObject { put("confirm_changes", on) }.toString())
     suspend fun refresh(id: String) = call("POST", "/devices/$id/refresh", Device.serializer())
+    suspend fun logbook(id: String, limit: Int) = call("GET", "/devices/$id/logbook?limit=$limit", ListSerializer(LogEntry.serializer()))
 
     /** A write whose answer is not needed (or is read loosely). */
     private suspend fun write(method: String, path: String, body: JsonElement? = null) =
