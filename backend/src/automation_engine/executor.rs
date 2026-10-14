@@ -31,6 +31,8 @@ struct RuleRow {
 /// Same rule cannot fire twice within this window (guards against feedback loops).
 const COOLDOWN: Duration = Duration::from_secs(2);
 const MAX_SCENE_DEPTH: u8 = 3;
+/// Traces kept per automation.
+const KEEP_RUNS: i64 = 50;
 
 pub struct AutomationEngine {
     pool: SqlitePool,
@@ -39,6 +41,38 @@ pub struct AutomationEngine {
     bus: EventBus,
     rules: RwLock<Vec<Rule>>,
     last_fired: Mutex<HashMap<String, Instant>>,
+    /// Power triggers with a duration: since when the device has been above, per (rule, trigger index),
+    /// and whether the rule already fired for this stretch.
+    sustained: Mutex<Stretches>,
+}
+
+type Stretches = HashMap<(String, usize), (DateTime<Local>, bool)>;
+
+/// Each fires once per stretch above the threshold; `stretches` remembers since when each device has been above.
+fn sustained_due(stretches: &mut Stretches, rules: &[Rule], states: &HashMap<String, (DeviceState, bool)>, now: DateTime<Local>) -> Vec<(Rule, usize)> {
+    let mut due = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+    for rule in rules {
+        for (i, t) in rule.triggers.iter().enumerate() {
+            let Trigger::PowerAbove { device_id, watts, for_minutes: Some(minutes) } = t else { continue };
+            let key = (rule.id.clone(), i);
+            seen.insert(key.clone());
+            let above = states
+                .get(device_id)
+                .is_some_and(|(s, online)| *online && s.current_power_watts.unwrap_or(0.0) as f64 > *watts);
+            if !above {
+                stretches.remove(&key);
+                continue;
+            }
+            let (since, fired) = stretches.entry(key).or_insert((now, false));
+            if !*fired && now - *since >= chrono::Duration::minutes(*minutes as i64) {
+                *fired = true;
+                due.push((rule.clone(), i));
+            }
+        }
+    }
+    stretches.retain(|k, _| seen.contains(k));
+    due
 }
 
 impl AutomationEngine {
@@ -50,6 +84,7 @@ impl AutomationEngine {
             bus,
             rules: RwLock::new(Vec::new()),
             last_fired: Mutex::new(HashMap::new()),
+            sustained: Mutex::new(HashMap::new()),
         }
     }
 
@@ -98,16 +133,15 @@ impl AutomationEngine {
                 }
                 Err(_) => return,
             };
-            let matched: Vec<Rule> = self
+            let matched: Vec<(Rule, usize)> = self
                 .rules
                 .read()
                 .await
                 .iter()
-                .filter(|r| r.triggers.iter().any(|t| triggers::matches_event(t, &event)))
-                .cloned()
+                .filter_map(|r| r.triggers.iter().position(|t| triggers::matches_event(t, &event)).map(|i| (r.clone(), i)))
                 .collect();
-            for rule in matched {
-                self.clone().fire(rule).await;
+            for (rule, index) in matched {
+                self.clone().fire(rule, index).await;
             }
         }
     }
@@ -115,17 +149,26 @@ impl AutomationEngine {
     /// Called once per minute by the scheduler.
     pub async fn tick(self: &Arc<Self>, now: DateTime<Local>) {
         let location = crate::modules::server::location(&self.pool).await;
-        let matched: Vec<Rule> = self
-            .rules
-            .read()
-            .await
+        let rules = self.rules.read().await.clone();
+        let mut matched: Vec<(Rule, usize)> = rules
             .iter()
-            .filter(|r| r.triggers.iter().any(|t| triggers::matches_time(t, &now, location)))
-            .cloned()
+            .filter_map(|r| r.triggers.iter().position(|t| triggers::matches_time(t, &now, location)).map(|i| (r.clone(), i)))
             .collect();
-        for rule in matched {
-            self.clone().fire(rule).await;
+        matched.extend(self.sustained_power(&rules, now).await);
+        for (rule, index) in matched {
+            self.clone().fire(rule, index).await;
         }
+    }
+
+    /// Power triggers with `for_minutes` whose device has now been above the threshold that long.
+    async fn sustained_power(&self, rules: &[Rule], now: DateTime<Local>) -> Vec<(Rule, usize)> {
+        let mut sustained = self.sustained.lock().await;
+        let watches = rules.iter().any(|r| r.triggers.iter().any(|t| matches!(t, Trigger::PowerAbove { for_minutes: Some(_), .. })));
+        if !watches {
+            sustained.clear();
+            return Vec::new();
+        }
+        sustained_due(&mut sustained, rules, &self.device_states().await, now)
     }
 
     async fn device_states(&self) -> HashMap<String, (DeviceState, bool)> {
@@ -139,7 +182,8 @@ impl AutomationEngine {
             .collect()
     }
 
-    async fn fire(self: Arc<Self>, rule: Rule) {
+    /// `trigger` is the index of the trigger that matched.
+    async fn fire(self: Arc<Self>, rule: Rule, trigger: usize) {
         {
             let mut last = self.last_fired.lock().await;
             if last.get(&rule.id).is_some_and(|t| t.elapsed() < COOLDOWN) {
@@ -147,14 +191,25 @@ impl AutomationEngine {
             }
             last.insert(rule.id.clone(), Instant::now());
         }
+        let mut checks = Vec::new();
         if !rule.conditions.is_empty() {
             let states = self.device_states().await;
             let now = Local::now();
             let lookup = |id: &str| states.get(id).cloned();
-            if !rule.conditions.iter().all(|c| conditions::evaluate(c, &now, &lookup)) {
-                return;
-            }
+            // Every condition is evaluated, so the trace shows each one that held it back.
+            checks = rule
+                .conditions
+                .iter()
+                .enumerate()
+                .map(|(i, c)| serde_json::json!({ "index": i, "passed": conditions::evaluate(c, &now, &lookup) }))
+                .collect();
         }
+        let trigger = serde_json::json!({ "index": trigger });
+        if checks.iter().any(|c| c["passed"] == false) {
+            self.record_run(&rule.id, &trigger, &checks, "blocked").await;
+            return;
+        }
+        let run = self.record_run(&rule.id, &trigger, &checks, "running").await;
         tracing::info!("Automation '{}' triggered", rule.name);
         let _ = sqlx::query("UPDATE automations SET last_triggered_at = ? WHERE id = ?")
             .bind(Utc::now())
@@ -169,6 +224,7 @@ impl AutomationEngine {
         tokio::spawn(async move {
             let actor = Actor::Automation { id: rule.id.clone(), name: rule.name.clone() };
             let errors = self.execute(&rule.actions, 0, &actor).await;
+            self.finish_run(run, &errors).await;
             if !errors.is_empty() {
                 self.notifier
                     .notify_admins("warning", &format!("Automation \"{}\" had problems", rule.name), &errors.join("; "), Some("/automations"))
@@ -269,6 +325,47 @@ impl AutomationEngine {
         }
     }
 
+    /// Start a trace; returns its id, or None when it could not be stored.
+    pub async fn record_run(&self, automation_id: &str, trigger: &serde_json::Value, conditions: &[serde_json::Value], outcome: &str) -> Option<i64> {
+        let now = Utc::now();
+        let finished = (outcome != "running").then_some(now);
+        let id = sqlx::query(
+            "INSERT INTO automation_runs (automation_id, started_at, finished_at, trigger, conditions, outcome) VALUES (?, ?, ?, ?, ?, ?)",
+        )
+        .bind(automation_id)
+        .bind(now)
+        .bind(finished)
+        .bind(trigger.to_string())
+        .bind(serde_json::Value::from(conditions.to_vec()).to_string())
+        .bind(outcome)
+        .execute(&self.pool)
+        .await
+        .map_err(|e| tracing::warn!("cannot store an automation run: {e}"))
+        .ok()?
+        .last_insert_rowid();
+        let _ = sqlx::query(
+            "DELETE FROM automation_runs WHERE automation_id = ?
+             AND id NOT IN (SELECT id FROM automation_runs WHERE automation_id = ? ORDER BY id DESC LIMIT ?)",
+        )
+        .bind(automation_id)
+        .bind(automation_id)
+        .bind(KEEP_RUNS)
+        .execute(&self.pool)
+        .await;
+        Some(id)
+    }
+
+    pub async fn finish_run(&self, run: Option<i64>, errors: &[String]) {
+        let Some(id) = run else { return };
+        let _ = sqlx::query("UPDATE automation_runs SET finished_at = ?, outcome = ?, errors = ? WHERE id = ?")
+            .bind(Utc::now())
+            .bind(if errors.is_empty() { "done" } else { "failed" })
+            .bind(serde_json::to_string(errors).unwrap_or_else(|_| "[]".into()))
+            .bind(id)
+            .execute(&self.pool)
+            .await;
+    }
+
     pub async fn scene_actions(&self, scene_id: &str) -> Option<Vec<Action>> {
         let row: Option<(String,)> = sqlx::query_as("SELECT actions_json FROM scenes WHERE id = ?")
             .bind(scene_id)
@@ -276,5 +373,32 @@ impl AutomationEngine {
             .await
             .ok()?;
         row.and_then(|(json,)| serde_json::from_str(&json).ok())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    #[test]
+    fn left_on_fires_once_per_stretch() {
+        let rule = Rule {
+            id: "r".into(),
+            name: "Heater left on".into(),
+            triggers: vec![Trigger::PowerAbove { device_id: "h".into(), watts: 1000.0, for_minutes: Some(30) }],
+            conditions: vec![],
+            actions: vec![],
+        };
+        let rules = [rule];
+        let states = |w: f32| HashMap::from([("h".to_string(), (DeviceState { current_power_watts: Some(w), ..Default::default() }, true))]);
+        let at = |m: u32| Local.with_ymd_and_hms(2026, 10, 14, 20, m, 0).unwrap();
+        let mut stretches = Stretches::new();
+        assert!(sustained_due(&mut stretches, &rules, &states(1200.0), at(0)).is_empty());
+        assert!(sustained_due(&mut stretches, &rules, &states(1200.0), at(29)).is_empty());
+        assert_eq!(sustained_due(&mut stretches, &rules, &states(1200.0), at(30)).len(), 1);
+        assert!(sustained_due(&mut stretches, &rules, &states(1200.0), at(45)).is_empty(), "fires once");
+        assert!(sustained_due(&mut stretches, &rules, &states(10.0), at(46)).is_empty());
+        assert!(sustained_due(&mut stretches, &rules, &states(1200.0), at(47)).is_empty(), "a new stretch starts over");
     }
 }

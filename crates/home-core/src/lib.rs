@@ -442,8 +442,14 @@ pub enum Trigger {
         #[serde(default)]
         days: Vec<u8>,
     },
-    /// Fires when a device's power draw rises above `watts`.
-    PowerAbove { device_id: String, watts: f64 },
+    /// Fires when a device's power draw rises above `watts`. With `for_minutes`, only once it has
+    /// stayed above for that long (a heater left on), checked once a minute.
+    PowerAbove {
+        device_id: String,
+        watts: f64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        for_minutes: Option<u32>,
+    },
     /// Fires when a new device is discovered.
     DeviceDiscovered,
     /// Fires when a device goes offline.

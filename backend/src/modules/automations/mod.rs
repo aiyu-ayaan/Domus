@@ -99,6 +99,9 @@ impl AutomationRequest {
             if matches!(t, Trigger::Sun { offset_minutes, .. } if offset_minutes.abs() > 360) {
                 return Err(ApiError::BadRequest("Sunrise and sunset can be shifted by at most 6 hours".into()));
             }
+            if matches!(t, Trigger::PowerAbove { for_minutes: Some(m), .. } if !(1..=1440).contains(m)) {
+                return Err(ApiError::BadRequest("A power trigger can wait 1 minute to 24 hours".into()));
+            }
         }
         Ok(())
     }
@@ -110,6 +113,34 @@ pub fn automation_routes() -> Router<AppState> {
         .route("/:id", get(get_one).put(update).delete(remove))
         .route("/:id/toggle", post(toggle))
         .route("/:id/run", post(run_now))
+        .route("/:id/runs", get(runs))
+}
+
+/// One trace: the trigger that matched (or the person who ran it), each condition and the outcome.
+#[derive(Serialize, sqlx::FromRow)]
+struct RunDto {
+    started_at: DateTime<Utc>,
+    finished_at: Option<DateTime<Utc>>,
+    #[sqlx(json)]
+    trigger: Value,
+    #[sqlx(json)]
+    conditions: Value,
+    outcome: String,
+    #[sqlx(json)]
+    errors: Value,
+}
+
+/// The automation's recent runs, newest first.
+async fn runs(State(s): State<AppState>, user: AuthUser, Path(id): Path<String>) -> ApiResult<Json<Vec<RunDto>>> {
+    fetch_visible(&s, &user, &id).await?;
+    let rows = sqlx::query_as(
+        "SELECT started_at, finished_at, trigger, conditions, outcome, errors FROM automation_runs
+         WHERE automation_id = ? ORDER BY id DESC",
+    )
+    .bind(&id)
+    .fetch_all(&s.pool)
+    .await?;
+    Ok(Json(rows))
 }
 
 async fn fetch(s: &AppState, id: &str) -> ApiResult<AutomationRow> {
@@ -257,7 +288,10 @@ async fn run_now(
         serde_json::from_str(&row.actions_json).map_err(|e| ApiError::BadRequest(format!("invalid actions: {e}")))?;
     require_control_of(&s, &user, &action_devices(&s, actions.clone()).await?).await?;
     s.automations.require_confirmed(&actions, q.confirmed).await?;
-    let errors = s.automations.execute(&actions, 0, &Actor::user(&user, &headers)).await;
+    let actor = Actor::user(&user, &headers);
+    let run = s.automations.record_run(&id, &json!({ "manual": actor }), &[], "running").await;
+    let errors = s.automations.execute(&actions, 0, &actor).await;
+    s.automations.finish_run(run, &errors).await;
     Ok(Json(json!({ "success": errors.is_empty(), "errors": errors })))
 }
 

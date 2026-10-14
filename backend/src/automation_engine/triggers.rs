@@ -22,7 +22,7 @@ pub fn matches_event(trigger: &Trigger, event: &SystemEvent) -> bool {
             now && !before
         }
         (
-            Trigger::PowerAbove { device_id, watts },
+            Trigger::PowerAbove { device_id, watts, for_minutes: None },
             SystemEvent::DeviceStateChanged { device_id: id, state, previous, .. },
         ) if device_id == id => {
             let now = state.current_power_watts.unwrap_or(0.0) as f64;
