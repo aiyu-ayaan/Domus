@@ -34,6 +34,10 @@ pub fn matches_event(trigger: &Trigger, event: &SystemEvent) -> bool {
             SystemEvent::DeviceStateChanged { device_id: id, is_online, was_online, .. },
         ) => device_id == id && *was_online && !*is_online,
         (Trigger::DeviceDiscovered, SystemEvent::DeviceDiscovered { .. }) => true,
+        (Trigger::Weather { property, compare }, SystemEvent::WeatherChanged { weather, previous }) => {
+            compare.matches(weather.property(property).as_ref())
+                && !compare.matches(previous.as_ref().and_then(|p| p.property(property)).as_ref())
+        }
         _ => false,
     }
 }
@@ -83,6 +87,17 @@ mod tests {
         };
         assert!(matches_event(&t, &changed(false, true)));
         assert!(!matches_event(&t, &changed(true, true)));
+    }
+
+    #[test]
+    fn weather_trigger_fires_when_outdoor_air_turns_bad() {
+        use crate::modules::weather::Weather;
+        let at = |pm: f64| Weather { temperature: None, humidity: None, weather_code: None, is_day: None, pm25: Some(pm), us_aqi: None, fetched_at: chrono::Utc::now() };
+        let t = Trigger::Weather { property: "pm25".into(), compare: Comparison { above: Some(35.0), ..Default::default() } };
+        let changed = |before: Option<f64>, now: f64| SystemEvent::WeatherChanged { weather: at(now), previous: before.map(at) };
+        assert!(matches_event(&t, &changed(Some(20.0), 50.0)));
+        assert!(matches_event(&t, &changed(None, 50.0)));
+        assert!(!matches_event(&t, &changed(Some(40.0), 50.0)));
     }
 
     #[test]

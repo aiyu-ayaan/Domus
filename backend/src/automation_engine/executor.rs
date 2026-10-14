@@ -196,12 +196,13 @@ impl AutomationEngine {
             let states = self.device_states().await;
             let now = Local::now();
             let lookup = |id: &str| states.get(id).cloned();
+            let weather = crate::modules::weather::latest();
             // Every condition is evaluated, so the trace shows each one that held it back.
             checks = rule
                 .conditions
                 .iter()
                 .enumerate()
-                .map(|(i, c)| serde_json::json!({ "index": i, "passed": conditions::evaluate(c, &now, &lookup) }))
+                .map(|(i, c)| serde_json::json!({ "index": i, "passed": conditions::evaluate(c, &now, &lookup, weather.as_ref()) }))
                 .collect();
         }
         let trigger = serde_json::json!({ "index": trigger });

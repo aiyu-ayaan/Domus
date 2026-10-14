@@ -11,3 +11,4 @@ pub mod rooms;
 pub mod scenes;
 pub mod server;
 pub mod users;
+pub mod weather;

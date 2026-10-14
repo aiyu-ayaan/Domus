@@ -99,8 +99,16 @@ impl AutomationRequest {
             if matches!(t, Trigger::Sun { offset_minutes, .. } if offset_minutes.abs() > 360) {
                 return Err(ApiError::BadRequest("Sunrise and sunset can be shifted by at most 6 hours".into()));
             }
+            if matches!(t, Trigger::Weather { property, .. } if !crate::modules::weather::PROPERTIES.contains(&property.as_str())) {
+                return Err(ApiError::BadRequest("Unknown weather reading".into()));
+            }
             if matches!(t, Trigger::PowerAbove { for_minutes: Some(m), .. } if !(1..=1440).contains(m)) {
                 return Err(ApiError::BadRequest("A power trigger can wait 1 minute to 24 hours".into()));
+            }
+        }
+        for c in &self.conditions {
+            if matches!(c, Condition::Weather { property, .. } if !crate::modules::weather::PROPERTIES.contains(&property.as_str())) {
+                return Err(ApiError::BadRequest("Unknown weather reading".into()));
             }
         }
         Ok(())
@@ -169,13 +177,13 @@ async fn sees_rule(s: &AppState, visible: &Option<HashSet<String>>, row: &Automa
             Trigger::DeviceState { device_id, .. } | Trigger::PowerAbove { device_id, .. } | Trigger::DeviceOffline { device_id } => {
                 ids.push(device_id)
             }
-            Trigger::Time { .. } | Trigger::Sun { .. } | Trigger::DeviceDiscovered => {}
+            Trigger::Time { .. } | Trigger::Sun { .. } | Trigger::DeviceDiscovered | Trigger::Weather { .. } => {}
         }
     }
     for c in conditions {
         match c {
             Condition::DeviceState { device_id, .. } => ids.push(device_id),
-            Condition::TimeBetween { .. } => {}
+            Condition::TimeBetween { .. } | Condition::Weather { .. } => {}
         }
     }
     Ok(sees_all(visible, &ids))

@@ -454,6 +454,13 @@ pub enum Trigger {
     DeviceDiscovered,
     /// Fires when a device goes offline.
     DeviceOffline { device_id: String },
+    /// Fires when an outdoor reading at the home (`temperature`, `humidity`, `pm25`, `us_aqi`)
+    /// starts matching the comparison. Checked each time the weather is fetched.
+    Weather {
+        property: String,
+        #[serde(flatten)]
+        compare: Comparison,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -467,6 +474,12 @@ pub enum Condition {
     },
     /// "HH:MM" local time window; may wrap midnight.
     TimeBetween { start: String, end: String },
+    /// The latest outdoor reading matches; false while there is no weather.
+    Weather {
+        property: String,
+        #[serde(flatten)]
+        compare: Comparison,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

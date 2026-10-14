@@ -133,6 +133,7 @@ async fn put_location(State(s): State<AppState>, user: AuthUser, Json(req): Json
         return Err(ApiError::BadRequest("Latitude is between -90 and 90, longitude between -180 and 180".into()));
     }
     set_setting(&s.pool, LOCATION_KEY, &req).await?;
+    crate::modules::weather::refresh();
     Ok(get_location(State(s), user).await)
 }
 

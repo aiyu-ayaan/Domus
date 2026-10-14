@@ -88,6 +88,13 @@ pub enum SystemEvent {
         automation_id: String,
         name: String,
     },
+    /// New outdoor weather at the home's location.
+    WeatherChanged {
+        weather: crate::modules::weather::Weather,
+        /// Used for edge-triggered weather automations.
+        #[serde(skip)]
+        previous: Option<crate::modules::weather::Weather>,
+    },
 }
 
 impl SystemEvent {
