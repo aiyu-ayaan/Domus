@@ -353,3 +353,10 @@ Plan and diagram: `development/docs/ROADMAP.md`. Order: each builds on the one b
 - [x] Checked against fake MQTT devices on a test server: logbook attribution, automation traces, left-on trigger and alert (timing), weather trigger and condition, solar split, Matter end to end
 - [ ] Verify on hardware: filter alert (MQTT discovery maps no filter life), solar with a real inverter plug
 - [x] Android: History (collapsed card), Runs, Matter page and QR, left-on picker, weather card, solar-free "Using now" checked on an emulator
+
+## Scene toggles follow their devices (2026-11-05)
+- [x] Backend: a scene is on while all devices it switches on are on (`derived_active`), activating one scene no longer switches the others off, deactivating switches off nested scenes' devices instead of running them
+- [x] Android and web re-fetch scenes when a device's `is_on` changes; web dropped its own any-device-on `isSceneActive` and shows the server's `is_active`
+- [x] Checked on a test server (state derivation over the API) and in the Android dev app on an emulator
+- [ ] Verify on real devices: switching a scene off turns its devices off (test devices could not take commands); live scene update when a device is switched elsewhere (Android and web)
+- [ ] Add Rust tests for `derived_active` / `on_targets` (no scene tests exist)

@@ -94,12 +94,13 @@ flowchart TD
 ## Scene & Group One-Touch Toggling
 
 ### Backend Implementation (`backend/src/modules/scenes/mod.rs`)
-- Added `/scenes/:id/deactivate` to invert scene commands (sets `is_on: false` for all targeted devices and device groups).
+- Added `/scenes/:id/deactivate`: sets `is_on: false` on every device the scene touches (groups and nested scenes expanded to their devices, so a nested scene is switched off, never on).
 - Added `/scenes/:id/toggle` supporting optional payload `{ "on": bool }`. If omitted, automatically checks live device states to flip them on or off cleanly.
-- Updates scene `is_active` state in the database while broadcasting realtime device status updates.
+- Scenes are independent switches: activating one never switches another scene off.
+- A standard scene's `is_active` in `GET /scenes` is derived from live device state, see "Scene on state" in `ARCHITECTURE.md` (section 6).
 
 ### Frontend Integration (`apps/web/src/features/overview/OverviewView.tsx` & `AutomationsView.tsx`)
-- **Real-Time State Detection (`isSceneActive`)**: Computes whether member devices of a scene or group are powered on from live WebSocket/query devices.
+- **Scene state**: the web, desktop and Android apps all show the server's `is_active`; none computes it. `lib/live.ts` (web) and `DomusRepository.handle` (Android) re-fetch scenes when a device's `is_on` changes.
 - **Overview Quick Control**: Shows a segmented switcher between Scenes and Groups when both are present. Each item includes a direct one-touch `<Switch>` and action feedback toasts.
 - **Automations View**: Each scene row features an interactive `<Switch>` alongside the manual `Run` button for instant group/scene power on and off.
 

@@ -421,6 +421,27 @@ consecutive failed polls. Accumulated values (kWh, cost) come from the energy
 query, refetched every 5 s. Linking or adopting a device refreshes every dependent view without
 a reload.
 
+### Scene on state
+
+A scene has no state of its own. `GET /scenes` (`modules/scenes/mod.rs`, `derived_active`) reports a standard
+scene as on while **every** device it switches on is on, following groups and nested scenes. Actions that
+only switch a device off are ignored. A scene with nothing to switch on (only off commands) and a Screen Sync
+scene (its live session decides) keep the stored `is_active` flag. Scenes are independent: activating one
+never switches another off, and a scene turns on by itself when its devices are switched on elsewhere.
+Deactivating a scene switches every device it touches off, nested scenes expanded to their devices.
+
+```mermaid
+flowchart LR
+    Dev["Device switched<br/>(any app, wall switch)"] --> Ev["device_state_changed"]
+    Ev --> Web["Web live.ts<br/>invalidate scenes"]
+    Ev --> And["Android DomusRepository<br/>re-fetch scenes"]
+    Web --> List["GET /scenes"]
+    And --> List
+    List --> D{"standard scene with<br/>devices to switch on?"}
+    D -- yes --> All["is_active = all of them are on"]
+    D -- "no / Screen Sync" --> Flag["stored is_active / live session"]
+```
+
 ## 7. Security model
 
 ```mermaid
