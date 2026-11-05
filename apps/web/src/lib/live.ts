@@ -59,6 +59,8 @@ export function useLiveEvents(enabled: boolean) {
             break
           case 'device_state_changed': {
             const list = qc.getQueryData<Device[]>(keys.devices)
+            // A scene is on while its devices are on, so a switch flipped elsewhere moves the scene too.
+            if (list?.find((d) => d.id === ev.device_id)?.state.is_on !== ev.state.is_on) qc.invalidateQueries({ queryKey: keys.scenes })
             if (list && !list.some((d) => d.id === ev.device_id)) qc.invalidateQueries({ queryKey: keys.devices })
             else
               qc.setQueryData<Device[]>(keys.devices, (l) =>
