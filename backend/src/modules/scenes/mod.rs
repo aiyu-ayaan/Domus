@@ -18,6 +18,7 @@ use chrono::{DateTime, Utc};
 use home_core::Action;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::collections::HashSet;
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow)]
@@ -179,13 +180,59 @@ async fn list(State(s): State<AppState>, user: AuthUser) -> ApiResult<Json<Vec<S
         .fetch_all(&s.pool)
         .await?;
     let visible = visible_ids(&s, &user).await?;
+    let on = devices_on(&s).await?;
     let mut out = Vec::with_capacity(rows.len());
     for row in rows {
         if visible.is_none() || sees_all(&visible, &scene_devices(&s, &row).await?) {
-            out.push(row.into());
+            let derived = derived_active(&s, &row, &on).await?;
+            let mut dto: SceneDto = row.into();
+            if let Some(active) = derived {
+                dto.is_active = active;
+            }
+            out.push(dto);
         }
     }
     Ok(Json(out))
+}
+
+/// Ids of the devices that are on right now.
+async fn devices_on(s: &AppState) -> ApiResult<HashSet<String>> {
+    let rows: Vec<(String, String)> = sqlx::query_as("SELECT id, state_json FROM devices").fetch_all(&s.pool).await?;
+    Ok(rows
+        .into_iter()
+        .filter(|(_, state)| serde_json::from_str::<home_core::DeviceState>(state).map_or(false, |st| st.is_on == Some(true)))
+        .map(|(id, _)| id)
+        .collect())
+}
+
+/// Devices a scene switches on, following nested scenes and groups.
+async fn on_targets(s: &AppState, actions: Vec<Action>) -> ApiResult<Vec<String>> {
+    let mut ids = Vec::new();
+    let mut seen = HashSet::new();
+    let mut todo = actions;
+    while let Some(action) = todo.pop() {
+        match action {
+            Action::DeviceCommand { device_id, command } if command.is_on != Some(false) => ids.push(device_id),
+            Action::GroupCommand { group_id, command } if command.is_on != Some(false) => {
+                ids.extend(s.manager.group_device_ids(&group_id).await?)
+            }
+            Action::Scene { scene_id } if seen.insert(scene_id.clone()) => {
+                todo.extend(s.automations.scene_actions(&scene_id).await.unwrap_or_default())
+            }
+            _ => {}
+        }
+    }
+    Ok(ids)
+}
+
+/// A scene is on while every device it switches on is on. `None` (use the stored flag) for Screen Sync
+/// scenes and for scenes that only switch things off.
+async fn derived_active(s: &AppState, row: &SceneRow, on: &HashSet<String>) -> ApiResult<Option<bool>> {
+    if row.kind == KIND_SCREEN_SYNC {
+        return Ok(None);
+    }
+    let targets = on_targets(s, serde_json::from_str(&row.actions_json).unwrap_or_default()).await?;
+    Ok((!targets.is_empty()).then(|| targets.iter().all(|id| on.contains(id))))
 }
 
 /// Running a scene needs control of every device it touches: 404 when the user
@@ -313,7 +360,7 @@ async fn activate(
         .ok_or_else(|| ApiError::NotFound("Scene not found".into()))?;
     s.automations.require_confirmed(&actions, q.confirmed).await?;
     let errors = s.automations.execute(&actions, 1, &Actor::user(&user, &headers)).await;
-    sqlx::query("UPDATE scenes SET is_active = CASE WHEN id = ? THEN 1 ELSE 0 END")
+    sqlx::query("UPDATE scenes SET is_active = 1 WHERE id = ?")
         .bind(&id)
         .execute(&s.pool)
         .await?;
@@ -353,31 +400,17 @@ async fn deactivate(
         .await
         .ok_or_else(|| ApiError::NotFound("Scene not found".into()))?;
 
-    let off_cmd = home_core::DeviceCommand {
-        is_on: Some(false),
-        ..Default::default()
-    };
-    let mut off_actions = Vec::new();
-    for action in actions {
-        match action {
-            Action::DeviceCommand { device_id, .. } => {
-                off_actions.push(Action::DeviceCommand {
-                    device_id,
-                    command: off_cmd.clone(),
-                });
-            }
-            Action::GroupCommand { group_id, .. } => {
-                off_actions.push(Action::GroupCommand {
-                    group_id,
-                    command: off_cmd.clone(),
-                });
-            }
-            Action::Scene { scene_id } => {
-                off_actions.push(Action::Scene { scene_id });
-            }
-            _ => {}
-        }
-    }
+    // Nested scenes are expanded to their devices: a `Scene` action would switch them on, not off.
+    let mut ids = action_devices(&s, actions).await?;
+    ids.sort();
+    ids.dedup();
+    let off_actions: Vec<Action> = ids
+        .into_iter()
+        .map(|device_id| Action::DeviceCommand {
+            device_id,
+            command: home_core::DeviceCommand { is_on: Some(false), ..Default::default() },
+        })
+        .collect();
 
     s.automations.require_confirmed(&off_actions, q.confirmed).await?;
     let errors = s.automations.execute(&off_actions, 1, &Actor::user(&user, &headers)).await;
