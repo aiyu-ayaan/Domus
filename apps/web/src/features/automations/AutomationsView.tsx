@@ -233,7 +233,7 @@ export function AutomationsView() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={isSceneActive(s, devices, groups)}
+                      checked={s.is_active}
                       disabled={!control || (toggleScene.isPending && toggleScene.variables?.id === s.id)}
                       label={t('overview.toggle', { name: s.name })}
                       onChange={(on) => toggleScene.mutate({ id: s.id, on })}
@@ -711,25 +711,5 @@ function SceneSheet({
       </div>
     </Sheet>
   )
-}
-
-function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolean {
-  if (scene.kind === 'screen_sync') {
-    return scene.is_active
-  }
-  const targetIds = new Set<string>()
-  for (const action of scene.actions) {
-    if (action.type === 'device_command' && action.device_id) {
-      targetIds.add(action.device_id)
-    } else if (action.type === 'group_command' && action.group_id) {
-      const g = groups.find((grp) => grp.id === action.group_id)
-      g?.device_ids.forEach((id) => targetIds.add(id))
-    }
-  }
-  if (targetIds.size > 0) {
-    const memberDevices = devices.filter((d) => targetIds.has(d.id))
-    return memberDevices.some((d) => d.is_online && d.state.is_on)
-  }
-  return scene.is_active
 }
 

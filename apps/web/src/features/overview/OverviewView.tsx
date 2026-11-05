@@ -432,7 +432,7 @@ export function OverviewView() {
                     {scenes.map((s) => {
                       const isScreenSync = s.kind === 'screen_sync'
                       const isLocalRunning = isScreenSync && isScreenSyncRunning(s.id)
-                      const active = isLocalRunning || isSceneActive(s, list, groups)
+                      const active = isLocalRunning || s.is_active
                       const targetCount = getSceneTargetCount(s, groups)
                       return (
                         <li key={s.id} className="flex min-h-12 items-center gap-3 px-4 py-2.5">
@@ -559,26 +559,6 @@ function summarizeClimate(devices: Device[]) {
   const avg = (a: number[]) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : undefined)
   const pms = nums('air_quality_pm25')
   return { pm25: pms.length ? Math.max(...pms) : undefined, temp: avg(nums('temperature')), humidity: avg(nums('humidity')) }
-}
-
-function isSceneActive(scene: Scene, devices: Device[], groups: Group[]): boolean {
-  if (scene.kind === 'screen_sync') {
-    return scene.is_active
-  }
-  const targetIds = new Set<string>()
-  for (const action of scene.actions) {
-    if (action.type === 'device_command' && action.device_id) {
-      targetIds.add(action.device_id)
-    } else if (action.type === 'group_command' && action.group_id) {
-      const g = groups.find((grp) => grp.id === action.group_id)
-      g?.device_ids.forEach((id) => targetIds.add(id))
-    }
-  }
-  if (targetIds.size > 0) {
-    const memberDevices = devices.filter((d) => targetIds.has(d.id))
-    return memberDevices.some((d) => d.is_online && d.state.is_on)
-  }
-  return scene.is_active
 }
 
 function getSceneTargetCount(scene: Scene, groups: Group[]): number {
