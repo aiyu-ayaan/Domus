@@ -359,4 +359,4 @@ Plan and diagram: `development/docs/ROADMAP.md`. Order: each builds on the one b
 - [x] Android and web re-fetch scenes when a device's `is_on` changes; web dropped its own any-device-on `isSceneActive` and shows the server's `is_active`
 - [x] Checked on a test server (state derivation over the API) and in the Android dev app on an emulator
 - [ ] Verify on real devices: switching a scene off turns its devices off (test devices could not take commands); live scene update when a device is switched elsewhere (Android and web)
-- [ ] Add Rust tests for `derived_active` / `on_targets` (no scene tests exist)
+- [x] Rust tests for the scene on rule (`all_on`, `switches_on`); group and nested-scene expansion (`on_targets`) still needs an `AppState` test helper, none exists

@@ -212,8 +212,8 @@ async fn on_targets(s: &AppState, actions: Vec<Action>) -> ApiResult<Vec<String>
     let mut todo = actions;
     while let Some(action) = todo.pop() {
         match action {
-            Action::DeviceCommand { device_id, command } if command.is_on != Some(false) => ids.push(device_id),
-            Action::GroupCommand { group_id, command } if command.is_on != Some(false) => {
+            Action::DeviceCommand { device_id, command } if switches_on(&command) => ids.push(device_id),
+            Action::GroupCommand { group_id, command } if switches_on(&command) => {
                 ids.extend(s.manager.group_device_ids(&group_id).await?)
             }
             Action::Scene { scene_id } if seen.insert(scene_id.clone()) => {
@@ -232,7 +232,17 @@ async fn derived_active(s: &AppState, row: &SceneRow, on: &HashSet<String>) -> A
         return Ok(None);
     }
     let targets = on_targets(s, serde_json::from_str(&row.actions_json).unwrap_or_default()).await?;
-    Ok((!targets.is_empty()).then(|| targets.iter().all(|id| on.contains(id))))
+    Ok(all_on(&targets, on))
+}
+
+/// A command that only switches off is not part of what makes a scene "on"; brightness, colour etc. imply on.
+fn switches_on(command: &home_core::DeviceCommand) -> bool {
+    command.is_on != Some(false)
+}
+
+/// `None` when there is nothing to check, else whether every target is on.
+fn all_on(targets: &[String], on: &HashSet<String>) -> Option<bool> {
+    (!targets.is_empty()).then(|| targets.iter().all(|id| on.contains(id)))
 }
 
 /// Running a scene needs control of every device it touches: 404 when the user
@@ -449,3 +459,34 @@ async fn toggle(
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use home_core::DeviceCommand;
+
+    fn on(ids: &[&str]) -> HashSet<String> {
+        ids.iter().map(|s| s.to_string()).collect()
+    }
+    fn ids(v: &[&str]) -> Vec<String> {
+        v.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn scene_is_on_only_when_every_target_is_on() {
+        assert_eq!(all_on(&ids(&["a", "b"]), &on(&["a", "b", "c"])), Some(true));
+        assert_eq!(all_on(&ids(&["a", "b"]), &on(&["a"])), Some(false));
+        assert_eq!(all_on(&ids(&["a", "b"]), &on(&[])), Some(false));
+    }
+
+    #[test]
+    fn scene_with_nothing_to_switch_on_keeps_its_stored_flag() {
+        assert_eq!(all_on(&[], &on(&["a"])), None);
+    }
+
+    #[test]
+    fn only_off_commands_are_left_out() {
+        assert!(!switches_on(&DeviceCommand { is_on: Some(false), ..Default::default() }));
+        assert!(switches_on(&DeviceCommand { is_on: Some(true), ..Default::default() }));
+        assert!(switches_on(&DeviceCommand { brightness: Some(40), ..Default::default() }));
+    }
+}
