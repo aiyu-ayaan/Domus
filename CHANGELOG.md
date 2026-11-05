@@ -1,3 +1,22 @@
+## v0.0.1-beta.1 (2026-11-05)
+
+- !beta chore(Release) : Beta release with scene toggles that follow their devices
+- docs(Scenes) : Record the end to end scene checks on web and Android
+- test(Scenes) : Cover the scene on rule with unit tests and track what is still unchecked
+- docs(Scenes) : Document scene on state derived from devices, add the diagram and track the open checks
+- fix(Web) : Show a scene's on state from the server instead of the any-device-on guess so web matches Android
+- fix(Web) : Refresh scenes when a device switches on or off so scene toggles follow their devices
+- fix(Android) : Refresh scenes when a device switches on or off so scene toggles follow their devices
+- fix(Scenes) : Derive a scene's on state from its devices, stop switching other scenes off on activate, and switch nested scenes' devices off on deactivate
+- docs(Readme) : Add a lines of code badge counting the Rust, TypeScript, Kotlin, JavaScript, CSS and SQL sources
+- docs(Readme) : Move the translations navigation below the app logo and title in all language READMEs
+- docs(Readme) : Add Tamil, Telugu, Kannada, Malayalam and Urdu translations
+- docs(Readme) : Add German, Spanish, French, Italian, Polish and Russian translations
+- docs(Readme) : Add Simplified Chinese, Traditional Chinese, Japanese, Korean, Vietnamese and Thai translations
+- docs(Readme) : Add Arabic, Brazilian Portuguese, Indonesian and Turkish translations
+- docs(Readme) : Add Hindi, Bengali, Marathi, Gujarati and Punjabi translations
+- docs(Readme) : Add the language switcher navigation bar for all 27 supported languages
+
 ## v0.0.1-alpha.6 (2026-10-14)
 
 - !alpha : Matter bridge, device history, automation runs, weather triggers, solar energy and standby alerts

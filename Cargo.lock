@@ -1081,7 +1081,7 @@ dependencies = [
 
 [[package]]
 name = "domus-backend"
-version = "0.0.1-alpha.6"
+version = "0.0.1-beta.1"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm",
@@ -1774,7 +1774,7 @@ dependencies = [
 
 [[package]]
 name = "home-core"
-version = "0.0.1-alpha.6"
+version = "0.0.1-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
