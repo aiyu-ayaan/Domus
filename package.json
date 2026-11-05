@@ -1,8 +1,8 @@
 {
   "name": "domus-root",
   "license": "MIT",
-  "version": "0.0.1-alpha.6",
-  "build": 7,
+  "version": "0.0.1-beta.1",
+  "build": 8,
   "private": true,
   "description": "Domus - Modern smart home assistant platform",
   "scripts": {
