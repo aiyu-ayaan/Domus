@@ -358,5 +358,6 @@ Plan and diagram: `development/docs/ROADMAP.md`. Order: each builds on the one b
 - [x] Backend: a scene is on while all devices it switches on are on (`derived_active`), activating one scene no longer switches the others off, deactivating switches off nested scenes' devices instead of running them
 - [x] Android and web re-fetch scenes when a device's `is_on` changes; web dropped its own any-device-on `isSceneActive` and shows the server's `is_active`
 - [x] Checked on a test server (state derivation over the API) and in the Android dev app on an emulator
-- [ ] Verify on real devices: switching a scene off turns its devices off (test devices could not take commands); live scene update when a device is switched elsewhere (Android and web)
+- [x] Checked against fake MQTT switches (Node broker + HA discovery, command topics update state): activate/deactivate round trips, scenes stay independent, shared device turns the other scene off only when it goes off, nested scene deactivate switches its devices off, wall-switch changes move scenes; web (headless Chrome) and Android (emulator) follow the lamps live without a reload
+- [ ] Verify on a real Tuya / Tapo device (only fake MQTT devices were used)
 - [x] Rust tests for the scene on rule (`all_on`, `switches_on`); group and nested-scene expansion (`on_targets`) still needs an `AppState` test helper, none exists
