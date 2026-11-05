@@ -547,6 +547,8 @@ class DomusRepository(
                 val known = _devices.value.firstOrNull { it.id == id } ?: return refresh()
                 val state = runCatching { api?.decodeState(event.getValue("state")) }.getOrNull() ?: return
                 replace(known.copy(state = state, isOnline = event["is_online"]?.jsonPrimitive?.booleanOrNull ?: known.isOnline))
+                // A scene is on while its devices are on, so a switch flipped elsewhere moves the scene too.
+                if (known.state.isOn != state.isOn) attempt { it.scenes() }?.let { _scenes.value = it }
             }
             "weather_changed" -> runCatching { api?.decodeWeather(event.getValue("weather")) }.getOrNull()?.let { _weather.value = it }
             "device_added", "device_updated", "device_removed", "rooms_changed", "automation_triggered", "resync" -> {
